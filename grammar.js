@@ -266,7 +266,7 @@ module.exports = grammar({
     // Parenthesized expression
     parenthesized_expression: $ => seq(
       '(',
-      $.expression,
+        $.expression,
       ')'
     ),
 
