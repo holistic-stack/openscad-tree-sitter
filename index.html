@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenSCAD Tree-sitter WebAssembly Parser</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .row {
+            display: flex;
+            gap: 20px;
+        }
+        .col {
+            flex: 1;
+        }
+        @media (max-width: 800px) {
+            .row {
+                flex-direction: column;
+            }
+        }
+        textarea {
+            width: 100%;
+            height: 300px;
+            font-family: monospace;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            overflow: auto;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            height: 300px;
+            margin: 0;
+        }
+        .status {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
+        }
+        .hidden {
+            display: none;
+        }
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .code-header button {
+            margin: 0;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        .examples {
+            margin-bottom: 10px;
+        }
+        .examples select {
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>OpenSCAD Tree-sitter WebAssembly Parser</h1>
+    <p>This demo uses Tree-sitter with WebAssembly to parse OpenSCAD code in your browser. Enter some OpenSCAD code and click the Parse button to see the syntax tree.</p>
+    
+    <div id="statusMessage" class="status hidden"></div>
+    
+    <div class="container">
+        <div class="examples">
+            <label for="exampleSelect">Example: </label>
+            <select id="exampleSelect">
+                <option value="basic">Basic Example</option>
+                <option value="modules">Module Definition</option>
+                <option value="functions">Function Definition</option>
+                <option value="includes">Include and Use</option>
+                <option value="variables">Variables and Assignment</option>
+                <option value="instantiation">Module Instantiation</option>
+                <option value="conditional">Conditional Expression</option>
+                <option value="let">Let Expression</option>
+            </select>
+            <button id="loadExampleBtn">Load Example</button>
+        </div>
+        
+        <div class="row">
+            <div class="col">
+                <div class="code-header">
+                    <h2>OpenSCAD Code</h2>
+                    <button id="parseButton" disabled>Parse</button>
+                </div>
+                <textarea id="codeInput">// Sample OpenSCAD code
+r = 10;
+h = 20;
+volume = 3.14 * r * r * h;
+
+translate([10, 0, 0]) {
+    cube(5);
+}
+
+#sphere(r=5);</textarea>
+            </div>
+            <div class="col">
+                <h2>Parse Tree</h2>
+                <pre id="outputArea">Parse result will appear here...</pre>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { OpenSCADParser } from './openscad-parser.js';
+        
+        // Document elements
+        const statusMessage = document.getElementById('statusMessage');
+        const codeInput = document.getElementById('codeInput');
+        const parseButton = document.getElementById('parseButton');
+        const outputArea = document.getElementById('outputArea');
+        const exampleSelect = document.getElementById('exampleSelect');
+        const loadExampleBtn = document.getElementById('loadExampleBtn');
+        
+        // Sample OpenSCAD code for examples
+        const examples = {
+            basic: `// Basic expressions
+1 + 2 * 3;
+true || false;
+"hello" == "world";`,
+            
+            modules: `// Module definition
+module cube_wrap(size = 10) {
+    cube(size);
+}`,
+            
+            functions: `// Function definition
+function add(a, b) = a + b;`,
+            
+            includes: `// Include and use statements
+include <shapes.scad>;
+use <utils.scad>;`,
+            
+            variables: `// Variables and assignment
+r = 10;
+h = 20;
+volume = 3.14 * r * r * h;`,
+            
+            instantiation: `// Module instantiation
+translate([10, 0, 0]) {
+    cube(5);
+}
+
+#sphere(r=5);`,
+            
+            conditional: `// Conditional expression
+x = 5;
+result = x > 10 ? "big" : "small";`,
+            
+            let: `// Let expression
+shape = let(
+    width = 10,
+    height = 20
+) cube([width, height, 1]);`
+        };
+        
+        // Create a parser instance
+        const parser = new OpenSCADParser();
+        
+        // Show status message
+        function showStatus(message, isError = false) {
+            statusMessage.textContent = message;
+            statusMessage.classList.remove('hidden', 'success', 'error');
+            statusMessage.classList.add(isError ? 'error' : 'success');
+        }
+        
+        // Initialize the parser
+        async function init() {
+            showStatus('Initializing parser...');
+            
+            const success = await parser.initialize();
+            
+            if (success) {
+                showStatus('Parser initialized successfully! Ready to parse OpenSCAD code.');
+                parseButton.disabled = false;
+            } else {
+                showStatus(`Failed to initialize parser: ${parser.error?.message || 'Unknown error'}`, true);
+                console.error('Parser initialization failed:', parser.error);
+            }
+        }
+        
+        // Parse the code
+        function parseCode() {
+            const code = codeInput.value;
+            
+            if (!code.trim()) {
+                showStatus('Please enter some OpenSCAD code to parse.', true);
+                return;
+            }
+            
+            try {
+                const tree = parser.parse(code);
+                
+                if (tree) {
+                    const formattedTree = parser.formatTree(tree.rootNode);
+                    outputArea.textContent = formattedTree;
+                    showStatus('Code parsed successfully!');
+                } else {
+                    showStatus('Failed to parse code. See console for details.', true);
+                }
+            } catch (error) {
+                showStatus(`Error parsing code: ${error.message}`, true);
+                console.error('Error parsing code:', error);
+            }
+        }
+        
+        // Load the selected example
+        function loadExample() {
+            const exampleCode = examples[exampleSelect.value] || examples.basic;
+            codeInput.value = exampleCode;
+        }
+        
+        // Event listeners
+        parseButton.addEventListener('click', parseCode);
+        loadExampleBtn.addEventListener('click', loadExample);
+        
+        // Initialize the parser
+        init();
+    </script>
+</body>
+</html> 
