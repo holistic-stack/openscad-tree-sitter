@@ -1,0 +1,54 @@
+{
+  "name": "openscad-tree-sitter",
+  "version": "0.1.0",
+  "description": "Tree-sitter grammar for OpenSCAD - provides syntax highlighting, code navigation, and incremental parsing",
+  "main": "bindings/node",
+  "scripts": {
+    "test": "tree-sitter test",
+    "build": "tree-sitter generate",
+    "parse": "tree-sitter parse",
+    "highlight": "tree-sitter highlight",
+    "playground": "tree-sitter playground"
+  },
+  "keywords": [
+    "parser",
+    "tree-sitter",
+    "openscad",
+    "grammar",
+    "syntax",
+    "highlighting",
+    "incremental",
+    "parsing",
+    "3d",
+    "cad"
+  ],
+  "author": "OpenSCAD Community",
+  "license": "MIT",
+  "packageManager": "pnpm@10.10.0",
+  "dependencies": {
+    "nan": "^2.18.0"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "^0.22.1",
+    "node-gyp": "^10.0.1",
+    "prebuildify": "^5.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/user/openscad-tree-sitter.git"
+  },
+  "tree-sitter": [
+    {
+      "scope": "source.openscad",
+      "file-types": [
+        "scad"
+      ],
+      "highlights": [
+        "queries/highlights.scm"
+      ],
+      "tags": [
+        "queries/tags.scm"
+      ]
+    }
+  ]
+}

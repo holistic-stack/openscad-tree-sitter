@@ -1,0 +1,43 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+pnpm-debug.log
+package-lock.json
+yarn.lock
+
+# Build outputs
+build/
+dist/
+*.wasm
+*.o
+
+*.a
+.DS_Store
+
+# Generated parser files
+src/
+bindings/
+*.cc
+*.c
+
+# IDE and editor files
+.idea/
+.cursor/
+.vscode/
+*.sublime-*
+*.swp
+*~
+
+# Test output
+.nyc_output/
+coverage/
+
+# Logs
+logs/
+*.log
+
+# Environment variables
+.env
+.env.local 
