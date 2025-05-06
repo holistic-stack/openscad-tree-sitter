@@ -2,6 +2,27 @@
 
 A [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) grammar for the [OpenSCAD](https://openscad.org/) language. This grammar provides incremental parsing capabilities for OpenSCAD files, enabling syntax highlighting, code navigation, and more in editors that support Tree-sitter.
 
+## Current Status
+
+- ✅ Core grammar implementation complete
+- ✅ All tests passing
+- ✅ Node.js bindings working
+- ✅ Syntax highlighting queries (highlights.scm)
+- ✅ Code navigation queries (tags.scm)
+- ❌ WebAssembly build (requires Emscripten)
+
+The grammar supports all core OpenSCAD syntax features:
+- Module definitions and instantiations
+- Function definitions and calls
+- Variables and assignments
+- Mathematical and boolean expressions
+- Conditionals
+- Let expressions
+- Include and use statements
+- Vector expressions and indexing
+- Range expressions
+- Comments (line and block)
+
 ## Features
 
 - Complete OpenSCAD syntax support
@@ -32,40 +53,17 @@ A [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) grammar for the [Ope
 
 3. Generate the parser:
    ```
-   npm run build
+   npx tree-sitter generate
    ```
 
 4. Run tests:
    ```
-   npm test
+   npx tree-sitter test
    ```
 
-## Usage in Editors
-
-### VSCode
-
-1. Install the [Tree-sitter extension](https://marketplace.visualstudio.com/items?itemName=georgewfraser.vscode-tree-sitter)
-2. Configure for OpenSCAD by adding to your `settings.json`:
-   ```json
-   "tree-sitter.languages": [
-     {
-       "languageId": "openscad",
-       "fileExtensions": ["scad"],
-       "parserPath": "/path/to/tree-sitter-openscad.wasm"
-     }
-   ]
+5. Parse a sample file:
    ```
-
-### Neovim
-
-1. For Neovim 0.9+, configure Tree-sitter:
-   ```lua
-   require'nvim-treesitter.configs'.setup {
-     ensure_installed = { "openscad" },
-     highlight = {
-       enable = true,
-     },
-   }
+   npx tree-sitter parse test.scad
    ```
 
 ## Structure
@@ -74,6 +72,7 @@ A [Tree-sitter](https://tree-sitter.github.io/tree-sitter/) grammar for the [Ope
 - `queries/highlights.scm` - Syntax highlighting rules
 - `queries/tags.scm` - Code navigation rules
 - `test/corpus/` - Test cases
+- `examples/` - Example OpenSCAD files
 
 ## Contributing
 
@@ -84,6 +83,14 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+
+## Future Work
+
+- Add WebAssembly support
+- Implement playground for interactive testing
+- Expand test corpus for edge cases
+- Add specific editor integration guides
+- Support for more complex OpenSCAD features
 
 ## License
 

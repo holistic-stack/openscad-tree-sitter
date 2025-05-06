@@ -1,90 +1,43 @@
-;; Keywords
-[
-  "module"
-  "function"
-  "include"
-  "use"
-  "for"
-  "if"
-  "else"
-  "let"
-  "true"
-  "false"
-] @keyword
-
-;; Operators
-[
-  "+"
-  "-"
-  "*"
-  "/"
-  "%"
-  "<"
-  "<="
-  ">"
-  ">="
-  "=="
-  "!="
-  "&&"
-  "||"
-  "!"
-  "?"
-  ":"
-] @operator
-
-;; Punctuation
-[
-  "("
-  ")"
-  "["
-  "]"
-  "{"
-  "}"
-] @punctuation.bracket
-
-[
-  ";"
-  ","
-] @punctuation.delimiter
-
-; Assignments
-(assignment_statement
-  name: (identifier) @variable.definition)
-
-; Function definitions
-(function_definition
-  name: (identifier) @function.definition)
-
-; Module definitions
-(module_definition
-  name: (identifier) @function.definition)
-
-; Function calls
-(call_expression
-  function: (identifier) @function.call)
-
-; Module instantiations
-(module_instantiation
-  name: (identifier) @function.call)
-
-;; Parameters and arguments
-(parameter_declaration
-  (identifier) @variable.parameter)
-
-(argument
-  . (identifier) @variable.parameter
-  . "=" @operator)
+;; Keywords as literals
+"module" @keyword
+"function" @keyword
+"include" @keyword
+"use" @keyword
+"let" @keyword
 
 ;; Literals
 (number) @number
-(boolean) @boolean
 (string) @string
+(identifier) @variable
+
+;; Operators from binary_expression
+(binary_expression
+  operator: (operator) @operator)
+
+;; Punctuation
+"(" @punctuation.bracket
+")" @punctuation.bracket
+"[" @punctuation.bracket
+"]" @punctuation.bracket
+"{" @punctuation.bracket
+"}" @punctuation.bracket
+";" @punctuation.delimiter
+"," @punctuation.delimiter
 
 ;; Comments
 (comment) @comment
 
-;; Identifiers
-(identifier) @variable
+;; Module and function definitions
+(module_definition
+  name: (identifier) @function)
+(function_definition
+  name: (identifier) @function)
+
+;; Function calls
+(call_expression
+  function: (identifier) @function.call)
+(module_instantiation
+  name: (identifier) @function.call)
 
 ;; Modifiers
-(modifier) @operator.special 
+(modifier) @special 

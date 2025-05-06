@@ -1,7 +1,7 @@
 {
   "name": "openscad-tree-sitter",
   "version": "0.1.0",
-  "description": "Tree-sitter grammar for OpenSCAD - provides syntax highlighting, code navigation, and incremental parsing",
+  "description": "Tree-sitter grammar for OpenSCAD with syntax highlighting, code navigation, and full language support",
   "main": "bindings/node",
   "types": "bindings/node",
   "scripts": {

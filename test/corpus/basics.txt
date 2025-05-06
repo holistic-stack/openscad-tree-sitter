@@ -57,7 +57,7 @@ module cube_wrap(size = 10) {
             name: (identifier)
             arguments: (argument_list
               (arguments
-                (argument (expression (identifier))))))))))
+                (argument (expression (identifier)))))))))))
 
 ==================
 Function Definition
@@ -120,17 +120,17 @@ volume = 3.14 * r * r * h;
       name: (identifier)
       value: (expression
         (binary_expression
-          left: (expression (number))
-          operator: (operator)
-          right: (expression
+          left: (expression
             (binary_expression
-              left: (expression (identifier))
-              operator: (operator)
-              right: (expression
+              left: (expression
                 (binary_expression
-                  left: (expression (identifier))
+                  left: (expression (number))
                   operator: (operator)
-                  right: (expression (identifier)))))))))))
+                  right: (expression (identifier))))
+              operator: (operator)
+              right: (expression (identifier))))
+          operator: (operator)
+          right: (expression (identifier)))))))
 
 ==================
 Module Instantiation
@@ -151,37 +151,34 @@ translate([10, 0, 0]) {
       arguments: (argument_list
         (arguments
           (argument
-            (expression (vector_expression (expression (number)) (expression (number)) (expression (number)))))))
-      body: (block
+            (expression (vector_expression
+              (expression (number))
+              (expression (number))
+              (expression (number)))))))
+      (block
         (statement
           (module_instantiation
             name: (identifier)
             arguments: (argument_list
               (arguments
-                (argument (expression (number)))))
-            ";")))))
+                (argument
+                  (expression (number))))))))))
   (statement
     (module_instantiation
-      modifier: (modifier)
+      (modifier)
       name: (identifier)
       arguments: (argument_list
         (arguments
           (argument
             (identifier)
-            (expression (number)))))
-      ";")))
+            (expression (number))))))))
 
 ==================
-Conditional and Let
+Conditional Expression
 ==================
 
 x = 5;
 result = x > 10 ? "big" : "small";
-
-shape = let(
-    width = 10,
-    height = 20
-) cube([width, height, 1]);
 
 ---
 
@@ -201,7 +198,20 @@ shape = let(
               operator: (operator)
               right: (expression (number))))
           consequence: (expression (string))
-          alternative: (expression (string))))))
+          alternative: (expression (string)))))))
+
+==================
+Let Expression
+==================
+
+shape = let(
+    width = 10,
+    height = 20
+) cube([width, height, 1]);
+
+---
+
+(source_file
   (statement
     (assignment_statement
       name: (identifier)
@@ -223,4 +233,4 @@ shape = let(
                       (vector_expression
                         (expression (identifier))
                         (expression (identifier))
-                        (expression (number)))))))))))))))) 
+                        (expression (number)))))))))))))) 
