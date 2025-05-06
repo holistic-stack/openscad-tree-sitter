@@ -9,7 +9,11 @@ This project follows the recommended Tree-sitter project organization:
 ```
 openscad-tree-sitter/
 ├── bindings/            # Language bindings
-│   └── node/            # Node.js bindings
+│   ├── c/               # C bindings
+│   ├── go/              # Go bindings
+│   ├── node/            # Node.js bindings
+│   ├── rust/            # Rust bindings
+│   └── swift/           # Swift bindings
 ├── examples/            # Example OpenSCAD files
 ├── grammar.js           # The grammar definition
 ├── queries/             # Tree-sitter queries
@@ -17,8 +21,8 @@ openscad-tree-sitter/
 │   └── tags.scm         # Code navigation
 ├── src/                 # Generated parser code
 ├── test/                # Test files
-│   └── corpus/          # Test corpus
-└── web-test/            # WebAssembly testing (planned)
+│   ├── corpus/          # Test corpus
+│   └── grammar/         # Vitest grammar tests
 ```
 
 ## Installation
@@ -77,8 +81,14 @@ pnpm install
 # Generate the parser
 pnpm build
 
-# Run tests
+# Run Tree-sitter tests
 pnpm test
+
+# Run Vitest unit tests
+pnpm test:vitest
+
+# Run all tests
+pnpm test:all
 ```
 
 ### Building WebAssembly Version
@@ -87,6 +97,42 @@ pnpm test
 # Build the WebAssembly module
 pnpm build:wasm
 ```
+
+## Testing
+
+The project includes two types of tests:
+
+1. **Tree-sitter corpus tests** - These are located in `test/corpus/` and can be run with `pnpm test`.
+2. **Vitest unit tests** - More detailed tests for specific grammar features located in `test/grammar/` and can be run with `pnpm test:vitest`.
+
+### Running Tests
+
+You can run tests using npm/pnpm scripts:
+
+```bash
+# Run Tree-sitter corpus tests
+pnpm test
+
+# Run Vitest unit tests
+pnpm test:vitest
+
+# Run Vitest tests in watch mode
+pnpm test:watch
+
+# Generate test coverage report
+pnpm test:coverage
+
+# Run tests with UI
+pnpm test:ui
+
+# Run all tests (both Tree-sitter and Vitest)
+pnpm test:all
+```
+
+The Vitest tests provide more detailed checks of specific grammar features, such as:
+- Basic syntax elements (comments, variable assignments, modules, functions)
+- Advanced features (list comprehensions, special variables, control structures)
+- Grammar improvements and edge cases
 
 ## Features
 
@@ -99,6 +145,9 @@ This grammar supports:
 - For loops
 - Include/use directives
 - Variables and assignments
+- List comprehensions
+- Special variables
+- Member access expressions
 - And more...
 
 ## Contributing

@@ -40,4 +40,25 @@ logs/
 
 # Environment variables
 .env
-.env.local 
+.env.local
+
+# Test and coverage results
+/coverage
+/test-results
+/.vitest
+
+# Node.js specific
+.npm
+.node_repl_history
+.lock-wscript
+.yarn-integrity
+.npm-debug.log*
+.yarn-debug.log*
+.yarn-error.log*
+.pnpm-debug.log*
+
+# Editor specific
+.idea
+.vscode
+*.sublime-project
+*.sublime-workspace 

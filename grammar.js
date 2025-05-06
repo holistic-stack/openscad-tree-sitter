@@ -18,6 +18,11 @@ module.exports = grammar({
   // Handle conflicts
   conflicts: $ => [
     [$.module_instantiation, $.call_expression],
+    [$.if_statement, $.module_instantiation], // For else-if chains
+    [$.for_statement, $.list_comprehension], // For list comprehensions
+    [$.statement, $.if_statement], // For nested if-else statements
+    [$.if_statement], // Self-conflict for nested if-else
+    [$.expression, $.list_comprehension_for], // For list comprehension for loop
   ],
 
   rules: {
@@ -27,7 +32,7 @@ module.exports = grammar({
     // Comments
     comment: $ => choice(
       seq('//', /.*/, /\r?\n/),
-      seq('/*', /[^*]*\*+([^/*][^*]*\*+)*/, '/')
+      seq('/*', /([^*]|\*[^/])*\*+\//) // Improved to handle nested comments
     ),
 
     // Statements
@@ -38,6 +43,10 @@ module.exports = grammar({
       $.function_definition,
       $.assignment_statement,
       $.module_instantiation,
+      $.if_statement,
+      $.for_statement,
+      $.echo_statement,
+      $.assert_statement,
       seq($.expression, ';')
     ),
 
@@ -45,13 +54,13 @@ module.exports = grammar({
     include_statement: $ => seq(
       'include',
       $.string,
-      ';'
+      optional(';')
     ),
 
     use_statement: $ => seq(
       'use',
       $.string,
-      ';'
+      optional(';')
     ),
 
     // Module definition
@@ -87,12 +96,14 @@ module.exports = grammar({
 
     parameter_declaration: $ => choice(
       $.identifier,
-      seq($.identifier, '=', $.expression)
+      $.special_variable,
+      seq($.identifier, '=', $.expression),
+      seq($.special_variable, '=', $.expression)
     ),
 
     // Assignment statement
     assignment_statement: $ => seq(
-      field('name', $.identifier),
+      field('name', choice($.identifier, $.special_variable)),
       '=',
       field('value', $.expression),
       ';'
@@ -132,7 +143,8 @@ module.exports = grammar({
 
     argument: $ => choice(
       $.expression,
-      seq($.identifier, '=', $.expression)
+      seq($.identifier, '=', $.expression),
+      seq($.special_variable, '=', $.expression)
     ),
 
     // Module children
@@ -154,13 +166,76 @@ module.exports = grammar({
       '*', // disable
     ),
 
+    // Control Structures
+    if_statement: $ => prec.right(0, seq(
+      'if',
+      '(',
+      $.expression,
+      ')',
+      choice(
+        $.block,
+        $.statement
+      ),
+      optional(seq(
+        'else',
+        choice(
+          $.if_statement, // else if
+          $.block,
+          $.statement
+        )
+      ))
+    )),
+
+    for_statement: $ => seq(
+      'for',
+      '(',
+      $.for_header,
+      ')',
+      choice(
+        $.block,
+        $.statement
+      )
+    ),
+
+    for_header: $ => seq(
+      field('variable', $.identifier),
+      '=',
+      field('iterator', $.expression)
+    ),
+
+    // Echo and Assert
+    echo_statement: $ => seq(
+      'echo',
+      '(',
+      optional($.echo_arguments),
+      ')',
+      ';'
+    ),
+
+    echo_arguments: $ => seq(
+      $.expression,
+      repeat(seq(',', $.expression)),
+      optional(',')
+    ),
+
+    assert_statement: $ => seq(
+      'assert',
+      '(',
+      $.expression,
+      optional(seq(',', $.expression)),
+      ')',
+      ';'
+    ),
+
     // Expressions with precedence handling
     expression: $ => choice(
       $.number,
       $.boolean,
       $.string,
+      $.special_variable,
       $.vector_expression,
       $.range_expression,
+      $.list_comprehension,
       $.identifier,
       $.call_expression,
       $.unary_expression,
@@ -168,8 +243,12 @@ module.exports = grammar({
       $.conditional_expression,
       $.let_expression,
       $.index_expression,
+      $.member_expression,
       $.parenthesized_expression
     ),
+
+    // Special variables (like $fn, $fa, etc.)
+    special_variable: $ => /\$[a-zA-Z_][a-zA-Z0-9_]*/,
 
     // Primitive types
     number: $ => /[-+]?(\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?/,
@@ -197,6 +276,29 @@ module.exports = grammar({
     range_expression: $ => choice(
       seq('[', $.expression, ':', $.expression, ']'),
       seq('[', $.expression, ':', $.expression, ':', $.expression, ']')
+    ),
+
+    // List comprehensions
+    list_comprehension: $ => seq(
+      '[',
+      $.list_comprehension_for,
+      $.expression,
+      ']'
+    ),
+
+    list_comprehension_for: $ => seq(
+      'for',
+      '(',
+      $.for_header,
+      ')',
+      optional($.list_comprehension_if)
+    ),
+
+    list_comprehension_if: $ => seq(
+      'if',
+      '(',
+      $.expression,
+      ')'
     ),
 
     // Function call expressions
@@ -261,7 +363,7 @@ module.exports = grammar({
     )),
 
     let_clause: $ => seq(
-      $.identifier,
+      choice($.identifier, $.special_variable),
       '=',
       $.expression
     ),
@@ -274,6 +376,13 @@ module.exports = grammar({
       ']'
     )),
 
+    // Member expression for accessing properties (e.g., vec.x)
+    member_expression: $ => prec.left(7, seq(
+      field('object', $.expression),
+      '.',
+      field('property', $.identifier)
+    )),
+
     // Parenthesized expressions
     parenthesized_expression: $ => seq(
       '(',
@@ -282,6 +391,6 @@ module.exports = grammar({
     ),
 
     // Identifier
-    identifier: $ => /[a-zA-Z_$][a-zA-Z0-9_$]*/,
+    identifier: $ => /[a-zA-Z_][a-zA-Z0-9_]*/,
   }
 }); 

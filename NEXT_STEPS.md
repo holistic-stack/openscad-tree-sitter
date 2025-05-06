@@ -1,6 +1,6 @@
 # OpenSCAD Tree-sitter - Next Steps
 
-This document outlines the progress made and the next steps to further enhance the OpenSCAD Tree-sitter grammar for WebAssembly.
+This document outlines the progress made and the next steps to further enhance the OpenSCAD Tree-sitter grammar.
 
 ## Project Setup Completed
 
@@ -13,7 +13,6 @@ We've successfully set up the OpenSCAD Tree-sitter grammar:
 ✅ Code navigation tag queries (tags.scm)
 ✅ Basic test cases (all passing)
 ✅ Sample OpenSCAD files for testing
-✅ WebAssembly test UI and browser integration
 
 ## Completed Tasks
 
@@ -39,12 +38,6 @@ We've successfully set up the OpenSCAD Tree-sitter grammar:
 - ✅ Properly marked function and module definitions
 - ✅ Added support for variable references
 
-### 5. WebAssembly Test
-- ✅ Created browser-based test UI
-- ✅ Implemented JavaScript wrapper for WebAssembly module
-- ✅ Added sample code examples for all language features
-- ✅ Created documentation for building and running the test
-
 ## Next Steps
 
 ### 1. WebAssembly Support
@@ -58,15 +51,6 @@ We've successfully set up the OpenSCAD Tree-sitter grammar:
 
 # Build the WebAssembly module
 npx tree-sitter build --wasm
-
-# Copy the WASM file to the web-test directory
-copy tree-sitter-openscad.wasm web-test/
-
-# Serve the web-test directory
-cd web-test
-python -m http.server 8000
-# Or 
-npx serve
 ```
 
 ### 2. Integration with Editors
@@ -112,14 +96,6 @@ npx tree-sitter test
 
 ```bash
 npx tree-sitter parse examples/sample.scad
-```
-
-### Test WebAssembly (Once Built)
-
-```bash
-# Navigate to a browser at http://localhost:8000 after starting a local server
-cd web-test
-python -m http.server 8000
 ```
 
 ## Resources
