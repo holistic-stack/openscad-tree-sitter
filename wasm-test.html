@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenSCAD WASM Test</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            overflow: auto;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .warning {
+            color: orange;
+            font-weight: bold;
+        }
+        #log {
+            white-space: pre-wrap;
+        }
+        button {
+            padding: 8px 16px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>OpenSCAD WebAssembly Module Test</h1>
+    <p>This page attempts to load the Tree-sitter OpenSCAD WASM module directly.</p>
+    
+    <div>
+        <button id="checkWasmFile">Check WASM File</button>
+        <button id="loadWasmModule">Load WASM Module</button>
+        <button id="clearLog">Clear Log</button>
+    </div>
+    
+    <h2>Test Log:</h2>
+    <pre id="log">Click a button to start a test...</pre>
+    
+    <script>
+        // Log function
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const classType = type === 'error' ? 'error' : (type === 'warning' ? 'warning' : 'success');
+            
+            logElement.innerHTML += `[${timestamp}] <span class="${classType}">${message}</span>\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        // Clear log
+        function clearLog() {
+            document.getElementById('log').innerHTML = 'Log cleared...\n';
+        }
+        
+        // Check if the WASM file exists and can be accessed
+        async function checkWasmFile() {
+            const wasmPath = './tree-sitter-openscad.wasm';
+            log(`Checking if WASM file exists at: ${wasmPath}`);
+            
+            try {
+                // Perform a HEAD request first
+                const headResponse = await fetch(wasmPath, { method: 'HEAD' });
+                
+                if (!headResponse.ok) {
+                    log(`HEAD request failed: ${headResponse.status} ${headResponse.statusText}`, 'error');
+                    throw new Error(`File not found or not accessible: ${headResponse.status} ${headResponse.statusText}`);
+                }
+                
+                log(`HEAD request successful: ${headResponse.status} ${headResponse.statusText}`);
+                
+                // Get content type and file size
+                const contentType = headResponse.headers.get('Content-Type');
+                const contentLength = headResponse.headers.get('Content-Length');
+                
+                log(`Content type: ${contentType || 'Not specified'}`);
+                log(`File size: ${contentLength ? `${Math.round(contentLength/1024)} KB` : 'Unknown'}`);
+                
+                // Try a GET request to confirm we can read the file
+                log('Attempting GET request...');
+                const getResponse = await fetch(wasmPath);
+                
+                if (!getResponse.ok) {
+                    log(`GET request failed: ${getResponse.status} ${getResponse.statusText}`, 'error');
+                    throw new Error(`Failed to fetch file: ${getResponse.status} ${getResponse.statusText}`);
+                }
+                
+                const arrayBuffer = await getResponse.arrayBuffer();
+                log(`GET request successful! File size: ${arrayBuffer.byteLength} bytes`);
+                
+                // Simple check to make sure it looks like a WASM file
+                const bytes = new Uint8Array(arrayBuffer.slice(0, 4));
+                const magicBytes = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(' ');
+                
+                log(`File magic bytes: ${magicBytes}`);
+                
+                if (magicBytes === '00 61 73 6d') {
+                    log('Magic bytes match WebAssembly module format (\\0asm)');
+                } else {
+                    log('Warning: Magic bytes do not match WebAssembly format', 'warning');
+                }
+                
+                log('File check complete - WASM file appears to be accessible');
+            } catch (error) {
+                log(`Error checking WASM file: ${error.message}`, 'error');
+                console.error('File check error:', error);
+            }
+        }
+        
+        // Test loading the WASM module directly
+        async function testWasmLoad() {
+            try {
+                log('Starting WebAssembly module test');
+                
+                // Step 1: Check if WebAssembly is supported
+                if (typeof WebAssembly === 'undefined') {
+                    throw new Error('WebAssembly is not supported in this browser');
+                }
+                log('WebAssembly is supported');
+                
+                // Step 2: Fetch the WASM module
+                log('Fetching tree-sitter-openscad.wasm...');
+                const response = await fetch('./tree-sitter-openscad.wasm');
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch WASM module: ${response.status} ${response.statusText}`);
+                }
+                log('WASM module fetched successfully');
+                
+                // Step 3: Get the WASM bytes
+                const wasmBytes = await response.arrayBuffer();
+                log(`WASM module size: ${wasmBytes.byteLength} bytes`);
+                
+                // Step 4: Compile the WebAssembly module
+                log('Compiling WebAssembly module...');
+                const wasmModule = await WebAssembly.compile(wasmBytes);
+                log('WebAssembly module compiled successfully');
+                
+                // Step 5: Create import object with memory and environment
+                const importObject = {
+                    env: {
+                        memory: new WebAssembly.Memory({ initial: 10, maximum: 100 })
+                    }
+                };
+                
+                // Step 6: Instantiate the module
+                log('Instantiating WebAssembly module...');
+                const instance = await WebAssembly.instantiate(wasmModule, importObject);
+                log('WebAssembly module instantiated successfully');
+                
+                // Step 7: Check for expected exports
+                const exports = Object.keys(instance.exports);
+                log(`Module exports (${exports.length}): ${exports.slice(0, 5).join(', ')}${exports.length > 5 ? '...' : ''}`);
+                
+                log('Test completed successfully!');
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+                console.error('Test error:', error);
+            }
+        }
+        
+        // Set up the button click handlers
+        document.getElementById('checkWasmFile').addEventListener('click', checkWasmFile);
+        document.getElementById('loadWasmModule').addEventListener('click', testWasmLoad);
+        document.getElementById('clearLog').addEventListener('click', clearLog);
+    </script>
+</body>
+</html> 

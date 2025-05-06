@@ -19,19 +19,25 @@ export class OpenSCADParser {
    */
   async initialize() {
     try {
-      // Load the Tree-sitter library
-      const TreeSitter = await import('https://unpkg.com/web-tree-sitter@0.20.8/tree-sitter.js');
-      await TreeSitter.default.init();
+      // Check if TreeSitter is available globally
+      if (typeof window.TreeSitter === 'undefined') {
+        throw new Error('Tree-sitter library not found. Make sure to include tree-sitter.js script.');
+      }
 
       // Create a parser
-      this.parser = new TreeSitter.default();
-
-      // Try to load the OpenSCAD language from the WebAssembly module
-      this.language = await TreeSitter.default.Language.load('./tree-sitter-openscad.wasm');
-      this.parser.setLanguage(this.language);
-
-      this.initialized = true;
-      return true;
+      this.parser = new window.TreeSitter();
+      
+      // Load the OpenSCAD language from the WebAssembly module
+      try {
+        this.language = await window.TreeSitter.Language.load('./tree-sitter-openscad.wasm');
+        this.parser.setLanguage(this.language);
+        this.initialized = true;
+        return true;
+      } catch (langError) {
+        console.error('Failed to load OpenSCAD language:', langError);
+        this.error = langError;
+        return false;
+      }
     } catch (error) {
       this.error = error;
       console.error('Failed to initialize OpenSCAD parser:', error);

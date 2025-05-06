@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenSCAD WASM Test</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            overflow: auto;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        #log {
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>OpenSCAD WebAssembly Module Test</h1>
+    <p>This page attempts to load the Tree-sitter OpenSCAD WASM module directly.</p>
+    
+    <button id="loadButton">Load WASM Module</button>
+    
+    <h2>Test Log:</h2>
+    <pre id="log">Click the button to start the test...</pre>
+    
+    <script>
+        // Log function
+        function log(message, isError = false) {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logClass = isError ? 'error' : 'success';
+            
+            logElement.innerHTML += `[${timestamp}] <span class="${logClass}">${message}</span>\n`;
+        }
+        
+        // Test loading the WASM module directly
+        async function testWasmLoad() {
+            try {
+                log('Starting WebAssembly module test');
+                
+                // Step 1: Check if WebAssembly is supported
+                if (typeof WebAssembly === 'undefined') {
+                    throw new Error('WebAssembly is not supported in this browser');
+                }
+                log('WebAssembly is supported');
+                
+                // Step 2: Fetch the WASM module
+                log('Fetching tree-sitter-openscad.wasm...');
+                const response = await fetch('./tree-sitter-openscad.wasm');
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch WASM module: ${response.status} ${response.statusText}`);
+                }
+                log('WASM module fetched successfully');
+                
+                // Step 3: Get the WASM bytes
+                const wasmBytes = await response.arrayBuffer();
+                log(`WASM module size: ${wasmBytes.byteLength} bytes`);
+                
+                // Step 4: Compile the WebAssembly module
+                log('Compiling WebAssembly module...');
+                const wasmModule = await WebAssembly.compile(wasmBytes);
+                log('WebAssembly module compiled successfully');
+                
+                // Step 5: Instantiate the module
+                log('Instantiating WebAssembly module...');
+                const instance = await WebAssembly.instantiate(wasmModule);
+                log('WebAssembly module instantiated successfully');
+                
+                // Step 6: Check for expected exports
+                const exports = instance.exports;
+                log(`Module exports: ${Object.keys(exports).join(', ')}`);
+                
+                log('Test completed successfully!');
+            } catch (error) {
+                log(`Error: ${error.message}`, true);
+                console.error('Test error:', error);
+            }
+        }
+        
+        // Set up the button click handler
+        document.getElementById('loadButton').addEventListener('click', testWasmLoad);
+    </script>
+</body>
+</html> 

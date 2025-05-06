@@ -1,0 +1,28 @@
+{
+  "name": "openscad",
+  "scopeName": "source.openscad",
+  "fileTypes": ["scad"],
+  "rules": {
+    "comments": {
+      "line": "//",
+      "block": {
+        "start": "/*",
+        "end": "*/"
+      }
+    }
+  },
+  "metadata": {
+    "version": "0.1.0",
+    "author": "OpenSCAD Community",
+    "description": "Tree-sitter grammar for OpenSCAD with WebAssembly support for browser use"
+  },
+  "grammars": [
+    {
+      "name": "openscad",
+      "scope": "source.openscad",
+      "file-types": ["scad"],
+      "highlights": ["queries/highlights.scm"],
+      "tags": ["queries/tags.scm"]
+    }
+  ]
+} 

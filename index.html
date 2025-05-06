@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenSCAD Tree-sitter WebAssembly Parser</title>
+    <title>OpenSCAD Parser Test</title>
     <style>
         body {
             font-family: system-ui, -apple-system, sans-serif;
@@ -32,32 +32,13 @@
                 flex-direction: column;
             }
         }
-        textarea {
+        .editor {
             width: 100%;
             height: 300px;
             font-family: monospace;
             padding: 10px;
-            margin-bottom: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
-            font-size: 14px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-bottom: 20px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
         }
         pre {
             background-color: #f5f5f5;
@@ -65,9 +46,27 @@
             overflow: auto;
             border-radius: 4px;
             border: 1px solid #ddd;
-            font-size: 14px;
             height: 300px;
-            margin: 0;
+        }
+        .code-toolbar {
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
         }
         .status {
             padding: 10px;
@@ -87,188 +86,306 @@
         .hidden {
             display: none;
         }
-        .code-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-        .code-header button {
-            margin: 0;
-            padding: 5px 10px;
-            font-size: 14px;
-        }
-        .examples {
-            margin-bottom: 10px;
-        }
-        .examples select {
-            padding: 5px;
+        .test-section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
             border-radius: 4px;
-            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+        .success-text {
+            color: green;
+            font-weight: bold;
+        }
+        .error-text {
+            color: red;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <h1>OpenSCAD Tree-sitter WebAssembly Parser</h1>
-    <p>This demo uses Tree-sitter with WebAssembly to parse OpenSCAD code in your browser. Enter some OpenSCAD code and click the Parse button to see the syntax tree.</p>
+    <h1>OpenSCAD Tree-sitter Parser</h1>
+    <p>This page demonstrates the OpenSCAD Tree-sitter grammar with WebAssembly support. You can test parsing OpenSCAD code and see the resulting syntax tree.</p>
     
     <div id="statusMessage" class="status hidden"></div>
-    
+
     <div class="container">
-        <div class="examples">
-            <label for="exampleSelect">Example: </label>
+        <div class="code-toolbar">
             <select id="exampleSelect">
-                <option value="basic">Basic Example</option>
-                <option value="modules">Module Definition</option>
-                <option value="functions">Function Definition</option>
-                <option value="includes">Include and Use</option>
-                <option value="variables">Variables and Assignment</option>
-                <option value="instantiation">Module Instantiation</option>
-                <option value="conditional">Conditional Expression</option>
-                <option value="let">Let Expression</option>
+                <option value="">-- Select an example --</option>
+                <option value="simple">Simple Example</option>
+                <option value="modules">Modules & Functions</option>
+                <option value="operations">Mathematical Operations</option>
+                <option value="control">Control Structures</option>
+                <option value="advanced">Advanced Example</option>
             </select>
-            <button id="loadExampleBtn">Load Example</button>
+            <button id="parseButton">Parse OpenSCAD Code</button>
         </div>
         
         <div class="row">
             <div class="col">
-                <div class="code-header">
-                    <h2>OpenSCAD Code</h2>
-                    <button id="parseButton" disabled>Parse</button>
-                </div>
-                <textarea id="codeInput">// Sample OpenSCAD code
-r = 10;
-h = 20;
-volume = 3.14 * r * r * h;
-
-translate([10, 0, 0]) {
-    cube(5);
-}
-
-#sphere(r=5);</textarea>
+                <h2>OpenSCAD Code</h2>
+                <textarea id="codeEditor" class="editor" spellcheck="false">// Enter OpenSCAD code here
+cube(size = 10, center = true);
+</textarea>
             </div>
             <div class="col">
                 <h2>Parse Tree</h2>
-                <pre id="outputArea">Parse result will appear here...</pre>
+                <pre id="parseResult">Parse result will appear here...</pre>
             </div>
         </div>
     </div>
+
+    <!-- WebAssembly Testing Section -->
+    <div class="test-section">
+        <h2>WebAssembly Module Testing</h2>
+        <p>Test loading the OpenSCAD Tree-sitter WebAssembly module directly.</p>
+        
+        <button id="testWasmButton">Test WASM Module</button>
+        <button id="clearLogButton">Clear Log</button>
+        
+        <h3>Test Results:</h3>
+        <pre id="testLog">Click the Test WASM Module button to begin testing...</pre>
+    </div>
     
-    <script type="module">
-        import { OpenSCADParser } from './openscad-parser.js';
+    <script>
+        // WebAssembly Testing Functions
+        const testLog = document.getElementById('testLog');
         
-        // Document elements
-        const statusMessage = document.getElementById('statusMessage');
-        const codeInput = document.getElementById('codeInput');
-        const parseButton = document.getElementById('parseButton');
-        const outputArea = document.getElementById('outputArea');
-        const exampleSelect = document.getElementById('exampleSelect');
-        const loadExampleBtn = document.getElementById('loadExampleBtn');
+        function logTest(message, isError = false) {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = isError ? 'error-text' : 'success-text';
+            testLog.innerHTML += `[${timestamp}] <span class="${className}">${message}</span>\n`;
+        }
         
-        // Sample OpenSCAD code for examples
+        async function testWasmModule() {
+            logTest('Starting WebAssembly module test');
+            
+            try {
+                // Step 1: Check if WebAssembly is supported
+                if (typeof WebAssembly === 'undefined') {
+                    throw new Error('WebAssembly is not supported in this browser');
+                }
+                logTest('WebAssembly is supported');
+                
+                // Step 2: Fetch the WASM module
+                logTest('Fetching tree-sitter-openscad.wasm...');
+                const response = await fetch('./tree-sitter-openscad.wasm');
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch WASM module: ${response.status} ${response.statusText}`);
+                }
+                logTest('WASM module fetched successfully');
+                
+                // Step 3: Get the WASM bytes
+                const wasmBytes = await response.arrayBuffer();
+                logTest(`WASM module size: ${wasmBytes.byteLength} bytes`);
+                
+                // Step 4: Check magic bytes
+                const bytes = new Uint8Array(wasmBytes.slice(0, 4));
+                const magicBytes = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(' ');
+                logTest(`Magic bytes: ${magicBytes}`);
+                
+                if (magicBytes === '00 61 73 6d') {
+                    logTest('Valid WebAssembly magic bytes detected');
+                } else {
+                    logTest('WARNING: Invalid WebAssembly magic bytes', true);
+                }
+                
+                // Step 5: Compile the WebAssembly module
+                logTest('Compiling WebAssembly module...');
+                const wasmModule = await WebAssembly.compile(wasmBytes);
+                logTest('WebAssembly module compiled successfully');
+                
+                // Step 6: Create import object with memory and environment
+                const importObject = {
+                    env: {
+                        memory: new WebAssembly.Memory({ initial: 10, maximum: 100 })
+                    }
+                };
+                
+                // Step 7: Instantiate the module
+                logTest('Instantiating WebAssembly module...');
+                try {
+                    const instance = await WebAssembly.instantiate(wasmModule, importObject);
+                    logTest('WebAssembly module instantiated successfully');
+                    
+                    // Step 8: Check for expected exports
+                    const exports = Object.keys(instance.exports);
+                    logTest(`Module exports (${exports.length}): ${exports.slice(0, 5).join(', ')}${exports.length > 5 ? '...' : ''}`);
+                    
+                    logTest('Test completed successfully!');
+                } catch (instError) {
+                    logTest(`Error instantiating module: ${instError.message}`, true);
+                    throw instError;
+                }
+                
+            } catch (error) {
+                logTest(`Error: ${error.message}`, true);
+                console.error('Test error:', error);
+            }
+        }
+        
+        // Set up the button click handlers
+        document.getElementById('testWasmButton').addEventListener('click', testWasmModule);
+        document.getElementById('clearLogButton').addEventListener('click', () => {
+            testLog.textContent = 'Log cleared...\n';
+        });
+        
+        // Main Parser UI Functions
         const examples = {
-            basic: `// Basic expressions
-1 + 2 * 3;
-true || false;
-"hello" == "world";`,
-            
-            modules: `// Module definition
-module cube_wrap(size = 10) {
-    cube(size);
-}`,
-            
-            functions: `// Function definition
-function add(a, b) = a + b;`,
-            
-            includes: `// Include and use statements
-include <shapes.scad>;
-use <utils.scad>;`,
-            
-            variables: `// Variables and assignment
-r = 10;
-h = 20;
-volume = 3.14 * r * r * h;`,
-            
-            instantiation: `// Module instantiation
-translate([10, 0, 0]) {
-    cube(5);
+            simple: `// Simple OpenSCAD example
+cube(size = 10, center = true);
+sphere(r = 5);
+cylinder(h = 10, r = 3);`,
+            modules: `// Modules and functions example
+module rounded_cube(size, radius) {
+    hull() {
+        for (x = [-1, 1], y = [-1, 1], z = [-1, 1]) {
+            translate([x * (size[0]/2 - radius), y * (size[1]/2 - radius), z * (size[2]/2 - radius)])
+                sphere(r = radius);
+        }
+    }
 }
 
-#sphere(r=5);`,
+function sum(a, b) = a + b;
+
+rounded_cube([20, 15, 10], 2);
+echo(sum(10, 5));`,
+            operations: `// Mathematical operations
+x = 10;
+y = 5;
+z = x + y;   // Addition
+a = x - y;   // Subtraction
+b = x * y;   // Multiplication
+c = x / y;   // Division
+d = x % y;   // Modulo
+e = x ^ 2;   // Exponentiation
+
+// Vector operations
+v1 = [1, 2, 3];
+v2 = [4, 5, 6];
+v3 = v1 + v2;  // Vector addition`,
+            control: `// Control structures
+x = 10;
+
+// Conditional
+if (x > 5) {
+    sphere(r = x);
+} else {
+    cube(size = x);
+}
+
+// For loop
+for (i = [0:5]) {
+    translate([i*10, 0, 0])
+        cylinder(h = i*2, r = 2);
+}
+
+// Intersection
+intersection() {
+    cube(15, center = true);
+    sphere(10);
+}`,
+            advanced: `// Advanced OpenSCAD example
+module gear(num_teeth, thickness, hole_diameter) {
+    pi = 3.14159;
+    pitch_circle_diameter = num_teeth * 4;
+    pitch_radius = pitch_circle_diameter / 2;
+    tooth_height = 2;
+    
+    difference() {
+        union() {
+            // Base cylinder
+            cylinder(h = thickness, r = pitch_radius, $fn = 50);
             
-            conditional: `// Conditional expression
-x = 5;
-result = x > 10 ? "big" : "small";`,
-            
-            let: `// Let expression
-shape = let(
-    width = 10,
-    height = 20
-) cube([width, height, 1]);`
+            // Teeth
+            for (i = [0:num_teeth-1]) {
+                angle = i * 360 / num_teeth;
+                rotate([0, 0, angle])
+                    translate([pitch_radius, 0, 0])
+                        cube([tooth_height, 2, thickness], center = true);
+            }
+        }
+        
+        // Center hole
+        cylinder(h = thickness * 2, r = hole_diameter / 2, center = true, $fn = 30);
+    }
+}
+
+gear(20, 5, 5);`
         };
         
-        // Create a parser instance
-        const parser = new OpenSCADParser();
+        // UI Elements
+        const statusMessage = document.getElementById('statusMessage');
+        const exampleSelect = document.getElementById('exampleSelect');
+        const codeEditor = document.getElementById('codeEditor');
+        const parseButton = document.getElementById('parseButton');
+        const parseResult = document.getElementById('parseResult');
+        
+        // Load example
+        exampleSelect.addEventListener('change', () => {
+            const selected = exampleSelect.value;
+            if (selected && examples[selected]) {
+                codeEditor.value = examples[selected];
+            }
+        });
         
         // Show status message
         function showStatus(message, isError = false) {
             statusMessage.textContent = message;
             statusMessage.classList.remove('hidden', 'success', 'error');
             statusMessage.classList.add(isError ? 'error' : 'success');
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                statusMessage.classList.add('hidden');
+            }, 5000);
         }
         
-        // Initialize the parser
-        async function init() {
-            showStatus('Initializing parser...');
+        // Format tree
+        function formatTree(node, indent = 0) {
+            if (!node) return 'null';
             
-            const success = await parser.initialize();
+            const indentStr = ' '.repeat(indent * 2);
+            let result = `${indentStr}(${node.type} [${node.startPosition.row},${node.startPosition.column}] - [${node.endPosition.row},${node.endPosition.column}]`;
             
-            if (success) {
-                showStatus('Parser initialized successfully! Ready to parse OpenSCAD code.');
-                parseButton.disabled = false;
-            } else {
-                showStatus(`Failed to initialize parser: ${parser.error?.message || 'Unknown error'}`, true);
-                console.error('Parser initialization failed:', parser.error);
-            }
-        }
-        
-        // Parse the code
-        function parseCode() {
-            const code = codeInput.value;
-            
-            if (!code.trim()) {
-                showStatus('Please enter some OpenSCAD code to parse.', true);
-                return;
-            }
-            
-            try {
-                const tree = parser.parse(code);
-                
-                if (tree) {
-                    const formattedTree = parser.formatTree(tree.rootNode);
-                    outputArea.textContent = formattedTree;
-                    showStatus('Code parsed successfully!');
-                } else {
-                    showStatus('Failed to parse code. See console for details.', true);
+            if (node.childCount > 0) {
+                result += '\n';
+                for (let i = 0; i < node.childCount; i++) {
+                    const child = node.child(i);
+                    const fieldName = node.fieldNameForChild(i);
+                    
+                    if (fieldName) {
+                        result += `${indentStr}  ${fieldName}: `;
+                    }
+                    
+                    result += formatTree(child, indent + 1);
+                    result += '\n';
                 }
-            } catch (error) {
-                showStatus(`Error parsing code: ${error.message}`, true);
-                console.error('Error parsing code:', error);
+                result += `${indentStr})`;
+            } else {
+                const text = node.text.replace(/\n/g, '\\n');
+                if (text) {
+                    result += ` "${text}")`;
+                } else {
+                    result += ')';
+                }
             }
+            
+            return result;
         }
         
-        // Load the selected example
-        function loadExample() {
-            const exampleCode = examples[exampleSelect.value] || examples.basic;
-            codeInput.value = exampleCode;
-        }
-        
-        // Event listeners
-        parseButton.addEventListener('click', parseCode);
-        loadExampleBtn.addEventListener('click', loadExample);
-        
-        // Initialize the parser
-        init();
+        // Parse code (to be implemented with actual WebAssembly parser)
+        parseButton.addEventListener('click', () => {
+            parseResult.textContent = 'Parsing...';
+            
+            // For now, just show a message since we haven't fully implemented the parser
+            setTimeout(() => {
+                showStatus('Parser not fully implemented yet. Please test the WebAssembly module first.', true);
+                parseResult.textContent = 'The OpenSCAD parser requires WebAssembly support. Please test the WebAssembly module using the buttons below to verify compatibility.';
+            }, 500);
+        });
     </script>
 </body>
 </html> 

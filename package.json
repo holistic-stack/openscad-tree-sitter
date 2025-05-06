@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Tree-sitter grammar for OpenSCAD with WebAssembly support for browser use",
   "main": "web-test/openscad-parser.js",
+  "types": "bindings/node",
   "scripts": {
     "test": "tree-sitter test",
     "build": "tree-sitter generate",
@@ -10,7 +11,9 @@
     "docker:build-wasm": "docker build -t openscad-tree-sitter-wasm-builder -f Dockerfile.wasm .",
     "docker:extract-wasm": "docker create --name temp-wasm-container openscad-tree-sitter-wasm-builder && docker cp temp-wasm-container:/output/tree-sitter-openscad.wasm ./web-test/ && docker rm temp-wasm-container",
     "parse": "tree-sitter parse",
-    "playground": "tree-sitter playground"
+    "playground": "tree-sitter playground",
+    "install": "node-gyp-build",
+    "prebuildify": "prebuildify --napi --strip"
   },
   "keywords": [
     "parser",
@@ -37,7 +40,8 @@
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",
   "devDependencies": {
-    "tree-sitter-cli": "^0.22.1"
+    "tree-sitter-cli": "^0.22.1",
+    "prebuildify": "^6.0.0"
   },
   "repository": {
     "type": "git",
@@ -56,5 +60,17 @@
         "queries/tags.scm"
       ]
     }
-  ]
+  ],
+  "dependencies": {
+    "web-tree-sitter": "^0.25.3",
+    "node-gyp-build": "^4.8.0"
+  },
+  "peerDependencies": {
+    "tree-sitter": "^0.21.0"
+  },
+  "peerDependenciesMeta": {
+    "tree_sitter": {
+      "optional": true
+    }
+  }
 }
