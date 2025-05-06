@@ -1,6 +1,6 @@
 # OpenSCAD Tree-sitter - Next Steps
 
-This document outlines the progress made and the next steps to further enhance the OpenSCAD Tree-sitter grammar.
+This document outlines the progress made and the next steps to further enhance the OpenSCAD Tree-sitter grammar for WebAssembly.
 
 ## Project Setup Completed
 
@@ -13,8 +13,7 @@ We've successfully set up the OpenSCAD Tree-sitter grammar:
 ✅ Code navigation tag queries (tags.scm)
 ✅ Basic test cases (all passing)
 ✅ Sample OpenSCAD files for testing
-✅ Node.js bindings
-✅ WebAssembly test UI
+✅ WebAssembly test UI and browser integration
 
 ## Completed Tasks
 
