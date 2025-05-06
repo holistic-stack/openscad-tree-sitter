@@ -1,71 +1,121 @@
-# OpenSCAD Tree-sitter WebAssembly Test
+# OpenSCAD Tree-sitter Grammar
 
-This directory contains a browser-based test for the OpenSCAD Tree-sitter grammar using WebAssembly.
+A Tree-sitter grammar for the OpenSCAD language, providing parsing capabilities for Node.js and TypeScript applications.
 
-## Prerequisites
+## Project Structure
 
-Before using this test, you need to build the WebAssembly version of the parser using Docker:
+This project follows the recommended Tree-sitter project organization:
 
-1. Build the WebAssembly module using Docker:
-   ```bash
-   # From the root directory of the project
-   npm run docker:build-wasm
-   npm run docker:extract-wasm
-   ```
+```
+openscad-tree-sitter/
+├── bindings/            # Language bindings
+│   └── node/            # Node.js bindings
+├── examples/            # Example OpenSCAD files
+├── grammar.js           # The grammar definition
+├── queries/             # Tree-sitter queries
+│   ├── highlights.scm   # Syntax highlighting
+│   └── tags.scm         # Code navigation
+├── src/                 # Generated parser code
+├── test/                # Test files
+│   └── corpus/          # Test corpus
+└── web-test/            # WebAssembly testing (planned)
+```
 
-This will create the `tree-sitter-openscad.wasm` file in this directory.
+## Installation
 
-## Running the Test
+```bash
+npm install openscad-tree-sitter
+# or
+pnpm add openscad-tree-sitter
+# or
+yarn add openscad-tree-sitter
+```
 
-There are several ways to run the test:
+## Usage with Node.js
 
-### Using a Local Web Server
+```javascript
+const Parser = require('openscad-tree-sitter');
 
-1. Start a local web server:
-   ```bash
-   # Using Python
-   python -m http.server 8000
-   
-   # Or using Node.js
-   npx serve
-   ```
+// Parse OpenSCAD code
+const code = `cylinder(h=10, r=5);`;
+const tree = Parser.parse(code);
 
-2. Open your browser and navigate to:
-   ```
-   http://localhost:8000/
-   ```
+// Access the parsed syntax tree
+console.log(tree.rootNode.toString());
+```
 
-### Using Visual Studio Code
+## Usage with TypeScript
 
-If you're using Visual Studio Code, you can use the Live Server extension:
+```typescript
+import { Parser } from 'openscad-tree-sitter';
 
-1. Install the "Live Server" extension
-2. Right-click on `index.html` and select "Open with Live Server"
+// Parse OpenSCAD code
+const code = `cylinder(h=10, r=5);`;
+const tree = Parser.parse(code);
 
-## Using the Test Page
+// Access the parsed syntax tree
+console.log(tree.rootNode.toString());
+```
 
-The test page provides:
+## Development
 
-1. A dropdown menu to select example OpenSCAD code
-2. A text area to edit or enter your own OpenSCAD code
-3. A "Parse" button to trigger parsing
-4. An output area showing the parse tree result
+### Prerequisites
 
-## Troubleshooting
+- Node.js 12+
+- pnpm, npm, or yarn
 
-If you encounter issues:
+### Building the Project
 
-1. **WASM file not found**: Make sure you've built the WebAssembly module using Docker
-2. **CORS errors**: You must use a web server, opening the HTML file directly might cause CORS issues
-3. **Parser initialization fails**: Check the browser console for more detailed error messages
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/openscad-tree-sitter.git
+cd openscad-tree-sitter
 
-## Building a Complete WebAssembly Integration
+# Install dependencies
+pnpm install
 
-For a complete WebAssembly integration in a real application:
+# Generate the parser
+pnpm build
 
-1. Create a proper npm package for browser use
-2. Add TypeScript typings for improved developer experience
-3. Implement proper error handling and recovery
-4. Add syntax highlighting and code navigation using the query files
-5. Consider using a bundler like webpack or rollup
-6. Follow the memory management practices in the implementation (tree.delete()) 
+# Run tests
+pnpm test
+```
+
+### Building WebAssembly Version
+
+```bash
+# Build the WebAssembly module
+pnpm build:wasm
+```
+
+## Features
+
+This grammar supports:
+
+- Module definitions and instantiations
+- Function definitions and calls
+- Mathematical expressions
+- Conditional statements
+- For loops
+- Include/use directives
+- Variables and assignments
+- And more...
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Tree-sitter team for the amazing parser generator
+- OpenSCAD developers for the language specification 
