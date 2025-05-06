@@ -19,14 +19,12 @@ module.exports = grammar({
   conflicts: $ => [
     [$.module_instantiation, $.call_expression],
     [$.if_statement, $.module_instantiation], // For else-if chains
-    [$.for_statement, $.list_comprehension], // For list comprehensions
     [$.statement, $.if_statement], // For nested if-else statements
     [$.if_statement], // Self-conflict for nested if-else
-    [$.expression, $.list_comprehension_for], // For list comprehension for loop
-    [$.expression, $.index_expression], // For array indexing
+    [$.index_expression, $.expression],
     [$.range_expression, $.expression], // For range expressions
     [$.index_expression, $.array_literal], // For multidimensional arrays
-    [$.member_expression, $.expression], // For member access
+    [$.member_expression, $.expression],
   ],
 
   rules: {
@@ -242,104 +240,109 @@ module.exports = grammar({
     ),
 
     // Expression
-    expression: $ => choice(
-      $.binary_expression,
-      $.unary_expression,
-      $.conditional_expression,
+    expression: $ => $.conditional_expression,
+
+    primary_expression: $ => choice(
+      $.parenthesized_expression,
       $.call_expression,
       $.index_expression,
       $.member_expression,
-      $.let_expression,
-      $.list_comprehension,
+      $.identifier,
       $.special_variable,
-      $.parenthesized_expression,
-      $.vector_expression,
-      $.array_literal,
-      $.object_literal,
-      $.string,
       $.number,
+      $.string,
       $.boolean,
       $.undef,
-      $.identifier
+      $.array_literal,
+      $.list_comprehension,
+      $.range_expression
     ),
 
-    // Parenthesized expression
     parenthesized_expression: $ => seq(
       '(',
-        $.expression,
+      $.expression,
       ')'
     ),
 
-    // Binary expressions
-    binary_expression: $ => {
-      const operators = [
-        ['||', 1], // logical OR
-        ['&&', 2], // logical AND
-        [['<', '<=', '>', '>=', '==', '!='], 3], // comparison
-        [['|'], 4], // bitwise OR
-        [['~'], 5], // bitwise XOR
-        [['&'], 6], // bitwise AND
-        [['<<', '>>'], 7], // bit shift
-        [['+', '-'], 8], // addition/subtraction
-        [['*', '/', '%'], 9], // multiplication/division/modulo
-        [['^'], 10], // exponentiation
-      ];
-
-      return buildBinaryExpression(operators, 0);
-
-      function buildBinaryExpression(operatorGroups, index) {
-        if (index === operatorGroups.length) {
-          return $.expression;
-        }
-
-        const [operators, precedence] = operatorGroups[index];
-        const higherPrecedence = buildBinaryExpression(operatorGroups, index + 1);
-
-        return prec.left(precedence, seq(
-          field('left', $.expression),
-          field('operator', choice(...[].concat(operators).map(operator => token(operator)))),
-          field('right', higherPrecedence)
-        ));
-      }
-    },
-
-    // Unary expressions
-    unary_expression: $ => prec(11, seq(
-      field('operator', choice(
-        '+', '-', '!', '~'
-      )),
-      field('argument', $.expression)
+    // Operator Precedence Rules (highest to lowest)
+    // Level 2: Unary Operators (right-associative)
+    unary_expression: $ => prec.right(2, choice(
+      seq(choice('!', '-'), $.exponentiation_expression),
+      $.primary_expression
     )),
 
-    // Conditional expression (ternary)
-    conditional_expression: $ => prec.right(0, seq(
-      field('condition', $.expression),
-      '?',
-      field('consequence', $.expression),
-      ':',
-      field('alternative', $.expression)
+    // Level 3: Exponentiation (right-associative) - if we support ^
+    // Reverting diagnostic change back to right-associative
+    exponentiation_expression: $ => prec.right(3, choice(
+      seq(field('left', $.unary_expression), '^', field('right', $.exponentiation_expression)),
+      $.unary_expression
+    )),
+
+    // Level 4: Multiplicative (left-associative)
+    multiplicative_expression: $ => prec.left(4, choice(
+      seq(field('left', $.exponentiation_expression), choice('*', '/', '%'), field('right', $.exponentiation_expression)),
+      $.exponentiation_expression
+    )),
+
+    // Level 5: Additive (left-associative)
+    additive_expression: $ => prec.left(5, choice(
+      seq(field('left', $.multiplicative_expression), choice('+', '-'), field('right', $.multiplicative_expression)),
+      $.multiplicative_expression
+    )),
+
+    // Level 6: Relational (left-associative)
+    relational_expression: $ => prec.left(6, choice(
+      seq(field('left', $.additive_expression), choice('<', ' <=', '>', '>='), field('right', $.additive_expression)),
+      $.additive_expression
+    )),
+
+    // Level 7: Equality (left-associative)
+    equality_expression: $ => prec.left(7, choice(
+      seq(field('left', $.relational_expression), choice('==', '!='), field('right', $.relational_expression)),
+      $.relational_expression
+    )),
+
+    // Level 8: Logical AND (left-associative)
+    logical_and_expression: $ => prec.left(8, choice(
+      seq(field('left', $.equality_expression), '&&', field('right', $.equality_expression)),
+      $.equality_expression
+    )),
+
+    // Level 9: Logical OR (left-associative)
+    logical_or_expression: $ => prec.left(9, choice(
+      seq(field('left', $.logical_and_expression), '||', field('right', $.logical_and_expression)),
+      $.logical_and_expression
+    )),
+
+    // Level 10: Conditional (Ternary) Operator (right-associative)
+    conditional_expression: $ => prec.right(10, choice(
+      seq(
+        field('condition', $.logical_or_expression),
+        '?',
+        field('consequence', $.expression),
+        ':',
+        field('alternative', $.conditional_expression)
+      ),
+      $.logical_or_expression
     )),
 
     // Call expression (function calls)
-    call_expression: $ => seq(
-      field('function', $.identifier),
-      field('arguments', $.argument_list)
-    ),
+    call_expression: $ => prec.left(1, seq(
+      field('function', $.primary_expression),
+      $.argument_list
+    )),
 
     // Index expression (array indexing)
-    index_expression: $ => prec.left(12, seq(
-      field('array', $.expression),
+    index_expression: $ => prec.left(1, seq(
+      field('array', $.primary_expression),
       '[',
-      field('index', choice(
-        $.expression,
-        $.range_expression
-      )),
+      field('index', $.expression),
       ']'
     )),
 
     // Member access expression (e.g., v.x, p.y)
-    member_expression: $ => prec.left(12, seq(
-      field('object', $.expression),
+    member_expression: $ => prec.left(1, seq(
+      field('object', $.primary_expression),
       '.',
       field('property', $.identifier)
     )),
@@ -365,27 +368,29 @@ module.exports = grammar({
       field('value', $.expression)
     ),
 
-    // List comprehension
-    list_comprehension: $ => seq(
+    // List comprehension - aiming for [expr for (var=list)] and [expr for (var=list) if (cond)]
+    list_comprehension: $ => prec(1, seq(
       '[',
-      field('expr', $.expression),
+      field('element', $.expression),
+      field('for_clause', $.list_comprehension_for_block),
+      optional(field('if_clause', $.list_comprehension_if_block)),
+      ']'
+    )),
+
+    list_comprehension_for_block: $ => seq(
       'for',
       '(',
-      $.list_comprehension_for,
-      ')',
-      optional(seq(
-        'if',
-        '(',
-        field('condition', $.expression),
-        ')'
-      )),
-      ']'
+      field('iterator', $.identifier), // Single identifier for now
+      '=',
+      field('list', $.expression),
+      ')'
     ),
 
-    list_comprehension_for: $ => seq(
-      field('iterator', choice($.identifier, $.special_variable)),
-      '=',
-      field('range', choice($.expression, $.range_expression))
+    list_comprehension_if_block: $ => seq(
+      'if',
+      '(',
+      field('condition', $.expression),
+      ')'
     ),
 
     // Data types
@@ -400,10 +405,7 @@ module.exports = grammar({
 
     array_literal: $ => seq(
       '[',
-      optional(seq(
-        commaSep1(choice($.expression, $.array_literal)),
-        optional(',')
-      )),
+      optional(commaSep1($.expression)),
       ']'
     ),
 
@@ -427,8 +429,8 @@ module.exports = grammar({
 
     // Primitives
     string: $ => choice(
-      seq('"', optional(/[^"]*/), '"'),
-      seq("'", optional(/[^']*/), "'")
+      seq('"', optional(token.immediate(/[^\"]*/)), '"'),
+      seq("'", optional(token.immediate(/[^']*/)), "'")
     ),
 
     number: $ => {
@@ -447,7 +449,7 @@ module.exports = grammar({
 
     undef: $ => 'undef',
 
-    identifier: $ => /[a-zA-Z_][a-zA-Z0-9_]*/,
+    identifier: $ => /[\p{L}_][\p{L}\p{N}_]*/u,
 
     operator: $ => choice(
       '+', '-', '*', '/', '%', '^',
