@@ -18,6 +18,8 @@ module.exports = grammar({
   // Handle conflicts
   conflicts: $ => [
     [$.expression, $.call_expression],
+    [$.module_instantiation, $.call_expression],
+    [$.binary_expression, $.let_expression],
   ],
 
   rules: {
@@ -239,7 +241,7 @@ module.exports = grammar({
     )),
 
     // Let expression
-    let_expression: $ => seq(
+    let_expression: $ => prec.right(1, seq(
       'let',
       '(',
       $.let_clause,
@@ -247,7 +249,7 @@ module.exports = grammar({
       optional(','),
       ')',
       $.expression
-    ),
+    )),
 
     let_clause: $ => seq(
       $.identifier,

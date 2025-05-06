@@ -3,12 +3,15 @@
   "version": "0.1.0",
   "description": "Tree-sitter grammar for OpenSCAD - provides syntax highlighting, code navigation, and incremental parsing",
   "main": "bindings/node",
+  "types": "bindings/node",
   "scripts": {
     "test": "tree-sitter test",
     "build": "tree-sitter generate",
     "parse": "tree-sitter parse",
     "highlight": "tree-sitter highlight",
-    "playground": "tree-sitter playground"
+    "playground": "tree-sitter playground",
+    "install": "node-gyp-build",
+    "prebuildify": "prebuildify --napi --strip"
   },
   "keywords": [
     "parser",
@@ -22,11 +25,28 @@
     "3d",
     "cad"
   ],
+  "files": [
+    "grammar.js",
+    "binding.gyp",
+    "prebuilds/**",
+    "bindings/node/*",
+    "queries/*",
+    "src/**"
+  ],
   "author": "OpenSCAD Community",
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",
   "dependencies": {
-    "nan": "^2.18.0"
+    "node-addon-api": "^7.1.0",
+    "node-gyp-build": "^4.8.0"
+  },
+  "peerDependencies": {
+    "tree-sitter": "^0.21.0"
+  },
+  "peerDependenciesMeta": {
+    "tree_sitter": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "tree-sitter-cli": "^0.22.1",
