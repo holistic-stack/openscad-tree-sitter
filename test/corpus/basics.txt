@@ -13,23 +13,23 @@ true || false;
     (expression
       (binary_expression
         left: (expression (number))
-        operator: "+"
+        operator: (operator)
         right: (expression
           (binary_expression
             left: (expression (number))
-            operator: "*"
+            operator: (operator)
             right: (expression (number)))))))
   (statement
     (expression
       (binary_expression
         left: (expression (boolean))
-        operator: "||"
+        operator: (operator)
         right: (expression (boolean)))))
   (statement
     (expression
       (binary_expression
         left: (expression (string))
-        operator: "=="
+        operator: (operator)
         right: (expression (string))))))
 
 ==================
@@ -57,9 +57,7 @@ module cube_wrap(size = 10) {
             name: (identifier)
             arguments: (argument_list
               (arguments
-                (argument (expression (identifier)))))
-            ";"
-          ))))))
+                (argument (expression (identifier))))))))))
 
 ==================
 Function Definition
@@ -80,7 +78,7 @@ function add(a, b) = a + b;
       value: (expression
         (binary_expression
           left: (expression (identifier))
-          operator: "+"
+          operator: (operator)
           right: (expression (identifier)))))))
 
 ==================
@@ -123,15 +121,15 @@ volume = 3.14 * r * r * h;
       value: (expression
         (binary_expression
           left: (expression (number))
-          operator: "*"
+          operator: (operator)
           right: (expression
             (binary_expression
               left: (expression (identifier))
-              operator: "*"
+              operator: (operator)
               right: (expression
                 (binary_expression
                   left: (expression (identifier))
-                  operator: "*"
+                  operator: (operator)
                   right: (expression (identifier)))))))))))
 
 ==================
@@ -200,7 +198,7 @@ shape = let(
           condition: (expression
             (binary_expression
               left: (expression (identifier))
-              operator: ">"
+              operator: (operator)
               right: (expression (number))))
           consequence: (expression (string))
           alternative: (expression (string))))))
@@ -225,4 +223,4 @@ shape = let(
                       (vector_expression
                         (expression (identifier))
                         (expression (identifier))
-                        (expression (number)))))))))))))) 
+                        (expression (number)))))))))))))))) 

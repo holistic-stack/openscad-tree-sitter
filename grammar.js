@@ -17,9 +17,7 @@ module.exports = grammar({
 
   // Handle conflicts
   conflicts: $ => [
-    [$.expression, $.call_expression],
     [$.module_instantiation, $.call_expression],
-    [$.binary_expression, $.let_expression],
   ],
 
   rules: {
@@ -180,7 +178,8 @@ module.exports = grammar({
 
     string: $ => choice(
       seq('"', repeat(choice(/[^"\\]/, /\\./)), '"'),
-      seq("'", repeat(choice(/[^'\\]/, /\\./)), "'")
+      seq("'", repeat(choice(/[^'\\]/, /\\./)), "'"),
+      seq("<", repeat(choice(/[^>\\]/, /\\./)), ">")
     ),
 
     // Vector expressions
@@ -225,10 +224,20 @@ module.exports = grammar({
       ].map(([operator, precedence]) =>
         prec.left(precedence, seq(
           field('left', $.expression),
-          field('operator', operator),
+          field('operator', alias(operator, $.operator)),
           field('right', $.expression)
         ))
       )
+    ),
+
+    // Add operator as a named node to make the field label work
+    operator: $ => choice(
+      '*', '/', '%',
+      '+', '-',
+      '<', '<=', '>', '>=',
+      '==', '!=',
+      '&&',
+      '||'
     ),
 
     // Conditional expression
