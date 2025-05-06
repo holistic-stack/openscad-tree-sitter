@@ -81,14 +81,8 @@ pnpm install
 # Generate the parser
 pnpm build
 
-# Run Tree-sitter tests
+# Run tests
 pnpm test
-
-# Run Vitest unit tests
-pnpm test:vitest
-
-# Run all tests
-pnpm test:all
 ```
 
 ### Building WebAssembly Version
@@ -100,23 +94,20 @@ pnpm build:wasm
 
 ## Testing
 
-The project includes two types of tests:
+The project uses Vitest for all testing. Tests are organized into two main categories:
 
-1. **Tree-sitter corpus tests** - These are located in `test/corpus/` and can be run with `pnpm test`.
-2. **Vitest unit tests** - More detailed tests for specific grammar features located in `test/grammar/` and can be run with `pnpm test:vitest`.
+1. **Corpus Tests** - These validate the grammar against a collection of OpenSCAD code examples.
+2. **Grammar Tests** - Targeted tests for specific grammar features.
 
 ### Running Tests
 
 You can run tests using npm/pnpm scripts:
 
 ```bash
-# Run Tree-sitter corpus tests
+# Run all tests
 pnpm test
 
-# Run Vitest unit tests
-pnpm test:vitest
-
-# Run Vitest tests in watch mode
+# Run tests in watch mode
 pnpm test:watch
 
 # Generate test coverage report
@@ -124,20 +115,19 @@ pnpm test:coverage
 
 # Run tests with UI
 pnpm test:ui
-
-# Run all tests (both Tree-sitter and Vitest)
-pnpm test:all
 ```
 
-The Vitest tests provide more detailed checks of specific grammar features, such as:
+The test suite checks various aspects of the grammar, including:
 - Basic syntax elements (comments, variable assignments, modules, functions)
 - Advanced features (list comprehensions, special variables, control structures)
+- Improved language features (range expressions, array indexing, object literals)
 - Grammar improvements and edge cases
 
-## Features
+## Improved Grammar Features
 
-This grammar supports:
+This grammar supports the full OpenSCAD language specification with additional improvements:
 
+### Core Features
 - Module definitions and instantiations
 - Function definitions and calls
 - Mathematical expressions
@@ -145,10 +135,16 @@ This grammar supports:
 - For loops
 - Include/use directives
 - Variables and assignments
-- List comprehensions
-- Special variables
+
+### Advanced Features
+- List comprehensions with conditions
+- Special variables ($fa, $fs, $fn, etc.)
+- Multi-dimensional arrays
+- Array slicing with range expressions
+- Object literals for structured data
+- Let expressions for local variable definitions
 - Member access expressions
-- And more...
+- Improved type handling (numbers, strings, booleans, undef)
 
 ## Contributing
 

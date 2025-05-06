@@ -1,0 +1,351 @@
+==================
+List Comprehensions
+==================
+
+values = [i * i for (i = [1:5])];
+evens = [x for (x = [1:20]) if (x % 2 == 0)];
+matrix = [[i+j for (j = [0:2])] for (i = [0:2])];
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression
+        (list_comprehension
+          expr: (expression
+            (binary_expression
+              left: (expression (identifier))
+              operator: (operator)
+              right: (expression (identifier))))
+          (list_comprehension_for
+            iterator: (identifier)
+            range: (expression (range_expression
+              start: (expression (number))
+              end: (expression (number)))))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression
+        (list_comprehension
+          expr: (expression (identifier))
+          (list_comprehension_for
+            iterator: (identifier)
+            range: (expression (range_expression
+              start: (expression (number))
+              end: (expression (number)))))
+          condition: (expression
+            (binary_expression
+              left: (expression
+                (binary_expression
+                  left: (expression (identifier))
+                  operator: (operator)
+                  right: (expression (number))))
+              operator: (operator)
+              right: (expression (number))))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression
+        (list_comprehension
+          expr: (expression
+            (list_comprehension
+              expr: (expression
+                (binary_expression
+                  left: (expression (identifier))
+                  operator: (operator)
+                  right: (expression (identifier))))
+              (list_comprehension_for
+                iterator: (identifier)
+                range: (expression (range_expression
+                  start: (expression (number))
+                  end: (expression (number)))))))
+          (list_comprehension_for
+            iterator: (identifier)
+            range: (expression (range_expression
+              start: (expression (number))
+              end: (expression (number))))))))))
+
+==================
+Object Literals
+==================
+
+settings = {
+  "resolution": 36,
+  "quality": "high",
+  "options": {
+    "render": true,
+    "preview": false
+  }
+};
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression
+        (object_literal
+          (object_field
+            key: (string)
+            value: (expression (number)))
+          (object_field
+            key: (string)
+            value: (expression (string)))
+          (object_field
+            key: (string)
+            value: (expression
+              (object_literal
+                (object_field
+                  key: (string)
+                  value: (expression (boolean)))
+                (object_field
+                  key: (string)
+                  value: (expression (boolean)))))))))))
+
+==================
+Range Expressions
+==================
+
+for (i = [0:5]) cube(i);
+for (j = [0:0.5:10]) sphere(j);
+for (k = [start:step:end]) cylinder(k);
+
+---
+
+(source_file
+  (statement
+    (for_statement
+      (for_header
+        iterator: (identifier)
+        range: (range_expression
+          start: (expression (number))
+          end: (expression (number))))
+      (statement
+        (module_instantiation
+          name: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument (expression (identifier)))))))))
+  (statement
+    (for_statement
+      (for_header
+        iterator: (identifier)
+        range: (range_expression
+          start: (expression (number))
+          step: (expression (number))
+          end: (expression (number))))
+      (statement
+        (module_instantiation
+          name: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument (expression (identifier)))))))))
+  (statement
+    (for_statement
+      (for_header
+        iterator: (identifier)
+        range: (range_expression
+          start: (expression (identifier))
+          step: (expression (identifier))
+          end: (expression (identifier))))
+      (statement
+        (module_instantiation
+          name: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument (expression (identifier))))))))))
+
+==================
+Array Indexing
+==================
+
+points = [[1,2,3], [4,5,6], [7,8,9]];
+x = points[0][0];
+row = points[1];
+subset = points[0:1];
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression
+        (array_literal
+          (expression
+            (vector_expression
+              (expression (number))
+              (expression (number))
+              (expression (number))))
+          (expression
+            (vector_expression
+              (expression (number))
+              (expression (number))
+              (expression (number))))
+          (expression
+            (vector_expression
+              (expression (number))
+              (expression (number))
+              (expression (number))))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression
+        (index_expression
+          array: (expression
+            (index_expression
+              array: (expression (identifier))
+              index: (expression (number))))
+          index: (expression (number))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression
+        (index_expression
+          array: (expression (identifier))
+          index: (expression (number))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression
+        (index_expression
+          array: (expression (identifier))
+          index: (range_expression
+            start: (expression (number))
+            end: (expression (number))))))))
+
+==================
+Member Access
+==================
+
+point = [10, 20, 30];
+x = point.x;
+y = point.y;
+z = point.z;
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression
+        (vector_expression
+          (expression (number))
+          (expression (number))
+          (expression (number))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression
+        (member_expression
+          object: (expression (identifier))
+          property: (identifier)))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression
+        (member_expression
+          object: (expression (identifier))
+          property: (identifier)))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression
+        (member_expression
+          object: (expression (identifier))
+          property: (identifier))))))
+
+==================
+Special Variables
+==================
+
+$fn = 36;
+cube(10, $fn = 12);
+rotate([$t * 360, 0, 0]) sphere(5);
+move = $vpt;
+view = $vpr;
+dist = $vpd;
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (special_variable)
+      value: (expression (number))))
+  (statement
+    (module_instantiation
+      name: (identifier)
+      arguments: (argument_list
+        (arguments
+          (argument (expression (number)))
+          (argument
+            (special_variable)
+            (expression (number)))))))
+  (statement
+    (module_instantiation
+      name: (identifier)
+      arguments: (argument_list
+        (arguments
+          (argument
+            (expression
+              (vector_expression
+                (expression
+                  (binary_expression
+                    left: (expression (special_variable))
+                    operator: (operator)
+                    right: (expression (number))))
+                (expression (number))
+                (expression (number)))))))
+      (block
+        (statement
+          (module_instantiation
+            name: (identifier)
+            arguments: (argument_list
+              (arguments
+                (argument (expression (number))))))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression (special_variable))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression (special_variable))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression (special_variable)))))
+
+==================
+Complex Numeric Literals
+==================
+
+small = 1.2e-3;
+large = 1.5e6;
+negative = -42;
+precise = 3.14159265359;
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression (number))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression (number))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression (number))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression (number))))) 
