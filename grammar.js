@@ -23,6 +23,7 @@ module.exports = grammar({
     [$.list_comprehension_for, $.list_comprehension_for_block],
     [$.list_comprehension_if, $.list_comprehension_if_block],
     [$.array_literal, $.list_comprehension],
+    [$.primary_expression, $.index_expression],
   ],
 
   rules: {
@@ -315,8 +316,17 @@ module.exports = grammar({
       $.undef,
       $.array_literal,
       $.list_comprehension,
-      $.call_expression
+      $.object_literal,
+      $.call_expression,
+      $.index_expression
     ),
+
+    index_expression: $ => prec.right(20, seq(
+      field('array', $.primary_expression),
+      '[',
+      field('index', $.expression),
+      ']'
+    )),
 
     parenthesized_expression: $ => seq(
       '(',
@@ -388,6 +398,22 @@ module.exports = grammar({
       '(',
       field('condition', $.expression),
       ')'
+    ),
+
+    // Object literals
+    object_literal: $ => prec(1, seq(
+      '{',
+      optional(seq(
+        commaSep1($.object_field),
+        optional(',')
+      )),
+      '}'
+    )),
+
+    object_field: $ => seq(
+      field('key', $.string),
+      ':',
+      field('value', $.expression)
     ),
 
     range_expression: $ => choice(
