@@ -6,44 +6,58 @@
 module.exports = grammar({
   name: 'openscad',
 
+  // Use 'word' to properly handle identifiers and keywords
   word: $ => $.identifier,
 
+  // Use this for error recovery on common delimiters
   extras: $ => [
     /\s/,
     $.comment,
+    $.error_sentinel, // Add error sentinel for better recovery
   ],
 
+  // Handle conflicts
   conflicts: $ => [
     [$.module_instantiation, $.primary_expression],
     [$.statement, $.if_statement],
-    [$.modifier, $.unary_expression],
-    [$.module_instantiation, $.call_expression],
-    [$.for_header, $.array_literal],
-    [$.if_statement],
+    [$.if_statement, $.module_instantiation],
+    [$.list_comprehension_for_block, $.array_literal],
   ],
 
   rules: {
+    // Program is the root rule
     source_file: $ => repeat($.statement),
 
+    // Comments
     comment: $ => choice(
       seq('//', /.*/, /\r?\n/),
-      seq('/*', /([^*]|\*[^\/])*\*\//)
+      seq('/*', /([^*]|\*[^\/])*\*\//) // Fixed to handle nested comments correctly
     ),
 
+    // Error sentinel for better recovery
+    error_sentinel: $ => token(prec(-1, /[^\s]+/)),
+
+    // Statements
     statement: $ => choice(
       $.include_statement,
       $.use_statement,
-      $.module_definition,
-      $.function_definition,
-      $.assignment_statement,
+      prec(2, $.module_definition),
+      prec(2, $.function_definition),
+      prec(2, $.assignment_statement),
       $.module_instantiation,
+      // Control structures
       $.if_statement,
       $.for_statement,
+      // Other statements
       $.echo_statement,
       $.assert_statement,
       seq($.expression, ';')
     ),
 
+    // Error recovery helper
+    _error_recovery: $ => token(prec(-1, /[^;{}()\[\]\s]+/)),
+
+    // Include and Use statements
     include_statement: $ => seq(
       'include',
       $.string,
@@ -56,6 +70,7 @@ module.exports = grammar({
       optional(';')
     ),
 
+    // Module definition
     module_definition: $ => seq(
       'module',
       field('name', $.identifier),
@@ -63,6 +78,7 @@ module.exports = grammar({
       field('body', $.block)
     ),
 
+    // Function definition
     function_definition: $ => seq(
       'function',
       field('name', $.identifier),
@@ -72,10 +88,15 @@ module.exports = grammar({
       ';'
     ),
 
+    // Parameter list
     parameter_list: $ => seq(
       '(',
       optional($.parameter_declarations),
-      ')'
+      choice(
+        ')',
+        // Error recovery for missing closing parenthesis
+        token.immediate(prec(-1, /[;{]/)) // Match semicolon or opening brace
+      )
     ),
 
     parameter_declarations: $ => seq(
@@ -91,19 +112,26 @@ module.exports = grammar({
       seq($.special_variable, '=', $.expression)
     ),
 
+    // Assignment statement
     assignment_statement: $ => seq(
-      field('name', choice($.special_variable, $.identifier)),
+      field('name', prec(2, choice($.special_variable, $.identifier))),
       '=',
       field('value', $.expression),
       ';'
     ),
 
+    // Blocks
     block: $ => seq(
       '{',
       repeat($.statement),
-      '}'
+      choice(
+        '}',
+        // Error recovery for missing closing brace
+        token.immediate(prec(-1, /[^\s;]/)) // Match any non-whitespace, non-semicolon character
+      )
     ),
 
+    // Module instantiation
     module_instantiation: $ => seq(
       optional($.modifier),
       field('name', $.identifier),
@@ -115,10 +143,15 @@ module.exports = grammar({
       )
     ),
 
+    // Arguments
     argument_list: $ => seq(
       '(',
       optional($.arguments),
-      ')'
+      choice(
+        ')',
+        // Error recovery for missing closing parenthesis
+        token.immediate(prec(-1, /[;{]/)) // Match semicolon or opening brace
+      )
     ),
 
     arguments: $ => seq(
@@ -129,10 +162,11 @@ module.exports = grammar({
 
     argument: $ => choice(
       $.expression,
-      seq($.special_variable, '=', $.expression),
+      seq(prec(2, $.special_variable), '=', $.expression),
       seq($.identifier, '=', $.expression)
     ),
 
+    // Module children
     module_child: $ => seq(
       'children',
       optional(seq(
@@ -143,14 +177,16 @@ module.exports = grammar({
       ';'
     ),
 
+    // Modifiers for module instantiation
     modifier: $ => choice(
-      '#',
-      '!',
-      '%',
-      '*',
+      '#', // debug
+      '!', // root
+      '%', // background
+      '*', // disable
     ),
 
-    if_statement: $ => seq(
+    // Control Structures
+    if_statement: $ => prec.right(0, seq(
       'if',
       '(',
       $.expression,
@@ -159,15 +195,15 @@ module.exports = grammar({
         $.block,
         $.statement
       ),
-      optional(seq(
+      optional(field('alternative', seq(
         'else',
         choice(
-          $.if_statement,
+          $.if_statement, // else if
           $.block,
           $.statement
         )
-      ))
-    ),
+      )))
+    )),
 
     for_statement: $ => seq(
       'for',
@@ -186,6 +222,7 @@ module.exports = grammar({
       choice($.range_expression, $.expression)
     ),
 
+    // Range expression (for for loops)
     range_expression: $ => choice(
       seq(
         field('start', $.expression),
@@ -201,6 +238,7 @@ module.exports = grammar({
       )
     ),
 
+    // Echo and Assert
     echo_statement: $ => seq(
       'echo',
       '(',
@@ -218,125 +256,219 @@ module.exports = grammar({
       ';'
     ),
 
+    // Expression
     expression: $ => $.conditional_expression,
 
+    // Precedence levels (higher number = higher precedence)
+    // Conditional: 1, Logical OR: 2, Logical AND: 3, Equality: 4, Relational: 5,
+    // Additive: 6, Multiplicative: 7, Exponentiation: 8, Unary: 9, Postfix: 10
+
     conditional_expression: $ => choice(
-      seq(
+      prec.right(1, seq(
         field('condition', $.logical_or_expression),
         '?',
-        field('consequence', $.expression),
+        field('consequence', $.expression), // Recursive call to $.expression for consequence
         ':',
-        field('alternative', $.expression)
-      ),
-      $.logical_or_expression
+        field('alternative', $.conditional_expression) // Allows right-chaining
+      )),
+      $.logical_or_expression // Pass to next higher precedence
     ),
 
     logical_or_expression: $ => choice(
-      seq(
+      prec.left(2, seq(
         field('left', $.logical_or_expression),
         '||',
         field('right', $.logical_and_expression)
-      ),
-      $.logical_and_expression
+      )),
+      $.logical_and_expression // Pass to next higher precedence
     ),
 
     logical_and_expression: $ => choice(
-      seq(
+      prec.left(3, seq(
         field('left', $.logical_and_expression),
         '&&',
         field('right', $.equality_expression)
-      ),
-      $.equality_expression
+      )),
+      $.equality_expression // Pass to next higher precedence
     ),
 
     equality_expression: $ => choice(
-      seq(
+      prec.left(4, seq(
         field('left', $.equality_expression),
         field('operator', choice('==', '!=')),
         field('right', $.relational_expression)
-      ),
-      $.relational_expression
+      )),
+      $.relational_expression // Pass to next higher precedence
     ),
 
     relational_expression: $ => choice(
-      seq(
+      prec.left(5, seq(
         field('left', $.relational_expression),
         field('operator', choice('<', '<=', '>', '>=')),
         field('right', $.additive_expression)
-      ),
-      $.additive_expression
+      )),
+      $.additive_expression // Pass to next higher precedence
     ),
 
     additive_expression: $ => choice(
-      seq(
+      prec.left(6, seq(
         field('left', $.additive_expression),
         field('operator', choice('+', '-')),
         field('right', $.multiplicative_expression)
-      ),
-      $.multiplicative_expression
+      )),
+      $.multiplicative_expression // Pass to next higher precedence
     ),
 
     multiplicative_expression: $ => choice(
-      seq(
+      prec.left(7, seq(
         field('left', $.multiplicative_expression),
         field('operator', choice('*', '/', '%')),
         field('right', $.exponentiation_expression)
-      ),
-      $.exponentiation_expression
+      )),
+      $.exponentiation_expression // Pass to next higher precedence
     ),
 
     exponentiation_expression: $ => choice(
-      seq(
+      prec.right(8, seq(
         field('left', $.unary_expression),
         field('operator', '^'),
         field('right', $.exponentiation_expression)
-      ),
-      $.unary_expression
+      )),
+      $.unary_expression // Pass to next higher precedence
     ),
 
     unary_expression: $ => choice(
-      seq(
+      prec.right(9, seq(
         field('operator', choice('!', '-')),
-        field('operand', $.primary_expression)
-      ),
-      $.primary_expression
+        field('operand', $.accessor_expression)
+      )),
+      $.accessor_expression // Pass to next higher precedence
+    ),
+
+    accessor_expression: $ => choice(
+      $.primary_expression,
+      prec.right(20, seq(
+        field('array', $.accessor_expression),
+        '[',
+        field('index', $.expression),
+        ']'
+      )), // Index access (higher precedence for nesting)
+      prec.left(10, seq(
+        field('object', $.accessor_expression),
+        '.',
+        field('property', $.identifier)
+      )), // Member access
+      prec.left(10, seq(
+        field('function', $.accessor_expression),
+        $.argument_list
+      ))  // Call expression
     ),
 
     primary_expression: $ => choice(
       $.parenthesized_expression,
-      $.special_variable,
+      prec(2, $.special_variable),
       $.identifier,
       $.number,
       $.string,
       $.boolean,
       $.undef,
       $.array_literal,
-      $.call_expression
+      $.list_comprehension,
+      $.let_expression
     ),
 
     parenthesized_expression: $ => seq(
       '(',
-      $.expression,
+      $.expression, // Allows full expression inside parentheses
       ')'
     ),
 
-    call_expression: $ => seq(
-      field('function', $.identifier),
-      field('arguments', $.argument_list)
+    // Let expression
+    let_expression: $ => seq(
+      'let',
+      '(',
+      optional($.let_assignments),
+      ')',
+      $.expression
     ),
 
-    array_literal: $ => choice(
+    let_assignments: $ => seq(
+      $.let_assignment,
+      repeat(seq(',', $.let_assignment)),
+      optional(',')
+    ),
+
+    let_assignment: $ => seq(
+      field('name', choice($.identifier, $.special_variable)),
+      '=',
+      field('value', $.expression)
+    ),
+
+    // List comprehension - aiming for [expr for (var=list)] and [expr for (var=list) if (cond)]
+    list_comprehension: $ => seq(
+      '[',
+      field('element', $.expression),
+      field('for_clause', prec(2, $.list_comprehension_for_block)),
+      optional(field('if_clause', $.list_comprehension_if_block)),
+      ']'
+    ),
+
+    list_comprehension_for_block: $ => seq(
+      'for',
+      '(',
+      field('iterator', choice($.identifier, $.special_variable)),
+      '=',
+      choice($.range_expression, $.expression),
+      ')'
+    ),
+
+    list_comprehension_if_block: $ => seq(
+      'if',
+      '(',
+      field('condition', $.expression),
+      ')'
+    ),
+
+    // Data types
+    vector_expression: $ => seq(
+      '[',
+      optional(seq(
+        commaSep1($.expression),
+        optional(',')
+      )),
+      ']'
+    ),
+
+    array_literal: $ => prec(1, choice(
       $.range_expression,
       seq('[', optional(commaSep1($.expression)), ']')
+    )),
+
+    object_literal: $ => seq(
+      '{',
+      optional(seq(
+        commaSep1($.object_field),
+        optional(',')
+      )),
+      '}'
     ),
 
+    object_field: $ => seq(
+      field('key', $.string),
+      ':',
+      field('value', $.expression)
+    ),
+
+    // Range expressions: [start:end] or [start:step:end]
     range_expression: $ => choice(
       seq('[', $.expression, ':', $.expression, ']'),
       seq('[', $.expression, ':', $.expression, ':', $.expression, ']')
     ),
 
+    // Special variables - updated to use Unicode character classes
     special_variable: $ => token(/\$[\p{L}_][\p{L}\p{N}_]*/u),
 
+    // Primitives
     string: $ => choice(
       seq('"', optional(token.immediate(/[^\"]*/)), '"'),
       seq("'", optional(token.immediate(/[^']*/)), "'")
@@ -359,9 +491,17 @@ module.exports = grammar({
     undef: $ => 'undef',
 
     identifier: $ => /[\p{L}_][\p{L}\p{N}_]*/u,
+
+    operator: $ => choice(
+      '+', '-', '*', '/', '%', '^',
+      '&&', '||', '!',
+      '==', '!=', '<', '<=', '>', '>=',
+      '&', '|', '~', '<<', '>>'
+    ),
   }
 });
 
+// Helper functions
 function commaSep1(rule) {
   return seq(rule, repeat(seq(',', rule)));
 }

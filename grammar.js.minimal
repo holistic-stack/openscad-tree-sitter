@@ -16,10 +16,6 @@ module.exports = grammar({
   conflicts: $ => [
     [$.module_instantiation, $.primary_expression],
     [$.statement, $.if_statement],
-    [$.modifier, $.unary_expression],
-    [$.module_instantiation, $.call_expression],
-    [$.for_header, $.array_literal],
-    [$.if_statement],
   ],
 
   rules: {
