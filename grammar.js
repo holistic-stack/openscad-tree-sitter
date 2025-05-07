@@ -13,6 +13,7 @@ module.exports = grammar({
   extras: $ => [
     /\s/,
     $.comment,
+    $.error_sentinel, // Add error sentinel for better recovery
   ],
 
   // Handle conflicts
@@ -33,6 +34,9 @@ module.exports = grammar({
       seq('/*', /([^*]|\*[^\/])*\*\//) // Fixed to handle nested comments correctly
     ),
 
+    // Error sentinel for better recovery
+    error_sentinel: $ => token(prec(-1, /[^\s]+/)),
+
     // Statements
     statement: $ => choice(
       $.include_statement,
@@ -45,8 +49,15 @@ module.exports = grammar({
       $.for_statement,
       $.echo_statement,
       $.assert_statement,
-      seq($.expression, ';')
+      seq($.expression, ';'),
+      // Error recovery for common statement errors
+      seq($.expression, token.immediate(prec(1, ';'))), // Missing semicolon but newline
+      seq($.expression, $._error_recovery), // Expression without semicolon
+      $._error_recovery // Completely invalid statement
     ),
+
+    // Error recovery helper
+    _error_recovery: $ => token(prec(-1, /[^;{}()\[\]\s]+/)),
 
     // Include and Use statements
     include_statement: $ => seq(
@@ -83,7 +94,11 @@ module.exports = grammar({
     parameter_list: $ => seq(
       '(',
       optional($.parameter_declarations),
-      ')'
+      choice(
+        ')',
+        // Error recovery for missing closing parenthesis
+        token.immediate(prec(-1, /[;{]/)) // Match semicolon or opening brace
+      )
     ),
 
     parameter_declarations: $ => seq(
@@ -111,7 +126,11 @@ module.exports = grammar({
     block: $ => seq(
       '{',
       repeat($.statement),
-      '}'
+      choice(
+        '}',
+        // Error recovery for missing closing brace
+        token.immediate(prec(-1, /[^\s;]/)) // Match any non-whitespace, non-semicolon character
+      )
     ),
 
     // Module instantiation
@@ -130,7 +149,11 @@ module.exports = grammar({
     argument_list: $ => seq(
       '(',
       optional($.arguments),
-      ')'
+      choice(
+        ')',
+        // Error recovery for missing closing parenthesis
+        token.immediate(prec(-1, /[;{]/)) // Match semicolon or opening brace
+      )
     ),
 
     arguments: $ => seq(

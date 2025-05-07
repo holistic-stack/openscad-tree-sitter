@@ -176,9 +176,10 @@ current rules:
    - testing_debug.mdc
 
 the rule_name.md are:
-	- general.mdc : the rules that are used any context;
-	- testing_debug.mdc : the rules that are used when the context is about testing or debug;
-	- implementing.mdc: the rules that are used when implementing features context;
+- general.mdc : the rules that are used any context;
+- testing_debug.mdc : the rules that are used when the context is about testing or debug;
+- implementing.mdc: the rules that are used when implementing features context;
+- refactoring.mdc: the rules that are used when refactoring context;
 
 The `.cursor/rules/[rule_name].mdc` file is my learning journal for each project. It captures important patterns, preferences, and project intelligence that help me work more effectively. As I work with you and the project, I'll discover and document key insights that aren't obvious from the code alone. I should be prompted to update this when new, valuable patterns or preferences are identified.
 

@@ -322,6 +322,136 @@ dist = $vpd;
       value: (expression (special_variable)))))
 
 ==================
+Special Variables
+==================
+
+angle = $fa;
+size = $fs;
+segments = $fn;
+time = $t;
+children_count = $children;
+
+use_specials($fa, $fs, $fn, $t, $children);
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression (special_variable))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression (special_variable))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression (special_variable))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression (special_variable))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression (special_variable))))
+  (statement
+    (module_instantiation
+      name: (identifier)
+      arguments: (argument_list
+        (arguments
+          (argument (special_variable))
+          (argument (special_variable))
+          (argument (special_variable))
+          (argument (special_variable))
+          (argument (special_variable)))))))
+
+==================
+Error Recovery
+==================
+
+a = 5
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression (number)))))
+
+==================
+Unclosed Block
+==================
+
+module foo() {
+  a = 1;
+// missing closing }
+
+---
+
+(source_file
+  (statement
+    (module_definition
+      name: (identifier)
+      parameters: (parameter_list)
+      body: (block
+        (statement
+          (assignment_statement
+            name: (identifier)
+            value: (expression (number))))))))
+
+==================
+Unclosed Parenthesis
+==================
+
+b = (2 + 3;
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression (parenthesized_expression
+        (expression (binary_expression
+          left: (expression (number))
+          operator: (operator)
+          right: (expression (number)))))))))
+
+==================
+Incomplete Expression
+==================
+
+c = 1 + ;
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression (binary_expression
+        left: (expression (number))
+        operator: (operator)
+        right: (expression (ERROR)))))))
+
+==================
+Unclosed String
+==================
+
+d = "unterminated string;
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (expression (string))))
+
+==================
 Complex Numeric Literals
 ==================
 
