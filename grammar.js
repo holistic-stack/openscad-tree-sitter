@@ -442,8 +442,8 @@ module.exports = grammar({
       field('value', $.expression)
     ),
 
-    // Special variables - updated to use regex pattern
-    special_variable: $ => token(/\$[a-zA-Z_][a-zA-Z0-9_]*/),
+    // Special variables - updated to use Unicode character classes
+    special_variable: $ => token(/\$[\p{L}_][\p{L}\p{N}_]*/u),
 
     // Primitives
     string: $ => choice(
@@ -481,4 +481,4 @@ module.exports = grammar({
 // Helper functions
 function commaSep1(rule) {
   return seq(rule, repeat(seq(',', rule)));
-} 
+}

@@ -5,8 +5,8 @@
 
 import { describe, it, expect } from 'vitest';
 import { parseCode, testParse, hasErrors, findNodesOfType } from '../helpers/parser-test-utils';
-import { 
-  extractSpecialVariables, 
+import {
+  extractSpecialVariables,
   extractListComprehensions,
   extractObjectLiterals,
   extractRangeExpressions,
@@ -28,29 +28,29 @@ describe('Comprehensive OpenSCAD Grammar Tests', () => {
         c = -10;
         d = 1.2e-3;
         e = 1.5e6;
-        
+
         // Strings
         s1 = "hello";
         s2 = 'world';
-        
+
         // Booleans
         t = true;
         f = false;
-        
+
         // Undef
         u = undef;
-        
+
         // Vectors
         v1 = [1, 2, 3];
         v2 = [[1, 2], [3, 4]];
-        
+
         // Ranges
         r1 = [0:5];
         r2 = [0:0.5:10];
       `;
       expect(testParse(code)).toBe(true);
     });
-    
+
     it('should parse all operators', () => {
       const code = `
         // Arithmetic
@@ -60,7 +60,7 @@ describe('Comprehensive OpenSCAD Grammar Tests', () => {
         d = 7 / 8;
         e = 9 % 10;
         f = 2 ^ 3;
-        
+
         // Comparison
         g = 1 < 2;
         h = 3 <= 4;
@@ -68,19 +68,19 @@ describe('Comprehensive OpenSCAD Grammar Tests', () => {
         j = 7 >= 8;
         k = 9 == 10;
         l = 11 != 12;
-        
+
         // Logical
         m = true && false;
         n = true || false;
         o = !true;
-        
+
         // Bitwise
         p = 1 & 2;
         q = 3 | 4;
         r = 5 ~ 6;
         s = 7 << 8;
         t = 9 >> 10;
-        
+
         // Conditional (ternary)
         u = (1 < 2) ? "yes" : "no";
       `;
@@ -100,7 +100,7 @@ describe('Comprehensive OpenSCAD Grammar Tests', () => {
       `;
       expect(testParse(code)).toBe(true);
     });
-    
+
     it('should parse nested expressions and operator precedence', () => {
       const code = `
         a = (1 + 2) * 3;
@@ -111,27 +111,29 @@ describe('Comprehensive OpenSCAD Grammar Tests', () => {
       const tree = parseCode(code);
       expect(hasErrors(tree.rootNode)).toBe(false);
     });
-    
-    it.skip('should parse member access from different expressions', () => {
+
+    it('should parse member access from different expressions', () => {
       const code = `
         // Basic member access
         p1 = point.x;
-        /* Temporarily commenting out more complex cases
+
         // Member access from complex expression (parenthesized)
         p2 = (point1 + point2).x;
-        
+
         // Member access from function result
         p3 = get_point().x;
-        
+
         // Member access chains
         p4 = object.child.property;
-        
+
         // Member access from indexed elements
         p5 = points[0].x;
 
         // Chained call, index, member
         p6 = get_obj().array_prop[0].final_val;
-        */
+
+        // Member access as assignment target
+        point.x = 10;
       `;
       const tree = parseCode(code);
       expect(hasErrors(tree.rootNode)).toBe(false);
@@ -157,10 +159,10 @@ describe('Comprehensive OpenSCAD Grammar Tests', () => {
       `;
       expect(testParse(code)).toBe(true);
     });
-    
+
     it('should parse function definitions with complex return values', () => {
       const code = `
-        function complex_calc(x, y, z) = 
+        function complex_calc(x, y, z) =
           let(
             sum = x + y + z,
             avg = sum / 3,
@@ -169,7 +171,7 @@ describe('Comprehensive OpenSCAD Grammar Tests', () => {
       `;
       expect(testParse(code)).toBe(true);
     });
-    
+
     it('should parse recursive functions', () => {
       const code = `
         function factorial(n) = (n <= 1) ? 1 : n * factorial(n - 1);
@@ -198,29 +200,29 @@ describe('Comprehensive OpenSCAD Grammar Tests', () => {
       expect(ifStatements.length).toBeGreaterThan(0);
       expect(elseIfCount).toBeGreaterThanOrEqual(0);
     });
-    
+
     it('should parse for loops with various expressions', () => {
       const code = `
         // Basic for loop
         for (i = [0:5]) {
           cube(i);
         }
-        
+
         // For loop with step
         for (i = [0:0.5:10]) {
           sphere(i);
         }
-        
+
         // For loop with variable range
         for (i = [start:step:end]) {
           cylinder(i);
         }
-        
+
         // For loop with complex expression
         for (i = concat([1,2,3], [4,5,6])) {
           echo(i);
         }
-        
+
         // Nested for loops
         for (i = [0:2]) {
           for (j = [0:2]) {
@@ -233,57 +235,56 @@ describe('Comprehensive OpenSCAD Grammar Tests', () => {
   });
 
   describe('List Comprehensions and Arrays', () => {
-    it.skip('should parse various list comprehension forms', () => {
+    it('should parse various list comprehension forms', () => {
       const code = `
         // Basic list comprehension - simplest case
         lc_simple = [idx for (idx = [1])];
 
-        /* Original more complex cases - temporarily comment out
         // Basic list comprehension
         squares = [i * i for (i = [1:10])];
-        
+
         // With condition
         evens = [i for (i = [1:20]) if (i % 2 == 0)];
-        
+
         // With complex expressions in element and list
         points = [[cos(a), sin(a), 0] for (a = [0:10:360])];
-        
+
         // With function call in result and if condition
         results = [process(i) for (i = values) if (should_process(i))];
 
-        // Nested comprehensions will be tested separately after basic forms are stable
-        // matrix = [[i+j for (j = [0:2])] for (i = [0:2])]; 
-        */
+        // Nested comprehensions
+        matrix = [[i+j for (j = [0:2])] for (i = [0:2])];
       `;
-      const tree = parseCode(code);
+      const { tree, listComps } = extractListComprehensions(code);
       expect(hasErrors(tree.rootNode)).toBe(false);
+      expect(listComps.length).toBeGreaterThan(0);
     });
-    
+
     it('should parse advanced array operations', () => {
       const code = `
         // Array construction and concatenation
         a1 = [1, 2, 3];
         a2 = [4, 5, 6];
         a3 = concat(a1, a2);
-        
+
         // Array slicing
         slice1 = a3[2:4];
-        
+
         // Multidimensional arrays
         matrix = [
           [1, 2, 3],
           [4, 5, 6],
           [7, 8, 9]
         ];
-        
+
         // Deep indexing
         element = matrix[1][2];
-        
+
         // Array with mixed types
         mixed = [1, "string", true, [2, 3], undef];
       `;
       expect(mockTestParse(code)).toBe(true);
-      
+
       const { tree, ranges } = extractRangeExpressions(code);
       expect(hasErrors(tree.rootNode)).toBe(false);
       expect(ranges.length).toBeGreaterThan(0);
@@ -317,30 +318,30 @@ describe('Comprehensive OpenSCAD Grammar Tests', () => {
       expect(hasErrors(tree.rootNode)).toBe(false);
       expect(objects.length).toBeGreaterThan(0);
     });
-    
+
     it('should parse all special variable forms', () => {
       const code = `
         // Resolution variables
         $fa = 2;
         $fs = 0.1;
         $fn = 64;
-        
+
         // Viewport variables
         translate($vpt);
         rotate($vpr);
         echo($vpd);
         echo($vpf);
-        
+
         // Animation
         rotate([$t * 360, 0, 0]);
-        
+
         // Custom special variables
         $my_var = 42;
-        
+
         // Special vars as arguments
         sphere(10, $fn=36);
         cylinder(h=5, r=2, $fs=0.1, $fa=5);
-        
+
         // Special vars in expressions
         detail = $preview ? 10 : $fn;
       `;
@@ -358,16 +359,16 @@ describe('Comprehensive OpenSCAD Grammar Tests', () => {
         !sphere(5);           // root (show only this)
         %cylinder(h=10, r=2); // background (transparent)
         *translate([10,0,0]) cube(5); // disable
-        
+
         // Modifiers with blocks
         #union() {
           cube(10);
           sphere(5);
         }
-        
+
         // Modifiers with named arguments
         !translate(x=10, y=20, z=30) cube(size=5, center=true);
-        
+
         // Modifiers with children
         #difference() {
           cube(20, center=true);
@@ -386,7 +387,7 @@ describe('Comprehensive OpenSCAD Grammar Tests', () => {
       const tree = parseCode(code);
       expect(hasErrors(tree.rootNode)).toBe(false);
     });
-    
+
     it('should handle empty blocks and statements', () => {
       const code = `
         module foo() {}
@@ -397,26 +398,31 @@ describe('Comprehensive OpenSCAD Grammar Tests', () => {
       const tree = parseCode(code);
       expect(hasErrors(tree.rootNode)).toBe(false);
     });
-    
-    it.skip('should handle unicode characters in strings and identifiers', () => {
+
+    it('should handle unicode characters in strings and identifiers', () => {
       const code = `
         你好 = "世界"; // Hello = "World" in Chinese
         αβγ = "ข้อความ"; // abc = "text" in Greek and Thai
         echo(你好, αβγ);
+
+        // Unicode in special variables
+        $你好 = 42;
+        $αβγ = 3.14;
+        echo($你好, $αβγ);
       `;
       const tree = parseCode(code);
       expect(hasErrors(tree.rootNode)).toBe(false);
     });
-    
+
     it('should recover from common syntax errors', () => {
       const code = `
         // Missing semicolon
         a = 10
         b = 20;
-        
+
         // Unmatched brackets
         c = [1, 2, 3;
-        
+
         // Extra closing brace
         module test() {
           cube(10);
@@ -426,4 +432,4 @@ describe('Comprehensive OpenSCAD Grammar Tests', () => {
       expect(tree).toBeDefined();
     });
   });
-}); 
+});

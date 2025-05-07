@@ -154,8 +154,20 @@ export function findNodesOfType(tree: Tree, nodeType: string): SyntaxNode[] {
 }
 
 // Additional mock functions for specific test cases
-export function extractListComprehensions(code: string): any[] {
-  return [{ type: 'list_comprehension' }];
+export function extractListComprehensions(code: string): { tree: any, listComps: any[] } {
+  const tree = parseCode(code);
+  const listComps = [
+    {
+      type: 'list_comprehension',
+      childForFieldName: (name: string) => {
+        if (name === 'element') return { text: 'i * i' };
+        if (name === 'for_clause') return { text: 'for (i = [1:10])' };
+        if (name === 'if_clause') return { text: 'if (i % 2 == 0)' };
+        return null;
+      }
+    }
+  ];
+  return { tree, listComps };
 }
 
 export function extractSpecialVariables(code: string): any[] {
