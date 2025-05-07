@@ -27,8 +27,6 @@ module.exports = grammar({
     [$.primary_expression, $.accessor_expression],
     [$.accessor_expression, $.primary_expression],
     [$.let_expression, $.expression],
-    [$.module_instantiation],
-    [$.module_child],
   ],
 
   rules: {

@@ -27,8 +27,6 @@ module.exports = grammar({
     [$.primary_expression, $.accessor_expression],
     [$.accessor_expression, $.primary_expression],
     [$.let_expression, $.expression],
-    [$.module_instantiation],
-    [$.module_child],
   ],
 
   rules: {
@@ -540,9 +538,9 @@ module.exports = grammar({
       // Single-quoted strings with proper termination
       seq("'", optional(token.immediate(/[^']*/)), "'"),
       // Error recovery for unterminated double-quoted strings
-      seq('"', token.immediate(/[^"\n]*/)),
+      seq('"', token.immediate(/[^"\n]*/), token.immediate(prec(-1, /$/))),
       // Error recovery for unterminated single-quoted strings
-      seq("'", token.immediate(/[^'\n]*/)),
+      seq("'", token.immediate(/[^'\n]*/), token.immediate(prec(-1, /$/))),
     ),
 
     number: $ => {
