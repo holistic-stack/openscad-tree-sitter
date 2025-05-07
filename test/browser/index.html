@@ -115,6 +115,7 @@
             background-color: #2980b9;
         }
     </style>
+
 </head>
 <body>
     <h1>OpenSCAD Tree-sitter WebAssembly Test</h1>
@@ -145,6 +146,7 @@ test();</textarea>
         <button id="parse-button">Parse Code</button>
         <button id="clear-button">Clear</button>
     </div>
+
     
     <h2>Parse Tree</h2>
     <div id="output" class="output">
@@ -152,10 +154,11 @@ test();</textarea>
     </div>
     
     <script type="module">
-        // Import web-tree-sitter
-        import * as TreeSitter from 'https://unpkg.com/web-tree-sitter@0.20.8/tree-sitter.js';
-        
-        // Examples
+    import * as TreeSitter from 'https://cdn.jsdelivr.net/npm/web-tree-sitter@0.25.3/tree-sitter.js';
+    const Parser = TreeSitter.Parser;
+
+
+      // Examples
         const examples = {
             basic: `// Basic OpenSCAD example
 cube(10);
@@ -283,34 +286,48 @@ gear_system();`
         
         // Initialize the parser
         async function initParser() {
+
             try {
                 output.innerHTML = '<p class="loading">Loading parser...</p>';
                 
-                // Initialize Tree-sitter
-                await TreeSitter.init();
-                parser = new TreeSitter();
+                // Initialize Tree-sitter (global)
+                await Parser.init();
+                parser = new Parser();
                 
                 // Load the OpenSCAD language
-                const wasmUrl = '../../tree-sitter-openscad.wasm';
+                const wasmUrl = '../../tree-sitter-openscad.wasm'; // Restore relative path
                 
                 try {
-                    const response = await fetch(wasmUrl);
-                    if (!response.ok) {
-                        throw new Error(`Failed to fetch WASM file: ${response.status} ${response.statusText}`);
-                    }
-                    
-                    const wasmBytes = await response.arrayBuffer();
-                    language = await TreeSitter.Language.load(wasmBytes);
+                    const OpenSCAD = await TreeSitter.Language.load(wasmUrl);
+                    language = OpenSCAD;
                     parser.setLanguage(language);
-                    
-                    output.innerHTML = '<p class="success">Parser loaded successfully. Click "Parse Code" to test.</p>';
+                    output.innerHTML = '<p class="success">Parser loaded successfully. Enter code and click "Parse Code".</p>';
                     parseButton.disabled = false;
-                } catch (error) {
-                    output.innerHTML = `<p class="error">Error loading WASM file: ${error.message}</p>
-                        <p>Make sure you've built the WebAssembly version with:</p>
-                        <pre>npm run build:wasm</pre>
-                        <p>And that the file is accessible at: ${wasmUrl}</p>`;
-                    console.error('Error loading WASM:', error);
+                } catch (loadError) {
+                    let errorDetails = `Message: ${loadError.message}`;
+                    if (loadError.stack) {
+                        errorDetails += `\nStack: ${loadError.stack}`;
+                    }
+                    if (typeof loadError.status !== 'undefined') {
+                        errorDetails += `\nStatus: ${loadError.status}`;
+                    }
+                    if (loadError.response) {
+                        errorDetails += `\nResponse object present.`;
+                        try {
+                            if (typeof loadError.response.text === 'function') {
+                                const responseText = await loadError.response.text();
+                                errorDetails += `\nResponse Text (first 500 chars): ${responseText.substring(0, 500)}`;
+                            } else {
+                                errorDetails += `\nResponse object does not have a text() method.`;
+                            }
+                        } catch (respError) {
+                            errorDetails += `\nError trying to get response text: ${respError.message}`;
+                        }
+                    }
+                    console.error(`Detailed error in Language.load trying to load ${wasmUrl}:`, loadError);
+                    console.error(`Formatted error details: ${errorDetails}`);
+                    output.innerHTML = `<p class="error">Error loading WASM file from ${wasmUrl}.<br>Details: ${errorDetails.replace(/\n/g, '<br>')}.<br>Check console for full error object.</p>`;
+                    parseButton.disabled = true;
                 }
             } catch (error) {
                 output.innerHTML = `<p class="error">Error initializing parser: ${error.message}</p>`;
@@ -320,6 +337,7 @@ gear_system();`
         
         // Parse the code and display the tree
         function parseCode() {
+            console.log("Parsing code", parser, language);
             if (!parser || !language) {
                 output.innerHTML = '<p class="error">Parser not initialized yet.</p>';
                 return;

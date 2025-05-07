@@ -15,8 +15,8 @@ importers:
         specifier: 0.22.4
         version: 0.22.4
       web-tree-sitter:
-        specifier: ^0.25.3
-        version: 0.25.3
+        specifier: 0.22.4
+        version: 0.22.4
     devDependencies:
       '@vitest/coverage-v8':
         specifier: ^1.6.1
@@ -34,8 +34,8 @@ importers:
         specifier: ^6.0.0
         version: 6.0.1
       tree-sitter-cli:
-        specifier: ^0.25.3
-        version: 0.25.3
+        specifier: 0.22.4
+        version: 0.22.4
       vite:
         specifier: ^5.2.0
         version: 5.4.19
@@ -1087,9 +1087,8 @@ packages:
     resolution: {integrity: sha512-sf4i37nQ2LBx4m3wB74y+ubopq6W/dIzXg0FDGjsYnZHVa1Da8FH853wlL2gtUhg+xJXjfk3kUZS3BRoQeoQBQ==}
     engines: {node: '>=6'}
 
-  tree-sitter-cli@0.25.3:
-    resolution: {integrity: sha512-Bk6ZUXG+cKnwZpfR/te4NDrKld90p6350eqWlbLwSpV9/8vmL/x8LCw+3k7quY9oMDaYoMXHMvokXJbkM5A7bA==}
-    engines: {node: '>=12.0.0'}
+  tree-sitter-cli@0.22.4:
+    resolution: {integrity: sha512-Zli7yeD+ocVWm+au5YLJKLyxzvUirenomOgwapNZU8bpYt/CZMpEeya9eK/tEQAd7NDOQSvAnvhJXbPbwUdgMQ==}
     hasBin: true
 
   tree-sitter@0.22.4:
@@ -1174,8 +1173,8 @@ packages:
       jsdom:
         optional: true
 
-  web-tree-sitter@0.25.3:
-    resolution: {integrity: sha512-e0hdXG+nJ18Zd/QJFhSx0DNTSMz7miwUjKyJ/lglTnZo6ke08++BQzXkaeaqnGJFi9qq+nPJg2L8hYAjduToHQ==}
+  web-tree-sitter@0.22.4:
+    resolution: {integrity: sha512-W8+6dSWJ/vD2chFbYFaFFLfgFLvSEd3d9O3mayXCT4nwhdYpxF/+rqmQ7TB2e0FIY0Tx4a+8bgcXl6Od5SZx7Q==}
 
   which@2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}
@@ -2232,7 +2231,7 @@ snapshots:
 
   totalist@3.0.1: {}
 
-  tree-sitter-cli@0.25.3: {}
+  tree-sitter-cli@0.22.4: {}
 
   tree-sitter@0.22.4:
     dependencies:
@@ -2313,7 +2312,7 @@ snapshots:
       - supports-color
       - terser
 
-  web-tree-sitter@0.25.3: {}
+  web-tree-sitter@0.22.4: {}
 
   which@2.0.2:
     dependencies:

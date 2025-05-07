@@ -19,9 +19,8 @@ module.exports = grammar({
   // Handle conflicts
   conflicts: $ => [
     [$.module_instantiation, $.primary_expression],
-    [$.if_statement, $.module_instantiation],
     [$.statement, $.if_statement],
-    [$.if_statement],
+    [$.identifier, $.special_variable],
   ],
 
   rules: {
@@ -41,19 +40,21 @@ module.exports = grammar({
     statement: $ => choice(
       $.include_statement,
       $.use_statement,
-      $.module_definition,
-      $.function_definition,
-      $.assignment_statement,
-      $.module_instantiation,
-      $.if_statement,
-      $.for_statement,
-      $.echo_statement,
-      $.assert_statement,
-      seq($.expression, ';'),
-      // Error recovery for common statement errors
-      seq($.expression, token.immediate(prec(1, ';'))), // Missing semicolon but newline
-      seq($.expression, $._error_recovery), // Expression without semicolon
-      $._error_recovery // Completely invalid statement
+      prec(2, $.module_definition),
+      prec(2, $.function_definition),
+      prec(2, $.assignment_statement),
+      $.module_instantiation
+      // Next: add other statement types incrementally
+
+      // $.if_statement,
+      // $.for_statement,
+      // $.while_statement,
+      // $.echo_statement,
+      // $.assert_statement,
+      // seq($.expression, ';'),
+      // seq($.expression, token.immediate(prec(1, ';'))),
+      // seq($.expression, $._error_recovery),
+      // $._error_recovery
     ),
 
     // Error recovery helper
@@ -116,7 +117,7 @@ module.exports = grammar({
 
     // Assignment statement
     assignment_statement: $ => seq(
-      field('name', choice($.identifier, $.special_variable)),
+      field('name', prec(2, choice($.special_variable, $.identifier))),
       '=',
       field('value', $.expression),
       ';'
@@ -164,8 +165,8 @@ module.exports = grammar({
 
     argument: $ => choice(
       $.expression,
-      seq($.identifier, '=', $.expression),
-      seq($.special_variable, '=', $.expression)
+      seq(prec(2, $.special_variable), '=', $.expression),
+      seq($.identifier, '=', $.expression)
     ),
 
     // Module children
@@ -197,14 +198,14 @@ module.exports = grammar({
         $.block,
         $.statement
       ),
-      optional(seq(
+      optional(field('alternative', seq(
         'else',
         choice(
           $.if_statement, // else if
           $.block,
           $.statement
         )
-      ))
+      )))
     )),
 
     for_statement: $ => seq(
@@ -221,7 +222,7 @@ module.exports = grammar({
     for_header: $ => seq(
       field('iterator', choice($.identifier, $.special_variable)),
       '=',
-      field('range', choice($.expression, $.range_expression))
+      choice($.range_expression, $.expression)
     ),
 
     // Range expression (for for loops)
@@ -349,17 +350,17 @@ module.exports = grammar({
 
     accessor_expression: $ => choice(
       $.primary_expression,
+      prec.right(20, seq(
+        field('array', $.accessor_expression),
+        '[',
+        field('index', $.expression),
+        ']'
+      )), // Index access (higher precedence for nesting)
       prec.left(10, seq(
         field('object', $.accessor_expression),
         '.',
         field('property', $.identifier)
       )), // Member access
-      prec.left(10, seq(
-        field('array', $.accessor_expression),
-        '[',
-        field('index', $.expression), // Index expression uses full expression
-        ']'
-      )), // Index access
       prec.left(10, seq(
         field('function', $.accessor_expression),
         $.argument_list
@@ -368,8 +369,8 @@ module.exports = grammar({
 
     primary_expression: $ => choice(
       $.parenthesized_expression,
+      prec(2, $.special_variable),
       $.identifier,
-      $.special_variable,
       $.number,
       $.string,
       $.boolean,
@@ -421,9 +422,9 @@ module.exports = grammar({
     list_comprehension_for_block: $ => seq(
       'for',
       '(',
-      field('iterator', $.identifier), // Single identifier for now
+      field('iterator', choice($.identifier, $.special_variable)),
       '=',
-      field('list', $.expression),
+      choice($.range_expression, $.expression),
       ')'
     ),
 
@@ -444,10 +445,9 @@ module.exports = grammar({
       ']'
     ),
 
-    array_literal: $ => seq(
-      '[',
-      optional(commaSep1($.expression)),
-      ']'
+    array_literal: $ => choice(
+      $.range_expression,
+      seq('[', optional(commaSep1($.expression)), ']')
     ),
 
     object_literal: $ => seq(
@@ -463,6 +463,12 @@ module.exports = grammar({
       field('key', $.string),
       ':',
       field('value', $.expression)
+    ),
+
+    // Range expressions: [start:end] or [start:step:end]
+    range_expression: $ => choice(
+      seq('[', $.expression, ':', $.expression, ']'),
+      seq('[', $.expression, ':', $.expression, ':', $.expression, ']')
     ),
 
     // Special variables - updated to use Unicode character classes
