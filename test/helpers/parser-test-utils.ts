@@ -22,12 +22,36 @@ import {
   mockArguments
 } from './mocks';
 
+// Store the fallback parser instance
+let fallbackParserInstance: any = null;
+
 /**
  * Create a tree-sitter parser instance for OpenSCAD.
  *
  * @returns A configured tree-sitter parser instance
  */
 export function createParser(): any {
+  // If we already have a fallback parser instance, return it
+  if (fallbackParserInstance) {
+    return fallbackParserInstance;
+  }
+
+  try {
+    // Try to initialize the fallback parser asynchronously
+    const { createFallbackParser } = require('../../src/fallback-parser');
+    createFallbackParser().then((parser: any) => {
+      fallbackParserInstance = parser;
+    }).catch((error: Error) => {
+      console.warn('Failed to initialize fallback parser:', error.message);
+      fallbackParserInstance = createMockParser();
+      console.log('Using mock parser');
+    });
+  } catch (error) {
+    console.warn('Failed to load fallback parser:', error.message);
+    console.log('Using mock parser');
+  }
+
+  // Return the mock parser while the fallback parser is being initialized
   return createMockParser();
 }
 
