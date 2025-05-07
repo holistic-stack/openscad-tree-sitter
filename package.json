@@ -1,20 +1,12 @@
 {
   "name": "openscad-tree-sitter",
   "version": "0.1.0",
-  "description": "Tree-sitter grammar for OpenSCAD for Node.js and TypeScript",
+  "description": "Tree-sitter grammar for OpenSCAD for Node.js",
   "main": "bindings/node/index.js",
-  "types": "bindings/node",
   "scripts": {
-    "test": "vitest run",
-    "test:watch": "vitest watch",
-    "test:coverage": "vitest run --coverage",
-    "test:coverage:html": "vitest run --coverage --reporter=html",
-    "test:ui": "vitest --ui",
+    "test": "node test/nodejs/comprehensive-node-binding-test.js",
     "test:all": "node scripts/test-all.js",
     "test:examples": "tree-sitter parse examples/*.scad",
-    "test:indentation": "vitest run test/grammar/indentation-folding.test.ts",
-    "test:real-world": "vitest run test/grammar/real-world-examples.test.ts",
-    "test:real-world-parsing": "vitest run test/grammar/real-world-parsing.test.ts",
     "test:wasm": "node test/nodejs/test-wasm-build.js",
     "test:wasm:improved": "node test/nodejs/improved-wasm-test.js",
     "test:browser": "node scripts/serve-browser-test.js",
@@ -40,8 +32,7 @@
     "parsing",
     "3d",
     "cad",
-    "nodejs",
-    "typescript"
+    "nodejs"
   ],
   "files": [
     "grammar.js",
@@ -53,14 +44,10 @@
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",
   "devDependencies": {
-    "@vitest/coverage-v8": "^1.6.1",
-    "@vitest/ui": "^1.6.1",
     "node-addon-api": "^8.3.1",
     "node-gyp": "^11.2.0",
     "prebuildify": "^6.0.0",
-    "tree-sitter-cli": "0.22.4",
-    "vite": "^5.2.0",
-    "vitest": "^1.6.1"
+    "tree-sitter-cli": "0.22.4"
   },
   "repository": {
     "type": "git",
