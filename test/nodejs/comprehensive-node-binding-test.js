@@ -1,6 +1,6 @@
 /**
  * @file comprehensive-node-binding-test.js
- * @description Comprehensive test suite for tree-sitter node bindings
+ * @description Comprehensive test suite for tree-sitter node bindings using node:test
  *
  * This file demonstrates best practices for testing tree-sitter node bindings:
  * 1. Proper initialization testing
@@ -10,9 +10,10 @@
  * 5. Cross-platform considerations
  */
 
+const test = require('node:test');
+const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
-const assert = require('assert');
 
 // Path to the WebAssembly file
 const WASM_PATH = path.join(__dirname, '../../tree-sitter-openscad.wasm');
@@ -52,127 +53,167 @@ module test(size = 10 {  // Missing closing parenthesis
 `;
 
 /**
- * Test suite for tree-sitter node bindings
+ * Helper function to find error nodes in a syntax tree
  */
-async function runTests() {
-  console.log('=== Comprehensive Tree-Sitter Node Bindings Test ===');
-
-  // Test 1: Check if WebAssembly file exists
-  console.log('\n1. Testing WebAssembly file existence...');
-  const wasmExists = fs.existsSync(WASM_PATH);
-  console.log(`WebAssembly file exists: ${wasmExists}`);
-  if (!wasmExists) {
-    console.warn('WebAssembly file not found. Some tests will be skipped.');
-    console.log('Please run "pnpm build:wasm" to generate the WebAssembly file.');
+function findErrorNodes(node) {
+  // Check if this node is an error node
+  if (node.type === 'ERROR' || (typeof node.hasError === 'function' && node.hasError())) {
+    return true;
   }
+
+  // Recursively check children
+  if (node.children && node.children.length > 0) {
+    for (const child of node.children) {
+      if (child && findErrorNodes(child)) {
+        return true;
+      }
+    }
+  } else if (node.childCount > 0) {
+    // Alternative way to access children if node.children is not available
+    for (let i = 0; i < node.childCount; i++) {
+      const child = node.child(i);
+      if (child && findErrorNodes(child)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+// Main test suite
+test('Comprehensive Tree-Sitter Node Bindings Test', async (t) => {
+  // Test 1: Check if WebAssembly file exists
+  await t.test('WebAssembly file existence', () => {
+    const wasmExists = fs.existsSync(WASM_PATH);
+    console.log(`WebAssembly file exists: ${wasmExists}`);
+    if (!wasmExists) {
+      console.warn('WebAssembly file not found. Some tests will be skipped.');
+      console.log('Please run "pnpm build:wasm" to generate the WebAssembly file.');
+    }
+  });
 
   // Test 2: Initialize parser with web-tree-sitter
-  console.log('\n2. Testing parser initialization...');
-  let Parser, parser, language;
-  try {
-    Parser = require('web-tree-sitter');
-    await Parser.init();
-    parser = new Parser();
-    console.log('Parser initialized successfully');
-
-    if (wasmExists) {
-      language = await Parser.Language.load(WASM_PATH);
-      parser.setLanguage(language);
-      console.log('Language loaded successfully');
-    } else {
-      console.log('Skipping language loading (WebAssembly file not found)');
-    }
-  } catch (error) {
-    console.error('Error initializing parser:', error.message);
-    console.log('Attempting to use fallback parser...');
+  let Parser, parser, language, wasmExists;
+  await t.test('Parser initialization', async () => {
+    wasmExists = fs.existsSync(WASM_PATH);
 
     try {
-      // Try to use the fallback parser
-      const { createFallbackParser } = require('../../src/fallback-parser');
-      parser = await createFallbackParser();
-      console.log('Fallback parser initialized successfully');
-    } catch (fallbackError) {
-      console.error('Error initializing fallback parser:', fallbackError.message);
-      process.exit(1);
+      Parser = require('web-tree-sitter');
+      await Parser.init();
+      parser = new Parser();
+      assert.ok(parser, 'Parser should be initialized');
+
+      if (wasmExists) {
+        language = await Parser.Language.load(WASM_PATH);
+        parser.setLanguage(language);
+        assert.ok(language, 'Language should be loaded');
+      } else {
+        console.log('Skipping language loading (WebAssembly file not found)');
+      }
+    } catch (error) {
+      console.error('Error initializing parser:', error.message);
+      console.log('Attempting to use fallback parser...');
+
+      try {
+        // Try to use the fallback parser
+        const { createFallbackParser } = require('../../src/fallback-parser');
+        parser = await createFallbackParser();
+        assert.ok(parser, 'Fallback parser should be initialized');
+      } catch (fallbackError) {
+        assert.fail(`Failed to initialize any parser: ${fallbackError.message}`);
+      }
     }
-  }
+  });
 
   // Test 3: Parse simple code
-  if (parser) {
-    console.log('\n3. Testing parsing simple code...');
-    try {
-      const tree = parser.parse(SIMPLE_CODE);
-      console.log('Simple code parsed successfully');
-      console.log('Root node type:', tree.rootNode.type);
-      console.log('Root node child count:', tree.rootNode.childCount);
-
-      // Validate the tree structure
-      assert(tree.rootNode.type === 'source_file', 'Root node should be a source_file');
-      console.log('Tree structure validation passed');
-
-      // Print the first few levels of the syntax tree
-      console.log('\nSyntax tree (first 2 levels):');
-      printNodeTree(tree.rootNode, 2);
-    } catch (error) {
-      console.error('Error parsing simple code:', error.message);
+  await t.test('Parse simple code', async () => {
+    // Skip if parser is not initialized
+    if (!parser) {
+      console.warn('Parser not initialized. Skipping test.');
+      return;
     }
-  }
+
+    const tree = parser.parse(SIMPLE_CODE);
+
+    // Assertions
+    assert.ok(tree, 'Parse tree should be created');
+    assert.ok(tree.rootNode, 'Parse tree should have a root node');
+    assert.strictEqual(tree.rootNode.type, 'source_file', 'Root node should be source_file');
+
+    // Print the first few levels of the syntax tree for debugging
+    console.log('\nSimple code syntax tree (first 2 levels):');
+    printNodeTree(tree.rootNode, 2);
+  });
 
   // Test 4: Parse complex code
-  if (parser) {
-    console.log('\n4. Testing parsing complex code...');
-    try {
-      const tree = parser.parse(COMPLEX_CODE);
-      console.log('Complex code parsed successfully');
-      console.log('Root node type:', tree.rootNode.type);
-      console.log('Root node child count:', tree.rootNode.childCount);
-
-      // Count specific node types
-      const moduleDefinitions = countNodesOfType(tree.rootNode, 'module_definition');
-      const moduleInstantiations = countNodesOfType(tree.rootNode, 'module_instantiation');
-      const forStatements = countNodesOfType(tree.rootNode, 'for_statement');
-
-      console.log('Module definitions:', moduleDefinitions);
-      console.log('Module instantiations:', moduleInstantiations);
-      console.log('For statements:', forStatements);
-
-      // Validate counts
-      assert(moduleDefinitions > 0, 'Should have at least one module definition');
-      assert(moduleInstantiations > 0, 'Should have at least one module instantiation');
-      assert(forStatements > 0, 'Should have at least one for statement');
-      console.log('Node count validation passed');
-    } catch (error) {
-      console.error('Error parsing complex code:', error.message);
+  await t.test('Parse complex code', async () => {
+    // Skip if parser is not initialized
+    if (!parser) {
+      console.warn('Parser not initialized. Skipping test.');
+      return;
     }
-  }
+
+    const tree = parser.parse(COMPLEX_CODE);
+
+    // Assertions
+    assert.ok(tree, 'Parse tree should be created');
+    assert.ok(tree.rootNode, 'Parse tree should have a root node');
+    assert.strictEqual(tree.rootNode.type, 'source_file', 'Root node should be source_file');
+
+    // Count specific node types
+    const moduleDefinitions = countNodesOfType(tree.rootNode, 'module_definition');
+    const moduleInstantiations = countNodesOfType(tree.rootNode, 'module_instantiation');
+    const forStatements = countNodesOfType(tree.rootNode, 'for_statement');
+
+    console.log('Module definitions:', moduleDefinitions);
+    console.log('Module instantiations:', moduleInstantiations);
+    console.log('For statements:', forStatements);
+
+    // Validate counts
+    assert.ok(moduleDefinitions > 0, 'Should have at least one module definition');
+    assert.ok(moduleInstantiations > 0, 'Should have at least one module instantiation');
+    assert.ok(forStatements > 0, 'Should have at least one for statement');
+  });
 
   // Test 5: Error handling
-  if (parser) {
-    console.log('\n5. Testing error handling...');
+  await t.test('Error handling', async () => {
+    // Skip if parser is not initialized
+    if (!parser) {
+      console.warn('Parser not initialized. Skipping test.');
+      return;
+    }
+
     try {
       const tree = parser.parse(CODE_WITH_ERROR);
-      console.log('Code with error parsed');
 
       // Check if the tree contains error nodes
       const hasErrors = findErrorNodes(tree.rootNode);
       console.log('Tree contains error nodes:', hasErrors);
 
       // In a robust parser, even code with syntax errors should produce a tree
-      assert(tree.rootNode.type === 'source_file', 'Root node should still be a source_file');
-      console.log('Error handling validation passed');
+      assert.strictEqual(tree.rootNode.type, 'source_file', 'Root node should still be a source_file');
+
+      // We expect the tree to contain error nodes
+      assert.ok(hasErrors, 'Tree should contain error nodes for code with syntax errors');
     } catch (error) {
-      console.error('Parser threw exception on invalid code:', error.message);
+      // Some parsers might throw exceptions on invalid code
+      console.log('Parser threw exception on invalid code:', error.message);
       console.log('This might be expected depending on the parser configuration');
     }
-  }
+  });
 
   // Test 6: Incremental parsing
-  if (parser) {
-    console.log('\n6. Testing incremental parsing...');
+  await t.test('Incremental parsing', async () => {
+    // Skip if parser is not initialized
+    if (!parser) {
+      console.warn('Parser not initialized. Skipping test.');
+      return;
+    }
+
     try {
       // Initial parse
       let tree = parser.parse(SIMPLE_CODE);
-      console.log('Initial parse successful');
 
       // Modified code - change 'size = 10' to 'size = 20'
       const modifiedCode = SIMPLE_CODE.replace('size = 10', 'size = 20');
@@ -194,40 +235,50 @@ async function runTests() {
 
       // Re-parse with the edited tree
       const newTree = parser.parse(modifiedCode, tree);
-      console.log('Incremental parse successful');
 
-      // Validate the new tree
-      assert(newTree.rootNode.type === 'source_file', 'Root node should still be a source_file');
-      console.log('Incremental parsing validation passed');
+      // Assertions
+      assert.ok(newTree, 'New parse tree should be created');
+      assert.strictEqual(newTree.rootNode.type, 'source_file', 'Root node should still be a source_file');
+
+      // Verify the change was applied
+      const newCode = newTree.rootNode.text;
+      assert.ok(newCode.includes('size = 20'), 'Modified code should contain the updated value');
     } catch (error) {
-      console.error('Error during incremental parsing:', error.message);
+      // Some parsers might not support incremental parsing
+      console.log('Error during incremental parsing:', error.message);
     }
-  }
+  });
 
   // Test 7: Parser information
-  if (parser.getParserInfo) {
-    console.log('\n7. Testing parser information...');
-    try {
-      const info = parser.getParserInfo();
-      console.log('Parser info:', info);
-
-      // Log which parser is being used
-      if (info.usingWebParser) {
-        console.log('Using web-tree-sitter parser');
-      } else if (info.usingNativeParser) {
-        console.log('Using native tree-sitter parser');
-      } else if (info.usingMockParser) {
-        console.log('Using mock parser');
-      }
-    } catch (error) {
-      console.error('Error getting parser info:', error.message);
+  await t.test('Parser information', async () => {
+    // Skip if parser is not initialized
+    if (!parser) {
+      console.warn('Parser not initialized. Skipping test.');
+      return;
     }
-  } else {
-    console.log('\n7. Parser info not available');
-  }
 
-  console.log('\n=== Test Suite Completed ===');
-}
+    if (parser.getParserInfo) {
+      try {
+        const info = parser.getParserInfo();
+        assert.ok(info, 'Parser info should be available');
+        console.log('Parser info:', info);
+
+        // Log which parser is being used
+        if (info.usingWebParser) {
+          console.log('Using web-tree-sitter parser');
+        } else if (info.usingNativeParser) {
+          console.log('Using native tree-sitter parser');
+        } else if (info.usingMockParser) {
+          console.log('Using mock parser');
+        }
+      } catch (error) {
+        console.error('Error getting parser info:', error.message);
+      }
+    } else {
+      console.log('Parser info not available');
+    }
+  });
+});
 
 /**
  * Helper function to print a node tree up to a specified depth
@@ -324,8 +375,4 @@ function findErrorNodes(node) {
   return false;
 }
 
-// Run the tests
-runTests().catch(error => {
-  console.error('Test suite failed:', error);
-  process.exit(1);
-});
+// Note: The test is now run using node:test
