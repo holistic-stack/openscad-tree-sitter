@@ -11,6 +11,9 @@ importers:
       node-gyp-build:
         specifier: ^4.8.0
         version: 4.8.4
+      tree-sitter:
+        specifier: 0.22.4
+        version: 0.22.4
       web-tree-sitter:
         specifier: ^0.25.3
         version: 0.25.3
@@ -24,9 +27,6 @@ importers:
       prebuildify:
         specifier: ^6.0.0
         version: 6.0.1
-      tree-sitter-cli:
-        specifier: ^0.22.1
-        version: 0.22.6
       vite:
         specifier: ^5.2.0
         version: 5.4.19
@@ -623,6 +623,10 @@ packages:
     resolution: {integrity: sha512-OhYaY5sDsIka7H7AtijtI9jwGYLyl29eQn/W623DiN/MIv5sUqc4g7BIDThX+gb7di9f6xK02nkp8sdfFWZLTg==}
     engines: {node: '>=10'}
 
+  node-addon-api@8.3.1:
+    resolution: {integrity: sha512-lytcDEdxKjGJPTLEfW4mYMigRezMlyJY8W4wxJK8zE533Jlb8L8dRuObJFWg2P+AuOIxoCgKF+2Oq4d4Zd0OUA==}
+    engines: {node: ^18 || ^20 || >= 21}
+
   node-gyp-build@4.8.4:
     resolution: {integrity: sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ==}
     hasBin: true
@@ -795,9 +799,8 @@ packages:
     resolution: {integrity: sha512-sf4i37nQ2LBx4m3wB74y+ubopq6W/dIzXg0FDGjsYnZHVa1Da8FH853wlL2gtUhg+xJXjfk3kUZS3BRoQeoQBQ==}
     engines: {node: '>=6'}
 
-  tree-sitter-cli@0.22.6:
-    resolution: {integrity: sha512-s7mYOJXi8sIFkt/nLJSqlYZP96VmKTc3BAwIX0rrrlRxWjWuCwixFqwzxWZBQz4R8Hx01iP7z3cT3ih58BUmZQ==}
-    hasBin: true
+  tree-sitter@0.22.4:
+    resolution: {integrity: sha512-usbHZP9/oxNsUY65MQUsduGRqDHQOou1cagUSwjhoSYAmSahjQDAVsh9s+SlZkn8X8+O1FULRGwHu7AFP3kjzg==}
 
   type-detect@4.1.0:
     resolution: {integrity: sha512-Acylog8/luQ8L7il+geoSxhEkazvkslg7PSNKOX59mbB9cOveP5aq9h74Y7YU8yDpJwetzQQrfIwtf4Wp4LKcw==}
@@ -1412,6 +1415,8 @@ snapshots:
     dependencies:
       semver: 7.7.1
 
+  node-addon-api@8.3.1: {}
+
   node-gyp-build@4.8.4: {}
 
   npm-run-path@3.1.0:
@@ -1597,7 +1602,10 @@ snapshots:
 
   totalist@3.0.1: {}
 
-  tree-sitter-cli@0.22.6: {}
+  tree-sitter@0.22.4:
+    dependencies:
+      node-addon-api: 8.3.1
+      node-gyp-build: 4.8.4
 
   type-detect@4.1.0: {}
 

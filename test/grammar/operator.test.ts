@@ -4,7 +4,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { parseCode, hasErrors, findNodeText } from '../helpers/parser-test-utils';
+// import { parseCode, hasErrors, findNodeText } from '../helpers/parser-test-utils'; // findNodeText is not exported
+import { parseCode, hasErrors } from '../helpers/parser-test-utils';
 import { Tree, SyntaxNode } from '../types';
 
 describe('Operator Precedence and Associativity', () => {
@@ -12,7 +13,8 @@ describe('Operator Precedence and Associativity', () => {
     it('should correctly parse addition and subtraction with multiplication (left-to-right)', () => {
       const code = 'a = 1 + 2 * 3 - 4;'; // Expected: 1 + (2*3) - 4 = 1 + 6 - 4 = 3
       const tree = parseCode(code);
-      expect(hasErrors(tree.rootNode)).toBe(false); // This will fail initially
+      // console.log('S-expression for "a = 1 + 2 * 3 - 4;":', tree.rootNode.toString());
+      expect(hasErrors(tree.rootNode)).toBe(false);
       // TODO: Add more specific AST structural checks once grammar is updated
       // For example, check that '*' is a child of a node that is an operand to '+' or '-'
     });
@@ -59,24 +61,21 @@ describe('Operator Precedence and Associativity', () => {
       // TODO: AST checks
     });
 
-    it.skip('should parse simple exponentiation', () => { // SKIPPING due to ^ parsing issue
+    it('should parse simple exponentiation', () => {
       const code = 'a = 2 ^ 3;';
       const tree = parseCode(code);
+      console.log('S-expression for "a = 2 ^ 3;":', tree.rootNode.toString());
       expect(hasErrors(tree.rootNode)).toBe(false);
     });
 
-    // Deprecated, but should parse if still in grammar based on cheat sheet/docs.
-    // The syntax_expansion_plan mentions: "note: ^ is deprecated, pow() is preferred, but ^ might still need parsing if in cheat sheet/spec" 
-    // The cheat sheet has: "Note: ^ for exponentiation is deprecated; use pow()."
-    // Assuming we will parse it for now and potentially add a warning later.
-    it.skip('should parse exponentiation (^) with correct right-associativity (if supported)', () => { // SKIPPING
+    it('should parse exponentiation (^) with correct right-associativity (if supported)', () => {
       const code = 'h = 2 ^ 3 ^ 2;'; // Expected: 2 ^ (3^2) = 2 ^ 9 = 512 (if right-associative)
       const tree = parseCode(code);
       expect(hasErrors(tree.rootNode)).toBe(false);
       // TODO: AST checks for right-associativity if `^` is implemented
     });
 
-    it.skip('should parse exponentiation (^) before multiplication (if supported)', () => { // SKIPPING
+    it('should parse exponentiation (^) before multiplication (if supported)', () => {
       const code = 'i = 4 * 2 ^ 3;'; // Expected: 4 * (2^3) = 4 * 8 = 32
       const tree = parseCode(code);
       expect(hasErrors(tree.rootNode)).toBe(false);
@@ -175,7 +174,7 @@ describe('Operator Precedence and Associativity', () => {
       // TODO: AST checks
     });
 
-    it.skip('should correctly parse complex expression with ternary operator', () => { // SKIPPING due to ^
+    it('should correctly parse complex expression with ternary operator', () => {
       const code = 'v = -2 * 3 + 5 > 0 ? (10 / 2 + 1) : (4 ^ 2 % 3);';
       // ((-2*3)+5) > 0 ? ((10/2)+1) : ((4^2)%3)
       // (-6+5) > 0 ? (5+1) : (16%3)
