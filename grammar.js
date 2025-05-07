@@ -20,6 +20,9 @@ module.exports = grammar({
     [$.module_instantiation, $.call_expression],
     [$.for_header, $.array_literal],
     [$.if_statement],
+    [$.list_comprehension_for, $.list_comprehension_for_block],
+    [$.list_comprehension_if, $.list_comprehension_if_block],
+    [$.array_literal, $.list_comprehension],
   ],
 
   rules: {
@@ -311,6 +314,7 @@ module.exports = grammar({
       $.boolean,
       $.undef,
       $.array_literal,
+      $.list_comprehension,
       $.call_expression
     ),
 
@@ -325,9 +329,65 @@ module.exports = grammar({
       field('arguments', $.argument_list)
     ),
 
-    array_literal: $ => choice(
+    array_literal: $ => prec(1, choice(
       $.range_expression,
       seq('[', optional(commaSep1($.expression)), ']')
+    )),
+
+    // List comprehension - [expr for (var=list) if (cond)]
+    list_comprehension: $ => prec(2, seq(
+      '[',
+      choice(
+        // Traditional syntax: [expr for (var=list) if (cond)]
+        seq(
+          field('element', $.expression),
+          field('for_clause', $.list_comprehension_for),
+          optional(field('if_clause', $.list_comprehension_if))
+        ),
+        // OpenSCAD syntax: [for (var=list) if (cond) expr]
+        seq(
+          field('for_clause', $.list_comprehension_for_block),
+          optional(field('if_clause', $.list_comprehension_if_block)),
+          field('element', $.expression)
+        )
+      ),
+      ']'
+    )),
+
+    // Traditional syntax: for (var=list)
+    list_comprehension_for: $ => seq(
+      'for',
+      '(',
+      field('iterator', choice($.identifier, $.special_variable)),
+      '=',
+      field('range', choice($.range_expression, $.expression)),
+      ')'
+    ),
+
+    // Traditional syntax: if (cond)
+    list_comprehension_if: $ => seq(
+      'if',
+      '(',
+      field('condition', $.expression),
+      ')'
+    ),
+
+    // OpenSCAD syntax: for (var=list)
+    list_comprehension_for_block: $ => prec(3, seq(
+      'for',
+      '(',
+      field('iterator', choice($.identifier, $.special_variable)),
+      '=',
+      field('range', choice($.range_expression, $.expression)),
+      ')'
+    )),
+
+    // OpenSCAD syntax: if (cond)
+    list_comprehension_if_block: $ => seq(
+      'if',
+      '(',
+      field('condition', $.expression),
+      ')'
     ),
 
     range_expression: $ => choice(
