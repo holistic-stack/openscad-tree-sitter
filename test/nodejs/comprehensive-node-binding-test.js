@@ -16,7 +16,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Path to the WebAssembly file
-const WASM_PATH = path.join(__dirname, '../../tree-sitter-openscad.wasm');
+const WASM_PATH = path.join(__dirname, '../../bindings/wasm/tree-sitter-openscad.wasm');
 
 // Test OpenSCAD code samples
 const SIMPLE_CODE = `

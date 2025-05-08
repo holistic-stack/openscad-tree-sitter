@@ -10,7 +10,7 @@ const path = require('path');
 const { Parser } = require('web-tree-sitter');
 
 // Path to the WebAssembly file
-const WASM_PATH = path.join(__dirname, '../../tree-sitter-openscad.wasm');
+const WASM_PATH = path.join(__dirname, '../../bindings/wasm/tree-sitter-openscad.wasm');
 
 // Test OpenSCAD code
 const TEST_CODE = `

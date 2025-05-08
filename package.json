@@ -16,7 +16,7 @@
     "test:browser": "node scripts/serve-browser-test.js",
     "test:browser:improved": "node scripts/serve-browser-test.js improved",
     "build": "tree-sitter generate",
-    "build:wasm": "tree-sitter build --wasm",
+    "build:wasm": "tree-sitter build --wasm --output bindings/wasm/tree-sitter-openscad.wasm",
     "build:all": "npm run build && npm run build:wasm",
     "parse": "tree-sitter parse",
     "parse:examples": "tree-sitter parse examples/real-world/*.scad",
@@ -42,7 +42,8 @@
     "grammar.js",
     "queries/*",
     "src/**",
-    "bindings/node/**"
+    "bindings/node/**",
+    "bindings/wasm/**"
   ],
   "author": "OpenSCAD Community",
   "license": "MIT",

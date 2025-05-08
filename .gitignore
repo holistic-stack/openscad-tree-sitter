@@ -12,15 +12,32 @@ build/
 dist/
 *.wasm
 *.o
-
-*.a
-.DS_Store
+*.obj
+*.lib
+*.exp
+*.node
 
 # Generated parser files
-src/
-bindings/
-*.cc
-*.c
+src/parser.c
+src/grammar.json
+src/node-types.json
+src/tree_sitter/
+bindings/node/binding.cc
+bindings/wasm/*.wasm
+
+# Unused bindings (disabled in tree-sitter.json)
+bindings/rust/
+bindings/c/
+bindings/go/
+bindings/python/
+bindings/swift/
+bindings/zig/
+
+# Compiled binaries
+*.a
+*.exe
+*.dll
+.DS_Store
 
 # IDE and editor files
 .idea/
@@ -33,6 +50,8 @@ bindings/
 # Test output
 .nyc_output/
 coverage/
+test-results/
+parse-debug.log
 
 # Logs
 logs/
@@ -44,7 +63,6 @@ logs/
 
 # Test and coverage results
 /coverage
-/test-results
 /.vitest
 
 # Node.js specific
@@ -61,4 +79,10 @@ logs/
 .idea
 .vscode
 *.sublime-project
-*.sublime-workspace 
+*.sublime-workspace
+
+# Temporary files
+*.tmp
+*.temp
+*_temp.js
+*_temp.scad
