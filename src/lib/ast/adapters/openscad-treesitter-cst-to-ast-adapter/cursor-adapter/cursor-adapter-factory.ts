@@ -28,10 +28,11 @@ export function createCursorAdapter(adapterMap: CursorAdapterMap): (tree: Syntax
       const nodeType = detectNodeType(cursor.currentNode());
       
       // Get the appropriate adapter for this node type
-      const adapter = adapterMap[nodeType];
+      // If no adapter exists for the specific node type, use the 'Unknown' fallback adapter
+      const adapter = adapterMap[nodeType] || adapterMap['Unknown'];
       
       if (!adapter) {
-        throw new Error(`No adapter found for node type: ${nodeType}`);
+        throw new Error(`No adapter found for node type: ${nodeType} and no fallback adapter available.`);
       }
       
       // Initial AST node from the root

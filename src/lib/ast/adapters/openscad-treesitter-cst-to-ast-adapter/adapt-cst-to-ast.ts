@@ -1,4 +1,5 @@
-import { TreeSitterNode, SyntaxTree, ASTNode } from '../../types';
+import { TreeSitterNode, SyntaxTree, TreeCursor } from '../../types/cst-types';
+import { ASTNode } from '../../types/ast-types';
 import { 
   createNodeAdapter, 
   NodeAdapterMap, 
@@ -7,58 +8,49 @@ import {
   NodeAdapterSimple 
 } from './adapter-factory/adapter-factory';
 import { createCursorAdapter } from './cursor-adapter/cursor-adapter-factory';
-import { TreeCursor } from '../../types';
 
-// Import the existing node adapters
-import { 
-  adaptProgram, 
-  adaptCallExpression, 
-  adaptIdentifier, 
-  adaptLiteral, 
-  adaptAssignment 
-} from './node-adapters';
+// No need to import node adapters as we're using cursor-based adapters only
 
 // Import the cursor-based adapters
 import { blockStatementCursorAdapter } from './node-adapters/block-statement-adapter';
 import { binaryExpressionCursorAdapter } from './node-adapters/binary-expression-adapter';
 
+// Import OpenSCAD-specific adapters
+// 2D primitives
+import { circleCursorAdapter } from './node-adapters/circle-adapter';
+import { squareCursorAdapter } from './node-adapters/square-adapter';
+import { polygonCursorAdapter } from './node-adapters/polygon-adapter/polygon-cursor-adapter';
+
+// 3D primitives
+import { cubeCursorAdapter } from './node-adapters/cube-adapter';
+import { sphereCursorAdapter } from './node-adapters/sphere-adapter';
+import { cylinderCursorAdapter } from './node-adapters/cylinder-adapter';
+
+// Transformations
+import { translateCursorAdapter } from './node-adapters/translate-adapter';
+import { rotateTransformCursorAdapter } from './node-adapters/rotate-adapter';
+import { scaleCursorAdapter } from './node-adapters/scale-adapter/scale-cursor-adapter';
+import { linearExtrudeCursorAdapter } from './node-adapters/linear-extrude-adapter';
+
+// Operations
+import { unionCursorAdapter } from './node-adapters/union-adapter';
+import { differenceCursorAdapter } from './node-adapters/difference-adapter';
+import { intersectionCursorAdapter } from './node-adapters/intersection-adapter';
+
+// Control flow
+import { ifStatementCursorAdapter } from './node-adapters/if-statement-adapter';
+import { forLoopCursorAdapter } from './node-adapters/for-loop-adapter/for-loop-cursor-adapter';
+
+// Variables and expressions
+import { assignmentCursorAdapter as assignmentAdapter } from './node-adapters/assignment-adapter';
+
 /**
- * Map of AST node types to their adapter functions
+ * Map of AST node types to their adapter functions is not needed as
+ * we're using cursor-based adapters exclusively
  */
-const adapterMap: NodeAdapterMap = {
-  'Program': adaptProgram,
-  'CallExpression': adaptCallExpression,
-  'IdentifierExpression': adaptIdentifier,
-  'LiteralExpression': adaptLiteral,
-  'AssignmentStatement': adaptAssignment,
-};
 
-// Create cursor-based versions of the existing adapters
-// These adapters wrap the node-based adapters to work with the cursor API
-// while maintaining the same adaptation logic
-const createCursorBasedAdapter = (nodeAdapter: NodeAdapter) => {
-  return (cursor: TreeCursor) => {
-    // Get the current node from the cursor
-    const node = cursor.currentNode();
-    
-    // Create a node adapter function that can be called recursively
-    const adaptNode = createNodeAdapter(adapterMap);
-    
-    // Apply the original node adapter with the node and recursive adapter
-    if (nodeAdapter.length === 2) {
-      return (nodeAdapter as NodeAdapterWithRecursion)(node, adaptNode);
-    } else {
-      return (nodeAdapter as NodeAdapterSimple)(node);
-    }
-  };
-};
-
-// Create cursor-based versions of each adapter
-const programCursorAdapter = createCursorBasedAdapter(adaptProgram);
-const callExpressionCursorAdapter = createCursorBasedAdapter(adaptCallExpression);
-const identifierCursorAdapter = createCursorBasedAdapter(adaptIdentifier);
-const literalCursorAdapter = createCursorBasedAdapter(adaptLiteral);
-const assignmentCursorAdapter = createCursorBasedAdapter(adaptAssignment);
+// We've eliminated the node-based adapters in favor of cursor-based adapters only
+// This simplifies the codebase and eliminates duplication
 
 // Add a basic module declaration adapter for testing
 const moduleDeclarationCursorAdapter = (cursor: TreeCursor) => {
@@ -99,70 +91,143 @@ const moduleDeclarationCursorAdapter = (cursor: TreeCursor) => {
 
 // Create a map of cursor-based adapters for each node type
 const cursorAdapterMap = {
-  'Program': programCursorAdapter,
+  // Core language adapters
   'ModuleDeclaration': moduleDeclarationCursorAdapter,
   'BlockStatement': blockStatementCursorAdapter,
   'block': blockStatementCursorAdapter, // Support for direct block nodes from the parser
   'BinaryExpression': binaryExpressionCursorAdapter,
   'binary_expression': binaryExpressionCursorAdapter, // Support for direct binary expression nodes from the parser
-  'CallExpression': callExpressionCursorAdapter,
-  'IdentifierExpression': identifierCursorAdapter,
-  'LiteralExpression': literalCursorAdapter,
-  'AssignmentStatement': assignmentCursorAdapter,
+  
+  // OpenSCAD-specific adapters
+  
+  // 2D Primitives
+  'circle': circleCursorAdapter, // Circle primitive
+  'square': squareCursorAdapter, // Square primitive
+  'polygon': polygonCursorAdapter, // Polygon primitive
+  
+  // 3D Primitives
+  'cube': cubeCursorAdapter, // Cube primitive
+  'sphere': sphereCursorAdapter, // Sphere primitive
+  'cylinder': cylinderCursorAdapter, // Cylinder primitive
+  
+  // Transformations
+  'transform_statement': (cursor: TreeCursor) => {
+    const node = cursor.currentNode();
+    if (node.childCount > 0) {
+      const transformType = node.child(0);
+      if (transformType && transformType.type === 'identifier') {
+        const transformName = transformType.text;
+        switch (transformName) {
+          case 'translate':
+            return translateCursorAdapter(cursor);
+          case 'rotate':
+            return rotateTransformCursorAdapter(cursor);
+          case 'scale':
+            return scaleCursorAdapter(cursor);
+          case 'linear_extrude':
+            return linearExtrudeCursorAdapter(cursor);
+          // Additional transformations can be added here
+          default:
+            break;
+        }
+      }
+    }
+    throw new Error(`Unknown transform type: ${node.text}`);
+  },
+  
+  // Operations
+  'operation_statement': (cursor: TreeCursor) => {
+    const node = cursor.currentNode();
+    if (node.childCount > 0) {
+      const operationType = node.child(0);
+      if (operationType && operationType.type === 'identifier') {
+        switch (operationType.text) {
+          case 'union':
+            return unionCursorAdapter(cursor);
+          case 'difference':
+            return differenceCursorAdapter(cursor);
+          case 'intersection':
+            return intersectionCursorAdapter(cursor);
+          // Additional operations can be added here
+          default:
+            break;
+        }
+      }
+    }
+    throw new Error(`Unknown operation type: ${node.text}`);
+  },
+  
+  // Control Flow
+  'if_statement': ifStatementCursorAdapter,
+  'for_statement': forLoopCursorAdapter,
+  
+  // Variables and expressions
+  'assignment': assignmentAdapter,
+  
+  // Fallback for unknown node types
+  'Unknown': (cursor: TreeCursor): ASTNode => {
+    const node = cursor.currentNode();
+    return {
+      type: 'Unknown',
+      position: {
+        startLine: cursor.nodeStartPosition.row,
+        startColumn: cursor.nodeStartPosition.column,
+        endLine: cursor.nodeEndPosition.row,
+        endColumn: cursor.nodeEndPosition.column
+      }
+    };
+  }
 };
 
 /**
- * Adapt a Tree-sitter CST to an OpenSCAD AST
- * This improved implementation uses tree-sitter cursors for more efficient
- * traversal and better memory management
- * 
- * @param node The Tree-sitter CST node or syntax tree
- * @returns The OpenSCAD AST node
+ * Adapts a CST (Concrete Syntax Tree) to an AST (Abstract Syntax Tree)
+ *
+ * @param node The CST node to adapt, either a TreeSitterNode or a SyntaxTree
+ * @returns The resulting AST node
  */
 export function adaptCstToAst(node: TreeSitterNode | SyntaxTree): ASTNode {
-  // If a syntax tree is provided, use cursor-based approach for efficiency
+  // Always use the cursor-based approach for efficiency and consistency
+  const adaptTree = createCursorAdapter(cursorAdapterMap);
+  
+  // If a syntax tree is provided, use it directly
   if ('rootNode' in node && 'walk' in node) {
-    const adaptTree = createCursorAdapter(cursorAdapterMap);
     return adaptTree(node);
   }
   
-  // Fallback to original implementation for backward compatibility
-  // but create a temporary syntax tree to use cursor approach
+  // For nodes without cursor functionality (e.g. in tests),
+  // create a lightweight syntax tree wrapper to use the cursor adapter
+  const tsNode = node as TreeSitterNode;
   const tempTree = {
-    rootNode: node,
-    walk: () => {
-      // Create a basic cursor that just points to the node
-      return {
-        nodeType: node.type,
-        nodeIsNamed: node.isNamed,
-        nodeIsMissing: node.isMissing || false,
-        nodeId: node.id || 0,
-        nodeStartPosition: node.startPosition,
-        nodeEndPosition: node.endPosition,
-        nodeStartIndex: node.startIndex || 0,
-        nodeEndIndex: node.endIndex || 0,
-        currentNode: () => node,
-        currentFieldName: () => null,
-        gotoFirstChild: () => false,
-        gotoLastChild: () => false,
-        gotoNextSibling: () => false,
-        gotoPreviousSibling: () => false,
-        gotoParent: () => false,
-        gotoFirstChildForIndex: () => false,
-        gotoFirstChildForPosition: () => false,
-        reset: () => {}
-      };
-    },
+    rootNode: tsNode,
+    walk: () => ({
+      nodeType: tsNode.type,
+      nodeIsNamed: tsNode.isNamed,
+      nodeIsMissing: tsNode.isMissing || false,
+      nodeId: 0,
+      nodeStartPosition: tsNode.startPosition,
+      nodeEndPosition: tsNode.endPosition,
+      nodeStartIndex: 0,
+      nodeEndIndex: 0,
+      currentNode: () => tsNode,
+      currentFieldName: () => null,
+      gotoFirstChild: () => false,
+      gotoLastChild: () => false,
+      gotoNextSibling: () => false,
+      gotoPreviousSibling: () => false,
+      gotoParent: () => false,
+      gotoFirstChildForIndex: () => false,
+      gotoFirstChildForPosition: () => false,
+      reset: () => {}
+    }),
     getChangedRanges: () => [],
-    getEditedRange: () => ({ 
-      startPosition: node.startPosition,
-      endPosition: node.endPosition,
-      startIndex: node.startIndex || 0,
-      endIndex: node.endIndex || 0
+    getEditedRange: () => ({
+      startPosition: tsNode.startPosition,
+      endPosition: tsNode.endPosition,
+      startIndex: 0,
+      endIndex: 0
     }),
     getLanguage: () => ({})
   } as SyntaxTree;
   
-  const adaptTree = createCursorAdapter(cursorAdapterMap);
   return adaptTree(tempTree);
 }
