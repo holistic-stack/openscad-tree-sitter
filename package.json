@@ -14,10 +14,16 @@
     "test:native": "node --test test/nodejs/test-native-binding.js",
     "test:node": "node --test test/nodejs/*.js",
     "test:browser": "node scripts/serve-browser-test.js",
+    "test:nesting": "node --test test/nodejs/test-nesting-statements.js",
     "test:browser:improved": "node scripts/serve-browser-test.js improved",
     "build": "tree-sitter generate",
     "build:wasm": "tree-sitter build --wasm --output bindings/wasm/tree-sitter-openscad.wasm",
     "build:all": "npm run build && npm run build:wasm",
+    "build:ts": "tsc",
+    "lint": "eslint --ext .ts ./src/lib",
+    "lint:fix": "eslint --ext .ts ./src/lib --fix",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
     "parse": "tree-sitter parse",
     "parse:examples": "tree-sitter parse examples/real-world/*.scad",
     "playground": "tree-sitter playground",
@@ -49,10 +55,15 @@
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.56.0",
     "node-addon-api": "^8.3.1",
     "node-gyp": "^11.2.0",
     "prebuildify": "^6.0.0",
-    "tree-sitter-cli": "0.25.3"
+    "tree-sitter-cli": "0.25.3",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.0"
   },
   "repository": {
     "type": "git",
