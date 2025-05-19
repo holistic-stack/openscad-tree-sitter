@@ -52,6 +52,7 @@ module.exports = grammar({
     [$.module_child],
 
     // module_instantiation conflict is needed for handling blocks after module calls
+    // This also implies module_instantiation is a defined rule.
     [$.module_instantiation],
 
     // range_expression conflict is needed for handling nested range expressions
@@ -63,6 +64,22 @@ module.exports = grammar({
 
     // array_literal and list_comprehension_for conflict is needed for handling list comprehensions
     [$.array_literal, $.list_comprehension_for],
+
+    // Declare a conflict between a module_instantiation_with_body 
+    // and an expression. This is the core of our issue:
+    // `translate()` could be an expression, or it could be the start
+    // of `translate() cube();`
+    [$._module_instantiation_with_body, $.expression],
+
+    // Added to resolve conflict: `module_instantiation block • next_statement_token`
+    // This allows `statement` to be ambiguous with itself in this specific sequence.
+    [$.statement],
+
+    // Added to resolve: accessor_expression argument_list block • next_token
+    [$.statement, $._module_instantiation_with_body],
+
+    // Added to resolve: for (for_header) block • next_token
+    [$.statement, $.for_statement]
   ],
 
   rules: {
@@ -85,12 +102,13 @@ module.exports = grammar({
       $.module_definition,
       $.function_definition,
       $.assignment_statement,
-      $.module_instantiation,
+      $.module_instantiation, // Directly use the module_instantiation rule
       $.if_statement,
       $.for_statement,
       $.echo_statement,
       $.assert_statement,
-      seq($.expression, optional(';')) // Make semicolon optional for error recovery
+      $.expression_statement, // Make semicolon mandatory for expression statements
+      $.block
     ),
 
     include_statement: $ => seq(
@@ -161,29 +179,27 @@ module.exports = grammar({
       )
     ),
 
-    /**
-     * Module instantiation rule
-     *
-     * This rule handles calls to modules like cube(), sphere(), etc.
-     * We use precedence 2 to resolve conflicts with primary_expression.
-     * This ensures that module calls are properly distinguished from function calls
-     * in expression contexts.
-     *
-     * Examples:
-     *   cube(10);                // Simple module call
-     *   translate([0,0,5]) cube(10);  // Nested module calls
-     *   !cube(10);              // Module call with modifier
-     */
-    module_instantiation: $ => prec(2, seq(
+    _module_instantiation_with_body: $ => seq(
       optional($.modifier),
       field('name', $.accessor_expression),
       field('arguments', $.argument_list),
-      choice(
-        optional(';'), // Make semicolon optional for error recovery
-        $.block,        // For modules that contain other modules
-        $.module_child  // For the children() syntax
-      )
-    )),
+      field('body', choice(
+        $.block,
+        $.statement // A full statement, which will handle its own termination (e.g., semicolon for an inner module_instantiation_simple)
+      ))
+    ),
+
+    _module_instantiation_simple: $ => seq(
+      optional($.modifier),
+      field('name', $.accessor_expression),
+      field('arguments', $.argument_list),
+      ';'
+    ),
+
+    module_instantiation: $ => choice(
+      prec(2, $._module_instantiation_with_body),
+      prec(1, $._module_instantiation_simple)
+    ),
 
     argument_list: $ => seq(
       '(',
@@ -343,6 +359,8 @@ module.exports = grammar({
       ),
       optional(';') // Make semicolon optional for error recovery
     ),
+
+    expression_statement: $ => seq($.expression, ';'),
 
     expression: $ => $.conditional_expression,
 
@@ -706,3 +724,12 @@ module.exports = grammar({
     identifier: $ => /[\p{L}_][\p{L}\p{N}_]*/u,
   }
 });
+
+// Helper function for sequences separated by a delimiter
+function sepBy(delimiter, rule) {
+  return optional(sepBy1(delimiter, rule));
+}
+
+function sepBy1(delimiter, rule) {
+  return seq(rule, repeat(seq(delimiter, rule)));
+}

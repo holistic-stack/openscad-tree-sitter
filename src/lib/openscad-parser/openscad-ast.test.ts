@@ -1,57 +1,82 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { OpenscadParser } from './openscad-parser';
-import { SyntaxNode, Tree } from 'web-tree-sitter';
+import { Tree } from 'web-tree-sitter';
 
 describe('OpenSCAD Parser - AST Generation', () => {
-  let parser: OpenscadParser;
-  let tree: Tree | null = null;
+  let osParser: OpenscadParser;
+  let tree: Tree | null;
 
   beforeAll(async () => {
-    parser = new OpenscadParser();
-    // Assuming the WASM file is in the public directory when served
-    await parser.init('/tree-sitter-openscad.wasm');
+    osParser = new OpenscadParser();
+    await osParser.init('/tree-sitter-openscad.wasm');
   });
 
   afterAll(() => {
-    parser.dispose();
+    osParser.dispose();
   });
+
+  function findDescendantNode(node: any | null, predicate: (n: any) => boolean): any | undefined {
+    if (!node) return undefined;
+    if (predicate(node)) return node;
+    for (const child of node.children) {
+      const found = findDescendantNode(child, predicate);
+      if (found) return found;
+    }
+    return undefined;
+  }
 
   describe('Primitive Shapes', () => {
     describe('Cube', () => {
       it('should parse a simple cube with size parameter', () => {
-        const code = 'cube(10);';
-        tree = parser.parse(code);
+        const code = 'cube(5);';
+        tree = osParser.parse(code);
         
-        // Basic validation of the CST
         expect(tree).not.toBeNull();
         const rootNode = tree?.rootNode;
         expect(rootNode).not.toBeNull();
         
-        // Verify the structure of the CST
-        const cubeNode = rootNode?.descendants.find(
-          node => node.type === 'call_expression' && 
-                 node.firstChild?.text === 'cube'
+        const cubeNode = findDescendantNode(rootNode, 
+          (n) => n.type === 'module_instantiation' && 
+                 n.childForFieldName('name')?.firstChild?.type === 'identifier' && 
+                 n.childForFieldName('name')?.firstChild?.text === 'cube'
         );
         
         expect(cubeNode).toBeDefined();
-        
-        // TODO: Add more specific assertions for the AST structure
-        // once we implement the AST generation
       });
       
       it('should parse a cube with vector size', () => {
         const code = 'cube([10, 20, 30]);';
-        tree = parser.parse(code);
+        tree = osParser.parse(code);
         
         expect(tree).not.toBeNull();
+        const rootNode = tree?.rootNode;
+        expect(rootNode).not.toBeNull();
+        
+        const cubeNode = findDescendantNode(rootNode, 
+          (n) => n.type === 'module_instantiation' && 
+                 n.childForFieldName('name')?.firstChild?.type === 'identifier' && 
+                 n.childForFieldName('name')?.firstChild?.text === 'cube'
+        );
+        expect(cubeNode).toBeDefined();
+        
         // TODO: Add assertions for vector size
       });
       
       it('should parse a cube with named parameters', () => {
         const code = 'cube(size = 10, center = true);';
-        tree = parser.parse(code);
+        tree = osParser.parse(code);
         
         expect(tree).not.toBeNull();
+        const rootNode = tree?.rootNode;
+        expect(rootNode).not.toBeNull();
+        
+        const cubeNode = findDescendantNode(rootNode, 
+          (n) => n.type === 'module_instantiation' && 
+                 n.childForFieldName('name')?.firstChild?.type === 'identifier' && 
+                 n.childForFieldName('name')?.firstChild?.text === 'cube'
+        );
+        expect(cubeNode).toBeDefined();
+        
         // TODO: Add assertions for named parameters
       });
     });

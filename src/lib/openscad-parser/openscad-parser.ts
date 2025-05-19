@@ -39,6 +39,7 @@
 import { Parser, Language, Tree, SyntaxNode } from "web-tree-sitter";
 import { ASTGenerator } from "./ast/ast-generator";
 import { ASTNode } from "./ast/ast-types";
+import {cstTreeCursorWalkLog} from "@/lib/openscad-parser/cst/cursor-utils/cstTreeCursorWalkLog";
 
 /**
  * A parser for OpenSCAD code using the Tree-sitter library.
@@ -108,7 +109,7 @@ export class OpenscadParser {
 
     /**
      * Parse OpenSCAD code and return a CST (Concrete Syntax Tree).
-     * 
+     *
      * @param code - The OpenSCAD code to parse
      * @param previousTree - Optional previous parse tree for incremental parsing
      * @returns The parse tree or null
@@ -132,17 +133,18 @@ export class OpenscadParser {
 
     /**
      * Parse OpenSCAD code and return an AST (Abstract Syntax Tree).
-     * 
+     *
      * @param code - The OpenSCAD code to parse
      * @returns An array of AST nodes representing the parsed code
      * @throws If the parser hasn't been initialized or there's an error parsing the code
      */
     parseAST(code: string): ASTNode[] {
         const cst = this.parseCST(code);
+        // cstTreeCursorWalkLog(cst?.walk(),code); // Commented out due to incorrect arguments causing TypeError
         if (!cst) {
             return [];
         }
-        
+
         const generator = new ASTGenerator(cst, code);
         return generator.generate();
     }
@@ -150,7 +152,7 @@ export class OpenscadParser {
     /**
      * Parse OpenSCAD code and return a CST (Concrete Syntax Tree).
      * This is an alias for parseCST for backward compatibility.
-     * 
+     *
      * @param code - The OpenSCAD code to parse
      * @param previousTree - Optional previous parse tree for incremental parsing
      * @returns The parse tree or null

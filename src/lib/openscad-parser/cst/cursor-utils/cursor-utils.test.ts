@@ -163,26 +163,26 @@ describe('cursor-utils', () => {
       const code = 'cube(10);';
       const cursor = parseCode(code);
 
-      // Navigate to the cube call
-      expect(cursor.gotoFirstChild()).toBe(true); // source_file
-      expect(cursor.gotoFirstChild()).toBe(true); // call_expression
+      // Navigate to the expression_statement
+      expect(cursor.gotoFirstChild()).toBe(true); // source_file -> statement
+      expect(cursor.gotoFirstChild()).toBe(true); // statement -> expression_statement
 
       const nodeText = cursorUtils.getNodeText(cursor, code);
-      // The semicolon is not part of the node text in the parser
-      expect(nodeText).toBe('cube(10)');
+      // expression_statement now includes the semicolon due to grammar changes
+      expect(nodeText).toBe('cube(10);');
     });
 
     it('should handle multi-line nodes', () => {
       const code = 'translate([10, 20, 30])\n  cube(10);';
       const cursor = parseCode(code);
 
-      // Navigate to the translate call
-      expect(cursor.gotoFirstChild()).toBe(true); // source_file
-      expect(cursor.gotoFirstChild()).toBe(true); // call_expression (translate)
+      // Navigate to the module_instantiation node (translate call with its body)
+      expect(cursor.gotoFirstChild()).toBe(true); // source_file -> statement
+      expect(cursor.gotoFirstChild()).toBe(true); // statement -> module_instantiation
 
       const nodeText = cursorUtils.getNodeText(cursor, code);
-      // The semicolon and cube call are not part of the translate node text in the parser
-      expect(nodeText).toBe('translate([10, 20, 30])');
+      // getNodeText on module_instantiation includes its body
+      expect(nodeText).toBe('translate([10, 20, 30])\n  cube(10);');
     });
 
     it('should handle different node types correctly', () => {
