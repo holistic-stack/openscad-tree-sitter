@@ -58,13 +58,13 @@ const INVALID_OPENSCAD_CODE = `
   test();
 `;
 
-describe("TreeSitterOpenSCADParser", () => {
+describe("OpenSCADParser", () => {
   let parser: OpenscadParser;
 
   beforeEach(async () => {
     // Create a new parser instance before each test
     parser = new OpenscadParser();
-    await parser.init();
+    await parser.init("./tree-sitter-openscad.wasm");
   });
 
   afterEach(() => {

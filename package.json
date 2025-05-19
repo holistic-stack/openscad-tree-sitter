@@ -55,6 +55,7 @@
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",
   "devDependencies": {
+    "@types/node": "^22.15.18",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
     "eslint": "^8.56.0",
@@ -63,7 +64,8 @@
     "prebuildify": "^6.0.0",
     "tree-sitter-cli": "0.25.3",
     "typescript": "^5.3.3",
-    "vitest": "^1.0.0"
+    "vitest": "^1.0.0",
+    "vitest-fetch-mock": "^0.4.5"
   },
   "repository": {
     "type": "git",
