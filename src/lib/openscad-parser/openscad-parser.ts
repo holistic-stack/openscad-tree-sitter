@@ -36,7 +36,7 @@
  */
 
 // Import the Parser class from web-tree-sitter
-import { Parser, Language, Tree, SyntaxNode } from "web-tree-sitter";
+import * as TreeSitter from "web-tree-sitter";
 import { ASTGenerator } from "./ast/ast-generator";
 import { ASTNode } from "./ast/ast-types";
 import {cstTreeCursorWalkLog} from "@/lib/openscad-parser/cst/cursor-utils/cstTreeCursorWalkLog";
@@ -60,13 +60,13 @@ export class OpenscadParser {
      * The Tree-sitter parser instance
      * @private
      */
-    private parser: Parser | null = null;
+    private parser: TreeSitter.Parser | null = null;
 
     /**
      * The Tree-sitter language
      * @private
      */
-    private language: Language | null = null;
+    private language: TreeSitter.Language | null = null;
 
     /**
      * Whether the parser has been initialized
@@ -92,9 +92,9 @@ export class OpenscadParser {
                 }
             );
 
-            await Parser.init();
-            this.parser = new Parser();
-            this.language = await Language.load(bytes);
+            await TreeSitter.Parser.init();
+            this.parser = new TreeSitter.Parser();
+            this.language = await TreeSitter.Language.load(bytes);
 
             // Set the language for the parser
             this.parser.setLanguage(this.language);
@@ -115,7 +115,7 @@ export class OpenscadParser {
      * @returns The parse tree or null
      * @throws If the parser hasn't been initialized or there's an error parsing the code
      */
-    parseCST(code: string, previousTree?: Tree | null): Tree | null {
+    parseCST(code: string, previousTree?: TreeSitter.Tree | null): TreeSitter.Tree | null {
         if (!this.isInitialized || !this.parser) {
             // This case should still throw synchronously as it's a precondition failure
             throw new Error("Parser not initialized. Call init() first.");
@@ -157,7 +157,7 @@ export class OpenscadParser {
      * @param previousTree - Optional previous parse tree for incremental parsing
      * @returns The parse tree or null
      */
-    parse(code: string, previousTree?: Tree | null): Tree | null {
+    parse(code: string, previousTree?: TreeSitter.Tree | null): TreeSitter.Tree | null {
         return this.parseCST(code, previousTree);
     }
 

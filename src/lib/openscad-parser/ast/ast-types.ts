@@ -121,7 +121,7 @@ export interface FunctionCallNode extends BaseNode {
  */
 export interface TranslateNode extends BaseNode {
   type: 'translate';
-  v: [number, number, number];
+  v: Vector2D | Vector3D;
   children: ASTNode[];
 }
 

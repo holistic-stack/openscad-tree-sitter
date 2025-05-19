@@ -124,67 +124,6 @@ export class ASTGenerator {
   }
 
   /**
-   * Create a translate node
-   */
-  private createTranslateNode(node: TSNode, args: ast.Parameter[]): ast.TranslateNode {
-    // console.log('[createTranslateNode] Creating translate node for:', node.text.substring(0, 30));
-    const translateNode: ast.TranslateNode = {
-      type: 'translate',
-      v: [0, 0, 0], // Default translation vector
-      children: [],
-      location: this.getLocation(node)
-    };
-
-    // Process arguments
-    for (const arg of args) {
-      if (arg.name === 'v' || arg.name === undefined) { // Positional argument is 'v'
-        if (Array.isArray(arg.value) && (arg.value.length === 2 || arg.value.length === 3)) {
-          translateNode.v = arg.value as [number, number, number]; // ast.Vector type might need adjustment if it can be 2D
-        }
-      }
-    }
-
-    // Handle children using the 'body' field from the CST
-    const bodyCSTNode = node.childForFieldName('body');
-
-    if (bodyCSTNode) {
-      if (bodyCSTNode.type === 'block') {
-        // Process statements within the block
-        for (let i = 0; i < bodyCSTNode.namedChildCount; i++) {
-          const statementNode = bodyCSTNode.namedChild(i);
-          if (statementNode && statementNode.type === 'module_instantiation') { // Assuming statements in block are module instantiations
-            const astChildNode = this.processModuleInstantiation(statementNode);
-            if (astChildNode) {
-              translateNode.children.push(astChildNode);
-            }
-          } else if (statementNode) {
-            // If we need to handle other statement types within a translate block,
-            // we might need a more general processStatementNode method.
-            // For now, expecting module_instantiations.
-            const statementsInBlock: ast.ASTNode[] = [];
-            this.processNode(statementNode, statementsInBlock);
-            translateNode.children.push(...statementsInBlock);
-          }
-        }
-      } else if (bodyCSTNode.type === 'statement') {
-        // bodyCSTNode is the 'statement' node.
-        // Its first named child should be the 'module_instantiation' (e.g., for cube)
-        // According to grammar: statement: $ => choice($.module_instantiation, ..., $.expression_statement)
-        // For `translate() cube();`, bodyCSTNode is 'statement', its child is 'module_instantiation'
-        const actualModuleNode = bodyCSTNode.firstChild; // The module_instantiation is the first child of the statement node
-        if (actualModuleNode && actualModuleNode.type === 'module_instantiation') {
-          const astChildNode = this.processModuleInstantiation(actualModuleNode);
-          if (astChildNode) {
-            translateNode.children.push(astChildNode);
-          }
-        }
-      }
-    }
-
-    return translateNode;
-  }
-
-  /**
    * Find a block node that's a child of the given node
    * This method might become obsolete or less used with the new grammar.
    */
@@ -208,6 +147,72 @@ export class ASTGenerator {
     }
     
     return null;
+  }
+
+  /**
+   * Create a translate node
+   */
+  private createTranslateNode(node: TSNode, args: ast.Parameter[]): ast.TranslateNode {
+    let vParamValue: ast.ParameterValue | undefined = undefined;
+
+    const namedVArg = args.find(arg => arg.name === 'v');
+    if (namedVArg) {
+      vParamValue = namedVArg.value;
+      console.log(`[ASTGenerator.createTranslateNode] Found named 'v' argument. Value: ${JSON.stringify(vParamValue)}`); // DEBUG
+    } else {
+      const positionalVArg = args.find(arg => !arg.name); // Assuming 'v' is the first positional if not named
+      if (positionalVArg) {
+        vParamValue = positionalVArg.value;
+        console.log(`[ASTGenerator.createTranslateNode] Found positional vector argument. Value: ${JSON.stringify(vParamValue)}`); // DEBUG
+      } else {
+        console.log(`[ASTGenerator.createTranslateNode] No named 'v' or positional vector argument found for translate node: ${node.text.substring(0,30)}`); // DEBUG
+      }
+    }
+
+    console.log(`[ASTGenerator.createTranslateNode] Final vParamValue before creating vector: ${JSON.stringify(vParamValue)}, Type: ${typeof vParamValue}, IsArray: ${Array.isArray(vParamValue)}`); // DEBUG
+
+    const v = vParamValue && Array.isArray(vParamValue) && (vParamValue.length === 2 || vParamValue.length === 3)
+      ? vParamValue as ast.Vector2D | ast.Vector3D
+      : [0, 0, 0] as ast.Vector3D;
+    
+    console.log(`[ASTGenerator.createTranslateNode] Resulting vector 'v' for ${node.text.substring(0,30)}: ${JSON.stringify(v)}`); // DEBUG
+
+    const children: ast.ASTNode[] = [];
+    const bodyNode = node.childForFieldName('body');
+
+    if (bodyNode) {
+      if (bodyNode.type === 'block') {
+        console.log(`[ASTGenerator.createTranslateNode] Found block body for ${node.text.substring(0,30)}`); // DEBUG
+        for (const statementCSTNode of bodyNode.children) {
+          if (statementCSTNode && statementCSTNode.type === 'statement') { // Or directly module_instantiation, etc.
+             // We expect statements within a block to be processable into ASTNodes
+            this.processNode(statementCSTNode, children);
+          }
+        }
+      } else if (bodyNode.type === 'statement') {
+        // This case might be for something like: translate() if (true) cube(); where body is a single statement
+        console.log(`[ASTGenerator.createTranslateNode] Found statement body for ${node.text.substring(0,30)}: ${bodyNode.text.substring(0,20)}`); // DEBUG
+        this.processNode(bodyNode, children);
+      }
+    } else {
+      // No explicit body, check for an immediately following statement (e.g., translate() cube();)
+      // The 'node' here is the module_instantiation for 'translate'
+      // Its next sibling should be the 'statement' node for 'cube()'
+      const nextSibling = node.nextSibling;
+      if (nextSibling && nextSibling.type === 'statement') {
+        console.log(`[ASTGenerator.createTranslateNode] Found next sibling statement for ${node.text.substring(0,30)}: ${nextSibling.text.substring(0,20)}`); // DEBUG
+        this.processNode(nextSibling, children);
+      } else {
+        console.log(`[ASTGenerator.createTranslateNode] No body and no next sibling statement found for ${node.text.substring(0,30)}. Next sibling type: ${nextSibling?.type}`); // DEBUG
+      }
+    }
+
+    return {
+      type: 'translate',
+      v,
+      children,
+      location: this.getLocation(node)
+    };
   }
 
   /**
@@ -323,44 +328,44 @@ export class ASTGenerator {
   /**
    * Extract arguments from a module instantiation
    */
-  private extractArguments(argumentList: TSNode): ast.Parameter[] { // Renamed 'node' to 'argumentList' for clarity
+  private extractArguments(argumentList: TSNode): ast.Parameter[] {
     const args: ast.Parameter[] = [];
-    // The input 'argumentList' IS the 'argument_list' CST node from childForFieldName('arguments')
-    // No need to search for it again.
-    
-    if (!argumentList || argumentList.type !== 'argument_list') return args; // Basic sanity check
+    console.log(`[ASTGenerator.extractArguments] Processing argument_list: ${argumentList.text.substring(0,40)}, children count: ${argumentList.childCount}, namedChildren count: ${argumentList.namedChildCount}`); // DEBUG
 
-    let currentArgValueNode: TSNode | null = null;
-    let currentArgName: string | undefined = undefined;
-
-    for (let i = 0; i < argumentList.namedChildCount; i++) {
-      const child = argumentList.namedChild(i);
-      if (!child) continue;
-
-      // In argument_list: $ => seq('(', commaSep($.argument), ')'),
-      // argument: $ => choice($.named_argument, $.expression)
-      // named_argument: $ => seq(field('name', $.identifier), '=', field('value', $.expression)),
-      // We iterate through namedChildren which are 'argument' nodes.
-
-      if (child.type === 'named_argument') {
-        const nameNode = child.childForFieldName('name');
-        const valueNode = child.childForFieldName('value');
+    for (const childNode of argumentList.children) { 
+      if (!childNode) continue; // Added null check for childNode
+      console.log(`[ASTGenerator.extractArguments] Child of argument_list: type='${childNode.type}', text='${childNode.text.substring(0,20)}'`); // DEBUG
+      
+      if (childNode.type === 'named_argument') {
+        const nameNode = childNode.childForFieldName('name'); 
+        const valueNode = childNode.childForFieldName('value');
+        console.log(`[ASTGenerator.extractArguments]   Named argument: nameNode type='${nameNode?.type}', valueNode type='${valueNode?.type}'`); // DEBUG
         if (nameNode && valueNode) {
-          args.push({
-            name: nameNode.text,
-            value: this.extractValue(valueNode)
-          });
+          const name = nameNode.text;
+          const value = this.extractValue(valueNode);
+          console.log(`[ASTGenerator.extractArguments]     Extracted named arg: name='${name}', value='${JSON.stringify(value)}'`); // DEBUG
+          if (value !== undefined) {
+            args.push({ name, value });
+          }
         }
-      } else {
-        // This is a positional argument (an expression)
-        const value = this.extractValue(child);
-        // For positional arguments, we don't have a name from the CST directly here.
-        // The calling function (e.g., createCubeNode) will assign meaning based on position.
-        if (value !== undefined) { // Ensure value was extracted
+      } else if (childNode.type === 'expression' || 
+                 childNode.type === 'number' || 
+                 childNode.type === 'string_literal' ||
+                 childNode.type === 'array_literal' ||
+                 childNode.type === 'identifier' ||
+                 childNode.type === 'boolean' // Added boolean as it's a valid value
+                ) { 
+        console.log(`[ASTGenerator.extractArguments]   Positional argument candidate: type='${childNode.type}', text='${childNode.text.substring(0,20)}'`); // DEBUG
+        const value = this.extractValue(childNode);
+        console.log(`[ASTGenerator.extractArguments]     Extracted positional value: '${JSON.stringify(value)}'`); // DEBUG
+        if (value !== undefined) { 
           args.push({ value }); 
         }
+      } else {
+        console.log(`[ASTGenerator.extractArguments]   Ignoring child of argument_list: type='${childNode.type}'`); // DEBUG
       }
     }
+    console.log(`[ASTGenerator.extractArguments] Extracted args: ${JSON.stringify(args)}`); // DEBUG
     return args;
   }
 
@@ -369,57 +374,84 @@ export class ASTGenerator {
    */
   private extractValue(node?: TSNode | null): ast.ParameterValue {
     if (!node) return undefined;
+    console.log(`[ASTGenerator.extractValue] Attempting to extract from node: type='${node.type}', text='${node.text.substring(0,30)}'`); // DEBUG
 
     switch (node.type) {
       case 'number':
         return parseFloat(node.text);
-      case 'boolean': // Boolean literals true/false
+      case 'boolean':
         return node.text === 'true';
       case 'string_literal':
-        // Tree-sitter string_literal nodes include the quotes.
         const text = node.text;
         if ((text.startsWith('\"') && text.endsWith('\"')) || (text.startsWith("'") && text.endsWith("'"))) {
           return text.slice(1, -1);
         }
-        return text; // Should not happen if grammar is correct
-      case 'array_literal': // Added to handle [1,0,0] style vectors
+        return text;
+      case 'array_literal':
+        console.log(`[ASTGenerator.extractValue] Calling extractVector for array_literal: ${node.text.substring(0,20)}`); // DEBUG
         return this.extractVector(node);
       case 'unary_expression':
-        // Expected structure: children[0] is operator, children[1] is operand (expression)
-        if (node.childCount === 2) { // Use childCount for general children
+        if (node.childCount === 2) {
           const operatorNode = node.child(0);
           const operandNode = node.child(1);
           if (operatorNode && operandNode) {
             const operator = operatorNode.text;
             const operandValue = this.extractValue(operandNode);
-
-            if (operator === '-' && typeof operandValue === 'number') {
-              return -operandValue;
-            }
-            if (operator === '+' && typeof operandValue === 'number') {
-              return operandValue; // Unary plus
-            }
+            if (operator === '-' && typeof operandValue === 'number') return -operandValue;
+            if (operator === '+' && typeof operandValue === 'number') return operandValue;
           }
         }
-        break; 
+        console.warn(`[ASTGenerator.extractValue] Unhandled unary_expression: ${node.text.substring(0,30)}. Returning undefined.`); // DEBUG
+        return undefined; // Explicitly return undefined if not handled
+      case 'expression':
+        // If expression has one child, it might be a wrapper. Try to extract from child.
+        if (node.childCount === 1) {
+          const actualValueNode = node.child(0);
+          if (actualValueNode) {
+            console.log(`[ASTGenerator.extractValue] Unwrapping 'expression', calling extractValue on child: type='${actualValueNode.type}', text='${actualValueNode.text.substring(0,20)}'`); // DEBUG
+            return this.extractValue(actualValueNode);
+          }
+        }
+        // If not a simple wrapper, or has multiple children (e.g. binary expression)
+        // We might need specific handlers for binary_expression, etc. if they are valid parameter values.
+        // For now, try to parse its text as a number, or return text if it's more complex.
+        console.log(`[ASTGenerator.extractValue] 'expression' (text: ${node.text.substring(0,30)}) not a simple wrapper. Trying to parse its text as number or returning text.`);
+        const exprNum = parseFloat(node.text.trim());
+        if (!isNaN(exprNum)) {
+          return exprNum;
+        }
+        // Fallback for complex expressions or expressions that evaluate to strings not yet handled.
+        // This might need to be an actual expression object in the AST later.
+        console.warn(`[ASTGenerator.extractValue] Complex 'expression' node text '${node.text.substring(0,30)}' returned as string or undefined. Consider specific handlers.`);
+        // Returning node.text might be appropriate if the expression is a variable name not caught by 'identifier'.
+        // However, for something like '1+2', it should ideally be an expression node or evaluated.
+        // For now, returning undefined as a safer default for unhandled complex expressions.
+        return undefined; 
       case 'identifier':
         if (node.text === 'true') return true;
         if (node.text === 'false') return false;
         return {
-          type: 'expression', 
+          type: 'expression',
           expressionType: 'variable',
           name: node.text,
           location: this.getLocation(node)
         } as ast.VariableNode;
       default:
+        console.log(`[ASTGenerator.extractValue] Default case for node type: '${node.type}', text: '${node.text.substring(0,30)}'`);
         const potentialNumText = node.text.trim();
         const num = parseFloat(potentialNumText);
-        if (!isNaN(num) && num.toString() === potentialNumText) {
+        if (!isNaN(num)) {
+          console.log(`[ASTGenerator.extractValue] Default case parsed text '${potentialNumText}' as number: ${num}`);
           return num;
         }
-        return node.text; 
+        console.warn(`[ASTGenerator.extractValue] Default case returning raw text for node type: '${node.type}', text: '${node.text.substring(0,30)}'`);
+        // Returning node.text can be a fallback but might hide issues.
+        // Consider returning undefined for unhandled types to make errors more obvious.
+        return node.text; // Or return undefined for stricter handling
     }
-    return node.text;
+    // Should not be reached if all cases return explicitly or define behavior for falling through
+    // console.error(`[ASTGenerator.extractValue] Reached end of switch unexpectedly for node type: '${node.type}', text: '${node.text.substring(0,30)}'. Returning undefined.`);
+    // return undefined;
   }
 
   /**
@@ -427,29 +459,41 @@ export class ASTGenerator {
    */
   private extractVector(node: TSNode): ast.Vector2D | ast.Vector3D | undefined {
     const numbers: number[] = [];
+    const elementsToProcess = node.type === 'array_literal' ? node.children : [];
 
-    const elementsToProcess = node.type === 'array_literal' ? node.namedChildren : [];
-
+    console.log(`[ASTGenerator.extractVector] Processing array_literal node: ${node.text.substring(0,30)}, children count: ${elementsToProcess.length}`);
     for (const elementNode of elementsToProcess) {
-      if (!elementNode) continue; // Added null check for elementNode
+      if (!elementNode) continue;
+      console.log(`[ASTGenerator.extractVector] Iterating child: type='${elementNode.type}', text='${elementNode.text.substring(0,20)}'`);
 
-      const value = this.extractValue(elementNode); 
-      if (typeof value === 'number') {
-        numbers.push(value);
+      // Only process expression, number, identifier, or unary_expression nodes as potential vector elements
+      if (elementNode.type === 'expression' || 
+          elementNode.type === 'number' || 
+          elementNode.type === 'identifier' ||
+          elementNode.type === 'unary_expression') { 
+        console.log(`[ASTGenerator.extractVector]   Processing child of array_literal: type='${elementNode.type}', text='${elementNode.text.substring(0,20)}'`); // DEBUG
+        const value = this.extractValue(elementNode);
+        console.log(`[ASTGenerator.extractVector]   extractValue returned: ${JSON.stringify(value)}, typeof: ${typeof value}`);
+        if (typeof value === 'number') {
+          numbers.push(value);
+        } else {
+          console.warn(`[ASTGenerator.extractVector] Element in array_literal (type='${elementNode.type}', text='${elementNode.text.substring(0,20)}') did not resolve to a number. Extracted value: ${JSON.stringify(value)}`);
+        }
       } else {
-        console.warn(`[ASTGenerator.extractVector] Element in array_literal did not resolve to a number: ${elementNode.text.substring(0,30)}, extracted value: ${JSON.stringify(value)}`);
+        console.log(`[ASTGenerator.extractVector]   Skipping child of array_literal: type='${elementNode.type}' (not an expression, number, identifier, or unary_expression)`);
       }
     }
 
     if (numbers.length === 2) {
+      console.log(`[ASTGenerator.extractVector] Returning 2D vector from ${node.text.substring(0,20)}: ${JSON.stringify([numbers[0], numbers[1]])}`); // DEBUG
       return [numbers[0], numbers[1]] as ast.Vector2D;
     } else if (numbers.length === 3) {
+      console.log(`[ASTGenerator.extractVector] Returning 3D vector from ${node.text.substring(0,20)}: ${JSON.stringify([numbers[0], numbers[1], numbers[2]])}`); // DEBUG
       return [numbers[0], numbers[1], numbers[2]] as ast.Vector3D;
     }
     
-    if (node.type === 'array_literal') {
-        console.warn(`[ASTGenerator.extractVector] Extracted ${numbers.length} numbers from array_literal node: ${node.text.substring(0,30)}. Expected 2 or 3. Numbers: ${JSON.stringify(numbers)}`);
-    }
+    // This warning will now be more specific about failure.
+    console.warn(`[ASTGenerator.extractVector] FAILURE: Extracted ${numbers.length} numbers from array_literal node '${node.text.substring(0,30)}'. Expected 2 or 3. Numbers: ${JSON.stringify(numbers)}. RETURNING UNDEFINED.`);
     return undefined;
   }
 
