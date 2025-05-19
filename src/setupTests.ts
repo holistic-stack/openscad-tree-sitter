@@ -1,7 +1,9 @@
 /* eslint-disable */
-import { vi } from "vitest";
+import { vi, beforeAll } from "vitest";
 import createFetchMock from "vitest-fetch-mock";
 import { readFileSync } from "fs";
+
+
 
 const fetchMocker = createFetchMock(vi);
 fetchMocker.enableMocks();

@@ -1,0 +1,56 @@
+[2025-05-19T14:16:57.170Z] === Starting AST Debug ===
+
+[2025-05-19T14:16:57.172Z] === Input Code ===
+"cube(10);"
+
+[2025-05-19T14:16:57.172Z] === Character Positions ===
+[
+  {
+    "position": 0,
+    "char": "c",
+    "charCode": 99
+  },
+  {
+    "position": 1,
+    "char": "u",
+    "charCode": 117
+  },
+  {
+    "position": 2,
+    "char": "b",
+    "charCode": 98
+  },
+  {
+    "position": 3,
+    "char": "e",
+    "charCode": 101
+  },
+  {
+    "position": 4,
+    "char": "(",
+    "charCode": 40
+  },
+  {
+    "position": 5,
+    "char": "1",
+    "charCode": 49
+  },
+  {
+    "position": 6,
+    "char": "0",
+    "charCode": 48
+  },
+  {
+    "position": 7,
+    "char": ")",
+    "charCode": 41
+  },
+  {
+    "position": 8,
+    "char": ";",
+    "charCode": 59
+  }
+]
+
+[2025-05-19T14:16:57.173Z] Initializing parser...
+

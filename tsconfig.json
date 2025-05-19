@@ -10,6 +10,7 @@
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
+      "@/*": ["src/*"],
       "*": ["node_modules/*"]
     },
     "skipLibCheck": true,
