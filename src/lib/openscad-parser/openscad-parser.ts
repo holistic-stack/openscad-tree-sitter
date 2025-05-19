@@ -36,7 +36,9 @@
  */
 
 // Import the Parser class from web-tree-sitter
-import {Parser, Language, Tree} from "web-tree-sitter";
+import { Parser, Language, Tree, SyntaxNode } from "web-tree-sitter";
+import { ASTGenerator } from "./ast/ast-generator";
+import { ASTNode } from "./ast/ast-types";
 
 /**
  * A parser for OpenSCAD code using the Tree-sitter library.
@@ -105,15 +107,14 @@ export class OpenscadParser {
     }
 
     /**
-     *
-     * Parse OpenSCAD code and return an AST.
-     *
+     * Parse OpenSCAD code and return a CST (Concrete Syntax Tree).
+     * 
      * @param code - The OpenSCAD code to parse
      * @param previousTree - Optional previous parse tree for incremental parsing
      * @returns The parse tree or null
      * @throws If the parser hasn't been initialized or there's an error parsing the code
      */
-    public parse(code: string, previousTree?: Tree | null): Tree | null {
+    parseCST(code: string, previousTree?: Tree | null): Tree | null {
         if (!this.isInitialized || !this.parser) {
             // This case should still throw synchronously as it's a precondition failure
             throw new Error("Parser not initialized. Call init() first.");
@@ -130,10 +131,39 @@ export class OpenscadParser {
     }
 
     /**
+     * Parse OpenSCAD code and return an AST (Abstract Syntax Tree).
+     * 
+     * @param code - The OpenSCAD code to parse
+     * @returns An array of AST nodes representing the parsed code
+     * @throws If the parser hasn't been initialized or there's an error parsing the code
+     */
+    parseAST(code: string): ASTNode[] {
+        const cst = this.parseCST(code);
+        if (!cst) {
+            return [];
+        }
+        
+        const generator = new ASTGenerator(cst, code);
+        return generator.generate();
+    }
+
+    /**
+     * Parse OpenSCAD code and return a CST (Concrete Syntax Tree).
+     * This is an alias for parseCST for backward compatibility.
+     * 
+     * @param code - The OpenSCAD code to parse
+     * @param previousTree - Optional previous parse tree for incremental parsing
+     * @returns The parse tree or null
+     */
+    parse(code: string, previousTree?: Tree | null): Tree | null {
+        return this.parseCST(code, previousTree);
+    }
+
+    /**
      * Dispose of the parser and free resources.
      * Call this when you're done with the parser to avoid memory leaks.
      */
-    public dispose(): void {
+    dispose(): void {
         if (this.parser) {
             this.parser.delete();
             this.parser = null;
