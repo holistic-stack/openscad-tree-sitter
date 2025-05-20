@@ -26,6 +26,7 @@
   - [x] Add visitExpression method to handle expression nodes
   - [x] Update findNodeOfType function to handle the actual tree-sitter CST structure
   - [x] Fix base-ast-visitor.test.ts to use the real parser instead of mocks
+  - [x] Remove 'original', 'modular', and 'direct' generator patterns, keeping only the visitor pattern
 
 **Context:**
 The visitor pattern is a well-established method for processing hierarchical structures like syntax trees. It separates the algorithm from the object structure, making the code more maintainable and extensible. Tree-sitter's TreeCursor already provides a way to traverse the tree, but a proper visitor implementation would make the code more organized and easier to extend.
@@ -345,10 +346,10 @@ The difference and intersection operations are similar to union operations but h
 
 - [ ] **Visitor Tests**
   - [x] Fix base-ast-visitor.test.ts to use the real parser instead of mocks
-  - [ ] Fix primitive-visitor.test.ts to use the real parser and handle expression nodes
-  - [ ] Fix composite-visitor.test.ts to use the real parser and handle expression nodes
-  - [ ] Fix transform-visitor.test.ts to use the real parser and handle expression nodes
-  - [ ] Fix csg-visitor.test.ts to use the real parser and handle expression nodes
+  - [ ] Fix primitive-visitor.test.ts to use the real parser and handle call_expression nodes instead of module_instantiation nodes
+  - [ ] Fix composite-visitor.test.ts to use the real parser and handle call_expression nodes
+  - [ ] Fix transform-visitor.test.ts to use the real parser and handle call_expression nodes
+  - [ ] Fix csg-visitor.test.ts to use the real parser and handle call_expression nodes
 
 - [ ] **CSG Operation Tests**
   - [ ] Fix union operations
@@ -358,6 +359,10 @@ The difference and intersection operations are similar to union operations but h
 - [ ] **Module and Function Tests**
   - [ ] Fix module definition and instantiation
   - [ ] Fix function definition and calls
+
+- [ ] **Cursor Utils Tests**
+  - [ ] Fix cstTreeCursorWalkLog.ts to handle the tree-sitter Tree object correctly
+  - [ ] Fix cursor-utils.test.ts to use the correct tree-sitter API
 
 ### 1.3 Fix Module and Function System
 - [ ] **Fix Module Definition and Instantiation**

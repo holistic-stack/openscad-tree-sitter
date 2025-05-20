@@ -1,9 +1,6 @@
 import { OpenscadParser } from '../../../openscad-parser';
 import { afterAll, beforeAll, describe, it, expect } from 'vitest';
 
-// Set the generator type to use
-const GENERATOR_TYPE: 'original' | 'modular' | 'direct' | 'visitor' = 'visitor';
-
 describe('Transformation AST Generation', () => {
   let parser: OpenscadParser;
 
@@ -20,7 +17,7 @@ describe('Transformation AST Generation', () => {
   describe('Mirror Transformation', () => {
     it('should parse a mirror with vector parameter', async () => {
       const code = `mirror([1, 0, 0]) cube(10);`;
-      const ast = await parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('mirror');
@@ -33,7 +30,7 @@ describe('Transformation AST Generation', () => {
 
     it('should parse a mirror with named v parameter', async () => {
       const code = `mirror(v=[0, 1, 0]) cube(10);`;
-      const ast = await parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('mirror');
@@ -46,7 +43,7 @@ describe('Transformation AST Generation', () => {
 
     it('should parse a mirror with 2D vector parameter', async () => {
       const code = `mirror([1, 1]) cube(10);`;
-      const ast = await parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('mirror');
@@ -68,7 +65,7 @@ describe('Transformation AST Generation', () => {
           [0, 0, 0, 1]
         ]) cube(10);
       `;
-      const ast = await parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('multmatrix');
@@ -93,7 +90,7 @@ describe('Transformation AST Generation', () => {
           [0, 0, 0, 1]
         ]) cube(10);
       `;
-      const ast = await parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('multmatrix');
@@ -113,7 +110,7 @@ describe('Transformation AST Generation', () => {
   describe('Color Transformation', () => {
     it('should parse a color with name parameter', async () => {
       const code = `color("red") cube(10);`;
-      const ast = await parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('color');
@@ -126,7 +123,7 @@ describe('Transformation AST Generation', () => {
 
     it('should parse a color with hex value', async () => {
       const code = `color("#ff0000") cube(10);`;
-      const ast = await parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('color');
@@ -139,7 +136,7 @@ describe('Transformation AST Generation', () => {
 
     it('should parse a color with rgb vector', async () => {
       const code = `color([1, 0, 0]) cube(10);`;
-      const ast = await parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('color');
@@ -152,7 +149,7 @@ describe('Transformation AST Generation', () => {
 
     it('should parse a color with rgba vector', async () => {
       const code = `color([1, 0, 0, 0.5]) cube(10);`;
-      const ast = await parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('color');
@@ -165,7 +162,7 @@ describe('Transformation AST Generation', () => {
 
     it('should parse a color with alpha parameter', async () => {
       const code = `color("blue", 0.5) cube(10);`;
-      const ast = await parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('color');
@@ -178,7 +175,7 @@ describe('Transformation AST Generation', () => {
 
     it('should parse a color with named c and alpha parameters', async () => {
       const code = `color(c="green", alpha=0.7) cube(10);`;
-      const ast = await parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('color');
@@ -193,7 +190,7 @@ describe('Transformation AST Generation', () => {
   describe('Offset Transformation', () => {
     it('should parse an offset with r parameter', async () => {
       const code = `offset(r=2) square(10);`;
-      const ast = await parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('offset');
@@ -208,7 +205,7 @@ describe('Transformation AST Generation', () => {
 
     it('should parse an offset with delta parameter', async () => {
       const code = `offset(delta=2) square(10);`;
-      const ast = await parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('offset');
@@ -223,7 +220,7 @@ describe('Transformation AST Generation', () => {
 
     it('should parse an offset with chamfer parameter', async () => {
       const code = `offset(delta=2, chamfer=true) square(10);`;
-      const ast = await parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('offset');

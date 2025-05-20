@@ -20,10 +20,7 @@
 │   │
 │   ├───ast
 │   │   │   ast-generator.integration.test.ts
-│   │   │   ast-generator.ts
 │   │   │   ast-types.ts
-│   │   │   direct-ast-generator.ts
-│   │   │   modular-ast-generator.ts
 │   │   │   visitor-ast-generator.test.ts
 │   │   │   visitor-ast-generator.ts
 │   │   │
@@ -33,34 +30,23 @@
 │   │   │       parameter-extractor.ts
 │   │   │       value-extractor.ts
 │   │   │
-│   │   ├───generators
-│   │   │   │   base-generator.ts
-│   │   │   │   control-structure-generator.ts
-│   │   │   │   csg-generator.ts
-│   │   │   │   expression-generator.ts
-│   │   │   │   index.ts
-│   │   │   │   module-function-generator.ts
-│   │   │   │   primitive-generator.ts
-│   │   │   │   transform-generator.ts
-│   │   │   │
-│   │   │   └───tests
-│   │   │           control-structures.test.ts
-│   │   │           cylinder.test.ts
-│   │   │           difference.test.ts
-│   │   │           hull.test.ts
-│   │   │           minkowski.test.ts
-│   │   │           module-function.test.ts
-│   │   │           primitives.test.ts
-│   │   │           rotate.test.ts
-│   │   │           scale.test.ts
-│   │   │           sphere.test.ts
-│   │   │           transformations.test.ts
-│   │   │           union.test.ts
+│   │   ├───tests
+│   │   │       control-structures.test.ts
+│   │   │       cylinder.test.ts
+│   │   │       difference.test.ts
+│   │   │       hull.test.ts
+│   │   │       minkowski.test.ts
+│   │   │       module-function.test.ts
+│   │   │       primitives.test.ts
+│   │   │       rotate.test.ts
+│   │   │       scale.test.ts
+│   │   │       sphere.test.ts
+│   │   │       transformations.test.ts
+│   │   │       union.test.ts
 │   │   │
 │   │   ├───registry
 │   │   │       node-handler-registry.ts
 │   │   │       default-node-handler-registry.ts
-│   │   │       node-handler-registry-factory.ts
 │   │   │       node-handler-registry.test.ts
 │   │   │
 │   │   ├───query
@@ -132,10 +118,13 @@ The project has made significant progress with:
 - Fixed implementation of scale transformations
 - Fixed implementation of union operations
 - Implemented vector parameter extraction for transformations
+- Removed 'original', 'modular', and 'direct' generator patterns, keeping only the visitor pattern
+- Moved test files from generators/tests to ast/tests directory
+- Updated all test files to use the visitor pattern
 
 However, there are several issues that need to be addressed:
-- Some tests are using parseToAST instead of parseAST
-- The ModularASTGenerator needs updates to handle all operations
+- The primitive-visitor.test.ts tests are failing because they're looking for module_instantiation nodes, but the tree-sitter CST structure uses call_expression nodes instead
+- The composite-visitor.test.ts tests are failing for similar reasons
 - Difference and intersection operations need implementation
 - Module and function system needs more work
 

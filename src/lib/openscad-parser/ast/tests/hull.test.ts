@@ -1,9 +1,6 @@
 import { OpenscadParser } from '../../../openscad-parser';
 import { afterAll, beforeAll, describe, it, expect } from 'vitest';
 
-// Set the generator type to use
-const GENERATOR_TYPE: 'original' | 'modular' | 'direct' = 'modular';
-
 describe('Hull Operation AST Generation', () => {
   let parser: OpenscadParser;
 
@@ -24,7 +21,7 @@ describe('Hull Operation AST Generation', () => {
         translate([20, 0, 0]) sphere(5);
       }
     `;
-    const ast = parser.parseAST(code, GENERATOR_TYPE);
+    const ast = parser.parseAST(code);
 
     expect(ast).toHaveLength(1);
     expect(ast[0].type).toBe('hull');
@@ -42,7 +39,7 @@ describe('Hull Operation AST Generation', () => {
         translate([20, 0, 0]) cylinder(h=10, r=5, center=true);
       }
     `;
-    const ast = parser.parseAST(code, GENERATOR_TYPE);
+    const ast = parser.parseAST(code);
 
     expect(ast).toHaveLength(1);
     expect(ast[0].type).toBe('hull');
@@ -65,7 +62,7 @@ describe('Hull Operation AST Generation', () => {
         sphere(10);
       }
     `;
-    const ast = parser.parseAST(code, GENERATOR_TYPE);
+    const ast = parser.parseAST(code);
 
     expect(ast).toHaveLength(1);
     expect(ast[0].type).toBe('hull');
@@ -91,7 +88,7 @@ describe('Hull Operation AST Generation', () => {
         translate([0, 10, 0]) sphere(5);
       }
     `;
-    const ast = parser.parseAST(code, GENERATOR_TYPE);
+    const ast = parser.parseAST(code);
 
     expect(ast).toHaveLength(1);
     expect(ast[0].type).toBe('hull');
@@ -117,7 +114,7 @@ describe('Hull Operation AST Generation', () => {
         translate([10, 0, 0]) square(10);
       }
     `;
-    const ast = parser.parseAST(code, GENERATOR_TYPE);
+    const ast = parser.parseAST(code);
 
     expect(ast).toHaveLength(1);
     expect(ast[0].type).toBe('hull');

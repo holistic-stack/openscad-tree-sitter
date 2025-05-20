@@ -1,9 +1,6 @@
 import { OpenscadParser } from '../../../openscad-parser';
 import { afterAll, beforeAll, describe, it, expect } from 'vitest';
 
-// Set the generator type to use
-const GENERATOR_TYPE: 'original' | 'modular' | 'direct' | 'visitor' = 'visitor';
-
 describe('Control Structure AST Generation', () => {
   let parser: OpenscadParser;
 
@@ -23,7 +20,7 @@ describe('Control Structure AST Generation', () => {
         x = true ? 10 : 20;
         cube(x);
       `;
-      const ast = parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       // We expect two statements: the assignment and the cube
       expect(ast).toHaveLength(2);
@@ -48,7 +45,7 @@ describe('Control Structure AST Generation', () => {
         x = 5;
         result = x < 0 ? "negative" : x == 0 ? "zero" : "positive";
       `;
-      const ast = parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       // We expect two statements: the assignments
       expect(ast).toHaveLength(2);
@@ -79,7 +76,7 @@ describe('Control Structure AST Generation', () => {
           cube(10);
         }
       `;
-      const ast = parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('if');
@@ -99,7 +96,7 @@ describe('Control Structure AST Generation', () => {
           sphere(5);
         }
       `;
-      const ast = parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('if');
@@ -122,7 +119,7 @@ describe('Control Structure AST Generation', () => {
           cylinder(h=10, r=2);
         }
       `;
-      const ast = parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('if');
@@ -150,7 +147,7 @@ describe('Control Structure AST Generation', () => {
           translate([i*10, 0, 0]) cube(5);
         }
       `;
-      const ast = parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('for_loop');
@@ -173,7 +170,7 @@ describe('Control Structure AST Generation', () => {
           translate([i*10, 0, 0]) cube(5);
         }
       `;
-      const ast = parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('for_loop');
@@ -198,7 +195,7 @@ describe('Control Structure AST Generation', () => {
           translate([i, 0, 0]) cube(5);
         }
       `;
-      const ast = parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('for_loop');
@@ -218,7 +215,7 @@ describe('Control Structure AST Generation', () => {
           translate([i*10, j*10, 0]) cube(5);
         }
       `;
-      const ast = parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('for_loop');
@@ -254,7 +251,7 @@ describe('Control Structure AST Generation', () => {
           translate(p) cube(5);
         }
       `;
-      const ast = parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       // We expect two statements: the assignment and the for loop
       expect(ast).toHaveLength(2);
@@ -284,7 +281,7 @@ describe('Control Structure AST Generation', () => {
           cube(x);
         }
       `;
-      const ast = parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('let');
@@ -302,7 +299,7 @@ describe('Control Structure AST Generation', () => {
           translate([x, y, z]) cube(5);
         }
       `;
-      const ast = parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('let');
@@ -324,7 +321,7 @@ describe('Control Structure AST Generation', () => {
           }
         }
       `;
-      const ast = parser.parseAST(code, GENERATOR_TYPE);
+      const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('let');

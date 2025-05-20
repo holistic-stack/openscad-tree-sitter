@@ -174,6 +174,8 @@ The project follows a modular architecture with clear separation of concerns:
 - Fixed visitStatement method to handle expression statements as direct children
 - Added visitExpression method to handle expression nodes
 - Updated findNodeOfType function to handle the actual tree-sitter CST structure
+- Removed 'original', 'modular', and 'direct' generator patterns, keeping only the visitor pattern
+- Moved test files from generators/tests to ast/tests directory
 
 ## Next Steps
 
@@ -208,11 +210,12 @@ See [TODO.md](./TODO.md) for detailed next steps and implementation tasks.
 - Added visitExpression method to handle expression nodes
 - Updated findNodeOfType function to handle the actual tree-sitter CST structure
 - Fixed base-ast-visitor.test.ts to use the real parser instead of mocks
+- Removed 'original', 'modular', and 'direct' generator patterns, keeping only the visitor pattern
+- Moved test files from generators/tests to ast/tests directory
+- Updated all test files to use the visitor pattern
 
 ### Current Issues
 - There are still failing tests in other modules (difference, intersection, primitives, module-function)
-- The ModularASTGenerator needs to be updated to handle these other modules
-- Some tests are using parseToAST instead of parseAST, which is causing errors
 - The primitive-visitor.test.ts tests are failing because they're looking for module_instantiation nodes, but the tree-sitter CST structure uses call_expression nodes instead
 - The composite-visitor.test.ts tests are failing for similar reasons
 
@@ -220,7 +223,6 @@ See [TODO.md](./TODO.md) for detailed next steps and implementation tasks.
 - Fix the primitive-visitor.test.ts tests to use the correct node types
 - Fix the composite-visitor.test.ts tests to use the correct node types
 - Fix the module and function tests
-- Update the ModularASTGenerator to handle all types of operations
 - Implement module and function visitors
 - Implement control structure visitors
 - Add support for expression visitors
@@ -233,6 +235,5 @@ See [TODO.md](./TODO.md) for detailed next steps and implementation tasks.
 - The CSG Generator currently doesn't handle all types of child nodes correctly
 - Difference and intersection operations are not fully implemented
 - Module and function definitions and calls need more work
-- Some tests are using parseToAST instead of parseAST, which is causing errors
 - The tree-sitter CST structure is different from what we expected, which is causing issues with our visitors
 - The primitive-visitor.test.ts and composite-visitor.test.ts tests are failing because they're looking for module_instantiation nodes, but the tree-sitter CST structure uses call_expression nodes instead

@@ -1,9 +1,6 @@
 import { OpenscadParser } from '../../../openscad-parser';
 import { afterAll, beforeAll, describe, it, expect } from 'vitest';
 
-// Set the generator type to use
-const GENERATOR_TYPE: 'original' | 'modular' | 'direct' = 'modular';
-
 describe('Minkowski Operation AST Generation', () => {
   let parser: OpenscadParser;
 
@@ -24,7 +21,7 @@ describe('Minkowski Operation AST Generation', () => {
         cylinder(r=2, h=1);
       }
     `;
-    const ast = parser.parseAST(code, GENERATOR_TYPE);
+    const ast = parser.parseAST(code);
 
     expect(ast).toHaveLength(1);
     expect(ast[0].type).toBe('minkowski');
@@ -50,7 +47,7 @@ describe('Minkowski Operation AST Generation', () => {
         sphere(2);
       }
     `;
-    const ast = parser.parseAST(code, GENERATOR_TYPE);
+    const ast = parser.parseAST(code);
 
     expect(ast).toHaveLength(1);
     expect(ast[0].type).toBe('minkowski');
@@ -75,7 +72,7 @@ describe('Minkowski Operation AST Generation', () => {
         cube(10);
       }
     `;
-    const ast = parser.parseAST(code, GENERATOR_TYPE);
+    const ast = parser.parseAST(code);
 
     expect(ast).toHaveLength(1);
     expect(ast[0].type).toBe('minkowski');
@@ -101,7 +98,7 @@ describe('Minkowski Operation AST Generation', () => {
         sphere(1);
       }
     `;
-    const ast = parser.parseAST(code, GENERATOR_TYPE);
+    const ast = parser.parseAST(code);
 
     expect(ast).toHaveLength(1);
     expect(ast[0].type).toBe('minkowski');
@@ -127,7 +124,7 @@ describe('Minkowski Operation AST Generation', () => {
         circle(2);
       }
     `;
-    const ast = parser.parseAST(code, GENERATOR_TYPE);
+    const ast = parser.parseAST(code);
 
     expect(ast).toHaveLength(1);
     expect(ast[0].type).toBe('minkowski');
