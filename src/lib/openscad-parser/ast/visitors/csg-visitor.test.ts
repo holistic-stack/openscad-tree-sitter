@@ -1,6 +1,7 @@
 import { CSGVisitor } from './csg-visitor';
 import { OpenscadParser } from '../../openscad-parser';
 import { Node as TSNode } from 'web-tree-sitter';
+import { findDescendantOfType } from '../utils/node-utils';
 
 describe('CSGVisitor', () => {
   let parser: OpenscadParser;
@@ -154,16 +155,19 @@ function findNodeOfType(node: TSNode, type: string): TSNode | null {
     return node;
   }
 
-  // Special case for call_expression which might be a module_instantiation
-  if (node.type === 'call_expression' && type === 'module_instantiation') {
+  // Special case for accessor_expression which might be a module_instantiation
+  if (node.type === 'accessor_expression' && type === 'module_instantiation') {
     return node;
   }
 
-  // Special case for expression_statement which might contain a call_expression
+  // Special case for expression_statement which might contain an accessor_expression
   if (node.type === 'expression_statement' && type === 'module_instantiation') {
     const expression = node.firstChild;
-    if (expression && expression.type === 'call_expression') {
-      return expression;
+    if (expression) {
+      const accessorExpression = findDescendantOfType(expression, 'accessor_expression');
+      if (accessorExpression) {
+        return accessorExpression;
+      }
     }
   }
 

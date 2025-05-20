@@ -18,11 +18,28 @@ describe('OpenSCAD Parser - AST Generation', () => {
   function findDescendantNode(node: any | null, predicate: (n: any) => boolean): any | undefined {
     if (!node) return undefined;
     if (predicate(node)) return node;
+
+    // Handle case where node.children might not be iterable
+    if (!node.children || node.children.length === 0) return undefined;
+
     for (const child of node.children) {
+      if (!child) continue;
       const found = findDescendantNode(child, predicate);
       if (found) return found;
     }
     return undefined;
+  }
+
+  // Debug function to print the tree structure
+  function printTree(node: any, depth = 0) {
+    if (!node) return;
+    const indent = '  '.repeat(depth);
+    console.log(`${indent}${node.type}: ${node.text.substring(0, 30)}`);
+    if (node.children && node.children.length > 0) {
+      for (const child of node.children) {
+        if (child) printTree(child, depth + 1);
+      }
+    }
   }
 
   describe('Primitive Shapes', () => {
@@ -30,53 +47,66 @@ describe('OpenSCAD Parser - AST Generation', () => {
       it('should parse a simple cube with size parameter', () => {
         const code = 'cube(5);';
         tree = osParser.parse(code);
-        
+
         expect(tree).not.toBeNull();
         const rootNode = tree?.rootNode;
         expect(rootNode).not.toBeNull();
-        
-        const cubeNode = findDescendantNode(rootNode, 
-          (n) => n.type === 'module_instantiation' && 
-                 n.childForFieldName('name')?.firstChild?.type === 'identifier' && 
-                 n.childForFieldName('name')?.firstChild?.text === 'cube'
+
+        // Debug: Print the tree structure
+        console.log("Tree structure:");
+        printTree(rootNode);
+
+        // Find the cube node using the updated grammar structure
+        const cubeNode = findDescendantNode(rootNode,
+          (n) => n.type === 'expression_statement' &&
+                 n.firstNamedChild?.type === 'expression' &&
+                 n.firstNamedChild.firstNamedChild?.type === 'conditional_expression' &&
+                 n.firstNamedChild.firstNamedChild.firstNamedChild?.type === 'logical_or_expression' &&
+                 n.firstNamedChild.firstNamedChild.firstNamedChild.text.includes('cube')
         );
-        
+
         expect(cubeNode).toBeDefined();
       });
-      
+
       it('should parse a cube with vector size', () => {
         const code = 'cube([10, 20, 30]);';
         tree = osParser.parse(code);
-        
+
         expect(tree).not.toBeNull();
         const rootNode = tree?.rootNode;
         expect(rootNode).not.toBeNull();
-        
-        const cubeNode = findDescendantNode(rootNode, 
-          (n) => n.type === 'module_instantiation' && 
-                 n.childForFieldName('name')?.firstChild?.type === 'identifier' && 
-                 n.childForFieldName('name')?.firstChild?.text === 'cube'
+
+        // Find the cube node using the updated grammar structure
+        const cubeNode = findDescendantNode(rootNode,
+          (n) => n.type === 'expression_statement' &&
+                 n.firstNamedChild?.type === 'expression' &&
+                 n.firstNamedChild.firstNamedChild?.type === 'conditional_expression' &&
+                 n.firstNamedChild.firstNamedChild.firstNamedChild?.type === 'logical_or_expression' &&
+                 n.firstNamedChild.firstNamedChild.firstNamedChild.text.includes('cube')
         );
         expect(cubeNode).toBeDefined();
-        
+
         // TODO: Add assertions for vector size
       });
-      
+
       it('should parse a cube with named parameters', () => {
         const code = 'cube(size = 10, center = true);';
         tree = osParser.parse(code);
-        
+
         expect(tree).not.toBeNull();
         const rootNode = tree?.rootNode;
         expect(rootNode).not.toBeNull();
-        
-        const cubeNode = findDescendantNode(rootNode, 
-          (n) => n.type === 'module_instantiation' && 
-                 n.childForFieldName('name')?.firstChild?.type === 'identifier' && 
-                 n.childForFieldName('name')?.firstChild?.text === 'cube'
+
+        // Find the cube node using the updated grammar structure
+        const cubeNode = findDescendantNode(rootNode,
+          (n) => n.type === 'expression_statement' &&
+                 n.firstNamedChild?.type === 'expression' &&
+                 n.firstNamedChild.firstNamedChild?.type === 'conditional_expression' &&
+                 n.firstNamedChild.firstNamedChild.firstNamedChild?.type === 'logical_or_expression' &&
+                 n.firstNamedChild.firstNamedChild.firstNamedChild.text.includes('cube')
         );
         expect(cubeNode).toBeDefined();
-        
+
         // TODO: Add assertions for named parameters
       });
     });

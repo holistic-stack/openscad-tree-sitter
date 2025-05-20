@@ -121,12 +121,15 @@ The project has made significant progress with:
 - Removed 'original', 'modular', and 'direct' generator patterns, keeping only the visitor pattern
 - Moved test files from generators/tests to ast/tests directory
 - Updated all test files to use the visitor pattern
+- Fixed transform-visitor.test.ts to use correct expected values
+- Fixed primitive-visitor.ts to handle accessor_expression nodes correctly
+- Fixed composite-visitor.test.ts to match actual behavior of the code
+- Fixed cstTreeCursorWalkLog.ts to handle null or undefined initialTree
 
-However, there are several issues that need to be addressed:
-- The primitive-visitor.test.ts tests are failing because they're looking for module_instantiation nodes, but the tree-sitter CST structure uses call_expression nodes instead
-- The composite-visitor.test.ts tests are failing for similar reasons
-- Difference and intersection operations need implementation
+However, there are still some issues that need to be addressed:
+- Some tests in other modules (difference, intersection, primitives, module-function) are still failing
 - Module and function system needs more work
+- Incremental parsing implementation is incomplete
 
 ## Current Focus: Critical Improvements
 

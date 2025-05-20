@@ -1,4 +1,4 @@
-import { OpenscadParser } from '../../../openscad-parser';
+import { OpenscadParser } from '../../openscad-parser';
 import { afterAll, beforeAll, describe, it, expect } from 'vitest';
 
 describe('Module and Function AST Generation', () => {

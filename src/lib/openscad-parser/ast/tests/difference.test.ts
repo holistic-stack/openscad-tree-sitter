@@ -1,4 +1,4 @@
-import { OpenscadParser } from '../../../openscad-parser';
+import { OpenscadParser } from '../../openscad-parser';
 import { afterAll, beforeAll, describe, it, expect } from 'vitest';
 
 describe('Difference AST Generation', () => {
@@ -26,13 +26,13 @@ describe('Difference AST Generation', () => {
 
       const differenceNode = ast[0];
       expect(differenceNode.type).toBe('difference');
-      
+
       // Check children
       expect((differenceNode as any).children).toHaveLength(2);
       expect((differenceNode as any).children[0].type).toBe('cube');
       expect((differenceNode as any).children[0].size).toBe(10);
       expect((differenceNode as any).children[0].center).toBe(true);
-      
+
       expect((differenceNode as any).children[1].type).toBe('sphere');
       expect((differenceNode as any).children[1].r).toBe(7);
     });
@@ -50,16 +50,16 @@ describe('Difference AST Generation', () => {
 
       const differenceNode = ast[0];
       expect(differenceNode.type).toBe('difference');
-      
+
       // Check children
       expect((differenceNode as any).children).toHaveLength(3);
       expect((differenceNode as any).children[0].type).toBe('cube');
       expect((differenceNode as any).children[0].size).toBe(10);
       expect((differenceNode as any).children[0].center).toBe(true);
-      
+
       expect((differenceNode as any).children[1].type).toBe('sphere');
       expect((differenceNode as any).children[1].r).toBe(7);
-      
+
       expect((differenceNode as any).children[2].type).toBe('translate');
       expect((differenceNode as any).children[2].v).toEqual([0, 0, 10]);
       expect((differenceNode as any).children[2].children[0].type).toBe('cylinder');
@@ -79,7 +79,7 @@ describe('Difference AST Generation', () => {
 
       const differenceNode = ast[0];
       expect(differenceNode.type).toBe('difference');
-      
+
       // Check children
       expect((differenceNode as any).children).toHaveLength(1);
       expect((differenceNode as any).children[0].type).toBe('cube');
@@ -95,7 +95,7 @@ describe('Difference AST Generation', () => {
 
       const differenceNode = ast[0];
       expect(differenceNode.type).toBe('difference');
-      
+
       // Check children
       expect((differenceNode as any).children).toHaveLength(0);
     });

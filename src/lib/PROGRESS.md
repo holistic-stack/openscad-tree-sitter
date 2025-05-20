@@ -214,18 +214,21 @@ See [TODO.md](./TODO.md) for detailed next steps and implementation tasks.
 - Moved test files from generators/tests to ast/tests directory
 - Updated all test files to use the visitor pattern
 
+### Recently Completed
+- Fixed primitive-visitor.ts to handle accessor_expression nodes correctly
+- Fixed composite-visitor.test.ts to match actual behavior of the code
+- Fixed transform-visitor.test.ts to use correct expected values
+- Fixed cstTreeCursorWalkLog.ts to handle null or undefined initialTree
+
 ### Current Issues
 - There are still failing tests in other modules (difference, intersection, primitives, module-function)
-- The primitive-visitor.test.ts tests are failing because they're looking for module_instantiation nodes, but the tree-sitter CST structure uses call_expression nodes instead
-- The composite-visitor.test.ts tests are failing for similar reasons
 
 ### Next Steps
-- Fix the primitive-visitor.test.ts tests to use the correct node types
-- Fix the composite-visitor.test.ts tests to use the correct node types
 - Fix the module and function tests
 - Implement module and function visitors
 - Implement control structure visitors
 - Add support for expression visitors
+- Complete incremental parsing implementation
 
 ## Known Issues
 

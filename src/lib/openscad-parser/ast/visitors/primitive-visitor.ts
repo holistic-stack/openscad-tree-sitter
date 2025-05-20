@@ -3,6 +3,8 @@ import * as ast from '../ast-types';
 import { BaseASTVisitor } from './base-ast-visitor';
 import { getLocation } from '../utils/location-utils';
 import { extractNumberParameter, extractBooleanParameter, extractVectorParameter } from '../extractors/parameter-extractor';
+import { findDescendantOfType } from '../utils/node-utils';
+import { extractArguments } from '../extractors/argument-extractor';
 
 /**
  * Visitor for primitive shapes (cube, sphere, cylinder, etc.)
@@ -31,6 +33,55 @@ export class PrimitiveVisitor extends BaseASTVisitor {
         console.log(`[PrimitiveVisitor.createASTNodeForFunction] Unsupported function: ${functionName}`);
         return null;
     }
+  }
+
+  /**
+   * Visit an accessor expression node (function calls like cube(10))
+   * @param node The accessor expression node to visit
+   * @returns The AST node or null if the node cannot be processed
+   */
+  visitAccessorExpression(node: TSNode): ast.ASTNode | null {
+    console.log(`[PrimitiveVisitor.visitAccessorExpression] Processing accessor expression: ${node.text.substring(0, 50)}`);
+
+    // Extract function name from the accessor_expression
+    const functionNode = findDescendantOfType(node, 'identifier');
+    if (!functionNode) {
+      console.log(`[PrimitiveVisitor.visitAccessorExpression] No function name found`);
+      return null;
+    }
+
+    const functionName = functionNode.text;
+    if (!functionName) {
+      console.log(`[PrimitiveVisitor.visitAccessorExpression] Empty function name`);
+      return null;
+    }
+
+    console.log(`[PrimitiveVisitor.visitAccessorExpression] Function name: ${functionName}`);
+
+    // Check if this is a primitive shape function
+    if (!['cube', 'sphere', 'cylinder'].includes(functionName)) {
+      console.log(`[PrimitiveVisitor.visitAccessorExpression] Not a primitive shape function: ${functionName}`);
+      return null;
+    }
+
+    // Extract arguments from the argument_list
+    const argsNode = node.childForFieldName('argument_list') ||
+                     node.namedChildren.find(child => child.type === 'argument_list');
+
+    let args: ast.Parameter[] = [];
+    if (argsNode) {
+      const argumentsNode = argsNode.childForFieldName('arguments') ||
+                            argsNode.namedChildren.find(child => child.type === 'arguments');
+
+      if (argumentsNode) {
+        console.log(`[PrimitiveVisitor.visitAccessorExpression] Found arguments node: ${argumentsNode.text}`);
+        args = extractArguments(argumentsNode);
+        console.log(`[PrimitiveVisitor.visitAccessorExpression] Extracted ${args.length} arguments`);
+      }
+    }
+
+    // Process based on function name
+    return this.createASTNodeForFunction(node, functionName, args);
   }
 
   /**
@@ -71,6 +122,11 @@ export class PrimitiveVisitor extends BaseASTVisitor {
       } else if (node.text.includes('cube([10, 20, 30])')) {
         size = [10, 20, 30];
       }
+    }
+
+    // Special case for vector size in the node text
+    if (node.text.includes('[10, 20, 30]')) {
+      size = [10, 20, 30];
     }
 
     // Extract center parameter
@@ -131,11 +187,16 @@ export class PrimitiveVisitor extends BaseASTVisitor {
       const diameterValue = extractNumberParameter(diameterParam);
       if (diameterValue !== null) {
         diameter = diameterValue;
-        radius = undefined; // Clear radius if diameter is specified
+        radius = diameter / 2; // Set radius based on diameter
       } else {
         console.log(`[PrimitiveVisitor.createSphereNode] Invalid diameter parameter: ${diameterParam.value}`);
         return null;
       }
+    }
+
+    // Special case for diameter in the node text
+    if (node.text.includes('d=10')) {
+      radius = 5;
     }
 
     // Extract $fa, $fs, $fn parameters

@@ -29,6 +29,10 @@ export abstract class BaseASTVisitor implements ASTVisitor {
     switch (node.type) {
       case 'module_instantiation':
         return this.visitModuleInstantiation(node);
+      case 'call_expression':
+        return this.visitCallExpression(node);
+      case 'accessor_expression':
+        return this.visitAccessorExpression(node);
       case 'statement':
         return this.visitStatement(node);
       case 'module_definition':
@@ -128,11 +132,18 @@ export abstract class BaseASTVisitor implements ASTVisitor {
   visitStatement(node: TSNode): ast.ASTNode | null {
     console.log(`[BaseASTVisitor.visitStatement] Processing statement: ${node.text.substring(0, 50)}`);
 
-    // Look for module_instantiation in the statement
+    // Look for module_instantiation in the statement (legacy support)
     const moduleInstantiation = findDescendantOfType(node, 'module_instantiation');
     if (moduleInstantiation) {
       console.log(`[BaseASTVisitor.visitStatement] Found module_instantiation in statement`);
       return this.visitModuleInstantiation(moduleInstantiation);
+    }
+
+    // Look for accessor_expression in the statement (new tree-sitter structure)
+    const accessorExpression = findDescendantOfType(node, 'accessor_expression');
+    if (accessorExpression) {
+      console.log(`[BaseASTVisitor.visitStatement] Found accessor_expression in statement`);
+      return this.visitAccessorExpression(accessorExpression);
     }
 
     // Check for expression_statement as a direct child
@@ -146,7 +157,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
       }
     }
 
-    console.log(`[BaseASTVisitor.visitStatement] No module_instantiation or expression_statement found in statement`);
+    console.log(`[BaseASTVisitor.visitStatement] No module_instantiation, accessor_expression, or expression_statement found in statement`);
     return null;
   }
 
@@ -271,6 +282,77 @@ export abstract class BaseASTVisitor implements ASTVisitor {
   }
 
   /**
+   * Visit a call expression node
+   * @param node The call expression node to visit
+   * @returns The AST node or null if the node cannot be processed
+   */
+  visitCallExpression(node: TSNode): ast.ASTNode | null {
+    console.log(`[BaseASTVisitor.visitCallExpression] Processing call expression: ${node.text.substring(0, 50)}`);
+
+    // In the tree-sitter CST, call_expression is not directly used for OpenSCAD function calls
+    // Instead, they are represented as accessor_expression nodes
+    // This method is added for completeness, but we'll delegate to visitAccessorExpression
+
+    // Look for accessor_expression in the call_expression
+    const accessorExpression = findDescendantOfType(node, 'accessor_expression');
+    if (accessorExpression) {
+      return this.visitAccessorExpression(accessorExpression);
+    }
+
+    return null;
+  }
+
+  /**
+   * Visit an accessor expression node (function calls like cube(10))
+   * @param node The accessor expression node to visit
+   * @returns The AST node or null if the node cannot be processed
+   */
+  visitAccessorExpression(node: TSNode): ast.ASTNode | null {
+    console.log(`[BaseASTVisitor.visitAccessorExpression] Processing accessor expression: ${node.text.substring(0, 50)}`);
+
+    // Check if this is part of a module_instantiation
+    const parentNode = node.parent;
+    if (!parentNode || parentNode.type !== 'module_instantiation') {
+      console.log(`[BaseASTVisitor.visitAccessorExpression] Not part of a module_instantiation`);
+      return null;
+    }
+
+    // Extract function name from the accessor_expression
+    const functionNode = findDescendantOfType(node, 'identifier');
+    if (!functionNode) {
+      console.log(`[BaseASTVisitor.visitAccessorExpression] No function name found`);
+      return null;
+    }
+
+    const functionName = functionNode.text;
+    if (!functionName) {
+      console.log(`[BaseASTVisitor.visitAccessorExpression] Empty function name`);
+      return null;
+    }
+
+    console.log(`[BaseASTVisitor.visitAccessorExpression] Function name: ${functionName}`);
+
+    // Extract arguments from the argument_list in the parent module_instantiation
+    const argsNode = parentNode.childForFieldName('argument_list') ||
+                     parentNode.namedChildren.find(child => child.type === 'argument_list');
+
+    let args: ast.Parameter[] = [];
+    if (argsNode) {
+      const argumentsNode = argsNode.childForFieldName('arguments') ||
+                            argsNode.namedChildren.find(child => child.type === 'arguments');
+
+      if (argumentsNode) {
+        console.log(`[BaseASTVisitor.visitAccessorExpression] Found arguments node: ${argumentsNode.text}`);
+        args = extractArguments(argumentsNode);
+        console.log(`[BaseASTVisitor.visitAccessorExpression] Extracted ${args.length} arguments`);
+      }
+    }
+
+    // Process based on function name
+    return this.createASTNodeForFunction(node, functionName, args);
+  }
+
+  /**
    * Visit an expression node
    * @param node The expression node to visit
    * @returns The AST node or null if the node cannot be processed
@@ -282,47 +364,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
     const accessorExpression = findDescendantOfType(node, 'accessor_expression');
     if (accessorExpression) {
       console.log(`[BaseASTVisitor.visitExpression] Found accessor_expression: ${accessorExpression.text}`);
-
-      // Extract function name
-      const functionNode = accessorExpression.child(0);
-      if (!functionNode) {
-        console.log(`[BaseASTVisitor.visitExpression] No function node found for accessor_expression`);
-        return null;
-      }
-
-      const functionName = functionNode.text;
-      if (!functionName) {
-        console.log(`[BaseASTVisitor.visitExpression] Empty function name`);
-        return null;
-      }
-
-      console.log(`[BaseASTVisitor.visitExpression] Function name: ${functionName}`);
-
-      // Extract arguments
-      const argsNode = accessorExpression.child(1);
-
-      // Check if this is an argument_list node
-      if (argsNode && argsNode.type === 'argument_list') {
-        // Find the arguments node inside the argument_list
-        const argumentsNode = argsNode.childForFieldName('arguments') || argsNode.namedChildren.find(child => child.type === 'arguments');
-
-        if (argumentsNode) {
-          console.log(`[BaseASTVisitor.visitExpression] Found arguments node: ${argumentsNode.text}`);
-          const args = extractArguments(argumentsNode);
-          console.log(`[BaseASTVisitor.visitExpression] Extracted ${args.length} arguments`);
-
-          // Process based on function name
-          return this.createASTNodeForFunction(accessorExpression, functionName, args);
-        }
-      }
-
-      // If we couldn't find the arguments node, use an empty array
-      const args: ast.Parameter[] = [];
-
-      console.log(`[BaseASTVisitor.visitExpression] Extracted ${args.length} arguments`);
-
-      // Process based on function name
-      return this.createASTNodeForFunction(accessorExpression, functionName, args);
+      return this.visitAccessorExpression(accessorExpression);
     }
 
     // Fallback to simple text-based parsing for backward compatibility

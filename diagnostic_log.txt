@@ -13,9 +13,9 @@ Root node from tree.rootNode (simplified):
 
 === Full CST Tree Walk (translate test) ===
 
-source_file (field: child) [0,0 → 2,6]: 'translate([10, 20, 30])\n          cube(10);\n    ' (named: true)
-  statement (field: child) [0,0 → 1,19]: 'translate([10, 20, 30])\n          cube(10);' (named: true)
-    module_instantiation (field: child) [0,0 → 1,19]: 'translate([10, 20, 30])\n          cube(10);' (named: true)
+source_file (field: child) [0,0 → 2,6]: 'translate([10, 20, 30])\n          cube(10);\n ...' (named: true)
+  statement (field: child) [0,0 → 1,19]: 'translate([10, 20, 30])\n          cube(10);...' (named: true)
+    module_instantiation (field: child) [0,0 → 1,19]: 'translate([10, 20, 30])\n          cube(10);...' (named: true)
       accessor_expression (field: name) [0,0 → 0,9]: 'translate' (named: true)
         primary_expression (field: child) [0,0 → 0,9]: 'translate' (named: true)
           identifier (field: child) [0,0 → 0,9]: 'translate' (named: true)
