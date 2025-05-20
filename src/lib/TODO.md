@@ -118,22 +118,22 @@
   - [x] Scale with vector parameter
   - [x] Scale with scalar parameter (uniform)
 
-- [ ] **Mirror**
-  - [ ] Mirror with normal vector parameter
+- [x] **Mirror**
+  - [x] Mirror with normal vector parameter
 
-- [ ] **Multmatrix**
-  - [ ] Multmatrix with 4x4 transformation matrix
+- [x] **Multmatrix**
+  - [x] Multmatrix with 4x4 transformation matrix
 
-- [ ] **Color**
-  - [ ] Color with name parameter
-  - [ ] Color with hex value
-  - [ ] Color with rgb/rgba vector
-  - [ ] Color with alpha parameter
+- [x] **Color**
+  - [x] Color with name parameter
+  - [x] Color with hex value
+  - [x] Color with rgb/rgba vector
+  - [x] Color with alpha parameter
 
-- [ ] **Offset**
-  - [ ] Offset with r parameter
-  - [ ] Offset with delta parameter
-  - [ ] Offset with chamfer parameter
+- [x] **Offset**
+  - [x] Offset with r parameter
+  - [x] Offset with delta parameter
+  - [x] Offset with chamfer parameter
 
 #### 4.3 Boolean Operations
 - [x] **Union**
@@ -145,11 +145,11 @@
 - [x] **Intersection**
   - [x] Basic intersection of multiple children
 
-- [ ] **Hull**
-  - [ ] Hull of multiple children
+- [x] **Hull**
+  - [x] Hull of multiple children
 
-- [ ] **Minkowski**
-  - [ ] Minkowski sum of multiple children
+- [x] **Minkowski**
+  - [x] Minkowski sum of multiple children
 
 #### 4.4 Control Structures
 - [ ] **Conditional Statements**
@@ -500,7 +500,7 @@
       }
       ```
 
-    - [ ] Hull syntax variations
+    - [x] Hull syntax variations
       ```scad
       // Hull of multiple children
       hull() {
@@ -513,9 +513,29 @@
         cube(10, center=true);
         translate([20, 0, 0]) cylinder(h=10, r=5, center=true);
       }
+
+      // Hull with a single child
+      hull() {
+        sphere(10);
+      }
+
+      // Hull with nested operations
+      hull() {
+        union() {
+          cube(5);
+          translate([10, 0, 0]) cube(5);
+        }
+        translate([0, 10, 0]) sphere(5);
+      }
+
+      // Hull with 2D objects
+      hull() {
+        circle(5);
+        translate([10, 0, 0]) square(10);
+      }
       ```
 
-    - [ ] Minkowski syntax variations
+    - [x] Minkowski syntax variations
       ```scad
       // Minkowski sum of multiple children
       minkowski() {
@@ -527,6 +547,26 @@
       minkowski() {
         cube([10, 10, 10], center=true);
         sphere(2);
+      }
+
+      // Minkowski with a single child
+      minkowski() {
+        cube(10);
+      }
+
+      // Minkowski with nested operations
+      minkowski() {
+        difference() {
+          cube(10, center=true);
+          sphere(4);
+        }
+        sphere(1);
+      }
+
+      // Minkowski with 2D objects
+      minkowski() {
+        square(10);
+        circle(2);
       }
       ```
 

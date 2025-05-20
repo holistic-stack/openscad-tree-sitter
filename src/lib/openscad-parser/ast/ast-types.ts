@@ -342,6 +342,17 @@ export interface RotateExtrudeNode extends BaseNode {
 }
 
 /**
+ * Represents an offset node
+ */
+export interface OffsetNode extends BaseNode {
+  type: 'offset';
+  r: number;
+  delta: number;
+  chamfer: boolean;
+  children: ASTNode[];
+}
+
+/**
  * Represents an if statement
  */
 export interface IfNode extends BaseNode {
@@ -500,4 +511,5 @@ export type ASTNode =
   | FunctionDefinitionNode
   | ChildrenNode
   | LinearExtrudeNode
-  | RotateExtrudeNode;
+  | RotateExtrudeNode
+  | OffsetNode;

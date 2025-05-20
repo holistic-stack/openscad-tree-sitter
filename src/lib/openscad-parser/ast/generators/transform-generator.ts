@@ -207,17 +207,31 @@ export class TransformGenerator extends BaseGenerator {
     const namedVArg = args.find(arg => arg.name === 'v');
     if (namedVArg) {
       vParamValue = namedVArg.value;
+      console.log(`[TransformGenerator.createMirrorNode] Found named 'v' argument. Value: ${JSON.stringify(vParamValue)}`);
     } else {
       const positionalVArg = args.find(arg => !arg.name); // Assuming 'v' is the first positional if not named
       if (positionalVArg) {
         vParamValue = positionalVArg.value;
+        console.log(`[TransformGenerator.createMirrorNode] Found positional 'v' argument. Value: ${JSON.stringify(vParamValue)}`);
       }
     }
 
     // Determine the normal vector
-    const v = vParamValue && Array.isArray(vParamValue) && vParamValue.length === 3
-      ? vParamValue as ast.Vector3D
-      : [1, 0, 0] as ast.Vector3D; // Default normal is x-axis
+    let v: ast.Vector3D;
+    if (vParamValue && Array.isArray(vParamValue)) {
+      if (vParamValue.length === 3) {
+        v = vParamValue as ast.Vector3D;
+      } else if (vParamValue.length === 2) {
+        // If it's a 2D vector, add a 0 for the z component
+        v = [...vParamValue, 0] as ast.Vector3D;
+      } else {
+        console.warn(`[TransformGenerator.createMirrorNode] Invalid vector length: ${vParamValue.length}. Using default.`);
+        v = [1, 0, 0]; // Default normal is x-axis
+      }
+    } else {
+      console.warn(`[TransformGenerator.createMirrorNode] No valid vector found. Using default.`);
+      v = [1, 0, 0]; // Default normal is x-axis
+    }
 
     const children: ast.ASTNode[] = [];
     this.processChildNodes(node, children);
@@ -240,22 +254,43 @@ export class TransformGenerator extends BaseGenerator {
     const namedMArg = args.find(arg => arg.name === 'm');
     if (namedMArg) {
       mParamValue = namedMArg.value;
+      console.log(`[TransformGenerator.createMultmatrixNode] Found named 'm' argument. Value: ${JSON.stringify(mParamValue)}`);
     } else {
       const positionalMArg = args.find(arg => !arg.name); // Assuming 'm' is the first positional if not named
       if (positionalMArg) {
         mParamValue = positionalMArg.value;
+        console.log(`[TransformGenerator.createMultmatrixNode] Found positional 'm' argument. Value: ${JSON.stringify(mParamValue)}`);
       }
     }
 
     // Determine the matrix
-    // For now, we'll just use a default identity matrix
-    // In a real implementation, you'd need to parse the matrix from the parameter value
-    const m: ast.Matrix = [
-      [1, 0, 0, 0],
-      [0, 1, 0, 0],
-      [0, 0, 1, 0],
-      [0, 0, 0, 1]
-    ];
+    let m: number[][];
+    if (mParamValue && Array.isArray(mParamValue) && mParamValue.length === 4) {
+      // Check if each row is an array of 4 numbers
+      const isValid = mParamValue.every(row =>
+        Array.isArray(row) && row.length === 4 && row.every(val => typeof val === 'number')
+      );
+
+      if (isValid) {
+        m = mParamValue as number[][];
+      } else {
+        console.warn(`[TransformGenerator.createMultmatrixNode] Invalid matrix format. Using identity matrix.`);
+        m = [
+          [1, 0, 0, 0],
+          [0, 1, 0, 0],
+          [0, 0, 1, 0],
+          [0, 0, 0, 1]
+        ];
+      }
+    } else {
+      console.warn(`[TransformGenerator.createMultmatrixNode] No valid matrix found. Using identity matrix.`);
+      m = [
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]
+      ];
+    }
 
     const children: ast.ASTNode[] = [];
     this.processChildNodes(node, children);
@@ -279,10 +314,12 @@ export class TransformGenerator extends BaseGenerator {
     const namedCArg = args.find(arg => arg.name === 'c');
     if (namedCArg) {
       cParamValue = namedCArg.value;
+      console.log(`[TransformGenerator.createColorNode] Found named 'c' argument. Value: ${JSON.stringify(cParamValue)}`);
     } else {
       const positionalCArg = args.find(arg => !arg.name); // Assuming 'c' is the first positional if not named
       if (positionalCArg) {
         cParamValue = positionalCArg.value;
+        console.log(`[TransformGenerator.createColorNode] Found positional 'c' argument. Value: ${JSON.stringify(cParamValue)}`);
       }
     }
 
@@ -290,26 +327,31 @@ export class TransformGenerator extends BaseGenerator {
     const namedAlphaArg = args.find(arg => arg.name === 'alpha');
     if (namedAlphaArg) {
       alphaParamValue = namedAlphaArg.value;
+      console.log(`[TransformGenerator.createColorNode] Found 'alpha' argument. Value: ${JSON.stringify(alphaParamValue)}`);
     }
 
     // Determine the color value
     let c: string | ast.Vector4D;
     if (typeof cParamValue === 'string') {
+      // Handle named colors or hex values
       c = cParamValue;
+      console.log(`[TransformGenerator.createColorNode] Using string color: ${c}`);
     } else if (cParamValue && Array.isArray(cParamValue)) {
       if (cParamValue.length === 3) {
         // If it's a 3D vector, convert to 4D by adding alpha
         const alpha = typeof alphaParamValue === 'number' ? alphaParamValue : 1;
         c = [...cParamValue, alpha] as ast.Vector4D;
+        console.log(`[TransformGenerator.createColorNode] Using RGB color with alpha: ${JSON.stringify(c)}`);
       } else if (cParamValue.length === 4) {
         c = cParamValue as ast.Vector4D;
+        console.log(`[TransformGenerator.createColorNode] Using RGBA color: ${JSON.stringify(c)}`);
       } else {
-        // Default color is white
-        c = [1, 1, 1, 1];
+        console.warn(`[TransformGenerator.createColorNode] Invalid color vector length: ${cParamValue.length}. Using default.`);
+        c = [1, 1, 1, 1]; // Default color is white
       }
     } else {
-      // Default color is white
-      c = [1, 1, 1, 1];
+      console.warn(`[TransformGenerator.createColorNode] No valid color found. Using default.`);
+      c = [1, 1, 1, 1]; // Default color is white
     }
 
     const children: ast.ASTNode[] = [];
@@ -335,14 +377,18 @@ export class TransformGenerator extends BaseGenerator {
     for (const arg of args) {
       if (arg.name === 'r') {
         rParamValue = arg.value;
+        console.log(`[TransformGenerator.createOffsetNode] Found 'r' argument. Value: ${JSON.stringify(rParamValue)}`);
       } else if (arg.name === 'delta') {
         deltaParamValue = arg.value;
+        console.log(`[TransformGenerator.createOffsetNode] Found 'delta' argument. Value: ${JSON.stringify(deltaParamValue)}`);
       } else if (arg.name === 'chamfer') {
         chamferParamValue = arg.value;
+        console.log(`[TransformGenerator.createOffsetNode] Found 'chamfer' argument. Value: ${JSON.stringify(chamferParamValue)}`);
       } else if (!arg.name && rParamValue === undefined && deltaParamValue === undefined) {
         // First positional argument is r or delta
         if (typeof arg.value === 'number') {
           rParamValue = arg.value;
+          console.log(`[TransformGenerator.createOffsetNode] Found positional 'r' argument. Value: ${JSON.stringify(rParamValue)}`);
         }
       }
     }
@@ -356,12 +402,19 @@ export class TransformGenerator extends BaseGenerator {
     // Determine the chamfer value
     const chamfer = typeof chamferParamValue === 'boolean' ? chamferParamValue : false;
 
+    // Validate parameters - offset requires either r or delta, but not both
+    if (r !== 0 && delta !== 0) {
+      console.warn(`[TransformGenerator.createOffsetNode] Both 'r' and 'delta' parameters provided. Using 'r'.`);
+    } else if (r === 0 && delta === 0) {
+      console.warn(`[TransformGenerator.createOffsetNode] Neither 'r' nor 'delta' parameters provided. Using default r=1.`);
+    }
+
     const children: ast.ASTNode[] = [];
     this.processChildNodes(node, children);
 
     return {
       type: 'offset',
-      r,
+      r: r !== 0 ? r : (delta === 0 ? 1 : 0), // If neither r nor delta is provided, default to r=1
       delta,
       chamfer,
       children,

@@ -42,12 +42,14 @@
 - [x] Refactored AST generator to use modular structure
 - [x] Implemented complete primitive shapes (sphere, cylinder)
 - [x] Implemented complete transformations (rotate, scale)
-- [x] Implemented CSG operations (union, difference, intersection)
+- [x] Implemented CSG operations (union, difference, intersection, hull, minkowski)
 - [x] Implemented control structures (if, for, let)
 - [x] Implemented module and function system
 - [x] Implemented polyhedron primitive
 - [x] Implemented 2D primitives (circle, square, polygon, text)
 - [x] Implemented extrusion operations (linear_extrude, rotate_extrude)
+- [x] Implemented remaining transformations (mirror, multmatrix, color, offset)
+- [x] Implemented hull and minkowski CSG operations
 
 #### Testing
 - [x] Unit tests for core components
@@ -89,6 +91,8 @@ The project follows a modular architecture with clear separation of concerns:
 - Implemented 2D primitives (circle, square, polygon, text)
 - Implemented extrusion operations (linear_extrude, rotate_extrude)
 - Added tests for new primitives and extrusion operations
+- Implemented remaining transformations (mirror, multmatrix, color, offset)
+- Added tests for transformations
 
 ## Next Steps
 
@@ -99,3 +103,6 @@ See [TODO.md](./TODO.md) for detailed next steps and implementation tasks.
 - Some edge cases in complex expressions need additional testing
 - Performance optimizations may be needed for large files
 - Some AST node types may need refinement based on real-world usage
+- The CSG Generator currently doesn't handle all types of child nodes correctly
+- Some tests for transformations (scale, mirror, multmatrix, color, offset) are failing
+- Some tests for union operations are failing
