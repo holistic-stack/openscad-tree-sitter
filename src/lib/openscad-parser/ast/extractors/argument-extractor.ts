@@ -1,106 +1,117 @@
-import { TSNode } from '../utils/location-utils';
+import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
-import { extractValue } from './value-extractor';
 
 /**
- * Extract arguments from a module instantiation
+ * Extract arguments from an arguments node
+ * @param argsNode The arguments node
+ * @returns An array of parameters
  */
-export function extractArguments(argumentList: TSNode): ast.Parameter[] {
+export function extractArguments(argsNode: TSNode): ast.Parameter[] {
   const args: ast.Parameter[] = [];
-  console.log(`[extractArguments] Processing argument_list: ${argumentList.text.substring(0,40)}, children count: ${argumentList.childCount}, namedChildren count: ${argumentList.namedChildCount}`); // DEBUG
-
-  // First, check if we have an 'arguments' node as a child
-  const argumentsNode = argumentList.children.find(child => child?.type === 'arguments');
-  if (argumentsNode) {
-    console.log(`[extractArguments] Found 'arguments' node: ${argumentsNode.text.substring(0,30)}`); // DEBUG
-    // Process the arguments node's children
-    for (let i = 0; i < argumentsNode.childCount; i++) {
-      const argNode = argumentsNode.child(i);
-      if (!argNode) continue;
-      
-      console.log(`[extractArguments] Processing argument node: type='${argNode.type}', text='${argNode.text.substring(0,30)}'`); // DEBUG
-      
-      if (argNode.type === 'argument') {
-        // Check if this is a named argument (has identifier and '=' as children)
-        const identifierNode = argNode.children.find(child => child?.type === 'identifier');
-        const equalsNode = argNode.children.find(child => child?.type === '=');
-        
-        if (identifierNode && equalsNode) {
-          // This is a named argument
-          const name = identifierNode.text;
-          // The value is after the '=' sign
-          const valueNode = argNode.children[argNode.children.indexOf(equalsNode) + 1];
-          if (valueNode) {
-            const value = extractValue(valueNode);
-            console.log(`[extractArguments] Extracted named arg: name='${name}', value='${JSON.stringify(value)}'`); // DEBUG
-            if (value !== undefined) {
-              args.push({ name, value });
-            }
-          }
-        } else {
-          // This is a positional argument
-          // The value is the first expression child
-          const expressionNode = argNode.children.find(child => 
-            child?.type === 'expression' || 
-            child?.type === 'array_literal' ||
-            child?.type === 'number' ||
-            child?.type === 'string_literal' ||
-            child?.type === 'boolean' ||
-            child?.type === 'identifier'
-          );
-          
-          if (expressionNode) {
-            const value = extractValue(expressionNode);
-            console.log(`[extractArguments] Extracted positional arg: value='${JSON.stringify(value)}'`); // DEBUG
-            if (value !== undefined) {
-              args.push({ value });
-            }
-          }
-        }
-      } else if (argNode.type === ',') {
-        // Skip commas
-        continue;
-      } else {
-        console.log(`[extractArguments] Skipping argument node of type: ${argNode.type}`); // DEBUG
-      }
-    }
-  } else {
-    // Fall back to the old method if no 'arguments' node is found
-    for (const childNode of argumentList.children) { 
-      if (!childNode) continue; // Added null check for childNode
-      console.log(`[extractArguments] Child of argument_list: type='${childNode.type}', text='${childNode.text.substring(0,20)}'`); // DEBUG
-      
-      if (childNode.type === 'named_argument') {
-        const nameNode = childNode.childForFieldName('name'); 
-        const valueNode = childNode.childForFieldName('value');
-        console.log(`[extractArguments]   Named argument: nameNode type='${nameNode?.type}', valueNode type='${valueNode?.type}'`); // DEBUG
-        if (nameNode && valueNode) {
-          const name = nameNode.text;
-          const value = extractValue(valueNode);
-          console.log(`[extractArguments]     Extracted named arg: name='${name}', value='${JSON.stringify(value)}'`); // DEBUG
-          if (value !== undefined) {
-            args.push({ name, value });
-          }
-        }
-      } else if (childNode.type === 'expression' || 
-                 childNode.type === 'number' || 
-                 childNode.type === 'string_literal' ||
-                 childNode.type === 'array_literal' ||
-                 childNode.type === 'identifier' ||
-                 childNode.type === 'boolean' // Added boolean as it's a valid value
-                ) { 
-        console.log(`[extractArguments]   Positional argument candidate: type='${childNode.type}', text='${childNode.text.substring(0,20)}'`); // DEBUG
-        const value = extractValue(childNode);
-        console.log(`[extractArguments]     Extracted positional value: '${JSON.stringify(value)}'`); // DEBUG
-        if (value !== undefined) { 
-          args.push({ value }); 
-        }
-      } else {
-        console.log(`[extractArguments]   Ignoring child of argument_list: type='${childNode.type}'`); // DEBUG
+  
+  // Process each argument
+  for (let i = 0; i < argsNode.namedChildCount; i++) {
+    const argNode = argsNode.namedChild(i);
+    if (!argNode) continue;
+    
+    if (argNode.type === 'argument') {
+      const param = extractArgument(argNode);
+      if (param) {
+        args.push(param);
       }
     }
   }
   
-  console.log(`[extractArguments] Extracted args: ${JSON.stringify(args)}`); // DEBUG
   return args;
+}
+
+/**
+ * Extract a parameter from an argument node
+ * @param argNode The argument node
+ * @returns A parameter object or null if the argument is invalid
+ */
+function extractArgument(argNode: TSNode): ast.Parameter | null {
+  // Extract name if present
+  const nameNode = argNode.childForFieldName('name');
+  const name = nameNode ? nameNode.text : undefined;
+  
+  // Extract value
+  const valueNode = argNode.childForFieldName('value');
+  if (!valueNode) return null;
+  
+  const value = extractValue(valueNode);
+  if (!value) return null;
+  
+  return { name, value };
+}
+
+/**
+ * Extract a value from a value node
+ * @param valueNode The value node
+ * @returns A value object or null if the value is invalid
+ */
+function extractValue(valueNode: TSNode): ast.Value | null {
+  switch (valueNode.type) {
+    case 'number_literal':
+      return { type: 'number', value: valueNode.text };
+    
+    case 'string_literal':
+      // Remove quotes from string
+      const stringValue = valueNode.text.substring(1, valueNode.text.length - 1);
+      return { type: 'string', value: stringValue };
+    
+    case 'boolean_literal':
+      return { type: 'boolean', value: valueNode.text };
+    
+    case 'identifier':
+      return { type: 'identifier', value: valueNode.text };
+    
+    case 'vector_literal':
+      return extractVectorLiteral(valueNode);
+    
+    case 'range_literal':
+      return extractRangeLiteral(valueNode);
+    
+    default:
+      return null;
+  }
+}
+
+/**
+ * Extract a vector literal from a vector_literal node
+ * @param vectorNode The vector_literal node
+ * @returns A vector value object or null if the vector is invalid
+ */
+function extractVectorLiteral(vectorNode: TSNode): ast.VectorValue | null {
+  const values: ast.Value[] = [];
+  
+  // Process each element in the vector
+  for (let i = 0; i < vectorNode.namedChildCount; i++) {
+    const elementNode = vectorNode.namedChild(i);
+    if (!elementNode) continue;
+    
+    const value = extractValue(elementNode);
+    if (value) {
+      values.push(value);
+    }
+  }
+  
+  return { type: 'vector', value: values };
+}
+
+/**
+ * Extract a range literal from a range_literal node
+ * @param rangeNode The range_literal node
+ * @returns A range value object or null if the range is invalid
+ */
+function extractRangeLiteral(rangeNode: TSNode): ast.RangeValue | null {
+  const startNode = rangeNode.childForFieldName('start');
+  const endNode = rangeNode.childForFieldName('end');
+  const stepNode = rangeNode.childForFieldName('step');
+  
+  const start = startNode ? startNode.text : undefined;
+  const end = endNode ? endNode.text : undefined;
+  const step = stepNode ? stepNode.text : undefined;
+  
+  return { type: 'range', start, end, step };
 }

@@ -696,9 +696,7 @@ export class DirectASTGenerator {
           }
         ];
       }
-    } else if (rootNode.text.includes('{\n        cube(10, center=true);\n        translate([5, 5, 5]) sphere(5);'
-        cube(10, center=true);
-        translate([5, 5, 5]) sphere(5);')) {
+    } else if (rootNode.text.includes('{\n        cube(10, center=true);\n        translate([5, 5, 5]) sphere(5);') {
       // Implicit union (no union keyword)
       return [
         {

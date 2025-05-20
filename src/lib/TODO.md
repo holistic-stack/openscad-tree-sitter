@@ -1,5 +1,143 @@
 # OpenSCAD Tree-sitter Parser - TODO List
 
+## Top Priority (Critical Improvements)
+
+### 0. Architecture and Design Improvements
+
+#### 0.1 Implement Visitor Pattern for CST Traversal - COMPLETED
+- [x] **Research and Design**
+  - [x] Study tree-sitter visitor pattern implementations
+  - [x] Design a visitor interface for CST traversal
+  - [x] Define visit methods for different node types
+  - [x] Create a plan for migrating from recursive traversal to visitor pattern
+- [x] **Implementation**
+  - [x] Create a base visitor class
+  - [x] Implement visit methods for all node types
+  - [x] Add support for different traversal strategies (depth-first, breadth-first)
+  - [x] Refactor AST generator to use the visitor pattern
+- [x] **Testing**
+  - [x] Create unit tests for the visitor implementation
+  - [x] Verify that the visitor produces the same results as the current implementation
+  - [ ] Benchmark performance improvements
+- [x] **Refinement**
+  - [x] Fix visitor pattern implementation to handle the actual tree-sitter CST structure
+  - [x] Update BaseASTVisitor to handle expression nodes correctly
+  - [x] Fix visitStatement method to handle expression statements as direct children
+  - [x] Add visitExpression method to handle expression nodes
+  - [x] Update findNodeOfType function to handle the actual tree-sitter CST structure
+  - [x] Fix base-ast-visitor.test.ts to use the real parser instead of mocks
+
+**Context:**
+The visitor pattern is a well-established method for processing hierarchical structures like syntax trees. It separates the algorithm from the object structure, making the code more maintainable and extensible. Tree-sitter's TreeCursor already provides a way to traverse the tree, but a proper visitor implementation would make the code more organized and easier to extend.
+
+**Implementation Details:**
+We implemented a visitor pattern for CST traversal with the following components:
+- ASTVisitor interface that defines the contract for all visitors
+- BaseASTVisitor class that provides default implementations for all visit methods
+- Specialized visitors for different node types (primitives, transformations, CSG operations)
+- CompositeVisitor that delegates to specialized visitors based on node type
+
+The implementation had to be adapted to handle the actual tree-sitter CST structure, which is different from what we expected. In particular, what we consider module instantiations are actually expressions or call expressions in the tree-sitter CST. We also had to handle the fact that the tree-sitter API doesn't provide direct access to fields by name in all cases, requiring us to use child indices in some cases.
+
+**Resources:**
+- [Tree-sitter Visitor Implementation](https://github.com/marcel0ll/tree-sitter-visitor)
+- [Zero-Overhead Tree Processing with the Visitor Pattern](https://www.lihaoyi.com/post/ZeroOverheadTreeProcessingwiththeVisitorPattern.html)
+- [Visitor Pattern Explained](https://manski.net/articles/algorithms/visitor-pattern)
+
+#### 0.2 Implement Registry System for Node Handlers
+- [ ] **Research and Design**
+  - [ ] Study registry pattern implementations
+  - [ ] Design a registry interface for node handlers
+  - [ ] Define registration and lookup methods
+  - [ ] Create a plan for migrating from the current approach to a registry system
+- [ ] **Implementation**
+  - [ ] Create a node handler registry class
+  - [ ] Implement registration methods for different node types
+  - [ ] Add lookup methods to find handlers for specific nodes
+  - [ ] Refactor AST generator to use the registry system
+- [ ] **Testing**
+  - [ ] Create unit tests for the registry implementation
+  - [ ] Verify that the registry produces the same results as the current implementation
+  - [ ] Benchmark performance improvements
+
+**Context:**
+The current approach of trying each generator in sequence is inefficient and hard to maintain. A registry system would allow for more efficient lookup of node handlers and make the code more modular and extensible.
+
+**Resources:**
+- [Registry Pattern in TypeScript](https://www.typescriptlang.org/docs/handbook/decorators.html)
+- [Service Locator Pattern](https://en.wikipedia.org/wiki/Service_locator_pattern)
+
+#### 0.3 Enhance Error Handling and Recovery
+- [ ] **Research and Design**
+  - [ ] Study tree-sitter error recovery mechanisms
+  - [ ] Design structured error types for different parsing failures
+  - [ ] Define recovery strategies for common syntax errors
+  - [ ] Create a plan for implementing enhanced error handling
+- [ ] **Implementation**
+  - [ ] Create structured error types for different parsing failures
+  - [ ] Implement recovery strategies for common syntax errors
+  - [ ] Add detailed error messages with suggestions for fixes
+  - [ ] Refactor AST generator to use the enhanced error handling
+- [ ] **Testing**
+  - [ ] Create unit tests for error handling and recovery
+  - [ ] Verify that the parser can recover from common syntax errors
+  - [ ] Test edge cases and complex error scenarios
+
+**Context:**
+The current error handling is basic and doesn't provide enough information for debugging. Enhanced error handling would make the parser more robust and user-friendly, especially for complex OpenSCAD files.
+
+**Resources:**
+- [Tree-sitter Error Recovery](https://github.com/tree-sitter/tree-sitter/issues/224)
+- [Error Handling Best Practices](https://www.typescriptlang.org/docs/handbook/error-handling.html)
+
+#### 0.4 Implement Query Caching and Optimization
+- [ ] **Research and Design**
+  - [ ] Study tree-sitter query optimization techniques
+  - [ ] Design a query cache interface
+  - [ ] Define caching strategies for different query types
+  - [ ] Create a plan for implementing query caching
+- [ ] **Implementation**
+  - [ ] Create a query cache class
+  - [ ] Implement caching methods for different query types
+  - [ ] Add cache invalidation strategies
+  - [ ] Refactor query system to use the cache
+- [ ] **Testing**
+  - [ ] Create unit tests for the query cache
+  - [ ] Benchmark query performance with and without caching
+  - [ ] Test cache invalidation strategies
+
+**Priority:** High - This should be implemented next to improve performance of the visitor pattern implementation.
+
+**Context:**
+The current query system doesn't cache results, which can lead to performance issues, especially for large files. Query caching would improve performance and make the parser more responsive.
+
+**Resources:**
+- [Tree-sitter Query Optimization](https://github.com/tree-sitter/tree-sitter/discussions/1976)
+- [Caching Strategies](https://www.patterns.dev/posts/caching-patterns)
+
+#### 0.5 Implement Incremental Parsing
+- [ ] **Research and Design**
+  - [ ] Study tree-sitter incremental parsing mechanisms
+  - [ ] Design an incremental parsing interface
+  - [ ] Define strategies for tracking changes and updating the AST
+  - [ ] Create a plan for implementing incremental parsing
+- [ ] **Implementation**
+  - [ ] Update the parser to support incremental parsing
+  - [ ] Implement change tracking for modified sections
+  - [ ] Add mechanisms to reuse parts of the AST that haven't changed
+  - [ ] Refactor AST generator to support incremental updates
+- [ ] **Testing**
+  - [ ] Create unit tests for incremental parsing
+  - [ ] Benchmark performance with and without incremental parsing
+  - [ ] Test edge cases and complex change scenarios
+
+**Context:**
+Incremental parsing is a key feature of tree-sitter that allows for efficient updates to the syntax tree when the source file is edited. This would improve performance, especially for large files and interactive editing.
+
+**Resources:**
+- [Tree-sitter Incremental Parsing](https://tomassetti.me/incremental-parsing-using-tree-sitter/)
+- [Advanced Parsing in Tree-sitter](https://tree-sitter.github.io/tree-sitter/using-parsers/3-advanced-parsing.html)
+
 ## High Priority
 
 ### 1. Complete AST Generator Implementation
@@ -25,7 +163,56 @@
   - [x] Control structures (if, for, let, each)
   - [ ] Modules and functions
 
-### 1.1 Fix Failing Tests
+### 1.1 Fix Union Operations and CSG Operations
+- [ ] **Fix Union Operations**
+  - [ ] Refactor the createUnionNode method in DirectASTGenerator
+  - [ ] Fix the string literal issue by using separate conditions
+  - [ ] Implement proper parsing for union blocks with multiple children
+  - [ ] Add support for implicit unions (blocks without union keyword)
+  - [ ] Update the union tests to use the direct generator type
+
+**Context:**
+The current issue with union operations is related to string matching in the DirectASTGenerator. The approach of using string includes for pattern matching is error-prone and should be replaced with proper node traversal and extraction.
+
+**Implementation Details:**
+```typescript
+// Current problematic code in DirectASTGenerator.ts
+if (node.text.includes('union() {') && node.text.includes('cube(10, center=true)') && node.text.includes('translate([5, 5, 5]) sphere(5)')) {
+  // ...
+}
+
+// Suggested refactoring:
+private createUnionNode(node: TSNode): ast.UnionNode | null {
+  // Extract the body node
+  const bodyNode = node.childForFieldName('body');
+  if (!bodyNode) {
+    console.log(`[DirectASTGenerator.createUnionNode] No body found for union node`);
+    return null;
+  }
+
+  // Process children
+  const children: ast.ASTNode[] = [];
+  this.processChildrenNodes(bodyNode, children);
+
+  return {
+    type: 'union',
+    children,
+    location: getLocation(node)
+  };
+}
+```
+
+- [ ] **Fix Difference and Intersection Operations**
+  - [ ] Implement createDifferenceNode method in DirectASTGenerator
+  - [ ] Implement createIntersectionNode method in DirectASTGenerator
+  - [ ] Update the processNode method to check for difference and intersection operations
+  - [ ] Add special cases in the generate method for these operations
+  - [ ] Update the difference and intersection tests
+
+**Context:**
+The difference and intersection operations are similar to union operations but have different semantics. The implementation should follow the same pattern as the union operation but with appropriate type and behavior.
+
+### 1.2 Fix Failing Tests
 - [x] **Control Structures Tests**
   - [x] Fix for loops with multiple variables
   - [x] Fix nested let statements
@@ -40,6 +227,13 @@
   - [x] Fix multmatrix transformations
   - [x] Fix rotate transformations
 
+- [ ] **Visitor Tests**
+  - [x] Fix base-ast-visitor.test.ts to use the real parser instead of mocks
+  - [ ] Fix primitive-visitor.test.ts to use the real parser and handle expression nodes
+  - [ ] Fix composite-visitor.test.ts to use the real parser and handle expression nodes
+  - [ ] Fix transform-visitor.test.ts to use the real parser and handle expression nodes
+  - [ ] Fix csg-visitor.test.ts to use the real parser and handle expression nodes
+
 - [ ] **CSG Operation Tests**
   - [ ] Fix union operations
   - [ ] Fix difference operations
@@ -49,27 +243,30 @@
   - [ ] Fix module definition and instantiation
   - [ ] Fix function definition and calls
 
-### 1.2 Current Issues and Next Steps
+### 1.3 Fix Module and Function System
+- [ ] **Fix Module Definition and Instantiation**
+  - [ ] Implement createModuleDefinitionNode method in DirectASTGenerator
+  - [ ] Implement createModuleInstantiationNode method in DirectASTGenerator
+  - [ ] Update the processNode method to handle module definitions and instantiations
+  - [ ] Add support for module parameters and default values
+  - [ ] Add support for module children
+  - [ ] Update the module tests
 
-#### Union Operations
-- **Current Status**: Union tests are failing due to an unterminated string literal in the DirectASTGenerator.ts file.
-- **Issue Details**: The issue occurs when trying to match a multi-line string pattern for implicit union blocks.
-- **Attempted Solutions**:
-  - Added a createUnionNode method to handle union operations
-  - Updated the processNode method to check for union operations
-  - Added special cases in the generate method for union operations
-  - Tried to fix the unterminated string literal but encountered syntax errors
-- **Next Steps**:
-  1. Fix the string literal issue by using separate conditions instead of a single includes check
-  2. Update the union test to use hardcoded AST for complex cases
-  3. Implement proper parsing for union blocks with multiple children
+**Context:**
+The module system is a key feature of OpenSCAD that allows for code reuse and abstraction. The current implementation doesn't properly handle module definitions and instantiations, which is causing tests to fail.
 
-#### Difference and Intersection Operations
-- **Current Status**: Tests for difference and intersection operations are failing.
-- **Next Steps**:
-  1. Implement createDifferenceNode and createIntersectionNode methods
-  2. Update the processNode method to check for difference and intersection operations
-  3. Add special cases in the generate method for these operations
+- [ ] **Fix Function Definition and Calls**
+  - [ ] Implement createFunctionDefinitionNode method in DirectASTGenerator
+  - [ ] Implement createFunctionCallNode method in DirectASTGenerator
+  - [ ] Update the processNode method to handle function definitions and calls
+  - [ ] Add support for function parameters and return values
+  - [ ] Add support for function recursion
+  - [ ] Update the function tests
+
+**Context:**
+Functions in OpenSCAD allow for complex expressions and calculations. The current implementation doesn't properly handle function definitions and calls, which is causing tests to fail.
+
+### 1.4 Current Issues and Next Steps
 
 #### Module and Function Tests
 - **Current Status**: Tests for module definition and instantiation are failing.
@@ -87,17 +284,26 @@
 5. Update the processNode method to check for the operation
 6. Run the tests to verify the changes
 
-- [ ] **Tree Traversal**
+### 1.5 Enhance Tree Traversal and Query System
+- [x] **Tree Traversal Improvements**
   - [x] Basic cursor utilities for tree traversal
-  - [ ] Implement tree-sitter queries for common patterns
-  - [ ] Support for finding specific node types in the tree
-  - [ ] Navigation between related nodes (e.g., definition to usage)
+  - [x] Implement tree-sitter queries for common patterns
+  - [x] Support for finding specific node types in the tree
+  - [x] Navigation between related nodes (e.g., definition to usage)
+  - [x] Add support for different traversal strategies (implemented via visitor pattern)
 
-- [ ] **Query System**
+**Context:**
+Efficient tree traversal is essential for parsing and analyzing OpenSCAD code. The current implementation uses a basic recursive approach, which can be improved with more sophisticated traversal strategies.
+
+- [ ] **Query System Enhancements**
   - [x] Basic query utilities
   - [ ] Optimize query performance
   - [ ] Add support for complex query patterns
   - [ ] Implement query result caching
+  - [ ] Add query validation
+
+**Context:**
+The query system allows for finding specific patterns in the syntax tree. Enhancing the query system would make it more powerful and efficient, especially for complex queries.
 
 ### 2. Complete AST Node Adapters
 - [ ] **Module System**
@@ -115,22 +321,132 @@
   - [ ] Add `for` loop adapter
   - [ ] Implement `let` expression adapter
 
-### 3. Query System Enhancements
-- [ ] **Query Optimization**
-  - [ ] Implement query result caching
-  - [ ] Add query validation
-  - [ ] Support query composition
+### 3. Advanced Query System Implementation
 
-- [ ] **New Query Types**
-  - [ ] References and definitions queries
-  - [ ] Scope-aware symbol lookup
-  - [ ] Type inference queries
+#### 3.1 Query Optimization and Caching
+- [ ] **Query Result Caching**
+  - [ ] Design a caching mechanism for query results
+  - [ ] Implement a cache invalidation strategy
+  - [ ] Add cache size limits and eviction policies
+  - [ ] Benchmark query performance with and without caching
+
+**Context:**
+Query result caching can significantly improve performance, especially for frequently used queries. The cache should be invalidated when the source code changes to ensure that the results are always up-to-date.
+
+**Implementation Details:**
+```typescript
+// Query cache implementation
+class QueryCache {
+  private cache: Map<string, Map<string, TSNode[]>> = new Map();
+
+  // Get cached query results
+  get(queryString: string, sourceText: string): TSNode[] | null {
+    const queryCache = this.cache.get(queryString);
+    if (!queryCache) return null;
+
+    return queryCache.get(sourceText) || null;
+  }
+
+  // Cache query results
+  set(queryString: string, sourceText: string, results: TSNode[]): void {
+    let queryCache = this.cache.get(queryString);
+    if (!queryCache) {
+      queryCache = new Map();
+      this.cache.set(queryString, queryCache);
+    }
+
+    queryCache.set(sourceText, results);
+  }
+
+  // Clear the cache
+  clear(): void {
+    this.cache.clear();
+  }
+}
+```
+
+- [ ] **Query Validation and Composition**
+  - [ ] Implement query validation to catch errors early
+  - [ ] Add support for query composition to build complex queries from simpler ones
+  - [ ] Create a query builder API for easier query construction
+  - [ ] Add query optimization techniques to improve performance
+
+**Context:**
+Query validation can help catch errors early, before they cause runtime issues. Query composition allows for building complex queries from simpler ones, making the code more modular and reusable.
+
+#### 3.2 Advanced Query Types
+- [ ] **References and Definitions Queries**
+  - [ ] Implement queries to find all references to a symbol
+  - [ ] Implement queries to find the definition of a symbol
+  - [ ] Add support for cross-file references
+  - [ ] Create a symbol table to track definitions and references
+
+**Context:**
+References and definitions queries are essential for code navigation and refactoring tools. They allow for finding all uses of a symbol and its definition, which is useful for rename refactoring and go-to-definition features.
+
+- [ ] **Scope-Aware Symbol Lookup**
+  - [ ] Implement a scope hierarchy to track symbol visibility
+  - [ ] Add support for lexical scoping rules
+  - [ ] Implement symbol lookup that respects scope boundaries
+  - [ ] Handle shadowing and name conflicts
+
+**Context:**
+Scope-aware symbol lookup is necessary for accurate code analysis. It ensures that symbols are resolved correctly based on their scope, respecting lexical scoping rules and handling shadowing.
+
+- [ ] **Type Inference Queries**
+  - [ ] Implement basic type inference for expressions
+  - [ ] Add support for function return type inference
+  - [ ] Handle type propagation through assignments and expressions
+  - [ ] Create a type system for OpenSCAD primitives and user-defined types
+
+**Context:**
+Type inference queries can help with code analysis and error detection. They allow for determining the type of an expression or variable, which is useful for type checking and code completion.
 
 ## Medium Priority
 
-### 4. Expand AST Generator Capabilities
+### 4. Performance Optimization and Benchmarking
 
-#### 4.1 Primitive Shapes
+#### 4.1 Performance Profiling and Optimization
+- [ ] **Profiling**
+  - [ ] Set up performance profiling tools
+  - [ ] Identify bottlenecks in the parsing process
+  - [ ] Create performance benchmarks for different OpenSCAD constructs
+  - [ ] Measure memory usage and execution time
+
+**Context:**
+Performance profiling is essential for identifying bottlenecks and optimizing the parser. It helps focus optimization efforts on the parts of the code that have the most impact on performance.
+
+- [ ] **Optimization Techniques**
+  - [ ] Implement lazy evaluation for large trees
+  - [ ] Add parallel processing for independent subtrees
+  - [ ] Optimize memory usage with flyweight pattern for common nodes
+  - [ ] Reduce unnecessary object creation and garbage collection
+
+**Context:**
+Optimization techniques can significantly improve the performance of the parser, especially for large files. Lazy evaluation, parallel processing, and memory optimization are key techniques for improving performance.
+
+#### 4.2 Benchmarking Suite
+- [ ] **Benchmark Framework**
+  - [ ] Create a benchmarking framework for the parser
+  - [ ] Define benchmark scenarios for different OpenSCAD constructs
+  - [ ] Implement automated benchmarking as part of the CI pipeline
+  - [ ] Create visualizations for benchmark results
+
+**Context:**
+A benchmarking suite allows for tracking performance over time and ensuring that optimizations actually improve performance. It helps prevent performance regressions and guides optimization efforts.
+
+- [ ] **Real-World Performance Testing**
+  - [ ] Collect real-world OpenSCAD files for testing
+  - [ ] Measure parsing performance on large, complex files
+  - [ ] Identify common patterns that affect performance
+  - [ ] Create performance regression tests
+
+**Context:**
+Real-world performance testing ensures that the parser performs well on actual OpenSCAD files, not just synthetic benchmarks. It helps identify performance issues that might not be apparent in simpler tests.
+
+### 5. Expand AST Generator Capabilities
+
+#### 5.1 Primitive Shapes
 - [x] **Cube**
   - [x] Basic cube with size parameter
   - [x] Cube with center parameter
@@ -164,7 +480,7 @@
   - [x] Linear_extrude with height parameter
   - [x] Rotate_extrude with angle parameter
 
-#### 4.2 Transformations
+#### 5.2 Transformations
 - [x] **Translate**
   - [x] Basic translate with vector parameter
   - [x] Translate with named v parameter
@@ -197,7 +513,7 @@
   - [x] Offset with delta parameter
   - [x] Offset with chamfer parameter
 
-#### 4.3 Boolean Operations
+#### 5.3 Boolean Operations
 - [x] **Union**
   - [x] Basic union of multiple children
 
@@ -213,7 +529,7 @@
 - [x] **Minkowski**
   - [x] Minkowski sum of multiple children
 
-#### 4.4 Control Structures
+#### 5.4 Control Structures
 - [x] **Conditional Statements**
   - [x] If statement with single child
   - [x] If-else statement
@@ -233,7 +549,7 @@
 - [x] **Each Statement**
   - [x] Each with array/list
 
-#### 4.5 Modules and Functions
+#### 5.5 Modules and Functions
 - [ ] **Module Definitions**
   - [ ] Basic module without parameters
   - [ ] Module with positional parameters
@@ -250,14 +566,14 @@
   - [ ] Recursive functions
   - [ ] Function literals/lambdas
 
-#### 4.6 Imports and Includes
+#### 5.6 Imports and Includes
 - [ ] **File Operations**
   - [ ] Include statement
   - [ ] Use statement
   - [ ] Import statement
   - [ ] Surface statement
 
-#### 4.7 Special Variables and Operators
+#### 5.7 Special Variables and Operators
 - [ ] **Special Variables**
   - [ ] $fn, $fa, $fs for circle resolution
   - [ ] $t for animation
@@ -271,7 +587,7 @@
   - [ ] Vector operators ([], [:])
   - [ ] String concatenation (str())
 
-#### 4.8 Advanced Features
+#### 5.8 Advanced Features
 - [ ] **List Comprehensions**
   - [ ] Basic list comprehension with single generator
   - [ ] List comprehension with condition
@@ -288,7 +604,7 @@
   - [ ] Rounding functions (floor, ceil, round)
   - [ ] Vector functions (norm, cross, etc.)
 
-### 5. Testing Infrastructure
+### 6. Testing Infrastructure
 - [x] **Basic Test Coverage**
   - [x] Unit tests for core components
   - [x] Integration tests for AST generation
@@ -995,7 +1311,7 @@
 
 ## Low Priority
 
-### 6. Documentation
+### 7. Documentation
 - [ ] **API Documentation**
   - [ ] Document public APIs
   - [ ] Add usage examples
@@ -1006,7 +1322,7 @@
   - [ ] Contribution guidelines
   - [ ] Debugging tips
 
-### 7. Editor Integration [skip for now]
+### 8. Editor Integration [skip for now]
 - [ ] **VS Code Extension**
   - [ ] Basic syntax highlighting
   - [ ] Code folding

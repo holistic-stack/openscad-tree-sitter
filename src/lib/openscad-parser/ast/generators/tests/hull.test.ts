@@ -7,14 +7,15 @@ const GENERATOR_TYPE: 'original' | 'modular' | 'direct' = 'modular';
 describe('Hull Operation AST Generation', () => {
   let parser: OpenscadParser;
 
-  beforeAll(async () => {
-    parser = new OpenscadParser();
-    await parser.init();
-  });
+    beforeAll(async () => {
+        parser = new OpenscadParser();
+        await parser.init("./tree-sitter-openscad.wasm");
+    });
 
-  afterAll(() => {
-    parser.dispose();
-  });
+    afterAll(() => {
+        parser.dispose();
+    });
+
 
   it('should parse a basic hull of multiple children', async () => {
     const code = `

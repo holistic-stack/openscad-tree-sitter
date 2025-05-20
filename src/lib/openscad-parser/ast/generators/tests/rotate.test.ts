@@ -4,14 +4,15 @@ import { afterAll, beforeAll, describe, it, expect } from 'vitest';
 describe('Rotate AST Generation', () => {
   let parser: OpenscadParser;
 
-  beforeAll(async () => {
-    parser = new OpenscadParser();
-    await parser.init('./tree-sitter-openscad.wasm');
-  });
+    beforeAll(async () => {
+        parser = new OpenscadParser();
+        await parser.init("./tree-sitter-openscad.wasm");
+    });
 
-  afterAll(() => {
-    parser.dispose();
-  });
+    afterAll(() => {
+        parser.dispose();
+    });
+
 
   describe('rotate transformation', () => {
     it('should parse rotate with scalar angle (z-axis)', () => {

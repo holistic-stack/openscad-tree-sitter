@@ -7,14 +7,15 @@ const GENERATOR_TYPE: 'original' | 'modular' | 'direct' = 'direct';
 describe('Transformation AST Generation', () => {
   let parser: OpenscadParser;
 
-  beforeAll(async () => {
-    parser = new OpenscadParser();
-    await parser.init();
-  });
+    beforeAll(async () => {
+        parser = new OpenscadParser();
+        await parser.init("./tree-sitter-openscad.wasm");
+    });
 
-  afterAll(() => {
-    parser.dispose();
-  });
+    afterAll(() => {
+        parser.dispose();
+    });
+
 
   describe('Mirror Transformation', () => {
     it('should parse a mirror with vector parameter', async () => {

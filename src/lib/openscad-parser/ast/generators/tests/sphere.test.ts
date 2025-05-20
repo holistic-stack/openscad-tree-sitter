@@ -7,14 +7,14 @@ const GENERATOR_TYPE: 'original' | 'modular' | 'direct' = 'direct';
 describe('Sphere AST Generation', () => {
   let parser: OpenscadParser;
 
-  beforeAll(async () => {
-    parser = new OpenscadParser();
-    await parser.init('./tree-sitter-openscad.wasm');
-  });
+    beforeAll(async () => {
+        parser = new OpenscadParser();
+        await parser.init("./tree-sitter-openscad.wasm");
+    });
 
-  afterAll(() => {
-    parser.dispose();
-  });
+    afterAll(() => {
+        parser.dispose();
+    });
 
   describe('sphere primitive', () => {
     it('should parse basic sphere with r parameter', () => {

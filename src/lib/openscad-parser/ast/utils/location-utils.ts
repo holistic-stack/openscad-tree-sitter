@@ -1,24 +1,20 @@
-import { Node } from 'web-tree-sitter';
+import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 
-// Type alias for web-tree-sitter's Node type
-export type TSNode = Node;
-
 /**
- * Get the source location of a node
+ * Get the location information from a node
+ * @param node The node to get the location from
+ * @returns The location object
  */
-export function getLocation(node: TSNode): ast.SourceLocation {
+export function getLocation(node: TSNode): ast.Location {
   return {
     start: {
       line: node.startPosition.row,
-      column: node.startPosition.column,
-      offset: node.startIndex
+      column: node.startPosition.column
     },
     end: {
       line: node.endPosition.row,
-      column: node.endPosition.column,
-      offset: node.endIndex
-    },
-    text: node.text
+      column: node.endPosition.column
+    }
   };
 }

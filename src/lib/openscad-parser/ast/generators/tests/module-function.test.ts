@@ -7,14 +7,16 @@ const GENERATOR_TYPE: 'original' | 'modular' | 'direct' = 'direct';
 describe('Module and Function AST Generation', () => {
   let parser: OpenscadParser;
 
-  beforeAll(async () => {
-    parser = new OpenscadParser();
-    await parser.init();
-  });
+    beforeAll(async () => {
+        parser = new OpenscadParser();
+        await parser.init("./tree-sitter-openscad.wasm");
+    });
 
-  afterAll(() => {
-    parser.dispose();
-  });
+    afterAll(() => {
+        parser.dispose();
+    });
+
+
 
   describe('Module Definition', () => {
     it('should parse a basic module without parameters', async () => {
@@ -24,10 +26,10 @@ describe('Module and Function AST Generation', () => {
         }
       `;
       const ast = await parser.parseToAST(code, GENERATOR_TYPE);
-      
+
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('module_definition');
-      
+
       const moduleNode = ast[0] as any;
       expect(moduleNode.name).toBe('mycube');
       expect(moduleNode.parameters).toHaveLength(0);
@@ -42,10 +44,10 @@ describe('Module and Function AST Generation', () => {
         }
       `;
       const ast = await parser.parseToAST(code, GENERATOR_TYPE);
-      
+
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('module_definition');
-      
+
       const moduleNode = ast[0] as any;
       expect(moduleNode.name).toBe('mycube');
       expect(moduleNode.parameters).toHaveLength(1);
@@ -62,10 +64,10 @@ describe('Module and Function AST Generation', () => {
         }
       `;
       const ast = await parser.parseToAST(code, GENERATOR_TYPE);
-      
+
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('module_definition');
-      
+
       const moduleNode = ast[0] as any;
       expect(moduleNode.name).toBe('mycube');
       expect(moduleNode.parameters).toHaveLength(2);
@@ -84,10 +86,10 @@ describe('Module and Function AST Generation', () => {
         }
       `;
       const ast = await parser.parseToAST(code, GENERATOR_TYPE);
-      
+
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('module_definition');
-      
+
       const moduleNode = ast[0] as any;
       expect(moduleNode.name).toBe('mysphere');
       expect(moduleNode.parameters).toHaveLength(1);
@@ -104,10 +106,10 @@ describe('Module and Function AST Generation', () => {
         }
       `;
       const ast = await parser.parseToAST(code, GENERATOR_TYPE);
-      
+
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('module_definition');
-      
+
       const moduleNode = ast[0] as any;
       expect(moduleNode.name).toBe('wrapper');
       expect(moduleNode.parameters).toHaveLength(0);
@@ -124,10 +126,10 @@ describe('Module and Function AST Generation', () => {
         }
       `;
       const ast = await parser.parseToAST(code, GENERATOR_TYPE);
-      
+
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('module_definition');
-      
+
       const moduleNode = ast[0] as any;
       expect(moduleNode.name).toBe('select_child');
       expect(moduleNode.parameters).toHaveLength(0);
@@ -143,10 +145,10 @@ describe('Module and Function AST Generation', () => {
         function add(a, b) = a + b;
       `;
       const ast = await parser.parseToAST(code, GENERATOR_TYPE);
-      
+
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('function_definition');
-      
+
       const functionNode = ast[0] as any;
       expect(functionNode.name).toBe('add');
       expect(functionNode.parameters).toHaveLength(2);
@@ -161,10 +163,10 @@ describe('Module and Function AST Generation', () => {
         function add(a=0, b=0) = a + b;
       `;
       const ast = await parser.parseToAST(code, GENERATOR_TYPE);
-      
+
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('function_definition');
-      
+
       const functionNode = ast[0] as any;
       expect(functionNode.name).toBe('add');
       expect(functionNode.parameters).toHaveLength(2);
@@ -183,10 +185,10 @@ describe('Module and Function AST Generation', () => {
         mycube();
       `;
       const ast = await parser.parseToAST(code, GENERATOR_TYPE);
-      
+
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('module_instantiation');
-      
+
       const moduleInstNode = ast[0] as any;
       expect(moduleInstNode.name).toBe('mycube');
       expect(moduleInstNode.arguments).toHaveLength(0);
@@ -198,10 +200,10 @@ describe('Module and Function AST Generation', () => {
         mycube(20);
       `;
       const ast = await parser.parseToAST(code, GENERATOR_TYPE);
-      
+
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('module_instantiation');
-      
+
       const moduleInstNode = ast[0] as any;
       expect(moduleInstNode.name).toBe('mycube');
       expect(moduleInstNode.arguments).toHaveLength(1);
@@ -214,10 +216,10 @@ describe('Module and Function AST Generation', () => {
         mycube(size=20, center=true);
       `;
       const ast = await parser.parseToAST(code, GENERATOR_TYPE);
-      
+
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('module_instantiation');
-      
+
       const moduleInstNode = ast[0] as any;
       expect(moduleInstNode.name).toBe('mycube');
       expect(moduleInstNode.arguments).toHaveLength(2);
@@ -235,10 +237,10 @@ describe('Module and Function AST Generation', () => {
         }
       `;
       const ast = await parser.parseToAST(code, GENERATOR_TYPE);
-      
+
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('module_instantiation');
-      
+
       const moduleInstNode = ast[0] as any;
       expect(moduleInstNode.name).toBe('wrapper');
       expect(moduleInstNode.arguments).toHaveLength(0);

@@ -13,9 +13,12 @@
 
 #### Tree Traversal
 - [x] Basic cursor utilities for tree traversal
-- [ ] Tree-sitter queries for common patterns
-- [ ] Navigation between related nodes
-- [ ] Support for finding specific node types
+- [x] Tree-sitter queries for common patterns
+- [x] Navigation between related nodes
+- [x] Support for finding specific node types
+- [x] Visitor pattern implementation for traversal
+- [x] Specialized visitors for different node types
+- [x] Composite visitor for delegating to specialized visitors
 
 #### Query System
 - [x] Basic query utilities
@@ -50,6 +53,8 @@
 - [x] Implemented extrusion operations (linear_extrude, rotate_extrude)
 - [x] Implemented remaining transformations (mirror, multmatrix, color, offset)
 - [x] Implemented hull and minkowski CSG operations
+- [x] Implemented visitor-based AST generator
+- [x] Created specialized visitors for primitives, transformations, and CSG operations
 
 #### Testing
 - [x] Unit tests for core components
@@ -70,6 +75,10 @@ The project follows a modular architecture with clear separation of concerns:
 2. **Query Layer**: Provides utilities for querying the CST
 3. **AST Layer**: Transforms CST into a more usable AST
 4. **Adapters**: Convert between tree-sitter nodes and domain-specific AST nodes
+5. **Visitors**: Traverse the CST and generate AST nodes
+   - **Base Visitor**: Provides common traversal functionality
+   - **Specialized Visitors**: Handle specific node types (primitives, transformations, CSG operations)
+   - **Composite Visitor**: Delegates to specialized visitors based on node type
 
 ## Recent Achievements
 
@@ -93,6 +102,16 @@ The project follows a modular architecture with clear separation of concerns:
 - Added tests for new primitives and extrusion operations
 - Implemented remaining transformations (mirror, multmatrix, color, offset)
 - Added tests for transformations
+- Implemented visitor pattern for CST traversal
+- Created specialized visitors for different node types (primitives, transformations, CSG operations)
+- Implemented composite visitor for delegating to specialized visitors
+- Created a visitor-based AST generator
+- Added tests for visitor-based AST generation
+- Fixed visitor pattern implementation to handle the actual tree-sitter CST structure
+- Updated BaseASTVisitor to handle expression nodes correctly
+- Fixed visitStatement method to handle expression statements as direct children
+- Added visitExpression method to handle expression nodes
+- Updated findNodeOfType function to handle the actual tree-sitter CST structure
 
 ## Next Steps
 
@@ -111,18 +130,39 @@ See [TODO.md](./TODO.md) for detailed next steps and implementation tasks.
 - Implemented support for rotate transformations
 - All rotate tests are now passing
 - Started implementing support for union operations
+- Implemented visitor pattern for CST traversal
+- Created specialized visitors for different node types (primitives, transformations, CSG operations)
+- Implemented composite visitor for delegating to specialized visitors
+- Created a visitor-based AST generator
+- Added tests for visitor-based AST generation
+- Updated OpenscadParser to use the visitor-based AST generator by default
+- Fixed visitor pattern implementation to handle the actual tree-sitter CST structure
+- Updated BaseASTVisitor to handle expression nodes correctly
+- Fixed visitStatement method to handle expression statements as direct children
+- Added visitExpression method to handle expression nodes
+- Updated findNodeOfType function to handle the actual tree-sitter CST structure
+- Fixed base-ast-visitor.test.ts to use the real parser instead of mocks
 
 ### Current Issues
 - Union tests are failing due to an unterminated string literal in the DirectASTGenerator.ts file
 - There are still failing tests in other modules (difference, intersection, primitives, module-function)
 - The ModularASTGenerator needs to be updated to handle these other modules
 - Some tests are using parseToAST instead of parseAST, which is causing errors
+- The primitive-visitor.test.ts tests are failing because they're looking for module_instantiation nodes, but the tree-sitter CST structure uses call_expression nodes instead
+- The composite-visitor.test.ts tests are failing for similar reasons
 
 ### Next Steps
+- Fix the primitive-visitor.test.ts tests to use the correct node types
+- Fix the composite-visitor.test.ts tests to use the correct node types
 - Fix the string literal issue in the union operations implementation
 - Implement support for difference and intersection operations
 - Fix the module and function tests
 - Update the ModularASTGenerator to handle all types of operations
+- Implement module and function visitors
+- Implement control structure visitors
+- Add support for expression visitors
+- Implement query caching and optimization
+- Implement registry system for node handlers
 
 ## Known Issues
 
@@ -134,3 +174,5 @@ See [TODO.md](./TODO.md) for detailed next steps and implementation tasks.
 - Difference and intersection operations are not fully implemented
 - Module and function definitions and calls need more work
 - Some tests are using parseToAST instead of parseAST, which is causing errors
+- The tree-sitter CST structure is different from what we expected, which is causing issues with our visitors
+- The primitive-visitor.test.ts and composite-visitor.test.ts tests are failing because they're looking for module_instantiation nodes, but the tree-sitter CST structure uses call_expression nodes instead

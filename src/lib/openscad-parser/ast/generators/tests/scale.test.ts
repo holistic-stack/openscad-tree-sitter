@@ -4,14 +4,15 @@ import { afterAll, beforeAll, describe, it, expect } from 'vitest';
 describe('Scale AST Generation', () => {
   let parser: OpenscadParser;
 
-  beforeAll(async () => {
-    parser = new OpenscadParser();
-    await parser.init('./tree-sitter-openscad.wasm');
-  });
+    beforeAll(async () => {
+        parser = new OpenscadParser();
+        await parser.init("./tree-sitter-openscad.wasm");
+    });
 
-  afterAll(() => {
-    parser.dispose();
-  });
+    afterAll(() => {
+        parser.dispose();
+    });
+
 
   describe('scale transformation', () => {
     it('should parse scale with vector parameter', () => {

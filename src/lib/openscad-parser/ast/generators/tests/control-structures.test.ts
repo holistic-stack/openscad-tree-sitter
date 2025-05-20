@@ -7,14 +7,15 @@ const GENERATOR_TYPE: 'original' | 'modular' | 'direct' = 'direct';
 describe('Control Structure AST Generation', () => {
   let parser: OpenscadParser;
 
-  beforeAll(async () => {
-    parser = new OpenscadParser();
-    await parser.init();
-  });
+    beforeAll(async () => {
+        parser = new OpenscadParser();
+        await parser.init("./tree-sitter-openscad.wasm");
+    });
 
-  afterAll(() => {
-    parser.dispose();
-  });
+    afterAll(() => {
+        parser.dispose();
+    });
+
 
   describe('Conditional Expression', () => {
     it('should parse a simple conditional expression', async () => {

@@ -39,7 +39,8 @@
 import * as TreeSitter from "web-tree-sitter";
 import { ASTGenerator } from "./ast/ast-generator";
 import { ModularASTGenerator } from "./ast/modular-ast-generator";
-import { DirectASTGenerator } from "./ast/direct-ast-generator";
+import { DirectASTGenerator } from "./ast/direct-ast-generator-fixed";
+import { VisitorASTGenerator } from "./ast/visitor-ast-generator";
 import { ASTNode } from "./ast/ast-types";
 import {cstTreeCursorWalkLog} from "@/lib/openscad-parser/cst/cursor-utils/cstTreeCursorWalkLog";
 
@@ -137,17 +138,21 @@ export class OpenscadParser {
      * Parse OpenSCAD code and return an AST (Abstract Syntax Tree).
      *
      * @param code - The OpenSCAD code to parse
+     * @param generatorType - The type of AST generator to use ('original', 'modular', 'direct', or 'visitor')
      * @returns An array of AST nodes representing the parsed code
      * @throws If the parser hasn't been initialized or there's an error parsing the code
      */
-    parseAST(code: string, generatorType: 'original' | 'modular' | 'direct' = 'direct'): ASTNode[] {
+    parseAST(code: string, generatorType: 'original' | 'modular' | 'direct' | 'visitor' = 'visitor'): ASTNode[] {
         const cst = this.parseCST(code);
         // cstTreeCursorWalkLog(cst?.walk(),code); // Commented out due to incorrect arguments causing TypeError
         if (!cst) {
             return [];
         }
 
-        if (generatorType === 'modular') {
+        if (generatorType === 'visitor') {
+            const generator = new VisitorASTGenerator(cst, code);
+            return generator.generate();
+        } else if (generatorType === 'modular') {
             const generator = new ModularASTGenerator(cst, code);
             return generator.generate();
         } else if (generatorType === 'direct') {
