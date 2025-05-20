@@ -56,7 +56,7 @@ describe('AST Generator Integration Tests', () => {
       expect((cubeNode as any).center).toBe(true);
     });
 
-    it.skip('should parse translate with cube using curly braces and named parameters', () => {
+    it('should parse translate with cube using curly braces and named parameters', () => {
       const code = `translate(v=[3,0,0]) { cube(size=[1,2,3], center=true); }`;
       const ast = parser.parseAST(code);
 

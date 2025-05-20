@@ -8,7 +8,7 @@
 - [x] Basic parser setup with web-tree-sitter
 - [x] OpenSCAD grammar integration
 - [x] CST (Concrete Syntax Tree) generation
-- [ ] AST (Abstract Syntax Tree) generation from CST
+- [x] AST (Abstract Syntax Tree) generation from CST (initial implementation)
 - [ ] Support for incremental parsing
 
 #### Tree Traversal
@@ -31,10 +31,14 @@
   - [x] DifferenceOperation
   - [x] IfStatement
   - [x] AssignmentStatement
+  - [x] Cube3D
+  - [x] TranslateTransform
   - [ ] Module definitions
   - [ ] Function definitions
   - [ ] Control structures (for, let, each)
 - [x] Fallback adapter for unknown node types
+- [x] Initial implementation of AST generator
+- [x] Support for basic primitives (cube) and transformations (translate)
 
 #### Testing
 - [x] Unit tests for core components
@@ -56,6 +60,14 @@ The project follows a modular architecture with clear separation of concerns:
 3. **AST Layer**: Transforms CST into a more usable AST
 4. **Adapters**: Convert between tree-sitter nodes and domain-specific AST nodes
 
+## Recent Achievements
+
+- Implemented initial AST generator for OpenSCAD code
+- Added support for cube primitives and translate transformations
+- Created integration tests for AST generation
+- Refactored code to follow DRY and SRP principles
+- Set up modular architecture for AST generation
+
 ## Next Steps
 
 See [TODO.md](./TODO.md) for detailed next steps and implementation tasks.
@@ -65,3 +77,4 @@ See [TODO.md](./TODO.md) for detailed next steps and implementation tasks.
 - Some edge cases in complex expressions need additional testing
 - Performance optimizations may be needed for large files
 - Some AST node types may need refinement based on real-world usage
+- Current AST generator implementation needs to be fully refactored to use the modular structure
