@@ -6,7 +6,7 @@ export interface BaseNode {
    * The type of the node
    */
   type: string;
-  
+
   /**
    * The source location of the node
    */
@@ -21,12 +21,12 @@ export interface SourceLocation {
    * The start position of the node
    */
   start: Position;
-  
+
   /**
    * The end position of the node
    */
   end: Position;
-  
+
   /**
    * The source code text of the node
    */
@@ -41,12 +41,12 @@ export interface Position {
    * The 0-based line number
    */
   line: number;
-  
+
   /**
    * The 0-based column number
    */
   column: number;
-  
+
   /**
    * The 0-based byte offset
    */
@@ -64,14 +64,19 @@ export type Vector3D = [number, number, number];
 export type Vector2D = [number, number];
 
 /**
+ * Represents a 4D vector [x, y, z, w]
+ */
+export type Vector4D = [number, number, number, number];
+
+/**
  * Represents a parameter value which can be a literal or an expression
  */
-export type ParameterValue = 
-  | number 
-  | boolean 
-  | string 
-  | Vector2D 
-  | Vector3D 
+export type ParameterValue =
+  | number
+  | boolean
+  | string
+  | Vector2D
+  | Vector3D
   | ExpressionNode
   | undefined;
 
@@ -122,6 +127,92 @@ export interface FunctionCallNode extends BaseNode {
 export interface TranslateNode extends BaseNode {
   type: 'translate';
   v: Vector2D | Vector3D;
+  children: ASTNode[];
+}
+
+/**
+ * Represents a rotate node
+ */
+export interface RotateNode extends BaseNode {
+  type: 'rotate';
+  a: number | Vector3D;
+  v?: Vector3D;
+  children: ASTNode[];
+}
+
+/**
+ * Represents a scale node
+ */
+export interface ScaleNode extends BaseNode {
+  type: 'scale';
+  v: Vector3D;
+  children: ASTNode[];
+}
+
+/**
+ * Represents a mirror node
+ */
+export interface MirrorNode extends BaseNode {
+  type: 'mirror';
+  v: Vector3D;
+  children: ASTNode[];
+}
+
+/**
+ * Represents a multmatrix node
+ */
+export interface MultmatrixNode extends BaseNode {
+  type: 'multmatrix';
+  m: number[][];
+  children: ASTNode[];
+}
+
+/**
+ * Represents a color node
+ */
+export interface ColorNode extends BaseNode {
+  type: 'color';
+  c: string | Vector4D;
+  children: ASTNode[];
+}
+
+/**
+ * Represents a union node
+ */
+export interface UnionNode extends BaseNode {
+  type: 'union';
+  children: ASTNode[];
+}
+
+/**
+ * Represents a difference node
+ */
+export interface DifferenceNode extends BaseNode {
+  type: 'difference';
+  children: ASTNode[];
+}
+
+/**
+ * Represents an intersection node
+ */
+export interface IntersectionNode extends BaseNode {
+  type: 'intersection';
+  children: ASTNode[];
+}
+
+/**
+ * Represents a hull node
+ */
+export interface HullNode extends BaseNode {
+  type: 'hull';
+  children: ASTNode[];
+}
+
+/**
+ * Represents a minkowski node
+ */
+export interface MinkowskiNode extends BaseNode {
+  type: 'minkowski';
   children: ASTNode[];
 }
 
@@ -225,7 +316,7 @@ export interface TextNode extends BaseNode {
 /**
  * Union type of all possible AST nodes
  */
-export type ASTNode = 
+export type ASTNode =
   | CubeNode
   | SphereNode
   | CylinderNode
@@ -235,6 +326,16 @@ export type ASTNode =
   | SquareNode
   | TextNode
   | TranslateNode
+  | RotateNode
+  | ScaleNode
+  | MirrorNode
+  | MultmatrixNode
+  | ColorNode
+  | UnionNode
+  | DifferenceNode
+  | IntersectionNode
+  | HullNode
+  | MinkowskiNode
   | FunctionCallNode
   | LiteralNode
   | VariableNode

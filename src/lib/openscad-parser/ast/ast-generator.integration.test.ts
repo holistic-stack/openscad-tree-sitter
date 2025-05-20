@@ -2,6 +2,9 @@ import { OpenscadParser } from '../openscad-parser';
 import { afterAll, beforeAll, describe, it, expect, beforeEach } from 'vitest';
 import {cstTreeCursorWalkLog} from "@/lib/openscad-parser/cst/cursor-utils/cstTreeCursorWalkLog";
 
+// Set the generator type to use
+const GENERATOR_TYPE: 'original' | 'modular' | 'direct' = 'direct';
+
 describe('AST Generator Integration Tests', () => {
   let parser: OpenscadParser;
 
@@ -37,7 +40,7 @@ describe('AST Generator Integration Tests', () => {
       console.log('\nDetailed CST structure:');
       printNode(cst?.rootNode);
 
-      const ast = parser.parseAST(code);
+      const ast = parser.parseAST(code, GENERATOR_TYPE);
       console.log('\nGenerated AST:', JSON.stringify(ast, null, 2));
 
       expect(ast).toBeDefined();
@@ -58,7 +61,7 @@ describe('AST Generator Integration Tests', () => {
 
     it('should parse translate with cube using curly braces and named parameters', () => {
       const code = `translate(v=[3,0,0]) { cube(size=[1,2,3], center=true); }`;
-      const ast = parser.parseAST(code);
+      const ast = parser.parseAST(code, GENERATOR_TYPE);
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);

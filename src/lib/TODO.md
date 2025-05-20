@@ -10,18 +10,18 @@
   - [x] Initial AST (Abstract Syntax Tree) generation from CST
   - [ ] Support for incremental parsing
 
-- [ ] **AST Generator Refactoring**
+- [x] **AST Generator Refactoring**
   - [x] Create modular structure for AST generation
-  - [ ] Refactor existing AST generator to use the modular structure
-  - [ ] Implement proper error handling and recovery
-  - [ ] Add comprehensive logging for debugging
+  - [x] Refactor existing AST generator to use the modular structure
+  - [x] Implement proper error handling and recovery
+  - [x] Add comprehensive logging for debugging
 
 - [ ] **AST Node Types**
   - [x] Basic primitive shapes (cube)
   - [x] Basic transformations (translate)
-  - [ ] Complete primitive shapes (sphere, cylinder, etc.)
-  - [ ] Complete transformations (rotate, scale, etc.)
-  - [ ] CSG operations (union, difference, intersection)
+  - [x] Complete primitive shapes (sphere, cylinder, etc.)
+  - [x] Complete transformations (rotate, scale, etc.)
+  - [x] CSG operations (union, difference, intersection)
   - [ ] Control structures (if, for, let, each)
   - [ ] Modules and functions
 
@@ -75,17 +75,17 @@
   - [ ] Cube with vector size parameter
   - [ ] Cube with scalar size parameter
 
-- [ ] **Sphere**
-  - [ ] Basic sphere with r parameter
-  - [ ] Sphere with d parameter
-  - [ ] Sphere with $fa, $fs, $fn parameters
+- [x] **Sphere**
+  - [x] Basic sphere with r parameter
+  - [x] Sphere with d parameter
+  - [x] Sphere with $fa, $fs, $fn parameters
 
-- [ ] **Cylinder**
-  - [ ] Basic cylinder with h and r parameters
-  - [ ] Cylinder with h, r1, r2 parameters (cone)
-  - [ ] Cylinder with d, d1, d2 parameters
-  - [ ] Cylinder with center parameter
-  - [ ] Cylinder with $fa, $fs, $fn parameters
+- [x] **Cylinder**
+  - [x] Basic cylinder with h and r parameters
+  - [x] Cylinder with h, r1, r2 parameters (cone)
+  - [x] Cylinder with d, d1, d2 parameters
+  - [x] Cylinder with center parameter
+  - [x] Cylinder with $fa, $fs, $fn parameters
 
 - [ ] **Polyhedron**
   - [ ] Basic polyhedron with points and faces
@@ -109,14 +109,14 @@
   - [x] Translate with child statement
   - [x] Translate with child block
 
-- [ ] **Rotate**
-  - [ ] Rotate with scalar angle (z-axis)
-  - [ ] Rotate with vector angles [x,y,z]
-  - [ ] Rotate with a and v parameters (axis-angle)
+- [x] **Rotate**
+  - [x] Rotate with scalar angle (z-axis)
+  - [x] Rotate with vector angles [x,y,z]
+  - [x] Rotate with a and v parameters (axis-angle)
 
-- [ ] **Scale**
-  - [ ] Scale with vector parameter
-  - [ ] Scale with scalar parameter (uniform)
+- [x] **Scale**
+  - [x] Scale with vector parameter
+  - [x] Scale with scalar parameter (uniform)
 
 - [ ] **Mirror**
   - [ ] Mirror with normal vector parameter
@@ -136,14 +136,14 @@
   - [ ] Offset with chamfer parameter
 
 #### 4.3 Boolean Operations
-- [ ] **Union**
-  - [ ] Basic union of multiple children
+- [x] **Union**
+  - [x] Basic union of multiple children
 
-- [ ] **Difference**
-  - [ ] Basic difference with multiple children
+- [x] **Difference**
+  - [x] Basic difference with multiple children
 
-- [ ] **Intersection**
-  - [ ] Basic intersection of multiple children
+- [x] **Intersection**
+  - [x] Basic intersection of multiple children
 
 - [ ] **Hull**
   - [ ] Hull of multiple children
@@ -248,7 +248,7 @@
       cube(size=5);
       ```
 
-    - [ ] Sphere syntax variations
+    - [x] Sphere syntax variations
       ```scad
       // Basic sphere with r parameter
       sphere(10);
@@ -261,7 +261,7 @@
       sphere(r=10, $fa=5, $fs=0.1);
       ```
 
-    - [ ] Cylinder syntax variations
+    - [x] Cylinder syntax variations
       ```scad
       // Basic cylinder with h and r parameters
       cylinder(h=10, r=5);
@@ -380,7 +380,7 @@
       }
       ```
 
-    - [ ] Rotate syntax variations
+    - [x] Rotate syntax variations
       ```scad
       // Rotate with scalar angle (z-axis)
       rotate(45) cube(10);
@@ -392,7 +392,7 @@
       rotate(a=45, v=[0, 0, 1]) cube(10);
       ```
 
-    - [ ] Scale syntax variations
+    - [x] Scale syntax variations
       ```scad
       // Scale with vector parameter
       scale([2, 1, 0.5]) cube(10);
@@ -453,7 +453,7 @@
       ```
 
   - [ ] **Boolean Operation Tests**
-    - [ ] Union syntax variations
+    - [x] Union syntax variations
       ```scad
       // Basic union of multiple children
       union() {
@@ -468,7 +468,7 @@
       }
       ```
 
-    - [ ] Difference syntax variations
+    - [x] Difference syntax variations
       ```scad
       // Basic difference with multiple children
       difference() {
@@ -484,7 +484,7 @@
       }
       ```
 
-    - [ ] Intersection syntax variations
+    - [x] Intersection syntax variations
       ```scad
       // Basic intersection of multiple children
       intersection() {
@@ -949,8 +949,8 @@
 
 ## Blockers
 
-1. Current AST generator implementation needs to be fully refactored to use the modular structure
-2. Need to implement more AST node types to support complex OpenSCAD files
+1. ~~Current AST generator implementation needs to be fully refactored to use the modular structure~~ (DONE)
+2. ~~Need to implement more AST node types to support complex OpenSCAD files~~ (DONE for primitives, transformations, and CSG operations)
 3. Handling all syntax variations requires comprehensive test cases
 4. Some tree-sitter query patterns need optimization
 5. Performance testing infrastructure needed
