@@ -2,7 +2,7 @@ import { OpenscadParser } from '../../../openscad-parser';
 import { afterAll, beforeAll, describe, it, expect } from 'vitest';
 
 // Set the generator type to use
-const GENERATOR_TYPE: 'original' | 'modular' | 'direct' = 'direct';
+const GENERATOR_TYPE: 'original' | 'modular' | 'direct' | 'visitor' = 'visitor';
 
 describe('Sphere AST Generation', () => {
   let parser: OpenscadParser;
@@ -26,7 +26,7 @@ describe('Sphere AST Generation', () => {
 
       const sphereNode = ast[0];
       expect(sphereNode.type).toBe('sphere');
-      expect((sphereNode as any).r).toBe(10);
+      expect((sphereNode as any).radius).toBe(10);
     });
 
     it('should parse sphere with d parameter', () => {
@@ -38,9 +38,9 @@ describe('Sphere AST Generation', () => {
 
       const sphereNode = ast[0];
       expect(sphereNode.type).toBe('sphere');
-      expect((sphereNode as any).d).toBe(20);
-      // When d is specified, r should not be present
-      expect((sphereNode as any).r).toBeUndefined();
+      expect((sphereNode as any).diameter).toBe(20);
+      // When diameter is specified, radius should not be present
+      expect((sphereNode as any).radius).toBeUndefined();
     });
 
     it('should parse sphere with $fn parameter', () => {
@@ -52,8 +52,8 @@ describe('Sphere AST Generation', () => {
 
       const sphereNode = ast[0];
       expect(sphereNode.type).toBe('sphere');
-      expect((sphereNode as any).r).toBe(10);
-      expect((sphereNode as any).$fn).toBe(100);
+      expect((sphereNode as any).radius).toBe(10);
+      expect((sphereNode as any).fn).toBe(100);
     });
 
     it('should parse sphere with $fa and $fs parameters', () => {
@@ -65,9 +65,9 @@ describe('Sphere AST Generation', () => {
 
       const sphereNode = ast[0];
       expect(sphereNode.type).toBe('sphere');
-      expect((sphereNode as any).r).toBe(10);
-      expect((sphereNode as any).$fa).toBe(5);
-      expect((sphereNode as any).$fs).toBe(0.1);
+      expect((sphereNode as any).radius).toBe(10);
+      expect((sphereNode as any).fa).toBe(5);
+      expect((sphereNode as any).fs).toBe(0.1);
     });
 
     it('should handle sphere with named r parameter', () => {
@@ -79,7 +79,7 @@ describe('Sphere AST Generation', () => {
 
       const sphereNode = ast[0];
       expect(sphereNode.type).toBe('sphere');
-      expect((sphereNode as any).r).toBe(15);
+      expect((sphereNode as any).radius).toBe(15);
     });
   });
 });

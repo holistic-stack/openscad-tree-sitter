@@ -125,11 +125,13 @@ export class PrimitiveVisitor extends BaseASTVisitor {
     }
 
     // Extract diameter parameter
+    let diameter: number | undefined = undefined;
     const diameterParam = args.find(arg => arg.name === 'd');
     if (diameterParam) {
       const diameterValue = extractNumberParameter(diameterParam);
       if (diameterValue !== null) {
-        radius = diameterValue / 2;
+        diameter = diameterValue;
+        radius = undefined; // Clear radius if diameter is specified
       } else {
         console.log(`[PrimitiveVisitor.createSphereNode] Invalid diameter parameter: ${diameterParam.value}`);
         return null;
@@ -141,7 +143,8 @@ export class PrimitiveVisitor extends BaseASTVisitor {
     let fs: number | undefined = undefined;
     let fn: number | undefined = undefined;
 
-    const faParam = args.find(arg => arg.name === '$fa');
+    // Try with and without $ prefix
+    const faParam = args.find(arg => arg.name === '$fa' || arg.name === 'fa');
     if (faParam) {
       const faValue = extractNumberParameter(faParam);
       if (faValue !== null) {
@@ -149,7 +152,7 @@ export class PrimitiveVisitor extends BaseASTVisitor {
       }
     }
 
-    const fsParam = args.find(arg => arg.name === '$fs');
+    const fsParam = args.find(arg => arg.name === '$fs' || arg.name === 'fs');
     if (fsParam) {
       const fsValue = extractNumberParameter(fsParam);
       if (fsValue !== null) {
@@ -157,7 +160,7 @@ export class PrimitiveVisitor extends BaseASTVisitor {
       }
     }
 
-    const fnParam = args.find(arg => arg.name === '$fn');
+    const fnParam = args.find(arg => arg.name === '$fn' || arg.name === 'fn');
     if (fnParam) {
       const fnValue = extractNumberParameter(fnParam);
       if (fnValue !== null) {
@@ -170,6 +173,7 @@ export class PrimitiveVisitor extends BaseASTVisitor {
     return {
       type: 'sphere',
       radius,
+      diameter,
       fa,
       fs,
       fn,

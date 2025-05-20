@@ -1,0 +1,146 @@
+/**
+ * Tests for the QueryVisitor class
+ */
+
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { QueryVisitor } from './query-visitor';
+import { CompositeVisitor } from './composite-visitor';
+import { PrimitiveVisitor } from './primitive-visitor';
+import { TransformVisitor } from './transform-visitor';
+import { CSGVisitor } from './csg-visitor';
+import { OpenscadParser } from '../../openscad-parser';
+
+describe('QueryVisitor', () => {
+  let parser: OpenscadParser;
+  let queryVisitor: QueryVisitor;
+
+  beforeEach(async () => {
+    parser = new OpenscadParser();
+    await parser.init('./tree-sitter-openscad.wasm');
+  });
+
+  afterEach(() => {
+    parser.dispose();
+  });
+
+  it('should find nodes by type', () => {
+    const code = 'cube(10); sphere(5); cylinder(h=10, r=5);';
+    const tree = parser.parseCST(code);
+    if (!tree) throw new Error('Failed to parse CST');
+
+    // Create a composite visitor
+    const compositeVisitor = new CompositeVisitor([
+      new PrimitiveVisitor(code),
+      new TransformVisitor(code),
+      new CSGVisitor(code)
+    ]);
+
+    // Create a query visitor
+    queryVisitor = new QueryVisitor(code, tree, parser.language, compositeVisitor);
+
+    // Find all accessor_expression nodes
+    const accessorExpressions = queryVisitor.findNodesByType('accessor_expression');
+
+    // There should be at least 3 accessor expressions (cube, sphere, cylinder)
+    expect(accessorExpressions.length).toBeGreaterThanOrEqual(3);
+
+    // Check that we have cube, sphere, and cylinder
+    const functionNames = accessorExpressions.map(node => node.text);
+    expect(functionNames.some(name => name.includes('cube'))).toBe(true);
+    expect(functionNames.some(name => name.includes('sphere'))).toBe(true);
+    expect(functionNames.some(name => name.includes('cylinder'))).toBe(true);
+  });
+
+  it('should find nodes by multiple types', () => {
+    const code = 'cube(10); sphere(5); cylinder(h=10, r=5);';
+    const tree = parser.parseCST(code);
+    if (!tree) throw new Error('Failed to parse CST');
+
+    // Create a composite visitor
+    const compositeVisitor = new CompositeVisitor([
+      new PrimitiveVisitor(code),
+      new TransformVisitor(code),
+      new CSGVisitor(code)
+    ]);
+
+    // Create a query visitor
+    queryVisitor = new QueryVisitor(code, tree, parser.language, compositeVisitor);
+
+    // Find all accessor_expression and arguments nodes
+    const nodes = queryVisitor.findNodesByTypes(['accessor_expression', 'arguments']);
+
+    // There should be at least 3 call expressions and 3 arguments
+    expect(nodes.length).toBeGreaterThanOrEqual(6);
+
+    // Check that we have both accessor_expression and arguments nodes
+    const accessorExpressions = nodes.filter(node => node.type === 'accessor_expression');
+    const arguments_ = nodes.filter(node => node.type === 'arguments');
+
+    expect(accessorExpressions.length).toBeGreaterThanOrEqual(3);
+    expect(arguments_.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('should execute a query and cache the results', () => {
+    const code = 'cube(10); sphere(5); cylinder(h=10, r=5);';
+    const tree = parser.parseCST(code);
+    if (!tree) throw new Error('Failed to parse CST');
+
+    // Create a composite visitor
+    const compositeVisitor = new CompositeVisitor([
+      new PrimitiveVisitor(code),
+      new TransformVisitor(code),
+      new CSGVisitor(code)
+    ]);
+
+    // Create a query visitor
+    queryVisitor = new QueryVisitor(code, tree, parser.language, compositeVisitor);
+
+    // Execute a query to find all accessor expressions
+    const query = '(accessor_expression) @node';
+    const results1 = queryVisitor.executeQuery(query);
+
+    // There should be at least 3 accessor expressions
+    expect(results1.length).toBeGreaterThanOrEqual(3);
+
+    // Execute the same query again
+    const results2 = queryVisitor.executeQuery(query);
+
+    // The results should be the same
+    expect(results2.length).toEqual(results1.length);
+
+    // The cache should have been used
+    const stats = queryVisitor.getQueryCacheStats();
+    expect(stats.hits).toBe(1);
+    expect(stats.misses).toBe(1);
+    expect(stats.size).toBe(1);
+  });
+
+  it('should clear the query cache', () => {
+    const code = 'cube(10); sphere(5); cylinder(h=10, r=5);';
+    const tree = parser.parseCST(code);
+    if (!tree) throw new Error('Failed to parse CST');
+
+    // Create a composite visitor
+    const compositeVisitor = new CompositeVisitor([
+      new PrimitiveVisitor(code),
+      new TransformVisitor(code),
+      new CSGVisitor(code)
+    ]);
+
+    // Create a query visitor
+    queryVisitor = new QueryVisitor(code, tree, parser.language, compositeVisitor);
+
+    // Execute a query to find all accessor expressions
+    const query = '(accessor_expression) @node';
+    queryVisitor.executeQuery(query);
+
+    // The cache should have one entry
+    expect(queryVisitor.getQueryCacheStats().size).toBe(1);
+
+    // Clear the cache
+    queryVisitor.clearQueryCache();
+
+    // The cache should be empty
+    expect(queryVisitor.getQueryCacheStats().size).toBe(0);
+  });
+});

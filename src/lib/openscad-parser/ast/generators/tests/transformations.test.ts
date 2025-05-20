@@ -2,7 +2,7 @@ import { OpenscadParser } from '../../../openscad-parser';
 import { afterAll, beforeAll, describe, it, expect } from 'vitest';
 
 // Set the generator type to use
-const GENERATOR_TYPE: 'original' | 'modular' | 'direct' = 'direct';
+const GENERATOR_TYPE: 'original' | 'modular' | 'direct' | 'visitor' = 'visitor';
 
 describe('Transformation AST Generation', () => {
   let parser: OpenscadParser;
@@ -26,7 +26,7 @@ describe('Transformation AST Generation', () => {
       expect(ast[0].type).toBe('mirror');
 
       const mirrorNode = ast[0] as any;
-      expect(mirrorNode.v).toEqual([1, 0, 0]);
+      expect(mirrorNode.vector).toEqual([1, 0, 0]);
       expect(mirrorNode.children).toHaveLength(1);
       expect(mirrorNode.children[0].type).toBe('cube');
     });
@@ -52,7 +52,7 @@ describe('Transformation AST Generation', () => {
       expect(ast[0].type).toBe('mirror');
 
       const mirrorNode = ast[0] as any;
-      expect(mirrorNode.v).toEqual([1, 1, 0]); // Z should default to 0
+      expect(mirrorNode.vector).toEqual([1, 1, 0]); // Z should default to 0
       expect(mirrorNode.children).toHaveLength(1);
       expect(mirrorNode.children[0].type).toBe('cube');
     });
@@ -74,7 +74,7 @@ describe('Transformation AST Generation', () => {
       expect(ast[0].type).toBe('multmatrix');
 
       const multmatrixNode = ast[0] as any;
-      expect(multmatrixNode.m).toEqual([
+      expect(multmatrixNode.matrix).toEqual([
         [1, 0, 0, 10],
         [0, 1, 0, 20],
         [0, 0, 1, 30],
@@ -119,7 +119,7 @@ describe('Transformation AST Generation', () => {
       expect(ast[0].type).toBe('color');
 
       const colorNode = ast[0] as any;
-      expect(colorNode.c).toBe("red");
+      expect(colorNode.color).toBe("red");
       expect(colorNode.children).toHaveLength(1);
       expect(colorNode.children[0].type).toBe('cube');
     });
@@ -145,7 +145,7 @@ describe('Transformation AST Generation', () => {
       expect(ast[0].type).toBe('color');
 
       const colorNode = ast[0] as any;
-      expect(colorNode.c).toEqual([1, 0, 0, 1]); // Alpha should default to 1
+      expect(colorNode.color).toEqual([1, 0, 0, 1]); // Alpha should default to 1
       expect(colorNode.children).toHaveLength(1);
       expect(colorNode.children[0].type).toBe('cube');
     });
@@ -199,7 +199,7 @@ describe('Transformation AST Generation', () => {
       expect(ast[0].type).toBe('offset');
 
       const offsetNode = ast[0] as any;
-      expect(offsetNode.r).toBe(2);
+      expect(offsetNode.radius).toBe(2);
       expect(offsetNode.delta).toBe(0);
       expect(offsetNode.chamfer).toBe(false);
       expect(offsetNode.children).toHaveLength(1);
@@ -229,7 +229,7 @@ describe('Transformation AST Generation', () => {
       expect(ast[0].type).toBe('offset');
 
       const offsetNode = ast[0] as any;
-      expect(offsetNode.r).toBe(0);
+      expect(offsetNode.radius).toBe(0);
       expect(offsetNode.delta).toBe(2);
       expect(offsetNode.chamfer).toBe(true);
       expect(offsetNode.children).toHaveLength(1);

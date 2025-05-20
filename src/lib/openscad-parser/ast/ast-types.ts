@@ -230,11 +230,11 @@ export interface CubeNode extends BaseNode {
  */
 export interface SphereNode extends BaseNode {
   type: 'sphere';
-  r?: number;
-  d?: number;
-  $fn?: number;
-  $fa?: number;
-  $fs?: number;
+  radius?: number;
+  diameter?: number;
+  fa?: number;
+  fs?: number;
+  fn?: number;
 }
 
 /**

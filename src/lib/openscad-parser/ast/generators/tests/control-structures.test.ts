@@ -2,7 +2,7 @@ import { OpenscadParser } from '../../../openscad-parser';
 import { afterAll, beforeAll, describe, it, expect } from 'vitest';
 
 // Set the generator type to use
-const GENERATOR_TYPE: 'original' | 'modular' | 'direct' = 'direct';
+const GENERATOR_TYPE: 'original' | 'modular' | 'direct' | 'visitor' = 'visitor';
 
 describe('Control Structure AST Generation', () => {
   let parser: OpenscadParser;

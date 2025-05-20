@@ -222,7 +222,7 @@ export class OpenscadParser {
         }
 
         if (generatorType === 'visitor') {
-            const generator = new VisitorASTGenerator(cst, code);
+            const generator = new VisitorASTGenerator(cst, code, this.language);
             return generator.generate();
         } else if (generatorType === 'modular') {
             const generator = new ModularASTGenerator(cst, code);

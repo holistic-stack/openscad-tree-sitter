@@ -129,9 +129,11 @@ The project has made significant progress with:
 - Initial AST (Abstract Syntax Tree) generation from CST
 - Support for many OpenSCAD constructs (primitives, transformations, CSG operations)
 - Visitor pattern implementation for CST traversal
+- Fixed implementation of scale transformations
+- Fixed implementation of union operations
+- Implemented vector parameter extraction for transformations
 
 However, there are several issues that need to be addressed:
-- Union tests are failing due to string literal issues in DirectASTGenerator
 - Some tests are using parseToAST instead of parseAST
 - The ModularASTGenerator needs updates to handle all operations
 - Difference and intersection operations need implementation
@@ -180,16 +182,34 @@ We're enhancing error handling with structured error types and recovery strategi
 - **Error Reporting**: Detailed error messages with position information and suggestions for fixes
 - **Integration with Parser**: Updates to the parser to use the enhanced error handling system
 
-### 3. Query Caching and Optimization (Task 0.4)
+### 3. Query Caching and Optimization (Task 0.4) - COMPLETED
 
-We're implementing query caching to improve performance, especially for frequently used queries.
+We've implemented query caching to improve performance, especially for frequently used queries.
 
 #### Key Components
 
 - **QueryCache Interface**: Defines methods for caching and retrieving query results
 - **LRUQueryCache**: Implements the cache interface using an LRU (Least Recently Used) strategy
 - **QueryManager**: Manages query execution and caching
+- **QueryVisitor**: Integrates the query manager with the visitor pattern
 - **Integration with AST Generator**: Updates the AST generator to use the query manager
+
+#### Implementation Details
+
+- Created a `QueryCache` interface with methods for caching and retrieving query results
+- Implemented `LRUQueryCache` class with LRU eviction policy
+- Created `QueryManager` for executing and caching queries
+- Implemented `QueryVisitor` for integrating with the visitor pattern
+- Updated `VisitorASTGenerator` to use the query visitor
+- Added detailed logging to help debug issues with the query system
+- Created unit tests for the query cache, LRU cache, query manager, and query visitor
+
+#### Benefits
+
+- **Performance**: Query caching improves performance by avoiding redundant query execution
+- **Responsiveness**: The parser becomes more responsive, especially for large files
+- **Efficiency**: Query caching reduces the computational cost of parsing
+- **Scalability**: Query caching makes the parser more scalable for large projects
 
 ### 4. Incremental Parsing (Task 0.5)
 

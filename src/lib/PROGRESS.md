@@ -53,13 +53,18 @@ Implemented a registry system for node handlers to replace the current approach 
 - [x] Added detailed error messages with suggestions for fixes
 - [x] Created unit tests for error classes, recovery strategies, and integration with parser
 
-#### Query Caching and Optimization
+#### Query Caching and Optimization - COMPLETED
 - [x] Study tree-sitter query optimization techniques
 - [x] Design a query cache interface
 - [x] Define caching strategies for different query types
 - [x] Create a plan for implementing query caching
 - [x] Design `QueryCache` interface, `LRUQueryCache` class, and `QueryManager` class
-- [ ] Implementation and integration with AST generator
+- [x] Implementation of `QueryCache` interface with get/set methods
+- [x] Implementation of `LRUQueryCache` class with LRU eviction policy
+- [x] Implementation of `QueryManager` for executing and caching queries
+- [x] Implementation of `QueryVisitor` for integrating with the visitor pattern
+- [x] Integration with AST generator
+- [x] Created unit tests for query cache, LRU cache, query manager, and query visitor
 
 #### Incremental Parsing
 - [x] Study tree-sitter incremental parsing mechanisms
@@ -186,7 +191,11 @@ See [TODO.md](./TODO.md) for detailed next steps and implementation tasks.
 - All transformation tests are now passing
 - Implemented support for rotate transformations
 - All rotate tests are now passing
-- Started implementing support for union operations
+- Implemented support for union operations
+- Fixed implementation of scale transformations
+- Fixed vector parameter extraction for transformations
+- Implemented proper handling of children in transform operations
+- Fixed implementation of implicit unions (blocks without union keyword)
 - Implemented visitor pattern for CST traversal
 - Created specialized visitors for different node types (primitives, transformations, CSG operations)
 - Implemented composite visitor for delegating to specialized visitors
@@ -201,7 +210,6 @@ See [TODO.md](./TODO.md) for detailed next steps and implementation tasks.
 - Fixed base-ast-visitor.test.ts to use the real parser instead of mocks
 
 ### Current Issues
-- Union tests are failing due to an unterminated string literal in the DirectASTGenerator.ts file
 - There are still failing tests in other modules (difference, intersection, primitives, module-function)
 - The ModularASTGenerator needs to be updated to handle these other modules
 - Some tests are using parseToAST instead of parseAST, which is causing errors
@@ -211,15 +219,11 @@ See [TODO.md](./TODO.md) for detailed next steps and implementation tasks.
 ### Next Steps
 - Fix the primitive-visitor.test.ts tests to use the correct node types
 - Fix the composite-visitor.test.ts tests to use the correct node types
-- Fix the string literal issue in the union operations implementation
-- Implement support for difference and intersection operations
 - Fix the module and function tests
 - Update the ModularASTGenerator to handle all types of operations
 - Implement module and function visitors
 - Implement control structure visitors
 - Add support for expression visitors
-- Implement query caching and optimization
-- Implement registry system for node handlers
 
 ## Known Issues
 
@@ -227,7 +231,6 @@ See [TODO.md](./TODO.md) for detailed next steps and implementation tasks.
 - Performance optimizations may be needed for large files
 - Some AST node types may need refinement based on real-world usage
 - The CSG Generator currently doesn't handle all types of child nodes correctly
-- Union operations have an issue with unterminated string literals
 - Difference and intersection operations are not fully implemented
 - Module and function definitions and calls need more work
 - Some tests are using parseToAST instead of parseAST, which is causing errors

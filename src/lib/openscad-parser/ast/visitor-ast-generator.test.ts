@@ -21,7 +21,7 @@ describe('VisitorASTGenerator', () => {
       const tree = parser.parseCST(code);
       if (!tree) throw new Error('Failed to parse CST');
 
-      const generator = new VisitorASTGenerator(tree, code);
+      const generator = new VisitorASTGenerator(tree, code, parser.language);
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
@@ -35,7 +35,7 @@ describe('VisitorASTGenerator', () => {
       const tree = parser.parseCST(code);
       if (!tree) throw new Error('Failed to parse CST');
 
-      const generator = new VisitorASTGenerator(tree, code);
+      const generator = new VisitorASTGenerator(tree, code, parser.language);
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
@@ -48,7 +48,7 @@ describe('VisitorASTGenerator', () => {
       const tree = parser.parseCST(code);
       if (!tree) throw new Error('Failed to parse CST');
 
-      const generator = new VisitorASTGenerator(tree, code);
+      const generator = new VisitorASTGenerator(tree, code, parser.language);
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
@@ -64,7 +64,7 @@ describe('VisitorASTGenerator', () => {
       const tree = parser.parseCST(code);
       if (!tree) throw new Error('Failed to parse CST');
 
-      const generator = new VisitorASTGenerator(tree, code);
+      const generator = new VisitorASTGenerator(tree, code, parser.language);
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
@@ -80,7 +80,7 @@ describe('VisitorASTGenerator', () => {
       const tree = parser.parseCST(code);
       if (!tree) throw new Error('Failed to parse CST');
 
-      const generator = new VisitorASTGenerator(tree, code);
+      const generator = new VisitorASTGenerator(tree, code, parser.language);
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
@@ -96,7 +96,7 @@ describe('VisitorASTGenerator', () => {
       const tree = parser.parseCST(code);
       if (!tree) throw new Error('Failed to parse CST');
 
-      const generator = new VisitorASTGenerator(tree, code);
+      const generator = new VisitorASTGenerator(tree, code, parser.language);
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
@@ -112,7 +112,7 @@ describe('VisitorASTGenerator', () => {
       const tree = parser.parseCST(code);
       if (!tree) throw new Error('Failed to parse CST');
 
-      const generator = new VisitorASTGenerator(tree, code);
+      const generator = new VisitorASTGenerator(tree, code, parser.language);
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
@@ -129,7 +129,7 @@ describe('VisitorASTGenerator', () => {
       const tree = parser.parseCST(code);
       if (!tree) throw new Error('Failed to parse CST');
 
-      const generator = new VisitorASTGenerator(tree, code);
+      const generator = new VisitorASTGenerator(tree, code, parser.language);
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
@@ -147,7 +147,7 @@ describe('VisitorASTGenerator', () => {
       const tree = parser.parseCST(code);
       if (!tree) throw new Error('Failed to parse CST');
 
-      const generator = new VisitorASTGenerator(tree, code);
+      const generator = new VisitorASTGenerator(tree, code, parser.language);
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);

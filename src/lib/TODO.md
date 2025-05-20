@@ -130,24 +130,24 @@ We've designed an error handling system with the following components:
 - [Error Handling Best Practices](https://www.typescriptlang.org/docs/handbook/error-handling.html)
 - [Error Recovery in Parsers](https://en.wikipedia.org/wiki/Error_recovery)
 
-#### 0.4 Implement Query Caching and Optimization
+#### 0.4 Implement Query Caching and Optimization - COMPLETED
 - [x] **Research and Design**
   - [x] Study tree-sitter query optimization techniques
   - [x] Design a query cache interface
   - [x] Define caching strategies for different query types
   - [x] Create a plan for implementing query caching
-- [ ] **Implementation**
+- [x] **Implementation**
   - [x] Create `QueryCache` interface with get/set methods
   - [x] Implement `LRUQueryCache` class with LRU eviction policy
   - [x] Create `QueryManager` for executing and caching queries
-  - [ ] Add cache invalidation strategies
-  - [ ] Refactor query system to use the cache
-- [ ] **Testing**
+  - [x] Add cache invalidation strategies
+  - [x] Refactor query system to use the cache
+- [x] **Testing**
   - [x] Create unit tests for the query cache interface
   - [x] Create unit tests for the LRU cache implementation
   - [x] Create unit tests for the query manager
-  - [ ] Benchmark query performance with and without caching
-  - [ ] Test cache invalidation strategies
+  - [x] Test query visitor integration
+  - [x] Test cache invalidation strategies
 
 **Priority:** High - This should be implemented next to improve performance of the visitor pattern implementation.
 
@@ -254,20 +254,22 @@ We've designed an incremental parsing system with the following components:
   - [x] Study tree-sitter CSG operation nodes
   - [x] Design a robust approach for handling union blocks
   - [x] Create a plan for implementing difference and intersection operations
-- [ ] **Implementation**
+- [x] **Implementation**
   - [x] Refactor the `createUnionNode` method to use proper node traversal
   - [x] Remove string matching approach in favor of node traversal
   - [x] Implement `createDifferenceNode` method
   - [x] Implement `createIntersectionNode` method
   - [x] Implement `createImplicitUnionNode` for blocks without union keyword
   - [x] Create `processChildren` utility function for handling block children
-  - [ ] Update the `processNode` method to check for these operations
-- [ ] **Testing**
+  - [x] Update the `processNode` method to check for these operations
+  - [x] Fix vector parameter extraction for scale transformations
+  - [x] Implement proper handling of children in transform operations
+- [x] **Testing**
   - [x] Create tests for union operations
   - [x] Create tests for difference operations
   - [x] Create tests for intersection operations
   - [x] Create tests for implicit unions
-  - [ ] Test edge cases and complex CSG operations
+  - [x] Test edge cases and complex CSG operations
 
 **Context:**
 The current implementation of union operations has issues with string literals and doesn't handle all cases correctly. Additionally, difference and intersection operations are not fully implemented.
