@@ -314,6 +314,157 @@ export interface TextNode extends BaseNode {
 }
 
 /**
+ * Represents a linear_extrude node
+ */
+export interface LinearExtrudeNode extends BaseNode {
+  type: 'linear_extrude';
+  height: number;
+  center?: boolean;
+  convexity?: number;
+  twist?: number;
+  slices?: number;
+  scale?: number | Vector2D;
+  $fn?: number;
+  children: ASTNode[];
+}
+
+/**
+ * Represents a rotate_extrude node
+ */
+export interface RotateExtrudeNode extends BaseNode {
+  type: 'rotate_extrude';
+  angle?: number;
+  convexity?: number;
+  $fn?: number;
+  $fa?: number;
+  $fs?: number;
+  children: ASTNode[];
+}
+
+/**
+ * Represents an if statement
+ */
+export interface IfNode extends BaseNode {
+  type: 'if';
+  condition: ExpressionNode;
+  thenBranch: ASTNode[];
+  elseBranch?: ASTNode[];
+}
+
+/**
+ * Represents a for loop
+ */
+export interface ForLoopNode extends BaseNode {
+  type: 'for_loop';
+  variable: string;
+  range: ExpressionNode | Vector2D | Vector3D;
+  step?: number;
+  body: ASTNode[];
+}
+
+/**
+ * Represents a let expression
+ */
+export interface LetNode extends BaseNode {
+  type: 'let';
+  assignments: { [key: string]: ParameterValue };
+  body: ASTNode[];
+}
+
+/**
+ * Represents an each statement
+ */
+export interface EachNode extends BaseNode {
+  type: 'each';
+  expression: ExpressionNode;
+}
+
+/**
+ * Represents a binary expression
+ */
+export interface BinaryExpressionNode extends ExpressionNode {
+  expressionType: 'binary';
+  operator: BinaryOperator;
+  left: ExpressionNode;
+  right: ExpressionNode;
+}
+
+/**
+ * Represents a unary expression
+ */
+export interface UnaryExpressionNode extends ExpressionNode {
+  expressionType: 'unary';
+  operator: UnaryOperator;
+  operand: ExpressionNode;
+}
+
+/**
+ * Represents a conditional expression (ternary operator)
+ */
+export interface ConditionalExpressionNode extends ExpressionNode {
+  expressionType: 'conditional';
+  condition: ExpressionNode;
+  thenBranch: ExpressionNode;
+  elseBranch: ExpressionNode;
+}
+
+/**
+ * Binary operators in OpenSCAD
+ */
+export type BinaryOperator = '+' | '-' | '*' | '/' | '%' | '==' | '!=' | '<' | '<=' | '>' | '>=' | '&&' | '||';
+
+/**
+ * Unary operators in OpenSCAD
+ */
+export type UnaryOperator = '+' | '-' | '!';
+
+/**
+ * Represents a module definition
+ */
+export interface ModuleDefinitionNode extends BaseNode {
+  type: 'module_definition';
+  name: string;
+  parameters: ModuleParameter[];
+  body: ASTNode[];
+}
+
+/**
+ * Represents a module parameter
+ */
+export interface ModuleParameter {
+  name: string;
+  defaultValue?: ParameterValue;
+}
+
+/**
+ * Represents a module instantiation
+ */
+export interface ModuleInstantiationNode extends BaseNode {
+  type: 'module_instantiation';
+  name: string;
+  arguments: Parameter[];
+  children: ASTNode[];
+}
+
+/**
+ * Represents a function definition
+ */
+export interface FunctionDefinitionNode extends BaseNode {
+  type: 'function_definition';
+  name: string;
+  parameters: ModuleParameter[];
+  expression: ExpressionNode;
+}
+
+/**
+ * Represents a children() call in a module
+ */
+export interface ChildrenNode extends BaseNode {
+  type: 'children';
+  index?: number;
+}
+
+/**
  * Union type of all possible AST nodes
  */
 export type ASTNode =
@@ -339,4 +490,14 @@ export type ASTNode =
   | FunctionCallNode
   | LiteralNode
   | VariableNode
-  | ExpressionNode;
+  | ExpressionNode
+  | IfNode
+  | ForLoopNode
+  | LetNode
+  | EachNode
+  | ModuleDefinitionNode
+  | ModuleInstantiationNode
+  | FunctionDefinitionNode
+  | ChildrenNode
+  | LinearExtrudeNode
+  | RotateExtrudeNode;

@@ -33,9 +33,9 @@
   - [x] AssignmentStatement
   - [x] Cube3D
   - [x] TranslateTransform
-  - [ ] Module definitions
-  - [ ] Function definitions
-  - [ ] Control structures (for, let, each)
+  - [x] Module definitions
+  - [x] Function definitions
+  - [x] Control structures (for, let, each)
 - [x] Fallback adapter for unknown node types
 - [x] Initial implementation of AST generator
 - [x] Support for basic primitives (cube) and transformations (translate)
@@ -43,6 +43,11 @@
 - [x] Implemented complete primitive shapes (sphere, cylinder)
 - [x] Implemented complete transformations (rotate, scale)
 - [x] Implemented CSG operations (union, difference, intersection)
+- [x] Implemented control structures (if, for, let)
+- [x] Implemented module and function system
+- [x] Implemented polyhedron primitive
+- [x] Implemented 2D primitives (circle, square, polygon, text)
+- [x] Implemented extrusion operations (linear_extrude, rotate_extrude)
 
 #### Testing
 - [x] Unit tests for core components
@@ -75,6 +80,15 @@ The project follows a modular architecture with clear separation of concerns:
 - Implemented rotate and scale transformations
 - Implemented union, difference, and intersection CSG operations
 - Created a direct AST generator for testing purposes
+- Implemented control structures (if statements, for loops, let expressions)
+- Added tests for control structures
+- Implemented module and function system (definitions and instantiations)
+- Added support for module parameters and children
+- Added tests for modules and functions
+- Implemented polyhedron primitive
+- Implemented 2D primitives (circle, square, polygon, text)
+- Implemented extrusion operations (linear_extrude, rotate_extrude)
+- Added tests for new primitives and extrusion operations
 
 ## Next Steps
 

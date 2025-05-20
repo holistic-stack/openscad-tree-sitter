@@ -4,9 +4,11 @@ import {
   BaseGenerator,
   PrimitiveGenerator,
   TransformGenerator,
-  ExpressionGenerator
+  ExpressionGenerator,
+  CSGGenerator,
+  ControlStructureGenerator,
+  ModuleFunctionGenerator
 } from './generators';
-import { CSGGenerator } from './generators/csg-generator';
 import { findDescendantOfType } from './utils/node-utils';
 
 // Type alias for web-tree-sitter's Node type
@@ -21,6 +23,8 @@ export class ModularASTGenerator {
   private transformGenerator: TransformGenerator;
   private csgGenerator: CSGGenerator;
   private expressionGenerator: ExpressionGenerator;
+  private controlStructureGenerator: ControlStructureGenerator;
+  private moduleFunctionGenerator: ModuleFunctionGenerator;
   private source: string;
 
   constructor(private tree: Tree, source: string) {
@@ -29,6 +33,8 @@ export class ModularASTGenerator {
     this.transformGenerator = new TransformGenerator();
     this.csgGenerator = new CSGGenerator();
     this.expressionGenerator = new ExpressionGenerator();
+    this.controlStructureGenerator = new ControlStructureGenerator();
+    this.moduleFunctionGenerator = new ModuleFunctionGenerator();
   }
 
   /**
@@ -75,6 +81,62 @@ export class ModularASTGenerator {
         return; // Don't process children of processed module instantiations further here
       }
       console.log(`[ModularASTGenerator.processNode] processModuleInstantiation returned null for: ${node.text.substring(0,30)}`);
+    }
+
+    // Check for module and function definitions
+    if (node.type === 'module_definition') {
+      console.log(`[ModularASTGenerator.processNode] Found module_definition: ${node.text.substring(0,30)}`);
+      const moduleNode = this.moduleFunctionGenerator.processModuleDefinition(node);
+      if (moduleNode) {
+        statements.push(moduleNode);
+        return; // Don't process children of processed module definitions further here
+      }
+    }
+
+    if (node.type === 'function_definition') {
+      console.log(`[ModularASTGenerator.processNode] Found function_definition: ${node.text.substring(0,30)}`);
+      const functionNode = this.moduleFunctionGenerator.processFunctionDefinition(node);
+      if (functionNode) {
+        statements.push(functionNode);
+        return; // Don't process children of processed function definitions further here
+      }
+    }
+
+    if (node.type === 'module_child') {
+      console.log(`[ModularASTGenerator.processNode] Found module_child: ${node.text.substring(0,30)}`);
+      const childrenNode = this.moduleFunctionGenerator.processChildrenNode(node);
+      if (childrenNode) {
+        statements.push(childrenNode);
+        return; // Don't process children of processed children() calls further here
+      }
+    }
+
+    // Check for control structures
+    if (node.type === 'if_statement') {
+      console.log(`[ModularASTGenerator.processNode] Found if_statement: ${node.text.substring(0,30)}`);
+      const ifNode = this.controlStructureGenerator.processIfStatement(node);
+      if (ifNode) {
+        statements.push(ifNode);
+        return; // Don't process children of processed if statements further here
+      }
+    }
+
+    if (node.type === 'for_statement') {
+      console.log(`[ModularASTGenerator.processNode] Found for_statement: ${node.text.substring(0,30)}`);
+      const forNode = this.controlStructureGenerator.processForLoop(node);
+      if (forNode) {
+        statements.push(forNode);
+        return; // Don't process children of processed for loops further here
+      }
+    }
+
+    if (node.type === 'let_expression') {
+      console.log(`[ModularASTGenerator.processNode] Found let_expression: ${node.text.substring(0,30)}`);
+      const letNode = this.controlStructureGenerator.processLetExpression(node);
+      if (letNode) {
+        statements.push(letNode);
+        return; // Don't process children of processed let expressions further here
+      }
     }
 
     // Special case for expression_statement containing a function call
@@ -149,6 +211,13 @@ export class ModularASTGenerator {
     astNode = this.csgGenerator.processModuleInstantiation(node);
     if (astNode) {
       console.log(`[ModularASTGenerator.processModuleInstantiation] CSGGenerator created node of type: ${astNode.type}`);
+      return astNode;
+    }
+
+    // Then try the module and function generator
+    astNode = this.moduleFunctionGenerator.processModuleInstantiation(node);
+    if (astNode) {
+      console.log(`[ModularASTGenerator.processModuleInstantiation] ModuleFunctionGenerator created node of type: ${astNode.type}`);
       return astNode;
     }
 

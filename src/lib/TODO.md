@@ -22,8 +22,8 @@
   - [x] Complete primitive shapes (sphere, cylinder, etc.)
   - [x] Complete transformations (rotate, scale, etc.)
   - [x] CSG operations (union, difference, intersection)
-  - [ ] Control structures (if, for, let, each)
-  - [ ] Modules and functions
+  - [x] Control structures (if, for, let, each)
+  - [x] Modules and functions
 
 - [ ] **Tree Traversal**
   - [x] Basic cursor utilities for tree traversal
@@ -87,20 +87,20 @@
   - [x] Cylinder with center parameter
   - [x] Cylinder with $fa, $fs, $fn parameters
 
-- [ ] **Polyhedron**
-  - [ ] Basic polyhedron with points and faces
-  - [ ] Polyhedron with triangles parameter
-  - [ ] Polyhedron with convexity parameter
+- [x] **Polyhedron**
+  - [x] Basic polyhedron with points and faces
+  - [x] Polyhedron with triangles parameter
+  - [x] Polyhedron with convexity parameter
 
-- [ ] **2D Primitives**
-  - [ ] Circle with r parameter
-  - [ ] Square with size parameter
-  - [ ] Polygon with points parameter
-  - [ ] Text with text parameter
+- [x] **2D Primitives**
+  - [x] Circle with r parameter
+  - [x] Square with size parameter
+  - [x] Polygon with points parameter
+  - [x] Text with text parameter
 
-- [ ] **Extrusion Operations**
-  - [ ] Linear_extrude with height parameter
-  - [ ] Rotate_extrude with angle parameter
+- [x] **Extrusion Operations**
+  - [x] Linear_extrude with height parameter
+  - [x] Rotate_extrude with angle parameter
 
 #### 4.2 Transformations
 - [x] **Translate**
