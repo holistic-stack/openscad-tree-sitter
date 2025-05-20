@@ -57,6 +57,28 @@
 │   │   │           transformations.test.ts
 │   │   │           union.test.ts
 │   │   │
+│   │   ├───registry
+│   │   │       node-handler-registry.ts
+│   │   │       default-node-handler-registry.ts
+│   │   │       node-handler-registry-factory.ts
+│   │   │       node-handler-registry.test.ts
+│   │   │
+│   │   ├───query
+│   │   │       query-cache.ts
+│   │   │       lru-query-cache.ts
+│   │   │       query-manager.ts
+│   │   │       query-cache.test.ts
+│   │   │
+│   │   ├───errors
+│   │   │       parser-error.ts
+│   │   │       recovery-strategy.ts
+│   │   │       parser-error.test.ts
+│   │   │       recovery-strategy.test.ts
+│   │   │
+│   │   ├───changes
+│   │   │       change-tracker.ts
+│   │   │       change-tracker.test.ts
+│   │   │
 │   │   ├───utils
 │   │   │       index.ts
 │   │   │       location-utils.ts
@@ -106,6 +128,7 @@ The project has made significant progress with:
 - CST (Concrete Syntax Tree) generation
 - Initial AST (Abstract Syntax Tree) generation from CST
 - Support for many OpenSCAD constructs (primitives, transformations, CSG operations)
+- Visitor pattern implementation for CST traversal
 
 However, there are several issues that need to be addressed:
 - Union tests are failing due to string literal issues in DirectASTGenerator
@@ -114,41 +137,64 @@ However, there are several issues that need to be addressed:
 - Difference and intersection operations need implementation
 - Module and function system needs more work
 
-## Top Priority Tasks
+## Current Focus: Critical Improvements
 
-### 1. Implement Visitor Pattern for CST Traversal
+We are currently focusing on implementing several critical improvements to the OpenSCAD Tree Sitter Parser:
 
-#### Implementation Status: COMPLETED
+### 1. Registry System for Node Handlers (Task 0.2)
 
-We have successfully implemented the visitor pattern for CST traversal. The implementation includes:
-
-1. **Base Visitor Class**: A base visitor class that provides default implementations for all visit methods.
-2. **Specialized Visitors**: Specialized visitors for different node types (primitives, transformations, CSG operations).
-3. **Composite Visitor**: A composite visitor that delegates to specialized visitors based on node type.
-4. **Visitor-based AST Generator**: An AST generator that uses the visitor pattern to traverse the CST.
-
-The visitor pattern has replaced the recursive approach previously used in `ModularASTGenerator.ts`. This makes the code more maintainable and extensible.
+We're implementing a registry system for node handlers to replace the current approach of trying each generator in sequence. This will make the code more modular, maintainable, and efficient with O(1) lookup performance.
 
 #### Key Components
 
-- **ASTVisitor Interface**: Defines the contract for all visitors.
-- **BaseASTVisitor**: Provides default implementations for all visit methods.
-- **PrimitiveVisitor**: Handles primitive shapes (cube, sphere, cylinder).
-- **TransformVisitor**: Handles transformations (translate, rotate, scale).
-- **CSGVisitor**: Handles CSG operations (union, difference, intersection).
-- **CompositeVisitor**: Delegates to specialized visitors based on node type.
+- **NodeHandlerRegistry Interface**: Defines methods for registering, looking up, and checking for handlers
+- **DefaultNodeHandlerRegistry**: Implements the registry interface using a Map for O(1) lookup
+- **NodeHandlerRegistryFactory**: Creates and populates a registry with handlers for different node types
+- **Integration with ModularASTGenerator**: Updates the AST generator to use the registry for handler lookup
 
-#### Challenges Addressed
+### 2. Error Handling and Recovery (Task 0.3)
 
-- **Tree-sitter CST Structure**: The tree-sitter CST structure is different from what we expected. We had to adapt our visitor implementation to handle the actual structure.
-- **Expression vs. Module Instantiation**: In tree-sitter, what we consider module instantiations are actually expressions or call expressions. We had to adapt our visitors to handle this.
-- **Direct Child Access**: The tree-sitter API doesn't provide direct access to fields by name in all cases. We had to use child indices in some cases.
+We're enhancing error handling with structured error types and recovery strategies to make the parser more robust and user-friendly.
 
-#### Next Steps
+#### Key Components
 
-- **Query Caching**: Implement query caching to improve performance.
-- **Incremental Parsing**: Implement incremental parsing to improve performance for large files.
-- **Error Handling**: Enhance error handling and recovery strategies.
+- **Structured Error Types**: Base ParserError class and specialized error classes for different types of errors
+- **Recovery Strategies**: Strategies for recovering from common syntax errors
+- **Error Reporting**: Detailed error messages with position information and suggestions for fixes
+- **Integration with Parser**: Updates to the parser to use the enhanced error handling system
+
+### 3. Query Caching and Optimization (Task 0.4)
+
+We're implementing query caching to improve performance, especially for frequently used queries.
+
+#### Key Components
+
+- **QueryCache Interface**: Defines methods for caching and retrieving query results
+- **LRUQueryCache**: Implements the cache interface using an LRU (Least Recently Used) strategy
+- **QueryManager**: Manages query execution and caching
+- **Integration with AST Generator**: Updates the AST generator to use the query manager
+
+### 4. Incremental Parsing (Task 0.5)
+
+We're implementing incremental parsing to improve performance for large files and interactive editing.
+
+#### Key Components
+
+- **Change Tracking**: Tracks changes to the source code to determine what needs to be reparsed
+- **Incremental Updates**: Updates the parse tree incrementally based on changes
+- **AST Reuse**: Reuses parts of the AST that haven't changed
+- **Integration with Parser**: Updates the parser to support incremental parsing
+
+### 5. Fix Union Operations and CSG Operations (Task 1.1)
+
+We're fixing the current issues with union operations and implementing difference and intersection operations.
+
+#### Key Components
+
+- **Union Node Creation**: Refactors the createUnionNode method to use proper node traversal
+- **Difference and Intersection**: Implements createDifferenceNode and createIntersectionNode methods
+- **Implicit Unions**: Adds support for implicit unions (blocks without union keyword)
+- **Test Updates**: Updates tests to use the direct generator type and verify the changes
 
 #### Visitor Pattern Implementation
 

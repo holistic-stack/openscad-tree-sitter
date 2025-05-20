@@ -9,7 +9,8 @@
 - [x] OpenSCAD grammar integration
 - [x] CST (Concrete Syntax Tree) generation
 - [x] AST (Abstract Syntax Tree) generation from CST (initial implementation)
-- [ ] Support for incremental parsing
+- [x] Research and design for incremental parsing
+- [ ] Implementation of incremental parsing
 
 #### Tree Traversal
 - [x] Basic cursor utilities for tree traversal
@@ -19,6 +20,40 @@
 - [x] Visitor pattern implementation for traversal
 - [x] Specialized visitors for different node types
 - [x] Composite visitor for delegating to specialized visitors
+
+### Critical Improvements Research and Design
+
+#### Registry System for Node Handlers
+- [x] Study registry pattern implementations
+- [x] Design a registry interface for node handlers
+- [x] Define registration and lookup methods
+- [x] Create a plan for migrating from the current approach to a registry system
+- [x] Design `NodeHandlerRegistry` interface, `DefaultNodeHandlerRegistry` class, and `NodeHandlerRegistryFactory` class
+- [ ] Implementation and integration with AST generator
+
+#### Error Handling and Recovery
+- [x] Study tree-sitter error recovery mechanisms
+- [x] Design structured error types for different parsing failures
+- [x] Define recovery strategies for common syntax errors
+- [x] Create a plan for implementing enhanced error handling
+- [x] Design error classes and recovery strategies
+- [ ] Implementation and integration with parser
+
+#### Query Caching and Optimization
+- [x] Study tree-sitter query optimization techniques
+- [x] Design a query cache interface
+- [x] Define caching strategies for different query types
+- [x] Create a plan for implementing query caching
+- [x] Design `QueryCache` interface, `LRUQueryCache` class, and `QueryManager` class
+- [ ] Implementation and integration with AST generator
+
+#### Incremental Parsing
+- [x] Study tree-sitter incremental parsing mechanisms
+- [x] Design an incremental parsing interface
+- [x] Define strategies for tracking changes and updating the AST
+- [x] Create a plan for implementing incremental parsing
+- [x] Design `ChangeTracker` class and incremental parsing methods
+- [ ] Implementation and integration with parser
 
 #### Query System
 - [x] Basic query utilities
@@ -43,6 +78,14 @@
 - [x] Initial implementation of AST generator
 - [x] Support for basic primitives (cube) and transformations (translate)
 - [x] Refactored AST generator to use modular structure
+
+#### CSG Operations
+- [x] Study tree-sitter CSG operation nodes
+- [x] Design a robust approach for handling union blocks
+- [x] Create a plan for implementing difference and intersection operations
+- [x] Design `createUnionNode`, `createDifferenceNode`, `createIntersectionNode`, and `createImplicitUnionNode` functions
+- [x] Design `processChildren` utility function for handling block children
+- [ ] Implementation and integration with AST generator
 - [x] Implemented complete primitive shapes (sphere, cylinder)
 - [x] Implemented complete transformations (rotate, scale)
 - [x] Implemented CSG operations (union, difference, intersection, hull, minkowski)

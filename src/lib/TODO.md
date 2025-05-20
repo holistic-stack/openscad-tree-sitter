@@ -45,98 +45,183 @@ The implementation had to be adapted to handle the actual tree-sitter CST struct
 - [Visitor Pattern Explained](https://manski.net/articles/algorithms/visitor-pattern)
 
 #### 0.2 Implement Registry System for Node Handlers
-- [ ] **Research and Design**
-  - [ ] Study registry pattern implementations
-  - [ ] Design a registry interface for node handlers
-  - [ ] Define registration and lookup methods
-  - [ ] Create a plan for migrating from the current approach to a registry system
+- [x] **Research and Design**
+  - [x] Study registry pattern implementations
+  - [x] Design a registry interface for node handlers
+  - [x] Define registration and lookup methods
+  - [x] Create a plan for migrating from the current approach to a registry system
 - [ ] **Implementation**
-  - [ ] Create a node handler registry class
+  - [x] Create a node handler registry interface (`NodeHandlerRegistry`)
+  - [x] Implement default registry class (`DefaultNodeHandlerRegistry`)
+  - [x] Create registry factory (`NodeHandlerRegistryFactory`)
   - [ ] Implement registration methods for different node types
   - [ ] Add lookup methods to find handlers for specific nodes
   - [ ] Refactor AST generator to use the registry system
 - [ ] **Testing**
-  - [ ] Create unit tests for the registry implementation
+  - [x] Create unit tests for the registry interface
+  - [x] Create unit tests for the default registry implementation
+  - [x] Create unit tests for the registry factory
   - [ ] Verify that the registry produces the same results as the current implementation
   - [ ] Benchmark performance improvements
 
 **Context:**
-The current approach of trying each generator in sequence is inefficient and hard to maintain. A registry system would allow for more efficient lookup of node handlers and make the code more modular and extensible.
+The current approach of trying each generator in sequence is inefficient and hard to maintain. A registry system allows for more efficient O(1) lookup of node handlers and makes the code more modular and extensible.
+
+**Implementation Details:**
+We've designed a registry system with the following components:
+
+1. `NodeHandlerRegistry` interface with methods:
+   - `register(nodeType: string, handler: NodeHandler): void`
+   - `getHandler(nodeType: string): NodeHandler | null`
+   - `hasHandler(nodeType: string): boolean`
+   - `getRegisteredNodeTypes(): string[]`
+
+2. `DefaultNodeHandlerRegistry` class that implements the interface using a Map for O(1) lookup
+
+3. `NodeHandlerRegistryFactory` class that creates and populates a registry with handlers for different node types
 
 **Resources:**
 - [Registry Pattern in TypeScript](https://www.typescriptlang.org/docs/handbook/decorators.html)
 - [Service Locator Pattern](https://en.wikipedia.org/wiki/Service_locator_pattern)
+- [Map data structure for O(1) lookup](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map)
 
 #### 0.3 Enhance Error Handling and Recovery
-- [ ] **Research and Design**
-  - [ ] Study tree-sitter error recovery mechanisms
-  - [ ] Design structured error types for different parsing failures
-  - [ ] Define recovery strategies for common syntax errors
-  - [ ] Create a plan for implementing enhanced error handling
+- [x] **Research and Design**
+  - [x] Study tree-sitter error recovery mechanisms
+  - [x] Design structured error types for different parsing failures
+  - [x] Define recovery strategies for common syntax errors
+  - [x] Create a plan for implementing enhanced error handling
 - [ ] **Implementation**
-  - [ ] Create structured error types for different parsing failures
-  - [ ] Implement recovery strategies for common syntax errors
+  - [x] Create base `ParserError` class with position information and suggestions
+  - [x] Create specialized error classes (`SyntaxError`, `SemanticError`, etc.)
+  - [x] Implement recovery strategies (`SkipToNextStatementStrategy`, `InsertMissingTokenStrategy`, etc.)
+  - [x] Create `RecoveryStrategyFactory` for selecting appropriate recovery strategies
   - [ ] Add detailed error messages with suggestions for fixes
-  - [ ] Refactor AST generator to use the enhanced error handling
+  - [ ] Refactor parser to use the enhanced error handling
 - [ ] **Testing**
-  - [ ] Create unit tests for error handling and recovery
+  - [x] Create unit tests for error classes
+  - [x] Create unit tests for recovery strategies
+  - [x] Create unit tests for the recovery strategy factory
   - [ ] Verify that the parser can recover from common syntax errors
   - [ ] Test edge cases and complex error scenarios
 
 **Context:**
-The current error handling is basic and doesn't provide enough information for debugging. Enhanced error handling would make the parser more robust and user-friendly, especially for complex OpenSCAD files.
+The current error handling is basic and doesn't provide enough information for debugging. Enhanced error handling makes the parser more robust and user-friendly, especially for complex OpenSCAD files.
+
+**Implementation Details:**
+We've designed an error handling system with the following components:
+
+1. Structured error types:
+   - `ParserError`: Base class with position information and suggestions
+   - `SyntaxError`: For syntax errors
+   - `SemanticError`: For semantic errors
+   - `MissingTokenError`: For missing tokens
+   - `UnexpectedTokenError`: For unexpected tokens
+
+2. Recovery strategies:
+   - `SkipToNextStatementStrategy`: Skip to the next statement
+   - `InsertMissingTokenStrategy`: Insert missing tokens
+   - `DeleteExtraTokenStrategy`: Delete unexpected tokens
+   - `RecoveryStrategyFactory`: Select appropriate recovery strategies
 
 **Resources:**
 - [Tree-sitter Error Recovery](https://github.com/tree-sitter/tree-sitter/issues/224)
 - [Error Handling Best Practices](https://www.typescriptlang.org/docs/handbook/error-handling.html)
+- [Error Recovery in Parsers](https://en.wikipedia.org/wiki/Error_recovery)
 
 #### 0.4 Implement Query Caching and Optimization
-- [ ] **Research and Design**
-  - [ ] Study tree-sitter query optimization techniques
-  - [ ] Design a query cache interface
-  - [ ] Define caching strategies for different query types
-  - [ ] Create a plan for implementing query caching
+- [x] **Research and Design**
+  - [x] Study tree-sitter query optimization techniques
+  - [x] Design a query cache interface
+  - [x] Define caching strategies for different query types
+  - [x] Create a plan for implementing query caching
 - [ ] **Implementation**
-  - [ ] Create a query cache class
-  - [ ] Implement caching methods for different query types
+  - [x] Create `QueryCache` interface with get/set methods
+  - [x] Implement `LRUQueryCache` class with LRU eviction policy
+  - [x] Create `QueryManager` for executing and caching queries
   - [ ] Add cache invalidation strategies
   - [ ] Refactor query system to use the cache
 - [ ] **Testing**
-  - [ ] Create unit tests for the query cache
+  - [x] Create unit tests for the query cache interface
+  - [x] Create unit tests for the LRU cache implementation
+  - [x] Create unit tests for the query manager
   - [ ] Benchmark query performance with and without caching
   - [ ] Test cache invalidation strategies
 
 **Priority:** High - This should be implemented next to improve performance of the visitor pattern implementation.
 
 **Context:**
-The current query system doesn't cache results, which can lead to performance issues, especially for large files. Query caching would improve performance and make the parser more responsive.
+The current query system doesn't cache results, which can lead to performance issues, especially for large files. Query caching improves performance and makes the parser more responsive.
+
+**Implementation Details:**
+We've designed a query caching system with the following components:
+
+1. `QueryCache` interface with methods:
+   - `get(queryString: string, sourceText: string): TSNode[] | null`
+   - `set(queryString: string, sourceText: string, results: TSNode[]): void`
+   - `clear(): void`
+   - `size(): number`
+   - `getStats(): { hits: number; misses: number; size: number }`
+
+2. `LRUQueryCache` class that implements the interface using an LRU (Least Recently Used) eviction policy
+
+3. `QueryManager` class that manages query execution and caching:
+   - `executeQuery(queryString: string, tree: Tree): TSNode[]`
+   - `findNodesByType(nodeType: string, tree: Tree): TSNode[]`
+   - `clearCache(): void`
+   - `getCacheStats(): { hits: number; misses: number; size: number }`
 
 **Resources:**
 - [Tree-sitter Query Optimization](https://github.com/tree-sitter/tree-sitter/discussions/1976)
 - [Caching Strategies](https://www.patterns.dev/posts/caching-patterns)
+- [LRU Cache Implementation](https://medium.com/dsinjs/implementing-lru-cache-in-javascript-94ba6755cda9)
 
 #### 0.5 Implement Incremental Parsing
-- [ ] **Research and Design**
-  - [ ] Study tree-sitter incremental parsing mechanisms
-  - [ ] Design an incremental parsing interface
-  - [ ] Define strategies for tracking changes and updating the AST
-  - [ ] Create a plan for implementing incremental parsing
+- [x] **Research and Design**
+  - [x] Study tree-sitter incremental parsing mechanisms
+  - [x] Design an incremental parsing interface
+  - [x] Define strategies for tracking changes and updating the AST
+  - [x] Create a plan for implementing incremental parsing
 - [ ] **Implementation**
-  - [ ] Update the parser to support incremental parsing
-  - [ ] Implement change tracking for modified sections
+  - [x] Update `OpenscadParser` to support incremental parsing with `update` method
+  - [x] Create `ChangeTracker` class for tracking changes to the source code
+  - [x] Implement `indexToPosition` method for converting indices to row/column positions
+  - [x] Add `updateAST` method for incrementally updating the AST
   - [ ] Add mechanisms to reuse parts of the AST that haven't changed
   - [ ] Refactor AST generator to support incremental updates
 - [ ] **Testing**
-  - [ ] Create unit tests for incremental parsing
+  - [x] Create unit tests for the `ChangeTracker` class
+  - [x] Create unit tests for incremental parsing
+  - [x] Create unit tests for incremental AST updates
   - [ ] Benchmark performance with and without incremental parsing
   - [ ] Test edge cases and complex change scenarios
 
 **Context:**
-Incremental parsing is a key feature of tree-sitter that allows for efficient updates to the syntax tree when the source file is edited. This would improve performance, especially for large files and interactive editing.
+Incremental parsing is a key feature of tree-sitter that allows for efficient updates to the syntax tree when the source file is edited. This improves performance, especially for large files and interactive editing.
+
+**Implementation Details:**
+We've designed an incremental parsing system with the following components:
+
+1. `ChangeTracker` class for tracking changes to the source code:
+   - `trackChange(startIndex: number, oldEndIndex: number, newEndIndex: number): void`
+   - `getChanges(): Change[]`
+   - `getChangesSince(since: number): Change[]`
+   - `isNodeAffected(nodeStartIndex: number, nodeEndIndex: number, since?: number): boolean`
+   - `clear(): void`
+
+2. Enhanced `OpenscadParser` class with incremental parsing support:
+   - `update(newSourceText: string, startIndex: number, oldEndIndex: number, newEndIndex: number): Tree`
+   - `updateAST(newSourceText: string, startIndex: number, oldEndIndex: number, newEndIndex: number): ast.ASTNode`
+   - `indexToPosition(text: string, index: number): Point`
+
+3. Enhanced `ModularASTGenerator` class with incremental update support:
+   - `updateASTIncrementally(node: SyntaxNode, oldAST: ast.ASTNode, sourceText: string): ast.ASTNode | null`
+   - `canUpdateIncrementally(newTree: Tree, oldTree: Tree): boolean`
 
 **Resources:**
 - [Tree-sitter Incremental Parsing](https://tomassetti.me/incremental-parsing-using-tree-sitter/)
 - [Advanced Parsing in Tree-sitter](https://tree-sitter.github.io/tree-sitter/using-parsers/3-advanced-parsing.html)
+- [Tree-sitter Edit API](https://tree-sitter.github.io/tree-sitter/using-parsers/3-advanced-parsing.html#edit)
 
 ## High Priority
 
@@ -164,15 +249,43 @@ Incremental parsing is a key feature of tree-sitter that allows for efficient up
   - [ ] Modules and functions
 
 ### 1.1 Fix Union Operations and CSG Operations
-- [ ] **Fix Union Operations**
-  - [ ] Refactor the createUnionNode method in DirectASTGenerator
-  - [ ] Fix the string literal issue by using separate conditions
-  - [ ] Implement proper parsing for union blocks with multiple children
-  - [ ] Add support for implicit unions (blocks without union keyword)
-  - [ ] Update the union tests to use the direct generator type
+- [x] **Research and Design**
+  - [x] Study tree-sitter CSG operation nodes
+  - [x] Design a robust approach for handling union blocks
+  - [x] Create a plan for implementing difference and intersection operations
+- [ ] **Implementation**
+  - [x] Refactor the `createUnionNode` method to use proper node traversal
+  - [x] Remove string matching approach in favor of node traversal
+  - [x] Implement `createDifferenceNode` method
+  - [x] Implement `createIntersectionNode` method
+  - [x] Implement `createImplicitUnionNode` for blocks without union keyword
+  - [x] Create `processChildren` utility function for handling block children
+  - [ ] Update the `processNode` method to check for these operations
+- [ ] **Testing**
+  - [x] Create tests for union operations
+  - [x] Create tests for difference operations
+  - [x] Create tests for intersection operations
+  - [x] Create tests for implicit unions
+  - [ ] Test edge cases and complex CSG operations
 
 **Context:**
-The current issue with union operations is related to string matching in the DirectASTGenerator. The approach of using string includes for pattern matching is error-prone and should be replaced with proper node traversal and extraction.
+The current implementation of union operations has issues with string literals and doesn't handle all cases correctly. Additionally, difference and intersection operations are not fully implemented.
+
+**Implementation Details:**
+We've implemented CSG operations with the following components:
+
+1. `createUnionNode` function that properly traverses the block node to find children
+2. `createDifferenceNode` function that handles difference operations
+3. `createIntersectionNode` function that handles intersection operations
+4. `createImplicitUnionNode` function that handles blocks without union keyword
+5. `processChildren` utility function that processes all children in a block
+
+The implementation avoids string matching and uses proper node traversal, making it more robust and maintainable.
+
+**Resources:**
+- [OpenSCAD CSG Operations](https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/CSG_Modelling)
+- [Tree-sitter Node Types](https://tree-sitter.github.io/tree-sitter/using-parsers/2-basic-parsing.html#node-types)
+- [Tree-sitter Child Traversal](https://tree-sitter.github.io/tree-sitter/using-parsers/2-basic-parsing.html#traversing-nodes)
 
 **Implementation Details:**
 ```typescript
