@@ -20,6 +20,8 @@ export class ExpressionGenerator extends BaseGenerator {
   public processExpression(node: TSNode): ast.ExpressionNode | null {
     if (!node) return null;
 
+    console.log(`[ExpressionGenerator.processExpression] Processing expression: ${node.type}, ${node.text.substring(0, 30)}`);
+
     switch (node.type) {
       case 'variable':
         return this.processVariable(node);
@@ -31,9 +33,59 @@ export class ExpressionGenerator extends BaseGenerator {
         return this.processConditionalExpression(node);
       case 'function_call':
         return this.processFunctionCall(node);
+      case 'expression':
+        // If this is a wrapper expression, process its first child
+        if (node.childCount > 0) {
+          const firstChild = node.child(0);
+          if (firstChild) {
+            return this.processExpression(firstChild);
+          }
+        }
+        return this.processVariable(node);
+      case 'identifier':
+        return this.processVariable(node);
+      case 'number':
+        return {
+          type: 'expression',
+          expressionType: 'literal',
+          value: parseFloat(node.text),
+          location: getLocation(node)
+        };
+      case 'string':
+        return {
+          type: 'expression',
+          expressionType: 'literal',
+          value: node.text.replace(/^"(.*)"$/, '$1'), // Remove quotes
+          location: getLocation(node)
+        };
+      case 'boolean':
+        return {
+          type: 'expression',
+          expressionType: 'literal',
+          value: node.text === 'true',
+          location: getLocation(node)
+        };
+      case 'logical_or_expression':
+      case 'logical_and_expression':
+      case 'equality_expression':
+      case 'relational_expression':
+      case 'additive_expression':
+      case 'multiplicative_expression':
+      case 'exponentiation_expression':
+      case 'accessor_expression':
+      case 'primary_expression':
+        // For these expression types, process their children
+        if (node.childCount > 0) {
+          const firstChild = node.child(0);
+          if (firstChild) {
+            return this.processExpression(firstChild);
+          }
+        }
+        return this.processVariable(node);
       default:
         console.warn(`[ExpressionGenerator.processExpression] Unhandled expression type: ${node.type}`);
-        return null;
+        // As a fallback, treat it as a variable
+        return this.processVariable(node);
     }
   }
 
@@ -124,17 +176,46 @@ export class ExpressionGenerator extends BaseGenerator {
    * Process a conditional expression node
    */
   private processConditionalExpression(node: TSNode): ast.ConditionalExpressionNode | null {
-    if (node.childCount < 5) {
-      console.warn(`[ExpressionGenerator.processConditionalExpression] Conditional expression has less than 5 children: ${node.text}`);
+    console.log(`[ExpressionGenerator.processConditionalExpression] Processing conditional expression: ${node.text.substring(0, 50)}`);
+
+    // Get the condition, then branch, and else branch
+    const conditionNode = node.childForFieldName('condition');
+    const thenNode = node.childForFieldName('consequence');
+    const elseNode = node.childForFieldName('alternative');
+
+    if (!conditionNode) {
+      // Try to get the condition as the first child
+      if (node.childCount > 0) {
+        const firstChild = node.child(0);
+        if (firstChild && firstChild.type === 'logical_or_expression') {
+          console.log(`[ExpressionGenerator.processConditionalExpression] Using first child as condition: ${firstChild.text.substring(0, 30)}`);
+          const condition = this.processExpression(firstChild);
+
+          // Try to get the then branch as the third child (after the ? operator)
+          const thenBranch = node.childCount > 2 ? this.processExpression(node.child(2)) : null;
+
+          // Try to get the else branch as the fifth child (after the : operator)
+          const elseBranch = node.childCount > 4 ? this.processExpression(node.child(4)) : null;
+
+          if (condition && thenBranch && elseBranch) {
+            return {
+              type: 'expression',
+              expressionType: 'conditional',
+              condition,
+              thenBranch,
+              elseBranch,
+              location: getLocation(node)
+            };
+          }
+        }
+      }
+
+      console.warn(`[ExpressionGenerator.processConditionalExpression] No condition found in conditional expression: ${node.text.substring(0, 50)}`);
       return null;
     }
 
-    const conditionNode = node.child(0);
-    const thenNode = node.child(2);
-    const elseNode = node.child(4);
-
-    if (!conditionNode || !thenNode || !elseNode) {
-      console.warn(`[ExpressionGenerator.processConditionalExpression] Missing children in conditional expression: ${node.text}`);
+    if (!thenNode || !elseNode) {
+      console.warn(`[ExpressionGenerator.processConditionalExpression] Missing then or else branch in conditional expression: ${node.text.substring(0, 50)}`);
       return null;
     }
 
@@ -143,7 +224,7 @@ export class ExpressionGenerator extends BaseGenerator {
     const elseBranch = this.processExpression(elseNode);
 
     if (!condition || !thenBranch || !elseBranch) {
-      console.warn(`[ExpressionGenerator.processConditionalExpression] Failed to process condition, then, or else expression: ${node.text}`);
+      console.warn(`[ExpressionGenerator.processConditionalExpression] Failed to process condition, then, or else expression: ${node.text.substring(0, 50)}`);
       return null;
     }
 

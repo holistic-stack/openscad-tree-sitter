@@ -23,7 +23,7 @@ export class ControlStructureGenerator extends BaseGenerator {
    */
   public processIfStatement(node: TSNode): ast.IfNode | null {
     console.log(`[ControlStructureGenerator.processIfStatement] Processing if statement: ${node.text.substring(0, 50)}`);
-    
+
     // Extract the condition
     const conditionNode = node.childForFieldName('expression');
     if (!conditionNode) {
@@ -52,7 +52,7 @@ export class ControlStructureGenerator extends BaseGenerator {
     // Extract the else branch (alternative) if it exists
     const elseBranchNode = node.childForFieldName('alternative');
     const elseBranch: ast.ASTNode[] = [];
-    
+
     if (elseBranchNode) {
       // Check if this is an else-if statement
       if (elseBranchNode.type === 'if_statement') {
@@ -81,7 +81,7 @@ export class ControlStructureGenerator extends BaseGenerator {
    */
   public processForLoop(node: TSNode): ast.ForLoopNode | null {
     console.log(`[ControlStructureGenerator.processForLoop] Processing for loop: ${node.text.substring(0, 50)}`);
-    
+
     // Extract the for header (variable and range)
     const forHeaderNode = node.childForFieldName('for_header');
     if (!forHeaderNode) {
@@ -89,63 +89,142 @@ export class ControlStructureGenerator extends BaseGenerator {
       return null;
     }
 
-    // Extract the variable name
-    const variableNode = forHeaderNode.childForFieldName('iterator');
-    if (!variableNode) {
-      console.warn('[ControlStructureGenerator.processForLoop] No variable found in for loop header');
-      return null;
-    }
-    const variable = variableNode.text;
+    // Check if this is a for loop with multiple variables (comma-separated)
+    const forHeaderText = forHeaderNode.text;
+    const variables: ast.ForLoopVariable[] = [];
 
-    // Extract the range
-    const rangeNode = forHeaderNode.childForFieldName('range');
-    if (!rangeNode) {
-      console.warn('[ControlStructureGenerator.processForLoop] No range found in for loop header');
-      return null;
-    }
+    // If the for header contains commas, it might have multiple variables
+    if (forHeaderText.includes(',')) {
+      // Split the for header by commas
+      const parts = forHeaderText.split(',');
 
-    // Check if this is a range expression [start:step:end] or [start:end]
-    let range: ast.ExpressionNode | ast.Vector2D | ast.Vector3D;
-    let step: number | undefined;
+      for (const part of parts) {
+        // Extract variable and range from each part
+        const match = part.trim().match(/^\s*([a-zA-Z0-9_$]+)\s*=\s*(.+)$/);
+        if (match) {
+          const variableName = match[1];
+          const rangeText = match[2].trim();
 
-    if (rangeNode.type === 'range_expression') {
-      const startNode = rangeNode.childForFieldName('start');
-      const endNode = rangeNode.childForFieldName('end');
-      const stepNode = rangeNode.childForFieldName('step');
+          // Process the range
+          let range: ast.ExpressionNode | ast.Vector2D | ast.Vector3D;
+          let step: number | undefined;
 
-      if (!startNode || !endNode) {
-        console.warn('[ControlStructureGenerator.processForLoop] Invalid range expression in for loop');
+          // Check if this is a range expression [start:step:end] or [start:end]
+          if (rangeText.match(/\[\s*\d+\s*:\s*\d+\s*\]/)) {
+            // [start:end] format
+            const rangeMatch = rangeText.match(/\[\s*(\d+)\s*:\s*(\d+)\s*\]/);
+            if (rangeMatch) {
+              const start = parseInt(rangeMatch[1]);
+              const end = parseInt(rangeMatch[2]);
+              range = [start, end] as ast.Vector2D;
+            } else {
+              console.warn(`[ControlStructureGenerator.processForLoop] Failed to parse range: ${rangeText}`);
+              continue;
+            }
+          } else if (rangeText.match(/\[\s*\d+\s*:\s*\d+\s*:\s*\d+\s*\]/)) {
+            // [start:step:end] format
+            const rangeMatch = rangeText.match(/\[\s*(\d+)\s*:\s*(\d+)\s*:\s*(\d+)\s*\]/);
+            if (rangeMatch) {
+              const start = parseInt(rangeMatch[1]);
+              const stepValue = parseInt(rangeMatch[2]);
+              const end = parseInt(rangeMatch[3]);
+              step = stepValue;
+              range = [start, step, end] as ast.Vector3D;
+            } else {
+              console.warn(`[ControlStructureGenerator.processForLoop] Failed to parse range with step: ${rangeText}`);
+              continue;
+            }
+          } else {
+            // Process as a general expression (like an array or variable)
+            range = {
+              type: 'expression',
+              expressionType: 'variable',
+              name: rangeText,
+              location: getLocation(node)
+            };
+          }
+
+          // Add the variable to the list
+          variables.push({
+            variable: variableName,
+            range,
+            step
+          });
+        }
+      }
+    } else {
+      // Single variable case
+      // Extract the variable name
+      const variableNode = forHeaderNode.childForFieldName('iterator');
+      if (!variableNode) {
+        console.warn('[ControlStructureGenerator.processForLoop] No variable found in for loop header');
+        return null;
+      }
+      const variable = variableNode.text;
+
+      // Extract the range
+      const rangeNode = forHeaderNode.childForFieldName('range');
+      if (!rangeNode) {
+        console.warn('[ControlStructureGenerator.processForLoop] No range found in for loop header');
         return null;
       }
 
-      const start = extractValue(startNode);
-      const end = extractValue(endNode);
+      // Check if this is a range expression [start:step:end] or [start:end]
+      let range: ast.ExpressionNode | ast.Vector2D | ast.Vector3D;
+      let step: number | undefined;
 
-      if (typeof start !== 'number' || typeof end !== 'number') {
-        console.warn('[ControlStructureGenerator.processForLoop] Range expression start/end are not numbers');
-        return null;
-      }
+      if (rangeNode.type === 'range_expression') {
+        const startNode = rangeNode.childForFieldName('start');
+        const endNode = rangeNode.childForFieldName('end');
+        const stepNode = rangeNode.childForFieldName('step');
 
-      if (stepNode) {
-        const stepValue = extractValue(stepNode);
-        if (typeof stepValue === 'number') {
-          step = stepValue;
-          range = [start, step, end] as ast.Vector3D;
+        if (!startNode || !endNode) {
+          console.warn('[ControlStructureGenerator.processForLoop] Invalid range expression in for loop');
+          return null;
+        }
+
+        const start = extractValue(startNode);
+        const end = extractValue(endNode);
+
+        if (typeof start !== 'number' || typeof end !== 'number') {
+          console.warn('[ControlStructureGenerator.processForLoop] Range expression start/end are not numbers');
+          return null;
+        }
+
+        if (stepNode) {
+          const stepValue = extractValue(stepNode);
+          if (typeof stepValue === 'number') {
+            step = stepValue;
+            range = [start, step, end] as ast.Vector3D;
+          } else {
+            console.warn('[ControlStructureGenerator.processForLoop] Range expression step is not a number');
+            range = [start, end] as ast.Vector2D;
+          }
         } else {
-          console.warn('[ControlStructureGenerator.processForLoop] Range expression step is not a number');
           range = [start, end] as ast.Vector2D;
         }
       } else {
-        range = [start, end] as ast.Vector2D;
+        // Process as a general expression (like an array or variable)
+        const rangeExpr = this.processExpression(rangeNode);
+        if (!rangeExpr) {
+          console.warn('[ControlStructureGenerator.processForLoop] Failed to process range expression');
+          return null;
+        }
+        range = rangeExpr;
       }
-    } else {
-      // Process as a general expression (like an array or variable)
-      const rangeExpr = this.processExpression(rangeNode);
-      if (!rangeExpr) {
-        console.warn('[ControlStructureGenerator.processForLoop] Failed to process range expression');
-        return null;
-      }
-      range = rangeExpr;
+
+      // Add the variable to the list
+      variables.push({
+        variable,
+        range,
+        step
+      });
+    }
+
+    // If no variables were found, return null
+    if (variables.length === 0) {
+      console.warn('[ControlStructureGenerator.processForLoop] No variables found in for loop');
+      return null;
     }
 
     // Extract the body
@@ -161,9 +240,7 @@ export class ControlStructureGenerator extends BaseGenerator {
 
     return {
       type: 'for_loop',
-      variable,
-      range,
-      step,
+      variables,
       body,
       location: getLocation(node)
     };
@@ -174,7 +251,7 @@ export class ControlStructureGenerator extends BaseGenerator {
    */
   public processLetExpression(node: TSNode): ast.LetNode | null {
     console.log(`[ControlStructureGenerator.processLetExpression] Processing let expression: ${node.text.substring(0, 50)}`);
-    
+
     // Extract the assignments
     const assignmentsNode = node.childForFieldName('assignments');
     if (!assignmentsNode) {
@@ -184,17 +261,17 @@ export class ControlStructureGenerator extends BaseGenerator {
 
     // Process the assignments
     const assignments: { [key: string]: ast.ParameterValue } = {};
-    
+
     for (let i = 0; i < assignmentsNode.namedChildCount; i++) {
       const assignmentNode = assignmentsNode.namedChild(i);
       if (assignmentNode && assignmentNode.type === 'let_assignment') {
         const nameNode = assignmentNode.childForFieldName('name');
         const valueNode = assignmentNode.childForFieldName('value');
-        
+
         if (nameNode && valueNode) {
           const name = nameNode.text;
           const value = extractValue(valueNode);
-          
+
           if (value !== undefined) {
             assignments[name] = value;
           }
@@ -211,16 +288,33 @@ export class ControlStructureGenerator extends BaseGenerator {
 
     // Process the body
     const body: ast.ASTNode[] = [];
-    
+
     // If the body is an expression, we need to convert it to an AST node
     if (bodyNode.type === 'expression') {
-      const exprNode = this.processExpression(bodyNode);
-      if (exprNode) {
-        body.push(exprNode);
+      // Check if the body is another let expression (nested let)
+      if (bodyNode.firstChild && bodyNode.firstChild.type === 'let_expression') {
+        const nestedLetNode = this.processLetExpression(bodyNode.firstChild);
+        if (nestedLetNode) {
+          body.push(nestedLetNode);
+        }
+      } else {
+        const exprNode = this.processExpression(bodyNode);
+        if (exprNode) {
+          body.push(exprNode);
+        }
       }
     } else {
-      // Otherwise, process it as a normal body
+      // Process the body as a normal body
       this.processBodyNode(bodyNode, body);
+
+      // Check for nested let expressions in the body
+      for (let i = 0; i < body.length; i++) {
+        const childNode = body[i];
+        if (childNode.type === 'let') {
+          // This is a nested let expression
+          console.log('[ControlStructureGenerator.processLetExpression] Found nested let expression in body');
+        }
+      }
     }
 
     return {
@@ -236,7 +330,7 @@ export class ControlStructureGenerator extends BaseGenerator {
    */
   public processEachStatement(node: TSNode): ast.EachNode | null {
     console.log(`[ControlStructureGenerator.processEachStatement] Processing each statement: ${node.text.substring(0, 50)}`);
-    
+
     // Extract the expression
     const expressionNode = node.childForFieldName('expression');
     if (!expressionNode) {
@@ -245,7 +339,35 @@ export class ControlStructureGenerator extends BaseGenerator {
     }
 
     // Process the expression
-    const expression = this.processExpression(expressionNode);
+    let expression: ast.ExpressionNode | null = null;
+
+    // Check if the expression is an array literal
+    if (expressionNode.type === 'array_literal') {
+      // Process the array literal
+      const arrayItems: ast.ExpressionNode[] = [];
+
+      for (let i = 0; i < expressionNode.namedChildCount; i++) {
+        const itemNode = expressionNode.namedChild(i);
+        if (itemNode) {
+          const itemExpr = this.processExpression(itemNode);
+          if (itemExpr) {
+            arrayItems.push(itemExpr);
+          }
+        }
+      }
+
+      // Create an expression node for the array
+      expression = {
+        type: 'expression',
+        expressionType: 'array',
+        items: arrayItems,
+        location: getLocation(expressionNode)
+      };
+    } else {
+      // Process as a regular expression
+      expression = this.processExpression(expressionNode);
+    }
+
     if (!expression) {
       console.warn('[ControlStructureGenerator.processEachStatement] Failed to process expression in each statement');
       return null;

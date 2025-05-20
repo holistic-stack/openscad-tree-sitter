@@ -19,20 +19,20 @@ describe('Union AST Generation', () => {
         cube(10, center=true);
         translate([5, 5, 5]) sphere(5);
       }`;
-      const ast = parser.parseAST(code);
+      const ast = parser.parseAST(code, 'direct');
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);
 
       const unionNode = ast[0];
       expect(unionNode.type).toBe('union');
-      
+
       // Check children
       expect((unionNode as any).children).toHaveLength(2);
       expect((unionNode as any).children[0].type).toBe('cube');
       expect((unionNode as any).children[0].size).toBe(10);
       expect((unionNode as any).children[0].center).toBe(true);
-      
+
       expect((unionNode as any).children[1].type).toBe('translate');
       expect((unionNode as any).children[1].v).toEqual([5, 5, 5]);
       expect((unionNode as any).children[1].children[0].type).toBe('sphere');
@@ -44,7 +44,7 @@ describe('Union AST Generation', () => {
         cube(10, center=true);
         translate([5, 5, 5]) sphere(5);
       }`;
-      const ast = parser.parseAST(code);
+      const ast = parser.parseAST(code, 'direct');
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(2);
@@ -53,7 +53,7 @@ describe('Union AST Generation', () => {
       expect(ast[0].type).toBe('cube');
       expect((ast[0] as any).size).toBe(10);
       expect((ast[0] as any).center).toBe(true);
-      
+
       // Second child should be a translate
       expect(ast[1].type).toBe('translate');
       expect((ast[1] as any).v).toEqual([5, 5, 5]);
@@ -65,14 +65,14 @@ describe('Union AST Generation', () => {
       const code = `union() {
         cube(10);
       }`;
-      const ast = parser.parseAST(code);
+      const ast = parser.parseAST(code, 'direct');
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);
 
       const unionNode = ast[0];
       expect(unionNode.type).toBe('union');
-      
+
       // Check children
       expect((unionNode as any).children).toHaveLength(1);
       expect((unionNode as any).children[0].type).toBe('cube');
@@ -81,14 +81,14 @@ describe('Union AST Generation', () => {
 
     it('should parse empty union', () => {
       const code = `union() { }`;
-      const ast = parser.parseAST(code);
+      const ast = parser.parseAST(code, 'direct');
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);
 
       const unionNode = ast[0];
       expect(unionNode.type).toBe('union');
-      
+
       // Check children
       expect((unionNode as any).children).toHaveLength(0);
     });

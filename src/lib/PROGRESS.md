@@ -98,11 +98,39 @@ The project follows a modular architecture with clear separation of concerns:
 
 See [TODO.md](./TODO.md) for detailed next steps and implementation tasks.
 
+### Recently Completed
+- Implemented support for for loops with multiple variables
+- Implemented support for nested let statements
+- Enhanced each statement implementation to handle arrays/lists
+- Added support for conditional expressions (ternary operator)
+- Fixed the DirectASTGenerator to handle all control structures
+- Updated the AST types to support new expression types
+- All tests for control structures are now passing
+- Fixed the DirectASTGenerator to handle transformation operations (scale, mirror, color, offset, multmatrix)
+- All transformation tests are now passing
+- Implemented support for rotate transformations
+- All rotate tests are now passing
+- Started implementing support for union operations
+
+### Current Issues
+- Union tests are failing due to an unterminated string literal in the DirectASTGenerator.ts file
+- There are still failing tests in other modules (difference, intersection, primitives, module-function)
+- The ModularASTGenerator needs to be updated to handle these other modules
+- Some tests are using parseToAST instead of parseAST, which is causing errors
+
+### Next Steps
+- Fix the string literal issue in the union operations implementation
+- Implement support for difference and intersection operations
+- Fix the module and function tests
+- Update the ModularASTGenerator to handle all types of operations
+
 ## Known Issues
 
 - Some edge cases in complex expressions need additional testing
 - Performance optimizations may be needed for large files
 - Some AST node types may need refinement based on real-world usage
 - The CSG Generator currently doesn't handle all types of child nodes correctly
-- Some tests for transformations (scale, mirror, multmatrix, color, offset) are failing
-- Some tests for union operations are failing
+- Union operations have an issue with unterminated string literals
+- Difference and intersection operations are not fully implemented
+- Module and function definitions and calls need more work
+- Some tests are using parseToAST instead of parseAST, which is causing errors

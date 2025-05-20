@@ -10,6 +10,7 @@ import {
   ModuleFunctionGenerator
 } from './generators';
 import { findDescendantOfType } from './utils/node-utils';
+import { getLocation } from './utils/location-utils';
 
 // Type alias for web-tree-sitter's Node type
 type TSNode = Node;
@@ -118,6 +119,8 @@ export class ModularASTGenerator {
       if (ifNode) {
         statements.push(ifNode);
         return; // Don't process children of processed if statements further here
+      } else {
+        console.warn(`[ModularASTGenerator.processNode] Failed to process if_statement: ${node.text.substring(0,30)}`);
       }
     }
 
@@ -127,6 +130,8 @@ export class ModularASTGenerator {
       if (forNode) {
         statements.push(forNode);
         return; // Don't process children of processed for loops further here
+      } else {
+        console.warn(`[ModularASTGenerator.processNode] Failed to process for_statement: ${node.text.substring(0,30)}`);
       }
     }
 
@@ -136,6 +141,42 @@ export class ModularASTGenerator {
       if (letNode) {
         statements.push(letNode);
         return; // Don't process children of processed let expressions further here
+      } else {
+        console.warn(`[ModularASTGenerator.processNode] Failed to process let_expression: ${node.text.substring(0,30)}`);
+      }
+    }
+
+    // Handle conditional expressions (ternary operator)
+    if (node.type === 'conditional_expression') {
+      console.log(`[ModularASTGenerator.processNode] Found conditional_expression: ${node.text.substring(0,30)}`);
+      const condExpr = this.expressionGenerator.processExpression(node);
+      if (condExpr) {
+        statements.push(condExpr);
+        return; // Don't process children of processed conditional expressions further here
+      } else {
+        console.warn(`[ModularASTGenerator.processNode] Failed to process conditional_expression: ${node.text.substring(0,30)}`);
+      }
+    }
+
+    // Handle assignment statements
+    if (node.type === 'assignment_statement') {
+      console.log(`[ModularASTGenerator.processNode] Found assignment_statement: ${node.text.substring(0,30)}`);
+      const nameNode = node.childForFieldName('name');
+      const valueNode = node.childForFieldName('value');
+
+      if (nameNode && valueNode) {
+        const name = nameNode.text;
+        const value = this.expressionGenerator.processExpression(valueNode);
+
+        if (value) {
+          statements.push({
+            type: 'assignment',
+            name,
+            value,
+            location: getLocation(node)
+          });
+          return; // Don't process children of processed assignment statements further here
+        }
       }
     }
 

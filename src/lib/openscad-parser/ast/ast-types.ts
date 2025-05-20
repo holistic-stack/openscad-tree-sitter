@@ -93,7 +93,7 @@ export interface Parameter {
  */
 export interface ExpressionNode extends BaseNode {
   type: 'expression';
-  expressionType: string;
+  expressionType: 'variable' | 'binary' | 'unary' | 'conditional' | 'array' | 'literal' | 'each' | string;
 }
 
 /**
@@ -363,13 +363,20 @@ export interface IfNode extends BaseNode {
 }
 
 /**
+ * Represents a for loop variable with its range
+ */
+export interface ForLoopVariable {
+  variable: string;
+  range: ExpressionNode | Vector2D | Vector3D;
+  step?: number;
+}
+
+/**
  * Represents a for loop
  */
 export interface ForLoopNode extends BaseNode {
   type: 'for_loop';
-  variable: string;
-  range: ExpressionNode | Vector2D | Vector3D;
-  step?: number;
+  variables: ForLoopVariable[];
   body: ASTNode[];
 }
 
@@ -417,6 +424,30 @@ export interface ConditionalExpressionNode extends ExpressionNode {
   condition: ExpressionNode;
   thenBranch: ExpressionNode;
   elseBranch: ExpressionNode;
+}
+
+/**
+ * Represents an array expression
+ */
+export interface ArrayExpressionNode extends ExpressionNode {
+  expressionType: 'array';
+  items: ExpressionNode[];
+}
+
+/**
+ * Represents an each expression
+ */
+export interface EachExpressionNode extends ExpressionNode {
+  expressionType: 'each';
+  expression: ExpressionNode;
+}
+
+/**
+ * Represents a literal expression (number, string, boolean)
+ */
+export interface LiteralExpressionNode extends ExpressionNode {
+  expressionType: 'literal';
+  value: number | string | boolean;
 }
 
 /**
