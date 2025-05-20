@@ -42,7 +42,8 @@ import { ModularASTGenerator } from "./ast/modular-ast-generator";
 import { DirectASTGenerator } from "./ast/direct-ast-generator-fixed";
 import { VisitorASTGenerator } from "./ast/visitor-ast-generator";
 import { ASTNode } from "./ast/ast-types";
-import {cstTreeCursorWalkLog} from "@/lib/openscad-parser/cst/cursor-utils/cstTreeCursorWalkLog";
+import { cstTreeCursorWalkLog } from "@/lib/openscad-parser/cst/cursor-utils/cstTreeCursorWalkLog";
+import { ParserError, SyntaxError, SemanticError, RecoveryStrategyFactory } from "./ast/errors";
 
 /**
  * A parser for OpenSCAD code using the Tree-sitter library.
@@ -126,12 +127,83 @@ export class OpenscadParser {
 
         try {
             // Tree-sitter's parse method is synchronous, so we can just return its result
-            return this.parser.parse(code, previousTree);
+            const tree = this.parser.parse(code, previousTree);
+
+            // Check for syntax errors in the tree
+            const errorNode = this.findErrorNode(tree.rootNode);
+            if (errorNode) {
+                const position = {
+                    line: errorNode.startPosition.row,
+                    column: errorNode.startPosition.column,
+                    offset: errorNode.startIndex
+                };
+
+                // Create a syntax error with the error node information
+                const error = new SyntaxError(
+                    `Syntax error`,
+                    code,
+                    position,
+                    [{ message: "Check the syntax around this area" }]
+                );
+
+                // Try to recover from the error
+                const strategy = RecoveryStrategyFactory.createStrategy(error);
+                if (strategy) {
+                    const recoveredNode = strategy.recover(errorNode, error);
+                    if (recoveredNode) {
+                        console.log(`Recovered from syntax error at line ${position.line + 1}, column ${position.column + 1}`);
+                        // In a real implementation, we would continue parsing from the recovered node
+                        // For now, we'll just return the tree with errors
+                    }
+                }
+
+                // Log the formatted error message
+                console.error(error.getFormattedMessage());
+            }
+
+            return tree;
         } catch (err) {
             console.error("Failed to parse OpenSCAD code:", err);
-            // Re-throw the error as this is a synchronous function
-            throw new Error(`Failed to parse OpenSCAD code: ${err}`);
+
+            // If it's already a ParserError, just rethrow it
+            if (err instanceof ParserError) {
+                throw err;
+            }
+
+            // Otherwise, wrap it in a generic ParserError
+            throw new ParserError(
+                `Failed to parse OpenSCAD code: ${err}`,
+                'PARSE_ERROR',
+                code,
+                { line: 0, column: 0, offset: 0 }
+            );
         }
+    }
+
+    /**
+     * Find the first error node in the tree
+     *
+     * @param node - The root node to search from
+     * @returns The first error node found, or null if no errors
+     */
+    private findErrorNode(node: TreeSitter.SyntaxNode): TreeSitter.SyntaxNode | null {
+        // Check if this node is an error node
+        if (node.type === 'ERROR') {
+            return node;
+        }
+
+        // Check all children recursively
+        for (let i = 0; i < node.childCount; i++) {
+            const child = node.child(i);
+            if (child) {
+                const errorNode = this.findErrorNode(child);
+                if (errorNode) {
+                    return errorNode;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**

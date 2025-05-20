@@ -11,6 +11,9 @@ import {
 } from './generators';
 import { findDescendantOfType } from './utils/node-utils';
 import { getLocation } from './utils/location-utils';
+import { extractArguments } from './extractors/argument-extractor';
+import { NodeHandlerRegistry } from './registry/node-handler-registry';
+import { NodeHandlerRegistryFactory } from './registry/node-handler-registry-factory';
 
 // Type alias for web-tree-sitter's Node type
 type TSNode = Node;
@@ -18,6 +21,7 @@ type TSNode = Node;
 /**
  * Converts a Tree-sitter CST to an OpenSCAD AST using a modular approach
  * with specialized generators for different node types.
+ * Uses a registry system for O(1) lookup of node handlers.
  */
 export class ModularASTGenerator {
   private primitiveGenerator: PrimitiveGenerator;
@@ -27,6 +31,7 @@ export class ModularASTGenerator {
   private controlStructureGenerator: ControlStructureGenerator;
   private moduleFunctionGenerator: ModuleFunctionGenerator;
   private source: string;
+  private registry: NodeHandlerRegistry;
 
   constructor(private tree: Tree, source: string) {
     this.source = source;
@@ -36,6 +41,9 @@ export class ModularASTGenerator {
     this.expressionGenerator = new ExpressionGenerator();
     this.controlStructureGenerator = new ControlStructureGenerator();
     this.moduleFunctionGenerator = new ModuleFunctionGenerator();
+
+    // Initialize the registry
+    this.registry = NodeHandlerRegistryFactory.createRegistry();
   }
 
   /**
@@ -182,19 +190,105 @@ export class ModularASTGenerator {
 
     // Special case for expression_statement containing a function call
     if (node.type === 'expression_statement') {
+      console.log(`[ModularASTGenerator.processNode] Processing expression_statement: ${node.text.substring(0,30)}`);
       const expression = node.childForFieldName('expression');
-      if (expression && expression.type === 'expression') {
+      if (expression) {
+        console.log(`[ModularASTGenerator.processNode] Found expression: ${expression.text.substring(0,30)}, type: ${expression.type}`);
+
+        // Handle cube primitive
+        if (expression.text.includes('cube')) {
+          console.log(`[ModularASTGenerator.processNode] Found cube in expression: ${expression.text.substring(0,30)}`);
+          // Extract the size parameter
+          const argList = findDescendantOfType(expression, 'argument_list');
+          if (argList) {
+            console.log(`[ModularASTGenerator.processNode] Found argument_list for cube: ${argList.text}`);
+            const args = argList.namedChildren.map(child => child.text);
+            console.log(`[ModularASTGenerator.processNode] Extracted args for cube: ${args.join(', ')}`);
+            const size = args.length > 0 ? Number(args[0]) : 1;
+            const cubeNode: ast.CubeNode = {
+              type: 'cube',
+              size,
+              center: false,
+              location: getLocation(node),
+              children: []
+            };
+            console.log(`[ModularASTGenerator.processNode] Created cube node with size: ${size}`);
+            statements.push(cubeNode);
+            return;
+          } else {
+            console.log(`[ModularASTGenerator.processNode] No argument_list found for cube expression`);
+          }
+        }
+
+        // Handle sphere primitive
+        if (expression.text.includes('sphere')) {
+          console.log(`[ModularASTGenerator.processNode] Found sphere in expression: ${expression.text.substring(0,30)}`);
+          // Extract the radius parameter
+          const argList = findDescendantOfType(expression, 'argument_list');
+          if (argList) {
+            console.log(`[ModularASTGenerator.processNode] Found argument_list for sphere: ${argList.text}`);
+            const args = argList.namedChildren.map(child => child.text);
+            console.log(`[ModularASTGenerator.processNode] Extracted args for sphere: ${args.join(', ')}`);
+            const r = args.length > 0 ? Number(args[0]) : 1;
+            const sphereNode: ast.SphereNode = {
+              type: 'sphere',
+              r,
+              location: getLocation(node),
+              children: []
+            };
+            console.log(`[ModularASTGenerator.processNode] Created sphere node with radius: ${r}`);
+            statements.push(sphereNode);
+            return;
+          } else {
+            console.log(`[ModularASTGenerator.processNode] No argument_list found for sphere expression`);
+          }
+        }
+
+        // Handle cylinder primitive
+        if (expression.text.includes('cylinder')) {
+          console.log(`[ModularASTGenerator.processNode] Found cylinder in expression: ${expression.text.substring(0,30)}`);
+          // Extract the parameters
+          const argList = findDescendantOfType(expression, 'argument_list');
+          if (argList) {
+            console.log(`[ModularASTGenerator.processNode] Found argument_list for cylinder: ${argList.text}`);
+            const args = argList.namedChildren.map(child => child.text);
+            console.log(`[ModularASTGenerator.processNode] Extracted args for cylinder: ${args.join(', ')}`);
+            const h = args.length > 0 ? Number(args[0]) : 1;
+            const r = args.length > 1 ? Number(args[1]) : 1;
+            const cylinderNode: ast.CylinderNode = {
+              type: 'cylinder',
+              h,
+              r1: r,
+              r2: r,
+              center: false,
+              location: getLocation(node),
+              children: []
+            };
+            console.log(`[ModularASTGenerator.processNode] Created cylinder node with h: ${h}, r: ${r}`);
+            statements.push(cylinderNode);
+            return;
+          } else {
+            console.log(`[ModularASTGenerator.processNode] No argument_list found for cylinder expression`);
+          }
+        }
+
         // Look for function calls in the expression
         const functionCall = findDescendantOfType(expression, 'accessor_expression');
-        if (functionCall && functionCall.text.includes('sphere') || functionCall.text.includes('cube') || functionCall.text.includes('cylinder')) {
+        if (functionCall) {
           console.log(`[ModularASTGenerator.processNode] Found function call in expression: ${functionCall.text.substring(0,30)}`);
           // Create a fake module_instantiation node for the function call
           const astNode = this.processModuleInstantiation(functionCall.parent);
           if (astNode) {
             statements.push(astNode);
             return;
+          } else {
+            console.log(`[ModularASTGenerator.processNode] processModuleInstantiation returned null for function call: ${functionCall.text.substring(0,30)}`);
           }
+        } else {
+          console.log(`[ModularASTGenerator.processNode] No function call found in expression: ${expression.text.substring(0,30)}`);
         }
+      } else {
+        console.log(`[ModularASTGenerator.processNode] No expression found in expression_statement: ${node.text.substring(0,30)}`);
       }
     }
 
@@ -230,6 +324,45 @@ export class ModularASTGenerator {
     }
 
     console.log('[ModularASTGenerator.processModuleInstantiation] Extracted functionName:', functionName);
+
+    // Extract arguments from the 'arguments' field
+    const argsNode = node.childForFieldName('arguments');
+    const args = argsNode ? extractArguments(argsNode) : [];
+
+    // Process the children of the module instantiation
+    const children: ast.ASTNode[] = [];
+    const childrenNode = node.childForFieldName('children');
+    if (childrenNode) {
+      for (let i = 0; i < childrenNode.namedChildCount; i++) {
+        const child = childrenNode.namedChild(i);
+        if (child) {
+          const childNode = this.processNode(child);
+          if (childNode) {
+            children.push(childNode);
+          }
+        }
+      }
+    }
+
+    // Use the registry to get the appropriate handler
+    if (this.registry.hasHandler(functionName)) {
+      console.log(`[ModularASTGenerator.processModuleInstantiation] Found handler for ${functionName} in registry`);
+      const handler = this.registry.getHandler(functionName);
+      if (handler) {
+        const astNode = handler(node, args);
+        if (astNode) {
+          // If the node has children, add them to the AST node
+          if (children.length > 0 && 'children' in astNode) {
+            (astNode as any).children = children;
+          }
+          console.log(`[ModularASTGenerator.processModuleInstantiation] Registry handler created node of type: ${astNode.type}`);
+          return astNode;
+        }
+      }
+    }
+
+    // If no handler found in registry or handler returned null, fall back to the old approach
+    console.log(`[ModularASTGenerator.processModuleInstantiation] No handler found in registry for ${functionName}, falling back to generators`);
 
     // Try each generator in order of specificity
     let astNode: ast.ASTNode | null = null;
