@@ -276,19 +276,16 @@ See [TODO.md](./TODO.md) for detailed next steps and implementation tasks.
   - Added mock for cursor.nodeText property to handle tree-sitter API changes
   - Updated tests to work with the current tree-sitter API
 
-### Current Issues
-- The tree-sitter CST structure is different from what we expected, which is causing issues with our visitors
-- Some tests still rely on hardcoded values instead of proper parameter extraction
-
 ### Recently Completed
 - Implemented control structure visitors for if, for, let, and each statements:
   - Created ControlStructureVisitor class to handle control structures
-  - Implemented visitIfStatement method to handle if-else and if-else-if-else statements
-  - Implemented visitForStatement method to handle for loops with different variable formats
-  - Implemented visitLetExpression method to handle let expressions with assignments
-  - Implemented visitEachStatement method to handle each statements
+  - Implemented methods for if, for, let, and each statements
   - Added tests for all control structure types
   - Updated visitor-ast-generator.ts to include the new visitor
+
+### Current Issues
+- The tree-sitter CST structure is different from what we expected, which is causing issues with our visitors
+- Some tests still rely on hardcoded values instead of proper parameter extraction
 
 ### Next Steps
 - Add support for expression visitors
@@ -301,8 +298,6 @@ See [TODO.md](./TODO.md) for detailed next steps and implementation tasks.
 - Some edge cases in complex expressions need additional testing
 - Performance optimizations may be needed for large files
 - Some AST node types may need refinement based on real-world usage
-- Difference and intersection operations are not fully implemented
 - Module and function definitions and calls need more work
-- The tree-sitter CST structure is different from what we expected, which is causing issues with our visitors
 - The sphere.test.ts tests are failing because the PrimitiveVisitor is not handling sphere parameters correctly
 - The module-function.test.ts tests are failing because the ModuleVisitor and FunctionVisitor are not implemented yet

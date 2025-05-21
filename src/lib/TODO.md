@@ -440,19 +440,7 @@ Functions in OpenSCAD allow for complex expressions and calculations. The curren
 
 ### 1.4 Current Issues and Next Steps
 
-#### Control Structure Visitor Implementation
-- **Current Status**: Control structure visitor is now implemented and tests are passing.
-- **Implementation Details**:
-  - Created ControlStructureVisitor class to handle if, for, let, and each statements
-  - Implemented visitIfStatement, visitForStatement, visitLetExpression, and visitEachStatement methods
-  - Added tests for all control structure types
-  - Updated visitor-ast-generator.ts to include the new visitor
-- **Next Steps**:
-  1. Add support for more complex control structures like nested if-else statements
-  2. Improve parameter extraction for for loops and let expressions
-  3. Add support for conditional expressions (ternary operator)
-
-#### Expression Visitor Implementation
+#### Expression Visitor Implementation (Next Priority)
 - **Current Status**: Expression visitor is not yet implemented.
 - **Issue Details**: We need a dedicated visitor for handling expressions in OpenSCAD.
 - **Next Steps**:
@@ -460,6 +448,8 @@ Functions in OpenSCAD allow for complex expressions and calculations. The curren
   2. Implement methods for binary expressions, unary expressions, conditional expressions, etc.
   3. Add tests for all expression types
   4. Update visitor-ast-generator.ts to include the new visitor
+
+
 
 #### General Approach for Fixing Tests
 1. Identify the failing test and understand what it's expecting
@@ -714,10 +704,11 @@ Real-world performance testing ensures that the parser performs well on actual O
 - [x] **Minkowski**
   - [x] Minkowski sum of multiple children
 
-#### 5.4 Control Structures
+#### 5.4 Control Structures (COMPLETED)
 - [x] **Conditional Statements**
   - [x] If statement with single child
   - [x] If-else statement
+  - [x] If-else-if-else statement
   - [x] Conditional operator (a ? b : c)
 
 - [x] **Loops**
