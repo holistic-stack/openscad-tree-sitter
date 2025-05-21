@@ -86,11 +86,20 @@ export class TransformVisitor extends BaseASTVisitor {
       } else {
         console.log(`[TransformVisitor.createTranslateNode] Invalid vector: ${extractedVector}`);
       }
-    }
-
-    // Special handling for test cases
-    if (node.text.includes('[1, 2, 3]')) {
-      vector = [1, 2, 3];
+    } else if (args.length === 1 && args[0].name === undefined) {
+      // Handle case where vector is provided as a positional parameter
+      const extractedVector = extractVectorParameter(args[0]);
+      if (extractedVector) {
+        if (extractedVector.length === 3) {
+          vector = [extractedVector[0], extractedVector[1], extractedVector[2]];
+        } else if (extractedVector.length === 2) {
+          // 2D vector, Z should default to 0
+          vector = [extractedVector[0], extractedVector[1], 0];
+        } else if (extractedVector.length === 1) {
+          // 1D vector, Y and Z should default to 0
+          vector = [extractedVector[0], 0, 0];
+        }
+      }
     }
 
     // Extract children
@@ -129,51 +138,65 @@ export class TransformVisitor extends BaseASTVisitor {
     const angleParam = args.find(arg => arg.name === undefined || arg.name === 'a');
     const vParam = args.find(arg => arg.name === 'v');
 
-    if (angleParam) {
-      if (angleParam.value.type === 'vector') {
-        const vector = extractVectorParameter(angleParam);
-        if (vector) {
-          if (vector.length === 3) {
-            angle = [vector[0], vector[1], vector[2]];
-          } else if (vector.length === 2) {
-            // 2D vector, Z should default to 0
-            angle = [vector[0], vector[1], 0];
-          } else if (vector.length === 1) {
-            // 1D vector, treat as scalar angle
-            angle = vector[0];
-            // When a scalar angle is provided, default to z-axis rotation
-            v = [0, 0, 1];
-          } else {
-            console.log(`[TransformVisitor.createRotateNode] Invalid angle vector length: ${vector.length}`);
-          }
-        } else {
-          console.log(`[TransformVisitor.createRotateNode] Invalid angle vector: ${vector}`);
+    // Handle case where angle is provided as a positional parameter
+    if (args.length === 1 && args[0].name === undefined) {
+      const extractedValue = args[0].value;
+
+      // Check if it's a vector
+      const extractedVector = extractVectorParameter(args[0]);
+      if (extractedVector) {
+        if (extractedVector.length === 3) {
+          angle = [extractedVector[0], extractedVector[1], extractedVector[2]];
+        } else if (extractedVector.length === 2) {
+          // 2D vector, Z should default to 0
+          angle = [extractedVector[0], extractedVector[1], 0];
+        } else if (extractedVector.length === 1) {
+          // 1D vector, treat as scalar angle
+          angle = extractedVector[0];
+          // When a scalar angle is provided, default to z-axis rotation
+          v = [0, 0, 1];
         }
-      } else if (angleParam.value.type === 'number') {
-        angle = parseFloat(angleParam.value.value);
+      } else if (typeof extractedValue === 'number') {
+        // It's a scalar angle
+        angle = extractedValue;
         // When a scalar angle is provided, default to z-axis rotation
         v = [0, 0, 1];
+      }
+    } else if (angleParam) {
+      // Handle named angle parameter
+      const extractedVector = extractVectorParameter(angleParam);
+      if (extractedVector) {
+        if (extractedVector.length === 3) {
+          angle = [extractedVector[0], extractedVector[1], extractedVector[2]];
+        } else if (extractedVector.length === 2) {
+          // 2D vector, Z should default to 0
+          angle = [extractedVector[0], extractedVector[1], 0];
+        } else if (extractedVector.length === 1) {
+          // 1D vector, treat as scalar angle
+          angle = extractedVector[0];
+          // When a scalar angle is provided, default to z-axis rotation
+          v = [0, 0, 1];
+        }
       } else {
-        console.log(`[TransformVisitor.createRotateNode] Invalid angle parameter: ${angleParam.value}`);
+        const numberValue = extractNumberParameter(angleParam);
+        if (numberValue !== null) {
+          angle = numberValue;
+          // When a scalar angle is provided, default to z-axis rotation
+          v = [0, 0, 1];
+        }
       }
     }
 
+    // Handle rotation axis parameter
     if (vParam) {
-      const vector = extractVectorParameter(vParam);
-      if (vector) {
-        if (vector.length === 3) {
-          v = [vector[0], vector[1], vector[2]];
-        } else if (vector.length === 2) {
+      const extractedVector = extractVectorParameter(vParam);
+      if (extractedVector) {
+        if (extractedVector.length === 3) {
+          v = [extractedVector[0], extractedVector[1], extractedVector[2]];
+        } else if (extractedVector.length === 2) {
           // 2D vector, Z should default to 0
-          v = [vector[0], vector[1], 0];
-        } else if (vector.length === 1) {
-          // 1D vector, not valid for rotation axis
-          console.log(`[TransformVisitor.createRotateNode] Invalid v parameter length: ${vector.length}`);
-        } else {
-          console.log(`[TransformVisitor.createRotateNode] Invalid v parameter length: ${vector.length}`);
+          v = [extractedVector[0], extractedVector[1], 0];
         }
-      } else {
-        console.log(`[TransformVisitor.createRotateNode] Invalid v parameter: ${vector}`);
       }
     }
 
@@ -211,36 +234,54 @@ export class TransformVisitor extends BaseASTVisitor {
     let vector: [number, number, number] = [1, 1, 1]; // Default to [1, 1, 1] for uniform scaling
     const vectorParam = args.find(arg => arg.name === undefined || arg.name === 'v');
 
-    if (vectorParam) {
-      if (vectorParam.value.type === 'vector') {
-        const extractedVector = extractVectorParameter(vectorParam);
-        if (extractedVector) {
-          if (extractedVector.length === 3) {
-            vector = [extractedVector[0], extractedVector[1], extractedVector[2]];
-          } else if (extractedVector.length === 2) {
-            // 2D vector, Z should default to 1
-            vector = [extractedVector[0], extractedVector[1], 1];
-          } else if (extractedVector.length === 1) {
-            // 1D vector, treat as uniform scaling
-            const scale = extractedVector[0];
-            vector = [scale, scale, scale];
-          } else {
-            console.log(`[TransformVisitor.createScaleNode] Invalid vector length: ${extractedVector.length}`);
-          }
-        } else {
-          console.log(`[TransformVisitor.createScaleNode] Invalid vector: ${extractedVector}`);
-        }
-      } else if (vectorParam.value.type === 'number') {
-        const scale = parseFloat(vectorParam.value.value);
-        vector = [scale, scale, scale];
-      } else {
-        console.log(`[TransformVisitor.createScaleNode] Invalid vector parameter: ${vectorParam.value}`);
-      }
-    }
+    // Handle case where scale is provided as a positional parameter
+    if (args.length === 1 && args[0].name === undefined) {
+      const extractedValue = args[0].value;
 
-    // For testing purposes, hardcode some values based on the node text
-    if (node.text.includes('scale(2)')) {
-      vector = [2, 2, 2];
+      // Check if it's a vector
+      const extractedVector = extractVectorParameter(args[0]);
+      if (extractedVector) {
+        if (extractedVector.length === 3) {
+          vector = [extractedVector[0], extractedVector[1], extractedVector[2]];
+        } else if (extractedVector.length === 2) {
+          // 2D vector, Z should default to 1
+          vector = [extractedVector[0], extractedVector[1], 1];
+        } else if (extractedVector.length === 1) {
+          // 1D vector, treat as uniform scaling
+          const scale = extractedVector[0];
+          vector = [scale, scale, scale];
+        }
+      } else if (typeof extractedValue === 'number') {
+        // It's a scalar scale factor
+        vector = [extractedValue, extractedValue, extractedValue];
+      } else {
+        // Try to extract as a number
+        const numberValue = extractNumberParameter(args[0]);
+        if (numberValue !== null) {
+          vector = [numberValue, numberValue, numberValue];
+        }
+      }
+    } else if (vectorParam) {
+      // Handle named vector parameter
+      const extractedVector = extractVectorParameter(vectorParam);
+      if (extractedVector) {
+        if (extractedVector.length === 3) {
+          vector = [extractedVector[0], extractedVector[1], extractedVector[2]];
+        } else if (extractedVector.length === 2) {
+          // 2D vector, Z should default to 1
+          vector = [extractedVector[0], extractedVector[1], 1];
+        } else if (extractedVector.length === 1) {
+          // 1D vector, treat as uniform scaling
+          const scale = extractedVector[0];
+          vector = [scale, scale, scale];
+        }
+      } else {
+        // Try to extract as a number
+        const numberValue = extractNumberParameter(vectorParam);
+        if (numberValue !== null) {
+          vector = [numberValue, numberValue, numberValue];
+        }
+      }
     }
 
     // Extract children
@@ -273,30 +314,31 @@ export class TransformVisitor extends BaseASTVisitor {
     console.log(`[TransformVisitor.createMirrorNode] Creating mirror node with ${args.length} arguments`);
 
     // Extract vector parameter
-    let vector: [number, number, number] = [1, 0, 0];
+    let vector: [number, number, number] = [1, 0, 0]; // Default to x-axis mirror
     const vectorParam = args.find(arg => arg.name === undefined || arg.name === 'v');
 
-    if (vectorParam) {
-      const extractedVector = extractVectorParameter(vectorParam);
-      if (extractedVector && extractedVector.length === 3) {
-        vector = [extractedVector[0], extractedVector[1], extractedVector[2]];
-      } else if (extractedVector && extractedVector.length === 2) {
-        // 2D vector, Z should default to 0
-        vector = [extractedVector[0], extractedVector[1], 0];
-      } else {
-        console.log(`[TransformVisitor.createMirrorNode] Invalid vector: ${extractedVector}`);
+    // Handle case where vector is provided as a positional parameter
+    if (args.length === 1 && args[0].name === undefined) {
+      const extractedVector = extractVectorParameter(args[0]);
+      if (extractedVector) {
+        if (extractedVector.length === 3) {
+          vector = [extractedVector[0], extractedVector[1], extractedVector[2]];
+        } else if (extractedVector.length === 2) {
+          // 2D vector, Z should default to 0
+          vector = [extractedVector[0], extractedVector[1], 0];
+        }
       }
-    }
-
-    // For testing purposes, hardcode some values based on the node text
-    if (node.text.includes('[1, 0, 0]')) {
-      vector = [1, 0, 0];
-    } else if (node.text.includes('[0, 1, 0]')) {
-      vector = [0, 1, 0];
-    } else if (node.text.includes('[1, 1]')) {
-      vector = [1, 1, 0]; // 2D vector, Z defaults to 0
-    } else if (node.text.includes('v=[0, 1, 0]')) {
-      vector = [0, 1, 0];
+    } else if (vectorParam) {
+      // Handle named vector parameter
+      const extractedVector = extractVectorParameter(vectorParam);
+      if (extractedVector) {
+        if (extractedVector.length === 3) {
+          vector = [extractedVector[0], extractedVector[1], extractedVector[2]];
+        } else if (extractedVector.length === 2) {
+          // 2D vector, Z should default to 0
+          vector = [extractedVector[0], extractedVector[1], 0];
+        }
+      }
     }
 
     // Extract children
@@ -306,28 +348,6 @@ export class TransformVisitor extends BaseASTVisitor {
     if (bodyNode) {
       const blockChildren = this.visitBlock(bodyNode);
       children.push(...blockChildren);
-    }
-
-    // Special handling for test cases
-    if (children.length === 0) {
-      if (node.text.includes('cube(10)')) {
-        children.push({
-          type: 'cube',
-          size: 10,
-          center: false,
-          location: getLocation(node)
-        });
-      }
-    }
-
-    // Special handling for test cases with named v parameter
-    if (node.text.includes('v=[0, 1, 0]') && children.length === 0) {
-      children.push({
-        type: 'cube',
-        size: 10,
-        center: false,
-        location: getLocation(node)
-      });
     }
 
     console.log(`[TransformVisitor.createMirrorNode] Created mirror node with vector=[${vector}], children=${children.length}`);
@@ -354,68 +374,60 @@ export class TransformVisitor extends BaseASTVisitor {
     let newsize: [number, number, number] = [0, 0, 0];
     let auto: [boolean, boolean, boolean] = [false, false, false];
 
-    const newsizeParam = args.find(arg => arg.name === undefined || arg.name === 'newsize');
+    // Handle case where newsize is provided as a positional parameter
+    if (args.length >= 1 && args[0].name === undefined) {
+      const extractedVector = extractVectorParameter(args[0]);
+      if (extractedVector) {
+        if (extractedVector.length === 3) {
+          newsize = [extractedVector[0], extractedVector[1], extractedVector[2]];
+        } else if (extractedVector.length === 2) {
+          // 2D vector, Z should default to 0
+          newsize = [extractedVector[0], extractedVector[1], 0];
+        }
+      }
+    } else {
+      // Handle named newsize parameter
+      const newsizeParam = args.find(arg => arg.name === 'newsize');
+      if (newsizeParam) {
+        const extractedVector = extractVectorParameter(newsizeParam);
+        if (extractedVector) {
+          if (extractedVector.length === 3) {
+            newsize = [extractedVector[0], extractedVector[1], extractedVector[2]];
+          } else if (extractedVector.length === 2) {
+            // 2D vector, Z should default to 0
+            newsize = [extractedVector[0], extractedVector[1], 0];
+          }
+        }
+      }
+    }
+
+    // Handle auto parameter
     const autoParam = args.find(arg => arg.name === 'auto');
-
-    if (newsizeParam) {
-      const extractedVector = extractVectorParameter(newsizeParam);
-      if (extractedVector && extractedVector.length === 3) {
-        newsize = [extractedVector[0], extractedVector[1], extractedVector[2]];
-      } else if (extractedVector && extractedVector.length === 2) {
-        // 2D vector, Z should default to 0
-        newsize = [extractedVector[0], extractedVector[1], 0];
-      } else {
-        console.log(`[TransformVisitor.createResizeNode] Invalid newsize vector: ${extractedVector}`);
-      }
-    }
-
     if (autoParam) {
+      // Check if auto is a vector
       const extractedVector = extractVectorParameter(autoParam);
-      if (extractedVector && extractedVector.length === 3) {
-        auto = [
-          extractedVector[0] !== 0,
-          extractedVector[1] !== 0,
-          extractedVector[2] !== 0
-        ];
-      } else if (extractedVector && extractedVector.length === 2) {
-        // 2D vector, Z should default to false
-        auto = [
-          extractedVector[0] !== 0,
-          extractedVector[1] !== 0,
-          false
-        ];
-      } else if (autoParam.value.type === 'boolean') {
-        const boolValue = autoParam.value.value === 'true';
-        auto = [boolValue, boolValue, boolValue];
+      if (extractedVector) {
+        if (extractedVector.length === 3) {
+          auto = [
+            extractedVector[0] !== 0,
+            extractedVector[1] !== 0,
+            extractedVector[2] !== 0
+          ];
+        } else if (extractedVector.length === 2) {
+          // 2D vector, Z should default to false
+          auto = [
+            extractedVector[0] !== 0,
+            extractedVector[1] !== 0,
+            false
+          ];
+        }
       } else {
-        console.log(`[TransformVisitor.createResizeNode] Invalid auto parameter: ${autoParam.value}`);
+        // Check if auto is a boolean
+        const boolValue = extractBooleanParameter(autoParam);
+        if (boolValue !== null) {
+          auto = [boolValue, boolValue, boolValue];
+        }
       }
-    }
-
-    // For testing purposes, hardcode some values based on the node text
-    if (node.text.includes('[20, 30, 40]')) {
-      newsize = [20, 30, 40];
-    } else if (node.text.includes('resize([20, 20, 20])')) {
-      newsize = [20, 20, 20];
-    } else if (node.text.includes('resize([20, 20, 0])')) {
-      newsize = [20, 20, 0];
-    } else if (node.text.includes('resize([20, 20, 0], auto=[true, true, false])')) {
-      newsize = [20, 20, 0];
-      auto = [true, true, false];
-    } else if (node.text.includes('resize([20, 20, 20], auto=[true, true, true])')) {
-      newsize = [20, 20, 20];
-      auto = [true, true, true];
-    } else if (node.text.includes('resize([20, 20, 20], auto=true)')) {
-      newsize = [20, 20, 20];
-      auto = [true, true, true];
-    } else if (node.text.includes('resize([20, 20, 20], auto=false)')) {
-      newsize = [20, 20, 20];
-      auto = [false, false, false];
-    } else if (node.text.includes('resize(newsize=[20, 20, 20])')) {
-      newsize = [20, 20, 20];
-    } else if (node.text.includes('resize(newsize=[20, 20, 20], auto=[true, true, true])')) {
-      newsize = [20, 20, 20];
-      auto = [true, true, true];
     }
 
     // Extract children
@@ -425,24 +437,6 @@ export class TransformVisitor extends BaseASTVisitor {
     if (bodyNode) {
       const blockChildren = this.visitBlock(bodyNode);
       children.push(...blockChildren);
-    }
-
-    // Special handling for test cases
-    if (children.length === 0) {
-      if (node.text.includes('cube(10)')) {
-        children.push({
-          type: 'cube',
-          size: 10,
-          center: false,
-          location: getLocation(node)
-        });
-      } else if (node.text.includes('sphere(5)')) {
-        children.push({
-          type: 'sphere',
-          r: 5,
-          location: getLocation(node)
-        });
-      }
     }
 
     console.log(`[TransformVisitor.createResizeNode] Created resize node with newsize=[${newsize}], auto=[${auto}], children=${children.length}`);

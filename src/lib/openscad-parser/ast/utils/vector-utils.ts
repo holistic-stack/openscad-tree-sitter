@@ -1,81 +1,149 @@
 import { TSNode } from './location-utils';
 import * as ast from '../ast-types';
 import { extractValue } from '../extractors/value-extractor';
+import { findDescendantOfType } from './node-utils';
 
 /**
  * Extract a vector (2D or 3D) from a vector node
+ *
+ * @param node The node to extract a vector from
+ * @returns A 2D or 3D vector, or undefined if extraction fails
  */
 export function extractVector(node: TSNode): ast.Vector2D | ast.Vector3D | undefined {
   const numbers: number[] = [];
-  const elementsToProcess = node.type === 'array_literal' ? node.children : [];
 
-  console.log(`[extractVector] Processing array_literal node: ${node.text.substring(0,30)}, children count: ${elementsToProcess.length}`);
-
-  // If we don't have any elements to process, try to parse the text directly
-  if (elementsToProcess.length === 0 || (elementsToProcess.length > 0 && !elementsToProcess.some(el => el.type === 'expression' || el.type === 'number'))) {
-    console.log(`[extractVector] No valid elements found, trying to parse text directly: ${node.text}`);
-    // Try to extract numbers from the text
-    const matches = node.text.match(/\[\s*([\d\.\-\+]+)\s*,\s*([\d\.\-\+]+)\s*,\s*([\d\.\-\+]+)\s*\]/);
-    if (matches && matches.length === 4) {
-      const vector = [parseFloat(matches[1]), parseFloat(matches[2]), parseFloat(matches[3])];
-      console.log(`[extractVector] Extracted vector from text: ${JSON.stringify(vector)}`);
-      return vector as ast.Vector3D;
+  // Handle different node types
+  if (node.type === 'array_literal') {
+    // Process array_literal node
+    return extractVectorFromArrayLiteral(node);
+  } else if (node.type === 'expression') {
+    // Try to find array_literal in expression
+    const arrayLiteralNode = findDescendantOfType(node, 'array_literal');
+    if (arrayLiteralNode) {
+      return extractVectorFromArrayLiteral(arrayLiteralNode);
     }
 
-    // Try to extract 2D vector
-    const matches2D = node.text.match(/\[\s*([\d\.\-\+]+)\s*,\s*([\d\.\-\+]+)\s*\]/);
-    if (matches2D && matches2D.length === 3) {
-      const vector = [parseFloat(matches2D[1]), parseFloat(matches2D[2])];
-      console.log(`[extractVector] Extracted 2D vector from text: ${JSON.stringify(vector)}`);
-      return vector as ast.Vector2D;
+    // If no array_literal found, try to extract from text
+    return extractVectorFromText(node.text);
+  } else if (node.type === 'accessor_expression') {
+    // Try to find array_literal in accessor_expression
+    const arrayLiteralNode = findDescendantOfType(node, 'array_literal');
+    if (arrayLiteralNode) {
+      return extractVectorFromArrayLiteral(arrayLiteralNode);
     }
+
+    // If no array_literal found, try to extract from text
+    return extractVectorFromText(node.text);
+  } else {
+    // For other node types, try to extract from text
+    return extractVectorFromText(node.text);
   }
+}
+
+/**
+ * Extract a vector from an array_literal node
+ *
+ * @param node The array_literal node
+ * @returns A 2D or 3D vector, or undefined if extraction fails
+ */
+function extractVectorFromArrayLiteral(node: TSNode): ast.Vector2D | ast.Vector3D | undefined {
+  const numbers: number[] = [];
+  const elementsToProcess = node.children || [];
+
+  console.log(`[extractVectorFromArrayLiteral] Processing array_literal node: ${node.text.substring(0,30)}, children count: ${elementsToProcess.length}`);
 
   // Process each element
   for (const elementNode of elementsToProcess) {
     if (!elementNode) continue;
-    console.log(`[extractVector] Iterating child: type='${elementNode.type}', text='${elementNode.text.substring(0,20)}'`);
 
-    // Only process expression, number, identifier, or unary_expression nodes as potential vector elements
-    if (elementNode.type === 'expression' ||
-        elementNode.type === 'number' ||
-        elementNode.type === 'identifier' ||
-        elementNode.type === 'unary_expression') {
-      console.log(`[extractVector]   Processing child of array_literal: type='${elementNode.type}', text='${elementNode.text.substring(0,20)}'`); // DEBUG
+    console.log(`[extractVectorFromArrayLiteral] Iterating child: type='${elementNode.type}', text='${elementNode.text.substring(0,20)}'`);
+
+    if (elementNode.type === 'expression') {
+      // Process expression node
       const value = extractValue(elementNode);
-      console.log(`[extractVector]   extractValue returned: ${JSON.stringify(value)}, typeof: ${typeof value}`);
       if (typeof value === 'number') {
         numbers.push(value);
-      } else {
-        console.log(`[extractVector]   Skipping non-number value: ${JSON.stringify(value)}`);
+      }
+    } else if (elementNode.type === 'number') {
+      // Process number node directly
+      const numValue = parseFloat(elementNode.text);
+      if (!isNaN(numValue)) {
+        numbers.push(numValue);
+      }
+    } else if (elementNode.type === 'identifier') {
+      // For identifiers, we can't determine the value at parse time
+      // For now, use 0 as a placeholder
+      numbers.push(0);
+    } else if (elementNode.type === 'unary_expression') {
+      // Process unary expression (like -5)
+      const operatorNode = elementNode.child(0);
+      const operandNode = elementNode.child(1);
+
+      if (operatorNode && operandNode && operandNode.type === 'number') {
+        const operator = operatorNode.text;
+        const operand = parseFloat(operandNode.text);
+
+        if (!isNaN(operand)) {
+          if (operator === '-') {
+            numbers.push(-operand);
+          } else if (operator === '+') {
+            numbers.push(operand);
+          }
+        }
       }
     } else {
-      console.log(`[extractVector]   Skipping child of array_literal: type='${elementNode.type}' (not an expression, number, identifier, or unary_expression)`);
+      console.log(`[extractVectorFromArrayLiteral] Skipping child of array_literal: type='${elementNode.type}'`);
     }
   }
 
+  return createVectorFromNumbers(numbers, node.text);
+}
+
+/**
+ * Extract a vector from a text string
+ *
+ * @param text The text to extract a vector from
+ * @returns A 2D or 3D vector, or undefined if extraction fails
+ */
+function extractVectorFromText(text: string): ast.Vector2D | ast.Vector3D | undefined {
+  console.log(`[extractVectorFromText] Trying to extract vector from text: ${text}`);
+
+  // Try to extract 3D vector
+  const matches = text.match(/\[\s*([\d\.\-\+]+)\s*,\s*([\d\.\-\+]+)\s*,\s*([\d\.\-\+]+)\s*\]/);
+  if (matches && matches.length === 4) {
+    const vector = [parseFloat(matches[1]), parseFloat(matches[2]), parseFloat(matches[3])];
+    console.log(`[extractVectorFromText] Extracted 3D vector from text: ${JSON.stringify(vector)}`);
+    return vector as ast.Vector3D;
+  }
+
+  // Try to extract 2D vector
+  const matches2D = text.match(/\[\s*([\d\.\-\+]+)\s*,\s*([\d\.\-\+]+)\s*\]/);
+  if (matches2D && matches2D.length === 3) {
+    const vector = [parseFloat(matches2D[1]), parseFloat(matches2D[2])];
+    console.log(`[extractVectorFromText] Extracted 2D vector from text: ${JSON.stringify(vector)}`);
+    return vector as ast.Vector2D;
+  }
+
+  return undefined;
+}
+
+/**
+ * Create a vector from an array of numbers
+ *
+ * @param numbers The array of numbers
+ * @param originalText The original text for debugging
+ * @returns A 2D or 3D vector, or undefined if creation fails
+ */
+function createVectorFromNumbers(numbers: number[], originalText: string): ast.Vector2D | ast.Vector3D | undefined {
   if (numbers.length === 2) {
-    console.log(`[extractVector] Returning 2D vector from ${node.text.substring(0,20)}: ${JSON.stringify([numbers[0], numbers[1]])}`); // DEBUG
+    console.log(`[createVectorFromNumbers] Returning 2D vector: ${JSON.stringify([numbers[0], numbers[1]])}`);
     return [numbers[0], numbers[1]] as ast.Vector2D;
   } else if (numbers.length === 3) {
-    console.log(`[extractVector] Returning 3D vector from ${node.text.substring(0,20)}: ${JSON.stringify([numbers[0], numbers[1], numbers[2]])}`); // DEBUG
+    console.log(`[createVectorFromNumbers] Returning 3D vector: ${JSON.stringify([numbers[0], numbers[1], numbers[2]])}`);
     return [numbers[0], numbers[1], numbers[2]] as ast.Vector3D;
   }
 
-  // Special case for common vector patterns in tests
-  if (node.text.includes('[1, 2, 3]')) {
-    return [1, 2, 3] as ast.Vector3D;
-  } else if (node.text.includes('[2, 3, 4]')) {
-    return [2, 3, 4] as ast.Vector3D;
-  } else if (node.text.includes('[30, 60, 90]')) {
-    return [30, 60, 90] as ast.Vector3D;
-  } else if (node.text.includes('[1, 0, 0]')) {
-    return [1, 0, 0] as ast.Vector3D;
-  } else if (node.text.includes('[20, 30, 40]')) {
-    return [20, 30, 40] as ast.Vector3D;
-  }
-
   // This warning will now be more specific about failure.
-  console.warn(`[extractVector] FAILURE: Extracted ${numbers.length} numbers from array_literal node '${node.text.substring(0,30)}'. Expected 2 or 3. Numbers: ${JSON.stringify(numbers)}. RETURNING UNDEFINED.`);
+  console.warn(`[createVectorFromNumbers] FAILURE: Extracted ${numbers.length} numbers from '${originalText.substring(0,30)}'. Expected 2 or 3. Numbers: ${JSON.stringify(numbers)}.`);
   return undefined;
 }

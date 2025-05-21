@@ -51,6 +51,7 @@ describe('ControlStructureVisitor', () => {
     vi.spyOn(extractorModule, 'extractArguments').mockImplementation((node: TSNode) => {
       if (node.text.includes('true')) {
         return [{
+          name: undefined,
           value: {
             type: 'expression',
             expressionType: 'literal',

@@ -150,35 +150,26 @@ export class PrimitiveVisitor extends BaseASTVisitor {
     const sizeParam = args.find(arg => arg.name === undefined || arg.name === 'size');
 
     if (sizeParam) {
-      if (sizeParam.value.type === 'vector') {
-        const vector = extractVectorParameter(sizeParam);
-        if (vector && vector.length === 3) {
+      // Try to extract vector parameter first
+      const vector = extractVectorParameter(sizeParam);
+      if (vector) {
+        if (vector.length === 3) {
           size = [vector[0], vector[1], vector[2]];
+        } else if (vector.length === 2) {
+          // For 2D vectors, add a default z value
+          size = [vector[0], vector[1], 1];
         } else {
-          console.log(`[PrimitiveVisitor.createCubeNode] Invalid vector size: ${vector}`);
-          return null;
+          console.log(`[PrimitiveVisitor.createCubeNode] Invalid vector size length: ${vector.length}`);
         }
       } else {
+        // If not a vector, try to extract as a number
         const sizeValue = extractNumberParameter(sizeParam);
         if (sizeValue !== null) {
           size = sizeValue;
         } else {
-          console.log(`[PrimitiveVisitor.createCubeNode] Invalid size parameter: ${sizeParam.value}`);
-          return null;
+          console.log(`[PrimitiveVisitor.createCubeNode] Invalid size parameter: ${JSON.stringify(sizeParam.value)}`);
         }
       }
-    } else {
-      // For testing purposes, hardcode some values based on the node text
-      if (node.text.includes('cube(10)')) {
-        size = 10;
-      } else if (node.text.includes('cube([10, 20, 30])')) {
-        size = [10, 20, 30];
-      }
-    }
-
-    // Special case for vector size in the node text
-    if (node.text.includes('[10, 20, 30]')) {
-      size = [10, 20, 30];
     }
 
     // Extract center parameter
@@ -191,7 +182,7 @@ export class PrimitiveVisitor extends BaseASTVisitor {
       }
     }
 
-    console.log(`[PrimitiveVisitor.createCubeNode] Created cube node with size=${size}, center=${center}`);
+    console.log(`[PrimitiveVisitor.createCubeNode] Created cube node with size=${JSON.stringify(size)}, center=${center}`);
 
     return {
       type: 'cube',
@@ -217,73 +208,53 @@ export class PrimitiveVisitor extends BaseASTVisitor {
     let fs: number | undefined = undefined;
     let fn: number | undefined = undefined;
 
-    // Handle test cases directly based on the node text
-    const nodeText = node.text;
-
-    if (nodeText.includes('sphere(10)')) {
-      // Test case: should parse basic sphere with r parameter
-      radius = 10;
-    } else if (nodeText.includes('sphere(d=20)')) {
-      // Test case: should parse sphere with d parameter
-      diameter = 20;
-      radius = undefined; // When diameter is specified, radius should not be present
-    } else if (nodeText.includes('sphere(r=10, $fn=100)')) {
-      // Test case: should parse sphere with $fn parameter
-      radius = 10;
-      fn = 100;
-    } else if (nodeText.includes('sphere(r=10, $fa=5, $fs=0.1)')) {
-      // Test case: should parse sphere with $fa and $fs parameters
-      radius = 10;
-      fa = 5;
-      fs = 0.1;
-    } else if (nodeText.includes('sphere(r=15)')) {
-      // Test case: should handle sphere with named r parameter
-      radius = 15;
+    // Check for diameter parameter first (takes precedence over radius)
+    const diameterParam = args.find(arg => arg.name === 'd');
+    if (diameterParam) {
+      const diameterValue = extractNumberParameter(diameterParam);
+      if (diameterValue !== null) {
+        diameter = diameterValue;
+        radius = diameter / 2; // Set radius based on diameter
+      }
     } else {
-      // For non-test cases, try to extract parameters from args
-
-      // Check for diameter parameter first
-      const diameterParam = args.find(arg => arg.name === 'd');
-      if (diameterParam) {
-        const diameterValue = extractNumberParameter(diameterParam);
-        if (diameterValue !== null) {
-          diameter = diameterValue;
-          radius = diameter / 2; // Set radius based on diameter
+      // If no diameter, check for radius
+      const radiusParam = args.find(arg => arg.name === undefined || arg.name === 'r');
+      if (radiusParam) {
+        const radiusValue = extractNumberParameter(radiusParam);
+        if (radiusValue !== null) {
+          radius = radiusValue;
         }
-      } else {
-        // If no diameter, check for radius
-        const radiusParam = args.find(arg => arg.name === undefined || arg.name === 'r');
-        if (radiusParam) {
-          const radiusValue = extractNumberParameter(radiusParam);
-          if (radiusValue !== null) {
-            radius = radiusValue;
-          }
+      } else if (args.length === 1 && args[0].name === undefined) {
+        // Handle case where radius is provided as a positional parameter
+        const radiusValue = extractNumberParameter(args[0]);
+        if (radiusValue !== null) {
+          radius = radiusValue;
         }
       }
+    }
 
-      // Extract $fa, $fs, $fn parameters
-      const faParam = args.find(arg => arg.name === '$fa' || arg.name === 'fa');
-      if (faParam) {
-        const faValue = extractNumberParameter(faParam);
-        if (faValue !== null) {
-          fa = faValue;
-        }
+    // Extract $fa, $fs, $fn parameters
+    const faParam = args.find(arg => arg.name === '$fa');
+    if (faParam) {
+      const faValue = extractNumberParameter(faParam);
+      if (faValue !== null) {
+        fa = faValue;
       }
+    }
 
-      const fsParam = args.find(arg => arg.name === '$fs' || arg.name === 'fs');
-      if (fsParam) {
-        const fsValue = extractNumberParameter(fsParam);
-        if (fsValue !== null) {
-          fs = fsValue;
-        }
+    const fsParam = args.find(arg => arg.name === '$fs');
+    if (fsParam) {
+      const fsValue = extractNumberParameter(fsParam);
+      if (fsValue !== null) {
+        fs = fsValue;
       }
+    }
 
-      const fnParam = args.find(arg => arg.name === '$fn' || arg.name === 'fn');
-      if (fnParam) {
-        const fnValue = extractNumberParameter(fnParam);
-        if (fnValue !== null) {
-          fn = fnValue;
-        }
+    const fnParam = args.find(arg => arg.name === '$fn');
+    if (fnParam) {
+      const fnValue = extractNumberParameter(fnParam);
+      if (fnValue !== null) {
+        fn = fnValue;
       }
     }
 
@@ -294,6 +265,7 @@ export class PrimitiveVisitor extends BaseASTVisitor {
       return {
         type: 'sphere',
         r: radius, // For backward compatibility
+        radius, // For tests that expect radius
         diameter,
         fa,
         fs,
@@ -322,81 +294,37 @@ export class PrimitiveVisitor extends BaseASTVisitor {
   private createCylinderNode(node: TSNode, args: ast.Parameter[]): ast.CylinderNode | null {
     console.log(`[PrimitiveVisitor.createCylinderNode] Creating cylinder node with ${args.length} arguments`);
 
-    // Extract height parameter
+    // Default values
     let height = 1;
+    let radius1 = 1;
+    let radius2 = 1;
+    let center = false;
+    let fa: number | undefined = undefined;
+    let fs: number | undefined = undefined;
+    let fn: number | undefined = undefined;
+
+    // Extract height parameter
     const heightParam = args.find(arg => arg.name === undefined || arg.name === 'h');
     if (heightParam) {
       const heightValue = extractNumberParameter(heightParam);
       if (heightValue !== null) {
         height = heightValue;
-      } else {
-        console.log(`[PrimitiveVisitor.createCylinderNode] Invalid height parameter: ${heightParam.value}`);
-        return null;
       }
-    } else {
-      // For testing purposes, hardcode some values based on the node text
-      if (node.text.includes('cylinder(h=10, r=5)')) {
-        height = 10;
+    } else if (args.length >= 1 && args[0].name === undefined) {
+      // Handle case where height is provided as the first positional parameter
+      const heightValue = extractNumberParameter(args[0]);
+      if (heightValue !== null) {
+        height = heightValue;
       }
     }
 
-    // Extract radius parameters
-    let radius1 = 1;
-    let radius2 = 1;
-
-    const radiusParam = args.find(arg => arg.name === 'r');
-    if (radiusParam) {
-      const radiusValue = extractNumberParameter(radiusParam);
-      if (radiusValue !== null) {
-        radius1 = radiusValue;
-        radius2 = radiusValue;
-      } else {
-        console.log(`[PrimitiveVisitor.createCylinderNode] Invalid radius parameter: ${radiusParam.value}`);
-        return null;
-      }
-    } else {
-      // For testing purposes, hardcode some values based on the node text
-      if (node.text.includes('cylinder(h=10, r=5)')) {
-        radius1 = 5;
-        radius2 = 5;
-      } else if (node.text.includes('cylinder(h=10, r1=5, r2=3)')) {
-        radius1 = 5;
-        radius2 = 3;
-      }
-    }
-
-    const radius1Param = args.find(arg => arg.name === 'r1');
-    if (radius1Param) {
-      const radius1Value = extractNumberParameter(radius1Param);
-      if (radius1Value !== null) {
-        radius1 = radius1Value;
-      } else {
-        console.log(`[PrimitiveVisitor.createCylinderNode] Invalid radius1 parameter: ${radius1Param.value}`);
-        return null;
-      }
-    }
-
-    const radius2Param = args.find(arg => arg.name === 'r2');
-    if (radius2Param) {
-      const radius2Value = extractNumberParameter(radius2Param);
-      if (radius2Value !== null) {
-        radius2 = radius2Value;
-      } else {
-        console.log(`[PrimitiveVisitor.createCylinderNode] Invalid radius2 parameter: ${radius2Param.value}`);
-        return null;
-      }
-    }
-
-    // Extract diameter parameters
+    // Handle diameter parameters first (they take precedence over radius)
     const diameterParam = args.find(arg => arg.name === 'd');
     if (diameterParam) {
       const diameterValue = extractNumberParameter(diameterParam);
       if (diameterValue !== null) {
         radius1 = diameterValue / 2;
         radius2 = diameterValue / 2;
-      } else {
-        console.log(`[PrimitiveVisitor.createCylinderNode] Invalid diameter parameter: ${diameterParam.value}`);
-        return null;
       }
     }
 
@@ -405,9 +333,6 @@ export class PrimitiveVisitor extends BaseASTVisitor {
       const diameter1Value = extractNumberParameter(diameter1Param);
       if (diameter1Value !== null) {
         radius1 = diameter1Value / 2;
-      } else {
-        console.log(`[PrimitiveVisitor.createCylinderNode] Invalid diameter1 parameter: ${diameter1Param.value}`);
-        return null;
       }
     }
 
@@ -416,14 +341,46 @@ export class PrimitiveVisitor extends BaseASTVisitor {
       const diameter2Value = extractNumberParameter(diameter2Param);
       if (diameter2Value !== null) {
         radius2 = diameter2Value / 2;
-      } else {
-        console.log(`[PrimitiveVisitor.createCylinderNode] Invalid diameter2 parameter: ${diameter2Param.value}`);
-        return null;
+      }
+    }
+
+    // If no diameter parameters, check for radius parameters
+    if (!diameterParam && !diameter1Param && !diameter2Param) {
+      const radiusParam = args.find(arg => arg.name === 'r');
+      if (radiusParam) {
+        const radiusValue = extractNumberParameter(radiusParam);
+        if (radiusValue !== null) {
+          radius1 = radiusValue;
+          radius2 = radiusValue;
+        }
+      } else if (args.length >= 2 && args[1].name === undefined) {
+        // Handle case where radius is provided as the second positional parameter
+        const radiusValue = extractNumberParameter(args[1]);
+        if (radiusValue !== null) {
+          radius1 = radiusValue;
+          radius2 = radiusValue;
+        }
+      }
+
+      // Check for specific radius1 and radius2 parameters (override general radius)
+      const radius1Param = args.find(arg => arg.name === 'r1');
+      if (radius1Param) {
+        const radius1Value = extractNumberParameter(radius1Param);
+        if (radius1Value !== null) {
+          radius1 = radius1Value;
+        }
+      }
+
+      const radius2Param = args.find(arg => arg.name === 'r2');
+      if (radius2Param) {
+        const radius2Value = extractNumberParameter(radius2Param);
+        if (radius2Value !== null) {
+          radius2 = radius2Value;
+        }
       }
     }
 
     // Extract center parameter
-    let center = false;
     const centerParam = args.find(arg => arg.name === 'center');
     if (centerParam) {
       const centerValue = extractBooleanParameter(centerParam);
@@ -433,10 +390,6 @@ export class PrimitiveVisitor extends BaseASTVisitor {
     }
 
     // Extract $fa, $fs, $fn parameters
-    let fa: number | undefined = undefined;
-    let fs: number | undefined = undefined;
-    let fn: number | undefined = undefined;
-
     const faParam = args.find(arg => arg.name === '$fa');
     if (faParam) {
       const faValue = extractNumberParameter(faParam);
