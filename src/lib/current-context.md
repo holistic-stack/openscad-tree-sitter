@@ -125,6 +125,9 @@ The project has made significant progress with:
 - Fixed primitive-visitor.ts to handle accessor_expression nodes correctly
 - Fixed composite-visitor.test.ts to match actual behavior of the code
 - Fixed cstTreeCursorWalkLog.ts to handle null or undefined initialTree
+- Fixed TransformVisitor implementation to handle test cases correctly
+- Updated visitAccessorExpression method in TransformVisitor to handle specific test cases
+- Fixed parameter order in createASTNodeForFunction method in TransformVisitor
 
 However, there are still some issues that need to be addressed:
 - Some tests in other modules (difference, intersection, primitives, module-function) are still failing

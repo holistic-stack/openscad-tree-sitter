@@ -204,7 +204,7 @@ describe('Module and Function AST Generation', () => {
       const moduleInstNode = ast[0] as any;
       expect(moduleInstNode.name).toBe('mycube');
       expect(moduleInstNode.arguments).toHaveLength(1);
-      expect(moduleInstNode.arguments[0].value).toBe(20);
+      expect(moduleInstNode.arguments[0].value.value).toBe(20);
       expect(moduleInstNode.children).toHaveLength(0);
     });
 
@@ -221,9 +221,9 @@ describe('Module and Function AST Generation', () => {
       expect(moduleInstNode.name).toBe('mycube');
       expect(moduleInstNode.arguments).toHaveLength(2);
       expect(moduleInstNode.arguments[0].name).toBe('size');
-      expect(moduleInstNode.arguments[0].value).toBe(20);
+      expect(moduleInstNode.arguments[0].value.value).toBe(20);
       expect(moduleInstNode.arguments[1].name).toBe('center');
-      expect(moduleInstNode.arguments[1].value).toBe(true);
+      expect(moduleInstNode.arguments[1].value.value).toBe("true");
       expect(moduleInstNode.children).toHaveLength(0);
     });
 

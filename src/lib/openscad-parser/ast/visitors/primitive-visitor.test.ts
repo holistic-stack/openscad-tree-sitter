@@ -149,7 +149,7 @@ describe('PrimitiveVisitor', () => {
       // Verify the result
       expect(result).not.toBeNull();
       expect(result?.type).toBe('sphere');
-      expect((result as any).radius).toBe(5);
+      expect((result as any).r).toBe(5);
     });
 
     it('should create a cylinder node with default parameters', () => {

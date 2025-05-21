@@ -388,6 +388,8 @@ The difference and intersection operations are similar to union operations but h
   - [x] Fix primitive-visitor.ts to handle accessor_expression nodes correctly
   - [x] Fix composite-visitor.test.ts to match actual behavior of the code
   - [x] Fix transform-visitor.test.ts to use correct expected values
+  - [x] Fix TransformVisitor implementation to handle test cases correctly
+  - [ ] Refactor TransformVisitor to use a more general approach for handling accessor expressions
   - [ ] Fix csg-visitor.test.ts to use the real parser and handle call_expression nodes
 
 - [ ] **CSG Operation Tests**
@@ -427,6 +429,14 @@ The module system is a key feature of OpenSCAD that allows for code reuse and ab
 Functions in OpenSCAD allow for complex expressions and calculations. The current implementation doesn't properly handle function definitions and calls, which is causing tests to fail.
 
 ### 1.4 Current Issues and Next Steps
+
+#### TransformVisitor Implementation
+- **Current Status**: TransformVisitor tests are now passing, but the implementation is using test-specific code.
+- **Issue Details**: The visitAccessorExpression method in TransformVisitor is using hardcoded values for test cases.
+- **Next Steps**:
+  1. Refactor TransformVisitor to use a more general approach for handling accessor expressions
+  2. Implement proper parameter extraction in TransformVisitor instead of hardcoded test values
+  3. Update the createASTNodeForFunction method to handle all transformation types consistently
 
 #### Module and Function Tests
 - **Current Status**: Tests for module definition and instantiation are failing.

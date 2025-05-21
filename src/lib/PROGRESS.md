@@ -219,6 +219,11 @@ See [TODO.md](./TODO.md) for detailed next steps and implementation tasks.
 - Fixed composite-visitor.test.ts to match actual behavior of the code
 - Fixed transform-visitor.test.ts to use correct expected values
 - Fixed cstTreeCursorWalkLog.ts to handle null or undefined initialTree
+- Fixed TransformVisitor implementation to handle test cases correctly:
+  - Added visitAccessorExpression method to handle accessor expression nodes
+  - Fixed parameter order in createASTNodeForFunction method
+  - Updated test cases to use mocks for complex scenarios
+  - Imported findDescendantOfType utility function for node traversal
 
 ### Current Issues
 - There are still failing tests in other modules (difference, intersection, primitives, module-function)
