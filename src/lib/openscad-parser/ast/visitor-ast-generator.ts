@@ -1,4 +1,4 @@
-import { Tree, Node as TSNode } from 'web-tree-sitter';
+import { Tree, Node as TSNode, Edit } from 'web-tree-sitter';
 import * as ast from './ast-types';
 import { ASTVisitor } from './visitors/ast-visitor';
 import { CompositeVisitor } from './visitors/composite-visitor';
@@ -8,6 +8,7 @@ import { CSGVisitor } from './visitors/csg-visitor';
 import { ModuleVisitor } from './visitors/module-visitor';
 import { FunctionVisitor } from './visitors/function-visitor';
 import { QueryVisitor } from './visitors/query-visitor';
+import { Change } from './changes/change-tracker';
 
 /**
  * Converts a Tree-sitter CST to an OpenSCAD AST using the visitor pattern
@@ -17,6 +18,7 @@ import { QueryVisitor } from './visitors/query-visitor';
 export class VisitorASTGenerator {
   private visitor: ASTVisitor;
   private queryVisitor: QueryVisitor;
+  private previousAST: ast.ASTNode[] | null = null;
 
   /**
    * Create a new VisitorASTGenerator
@@ -26,9 +28,11 @@ export class VisitorASTGenerator {
    */
   constructor(private tree: Tree, private source: string, private language: any) {
     // Create a composite visitor that delegates to specialized visitors
+    // Order matters here - TransformVisitor should be first to handle transformation nodes
+    const transformVisitor = new TransformVisitor(source);
     const compositeVisitor = new CompositeVisitor([
+      transformVisitor,
       new PrimitiveVisitor(source),
-      new TransformVisitor(source),
       new CSGVisitor(source),
       new ModuleVisitor(source),
       new FunctionVisitor(source)

@@ -1,24 +1,24 @@
 /**
  * change-tracker.ts
- * 
+ *
  * Tracks changes to the source code for incremental parsing.
- * 
+ *
  * @module lib/openscad-parser/ast/changes/change-tracker
  * @author Augment Code
  * @created 2024-06-10
  * @updated 2024-06-10
- * 
+ *
  * @example
  * ```typescript
  * // Create a change tracker
  * const tracker = new ChangeTracker();
- * 
+ *
  * // Track a change
  * tracker.trackChange(10, 15, 20, sourceCode);
- * 
+ *
  * // Get all changes
  * const changes = tracker.getChanges();
- * 
+ *
  * // Check if a node is affected by changes
  * const isAffected = tracker.isNodeAffected(5, 25);
  * ```
@@ -47,7 +47,7 @@ export class ChangeTracker {
 
   /**
    * Track a change to the source code
-   * 
+   *
    * @param startIndex The index where the change starts
    * @param oldEndIndex The index where the old text ends
    * @param newEndIndex The index where the new text ends
@@ -71,7 +71,7 @@ export class ChangeTracker {
 
   /**
    * Get all changes that have been tracked
-   * 
+   *
    * @returns All changes
    */
   getChanges(): Change[] {
@@ -80,7 +80,7 @@ export class ChangeTracker {
 
   /**
    * Get changes that have been tracked since a specific time
-   * 
+   *
    * @param since The timestamp to get changes since
    * @returns Changes since the specified time
    */
@@ -90,7 +90,7 @@ export class ChangeTracker {
 
   /**
    * Check if a node is affected by any changes
-   * 
+   *
    * @param nodeStartIndex The start index of the node
    * @param nodeEndIndex The end index of the node
    * @param since Optional timestamp to only check changes since that time
@@ -98,7 +98,7 @@ export class ChangeTracker {
    */
   isNodeAffected(nodeStartIndex: number, nodeEndIndex: number, since?: number): boolean {
     const changesToCheck = since ? this.getChangesSince(since) : this.changes;
-    
+
     return changesToCheck.some(change => {
       // Check if the change overlaps with the node
       return (
@@ -123,7 +123,7 @@ export class ChangeTracker {
 
   /**
    * Convert an index in the source text to a position (line and column)
-   * 
+   *
    * @param text The source text
    * @param index The index to convert
    * @returns The position (line and column)

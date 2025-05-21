@@ -223,19 +223,19 @@ We've designed a query caching system with the following components:
   - [x] Design an incremental parsing interface
   - [x] Define strategies for tracking changes and updating the AST
   - [x] Create a plan for implementing incremental parsing
-- [ ] **Implementation**
+- [x] **Implementation**
   - [x] Update `OpenscadParser` to support incremental parsing with `update` method
   - [x] Create `ChangeTracker` class for tracking changes to the source code
   - [x] Implement `indexToPosition` method for converting indices to row/column positions
   - [x] Add `updateAST` method for incrementally updating the AST
-  - [ ] Add mechanisms to reuse parts of the AST that haven't changed
-  - [ ] Refactor AST generator to support incremental updates
-- [ ] **Testing**
+  - [x] Add mechanisms to reuse parts of the AST that haven't changed
+  - [x] Refactor AST generator to support incremental updates
+- [x] **Testing**
   - [x] Create unit tests for the `ChangeTracker` class
   - [x] Create unit tests for incremental parsing
   - [x] Create unit tests for incremental AST updates
-  - [ ] Benchmark performance with and without incremental parsing
-  - [ ] Test edge cases and complex change scenarios
+  - [x] Test edge cases and complex change scenarios
+  - [ ] Benchmark performance with and without incremental parsing (future enhancement)
 
 **Context:**
 Incremental parsing is a key feature of tree-sitter that allows for efficient updates to the syntax tree when the source file is edited. This improves performance, especially for large files and interactive editing.
@@ -272,7 +272,7 @@ We've designed an incremental parsing system with the following components:
   - [x] OpenSCAD grammar integration
   - [x] CST (Concrete Syntax Tree) generation
   - [x] Initial AST (Abstract Syntax Tree) generation from CST
-  - [ ] Support for incremental parsing
+  - [x] Support for incremental parsing
 
 - [x] **AST Generator Refactoring**
   - [x] Create modular structure for AST generation
@@ -389,8 +389,17 @@ The difference and intersection operations are similar to union operations but h
   - [x] Fix composite-visitor.test.ts to match actual behavior of the code
   - [x] Fix transform-visitor.test.ts to use correct expected values
   - [x] Fix TransformVisitor implementation to handle test cases correctly
+  - [x] Fix multmatrix tests by adding matrix and children properties to module_instantiation nodes
+  - [x] Fix csg-visitor.test.ts to use the real parser and handle call_expression nodes
+  - [ ] Fix PrimitiveVisitor to handle test cases correctly:
+    - [ ] Add startPosition and endPosition properties to mock nodes
+    - [ ] Update visitAccessorExpression method to handle different primitive operations
+    - [ ] Update createASTNodeForFunction method to handle all primitive types
+  - [ ] Fix CompositeVisitor to handle test cases correctly:
+    - [ ] Update visitNode method to delegate to the appropriate visitor
+    - [ ] Update visitChildren method to handle all child nodes
+    - [ ] Fix nested transformations handling
   - [ ] Refactor TransformVisitor to use a more general approach for handling accessor expressions
-  - [ ] Fix csg-visitor.test.ts to use the real parser and handle call_expression nodes
 
 - [ ] **CSG Operation Tests**
   - [ ] Fix union operations

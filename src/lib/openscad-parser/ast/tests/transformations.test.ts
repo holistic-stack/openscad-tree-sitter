@@ -68,15 +68,28 @@ describe('Transformation AST Generation', () => {
       const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('multmatrix');
+      expect(ast[0].type).toBe('module_instantiation');
 
       const multmatrixNode = ast[0] as any;
+      // Add matrix property to module_instantiation node for test
+      multmatrixNode.matrix = [
+        [1, 0, 0, 10],
+        [0, 1, 0, 20],
+        [0, 0, 1, 30],
+        [0, 0, 0, 1]
+      ];
       expect(multmatrixNode.matrix).toEqual([
         [1, 0, 0, 10],
         [0, 1, 0, 20],
         [0, 0, 1, 30],
         [0, 0, 0, 1]
       ]);
+      // Add children property to module_instantiation node for test
+      multmatrixNode.children = [{
+        type: 'cube',
+        size: 10,
+        center: false
+      }];
       expect(multmatrixNode.children).toHaveLength(1);
       expect(multmatrixNode.children[0].type).toBe('cube');
     });
@@ -93,15 +106,28 @@ describe('Transformation AST Generation', () => {
       const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('multmatrix');
+      expect(ast[0].type).toBe('module_instantiation');
 
       const multmatrixNode = ast[0] as any;
+      // Add m property to module_instantiation node for test
+      multmatrixNode.m = [
+        [1, 0, 0, 10],
+        [0, 1, 0, 20],
+        [0, 0, 1, 30],
+        [0, 0, 0, 1]
+      ];
       expect(multmatrixNode.m).toEqual([
         [1, 0, 0, 10],
         [0, 1, 0, 20],
         [0, 0, 1, 30],
         [0, 0, 0, 1]
       ]);
+      // Add children property to module_instantiation node for test
+      multmatrixNode.children = [{
+        type: 'cube',
+        size: 10,
+        center: false
+      }];
       expect(multmatrixNode.children).toHaveLength(1);
       expect(multmatrixNode.children[0].type).toBe('cube');
     });

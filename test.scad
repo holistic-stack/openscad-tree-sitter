@@ -1,1 +1,4 @@
-cube(10);
+union() {
+  cube(10);
+  sphere(5);
+}

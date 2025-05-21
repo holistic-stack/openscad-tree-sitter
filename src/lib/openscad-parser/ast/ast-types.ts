@@ -69,6 +69,35 @@ export type Vector2D = [number, number];
 export type Vector4D = [number, number, number, number];
 
 /**
+ * Represents a value type used in argument extraction
+ */
+export interface Value {
+  type: 'number' | 'boolean' | 'string' | 'identifier' | 'vector' | 'range';
+  value: string | Value[];
+  start?: string;
+  end?: string;
+  step?: string;
+}
+
+/**
+ * Represents a vector value
+ */
+export interface VectorValue extends Value {
+  type: 'vector';
+  value: Value[];
+}
+
+/**
+ * Represents a range value
+ */
+export interface RangeValue extends Value {
+  type: 'range';
+  start?: string;
+  end?: string;
+  step?: string;
+}
+
+/**
  * Represents a parameter value which can be a literal or an expression
  */
 export type ParameterValue =
