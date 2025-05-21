@@ -1,0 +1,152 @@
+/**
+ * incremental-parsing.test.ts
+ *
+ * Tests for incremental parsing functionality in the OpenscadParser.
+ *
+ * @module lib/openscad-parser/incremental-parsing.test
+ * @author Augment Code
+ * @created 2024-06-10
+ * @updated 2024-06-10
+ */
+
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { OpenscadParser } from './openscad-parser';
+import { ChangeTracker } from './ast/changes/change-tracker';
+
+describe('Incremental Parsing', () => {
+  let parser: OpenscadParser;
+
+  beforeEach(async () => {
+    parser = new OpenscadParser();
+    await parser.init('./tree-sitter-openscad.wasm');
+  });
+
+  afterEach(() => {
+    parser.dispose();
+  });
+
+  it('should parse code incrementally', () => {
+    // Initial code
+    const initialCode = 'cube(10);';
+    const initialTree = parser.parseCST(initialCode);
+    expect(initialTree).not.toBeNull();
+
+    // Modified code - change size from 10 to 20
+    const modifiedCode = 'cube(20);';
+
+    // Calculate edit positions
+    const startIndex = initialCode.indexOf('10');
+    const oldEndIndex = startIndex + 2; // '10' is 2 characters
+    const newEndIndex = startIndex + 2; // '20' is also 2 characters
+
+    // Update the tree incrementally
+    const updatedTree = parser.update(modifiedCode, startIndex, oldEndIndex, newEndIndex);
+
+    // Verify the update was successful
+    expect(updatedTree).not.toBeNull();
+    expect(updatedTree?.rootNode.text).toBe(modifiedCode);
+  });
+
+  it('should generate AST incrementally', () => {
+    // Initial code
+    const initialCode = 'cube(10);';
+    const initialAST = parser.parseAST(initialCode);
+    expect(initialAST.length).toBe(1);
+    expect(initialAST[0].type).toBe('cube');
+    expect((initialAST[0] as any).size).toBe(10);
+
+    // Modified code - change size from 10 to 20
+    const modifiedCode = 'cube(20);';
+
+    // Calculate edit positions
+    const startIndex = initialCode.indexOf('10');
+    const oldEndIndex = startIndex + 2; // '10' is 2 characters
+    const newEndIndex = startIndex + 2; // '20' is also 2 characters
+
+    // Update the AST incrementally
+    const updatedAST = parser.updateAST(modifiedCode, startIndex, oldEndIndex, newEndIndex);
+
+    // Verify the update was successful
+    expect(updatedAST.length).toBe(1);
+    expect(updatedAST[0].type).toBe('cube');
+    expect((updatedAST[0] as any).size).toBe(20);
+  });
+
+  it('should handle multiple incremental updates', () => {
+    // Initial code
+    const initialCode = 'cube(10);';
+    const initialTree = parser.parseCST(initialCode);
+
+    // First update: change size from 10 to 20
+    const firstModifiedCode = 'cube(20);';
+    const firstStartIndex = initialCode.indexOf('10');
+    const firstOldEndIndex = firstStartIndex + 2;
+    const firstNewEndIndex = firstStartIndex + 2;
+
+    const firstUpdatedTree = parser.update(firstModifiedCode, firstStartIndex, firstOldEndIndex, firstNewEndIndex);
+    expect(firstUpdatedTree?.rootNode.text).toBe(firstModifiedCode);
+
+    // Second update: add center parameter
+    const secondModifiedCode = 'cube(20, center=true);';
+    const secondStartIndex = firstModifiedCode.indexOf(');');
+    const secondOldEndIndex = secondStartIndex;
+    const secondNewEndIndex = secondStartIndex + ', center=true'.length;
+
+    const secondUpdatedTree = parser.update(secondModifiedCode, secondStartIndex, secondOldEndIndex, secondNewEndIndex);
+    expect(secondUpdatedTree?.rootNode.text).toBe(secondModifiedCode);
+
+    // Verify the AST after multiple updates
+    const finalAST = parser.parseAST(secondModifiedCode);
+    expect(finalAST.length).toBe(1);
+    expect(finalAST[0].type).toBe('cube');
+    expect((finalAST[0] as any).size).toBe(20);
+    expect((finalAST[0] as any).center).toBe(true);
+  });
+
+  it('should handle complex code changes', () => {
+    // Initial code with multiple statements
+    const initialCode = `cube(10);
+      translate([5, 0, 0]) {
+        sphere(5);
+      }
+    `;
+
+    const initialTree = parser.parseCST(initialCode);
+
+    // Modified code - add a new statement
+    const modifiedCode = `cube(10);
+      translate([5, 0, 0]) {
+        sphere(5);
+      }
+      cylinder(h=10, r=2);
+    `;
+
+    // Calculate edit positions
+    const startIndex = initialCode.lastIndexOf('}') + 1;
+    const oldEndIndex = initialCode.length;
+    const newEndIndex = modifiedCode.length;
+
+    // Update the tree incrementally
+    const updatedTree = parser.update(modifiedCode, startIndex, oldEndIndex, newEndIndex);
+
+    // Verify the update was successful
+    expect(updatedTree).not.toBeNull();
+
+    // Normalize whitespace for comparison
+    const normalizedTreeText = updatedTree?.rootNode.text.replace(/\s+/g, ' ').trim();
+    const normalizedModifiedCode = modifiedCode.replace(/\s+/g, ' ').trim();
+    expect(normalizedTreeText).toBe(normalizedModifiedCode);
+
+    // Verify the AST has the new statement
+    const updatedAST = parser.parseAST(modifiedCode);
+    expect(updatedAST.length).toBeGreaterThan(2); // Should have at least 3 nodes (cube, translate, cylinder)
+
+    // Find the cylinder node
+    const cylinderNode = updatedAST.find(node => node.type === 'cylinder');
+    expect(cylinderNode).toBeDefined();
+    expect((cylinderNode as any).height).toBe(10);
+
+    // The property is named radius1 in the implementation
+    expect((cylinderNode as any).radius1).toBe(2);
+  });
+});
