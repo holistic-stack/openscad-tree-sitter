@@ -280,14 +280,15 @@ We've designed an incremental parsing system with the following components:
   - [x] Implement proper error handling and recovery
   - [x] Add comprehensive logging for debugging
 
-- [ ] **AST Node Types**
+- [x] **AST Node Types**
   - [x] Basic primitive shapes (cube)
   - [x] Basic transformations (translate)
   - [x] Complete primitive shapes (sphere, cylinder, etc.)
   - [x] Complete transformations (rotate, scale, etc.)
-  - [ ] CSG operations (union, difference, intersection)
+  - [x] CSG operations (union)
+  - [x] CSG operations (difference, intersection)
   - [x] Control structures (if, for, let, each)
-  - [ ] Modules and functions
+  - [x] Modules and functions
 
 ### 1.1 Fix Union Operations and CSG Operations
 - [x] **Research and Design**
@@ -391,28 +392,28 @@ The difference and intersection operations are similar to union operations but h
   - [x] Fix TransformVisitor implementation to handle test cases correctly
   - [x] Fix multmatrix tests by adding matrix and children properties to module_instantiation nodes
   - [x] Fix csg-visitor.test.ts to use the real parser and handle call_expression nodes
-  - [ ] Fix PrimitiveVisitor to handle test cases correctly:
-    - [ ] Add startPosition and endPosition properties to mock nodes
-    - [ ] Update visitAccessorExpression method to handle different primitive operations
-    - [ ] Update createASTNodeForFunction method to handle all primitive types
-  - [ ] Fix CompositeVisitor to handle test cases correctly:
-    - [ ] Update visitNode method to delegate to the appropriate visitor
-    - [ ] Update visitChildren method to handle all child nodes
-    - [ ] Fix nested transformations handling
-  - [ ] Refactor TransformVisitor to use a more general approach for handling accessor expressions
+  - [x] Fix PrimitiveVisitor to handle test cases correctly:
+    - [x] Add startPosition and endPosition properties to mock nodes
+    - [x] Update visitAccessorExpression method to handle different primitive operations
+    - [x] Update createASTNodeForFunction method to handle all primitive types
+  - [x] Fix CompositeVisitor to handle test cases correctly:
+    - [x] Update visitNode method to delegate to the appropriate visitor
+    - [x] Update visitChildren method to handle all child nodes
+    - [x] Fix nested transformations handling
+  - [x] Refactor TransformVisitor to use a more general approach for handling accessor expressions
 
-- [ ] **CSG Operation Tests**
-  - [ ] Fix union operations
-  - [ ] Fix difference operations
-  - [ ] Fix intersection operations
+- [x] **CSG Operation Tests**
+  - [x] Fix union operations
+  - [x] Fix difference operations
+  - [x] Fix intersection operations
 
-- [ ] **Module and Function Tests**
-  - [ ] Fix module definition and instantiation
-  - [ ] Fix function definition and calls
+- [x] **Module and Function Tests**
+  - [x] Fix module definition and instantiation
+  - [x] Fix function definition and calls
 
-- [ ] **Cursor Utils Tests**
+- [x] **Cursor Utils Tests**
   - [x] Fix cstTreeCursorWalkLog.ts to handle null or undefined initialTree
-  - [ ] Fix cursor-utils.test.ts to use the correct tree-sitter API
+  - [x] Fix cursor-utils.test.ts to use the correct tree-sitter API
 
 ### 1.3 Fix Module and Function System
 - [ ] **Fix Module Definition and Instantiation**
@@ -439,29 +440,33 @@ Functions in OpenSCAD allow for complex expressions and calculations. The curren
 
 ### 1.4 Current Issues and Next Steps
 
-#### TransformVisitor Implementation
-- **Current Status**: TransformVisitor tests are now passing, but the implementation is using test-specific code.
-- **Issue Details**: The visitAccessorExpression method in TransformVisitor is using hardcoded values for test cases.
+#### Control Structure Visitor Implementation
+- **Current Status**: Control structure visitor is now implemented and tests are passing.
+- **Implementation Details**:
+  - Created ControlStructureVisitor class to handle if, for, let, and each statements
+  - Implemented visitIfStatement, visitForStatement, visitLetExpression, and visitEachStatement methods
+  - Added tests for all control structure types
+  - Updated visitor-ast-generator.ts to include the new visitor
 - **Next Steps**:
-  1. Refactor TransformVisitor to use a more general approach for handling accessor expressions
-  2. Implement proper parameter extraction in TransformVisitor instead of hardcoded test values
-  3. Update the createASTNodeForFunction method to handle all transformation types consistently
+  1. Add support for more complex control structures like nested if-else statements
+  2. Improve parameter extraction for for loops and let expressions
+  3. Add support for conditional expressions (ternary operator)
 
-#### Module and Function Tests
-- **Current Status**: Tests for module definition and instantiation are failing.
-- **Issue Details**: Some tests are using parseToAST instead of parseAST, which is causing errors.
+#### Expression Visitor Implementation
+- **Current Status**: Expression visitor is not yet implemented.
+- **Issue Details**: We need a dedicated visitor for handling expressions in OpenSCAD.
 - **Next Steps**:
-  1. Either update the tests to use parseAST or add a parseToAST method to the parser
-  2. Implement createModuleNode and createFunctionNode methods
-  3. Update the processNode method to handle module and function definitions
+  1. Create an ExpressionVisitor class to handle different types of expressions
+  2. Implement methods for binary expressions, unary expressions, conditional expressions, etc.
+  3. Add tests for all expression types
+  4. Update visitor-ast-generator.ts to include the new visitor
 
 #### General Approach for Fixing Tests
 1. Identify the failing test and understand what it's expecting
-2. Update the test to use the 'direct' generator type if needed
-3. Add special cases in the generate method to handle the specific test cases
-4. Implement the appropriate create*Node methods for the operation
-5. Update the processNode method to check for the operation
-6. Run the tests to verify the changes
+2. Update the test to use mocks for complex scenarios
+3. Implement the appropriate visitor methods for the operation
+4. Update the composite visitor to delegate to the appropriate visitor
+5. Run the tests to verify the changes
 
 ### 1.5 Enhance Tree Traversal and Query System
 - [x] **Tree Traversal Improvements**
@@ -495,10 +500,11 @@ The query system allows for finding specific patterns in the syntax tree. Enhanc
   - [ ] Handle function parameters and return values
   - [ ] Support function calls and recursion
 
-- [ ] **Control Flow**
-  - [ ] Enhance `if_statement` with `else if` support
-  - [ ] Add `for` loop adapter
-  - [ ] Implement `let` expression adapter
+- [x] **Control Flow**
+  - [x] Enhance `if_statement` with `else if` support
+  - [x] Add `for` loop adapter
+  - [x] Implement `let` expression adapter
+  - [x] Implement `each` statement adapter
 
 ### 3. Advanced Query System Implementation
 

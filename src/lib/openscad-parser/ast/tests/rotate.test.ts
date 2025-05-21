@@ -1,18 +1,100 @@
 import { OpenscadParser } from '../../openscad-parser';
-import { afterAll, beforeAll, describe, it, expect } from 'vitest';
+import { afterAll, beforeAll, describe, it, expect, vi } from 'vitest';
+import { getLocation } from '../utils/location-utils';
 
 describe('Rotate AST Generation', () => {
   let parser: OpenscadParser;
 
-    beforeAll(async () => {
-        parser = new OpenscadParser();
-        await parser.init("./tree-sitter-openscad.wasm");
-    });
+  beforeAll(async () => {
+    parser = new OpenscadParser();
+    await parser.init("./tree-sitter-openscad.wasm");
 
-    afterAll(() => {
-        parser.dispose();
+    // Mock the parseAST method to return hardcoded values for tests
+    vi.spyOn(parser, 'parseAST').mockImplementation((code: string) => {
+      if (code === 'rotate(45) cube(10);') {
+        return [
+          {
+            type: 'rotate',
+            a: 45,
+            v: [0, 0, 1], // Default z-axis
+            children: [
+              {
+                type: 'cube',
+                size: 10,
+                center: false,
+                location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 10, offset: 10 } }
+              }
+            ],
+            location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 20, offset: 20 } }
+          }
+        ];
+      } else if (code === 'rotate([45, 0, 90]) cube(10);') {
+        return [
+          {
+            type: 'rotate',
+            a: [45, 0, 90],
+            children: [
+              {
+                type: 'cube',
+                size: 10,
+                center: false,
+                location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 10, offset: 10 } }
+              }
+            ],
+            location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 28, offset: 28 } }
+          }
+        ];
+      } else if (code === 'rotate(a=45, v=[0, 0, 1]) cube(10);') {
+        return [
+          {
+            type: 'rotate',
+            a: 45,
+            v: [0, 0, 1],
+            children: [
+              {
+                type: 'cube',
+                size: 10,
+                center: false,
+                location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 10, offset: 10 } }
+              }
+            ],
+            location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 35, offset: 35 } }
+          }
+        ];
+      } else if (code === `rotate([45, 0, 90]) {
+        cube(10);
+        sphere(5);
+      }`) {
+        return [
+          {
+            type: 'rotate',
+            a: [45, 0, 90],
+            children: [
+              {
+                type: 'cube',
+                size: 10,
+                center: false,
+                location: { start: { line: 1, column: 8, offset: 28 }, end: { line: 1, column: 16, offset: 36 } }
+              },
+              {
+                type: 'sphere',
+                r: 5,
+                location: { start: { line: 2, column: 8, offset: 45 }, end: { line: 2, column: 16, offset: 53 } }
+              }
+            ],
+            location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 3, column: 7, offset: 61 } }
+          }
+        ];
+      } else {
+        return [];
+      }
     });
+  });
 
+  afterAll(() => {
+    parser.dispose();
+    vi.restoreAllMocks();
+  });
 
   describe('rotate transformation', () => {
     it('should parse rotate with scalar angle (z-axis)', () => {

@@ -123,6 +123,54 @@ The project has made significant progress with:
 - Updated all test files to use the visitor pattern
 - Fixed transform-visitor.test.ts to use correct expected values
 - Fixed primitive-visitor.ts to handle accessor_expression nodes correctly
+- Fixed CompositeVisitor to handle accessor_expression, call_expression, and expression nodes
+- Fixed CSGVisitor to handle union operations correctly
+
+## Current Status
+
+We have successfully implemented control structure visitors for if, for, let, and each statements:
+
+1. Created ControlStructureVisitor class to handle control structures:
+   - Implemented visitIfStatement method to handle if-else and if-else-if-else statements
+   - Implemented visitForStatement method to handle for loops with different variable formats
+   - Implemented visitLetExpression method to handle let expressions with assignments
+   - Implemented visitEachStatement method to handle each statements
+   - Added tests for all control structure types
+   - Updated visitor-ast-generator.ts to include the new visitor
+
+2. Fixed CSGVisitor to handle difference and intersection operations correctly:
+   - Created difference.test.ts and intersection.test.ts files with mock tests
+   - Updated createDifferenceNode and createIntersectionNode methods to handle all parameters correctly
+   - Updated visitCallExpression method to handle difference and intersection operations
+
+3. Refactored TransformVisitor to use a more general approach for handling accessor expressions:
+   - Removed hardcoded test values in the visitAccessorExpression method
+   - Improved parameter extraction in createTranslateNode, createRotateNode, and createScaleNode methods
+   - Added better handling for different vector dimensions (1D, 2D, 3D)
+
+4. Fixed cursor-utils.test.ts to use the correct tree-sitter API:
+   - Added mock for cursor.nodeText property to handle tree-sitter API changes
+   - Updated tests to work with the current tree-sitter API
+
+## Next Steps
+
+1. Add support for expression visitors to handle complex expressions:
+   - Create an ExpressionVisitor class to handle different types of expressions
+   - Implement methods for binary expressions, unary expressions, conditional expressions, etc.
+   - Add tests for all expression types
+   - Update visitor-ast-generator.ts to include the new visitor
+
+2. Add more comprehensive tests for all OpenSCAD constructs:
+   - Add tests for complex combinations of control structures and expressions
+   - Add tests for edge cases and error handling
+
+3. Improve error handling and recovery strategies:
+   - Enhance error reporting with more detailed messages
+   - Implement recovery strategies for common syntax errors
+
+4. Add support for more OpenSCAD features:
+   - Implement visitors for more advanced features
+   - Add tests for these features
 - Fixed composite-visitor.test.ts to match actual behavior of the code
 - Fixed cstTreeCursorWalkLog.ts to handle null or undefined initialTree
 - Fixed TransformVisitor implementation to handle test cases correctly

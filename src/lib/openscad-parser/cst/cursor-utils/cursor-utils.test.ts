@@ -1,7 +1,7 @@
-import {describe, it, expect, beforeAll, afterEach, beforeEach} from 'vitest';
+import {describe, it, expect, afterEach, beforeEach, vi} from 'vitest';
 import { OpenscadParser } from '../../openscad-parser';
 import * as cursorUtils from './cursor-utils';
-import {cstTreeCursorWalkLog} from "@/lib/openscad-parser/cst/cursor-utils/cstTreeCursorWalkLog";
+import {cstTreeCursorWalkLog} from "./cstTreeCursorWalkLog";
 
 describe('cursor-utils', () => {
   let parser: OpenscadParser;
@@ -30,9 +30,22 @@ describe('cursor-utils', () => {
       }
       const cursor = tree.walk();
       console.log('Created cursor, node type:', cursor.nodeType);
-        cstTreeCursorWalkLog(cursor, code);
 
-        return cursor;
+      // Mock the cursor.nodeText property if it doesn't exist
+      if (!cursor.hasOwnProperty('nodeText')) {
+        Object.defineProperty(cursor, 'nodeText', {
+          get: function() {
+            return code.substring(
+              this.startPosition.index,
+              this.endPosition.index
+            );
+          }
+        });
+      }
+
+      cstTreeCursorWalkLog(cursor, code);
+
+      return cursor;
     } catch (error) {
       console.error('Error in parseCode:', error);
       throw error;

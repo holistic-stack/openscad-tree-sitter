@@ -7,6 +7,7 @@ import { TransformVisitor } from './visitors/transform-visitor';
 import { CSGVisitor } from './visitors/csg-visitor';
 import { ModuleVisitor } from './visitors/module-visitor';
 import { FunctionVisitor } from './visitors/function-visitor';
+import { ControlStructureVisitor } from './visitors/control-structure-visitor';
 import { QueryVisitor } from './visitors/query-visitor';
 import { Change } from './changes/change-tracker';
 
@@ -34,6 +35,7 @@ export class VisitorASTGenerator {
       transformVisitor,
       new PrimitiveVisitor(source),
       new CSGVisitor(source),
+      new ControlStructureVisitor(source),
       new ModuleVisitor(source),
       new FunctionVisitor(source)
     ]);

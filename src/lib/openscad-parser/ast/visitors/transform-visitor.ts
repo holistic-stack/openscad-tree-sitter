@@ -71,20 +71,21 @@ export class TransformVisitor extends BaseASTVisitor {
 
     if (vectorParam) {
       const extractedVector = extractVectorParameter(vectorParam);
-      if (extractedVector && extractedVector.length === 3) {
-        vector = [extractedVector[0], extractedVector[1], extractedVector[2]];
+      if (extractedVector) {
+        if (extractedVector.length === 3) {
+          vector = [extractedVector[0], extractedVector[1], extractedVector[2]];
+        } else if (extractedVector.length === 2) {
+          // 2D vector, Z should default to 0
+          vector = [extractedVector[0], extractedVector[1], 0];
+        } else if (extractedVector.length === 1) {
+          // 1D vector, Y and Z should default to 0
+          vector = [extractedVector[0], 0, 0];
+        } else {
+          console.log(`[TransformVisitor.createTranslateNode] Invalid vector length: ${extractedVector.length}`);
+        }
       } else {
         console.log(`[TransformVisitor.createTranslateNode] Invalid vector: ${extractedVector}`);
       }
-    }
-
-    // For testing purposes, hardcode some values based on the node text
-    if (node.text.includes('[1, 2, 3]')) {
-      vector = [1, 2, 3];
-    } else if (node.text.includes('[1,0,0]')) {
-      vector = [1, 0, 0];
-    } else if (node.text.includes('v=[3,0,0]')) {
-      vector = [3, 0, 0];
     }
 
     // Extract children
@@ -94,32 +95,6 @@ export class TransformVisitor extends BaseASTVisitor {
     if (bodyNode) {
       const blockChildren = this.visitBlock(bodyNode);
       children.push(...blockChildren);
-    }
-
-    // Special handling for test cases
-    if (children.length === 0) {
-      if (node.text.includes('cube(10)')) {
-        children.push({
-          type: 'cube',
-          size: 10,
-          center: false,
-          location: getLocation(node)
-        });
-      } else if (node.text.includes('cube([1,2,3], center=true)')) {
-        children.push({
-          type: 'cube',
-          size: [1, 2, 3],
-          center: true,
-          location: getLocation(node)
-        });
-      } else if (node.text.includes('cube(size=[1,2,3], center=true)')) {
-        children.push({
-          type: 'cube',
-          size: [1, 2, 3],
-          center: true,
-          location: getLocation(node)
-        });
-      }
     }
 
     console.log(`[TransformVisitor.createTranslateNode] Created translate node with vector=[${vector}], children=${children.length}`);
@@ -152,8 +127,20 @@ export class TransformVisitor extends BaseASTVisitor {
     if (angleParam) {
       if (angleParam.value.type === 'vector') {
         const vector = extractVectorParameter(angleParam);
-        if (vector && vector.length === 3) {
-          angle = [vector[0], vector[1], vector[2]];
+        if (vector) {
+          if (vector.length === 3) {
+            angle = [vector[0], vector[1], vector[2]];
+          } else if (vector.length === 2) {
+            // 2D vector, Z should default to 0
+            angle = [vector[0], vector[1], 0];
+          } else if (vector.length === 1) {
+            // 1D vector, treat as scalar angle
+            angle = vector[0];
+            // When a scalar angle is provided, default to z-axis rotation
+            v = [0, 0, 1];
+          } else {
+            console.log(`[TransformVisitor.createRotateNode] Invalid angle vector length: ${vector.length}`);
+          }
         } else {
           console.log(`[TransformVisitor.createRotateNode] Invalid angle vector: ${vector}`);
         }
@@ -168,30 +155,20 @@ export class TransformVisitor extends BaseASTVisitor {
 
     if (vParam) {
       const vector = extractVectorParameter(vParam);
-      if (vector && vector.length === 3) {
-        v = [vector[0], vector[1], vector[2]];
+      if (vector) {
+        if (vector.length === 3) {
+          v = [vector[0], vector[1], vector[2]];
+        } else if (vector.length === 2) {
+          // 2D vector, Z should default to 0
+          v = [vector[0], vector[1], 0];
+        } else if (vector.length === 1) {
+          // 1D vector, not valid for rotation axis
+          console.log(`[TransformVisitor.createRotateNode] Invalid v parameter length: ${vector.length}`);
+        } else {
+          console.log(`[TransformVisitor.createRotateNode] Invalid v parameter length: ${vector.length}`);
+        }
       } else {
         console.log(`[TransformVisitor.createRotateNode] Invalid v parameter: ${vector}`);
-      }
-    }
-
-    // For testing purposes, hardcode some values based on the node text
-    if (node.text.includes('[45, 0, 90]')) {
-      angle = [45, 0, 90];
-    } else if (node.text.includes('[30, 60, 90]')) {
-      angle = [30, 60, 90];
-    } else if (node.text.includes('a=45') && node.text.includes('v=[0, 0, 1]')) {
-      angle = 45;
-      v = [0, 0, 1];
-    } else if (node.text.includes('rotate(45)')) {
-      angle = 45;
-      if (!v && typeof angle === 'number') {
-        v = [0, 0, 1]; // Default z-axis rotation
-      }
-    } else if (node.text.includes('45')) {
-      angle = 45;
-      if (!v && typeof angle === 'number') {
-        v = [0, 0, 1]; // Default z-axis rotation
       }
     }
 
@@ -202,37 +179,6 @@ export class TransformVisitor extends BaseASTVisitor {
     if (bodyNode) {
       const blockChildren = this.visitBlock(bodyNode);
       children.push(...blockChildren);
-    }
-
-    // Special handling for test cases
-    if (children.length === 0) {
-      // Check if this is a test case with both cube and sphere
-      if (node.text.includes('cube(10)') && node.text.includes('sphere(5)')) {
-        children.push({
-          type: 'cube',
-          size: 10,
-          center: false,
-          location: getLocation(node)
-        });
-        children.push({
-          type: 'sphere',
-          r: 5,
-          location: getLocation(node)
-        });
-      } else if (node.text.includes('cube(10)')) {
-        children.push({
-          type: 'cube',
-          size: 10,
-          center: false,
-          location: getLocation(node)
-        });
-      } else if (node.text.includes('sphere(5)')) {
-        children.push({
-          type: 'sphere',
-          r: 5,
-          location: getLocation(node)
-        });
-      }
     }
 
     console.log(`[TransformVisitor.createRotateNode] Created rotate node with angle=${angle}, v=${v}, children=${children.length}`);
@@ -257,14 +203,25 @@ export class TransformVisitor extends BaseASTVisitor {
     console.log(`[TransformVisitor.createScaleNode] Creating scale node with ${args.length} arguments`);
 
     // Extract vector parameter
-    let vector: [number, number, number] = [2, 2, 2]; // Default to [2, 2, 2] for tests
+    let vector: [number, number, number] = [1, 1, 1]; // Default to [1, 1, 1] for uniform scaling
     const vectorParam = args.find(arg => arg.name === undefined || arg.name === 'v');
 
     if (vectorParam) {
       if (vectorParam.value.type === 'vector') {
         const extractedVector = extractVectorParameter(vectorParam);
-        if (extractedVector && extractedVector.length === 3) {
-          vector = [extractedVector[0], extractedVector[1], extractedVector[2]];
+        if (extractedVector) {
+          if (extractedVector.length === 3) {
+            vector = [extractedVector[0], extractedVector[1], extractedVector[2]];
+          } else if (extractedVector.length === 2) {
+            // 2D vector, Z should default to 1
+            vector = [extractedVector[0], extractedVector[1], 1];
+          } else if (extractedVector.length === 1) {
+            // 1D vector, treat as uniform scaling
+            const scale = extractedVector[0];
+            vector = [scale, scale, scale];
+          } else {
+            console.log(`[TransformVisitor.createScaleNode] Invalid vector length: ${extractedVector.length}`);
+          }
         } else {
           console.log(`[TransformVisitor.createScaleNode] Invalid vector: ${extractedVector}`);
         }
@@ -276,44 +233,6 @@ export class TransformVisitor extends BaseASTVisitor {
       }
     }
 
-    // Try to extract vector from the node text
-    if (node.text.includes('[2, 3, 4]')) {
-      vector = [2, 3, 4];
-    } else if (node.text.match(/scale\(\s*\[([^\]]+)\]\s*\)/)) {
-      const match = node.text.match(/scale\(\s*\[([^\]]+)\]\s*\)/);
-      if (match) {
-        const vectorStr = `[${match[1]}]`;
-        const extractedVector = extractVectorFromString(vectorStr);
-        if (extractedVector && extractedVector.length >= 2) {
-          if (extractedVector.length === 2) {
-            // 2D vector, Z should default to 1
-            vector = [extractedVector[0], extractedVector[1], 1];
-          } else {
-            // 3D vector
-            vector = [extractedVector[0], extractedVector[1], extractedVector[2]];
-          }
-        }
-      }
-    } else if (node.text.match(/scale\(\s*(\d+(\.\d+)?)\s*\)/)) {
-      // Scalar parameter (uniform scaling)
-      const scaleMatch = node.text.match(/scale\(\s*(\d+(\.\d+)?)\s*\)/);
-      if (scaleMatch) {
-        const scale = parseFloat(scaleMatch[1]);
-        vector = [scale, scale, scale];
-      }
-    }
-
-    // Hardcode the vector for testing purposes
-    if (node.text.includes('[2, 1, 0.5]')) {
-      vector = [2, 1, 0.5];
-    } else if (node.text.includes('scale(2)')) {
-      vector = [2, 2, 2];
-    } else if (node.text.includes('[2, 1]')) {
-      vector = [2, 1, 1];
-    } else if (node.text.includes('v=[2, 1, 0.5]')) {
-      vector = [2, 1, 0.5];
-    }
-
     // Extract children
     const bodyNode = node.childForFieldName('body');
     const children: ast.ASTNode[] = [];
@@ -321,39 +240,6 @@ export class TransformVisitor extends BaseASTVisitor {
     if (bodyNode) {
       const blockChildren = this.visitBlock(bodyNode);
       children.push(...blockChildren);
-    } else {
-      // Try to find the child block in the node text
-      const match = node.text.match(/scale\([^)]*\)\s*([^;]*);/);
-      if (match) {
-        const childText = match[1];
-        if (childText.includes('cube')) {
-          // Add a cube child
-          children.push({
-            type: 'cube',
-            size: 10,
-            location: getLocation(node)
-          });
-        }
-      }
-    }
-
-    // Hardcode children for testing purposes
-    if (children.length === 0) {
-      if (node.text.includes('cube(10)')) {
-        children.push({
-          type: 'cube',
-          size: 10,
-          location: getLocation(node)
-        });
-      }
-
-      if (node.text.includes('sphere(5)')) {
-        children.push({
-          type: 'sphere',
-          radius: 5,
-          location: getLocation(node)
-        });
-      }
     }
 
     console.log(`[TransformVisitor.createScaleNode] Created scale node with vector=[${vector}], children=${children.length}`);
@@ -877,74 +763,25 @@ export class TransformVisitor extends BaseASTVisitor {
 
     console.log(`[TransformVisitor.visitAccessorExpression] Function name: ${functionName}`);
 
-    // Special handling for test cases based on the code in the test file
-    if (functionName === 'unknown_function') {
+    // Check if this is a transformation function
+    const transformFunctions = [
+      'translate', 'rotate', 'scale', 'mirror', 'resize',
+      'multmatrix', 'color', 'offset'
+    ];
+
+    if (!transformFunctions.includes(functionName)) {
+      console.log(`[TransformVisitor.visitAccessorExpression] Not a transformation function: ${functionName}`);
       return null;
     }
 
-    // Extract arguments from the text
+    // Extract arguments from the argument_list
+    const argsNode = node.childForFieldName('arguments');
     let args: ast.Parameter[] = [];
-
-    if (node.text.includes('(')) {
-      const startIndex = node.text.indexOf('(');
-      const endIndex = node.text.lastIndexOf(')');
-      if (startIndex > 0 && endIndex > startIndex) {
-        const argsText = node.text.substring(startIndex + 1, endIndex).trim();
-        if (argsText) {
-          // Simple parsing for testing purposes
-          const argValues = argsText.split(',').map(arg => arg.trim());
-          for (const argValue of argValues) {
-            if (argValue.includes('=')) {
-              // Named argument
-              const [name, value] = argValue.split('=').map(p => p.trim());
-              if (!isNaN(Number(value))) {
-                args.push({
-                  name,
-                  value: {
-                    type: 'number',
-                    value: Number(value)
-                  }
-                });
-              } else if (value === 'true' || value === 'false') {
-                args.push({
-                  name,
-                  value: {
-                    type: 'boolean',
-                    value
-                  }
-                });
-              } else {
-                args.push({
-                  name,
-                  value: {
-                    type: 'string',
-                    value
-                  }
-                });
-              }
-            } else if (!isNaN(Number(argValue))) {
-              // Positional number argument
-              args.push({
-                name: undefined,
-                value: {
-                  type: 'number',
-                  value: Number(argValue)
-                }
-              });
-            } else {
-              // Other positional argument
-              args.push({
-                name: undefined,
-                value: {
-                  type: 'string',
-                  value: argValue
-                }
-              });
-            }
-          }
-        }
-      }
+    if (argsNode) {
+      args = extractArguments(argsNode);
     }
+
+    console.log(`[TransformVisitor.visitAccessorExpression] Extracted ${args.length} arguments`);
 
     // Process based on function name
     return this.createASTNodeForFunction(node, functionName, args);
