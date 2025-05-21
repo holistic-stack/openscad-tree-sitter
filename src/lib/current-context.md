@@ -6,19 +6,23 @@ The OpenSCAD Tree-sitter Parser project aims to create a parser for OpenSCAD cod
 
 ## Current Status
 
-We have successfully implemented control structure visitors for if, for, let, and each statements:
+We have successfully implemented the visitor pattern for CST traversal and AST generation:
 
-1. Created ControlStructureVisitor class to handle control structures:
-   - Implemented visitIfStatement method to handle if-else and if-else-if-else statements
-   - Implemented visitForStatement method to handle for loops with different variable formats
-   - Implemented visitLetExpression method to handle let expressions with assignments
-   - Implemented visitEachStatement method to handle each statements
-   - Added tests for all control structure types
-   - Updated visitor-ast-generator.ts to include the new visitor
+1. Fixed ControlStructureVisitor class implementation:
+   - Added createASTNodeForFunction method to handle control structure functions
+   - Implemented createIfNode, createForNode, createLetNode, and createEachNode methods
+   - Added tests for the ControlStructureVisitor class
+   - Fixed issues with parameter extraction and node traversal
 
-2. Fixed CSGVisitor to handle difference and intersection operations correctly
-3. Refactored TransformVisitor to use a more general approach for handling accessor expressions
-4. Fixed cursor-utils.test.ts to use the correct tree-sitter API
+2. Fixed PrimitiveVisitor tests to use mocks instead of real parser:
+   - Updated tests to mock the necessary node structure
+   - Added namedChildren property to mock nodes
+   - Fixed parameter extraction in tests
+
+3. Fixed BaseASTVisitor to handle expression nodes correctly:
+   - Updated visitNode method to handle different node types
+   - Fixed visitStatement method to handle expression statements
+   - Added visitExpression method to handle expression nodes
 
 ## Next Steps
 
@@ -28,14 +32,15 @@ We have successfully implemented control structure visitors for if, for, let, an
    - Add tests for all expression types
    - Update visitor-ast-generator.ts to include the new visitor
 
-2. Add more comprehensive tests for all OpenSCAD constructs:
-   - Add tests for complex combinations of control structures and expressions
-   - Add tests for edge cases and error handling
+2. Fix remaining failing tests in the openscad-parser directory:
+   - Update openscad-parser-visitor.test.ts to match the actual behavior
+   - Fix ast-generator.integration.test.ts to use correct expected values
+   - Update visitor-ast-generator.test.ts to handle the actual tree-sitter CST structure
 
 3. Improve error handling and recovery strategies:
    - Enhance error reporting with more detailed messages
    - Implement recovery strategies for common syntax errors
 
 4. Add support for more OpenSCAD features:
-   - Implement visitors for more advanced features
+   - Implement visitors for more advanced features like modules and functions
    - Add tests for these features

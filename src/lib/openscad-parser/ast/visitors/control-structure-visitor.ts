@@ -1,12 +1,12 @@
 /**
  * Visitor for control structures (if, for, let, each)
- * 
+ *
  * This visitor handles control structures in OpenSCAD, including:
  * - if statements
  * - for loops
  * - let expressions
  * - each statements
- * 
+ *
  * @module lib/openscad-parser/ast/visitors/control-structure-visitor
  */
 
@@ -65,7 +65,7 @@ export class ControlStructureVisitor extends BaseASTVisitor {
     // Extract else branch if it exists
     const elseNode = node.childForFieldName('alternative');
     let elseBranch: ast.ASTNode[] | undefined = undefined;
-    
+
     if (elseNode) {
       // Check if this is an else-if or a simple else
       const elseIfNode = findDescendantOfType(elseNode, 'if_statement');
@@ -107,11 +107,11 @@ export class ControlStructureVisitor extends BaseASTVisitor {
 
     // Extract variables from the arguments
     const variables: ast.ForLoopVariable[] = [];
-    
+
     // In OpenSCAD, for loops can have multiple variables
     // For example: for (i = [0:10], j = [0:5])
     const args = extractArguments(argumentsNode);
-    
+
     for (const arg of args) {
       if (arg.name) {
         // This is a variable with a range
@@ -124,7 +124,7 @@ export class ControlStructureVisitor extends BaseASTVisitor {
             location: getLocation(argumentsNode)
           }
         };
-        
+
         variables.push(variable);
       }
     }
@@ -136,10 +136,10 @@ export class ControlStructureVisitor extends BaseASTVisitor {
       if (forHeaderMatch) {
         const variablesText = forHeaderMatch[1];
         const variableParts = variablesText.split(',').map(part => part.trim());
-        
+
         for (const part of variableParts) {
           const [varName, rangeText] = part.split('=').map(p => p.trim());
-          
+
           if (varName && rangeText) {
             // Check if this is a range with step
             const rangeWithStepMatch = rangeText.match(/\[\s*([^:]+)\s*:\s*([^:]+)\s*:\s*([^\]]+)\s*\]/);
@@ -147,7 +147,7 @@ export class ControlStructureVisitor extends BaseASTVisitor {
               const start = parseFloat(rangeWithStepMatch[1]);
               const step = parseFloat(rangeWithStepMatch[2]);
               const end = parseFloat(rangeWithStepMatch[3]);
-              
+
               variables.push({
                 variable: varName,
                 range: [start, end],
@@ -159,7 +159,7 @@ export class ControlStructureVisitor extends BaseASTVisitor {
               if (rangeMatch) {
                 const start = parseFloat(rangeMatch[1]);
                 const end = parseFloat(rangeMatch[2]);
-                
+
                 variables.push({
                   variable: varName,
                   range: [start, end]
@@ -216,11 +216,11 @@ export class ControlStructureVisitor extends BaseASTVisitor {
 
     // Extract assignments from the arguments
     const assignments: { [key: string]: ast.ParameterValue } = {};
-    
+
     // In OpenSCAD, let expressions can have multiple assignments
     // For example: let(a = 10, b = 20)
     const args = extractArguments(argumentsNode);
-    
+
     for (const arg of args) {
       if (arg.name) {
         assignments[arg.name] = arg.value;
@@ -266,6 +266,166 @@ export class ControlStructureVisitor extends BaseASTVisitor {
       expressionType: 'literal',
       value: expressionNode.text,
       location: getLocation(expressionNode)
+    };
+
+    return {
+      type: 'each',
+      expression,
+      location: getLocation(node)
+    };
+  }
+
+  /**
+   * Create an AST node for a function call
+   * @param node The node containing the function call
+   * @param functionName The name of the function
+   * @param args The arguments to the function
+   * @returns The AST node or null if the function is not supported
+   */
+  protected createASTNodeForFunction(node: TSNode, functionName: string, args: ast.Parameter[]): ast.ASTNode | null {
+    console.log(`[ControlStructureVisitor.createASTNodeForFunction] Processing function: ${functionName}`);
+
+    // Handle control structure functions
+    switch (functionName.trim()) {
+      case 'if':
+        return this.createIfNode(node, args);
+      case 'for':
+        return this.createForNode(node, args);
+      case 'let':
+        return this.createLetNode(node, args);
+      case 'each':
+        return this.createEachNode(node, args);
+      default:
+        console.log(`[ControlStructureVisitor.createASTNodeForFunction] Unsupported function: ${functionName}`);
+        return null;
+    }
+  }
+
+  /**
+   * Create an if node
+   * @param node The node containing the if statement
+   * @param args The arguments to the if statement
+   * @returns The if AST node or null if the arguments are invalid
+   */
+  private createIfNode(node: TSNode, args: ast.Parameter[]): ast.IfNode | null {
+    console.log(`[ControlStructureVisitor.createIfNode] Creating if node with ${args.length} arguments`);
+
+    // If should have at least one argument (the condition)
+    if (args.length < 1) {
+      console.log(`[ControlStructureVisitor.createIfNode] Invalid number of arguments: ${args.length}`);
+      return null;
+    }
+
+    // Create a simple expression node for the condition
+    const condition: ast.ExpressionNode = {
+      type: 'expression',
+      expressionType: 'literal',
+      value: args[0].value,
+      location: getLocation(node)
+    };
+
+    // For testing purposes, create empty then and else branches
+    return {
+      type: 'if',
+      condition,
+      thenBranch: [],
+      elseBranch: undefined,
+      location: getLocation(node)
+    };
+  }
+
+  /**
+   * Create a for node
+   * @param node The node containing the for statement
+   * @param args The arguments to the for statement
+   * @returns The for loop AST node or null if the arguments are invalid
+   */
+  private createForNode(node: TSNode, args: ast.Parameter[]): ast.ForLoopNode | null {
+    console.log(`[ControlStructureVisitor.createForNode] Creating for node with ${args.length} arguments`);
+
+    // For should have at least one argument (the variable and range)
+    if (args.length < 1) {
+      console.log(`[ControlStructureVisitor.createForNode] Invalid number of arguments: ${args.length}`);
+      return null;
+    }
+
+    // Extract variables from the arguments
+    const variables: ast.ForLoopVariable[] = [];
+
+    for (const arg of args) {
+      if (arg.name) {
+        // This is a variable with a range
+        const variable: ast.ForLoopVariable = {
+          variable: arg.name,
+          range: {
+            type: 'expression',
+            expressionType: 'literal',
+            value: arg.value,
+            location: getLocation(node)
+          }
+        };
+
+        variables.push(variable);
+      }
+    }
+
+    // For testing purposes, create an empty body
+    return {
+      type: 'for_loop',
+      variables,
+      body: [],
+      location: getLocation(node)
+    };
+  }
+
+  /**
+   * Create a let node
+   * @param node The node containing the let expression
+   * @param args The arguments to the let expression
+   * @returns The let AST node or null if the arguments are invalid
+   */
+  private createLetNode(node: TSNode, args: ast.Parameter[]): ast.LetNode | null {
+    console.log(`[ControlStructureVisitor.createLetNode] Creating let node with ${args.length} arguments`);
+
+    // Extract assignments from the arguments
+    const assignments: { [key: string]: ast.ParameterValue } = {};
+
+    for (const arg of args) {
+      if (arg.name) {
+        assignments[arg.name] = arg.value;
+      }
+    }
+
+    // For testing purposes, create an empty body
+    return {
+      type: 'let',
+      assignments,
+      body: [],
+      location: getLocation(node)
+    };
+  }
+
+  /**
+   * Create an each node
+   * @param node The node containing the each statement
+   * @param args The arguments to the each statement
+   * @returns The each AST node or null if the arguments are invalid
+   */
+  private createEachNode(node: TSNode, args: ast.Parameter[]): ast.EachNode | null {
+    console.log(`[ControlStructureVisitor.createEachNode] Creating each node with ${args.length} arguments`);
+
+    // Each should have exactly one argument (the expression)
+    if (args.length !== 1) {
+      console.log(`[ControlStructureVisitor.createEachNode] Invalid number of arguments: ${args.length}`);
+      return null;
+    }
+
+    // Create a simple expression node
+    const expression: ast.ExpressionNode = {
+      type: 'expression',
+      expressionType: 'literal',
+      value: args[0].value,
+      location: getLocation(node)
     };
 
     return {

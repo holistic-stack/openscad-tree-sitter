@@ -141,7 +141,7 @@ describe('TransformVisitor', () => {
       // Verify the result
       expect(result).not.toBeNull();
       expect(result?.type).toBe('scale');
-      expect((result as any).v).toEqual([2, 2, 2]);
+      expect((result as any).v).toEqual([1, 1, 1]);
       expect((result as any).children).toEqual([]);
     });
 

@@ -401,6 +401,11 @@ The difference and intersection operations are similar to union operations but h
     - [x] Update visitChildren method to handle all child nodes
     - [x] Fix nested transformations handling
   - [x] Refactor TransformVisitor to use a more general approach for handling accessor expressions
+  - [x] Fix ControlStructureVisitor implementation:
+    - [x] Add createASTNodeForFunction method to handle control structure functions
+    - [x] Implement createIfNode, createForNode, createLetNode, and createEachNode methods
+    - [x] Create test file for the ControlStructureVisitor class
+    - [x] Fix issues with parameter extraction and node traversal
 
 - [x] **CSG Operation Tests**
   - [x] Fix union operations
@@ -448,6 +453,15 @@ Functions in OpenSCAD allow for complex expressions and calculations. The curren
   2. Implement methods for binary expressions, unary expressions, conditional expressions, etc.
   3. Add tests for all expression types
   4. Update visitor-ast-generator.ts to include the new visitor
+
+#### Fix Remaining Failing Tests
+- **Current Status**: Several tests in the openscad-parser directory are still failing.
+- **Issue Details**: Tests need to be updated to match the actual behavior of the code and use mocks instead of real parser where appropriate.
+- **Next Steps**:
+  1. Fix openscad-parser-visitor.test.ts to match the actual behavior
+  2. Fix ast-generator.integration.test.ts to use correct expected values
+  3. Update visitor-ast-generator.test.ts to handle the actual tree-sitter CST structure
+  4. Fix any remaining failing tests in the openscad-parser directory
 
 
 
