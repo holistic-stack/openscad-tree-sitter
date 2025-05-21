@@ -5,6 +5,8 @@ import { CompositeVisitor } from './visitors/composite-visitor';
 import { PrimitiveVisitor } from './visitors/primitive-visitor';
 import { TransformVisitor } from './visitors/transform-visitor';
 import { CSGVisitor } from './visitors/csg-visitor';
+import { ModuleVisitor } from './visitors/module-visitor';
+import { FunctionVisitor } from './visitors/function-visitor';
 import { QueryVisitor } from './visitors/query-visitor';
 
 /**
@@ -27,7 +29,9 @@ export class VisitorASTGenerator {
     const compositeVisitor = new CompositeVisitor([
       new PrimitiveVisitor(source),
       new TransformVisitor(source),
-      new CSGVisitor(source)
+      new CSGVisitor(source),
+      new ModuleVisitor(source),
+      new FunctionVisitor(source)
     ]);
 
     // Create a query visitor that uses the composite visitor
