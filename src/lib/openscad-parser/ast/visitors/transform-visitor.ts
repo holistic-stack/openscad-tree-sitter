@@ -469,23 +469,11 @@ export class TransformVisitor extends BaseASTVisitor {
       console.log(`[TransformVisitor.createMultmatrixNode] Using identity matrix for now`);
     }
 
-    // For testing purposes, hardcode some values based on the node text
-    if (node.text.includes('multmatrix([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])')) {
-      // Identity matrix for the specific test case
-      matrix = [
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1]
-      ];
-    } else if (node.text.includes('multmatrix')) {
-      // Translation matrix for other test cases
-      matrix = [
-        [1, 0, 0, 10],
-        [0, 1, 0, 20],
-        [0, 0, 1, 30],
-        [0, 0, 0, 1]
-      ];
+    // Extract matrix from parameters
+    if (matrixParam && matrixParam.value.type === 'vector') {
+      // Try to extract the matrix from the vector parameter
+      // This would need a more sophisticated extraction method for nested vectors
+      console.log(`[TransformVisitor.createMultmatrixNode] Matrix parameter found, but extraction not yet implemented`);
     }
 
     // Extract children
@@ -497,17 +485,7 @@ export class TransformVisitor extends BaseASTVisitor {
       children.push(...blockChildren);
     }
 
-    // Special handling for test cases
-    if (children.length === 0) {
-      if (node.text.includes('cube(10)')) {
-        children.push({
-          type: 'cube',
-          size: 10,
-          center: false,
-          location: getLocation(node)
-        });
-      }
-    }
+    // No special handling for test cases anymore
 
     console.log(`[TransformVisitor.createMultmatrixNode] Created multmatrix node with children=${children.length}`);
 
@@ -557,33 +535,7 @@ export class TransformVisitor extends BaseASTVisitor {
       alpha = parseFloat(alphaParam.value.value);
     }
 
-    // For testing purposes, hardcode some values based on the node text
-    if (node.text.includes('color("red")')) {
-      color = "red";
-    } else if (node.text.includes('color("blue", 0.5)')) {
-      color = "blue";
-      alpha = 0.5;
-    } else if (node.text.includes('color([1, 0, 0])')) {
-      color = [1, 0, 0, 1]; // Add alpha=1 for tests
-    } else if (node.text.includes('color([1, 0, 0, 0.5])')) {
-      color = [1, 0, 0, 0.5];
-    } else if (node.text.includes('color([0, 0, 1, 0.5])')) {
-      color = [0, 0, 1, 0.5];
-    } else if (node.text.includes('color(c="green")')) {
-      color = "green";
-    } else if (node.text.includes('color(c="green", alpha=0.7)')) {
-      color = "green";
-      alpha = 0.7;
-    } else if (node.text.includes('color(c="yellow", alpha=0.8)')) {
-      color = "yellow";
-      alpha = 0.8;
-    } else if (node.text.includes('#FF0000')) {
-      color = "#FF0000";
-    } else if (node.text.includes('color("#FF0000")')) {
-      color = "#FF0000";
-    } else if (node.text.includes('color("#ff0000")')) {
-      color = "#ff0000";
-    }
+    // No more hardcoded special cases for testing
 
     // Extract children
     const bodyNode = node.childForFieldName('body');
@@ -594,43 +546,7 @@ export class TransformVisitor extends BaseASTVisitor {
       children.push(...blockChildren);
     }
 
-    // Special handling for test cases
-    if (children.length === 0) {
-      if (node.text.includes('cube(10)')) {
-        children.push({
-          type: 'cube',
-          size: 10,
-          center: false,
-          location: getLocation(node)
-        });
-      } else if (node.text.includes('sphere(5)')) {
-        children.push({
-          type: 'sphere',
-          r: 5,
-          location: getLocation(node)
-        });
-      }
-    }
-
-    // Special handling for test cases with rgba vector
-    if (node.text.includes('[1, 0, 0, 0.5]') && children.length === 0) {
-      children.push({
-        type: 'cube',
-        size: 10,
-        center: false,
-        location: getLocation(node)
-      });
-    }
-
-    // Special handling for test cases with named c and alpha parameters
-    if (node.text.includes('c="green", alpha=0.7') && children.length === 0) {
-      children.push({
-        type: 'cube',
-        size: 10,
-        center: false,
-        location: getLocation(node)
-      });
-    }
+    // No more special handling for test cases
 
     console.log(`[TransformVisitor.createColorNode] Created color node with color=${color}, alpha=${alpha}, children=${children.length}`);
 
@@ -674,25 +590,7 @@ export class TransformVisitor extends BaseASTVisitor {
       chamfer = chamferParam.value.value === 'true';
     }
 
-    // For testing purposes, hardcode some values based on the node text
-    if (node.text.includes('offset(r=2)')) {
-      radius = 2;
-      delta = 0; // Default delta to 0 for tests
-    } else if (node.text.includes('offset(delta=1)')) {
-      radius = 0; // Default radius to 0 for tests
-      delta = 1;
-    } else if (node.text.includes('offset(delta=1, chamfer=true)')) {
-      radius = 0; // Default radius to 0 for tests
-      delta = 1;
-      chamfer = true;
-    } else if (node.text.includes('offset(delta=2)')) {
-      radius = 0; // Default radius to 0 for tests
-      delta = 2;
-    } else if (node.text.includes('offset(delta=2, chamfer=true)') || node.text.includes('offset(delta=2, chamfer=tru')) {
-      radius = 0; // Default radius to 0 for tests
-      delta = 2;
-      chamfer = true;
-    }
+    // No more hardcoded special cases for testing
 
     // Extract children
     const bodyNode = node.childForFieldName('body');
@@ -703,33 +601,7 @@ export class TransformVisitor extends BaseASTVisitor {
       children.push(...blockChildren);
     }
 
-    // Special handling for test cases
-    if (children.length === 0) {
-      if (node.text.includes('square(10)')) {
-        children.push({
-          type: 'square',
-          size: 10,
-          center: false,
-          location: getLocation(node)
-        });
-      } else if (node.text.includes('circle(5)')) {
-        children.push({
-          type: 'circle',
-          r: 5,
-          location: getLocation(node)
-        });
-      }
-    }
-
-    // Special handling for test cases with chamfer parameter
-    if (node.text.includes('offset(delta=2, chamfer=tru') && children.length === 0) {
-      children.push({
-        type: 'square',
-        size: 10,
-        center: false,
-        location: getLocation(node)
-      });
-    }
+    // No more special handling for test cases
 
     console.log(`[TransformVisitor.createOffsetNode] Created offset node with radius=${radius}, delta=${delta}, chamfer=${chamfer}, children=${children.length}`);
 
@@ -750,7 +622,15 @@ export class TransformVisitor extends BaseASTVisitor {
    * @returns The AST node or null if the node is not supported
    */
   visitAccessorExpression(node: TSNode): ast.ASTNode | null {
-    console.log(`[TransformVisitor.visitAccessorExpression] Processing accessor expression: ${node.text.substring(0, 50)}`);
+    try {
+      if (node.text) {
+        console.log(`[TransformVisitor.visitAccessorExpression] Processing accessor expression: ${node.text.substring(0, 50)}`);
+      } else {
+        console.log(`[TransformVisitor.visitAccessorExpression] Processing accessor expression (no text available)`);
+      }
+    } catch (error) {
+      console.log(`[TransformVisitor.visitAccessorExpression] Error logging node text: ${error}`);
+    }
 
     // Extract function name from the accessor_expression
     const functionNode = findDescendantOfType(node, 'identifier');
@@ -759,31 +639,8 @@ export class TransformVisitor extends BaseASTVisitor {
       return null;
     }
 
-    // Get the full function name from the node text
-    let functionName = '';
-    if (node.text.startsWith('translate')) {
-      functionName = 'translate';
-    } else if (node.text.startsWith('rotate')) {
-      functionName = 'rotate';
-    } else if (node.text.startsWith('scale')) {
-      functionName = 'scale';
-    } else if (node.text.startsWith('mirror')) {
-      functionName = 'mirror';
-    } else if (node.text.startsWith('resize')) {
-      functionName = 'resize';
-    } else if (node.text.startsWith('multmatrix')) {
-      functionName = 'multmatrix';
-    } else if (node.text.startsWith('color')) {
-      functionName = 'color';
-    } else if (node.text.startsWith('offset')) {
-      functionName = 'offset';
-    } else if (node.text.startsWith('translat')) {
-      // Special case for test cases
-      functionName = 'translate';
-    } else {
-      // Fallback to the identifier text
-      functionName = functionNode.text;
-    }
+    // Get the function name from the identifier node
+    const functionName = functionNode.text;
 
     if (!functionName) {
       console.log(`[TransformVisitor.visitAccessorExpression] Empty function name`);
@@ -822,7 +679,15 @@ export class TransformVisitor extends BaseASTVisitor {
    * @returns The AST node or null if the node cannot be processed
    */
   visitModuleInstantiation(node: TSNode): ast.ASTNode | null {
-    console.log(`[TransformVisitor.visitModuleInstantiation] Processing module instantiation: ${node.text.substring(0, 50)}`);
+    try {
+      if (node.text) {
+        console.log(`[TransformVisitor.visitModuleInstantiation] Processing module instantiation: ${node.text.substring(0, 50)}`);
+      } else {
+        console.log(`[TransformVisitor.visitModuleInstantiation] Processing module instantiation (no text available)`);
+      }
+    } catch (error) {
+      console.log(`[TransformVisitor.visitModuleInstantiation] Error logging node text: ${error}`);
+    }
 
     // Extract function name
     const nameFieldNode = node.childForFieldName('name');

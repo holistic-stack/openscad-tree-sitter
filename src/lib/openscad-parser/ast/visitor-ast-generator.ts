@@ -13,6 +13,22 @@ import { QueryVisitor } from './visitors/query-visitor';
 import { Change } from './changes/change-tracker';
 
 /**
+ * Find a child node of a specific type
+ * @param node The parent node
+ * @param type The type of child to find
+ * @returns The child node or null if not found
+ */
+function findChildOfType(node: TSNode, type: string): TSNode | null {
+  for (let i = 0; i < node.childCount; i++) {
+    const child = node.child(i);
+    if (child && child.type === type) {
+      return child;
+    }
+  }
+  return null;
+}
+
+/**
  * Converts a Tree-sitter CST to an OpenSCAD AST using the visitor pattern
  *
  * @file Defines the VisitorASTGenerator class that uses the visitor pattern to generate an AST
@@ -65,322 +81,8 @@ export class VisitorASTGenerator {
     console.log(`[VisitorASTGenerator.generate] Root node type: ${rootNode.type}, Text: ${rootNode.text.substring(0, 50)}`);
     console.log(`[VisitorASTGenerator.generate] Root node childCount: ${rootNode.childCount}, namedChildCount: ${rootNode.namedChildCount}`);
 
-    // Special cases for tests
-    if (this.source === 'union() { cube(10); sphere(5); }') {
-      return [{
-        type: 'union',
-        children: [
-          {
-            type: 'cube',
-            size: 10,
-            center: false,
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-          },
-          {
-            type: 'sphere',
-            radius: 5,
-            r: 5, // For backward compatibility
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-          }
-        ],
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      }];
-    } else if (this.source.includes('cube(10); sphere(5);')) {
-      return [
-        {
-          type: 'cube',
-          size: 10,
-          center: false,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-        },
-        {
-          type: 'sphere',
-          radius: 5,
-          r: 5, // For backward compatibility
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-        }
-      ];
-    } else if (this.source.includes('translate([1, 2, 3]) cube(10);')) {
-      return [{
-        type: 'translate',
-        vector: [1, 2, 3],
-        v: [1, 2, 3], // For backward compatibility
-        children: [{
-          type: 'cube',
-          size: 10,
-          center: false,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-        }],
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      }];
-    } else if (this.source.includes('translate([1,0,0]) cube([1,2,3], center=true);')) {
-      return [{
-        type: 'translate',
-        vector: [1, 0, 0],
-        v: [1, 0, 0], // For backward compatibility
-        children: [{
-          type: 'cube',
-          size: [1, 2, 3],
-          center: true,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-        }],
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      }];
-    } else if (this.source.includes('translate(v=[3,0,0])')) {
-      return [{
-        type: 'translate',
-        vector: [3, 0, 0],
-        v: [3, 0, 0], // For backward compatibility
-        children: [{
-          type: 'cube',
-          size: [1, 2, 3],
-          center: true,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-        }],
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      }];
-    } else if (this.source.includes('rotate([30, 60, 90]) cube(10);')) {
-      return [{
-        type: 'rotate',
-        angle: [30, 60, 90],
-        a: [30, 60, 90], // For backward compatibility
-        children: [{
-          type: 'cube',
-          size: 10,
-          center: false,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-        }],
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      }];
-    } else if (this.source.includes('scale([2, 3, 4]) cube(10);')) {
-      return [{
-        type: 'scale',
-        vector: [2, 3, 4],
-        v: [2, 3, 4], // For backward compatibility
-        children: [{
-          type: 'cube',
-          size: 10,
-          center: false,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-        }],
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      }];
-    } else if (this.source.includes('union() { }')) {
-      return [{
-        type: 'union',
-        children: [],
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      }];
-    } else if (this.source.includes('union() { cube(10); sphere(5); }') ||
-               this.source.includes('union() {\n  cube(10);\n  sphere(5);\n}')) {
-      return [{
-        type: 'union',
-        children: [
-          {
-            type: 'cube',
-            size: 10,
-            center: false,
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-          },
-          {
-            type: 'sphere',
-            radius: 5,
-            r: 5, // For backward compatibility
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-          }
-        ],
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      }];
-    } else if (this.source.includes('union() {\n        cube(10, center=true);\n        translate([5, 5, 5]) sphere(5);\n      }')) {
-      return [{
-        type: 'union',
-        children: [
-          {
-            type: 'cube',
-            size: 10,
-            center: true,
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-          },
-          {
-            type: 'translate',
-            vector: [5, 5, 5],
-            v: [5, 5, 5], // For backward compatibility
-            children: [{
-              type: 'sphere',
-              radius: 5,
-              r: 5, // For backward compatibility
-              location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-            }],
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-          }
-        ],
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      }];
-    } else if (this.source.includes('difference() { cube(20, center=true); sphere(10); }')) {
-      return [{
-        type: 'difference',
-        children: [
-          {
-            type: 'cube',
-            size: 20,
-            center: true,
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-          },
-          {
-            type: 'sphere',
-            radius: 10,
-            r: 10, // For backward compatibility
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-          }
-        ],
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      }];
-    } else if (this.source.includes('intersection() { cube(20, center=true); sphere(15); }')) {
-      return [{
-        type: 'intersection',
-        children: [
-          {
-            type: 'cube',
-            size: 20,
-            center: true,
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-          },
-          {
-            type: 'sphere',
-            radius: 15,
-            r: 15, // For backward compatibility
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-          }
-        ],
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      }];
-    } else if (this.source.includes('difference() { cube(20, center=true); translate([0, 0, 5]) { rotate([0, 0, 45]) cube(10, center=true); } }')) {
-      return [{
-        type: 'difference',
-        children: [
-          {
-            type: 'cube',
-            size: 20,
-            center: true,
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-          },
-          {
-            type: 'translate',
-            vector: [0, 0, 5],
-            v: [0, 0, 5], // For backward compatibility
-            children: [
-              {
-                type: 'rotate',
-                angle: [0, 0, 45],
-                a: [0, 0, 45], // For backward compatibility
-                children: [
-                  {
-                    type: 'cube',
-                    size: 10,
-                    center: true,
-                    location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-                  }
-                ],
-                location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-              }
-            ],
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-          }
-        ],
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      }];
-    } else if (this.source.includes('mirror([1, 0, 0]) cube(10);')) {
-      return [{
-        type: 'mirror',
-        vector: [1, 0, 0],
-        v: [1, 0, 0], // For backward compatibility
-        children: [{
-          type: 'cube',
-          size: 10,
-          center: false,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-        }],
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      }];
-    } else if (this.source.includes('mirror(v=[0, 1, 0]) cube(10);')) {
-      return [{
-        type: 'mirror',
-        vector: [0, 1, 0],
-        v: [0, 1, 0], // For backward compatibility
-        children: [{
-          type: 'cube',
-          size: 10,
-          center: false,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-        }],
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      }];
-    } else if (this.source.includes('mirror([1, 1]) cube(10);')) {
-      return [{
-        type: 'mirror',
-        vector: [1, 1, 0],
-        v: [1, 1, 0], // For backward compatibility
-        children: [{
-          type: 'cube',
-          size: 10,
-          center: false,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-        }],
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      }];
-    } else if (this.source.includes('cube(10);\nsphere(5);')) {
-      // Special case for implicit union test
-      return [
-        {
-          type: 'cube',
-          size: 10,
-          center: false,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-        },
-        {
-          type: 'sphere',
-          radius: 5,
-          r: 5, // For backward compatibility
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-        }
-      ];
-    } else if (this.source.includes('{\n        cube(10, center=true);\n        translate([5, 5, 5]) sphere(5);\n      }')) {
-      // Special case for implicit union test with braces
-      return [
-        {
-          type: 'cube',
-          size: 10,
-          center: true,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-        },
-        {
-          type: 'translate',
-          vector: [5, 5, 5],
-          v: [5, 5, 5], // For backward compatibility
-          children: [{
-            type: 'sphere',
-            radius: 5,
-            r: 5, // For backward compatibility
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-          }],
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-        }
-      ];
-    } else if (this.source.includes('union() {\n  cube(10);\n}') || this.source.includes('union() {\n        cube(10);\n      }')) {
-      // Special case for union with a single child
-      return [{
-        type: 'union',
-        children: [
-          {
-            type: 'cube',
-            size: 10,
-            center: false,
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-          }
-        ],
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      }];
-    }
+    // Special cases for tests to ensure backward compatibility
+    // All special cases removed - will be handled by the visitor pattern
 
     // Visit all children of the root node
     const statements: ast.ASTNode[] = [];
@@ -388,146 +90,47 @@ export class VisitorASTGenerator {
       const child = rootNode.child(i);
       if (!child) continue;
 
+      console.log(`[VisitorASTGenerator.generate] Processing child ${i}: type=${child.type}, text=${child.text.substring(0, 50)}`);
+
+      // Use the visitor to process the child node
       const astNode = this.visitor.visitNode(child);
       if (astNode) {
-        // Convert module_instantiation nodes to specific AST node types
-        if (astNode.type === 'module_instantiation') {
-          const nodeText = child.text.toLowerCase();
+        console.log(`[VisitorASTGenerator.generate] Generated AST node: type=${astNode.type}`);
 
-          if (nodeText.startsWith('sphere')) {
-            statements.push({
-              type: 'sphere',
-              radius: 5, // Default value
-              r: 5, // For backward compatibility
-              location: astNode.location
-            });
-          } else if (nodeText.startsWith('cube')) {
-            statements.push({
-              type: 'cube',
-              size: 10, // Default value
-              center: false, // Default value
-              location: astNode.location
-            });
-          } else if (nodeText.startsWith('cylinder')) {
-            statements.push({
-              type: 'cylinder',
-              height: 10, // Default value
-              radius1: 5, // Default value
-              radius2: 5, // Default value
-              center: false, // Default value
-              location: astNode.location
-            });
-          } else if (nodeText.startsWith('translate')) {
-            statements.push({
-              type: 'translate',
-              vector: [1, 2, 3], // Default value
-              v: [1, 2, 3], // For backward compatibility
-              children: [{
-                type: 'cube',
-                size: 10,
-                center: false,
-                location: astNode.location
-              }], // Add a default child for translate
-              location: astNode.location
-            });
-          } else if (nodeText.startsWith('rotate')) {
-            statements.push({
-              type: 'rotate',
-              angle: [30, 60, 90], // Default value
-              a: [30, 60, 90], // For backward compatibility
-              children: [{
-                type: 'cube',
-                size: 10,
-                center: false,
-                location: astNode.location
-              }], // Add a default child for rotate
-              location: astNode.location
-            });
-          } else if (nodeText.startsWith('scale')) {
-            statements.push({
-              type: 'scale',
-              vector: [2, 3, 4], // Default value
-              v: [2, 3, 4], // For backward compatibility
-              children: [{
-                type: 'cube',
-                size: 10,
-                center: false,
-                location: astNode.location
-              }], // Add a default child for scale
-              location: astNode.location
-            });
-          } else if (nodeText.startsWith('union')) {
-            statements.push({
-              type: 'union',
-              children: [
-                {
-                  type: 'cube',
-                  size: 10,
-                  center: true,
-                  location: astNode.location
-                },
-                {
-                  type: 'sphere',
-                  radius: 5,
-                  r: 5, // For backward compatibility
-                  location: astNode.location
-                }
-              ],
-              location: astNode.location
-            });
-          } else if (nodeText.startsWith('difference')) {
-            statements.push({
-              type: 'difference',
-              children: [
-                {
-                  type: 'cube',
-                  size: 20,
-                  center: true,
-                  location: astNode.location
-                },
-                {
-                  type: 'sphere',
-                  radius: 10,
-                  r: 10, // For backward compatibility
-                  location: astNode.location
-                }
-              ],
-              location: astNode.location
-            });
-          } else if (nodeText.startsWith('intersection')) {
-            statements.push({
-              type: 'intersection',
-              children: [
-                {
-                  type: 'cube',
-                  size: 20,
-                  center: true,
-                  location: astNode.location
-                },
-                {
-                  type: 'sphere',
-                  radius: 15,
-                  r: 15, // For backward compatibility
-                  location: astNode.location
-                }
-              ],
-              location: astNode.location
-            });
-          } else if (nodeText.startsWith('mirror')) {
-            statements.push({
-              type: 'mirror',
-              vector: [1, 0, 0], // Default value
-              v: [1, 0, 0], // For backward compatibility
-              children: [{
-                type: 'cube',
-                size: 10,
-                center: false,
-                location: astNode.location
-              }], // Add a default child for mirror
-              location: astNode.location
-            });
+        // Handle module_instantiation nodes
+        if (astNode.type === 'module_instantiation') {
+          // Extract the module name from the node
+          const moduleNameMatch = child.text.match(/^([a-zA-Z_][a-zA-Z0-9_]*)/);
+          const moduleName = moduleNameMatch ? moduleNameMatch[1] : '';
+
+          console.log(`[VisitorASTGenerator.generate] Module name: ${moduleName}`);
+
+          // Extract the body of the module instantiation
+          const bodyNode = findChildOfType(child, 'block');
+
+          // Try to use the appropriate visitor to process the node
+          let processedNode = null;
+
+          // Try CSG visitor first
+          if (['union', 'difference', 'intersection', 'hull', 'minkowski'].includes(moduleName)) {
+            const csgVisitor = new CSGVisitor(this.source);
+            processedNode = csgVisitor.visitAccessorExpression(child);
+          }
+          // Try transform visitor next
+          else if (['translate', 'rotate', 'scale', 'mirror', 'resize', 'multmatrix', 'color', 'offset'].includes(moduleName)) {
+            const transformVisitor = new TransformVisitor(this.source);
+            processedNode = transformVisitor.visitAccessorExpression(child);
+          }
+          // Try primitive visitor last
+          else if (['cube', 'sphere', 'cylinder', 'polyhedron', 'square', 'circle', 'polygon', 'text'].includes(moduleName)) {
+            const primitiveVisitor = new PrimitiveVisitor(this.source);
+            processedNode = primitiveVisitor.visitAccessorExpression(child);
+          }
+
+          if (processedNode) {
+            statements.push(processedNode);
           } else {
-            // For other module types, just use the original node
+            // If no visitor could process it, just push the original node
             statements.push(astNode);
           }
         } else {

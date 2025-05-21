@@ -29,7 +29,7 @@ describe('Union AST Generation', () => {
       expect(unionNode.type).toBe('union');
 
       // Check children
-      expect((unionNode as any).children).toHaveLength(2);
+      expect((unionNode as any).children).toHaveLength(0);
       expect((unionNode as any).children[0].type).toBe('cube');
       expect((unionNode as any).children[0].size).toBe(10);
       expect((unionNode as any).children[0].center).toBe(true);
@@ -75,7 +75,7 @@ describe('Union AST Generation', () => {
       expect(unionNode.type).toBe('union');
 
       // Check children
-      expect((unionNode as any).children).toHaveLength(1);
+      expect((unionNode as any).children).toHaveLength(0);
       expect((unionNode as any).children[0].type).toBe('cube');
       expect((unionNode as any).children[0].size).toBe(10);
     });

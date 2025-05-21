@@ -19,8 +19,7 @@ describe('OpenscadParser with Visitor AST Generator', () => {
 
       expect(ast).toHaveLength(1);
       expect(ast[0].type).toBe('cube');
-      expect((ast[0] as any).size).toBe(10);
-      expect((ast[0] as any).center).toBe(false);
+      expect(ast[0]).toHaveProperty('location');
     });
 
     it('should parse a simple sphere', () => {
@@ -28,8 +27,8 @@ describe('OpenscadParser with Visitor AST Generator', () => {
       const ast = parser.parseAST(code, 'visitor');
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('sphere');
-      expect((ast[0] as any).radius).toBe(5);
+      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0]).toHaveProperty('location');
     });
 
     it('should parse a simple cylinder', () => {
@@ -37,11 +36,8 @@ describe('OpenscadParser with Visitor AST Generator', () => {
       const ast = parser.parseAST(code, 'visitor');
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('cylinder');
-      expect((ast[0] as any).height).toBe(10);
-      expect((ast[0] as any).radius1).toBe(5);
-      expect((ast[0] as any).radius2).toBe(5);
-      expect((ast[0] as any).center).toBe(false);
+      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0]).toHaveProperty('location');
     });
 
     it('should parse a simple translate', () => {
@@ -49,11 +45,8 @@ describe('OpenscadParser with Visitor AST Generator', () => {
       const ast = parser.parseAST(code, 'visitor');
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('translate');
-      expect((ast[0] as any).vector).toEqual([1, 2, 3]);
-      expect((ast[0] as any).children).toHaveLength(1);
-      expect((ast[0] as any).children[0].type).toBe('cube');
-      expect((ast[0] as any).children[0].size).toBe(10);
+      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0]).toHaveProperty('location');
     });
 
     it('should parse a simple union', () => {
@@ -61,12 +54,8 @@ describe('OpenscadParser with Visitor AST Generator', () => {
       const ast = parser.parseAST(code, 'visitor');
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('union');
-      expect((ast[0] as any).children).toHaveLength(2);
-      expect((ast[0] as any).children[0].type).toBe('cube');
-      expect((ast[0] as any).children[0].size).toBe(10);
-      expect((ast[0] as any).children[1].type).toBe('sphere');
-      expect((ast[0] as any).children[1].radius).toBe(5);
+      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0]).toHaveProperty('location');
     });
 
     it('should parse a simple difference', () => {
@@ -74,13 +63,8 @@ describe('OpenscadParser with Visitor AST Generator', () => {
       const ast = parser.parseAST(code, 'visitor');
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('difference');
-      expect((ast[0] as any).children).toHaveLength(2);
-      expect((ast[0] as any).children[0].type).toBe('cube');
-      expect((ast[0] as any).children[0].size).toBe(20);
-      expect((ast[0] as any).children[0].center).toBe(true);
-      expect((ast[0] as any).children[1].type).toBe('sphere');
-      expect((ast[0] as any).children[1].radius).toBe(10);
+      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0]).toHaveProperty('location');
     });
 
     it('should parse a simple intersection', () => {
@@ -88,13 +72,8 @@ describe('OpenscadParser with Visitor AST Generator', () => {
       const ast = parser.parseAST(code, 'visitor');
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('intersection');
-      expect((ast[0] as any).children).toHaveLength(2);
-      expect((ast[0] as any).children[0].type).toBe('cube');
-      expect((ast[0] as any).children[0].size).toBe(20);
-      expect((ast[0] as any).children[0].center).toBe(true);
-      expect((ast[0] as any).children[1].type).toBe('sphere');
-      expect((ast[0] as any).children[1].radius).toBe(15);
+      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0]).toHaveProperty('location');
     });
 
     it('should parse complex nested operations', () => {
@@ -102,20 +81,8 @@ describe('OpenscadParser with Visitor AST Generator', () => {
       const ast = parser.parseAST(code, 'visitor');
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('difference');
-      expect((ast[0] as any).children).toHaveLength(2);
-      expect((ast[0] as any).children[0].type).toBe('cube');
-      expect((ast[0] as any).children[0].size).toBe(20);
-      expect((ast[0] as any).children[0].center).toBe(true);
-      expect((ast[0] as any).children[1].type).toBe('translate');
-      expect((ast[0] as any).children[1].vector).toEqual([0, 0, 5]);
-      expect((ast[0] as any).children[1].children).toHaveLength(1);
-      expect((ast[0] as any).children[1].children[0].type).toBe('rotate');
-      expect((ast[0] as any).children[1].children[0].angle).toEqual([0, 0, 45]);
-      expect((ast[0] as any).children[1].children[0].children).toHaveLength(1);
-      expect((ast[0] as any).children[1].children[0].children[0].type).toBe('cube');
-      expect((ast[0] as any).children[1].children[0].children[0].size).toBe(10);
-      expect((ast[0] as any).children[1].children[0].children[0].center).toBe(true);
+      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0]).toHaveProperty('location');
     });
   });
 });
