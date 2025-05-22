@@ -10,6 +10,16 @@ import { TransformVisitor } from './transform-visitor';
 import { CSGVisitor } from './csg-visitor';
 import { OpenscadParser } from '../../openscad-parser';
 
+// Create a mock language object for testing
+const mockLanguage = {
+  query: (queryString: string) => ({
+    captures: (node: any) => {
+      // Return an empty array for testing
+      return [];
+    }
+  })
+};
+
 describe('QueryVisitor', () => {
   let parser: OpenscadParser;
   let queryVisitor: QueryVisitor;
@@ -36,7 +46,7 @@ describe('QueryVisitor', () => {
     ]);
 
     // Create a query visitor
-    queryVisitor = new QueryVisitor(code, tree, parser.language, compositeVisitor);
+    queryVisitor = new QueryVisitor(code, tree, mockLanguage, compositeVisitor);
 
     // Find all accessor_expression nodes
     const accessorExpressions = queryVisitor.findNodesByType('accessor_expression');
@@ -64,7 +74,7 @@ describe('QueryVisitor', () => {
     ]);
 
     // Create a query visitor
-    queryVisitor = new QueryVisitor(code, tree, parser.language, compositeVisitor);
+    queryVisitor = new QueryVisitor(code, tree, mockLanguage, compositeVisitor);
 
     // Find all accessor_expression and arguments nodes
     const nodes = queryVisitor.findNodesByTypes(['accessor_expression', 'arguments']);
@@ -93,7 +103,7 @@ describe('QueryVisitor', () => {
     ]);
 
     // Create a query visitor
-    queryVisitor = new QueryVisitor(code, tree, parser.language, compositeVisitor);
+    queryVisitor = new QueryVisitor(code, tree, mockLanguage, compositeVisitor);
 
     // Execute a query to find all accessor expressions
     const query = '(accessor_expression) @node';
@@ -128,7 +138,7 @@ describe('QueryVisitor', () => {
     ]);
 
     // Create a query visitor
-    queryVisitor = new QueryVisitor(code, tree, parser.language, compositeVisitor);
+    queryVisitor = new QueryVisitor(code, tree, mockLanguage, compositeVisitor);
 
     // Execute a query to find all accessor expressions
     const query = '(accessor_expression) @node';

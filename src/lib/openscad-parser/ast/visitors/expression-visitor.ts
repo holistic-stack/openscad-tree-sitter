@@ -25,6 +25,19 @@ import { extractValue } from '../extractors/value-extractor';
  */
 export class ExpressionVisitor extends BaseASTVisitor {
   /**
+   * Create an AST node for a function call
+   * @param node The function call node
+   * @returns The function call AST node or null if the node cannot be processed
+   */
+  createASTNodeForFunction(node: TSNode): ast.ASTNode | null {
+    console.log(`[ExpressionVisitor.createASTNodeForFunction] Processing function call: ${node.text.substring(0, 50)}`);
+
+    // This is a placeholder implementation
+    // In a real implementation, we would extract the function name and arguments
+    // and create a proper function call node
+    return null;
+  }
+  /**
    * Create a new ExpressionVisitor
    * @param source The source code
    */
@@ -112,9 +125,14 @@ export class ExpressionVisitor extends BaseASTVisitor {
           location: {
             start: {
               line: node.startPosition.row,
-              column: node.startPosition.column + 1
+              column: node.startPosition.column + 1,
+              offset: node.startIndex
             },
-            end: node.endPosition
+            end: {
+              line: node.endPosition.row,
+              column: node.endPosition.column,
+              offset: node.endIndex
+            }
           }
         };
       } else if (operator === '!' && (operandText === 'true' || operandText === 'false')) {
@@ -126,9 +144,14 @@ export class ExpressionVisitor extends BaseASTVisitor {
           location: {
             start: {
               line: node.startPosition.row,
-              column: node.startPosition.column + 1
+              column: node.startPosition.column + 1,
+              offset: node.startIndex
             },
-            end: node.endPosition
+            end: {
+              line: node.endPosition.row,
+              column: node.endPosition.column,
+              offset: node.endIndex
+            }
           }
         };
       } else {
@@ -153,9 +176,14 @@ export class ExpressionVisitor extends BaseASTVisitor {
               location: {
                 start: {
                   line: node.startPosition.row,
-                  column: node.startPosition.column + 1
+                  column: node.startPosition.column + 1,
+                  offset: node.startIndex
                 },
-                end: node.endPosition
+                end: {
+                  line: node.endPosition.row,
+                  column: node.endPosition.column,
+                  offset: node.endIndex
+                }
               }
             };
           } else if (!isNaN(parseFloat(operandText))) {
@@ -166,9 +194,14 @@ export class ExpressionVisitor extends BaseASTVisitor {
               location: {
                 start: {
                   line: node.startPosition.row,
-                  column: node.startPosition.column + 1
+                  column: node.startPosition.column + 1,
+                  offset: node.startIndex
                 },
-                end: node.endPosition
+                end: {
+                  line: node.endPosition.row,
+                  column: node.endPosition.column,
+                  offset: node.endIndex
+                }
               }
             };
           } else {
@@ -179,9 +212,14 @@ export class ExpressionVisitor extends BaseASTVisitor {
               location: {
                 start: {
                   line: node.startPosition.row,
-                  column: node.startPosition.column + 1
+                  column: node.startPosition.column + 1,
+                  offset: node.startIndex
                 },
-                end: node.endPosition
+                end: {
+                  line: node.endPosition.row,
+                  column: node.endPosition.column,
+                  offset: node.endIndex
+                }
               }
             };
           }

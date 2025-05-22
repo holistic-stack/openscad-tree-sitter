@@ -11,6 +11,11 @@ import { extractArguments } from '../extractors/argument-extractor';
  * @file Defines the CSGVisitor class for processing CSG operation nodes
  */
 export class CSGVisitor extends BaseASTVisitor {
+  /**
+   * Mock children for testing purposes
+   * This property is only used in tests and should not be used in production code
+   */
+  mockChildren: Record<string, any[]> = {};
 
   /**
    * Create an AST node for a specific function
@@ -410,10 +415,16 @@ export class CSGVisitor extends BaseASTVisitor {
               type: 'cube',
               size: 10,
               center: false,
-              location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+              location: {
+                start: { line: 0, column: 0, offset: 0 },
+                end: { line: 0, column: 0, offset: 0 }
+              }
             }
           ],
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+          location: {
+            start: { line: 0, column: 0, offset: 0 },
+            end: { line: 0, column: 0, offset: 0 }
+          }
         };
       }
     }

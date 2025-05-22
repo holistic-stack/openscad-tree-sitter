@@ -103,12 +103,12 @@ export class PrimitiveVisitor extends BaseASTVisitor {
 
     // Extract arguments from the argument_list
     const argsNode = node.childForFieldName('argument_list') ||
-                     node.namedChildren.find(child => child.type === 'argument_list');
+                     node.namedChildren.find(child => child && child.type === 'argument_list');
 
     let args: ast.Parameter[] = [];
     if (argsNode) {
       const argumentsNode = argsNode.childForFieldName('arguments') ||
-                            argsNode.namedChildren.find(child => child.type === 'arguments');
+                            argsNode.namedChildren.find(child => child && child.type === 'arguments');
 
       if (argumentsNode) {
         console.log(`[PrimitiveVisitor.visitAccessorExpression] Found arguments node: ${argumentsNode.text}`);
@@ -450,12 +450,12 @@ export class PrimitiveVisitor extends BaseASTVisitor {
     return {
       type: 'cylinder',
       h: height, // Use h instead of height to match the CylinderNode interface
-      radius1,
-      radius2,
+      r1: radius1,
+      r2: radius2,
       center,
-      fa,
-      fs,
-      fn,
+      $fa: fa,
+      $fs: fs,
+      $fn: fn,
       location: getLocation(node)
     };
   }

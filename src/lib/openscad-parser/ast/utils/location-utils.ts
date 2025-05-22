@@ -20,7 +20,7 @@ export function pointToPosition(point: Point, offset: number = 0): ast.Position 
  * @param node The node to get the location from
  * @returns The location object
  */
-export function getLocation(node: TSNode): ast.Location {
+export function getLocation(node: TSNode): ast.SourceLocation {
   // Check if the node has startPosition and endPosition properties
   // This is needed for mock nodes in tests
   if (node.startPosition && node.endPosition) {

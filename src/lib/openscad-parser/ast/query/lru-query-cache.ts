@@ -1,9 +1,9 @@
 /**
  * LRU (Least Recently Used) implementation of the QueryCache interface
- * 
+ *
  * This module provides an implementation of the QueryCache interface
  * using an LRU (Least Recently Used) eviction policy.
- * 
+ *
  * @module lib/openscad-parser/ast/query/lru-query-cache
  */
 
@@ -16,22 +16,22 @@ import { QueryCache } from './query-cache';
 export class LRUQueryCache implements QueryCache {
   /**
    * The cache of query results
-   * 
+   *
    * The outer map uses a cache key (query string + source hash) as the key
    * and a map of source text to query results as the value.
    */
   private cache: Map<string, TSNode[]> = new Map();
-  
+
   /**
    * The maximum number of queries to cache
    */
   private maxSize: number;
-  
+
   /**
    * The number of cache hits
    */
   private hits: number = 0;
-  
+
   /**
    * The number of cache misses
    */
@@ -80,7 +80,9 @@ export class LRUQueryCache implements QueryCache {
     // If the cache is full, remove the least recently used entry
     if (this.cache.size >= this.maxSize) {
       const oldestKey = this.cache.keys().next().value;
-      this.cache.delete(oldestKey);
+      if (oldestKey !== undefined) {
+        this.cache.delete(oldestKey);
+      }
     }
 
     // Add the entry to the cache

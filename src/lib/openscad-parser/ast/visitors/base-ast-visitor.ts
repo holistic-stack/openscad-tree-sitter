@@ -382,45 +382,30 @@ export abstract class BaseASTVisitor implements ASTVisitor {
               if (!isNaN(Number(value))) {
                 args.push({
                   name,
-                  value: {
-                    type: 'number',
-                    value: Number(value)
-                  }
+                  value: Number(value)
                 });
               } else if (value === 'true' || value === 'false') {
                 args.push({
                   name,
-                  value: {
-                    type: 'boolean',
-                    value
-                  }
+                  value: value === 'true'
                 });
               } else {
                 args.push({
                   name,
-                  value: {
-                    type: 'string',
-                    value
-                  }
+                  value: value
                 });
               }
             } else if (!isNaN(Number(argValue))) {
               // Positional number argument
               args.push({
                 name: undefined,
-                value: {
-                  type: 'number',
-                  value: Number(argValue)
-                }
+                value: Number(argValue)
               });
             } else {
               // Other positional argument
               args.push({
                 name: undefined,
-                value: {
-                  type: 'string',
-                  value: argValue
-                }
+                value: argValue
               });
             }
           }
@@ -462,10 +447,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
           if (!isNaN(Number(argValue))) {
             args.push({
               name: undefined,
-              value: {
-                type: 'number',
-                value: Number(argValue)
-              }
+              value: Number(argValue)
             });
           }
         }

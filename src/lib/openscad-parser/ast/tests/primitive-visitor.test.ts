@@ -32,12 +32,22 @@ describe('PrimitiveVisitor', () => {
       // Create a mock node
       const mockNode = createMockNode('cube(10);');
 
-      // Create a mock visitor
-      const visitor = new TestPrimitiveVisitor();
+      // Create a mock visitor with source code
+      const visitor = new TestPrimitiveVisitor('cube(10);');
 
       // Create mock arguments
       const args: ast.Parameter[] = [
-        { value: { type: 'number', value: '10' } }
+        {
+          value: {
+            type: 'expression',
+            expressionType: 'literal',
+            value: 10,
+            location: {
+              start: { line: 1, column: 5, offset: 5 },
+              end: { line: 1, column: 7, offset: 7 }
+            }
+          }
+        }
       ];
 
       // Call the method
@@ -54,13 +64,34 @@ describe('PrimitiveVisitor', () => {
       // Create a mock node
       const mockNode = createMockNode('cube(10, center=true);');
 
-      // Create a mock visitor
-      const visitor = new TestPrimitiveVisitor();
+      // Create a mock visitor with source code
+      const visitor = new TestPrimitiveVisitor('cube(10, center=true);');
 
       // Create mock arguments
       const args: ast.Parameter[] = [
-        { value: { type: 'number', value: '10' } },
-        { name: 'center', value: { type: 'boolean', value: 'true' } }
+        {
+          value: {
+            type: 'expression',
+            expressionType: 'literal',
+            value: 10,
+            location: {
+              start: { line: 1, column: 5, offset: 5 },
+              end: { line: 1, column: 7, offset: 7 }
+            }
+          }
+        },
+        {
+          name: 'center',
+          value: {
+            type: 'expression',
+            expressionType: 'literal',
+            value: true,
+            location: {
+              start: { line: 1, column: 15, offset: 15 },
+              end: { line: 1, column: 19, offset: 19 }
+            }
+          }
+        }
       ];
 
       // Call the method
@@ -77,12 +108,23 @@ describe('PrimitiveVisitor', () => {
       // Create a mock node
       const mockNode = createMockNode('cube(size=10);');
 
-      // Create a mock visitor
-      const visitor = new TestPrimitiveVisitor();
+      // Create a mock visitor with source code
+      const visitor = new TestPrimitiveVisitor('cube(size=10);');
 
       // Create mock arguments
       const args: ast.Parameter[] = [
-        { name: 'size', value: { type: 'number', value: '10' } }
+        {
+          name: 'size',
+          value: {
+            type: 'expression',
+            expressionType: 'literal',
+            value: 10,
+            location: {
+              start: { line: 1, column: 10, offset: 10 },
+              end: { line: 1, column: 12, offset: 12 }
+            }
+          }
+        }
       ];
 
       // Call the method
@@ -99,12 +141,50 @@ describe('PrimitiveVisitor', () => {
       // Create a mock node
       const mockNode = createMockNode('cube([10, 20, 30]);');
 
-      // Create a mock visitor
-      const visitor = new TestPrimitiveVisitor();
+      // Create a mock visitor with source code
+      const visitor = new TestPrimitiveVisitor('cube([10, 20, 30]);');
 
       // Create mock arguments
       const args: ast.Parameter[] = [
-        { value: { type: 'vector', value: [10, 20, 30] } }
+        {
+          value: {
+            type: 'expression',
+            expressionType: 'array',
+            items: [
+              {
+                type: 'expression',
+                expressionType: 'literal',
+                value: 10,
+                location: {
+                  start: { line: 1, column: 6, offset: 6 },
+                  end: { line: 1, column: 8, offset: 8 }
+                }
+              },
+              {
+                type: 'expression',
+                expressionType: 'literal',
+                value: 20,
+                location: {
+                  start: { line: 1, column: 10, offset: 10 },
+                  end: { line: 1, column: 12, offset: 12 }
+                }
+              },
+              {
+                type: 'expression',
+                expressionType: 'literal',
+                value: 30,
+                location: {
+                  start: { line: 1, column: 14, offset: 14 },
+                  end: { line: 1, column: 16, offset: 16 }
+                }
+              }
+            ],
+            location: {
+              start: { line: 1, column: 5, offset: 5 },
+              end: { line: 1, column: 17, offset: 17 }
+            }
+          }
+        }
       ];
 
       // Call the method
@@ -121,8 +201,8 @@ describe('PrimitiveVisitor', () => {
       // Create a mock node
       const mockNode = createMockNode('cube();');
 
-      // Create a mock visitor
-      const visitor = new TestPrimitiveVisitor();
+      // Create a mock visitor with source code
+      const visitor = new TestPrimitiveVisitor('cube();');
 
       // Create mock arguments
       const args: ast.Parameter[] = [];

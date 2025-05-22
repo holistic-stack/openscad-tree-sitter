@@ -464,17 +464,10 @@ export class TransformVisitor extends BaseASTVisitor {
     const matrix: number[][] = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
     const matrixParam = args.find(arg => arg.name === undefined || arg.name === 'm');
 
-    if (matrixParam && matrixParam.value.type === 'matrix') {
+    if (matrixParam) {
       // Matrix extraction would be more complex and depends on how matrices are represented in the AST
       // For now, we'll just use the identity matrix
       console.log(`[TransformVisitor.createMultmatrixNode] Using identity matrix for now`);
-    }
-
-    // Extract matrix from parameters
-    if (matrixParam && matrixParam.value.type === 'vector') {
-      // Try to extract the matrix from the vector parameter
-      // This would need a more sophisticated extraction method for nested vectors
-      console.log(`[TransformVisitor.createMultmatrixNode] Matrix parameter found, but extraction not yet implemented`);
     }
 
     // Extract children
@@ -532,7 +525,7 @@ export class TransformVisitor extends BaseASTVisitor {
           alpha = vector[3];
           console.log(`[TransformVisitor.createColorNode] Found RGBA color: ${JSON.stringify(color)}`);
         } else {
-          console.log(`[TransformVisitor.createColorNode] Invalid color parameter: ${JSON.stringify(colorParam.value)}`);
+          console.log(`[TransformVisitor.createColorNode] Invalid color parameter`);
         }
       }
     }
@@ -543,7 +536,7 @@ export class TransformVisitor extends BaseASTVisitor {
         alpha = alphaValue;
         console.log(`[TransformVisitor.createColorNode] Found alpha parameter: ${alpha}`);
       } else {
-        console.log(`[TransformVisitor.createColorNode] Invalid alpha parameter: ${JSON.stringify(alphaParam.value)}`);
+        console.log(`[TransformVisitor.createColorNode] Invalid alpha parameter`);
       }
     }
 
@@ -594,7 +587,7 @@ export class TransformVisitor extends BaseASTVisitor {
         radius = radiusValue;
         console.log(`[TransformVisitor.createOffsetNode] Found radius parameter: ${radius}`);
       } else {
-        console.log(`[TransformVisitor.createOffsetNode] Invalid radius parameter: ${JSON.stringify(radiusParam.value)}`);
+        console.log(`[TransformVisitor.createOffsetNode] Invalid radius parameter`);
       }
     }
 
@@ -604,7 +597,7 @@ export class TransformVisitor extends BaseASTVisitor {
         delta = deltaValue;
         console.log(`[TransformVisitor.createOffsetNode] Found delta parameter: ${delta}`);
       } else {
-        console.log(`[TransformVisitor.createOffsetNode] Invalid delta parameter: ${JSON.stringify(deltaParam.value)}`);
+        console.log(`[TransformVisitor.createOffsetNode] Invalid delta parameter`);
       }
     }
 
@@ -614,7 +607,7 @@ export class TransformVisitor extends BaseASTVisitor {
         chamfer = chamferValue;
         console.log(`[TransformVisitor.createOffsetNode] Found chamfer parameter: ${chamfer}`);
       } else {
-        console.log(`[TransformVisitor.createOffsetNode] Invalid chamfer parameter: ${JSON.stringify(chamferParam.value)}`);
+        console.log(`[TransformVisitor.createOffsetNode] Invalid chamfer parameter`);
       }
     }
 

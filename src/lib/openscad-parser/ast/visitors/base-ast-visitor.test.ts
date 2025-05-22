@@ -14,7 +14,10 @@ class TestVisitor extends BaseASTVisitor {
         type: 'cube',
         size: 10,
         center: false,
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+        location: {
+          start: { line: 0, column: 0, offset: 0 },
+          end: { line: 0, column: 0, offset: 0 }
+        }
       };
     }
     return null;
@@ -87,11 +90,15 @@ describe('BaseASTVisitor', () => {
         }
       }('');
 
-      // Create a mock result
-      const mockResult = {
+      // Create a mock result that matches CubeNode
+      const mockResult: ast.CubeNode = {
         type: 'cube',
         size: 10,
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+        center: false,
+        location: {
+          start: { line: 0, column: 0, offset: 0 },
+          end: { line: 0, column: 0, offset: 0 }
+        }
       };
 
       // Mock the visitExpression method to return our mock result
@@ -152,8 +159,9 @@ describe('BaseASTVisitor', () => {
                   return {
                     type: 'cube',
                     size: 10,
+                    center: false,
                     location: getLocation(node)
-                  };
+                  } as ast.CubeNode;
                 }
               }
             }
@@ -166,11 +174,15 @@ describe('BaseASTVisitor', () => {
         }
       }('');
 
-      // Create a mock result
-      const mockResult = {
+      // Create a mock result that matches CubeNode
+      const mockResult: ast.CubeNode = {
         type: 'cube',
         size: 10,
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+        center: false,
+        location: {
+          start: { line: 0, column: 0, offset: 0 },
+          end: { line: 0, column: 0, offset: 0 }
+        }
       };
 
       // Mock the visitStatement method to return our mock result
@@ -312,8 +324,9 @@ describe('BaseASTVisitor', () => {
                   return {
                     type: 'cube',
                     size: 10,
+                    center: false,
                     location: getLocation(node)
-                  };
+                  } as ast.CubeNode;
                 }
               }
             }
@@ -327,10 +340,14 @@ describe('BaseASTVisitor', () => {
       }('');
 
       // Create a mock result for the first statement
-      const mockResult = {
+      const mockResult: ast.CubeNode = {
         type: 'cube',
         size: 10,
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+        center: false,
+        location: {
+          start: { line: 0, column: 0, offset: 0 },
+          end: { line: 0, column: 0, offset: 0 }
+        }
       };
 
       // Mock the visitNode method to return our mock result for the first statement
@@ -376,8 +393,9 @@ describe('BaseASTVisitor', () => {
             return {
               type: 'cube',
               size: 10,
+              center: false,
               location: getLocation(node)
-            };
+            } as ast.CubeNode;
           }
           return null;
         }
@@ -387,11 +405,15 @@ describe('BaseASTVisitor', () => {
         }
       }('');
 
-      // Create a mock result
-      const mockResult = {
+      // Create a mock result that matches CubeNode
+      const mockResult: ast.CubeNode = {
         type: 'cube',
         size: 10,
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+        center: false,
+        location: {
+          start: { line: 0, column: 0, offset: 0 },
+          end: { line: 0, column: 0, offset: 0 }
+        }
       };
 
       // Mock the visitModuleInstantiation method to return our mock result

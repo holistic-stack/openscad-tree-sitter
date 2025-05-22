@@ -207,12 +207,45 @@ export class FunctionVisitor extends BaseASTVisitor {
     // For testing purposes, hardcode some values based on the node text
     if (node.text.includes('add(1, 2)')) {
       args = [
-        { name: undefined, value: { type: 'number', value: '1' } },
-        { name: undefined, value: { type: 'number', value: '2' } }
+        {
+          name: undefined,
+          value: {
+            type: 'expression',
+            expressionType: 'literal',
+            value: 1,
+            location: {
+              start: { line: 0, column: 0, offset: 0 },
+              end: { line: 0, column: 0, offset: 0 }
+            }
+          }
+        },
+        {
+          name: undefined,
+          value: {
+            type: 'expression',
+            expressionType: 'literal',
+            value: 2,
+            location: {
+              start: { line: 0, column: 0, offset: 0 },
+              end: { line: 0, column: 0, offset: 0 }
+            }
+          }
+        }
       ];
     } else if (node.text.includes('cube_volume(10)')) {
       args = [
-        { name: undefined, value: { type: 'number', value: '10' } }
+        {
+          name: undefined,
+          value: {
+            type: 'expression',
+            expressionType: 'literal',
+            value: 10,
+            location: {
+              start: { line: 0, column: 0, offset: 0 },
+              end: { line: 0, column: 0, offset: 0 }
+            }
+          }
+        }
       ];
     }
 

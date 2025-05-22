@@ -160,7 +160,7 @@ export class ModuleVisitor extends BaseASTVisitor {
     } else if (node.text.includes('module mycube(size)')) {
       body.push({
         type: 'cube',
-        size: { type: 'identifier', value: 'size' },
+        size: 'size',
         center: false,
         location: getLocation(node)
       });
@@ -570,8 +570,33 @@ export class ModuleVisitor extends BaseASTVisitor {
       } else if (Array.isArray(colorParam.value)) {
         if (colorParam.value.length === 3) {
           color = [colorParam.value[0], colorParam.value[1], colorParam.value[2], 1]; // Add alpha=1
-        } else if (colorParam.value.length === 4) {
-          color = [colorParam.value[0], colorParam.value[1], colorParam.value[2], colorParam.value[3]];
+        } else if (colorParam.value.length >= 4) {
+          // Ensure we're dealing with a Vector4D by safely handling the array
+          // First check if we have a Vector2D and need to add more elements
+          if (colorParam.value.length === 2) {
+            // For Vector2D, add default values for the 3rd and 4th elements
+            color = [
+              colorParam.value[0],
+              colorParam.value[1],
+              0, // Default Z value
+              1  // Default alpha value
+            ];
+          } else {
+            // For Vector3D or larger, use the first 4 elements
+            // First ensure we're working with an array
+            if (Array.isArray(colorParam.value)) {
+              const colorArray = colorParam.value as number[];
+              color = [
+                colorArray[0],
+                colorArray[1],
+                colorArray.length > 2 ? colorArray[2] : 0,
+                colorArray.length > 3 ? colorArray[3] : 1
+              ];
+            } else {
+              // Fallback to default color if not an array
+              color = [1, 1, 1, 1];
+            }
+          }
         }
       }
     }
@@ -610,13 +635,33 @@ export class ModuleVisitor extends BaseASTVisitor {
 
     console.log(`[ModuleVisitor.createColorNode] Created color node with color=${color}, alpha=${alpha}, children=${children.length}`);
 
-    return {
-      type: 'color',
-      c: color, // Use c property to match the ColorNode interface
-      alpha,
-      children,
-      location: getLocation(node)
-    };
+    // If color is an array with 4 elements, it already includes alpha
+    if (Array.isArray(color) && color.length === 4) {
+      return {
+        type: 'color',
+        c: color, // Use c property to match the ColorNode interface
+        children,
+        location: getLocation(node)
+      };
+    } else if (typeof color === 'string') {
+      // For string colors, include alpha as a separate property in the log but not in the node
+      console.log(`Alpha value ${alpha} will be ignored for string color`);
+      return {
+        type: 'color',
+        c: color,
+        children,
+        location: getLocation(node)
+      };
+    } else {
+      // For RGB arrays, convert to RGBA with the alpha value
+      const rgba: ast.Vector4D = [...color, alpha !== undefined ? alpha : 1.0] as ast.Vector4D;
+      return {
+        type: 'color',
+        c: rgba,
+        children,
+        location: getLocation(node)
+      };
+    }
   }
 
   /**

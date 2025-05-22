@@ -2,7 +2,7 @@ import { DefaultNodeHandlerRegistry } from './default-node-handler-registry';
 // NodeHandler is not used directly in this file
 import { NodeHandlerRegistry } from './node-handler-registry';
 import { Node as TSNode } from 'web-tree-sitter';
-// ast is not used directly in this file
+import { ExpressionNode } from '../ast-types';
 
 /**
  * Factory for creating and configuring NodeHandlerRegistry instances.
@@ -158,7 +158,13 @@ export class NodeHandlerRegistryFactory {
     });
 
     registry.register('function', (_node: TSNode) => {
-      return { type: 'function_definition', name: '', parameters: [], expression: null };
+      // Create a minimal valid expression node
+      const dummyExpression: ExpressionNode = {
+        type: 'expression',
+        expressionType: 'literal',
+        location: undefined
+      };
+      return { type: 'function_definition', name: '', parameters: [], expression: dummyExpression };
     });
 
     registry.register('children', (_node: TSNode) => {

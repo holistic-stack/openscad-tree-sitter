@@ -1,8 +1,8 @@
 /**
  * Manager for executing and caching tree-sitter queries
- * 
+ *
  * This module provides a manager for executing and caching tree-sitter queries.
- * 
+ *
  * @module lib/openscad-parser/ast/query/query-manager
  */
 
@@ -18,7 +18,7 @@ export class QueryManager {
    * The cache of query results
    */
   private cache: QueryCache;
-  
+
   /**
    * The map of query strings to compiled queries
    */
@@ -68,27 +68,31 @@ export class QueryManager {
     // Create a cache key for the node
     const nodeText = node.text;
     const nodeCacheKey = `${queryString}:${nodeText}`;
-    
+
     // Check cache first
     const cachedResults = this.cache.get(nodeCacheKey, sourceText);
     if (cachedResults) {
       return cachedResults;
     }
-    
+
     // Get or create the query
     let query = this.queryMap.get(queryString);
     if (!query) {
       query = this.language.query(queryString);
-      this.queryMap.set(queryString, query);
+      if (query) {
+        this.queryMap.set(queryString, query);
+      }
     }
 
     // Execute the query
     const results: TSNode[] = [];
-    const matches = query.matches(node);
-    
-    for (const match of matches) {
-      for (const capture of match.captures) {
-        results.push(capture.node);
+    if (query) {
+      const matches = query.matches(node);
+
+      for (const match of matches) {
+        for (const capture of match.captures) {
+          results.push(capture.node);
+        }
       }
     }
 
@@ -146,16 +150,20 @@ export class QueryManager {
     let query = this.queryMap.get(queryString);
     if (!query) {
       query = this.language.query(queryString);
-      this.queryMap.set(queryString, query);
+      if (query) {
+        this.queryMap.set(queryString, query);
+      }
     }
 
     // Execute the query
     const results: TSNode[] = [];
-    const matches = query.matches(tree.rootNode);
-    
-    for (const match of matches) {
-      for (const capture of match.captures) {
-        results.push(capture.node);
+    if (query) {
+      const matches = query.matches(tree.rootNode);
+
+      for (const match of matches) {
+        for (const capture of match.captures) {
+          results.push(capture.node);
+        }
       }
     }
 

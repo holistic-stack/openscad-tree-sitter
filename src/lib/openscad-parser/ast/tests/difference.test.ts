@@ -1,6 +1,7 @@
 import { OpenscadParser } from '../../openscad-parser';
 import { afterAll, beforeAll, describe, it, expect, vi } from 'vitest';
 import { getLocation } from '../utils/location-utils';
+import * as ast from '../ast-types';
 
 describe('Difference AST Generation', () => {
   let parser: OpenscadParser;
@@ -8,9 +9,9 @@ describe('Difference AST Generation', () => {
   beforeAll(async () => {
     parser = new OpenscadParser();
     await parser.init("./tree-sitter-openscad.wasm");
-    
+
     // Mock the parseAST method to return hardcoded values for tests
-    vi.spyOn(parser, 'parseAST').mockImplementation((code: string) => {
+    vi.spyOn(parser, 'parseAST').mockImplementation((code: string): ast.ASTNode[] => {
       if (code.includes('difference() {')) {
         if (code.includes('cube(20, center=true)') && code.includes('sphere(10)')) {
           return [
@@ -25,7 +26,6 @@ describe('Difference AST Generation', () => {
                 },
                 {
                   type: 'sphere',
-                  r: 10,
                   radius: 10,
                   location: { start: { line: 2, column: 8, offset: 38 }, end: { line: 2, column: 18, offset: 48 } }
                 }
@@ -46,7 +46,7 @@ describe('Difference AST Generation', () => {
                 },
                 {
                   type: 'translate',
-                  vector: [0, 0, 5],
+                  v: [0, 0, 5],
                   children: [
                     {
                       type: 'rotate',
@@ -78,7 +78,7 @@ describe('Difference AST Generation', () => {
           ];
         }
       }
-      
+
       return [];
     });
   });
@@ -132,7 +132,7 @@ describe('Difference AST Generation', () => {
       expect((differenceNode as any).children[0].center).toBe(true);
 
       expect((differenceNode as any).children[1].type).toBe('translate');
-      expect((differenceNode as any).children[1].vector).toEqual([0, 0, 5]);
+      expect((differenceNode as any).children[1].v).toEqual([0, 0, 5]);
       expect((differenceNode as any).children[1].children[0].type).toBe('rotate');
       expect((differenceNode as any).children[1].children[0].a).toEqual([0, 0, 45]);
       expect((differenceNode as any).children[1].children[0].children[0].type).toBe('cube');

@@ -4,6 +4,13 @@ import { PrimitiveVisitor } from './visitors/primitive-visitor';
 import { TransformVisitor } from './visitors/transform-visitor';
 import { CSGVisitor } from './visitors/csg-visitor';
 
+// Create a mock language object for testing
+const mockLanguage = {
+  query: () => ({
+    captures: () => []
+  })
+};
+
 describe('VisitorASTGenerator', () => {
   let parser: OpenscadParser;
 
@@ -24,7 +31,7 @@ describe('VisitorASTGenerator', () => {
       const tree = parser.parseCST(code);
       if (!tree) throw new Error('Failed to parse CST');
 
-      const generator = new VisitorASTGenerator(tree, code, parser.language);
+      const generator = new VisitorASTGenerator(tree, code, mockLanguage);
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
@@ -40,7 +47,7 @@ describe('VisitorASTGenerator', () => {
       const tree = parser.parseCST(code);
       if (!tree) throw new Error('Failed to parse CST');
 
-      const generator = new VisitorASTGenerator(tree, code, parser.language);
+      const generator = new VisitorASTGenerator(tree, code, mockLanguage);
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
@@ -56,7 +63,7 @@ describe('VisitorASTGenerator', () => {
       const tree = parser.parseCST(code);
       if (!tree) throw new Error('Failed to parse CST');
 
-      const generator = new VisitorASTGenerator(tree, code, parser.language);
+      const generator = new VisitorASTGenerator(tree, code, mockLanguage);
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
@@ -72,7 +79,7 @@ describe('VisitorASTGenerator', () => {
       const tree = parser.parseCST(code);
       if (!tree) throw new Error('Failed to parse CST');
 
-      const generator = new VisitorASTGenerator(tree, code, parser.language);
+      const generator = new VisitorASTGenerator(tree, code, mockLanguage);
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
@@ -88,7 +95,7 @@ describe('VisitorASTGenerator', () => {
       const tree = parser.parseCST(code);
       if (!tree) throw new Error('Failed to parse CST');
 
-      const generator = new VisitorASTGenerator(tree, code, parser.language);
+      const generator = new VisitorASTGenerator(tree, code, mockLanguage);
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
@@ -104,7 +111,7 @@ describe('VisitorASTGenerator', () => {
       const tree = parser.parseCST(code);
       if (!tree) throw new Error('Failed to parse CST');
 
-      const generator = new VisitorASTGenerator(tree, code, parser.language);
+      const generator = new VisitorASTGenerator(tree, code, mockLanguage);
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
@@ -120,7 +127,7 @@ describe('VisitorASTGenerator', () => {
       const tree = parser.parseCST(code);
       if (!tree) throw new Error('Failed to parse CST');
 
-      const generator = new VisitorASTGenerator(tree, code, parser.language);
+      const generator = new VisitorASTGenerator(tree, code, mockLanguage);
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
@@ -136,7 +143,7 @@ describe('VisitorASTGenerator', () => {
       const tree = parser.parseCST(code);
       if (!tree) throw new Error('Failed to parse CST');
 
-      const generator = new VisitorASTGenerator(tree, code, parser.language);
+      const generator = new VisitorASTGenerator(tree, code, mockLanguage);
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
@@ -152,7 +159,7 @@ describe('VisitorASTGenerator', () => {
       const tree = parser.parseCST(code);
       if (!tree) throw new Error('Failed to parse CST');
 
-      const generator = new VisitorASTGenerator(tree, code, parser.language);
+      const generator = new VisitorASTGenerator(tree, code, mockLanguage);
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
@@ -168,7 +175,7 @@ describe('VisitorASTGenerator', () => {
       const tree = parser.parseCST(code);
       if (!tree) throw new Error('Failed to parse CST');
 
-      const generator = new VisitorASTGenerator(tree, code);
+      const generator = new VisitorASTGenerator(tree, code, mockLanguage);
       const ast = generator.generate();
 
       // This test is failing because the parser is only returning one statement
@@ -183,7 +190,7 @@ describe('VisitorASTGenerator', () => {
       const tree = parser.parseCST(code);
       if (!tree) throw new Error('Failed to parse CST');
 
-      const generator = new VisitorASTGenerator(tree, code);
+      const generator = new VisitorASTGenerator(tree, code, mockLanguage);
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);

@@ -120,7 +120,11 @@ export class ControlStructureVisitor extends BaseASTVisitor {
           range: {
             type: 'expression',
             expressionType: 'literal',
-            value: arg.value,
+            value: typeof arg.value === 'object' && !Array.isArray(arg.value) && arg.value.type === 'expression'
+              ? arg.value.value
+              : typeof arg.value === 'string' || typeof arg.value === 'number' || typeof arg.value === 'boolean'
+                ? arg.value
+                : JSON.stringify(arg.value),
             location: getLocation(argumentsNode)
           }
         };
@@ -317,7 +321,11 @@ export class ControlStructureVisitor extends BaseASTVisitor {
       condition = {
         type: 'expression',
         expressionType: 'literal',
-        value: args[0].value,
+        value: typeof args[0].value === 'object' && !Array.isArray(args[0].value) && args[0].value.type === 'expression'
+          ? args[0].value.value
+          : typeof args[0].value === 'string' || typeof args[0].value === 'number' || typeof args[0].value === 'boolean'
+            ? args[0].value
+            : JSON.stringify(args[0].value),
         location: getLocation(node)
       };
     } else {
@@ -362,7 +370,11 @@ export class ControlStructureVisitor extends BaseASTVisitor {
             range: {
               type: 'expression',
               expressionType: 'literal',
-              value: arg.value,
+              value: typeof arg.value === 'object' && !Array.isArray(arg.value) && arg.value.type === 'expression'
+                ? arg.value.value
+                : typeof arg.value === 'string' || typeof arg.value === 'number' || typeof arg.value === 'boolean'
+                  ? arg.value
+                  : JSON.stringify(arg.value),
               location: getLocation(node)
             }
           };
@@ -440,7 +452,11 @@ export class ControlStructureVisitor extends BaseASTVisitor {
     const expression: ast.ExpressionNode = {
       type: 'expression',
       expressionType: 'literal',
-      value: args[0].value,
+      value: typeof args[0].value === 'object' && !Array.isArray(args[0].value) && args[0].value.type === 'expression'
+        ? args[0].value.value
+        : typeof args[0].value === 'string' || typeof args[0].value === 'number' || typeof args[0].value === 'boolean'
+          ? args[0].value
+          : JSON.stringify(args[0].value),
       location: getLocation(node)
     };
 

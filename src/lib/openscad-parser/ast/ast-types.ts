@@ -123,6 +123,17 @@ export interface Parameter {
 export interface ExpressionNode extends BaseNode {
   type: 'expression';
   expressionType: 'variable' | 'binary' | 'unary' | 'conditional' | 'array' | 'literal' | 'each' | string;
+
+  // Optional properties used in various expression types
+  value?: number | string | boolean;
+  name?: string;
+  operator?: BinaryOperator | UnaryOperator | string;
+  left?: ExpressionNode;
+  right?: ExpressionNode;
+  condition?: ExpressionNode;
+  thenBranch?: ExpressionNode;
+  elseBranch?: ExpressionNode;
+  items?: ExpressionNode[];
 }
 
 /**
@@ -382,6 +393,16 @@ export interface OffsetNode extends BaseNode {
 }
 
 /**
+ * Represents a resize node
+ */
+export interface ResizeNode extends BaseNode {
+  type: 'resize';
+  newsize: [number, number, number];
+  auto: [boolean, boolean, boolean];
+  children: ASTNode[];
+}
+
+/**
  * Represents an if statement
  */
 export interface IfNode extends BaseNode {
@@ -572,4 +593,5 @@ export type ASTNode =
   | ChildrenNode
   | LinearExtrudeNode
   | RotateExtrudeNode
-  | OffsetNode;
+  | OffsetNode
+  | ResizeNode;

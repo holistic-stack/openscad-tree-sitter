@@ -10,7 +10,7 @@ describe('Module and Function AST Generation', () => {
     await parser.init("./tree-sitter-openscad.wasm");
 
     // Mock the parseAST method to return hardcoded values for tests
-    vi.spyOn(parser, 'parseAST').mockImplementation((code: string) => {
+    vi.spyOn(parser, 'parseAST').mockImplementation((code: string): ast.ASTNode[] => {
       // Module Definition tests
       if (code.includes('module mycube() {')) {
         return [
@@ -43,7 +43,12 @@ describe('Module and Function AST Generation', () => {
             body: [
               {
                 type: 'cube',
-                size: { type: 'identifier', value: 'size' },
+                size: {
+                  type: 'expression',
+                  expressionType: 'variable',
+                  name: 'size',
+                  location: { start: { line: 2, column: 15, offset: 40 }, end: { line: 2, column: 19, offset: 44 } }
+                },
                 center: false,
                 location: { start: { line: 2, column: 10, offset: 35 }, end: { line: 2, column: 20, offset: 45 } }
               }
@@ -91,7 +96,7 @@ describe('Module and Function AST Generation', () => {
             body: [
               {
                 type: 'sphere',
-                r: 10,
+                radius: 10,
                 fn: undefined,
                 location: { start: { line: 2, column: 10, offset: 37 }, end: { line: 2, column: 28, offset: 55 } }
               }
@@ -108,7 +113,7 @@ describe('Module and Function AST Generation', () => {
             body: [
               {
                 type: 'translate',
-                vector: [0, 0, 10],
+                v: [0, 0, 10],
                 children: [
                   {
                     type: 'children',
@@ -157,6 +162,7 @@ describe('Module and Function AST Generation', () => {
             ],
             expression: {
               type: 'expression',
+              expressionType: 'binary',
               value: 'a + b',
               location: { start: { line: 2, column: 28, offset: 37 }, end: { line: 2, column: 33, offset: 42 } }
             },
@@ -180,6 +186,7 @@ describe('Module and Function AST Generation', () => {
             ],
             expression: {
               type: 'expression',
+              expressionType: 'binary',
               value: 'a + b',
               location: { start: { line: 2, column: 32, offset: 41 }, end: { line: 2, column: 37, offset: 46 } }
             },
@@ -207,8 +214,10 @@ describe('Module and Function AST Generation', () => {
               {
                 name: undefined,
                 value: {
-                  type: 'number',
-                  value: 20
+                  type: 'expression',
+                  expressionType: 'literal',
+                  value: 20,
+                  location: { start: { line: 2, column: 15, offset: 16 }, end: { line: 2, column: 17, offset: 18 } }
                 }
               }
             ],
@@ -225,15 +234,19 @@ describe('Module and Function AST Generation', () => {
               {
                 name: 'size',
                 value: {
-                  type: 'number',
-                  value: 20
+                  type: 'expression',
+                  expressionType: 'literal',
+                  value: 20,
+                  location: { start: { line: 2, column: 20, offset: 21 }, end: { line: 2, column: 22, offset: 23 } }
                 }
               },
               {
                 name: 'center',
                 value: {
-                  type: 'boolean',
-                  value: 'true'
+                  type: 'expression',
+                  expressionType: 'literal',
+                  value: 'true',
+                  location: { start: { line: 2, column: 29, offset: 30 }, end: { line: 2, column: 33, offset: 34 } }
                 }
               }
             ],
@@ -366,8 +379,8 @@ describe('Module and Function AST Generation', () => {
       expect(moduleNode.parameters).toHaveLength(0);
       expect(moduleNode.body).toHaveLength(1);
       expect(moduleNode.body[0].type).toBe('translate');
-      expect(moduleNode.body[0].children).toHaveLength(1);
-      expect(moduleNode.body[0].children[0].type).toBe('children');
+      expect((moduleNode.body[0] as ast.TranslateNode).children).toHaveLength(1);
+      expect((moduleNode.body[0] as ast.TranslateNode).children[0].type).toBe('children');
     });
 
     it('should parse a module with child indexing', async () => {
@@ -386,7 +399,7 @@ describe('Module and Function AST Generation', () => {
       expect(moduleNode.parameters).toHaveLength(0);
       expect(moduleNode.body).toHaveLength(1);
       expect(moduleNode.body[0].type).toBe('children');
-      expect(moduleNode.body[0].index).toBe(0);
+      expect((moduleNode.body[0] as ast.ChildrenNode).index).toBe(0);
     });
   });
 
@@ -458,7 +471,7 @@ describe('Module and Function AST Generation', () => {
       const moduleInstNode = astNodes[0] as ast.ModuleInstantiationNode;
       expect(moduleInstNode.name).toBe('mycube');
       expect(moduleInstNode.arguments).toHaveLength(1);
-      expect(moduleInstNode.arguments[0].value.value).toBe(20);
+      expect((moduleInstNode.arguments[0].value as ast.ExpressionNode).value).toBe(20);
       expect(moduleInstNode.children).toHaveLength(0);
     });
 
@@ -475,9 +488,9 @@ describe('Module and Function AST Generation', () => {
       expect(moduleInstNode.name).toBe('mycube');
       expect(moduleInstNode.arguments).toHaveLength(2);
       expect(moduleInstNode.arguments[0].name).toBe('size');
-      expect(moduleInstNode.arguments[0].value.value).toBe(20);
+      expect((moduleInstNode.arguments[0].value as ast.ExpressionNode).value).toBe(20);
       expect(moduleInstNode.arguments[1].name).toBe('center');
-      expect(moduleInstNode.arguments[1].value.value).toBe("true");
+      expect((moduleInstNode.arguments[1].value as ast.ExpressionNode).value).toBe("true");
       expect(moduleInstNode.children).toHaveLength(0);
     });
 

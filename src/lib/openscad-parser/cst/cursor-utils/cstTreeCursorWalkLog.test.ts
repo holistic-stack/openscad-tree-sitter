@@ -20,9 +20,13 @@ describe('cstTreeCursorWalkLog', () => {
         consoleSpy.mockRestore();
     });
 
-    // Helper to parse code and get tree
-    const parseCode = (code: string) => {
-        return parser.parse(code);
+    // Helper to parse code and get tree cursor
+    const parseCode = (code: string): TreeCursor => {
+        const tree = parser.parse(code);
+        if (!tree) {
+            throw new Error('Failed to parse code');
+        }
+        return tree.walk();
     };
 
     // Helper to get all console output as a single string
@@ -35,8 +39,15 @@ describe('cstTreeCursorWalkLog', () => {
         let lastIndex = -1;
         for (const nodeType of nodeTypes) {
             const currentIndex = output.indexOf(nodeType);
-            expect(currentIndex).toBeGreaterThan(-1, `Node type ${nodeType} not found in output`);
-            expect(currentIndex).toBeGreaterThan(lastIndex, `Node type ${nodeType} not in correct sequence`);
+            // Fix: Use separate expect statements without message parameter
+            expect(currentIndex).toBeGreaterThan(-1);
+            if (currentIndex === -1) {
+                console.error(`Node type ${nodeType} not found in output`);
+            }
+            expect(currentIndex).toBeGreaterThan(lastIndex);
+            if (currentIndex <= lastIndex) {
+                console.error(`Node type ${nodeType} not in correct sequence`);
+            }
             lastIndex = currentIndex;
         }
     };
