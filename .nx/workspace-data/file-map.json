@@ -2,42 +2,974 @@
   "version": "6.0",
   "nxVersion": "21.1.1",
   "pathMappings": {},
-  "nxJsonPlugins": [],
+  "nxJsonPlugins": [
+    {
+      "name": "@nx/js/typescript",
+      "options": {
+        "typecheck": {
+          "targetName": "typecheck"
+        },
+        "build": {
+          "targetName": "build",
+          "configName": "tsconfig.lib.json",
+          "buildDepsName": "build-deps",
+          "watchDepsName": "watch-deps"
+        }
+      }
+    }
+  ],
   "fileMap": {
-    "projectFileMap": {},
     "nonProjectFiles": [
       {
-        "file": ".gitignore",
-        "hash": "18435103667633526488"
-      },
-      {
-        "file": ".npmrc",
-        "hash": "1880664178033616490"
-      },
-      {
-        "file": "README.md",
-        "hash": "11598081870059935143"
-      },
-      {
-        "file": "nx.json",
-        "hash": "7984885312398650396"
-      },
-      {
-        "file": "package.json",
-        "hash": "4427781217396673314"
-      },
-      {
-        "file": "packages/.gitkeep",
-        "hash": "3244421341483603138"
-      },
-      {
-        "file": "pnpm-lock.yaml",
-        "hash": "3523967822787544164"
+        "file": "tsconfig.json",
+        "hash": "10920419996432058038"
       },
       {
         "file": "pnpm-workspace.yaml",
-        "hash": "11096538227519865400"
+        "hash": "14584964592733999236"
+      },
+      {
+        "file": ".editorconfig",
+        "hash": "1447674007351889246"
+      },
+      {
+        "file": "vitest.config.ts",
+        "hash": "5230262264348903589"
+      },
+      {
+        "file": ".windsurfrules",
+        "hash": "4892420328746280328"
+      },
+      {
+        "file": ".gitignore",
+        "hash": "1397683648924995905"
+      },
+      {
+        "file": "package.json",
+        "hash": "13652260169301923756"
+      },
+      {
+        "file": "nx.json",
+        "hash": "3283617370227279846"
+      },
+      {
+        "file": "pnpm-lock.yaml",
+        "hash": "10032670803176178621"
+      },
+      {
+        "file": ".gitattributes",
+        "hash": "6226946314751214720"
+      },
+      {
+        "file": "eslint.config.js",
+        "hash": "4771546647880369723"
+      },
+      {
+        "file": "README.md",
+        "hash": "6483872845869609402"
       }
-    ]
+    ],
+    "projectFileMap": {
+      "tree-sitter-openscad": [
+        {
+          "file": "packages/tree-sitter-openscad/bindings/node/index.d.ts",
+          "hash": "568430408637213585"
+        },
+        {
+          "file": "packages/tree-sitter-openscad/bindings/node/index.js",
+          "hash": "16506744138974304477",
+          "deps": [
+            [
+              "npm:node-gyp-build",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "packages/tree-sitter-openscad/bindings/wasm/README.md",
+          "hash": "13457083749660212054"
+        },
+        {
+          "file": "packages/tree-sitter-openscad/examples/control-structures.scad",
+          "hash": "15846722227080161774"
+        },
+        {
+          "file": "packages/tree-sitter-openscad/examples/indentation-test.scad",
+          "hash": "10966666217053626862"
+        },
+        {
+          "file": "packages/tree-sitter-openscad/examples/object-literals.scad",
+          "hash": "2359373052326303680"
+        },
+        {
+          "file": "packages/tree-sitter-openscad/examples/real-world/architectural_model.scad",
+          "hash": "1347743018367263352"
+        },
+        {
+          "file": "packages/tree-sitter-openscad/examples/real-world/mathematical_surfaces.scad",
+          "hash": "8360121699875568045"
+        },
+        {
+          "file": "packages/tree-sitter-openscad/examples/real-world/mechanical_gearbox.scad",
+          "hash": "10637130649930206081"
+        },
+        {
+          "file": "packages/tree-sitter-openscad/examples/sample.scad",
+          "hash": "10781434577022083188"
+        },
+        {
+          "file": "packages/tree-sitter-openscad/grammar.js",
+          "hash": "5526328111963919989"
+        },
+        {
+          "file": "packages/tree-sitter-openscad/package.json",
+          "hash": "6102055577722115285",
+          "deps": [
+            "npm:tree-sitter",
+            "npm:tree-sitter-cli",
+            "npm:node-addon-api",
+            "npm:node-gyp",
+            "npm:prebuildify",
+            "npm:node-gyp-build",
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/tree-sitter-openscad/project.json",
+          "hash": "13242537432171357083"
+        },
+        {
+          "file": "packages/tree-sitter-openscad/queries/folds.scm",
+          "hash": "4055101050663675091"
+        },
+        {
+          "file": "packages/tree-sitter-openscad/queries/highlights.scm",
+          "hash": "8047495759872550772"
+        },
+        {
+          "file": "packages/tree-sitter-openscad/queries/indents.scm",
+          "hash": "6634960936144390077"
+        },
+        {
+          "file": "packages/tree-sitter-openscad/queries/injections.scm",
+          "hash": "10026360196402476082"
+        },
+        {
+          "file": "packages/tree-sitter-openscad/queries/locals.scm",
+          "hash": "11922022080410900078"
+        },
+        {
+          "file": "packages/tree-sitter-openscad/queries/tags.scm",
+          "hash": "10185721229581526476"
+        },
+        {
+          "file": "packages/tree-sitter-openscad/src/index.js",
+          "hash": "16071649968414937872"
+        },
+        {
+          "file": "packages/tree-sitter-openscad/test/corpus/advanced.txt",
+          "hash": "2291650582788773004"
+        },
+        {
+          "file": "packages/tree-sitter-openscad/test/corpus/basics.txt",
+          "hash": "4952118155264077322"
+        },
+        {
+          "file": "packages/tree-sitter-openscad/tree-sitter.json",
+          "hash": "15751411004345550152"
+        },
+        {
+          "file": "packages/tree-sitter-openscad/tsconfig.json",
+          "hash": "17614457734532375894"
+        }
+      ],
+      "openscad-parser": [
+        {
+          "file": "packages/openscad-parser/package.json",
+          "hash": "10864252411436894085",
+          "deps": [
+            "npm:@types/node",
+            "npm:@typescript-eslint/eslint-plugin",
+            "npm:@typescript-eslint/parser",
+            "npm:eslint",
+            "npm:eslint-plugin-vitest",
+            "npm:typescript",
+            "npm:vite",
+            "npm:vite-plugin-dts",
+            "npm:vitest",
+            "npm:vitest-fetch-mock",
+            "tree-sitter-openscad",
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/project.json",
+          "hash": "4105892662916402659"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/index.ts",
+          "hash": "7330746341595195736"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/argument-debug.test.ts",
+          "hash": "5114117400231983609",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/ast-generator.integration.test.ts",
+          "hash": "3940377837010109503",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/ast-types.ts",
+          "hash": "17436170878947500208"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/changes/change-tracker.test.ts",
+          "hash": "15923510601149300536",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/changes/change-tracker.ts",
+          "hash": "2451776752553792481",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/errors/index.ts",
+          "hash": "18019716512101503406"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/errors/parser-error.test.ts",
+          "hash": "1936497913905597128"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/errors/parser-error.ts",
+          "hash": "8126499955449038804"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/errors/recovery-strategy.test.ts",
+          "hash": "14111123863932233622"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/errors/recovery-strategy.ts",
+          "hash": "1577720743238588117",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/errors/semantic-error.ts",
+          "hash": "742326226025934205"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/errors/syntax-error.test.ts",
+          "hash": "10787446983125657694"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/errors/syntax-error.ts",
+          "hash": "18033056768196870548"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/extractors/argument-extractor.ts",
+          "hash": "4636807913427311918",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/extractors/color-extractor.ts",
+          "hash": "13911350715946540563",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/extractors/cube-extractor.ts",
+          "hash": "16933047868044888155",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/extractors/cylinder-extractor.ts",
+          "hash": "7657294318862351849",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/extractors/index.ts",
+          "hash": "4068518638346521067"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/extractors/module-parameter-extractor.test.ts",
+          "hash": "15363757093073731928",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/extractors/module-parameter-extractor.ts",
+          "hash": "11977251436815117852",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/extractors/offset-extractor.ts",
+          "hash": "3569731677297037000",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/extractors/parameter-extractor.ts",
+          "hash": "14549902477748746126"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/extractors/sphere-extractor.ts",
+          "hash": "8496450731656684654",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/extractors/value-extractor.ts",
+          "hash": "8815541875712489082",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/extractors/vector-extractor.ts",
+          "hash": "9454362590254480043"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/index.ts",
+          "hash": "13944814398202306052"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/query/index.ts",
+          "hash": "8352959130731018671"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/query/lru-query-cache.test.ts",
+          "hash": "10762769178378751397",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/query/lru-query-cache.ts",
+          "hash": "6612592256271725521",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/query/query-cache.test.ts",
+          "hash": "1713032862197497291",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/query/query-cache.ts",
+          "hash": "18260144487935724973",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/query/query-manager.test.ts",
+          "hash": "4815081356749199800",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/query/query-manager.ts",
+          "hash": "9470888821675749616",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/registry/default-node-handler-registry.ts",
+          "hash": "12037484001597752215"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/registry/index.ts",
+          "hash": "5805770824141890434"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/registry/node-handler-registry-factory.ts",
+          "hash": "18223089054339276155",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/registry/node-handler-registry.test.ts",
+          "hash": "18417241275012088904",
+          "deps": [
+            "npm:vitest",
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/registry/node-handler-registry.ts",
+          "hash": "12137302894366267982",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/tests/control-structures.test.ts",
+          "hash": "5270085801011898653",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/tests/cube-extractor.test.ts",
+          "hash": "1712260766036158832",
+          "deps": [
+            "npm:vitest",
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/tests/cube.test.ts",
+          "hash": "14449049859176770008",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/tests/cylinder-extractor.test.ts",
+          "hash": "5778880605638431667",
+          "deps": [
+            "npm:vitest",
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/tests/difference.test.ts",
+          "hash": "8992684817212979766",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/tests/intersection.test.ts",
+          "hash": "10022592418658244134",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/tests/minkowski.test.ts",
+          "hash": "18431254939037930308",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/tests/module-function.test.ts",
+          "hash": "8131548812280953469",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/tests/primitive-visitor.test.ts",
+          "hash": "785827740605875055",
+          "deps": [
+            "npm:vitest",
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/tests/rotate.test.ts",
+          "hash": "6646603258130043474",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/tests/scale.test.ts",
+          "hash": "17106537903722059475",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/tests/sphere-extractor.test.ts",
+          "hash": "7439204585982406207",
+          "deps": [
+            "npm:vitest",
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/tests/sphere.test.ts",
+          "hash": "9612905953180999414",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/tests/transformations.test.ts",
+          "hash": "12806142016566977706",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/tests/union.test.ts",
+          "hash": "15220016920624574160",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/utils/debug-utils.ts",
+          "hash": "7950874705318472390",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/utils/index.ts",
+          "hash": "18173928099635108153"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/utils/location-utils.ts",
+          "hash": "4630008277814698703",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/utils/node-utils.ts",
+          "hash": "16516006385525648401",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/utils/vector-utils.ts",
+          "hash": "5527154116233529683",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitor-ast-generator.test.ts",
+          "hash": "16893181991682093797"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitor-ast-generator.ts",
+          "hash": "4225108745266758073",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/ast-visitor.ts",
+          "hash": "2996582925300812405",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/base-ast-visitor.test.ts",
+          "hash": "11667033215140696790",
+          "deps": [
+            "npm:vitest",
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/base-ast-visitor.ts",
+          "hash": "5264700555992429824",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/composite-visitor-real.test.ts",
+          "hash": "16586315378343395475",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/composite-visitor.test.ts",
+          "hash": "6696914936317084549",
+          "deps": [
+            "npm:vitest",
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/composite-visitor.ts",
+          "hash": "11476540367540026297",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/control-structure-visitor.test.ts",
+          "hash": "16380228212391172056",
+          "deps": [
+            "npm:vitest",
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/control-structure-visitor.ts",
+          "hash": "10381318796626911731",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/control-structure-visitor/for-loop-visitor.test.ts",
+          "hash": "14106372005274953260",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/control-structure-visitor/for-loop-visitor.ts",
+          "hash": "5204610975505769106",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/control-structure-visitor/if-else-visitor.test.ts",
+          "hash": "1645865605036940172",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/control-structure-visitor/if-else-visitor.ts",
+          "hash": "2705358743146454153",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/csg-visitor.test.ts",
+          "hash": "14186940479495888425",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/csg-visitor.ts",
+          "hash": "10374926789880943415",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor.debug.test.ts",
+          "hash": "18177701641331880012",
+          "deps": [
+            "npm:vitest",
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor.integration.test.ts",
+          "hash": "11145418296558818482",
+          "deps": [
+            "npm:vitest",
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor.simple.test.ts",
+          "hash": "7228517159777691533",
+          "deps": [
+            "npm:vitest",
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor.test.ts",
+          "hash": "2956360352089914798",
+          "deps": [
+            "npm:vitest",
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor.ts",
+          "hash": "5868202450815080080",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor/function-call-visitor.test.ts",
+          "hash": "2181051788349322983",
+          "deps": [
+            "npm:vitest",
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor/function-call-visitor.ts",
+          "hash": "10629792269417596612",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor/index.ts",
+          "hash": "4472073883514487341"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/function-visitor.test.ts",
+          "hash": "2008625477306405637",
+          "deps": [
+            "npm:vitest",
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/function-visitor.ts",
+          "hash": "13548469577078211426",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/index.ts",
+          "hash": "5487890563462561402"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/module-visitor.test.ts",
+          "hash": "15668171112109805269",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/module-visitor.ts",
+          "hash": "8289679947066720854",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/primitive-visitor.test.ts",
+          "hash": "1769744491686273207",
+          "deps": [
+            "npm:vitest",
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/primitive-visitor.ts",
+          "hash": "2864699444310248075",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/query-visitor.test.ts",
+          "hash": "9164170845808472784",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/query-visitor.ts",
+          "hash": "1039709676687634062",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/transform-visitor.test.ts",
+          "hash": "17655322092118712239",
+          "deps": [
+            "npm:vitest",
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/ast/visitors/transform-visitor.ts",
+          "hash": "14060124505718897301",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/cst/cursor-utils/README.md",
+          "hash": "17153902320868003443"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/cst/cursor-utils/cstTreeCursorWalkLog.test.ts",
+          "hash": "16160020314631442815",
+          "deps": [
+            "npm:vitest",
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/cst/cursor-utils/cstTreeCursorWalkLog.ts",
+          "hash": "811111492274961127",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/cst/cursor-utils/cursor-utils.integration.test.ts",
+          "hash": "987438290911961166",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/cst/cursor-utils/cursor-utils.test.ts",
+          "hash": "4213748846276755555",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/cst/cursor-utils/cursor-utils.ts",
+          "hash": "14795855144601103168",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/cst/queries/dependencies.scm",
+          "hash": "15131645586071884394"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/cst/queries/find-function-calls.scm",
+          "hash": "17461317764942954826"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/cst/queries/highlights.scm",
+          "hash": "6151342320561322763"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/cst/query-utils.test.ts",
+          "hash": "15335937188622282287",
+          "deps": [
+            "npm:vitest",
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/cst/query-utils.ts",
+          "hash": "7354173819245512875",
+          "deps": [
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/debug-accessor.test.ts",
+          "hash": "2363682280965477358"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/debug-cst.test.ts",
+          "hash": "18050548936107839845"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/incremental-parsing.test.ts",
+          "hash": "12412612216133987441",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/node-types-debug.test.ts",
+          "hash": "334596590995176348",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/node-types.test.ts",
+          "hash": "13909418312696380975",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/openscad-ast.test.ts",
+          "hash": "5624288426859417446",
+          "deps": [
+            "npm:vitest",
+            "npm:web-tree-sitter"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/openscad-parser-error-handling.test.ts",
+          "hash": "16290059453589701798",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/openscad-parser-visitor.test.ts",
+          "hash": "17998662509973704528"
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/openscad-parser.test.ts",
+          "hash": "8454271803940646392",
+          "deps": [
+            "npm:vitest"
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/lib/openscad-parser/openscad-parser.ts",
+          "hash": "6995598951832397021",
+          "deps": [
+            "npm:web-tree-sitter",
+            [
+              "tree-sitter-openscad",
+              "dynamic"
+            ]
+          ]
+        },
+        {
+          "file": "packages/openscad-parser/src/test.ts",
+          "hash": "16581094966366191183"
+        },
+        {
+          "file": "packages/openscad-parser/tsconfig.json",
+          "hash": "2442504761124446212"
+        },
+        {
+          "file": "packages/openscad-parser/vite.config.ts",
+          "hash": "2667662005684707294",
+          "deps": [
+            "npm:vite",
+            "npm:vite-plugin-dts"
+          ]
+        }
+      ]
+    }
   }
 }

@@ -4,40 +4,22 @@
   "tasksRunnerOptions": {
     "default": {
       "runner": "nx/tasks-runners/default",
-      "options": {
-        "cacheableOperations": ["build", "test", "lint"]
-      }
+      "options": {}
     }
-  },
-  "namedInputs": {
-    "default": ["{projectRoot}/**/*", "!{projectRoot}/**/*.md", "sharedGlobals"],
-    "production": [
-      "default",
-      "!{projectRoot}/**/*.test.ts",
-      "!{projectRoot}/**/*.spec.ts"
-    ],
-    "testing": [
-      "default",
-      "{workspaceRoot}/jest.preset.js",
-      "{workspaceRoot}/vitest.config.ts"
-    ],
-    "sharedGlobals": []
   },
   "targetDefaults": {
     "build": {
-      "inputs": ["production", "^production"],
       "dependsOn": ["^build"]
     },
     "test": {
-      "inputs": ["testing", "^testing"],
       "dependsOn": ["build"]
     },
+    "dev": {
+      "dependsOn": ["^build"]
+    },
     "lint": {
-      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"]
+      "dependsOn": []
     }
-  },
-  "affected": {
-    "defaultBase": "main"
   },
   "plugins": [
     {

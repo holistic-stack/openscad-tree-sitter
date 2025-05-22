@@ -8,36 +8,42 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": [
-          "cd packages/tree-sitter-openscad && tree-sitter generate",
-          "cd packages/tree-sitter-openscad && tree-sitter build --wasm"
+          "tree-sitter generate",
+          "tree-sitter build --wasm"
         ],
+        "cwd": "packages/tree-sitter-openscad",
         "parallel": false
-      }
+      },
+      "outputs": ["packages/tree-sitter-openscad/src/parser.c", "packages/tree-sitter-openscad/src/grammar.json"]
     },
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cd packages/tree-sitter-openscad && tree-sitter test"
+        "command": "tree-sitter test",
+        "cwd": "packages/tree-sitter-openscad"
       }
     },
     "parse": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cd packages/tree-sitter-openscad && tree-sitter parse"
+        "command": "tree-sitter parse",
+        "cwd": "packages/tree-sitter-openscad"
       }
     },
     "playground": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cd packages/tree-sitter-openscad && tree-sitter playground"
+        "command": "tree-sitter playground",
+        "cwd": "packages/tree-sitter-openscad"
       }
     },
     "lint": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cd packages/tree-sitter-openscad && eslint ."
+        "command": "eslint .",
+        "cwd": "packages/tree-sitter-openscad"
       }
     }
   },
-  "tags": []
+  "tags": ["grammar"]
 }

@@ -7,8 +7,10 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cd packages/openscad-parser && vite build"
+        "command": "vite build",
+        "cwd": "packages/openscad-parser"
       },
+      "outputs": ["packages/openscad-parser/dist"],
       "dependsOn": [
         {
           "target": "build",
@@ -19,13 +21,15 @@
     "dev": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cd packages/openscad-parser && vite build --watch"
+        "command": "vite build --watch",
+        "cwd": "packages/openscad-parser"
       }
     },
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cd packages/openscad-parser && vitest run"
+        "command": "vitest run",
+        "cwd": "packages/openscad-parser"
       },
       "dependsOn": [
         {
@@ -37,33 +41,38 @@
     "test:watch": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cd packages/openscad-parser && vitest"
+        "command": "vitest",
+        "cwd": "packages/openscad-parser"
       }
     },
     "test:coverage": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cd packages/openscad-parser && vitest run --coverage"
+        "command": "vitest run --coverage",
+        "cwd": "packages/openscad-parser"
       }
     },
     "lint": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cd packages/openscad-parser && eslint ."
+        "command": "eslint .",
+        "cwd": "packages/openscad-parser"
       }
     },
     "lint:fix": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cd packages/openscad-parser && eslint . --fix"
+        "command": "eslint . --fix",
+        "cwd": "packages/openscad-parser"
       }
     },
     "typecheck": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cd packages/openscad-parser && tsc --noEmit"
+        "command": "tsc --noEmit",
+        "cwd": "packages/openscad-parser"
       }
     }
   },
-  "tags": []
+  "tags": ["parser"]
 }

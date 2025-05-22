@@ -10,10 +10,18 @@
     "test": "nx run-many --target=test --all",
     "test:grammar": "nx test tree-sitter-openscad",
     "test:parser": "nx test openscad-parser",
+    "test:watch": "nx run-many --target=test:watch --all",
+    "test:coverage": "nx run-many --target=test:coverage --all",
     "lint": "nx run-many --target=lint --all",
+    "lint:fix": "nx run-many --target=lint:fix --all",
+    "typecheck": "nx run-many --target=typecheck --all",
+    "dev": "nx run-many --target=dev --all",
+    "dev:parser": "nx dev openscad-parser",
     "graph": "nx graph",
-    "parse": "cd packages/tree-sitter-openscad && tree-sitter parse",
-    "playground": "cd packages/tree-sitter-openscad && tree-sitter playground"
+    "parse": "nx parse tree-sitter-openscad",
+    "playground": "nx playground tree-sitter-openscad",
+    "clean": "rm -rf node_modules && rm -rf packages/*/node_modules && rm -rf packages/*/dist",
+    "reset": "pnpm clean && pnpm install"
   },
   "keywords": [
     "openscad",

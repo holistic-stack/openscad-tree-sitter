@@ -185,6 +185,54 @@ pnpm test
 # Or run tests for specific packages
 pnpm test:grammar   # Test the tree-sitter grammar
 pnpm test:parser    # Test the TypeScript parser
+
+# Run tests with watch mode
+pnpm test:watch
+
+# Run tests with coverage
+pnpm test:coverage
+
+# Run linting
+pnpm lint
+
+# Fix linting issues
+pnpm lint:fix
+
+# Type checking
+pnpm typecheck
+
+# Development mode (watch mode)
+pnpm dev
+
+# Development mode for parser only
+pnpm dev:parser
+
+# Clean up build artifacts and node_modules
+pnpm clean
+
+# Reset the project (clean and reinstall)
+pnpm reset
+```
+
+### Nx Commands
+
+This project uses Nx for task orchestration. Here are some useful Nx commands:
+
+```bash
+# View the project dependency graph
+pnpm graph
+
+# Run a specific target for a project
+nx <target> <project>
+# Example: nx build openscad-parser
+
+# Run a target for all projects
+nx run-many --target=<target> --all
+# Example: nx run-many --target=build --all
+
+# Run a target for specific projects
+nx run-many --target=<target> --projects=<project1>,<project2>
+# Example: nx run-many --target=test --projects=tree-sitter-openscad,openscad-parser
 ```
 
 ### Known Issues and Workarounds
@@ -210,21 +258,41 @@ The build process consists of several steps:
 ### Development Workflow
 
 1. **Edit Grammar**: Modify `packages/tree-sitter-openscad/grammar.js` to update language rules
-2. **Build Grammar**: Run `pnpm nx build tree-sitter-openscad` to generate updated parser code
+2. **Build Grammar**: Run `pnpm build:grammar` to generate updated parser code
 3. **Edit Parser**: Modify files in `packages/openscad-parser/src/lib` to update the parser
-4. **Build Parser**: Run `pnpm nx build openscad-parser` to compile the parser
-5. **Test**: Run `pnpm nx run-many --target=test --all` to verify changes
-6. **Parse Examples**: Run `pnpm nx exec -- cd packages/tree-sitter-openscad && tree-sitter parse examples/*.scad` to test with examples
-7. **Playground**: Run `pnpm nx exec -- cd packages/tree-sitter-openscad && tree-sitter playground` to interactively test the grammar
+4. **Build Parser**: Run `pnpm build:parser` to compile the parser
+5. **Test**: Run `pnpm test` to verify changes
+6. **Parse Examples**: Run `pnpm parse examples/*.scad` to test with examples
+7. **Playground**: Run `pnpm playground` to interactively test the grammar
+
+### Task Dependencies
+
+The project is configured with task dependencies to ensure that dependent tasks are run in the correct order:
+
+- When running `build` on the parser, it will automatically build any dependencies first
+- When running `test` on any project, it will automatically build that project first
+- When running `dev` on any project, it will automatically build its dependencies first
+
+This ensures that you always have the latest code built before running tests or development tasks.
 
 ### Debugging the Grammar
 
 When encountering parsing issues:
 
-1. Use `pnpm nx exec -- cd packages/tree-sitter-openscad && tree-sitter parse <file.scad>` to see how a specific file is parsed
+1. Use `pnpm parse <file.scad>` to see how a specific file is parsed
 2. Check the parse tree for unexpected structures
-3. Run `pnpm nx test tree-sitter-openscad` to verify grammar functionality
-4. Use the playground for interactive debugging
+3. Run `pnpm test:grammar` to verify grammar functionality
+4. Use `pnpm playground` for interactive debugging
+
+### Project Graph Visualization
+
+Nx provides a visualization of the project dependency graph, which can be helpful for understanding the relationships between packages:
+
+```bash
+pnpm graph
+```
+
+This will open a browser window with an interactive visualization of the project graph, showing dependencies between packages and tasks.
 
 ## Testing
 
@@ -240,17 +308,17 @@ The project includes comprehensive tests to ensure both the grammar and parser c
 
 ```bash
 # Run all tests
-pnpm nx run-many --target=test --all
+pnpm test
 
 # Run tests for specific packages
-pnpm nx test tree-sitter-openscad  # Test the grammar
-pnpm nx test openscad-parser       # Test the parser
+pnpm test:grammar  # Test the grammar
+pnpm test:parser   # Test the parser
 
 # Run tests with coverage
-pnpm nx test openscad-parser --coverage
+pnpm test:coverage
 
 # Run tests in watch mode
-pnpm nx test openscad-parser --watch
+pnpm test:watch
 ```
 
 ### What the Tests Verify
@@ -354,9 +422,19 @@ When contributing to this monorepo, follow these steps:
 1. **Identify the package**: Determine which package your change affects (tree-sitter-openscad or openscad-parser)
 2. **Make changes**: Make your changes to the appropriate package
 3. **Add tests**: Add tests for your changes in the same package
-4. **Build and test**: Run `pnpm nx build <package>` and `pnpm nx test <package>` to verify your changes
-5. **Check affected packages**: Run `pnpm nx affected:test` to ensure your changes don't break other packages
+4. **Build and test**: Run `pnpm build:<package>` and `pnpm test:<package>` to verify your changes
+5. **Check dependencies**: The task dependencies will ensure that all necessary dependencies are built
 6. **Submit PR**: Submit a pull request with your changes
+
+### Visualizing Your Changes
+
+Before submitting a PR, it's helpful to visualize the project graph to understand how your changes affect the project:
+
+```bash
+pnpm graph
+```
+
+This will open a browser window with an interactive visualization of the project graph, showing dependencies between packages and tasks.
 
 ## License
 

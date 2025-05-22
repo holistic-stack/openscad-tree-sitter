@@ -6,10 +6,13 @@ yarn-error.log
 pnpm-debug.log
 package-lock.json
 yarn.lock
+.pnpm-store/
 
 # Build outputs
 build/
 dist/
+lib/
+out/
 *.wasm
 *.o
 *.obj
@@ -23,10 +26,18 @@ packages/tree-sitter-openscad/src/grammar.json
 packages/tree-sitter-openscad/src/node-types.json
 packages/tree-sitter-openscad/src/tree_sitter/
 packages/tree-sitter-openscad/bindings/node/binding.cc
+packages/tree-sitter-openscad/bindings/node/index.js
+packages/tree-sitter-openscad/bindings/node/index.d.ts
 packages/tree-sitter-openscad/bindings/wasm/*.wasm
+packages/tree-sitter-openscad/bindings/wasm/*.js
+packages/tree-sitter-openscad/bindings/wasm/*.d.ts
 
-# Nx cache
+# Nx cache and generated files
+.nx/
 .nx/cache
+tmp/
+.tmp/
+.cache/
 
 # Unused bindings (disabled in tree-sitter.json)
 packages/tree-sitter-openscad/bindings/rust/
@@ -40,6 +51,8 @@ packages/tree-sitter-openscad/bindings/zig/
 *.a
 *.exe
 *.dll
+*.so
+*.dylib
 .DS_Store
 
 # IDE and editor files
@@ -49,12 +62,19 @@ packages/tree-sitter-openscad/bindings/zig/
 *.sublime-*
 *.swp
 *~
+.history/
+.project
+.classpath
+.settings/
+*.code-workspace
 
 # Test output
 .nyc_output/
 coverage/
 test-results/
 parse-debug.log
+junit.xml
+*.lcov
 
 # Logs
 logs/
@@ -63,10 +83,17 @@ logs/
 # Environment variables
 .env
 .env.local
+.env.development
+.env.test
+.env.production
+.env.*.local
 
 # Test and coverage results
 /coverage
 /.vitest
+/test-results/
+/playwright-report/
+/playwright/.cache/
 
 # Node.js specific
 .npm
@@ -78,14 +105,15 @@ logs/
 .yarn-error.log*
 .pnpm-debug.log*
 
-# Editor specific
-.idea
-.vscode
-*.sublime-project
-*.sublime-workspace
+# TypeScript specific
+*.tsbuildinfo
+.tscache/
+tsconfig.tsbuildinfo
 
 # Temporary files
 *.tmp
 *.temp
 *_temp.js
 *_temp.scad
+.temp/
+.tmp/

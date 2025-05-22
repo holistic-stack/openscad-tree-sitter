@@ -1,0 +1,19 @@
+{
+  "name": "openscad",
+  "grammars": [
+    {
+      "name": "openscad",
+      "path": "grammar.js",
+      "scope": "source.openscad",
+      "file-types": ["scad"],
+      "wasm": true,
+      "node": true
+    }
+  ],
+  "metadata": {
+    "author": "OpenSCAD Community",
+    "description": "Tree-sitter grammar for OpenSCAD",
+    "license": "MIT",
+    "version": "0.1.0"
+  }
+}
