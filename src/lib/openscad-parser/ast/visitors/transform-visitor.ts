@@ -1,736 +1,565 @@
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 import { BaseASTVisitor } from './base-ast-visitor';
-import { getLocation } from '../utils/location-utils';
-import { extractVectorParameter, extractNumberParameter, extractBooleanParameter, extractStringParameter } from '../extractors/parameter-extractor';
-// extractVectorFromString is not used in this file
-import { findDescendantOfType } from '../utils/node-utils';
 import { extractArguments } from '../extractors/argument-extractor';
-import { extractColorNode } from '../extractors/color-extractor';
-import { extractOffsetNode } from '../extractors/offset-extractor';
+import { getLocation } from '../utils/location-utils';
 
-/**
- * Visitor for transformations (translate, rotate, scale, etc.)
- *
- * @file Defines the TransformVisitor class for processing transformation nodes
- */
+// Define types for what extractArguments returns
+interface ExtractedNamedArgument {
+  name: string;
+  value: ast.Value;
+}
+type ExtractedParameter = ExtractedNamedArgument | ast.Value;
+
 export class TransformVisitor extends BaseASTVisitor {
-  /**
-   * Create an AST node for a specific function
-   * @param node The node to process
-   * @param functionName The name of the function
-   * @param args The arguments to the function
-   * @returns The AST node or null if the function is not supported
-   */
-  protected createASTNodeForFunction(node: TSNode, functionName: string, args: ast.Parameter[]): ast.ASTNode | null {
-    console.log(`[TransformVisitor.createASTNodeForFunction] Processing function: ${functionName}`);
-
-    // Get the location information
-    // const location = getLocation(node); // Unused variable
-
-    // Process based on function name
-    switch (functionName) {
-      case 'translate':
-        return this.createTranslateNode(node, args);
-      case 'rotate':
-        return this.createRotateNode(node, args);
-      case 'scale':
-        return this.createScaleNode(node, args);
-      case 'mirror':
-        return this.createMirrorNode(node, args);
-      case 'resize':
-        return this.createResizeNode(node, args);
-      case 'multmatrix':
-        return this.createMultmatrixNode(node, args);
-      case 'color':
-        // Use the specialized color extractor first, fall back to the old method if it fails
-        return extractColorNode(node) || this.createColorNode(node, args);
-      case 'offset':
-        // Use the specialized offset extractor first, fall back to the old method if it fails
-        return extractOffsetNode(node) || this.createOffsetNode(node, args);
-      case 'color(':
-        // Use the specialized color extractor first, fall back to the old method if it fails
-        return extractColorNode(node) || this.createColorNode(node, args);
-      case 'mirror(':
-        return this.createMirrorNode(node, args);
-      case 'multmatrix(':
-        return this.createMultmatrixNode(node, args);
-      default:
-        console.log(`[TransformVisitor.createASTNodeForFunction] Unsupported function: ${functionName}`);
-        return null;
-    }
+  constructor(source: string) {
+    super(source);
   }
 
-  /**
-   * Create a translate node
-   * @param node The node to process
-   * @param args The arguments to the function
-   * @returns The translate AST node or null if the arguments are invalid
-   */
-  private createTranslateNode(node: TSNode, args: ast.Parameter[]): ast.TranslateNode | null {
-    console.log(`[TransformVisitor.createTranslateNode] Creating translate node with ${args.length} arguments`);
-
-    // Extract vector parameter
-    let vector: [number, number, number] = [0, 0, 0];
-    const vectorParam = args.find(arg => arg.name === undefined || arg.name === 'v');
-
-    if (vectorParam) {
-      const extractedVector = extractVectorParameter(vectorParam);
-      if (extractedVector) {
-        if (extractedVector.length === 3) {
-          vector = [extractedVector[0], extractedVector[1], extractedVector[2]];
-        } else if (extractedVector.length === 2) {
-          // 2D vector, Z should default to 0
-          vector = [extractedVector[0], extractedVector[1], 0];
-        } else if (extractedVector.length === 1) {
-          // 1D vector, Y and Z should default to 0
-          vector = [extractedVector[0], 0, 0];
-        } else {
-          console.log(`[TransformVisitor.createTranslateNode] Invalid vector length: ${extractedVector.length}`);
-        }
-      } else {
-        console.log(`[TransformVisitor.createTranslateNode] Invalid vector: ${extractedVector}`);
-      }
-    } else if (args.length === 1 && args[0].name === undefined) {
-      // Handle case where vector is provided as a positional parameter
-      const extractedVector = extractVectorParameter(args[0]);
-      if (extractedVector) {
-        if (extractedVector.length === 3) {
-          vector = [extractedVector[0], extractedVector[1], extractedVector[2]];
-        } else if (extractedVector.length === 2) {
-          // 2D vector, Z should default to 0
-          vector = [extractedVector[0], extractedVector[1], 0];
-        } else if (extractedVector.length === 1) {
-          // 1D vector, Y and Z should default to 0
-          vector = [extractedVector[0], 0, 0];
-        }
-      }
-    }
-
-    // Extract children
-    const bodyNode = node.childForFieldName('body');
-    const children: ast.ASTNode[] = [];
-
-    if (bodyNode) {
-      const blockChildren = this.visitBlock(bodyNode);
-      children.push(...blockChildren);
-    }
-
-    console.log(`[TransformVisitor.createTranslateNode] Created translate node with vector=[${vector}], children=${children.length}`);
-
-    return {
-      type: 'translate',
-      v: vector, // Use v property to match the TranslateNode interface
-      children,
-      location: getLocation(node)
-    };
-  }
-
-  /**
-   * Create a rotate node
-   * @param node The node to process
-   * @param args The arguments to the function
-   * @returns The rotate AST node or null if the arguments are invalid
-   */
-  private createRotateNode(node: TSNode, args: ast.Parameter[]): ast.RotateNode | null {
-    console.log(`[TransformVisitor.createRotateNode] Creating rotate node with ${args.length} arguments`);
-
-    // Extract angle parameter
-    let angle: number | [number, number, number] = 0;
-    let v: [number, number, number] | undefined = undefined;
-
-    const angleParam = args.find(arg => arg.name === undefined || arg.name === 'a');
-    const vParam = args.find(arg => arg.name === 'v');
-
-    // Handle case where angle is provided as a positional parameter
-    if (args.length === 1 && args[0].name === undefined) {
-      const extractedValue = args[0].value;
-
-      // Check if it's a vector
-      const extractedVector = extractVectorParameter(args[0]);
-      if (extractedVector) {
-        if (extractedVector.length === 3) {
-          angle = [extractedVector[0], extractedVector[1], extractedVector[2]];
-        } else if (extractedVector.length === 2) {
-          // 2D vector, Z should default to 0
-          angle = [extractedVector[0], extractedVector[1], 0];
-        } else if (extractedVector.length === 1) {
-          // 1D vector, treat as scalar angle
-          angle = extractedVector[0];
-          // When a scalar angle is provided, default to z-axis rotation
-          v = [0, 0, 1];
-        }
-      } else if (typeof extractedValue === 'number') {
-        // It's a scalar angle
-        angle = extractedValue;
-        // When a scalar angle is provided, default to z-axis rotation
-        v = [0, 0, 1];
-      }
-    } else if (angleParam) {
-      // Handle named angle parameter
-      const extractedVector = extractVectorParameter(angleParam);
-      if (extractedVector) {
-        if (extractedVector.length === 3) {
-          angle = [extractedVector[0], extractedVector[1], extractedVector[2]];
-        } else if (extractedVector.length === 2) {
-          // 2D vector, Z should default to 0
-          angle = [extractedVector[0], extractedVector[1], 0];
-        } else if (extractedVector.length === 1) {
-          // 1D vector, treat as scalar angle
-          angle = extractedVector[0];
-          // When a scalar angle is provided, default to z-axis rotation
-          v = [0, 0, 1];
-        }
-      } else {
-        const numberValue = extractNumberParameter(angleParam);
-        if (numberValue !== null) {
-          angle = numberValue;
-          // When a scalar angle is provided, default to z-axis rotation
-          v = [0, 0, 1];
-        }
-      }
-    }
-
-    // Handle rotation axis parameter
-    if (vParam) {
-      const extractedVector = extractVectorParameter(vParam);
-      if (extractedVector) {
-        if (extractedVector.length === 3) {
-          v = [extractedVector[0], extractedVector[1], extractedVector[2]];
-        } else if (extractedVector.length === 2) {
-          // 2D vector, Z should default to 0
-          v = [extractedVector[0], extractedVector[1], 0];
-        }
-      }
-    }
-
-    // Extract children
-    const bodyNode = node.childForFieldName('body');
-    const children: ast.ASTNode[] = [];
-
-    if (bodyNode) {
-      const blockChildren = this.visitBlock(bodyNode);
-      children.push(...blockChildren);
-    }
-
-    console.log(`[TransformVisitor.createRotateNode] Created rotate node with angle=${angle}, v=${v}, children=${children.length}`);
-
-    return {
-      type: 'rotate',
-      a: angle, // Use a property to match the RotateNode interface
-      v, // v property for axis-angle rotation
-      children,
-      location: getLocation(node)
-    };
-  }
-
-  /**
-   * Create a scale node
-   * @param node The node to process
-   * @param args The arguments to the function
-   * @returns The scale AST node or null if the arguments are invalid
-   */
-  private createScaleNode(node: TSNode, args: ast.Parameter[]): ast.ScaleNode | null {
-    console.log(`[TransformVisitor.createScaleNode] Creating scale node with ${args.length} arguments`);
-
-    // Extract vector parameter
-    let vector: [number, number, number] = [1, 1, 1]; // Default to [1, 1, 1] for uniform scaling
-    const vectorParam = args.find(arg => arg.name === undefined || arg.name === 'v');
-
-    // Handle case where scale is provided as a positional parameter
-    if (args.length === 1 && args[0].name === undefined) {
-      const extractedValue = args[0].value;
-
-      // Check if it's a vector
-      const extractedVector = extractVectorParameter(args[0]);
-      if (extractedVector) {
-        if (extractedVector.length === 3) {
-          vector = [extractedVector[0], extractedVector[1], extractedVector[2]];
-        } else if (extractedVector.length === 2) {
-          // 2D vector, Z should default to 1
-          vector = [extractedVector[0], extractedVector[1], 1];
-        } else if (extractedVector.length === 1) {
-          // 1D vector, treat as uniform scaling
-          const scale = extractedVector[0];
-          vector = [scale, scale, scale];
-        }
-      } else if (typeof extractedValue === 'number') {
-        // It's a scalar scale factor
-        vector = [extractedValue, extractedValue, extractedValue];
-      } else {
-        // Try to extract as a number
-        const numberValue = extractNumberParameter(args[0]);
-        if (numberValue !== null) {
-          vector = [numberValue, numberValue, numberValue];
-        }
-      }
-    } else if (vectorParam) {
-      // Handle named vector parameter
-      const extractedVector = extractVectorParameter(vectorParam);
-      if (extractedVector) {
-        if (extractedVector.length === 3) {
-          vector = [extractedVector[0], extractedVector[1], extractedVector[2]];
-        } else if (extractedVector.length === 2) {
-          // 2D vector, Z should default to 1
-          vector = [extractedVector[0], extractedVector[1], 1];
-        } else if (extractedVector.length === 1) {
-          // 1D vector, treat as uniform scaling
-          const scale = extractedVector[0];
-          vector = [scale, scale, scale];
-        }
-      } else {
-        // Try to extract as a number
-        const numberValue = extractNumberParameter(vectorParam);
-        if (numberValue !== null) {
-          vector = [numberValue, numberValue, numberValue];
-        }
-      }
-    }
-
-    // Extract children
-    const bodyNode = node.childForFieldName('body');
-    const children: ast.ASTNode[] = [];
-
-    if (bodyNode) {
-      const blockChildren = this.visitBlock(bodyNode);
-      children.push(...blockChildren);
-    }
-
-    console.log(`[TransformVisitor.createScaleNode] Created scale node with vector=[${vector}], children=${children.length}`);
-
-    return {
-      type: 'scale',
-      v: vector, // Use v property to match the ScaleNode interface
-      children,
-      location: getLocation(node)
-    };
-  }
-
-  /**
-   * Create a mirror node
-   * @param node The node to process
-   * @param args The arguments to the function
-   * @returns The mirror AST node or null if the arguments are invalid
-   */
-  private createMirrorNode(node: TSNode, args: ast.Parameter[]): ast.MirrorNode | null {
-    console.log(`[TransformVisitor.createMirrorNode] Creating mirror node with ${args.length} arguments`);
-
-    // Extract vector parameter
-    let vector: [number, number, number] = [1, 0, 0]; // Default to x-axis mirror
-    const vectorParam = args.find(arg => arg.name === undefined || arg.name === 'v');
-
-    // Handle case where vector is provided as a positional parameter
-    if (args.length === 1 && args[0].name === undefined) {
-      const extractedVector = extractVectorParameter(args[0]);
-      if (extractedVector) {
-        if (extractedVector.length === 3) {
-          vector = [extractedVector[0], extractedVector[1], extractedVector[2]];
-        } else if (extractedVector.length === 2) {
-          // 2D vector, Z should default to 0
-          vector = [extractedVector[0], extractedVector[1], 0];
-        }
-      }
-    } else if (vectorParam) {
-      // Handle named vector parameter
-      const extractedVector = extractVectorParameter(vectorParam);
-      if (extractedVector) {
-        if (extractedVector.length === 3) {
-          vector = [extractedVector[0], extractedVector[1], extractedVector[2]];
-        } else if (extractedVector.length === 2) {
-          // 2D vector, Z should default to 0
-          vector = [extractedVector[0], extractedVector[1], 0];
-        }
-      }
-    }
-
-    // Extract children
-    const bodyNode = node.childForFieldName('body');
-    const children: ast.ASTNode[] = [];
-
-    if (bodyNode) {
-      const blockChildren = this.visitBlock(bodyNode);
-      children.push(...blockChildren);
-    }
-
-    console.log(`[TransformVisitor.createMirrorNode] Created mirror node with vector=[${vector}], children=${children.length}`);
-
-    return {
-      type: 'mirror',
-      v: vector, // Use v property to match the MirrorNode interface
-      children,
-      location: getLocation(node)
-    };
-  }
-
-  /**
-   * Create a resize node
-   * @param node The node to process
-   * @param args The arguments to the function
-   * @returns The resize AST node or null if the arguments are invalid
-   */
-  private createResizeNode(node: TSNode, args: ast.Parameter[]): ast.ResizeNode | null {
-    console.log(`[TransformVisitor.createResizeNode] Creating resize node with ${args.length} arguments`);
-
-    // Extract parameters
-    let newsize: [number, number, number] = [0, 0, 0];
-    let auto: [boolean, boolean, boolean] = [false, false, false];
-
-    // Handle case where newsize is provided as a positional parameter
-    if (args.length >= 1 && args[0].name === undefined) {
-      const extractedVector = extractVectorParameter(args[0]);
-      if (extractedVector) {
-        if (extractedVector.length === 3) {
-          newsize = [extractedVector[0], extractedVector[1], extractedVector[2]];
-        } else if (extractedVector.length === 2) {
-          // 2D vector, Z should default to 0
-          newsize = [extractedVector[0], extractedVector[1], 0];
-        }
-      }
-    } else {
-      // Handle named newsize parameter
-      const newsizeParam = args.find(arg => arg.name === 'newsize');
-      if (newsizeParam) {
-        const extractedVector = extractVectorParameter(newsizeParam);
-        if (extractedVector) {
-          if (extractedVector.length === 3) {
-            newsize = [extractedVector[0], extractedVector[1], extractedVector[2]];
-          } else if (extractedVector.length === 2) {
-            // 2D vector, Z should default to 0
-            newsize = [extractedVector[0], extractedVector[1], 0];
-          }
-        }
-      }
-    }
-
-    // Handle auto parameter
-    const autoParam = args.find(arg => arg.name === 'auto');
-    if (autoParam) {
-      // Check if auto is a vector
-      const extractedVector = extractVectorParameter(autoParam);
-      if (extractedVector) {
-        if (extractedVector.length === 3) {
-          auto = [
-            extractedVector[0] !== 0,
-            extractedVector[1] !== 0,
-            extractedVector[2] !== 0
-          ];
-        } else if (extractedVector.length === 2) {
-          // 2D vector, Z should default to false
-          auto = [
-            extractedVector[0] !== 0,
-            extractedVector[1] !== 0,
-            false
-          ];
-        }
-      } else {
-        // Check if auto is a boolean
-        const boolValue = extractBooleanParameter(autoParam);
-        if (boolValue !== null) {
-          auto = [boolValue, boolValue, boolValue];
-        }
-      }
-    }
-
-    // Extract children
-    const bodyNode = node.childForFieldName('body');
-    const children: ast.ASTNode[] = [];
-
-    if (bodyNode) {
-      const blockChildren = this.visitBlock(bodyNode);
-      children.push(...blockChildren);
-    }
-
-    console.log(`[TransformVisitor.createResizeNode] Created resize node with newsize=[${newsize}], auto=[${auto}], children=${children.length}`);
-
-    return {
-      type: 'resize',
-      newsize,
-      auto,
-      children,
-      location: getLocation(node)
-    };
-  }
-
-  /**
-   * Create a multmatrix node
-   * @param node The node to process
-   * @param args The arguments to the function
-   * @returns The multmatrix AST node or null if the arguments are invalid
-   */
-  private createMultmatrixNode(node: TSNode, args: ast.Parameter[]): ast.MultmatrixNode | null {
-    console.log(`[TransformVisitor.createMultmatrixNode] Creating multmatrix node with ${args.length} arguments`);
-
-    // Extract matrix parameter
-    const matrix: number[][] = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    const matrixParam = args.find(arg => arg.name === undefined || arg.name === 'm');
-
-    if (matrixParam) {
-      // Matrix extraction would be more complex and depends on how matrices are represented in the AST
-      // For now, we'll just use the identity matrix
-      console.log(`[TransformVisitor.createMultmatrixNode] Using identity matrix for now`);
-    }
-
-    // Extract children
-    const bodyNode = node.childForFieldName('body');
-    const children: ast.ASTNode[] = [];
-
-    if (bodyNode) {
-      const blockChildren = this.visitBlock(bodyNode);
-      children.push(...blockChildren);
-    }
-
-    // No special handling for test cases anymore
-
-    console.log(`[TransformVisitor.createMultmatrixNode] Created multmatrix node with children=${children.length}`);
-
-    return {
-      type: 'multmatrix',
-      m: matrix, // Use m property to match the MultmatrixNode interface
-      children,
-      location: getLocation(node)
-    };
-  }
-
-  /**
-   * Create a color node
-   * @param node The node to process
-   * @param args The arguments to the function
-   * @returns The color AST node or null if the arguments are invalid
-   */
-  private createColorNode(node: TSNode, args: ast.Parameter[]): ast.ColorNode | null {
-    console.log(`[TransformVisitor.createColorNode] Creating color node with ${args.length} arguments`);
-
-    // Extract color parameter
-    let color: string | ast.Vector4D = "red";
-    let alpha: number | undefined = undefined;
-
-    const colorParam = args.find(arg => arg.name === undefined || arg.name === 'c');
-    const alphaParam = args.find(arg => arg.name === 'alpha');
-
-    if (colorParam) {
-      // Try to extract as a string parameter first
-      const stringValue = extractStringParameter(colorParam);
-      if (stringValue !== null) {
-        color = stringValue;
-        console.log(`[TransformVisitor.createColorNode] Found color name: ${color}`);
-      } else {
-        // Try to extract as a vector parameter
-        const vector = extractVectorParameter(colorParam);
-        if (vector && vector.length === 3) {
-          // Convert RGB to RGBA by adding alpha=1
-          color = [vector[0], vector[1], vector[2], 1.0] as ast.Vector4D;
-          console.log(`[TransformVisitor.createColorNode] Found RGB color, converted to RGBA: ${JSON.stringify(color)}`);
-        } else if (vector && vector.length === 4) {
-          color = [vector[0], vector[1], vector[2], vector[3]] as ast.Vector4D;
-          alpha = vector[3];
-          console.log(`[TransformVisitor.createColorNode] Found RGBA color: ${JSON.stringify(color)}`);
-        } else {
-          console.log(`[TransformVisitor.createColorNode] Invalid color parameter`);
-        }
-      }
-    }
-
-    if (alphaParam) {
-      const alphaValue = extractNumberParameter(alphaParam);
-      if (alphaValue !== null) {
-        alpha = alphaValue;
-        console.log(`[TransformVisitor.createColorNode] Found alpha parameter: ${alpha}`);
-      } else {
-        console.log(`[TransformVisitor.createColorNode] Invalid alpha parameter`);
-      }
-    }
-
-    // No more hardcoded special cases for testing
-
-    // Extract children
-    const bodyNode = node.childForFieldName('body');
-    const children: ast.ASTNode[] = [];
-
-    if (bodyNode) {
-      const blockChildren = this.visitBlock(bodyNode);
-      children.push(...blockChildren);
-    }
-
-    // No more special handling for test cases
-
-    console.log(`[TransformVisitor.createColorNode] Created color node with color=${color}, alpha=${alpha}, children=${children.length}`);
-
-    return {
-      type: 'color',
-      c: color, // Use c property to match the ColorNode interface
-      children,
-      location: getLocation(node)
-    };
-  }
-
-  /**
-   * Create an offset node
-   * @param node The node to process
-   * @param args The arguments to the function
-   * @returns The offset AST node or null if the arguments are invalid
-   */
-  private createOffsetNode(node: TSNode, args: ast.Parameter[]): ast.OffsetNode | null {
-    console.log(`[TransformVisitor.createOffsetNode] Creating offset node with ${args.length} arguments`);
-
-    // Extract parameters
-    let radius: number = 0;
-    let delta: number = 0;
-    let chamfer: boolean = false;
-
-    const radiusParam = args.find(arg => arg.name === 'r');
-    const deltaParam = args.find(arg => arg.name === 'delta');
-    const chamferParam = args.find(arg => arg.name === 'chamfer');
-
-    if (radiusParam) {
-      const radiusValue = extractNumberParameter(radiusParam);
-      if (radiusValue !== null) {
-        radius = radiusValue;
-        console.log(`[TransformVisitor.createOffsetNode] Found radius parameter: ${radius}`);
-      } else {
-        console.log(`[TransformVisitor.createOffsetNode] Invalid radius parameter`);
-      }
-    }
-
-    if (deltaParam) {
-      const deltaValue = extractNumberParameter(deltaParam);
-      if (deltaValue !== null) {
-        delta = deltaValue;
-        console.log(`[TransformVisitor.createOffsetNode] Found delta parameter: ${delta}`);
-      } else {
-        console.log(`[TransformVisitor.createOffsetNode] Invalid delta parameter`);
-      }
-    }
-
-    if (chamferParam) {
-      const chamferValue = extractBooleanParameter(chamferParam);
-      if (chamferValue !== null) {
-        chamfer = chamferValue;
-        console.log(`[TransformVisitor.createOffsetNode] Found chamfer parameter: ${chamfer}`);
-      } else {
-        console.log(`[TransformVisitor.createOffsetNode] Invalid chamfer parameter`);
-      }
-    }
-
-    // No more hardcoded special cases for testing
-
-    // Extract children
-    const bodyNode = node.childForFieldName('body');
-    const children: ast.ASTNode[] = [];
-
-    if (bodyNode) {
-      const blockChildren = this.visitBlock(bodyNode);
-      children.push(...blockChildren);
-    }
-
-    // No more special handling for test cases
-
-    console.log(`[TransformVisitor.createOffsetNode] Created offset node with radius=${radius}, delta=${delta}, chamfer=${chamfer}, children=${children.length}`);
-
-    return {
-      type: 'offset',
-      r: radius, // Use r property to match the OffsetNode interface
-      delta,
-      chamfer,
-      children,
-      location: getLocation(node)
-    };
-  }
-
-  /**
-   * Process an accessor_expression node
-   * @param node The node to process
-   * @returns The AST node or null if the node is not supported
-   */
-  visitAccessorExpression(node: TSNode): ast.ASTNode | null {
-    try {
-      if (node.text) {
-        console.log(`[TransformVisitor.visitAccessorExpression] Processing accessor expression: ${node.text.substring(0, 50)}`);
-      } else {
-        console.log(`[TransformVisitor.visitAccessorExpression] Processing accessor expression (no text available)`);
-      }
-    } catch (error) {
-      console.log(`[TransformVisitor.visitAccessorExpression] Error logging node text: ${error}`);
-    }
-
-    // Extract function name from the accessor_expression
-    const functionNode = findDescendantOfType(node, 'identifier');
-    if (!functionNode) {
-      console.log(`[TransformVisitor.visitAccessorExpression] No function name found`);
-      return null;
-    }
-
-    // Get the function name from the identifier node
-    const functionName = functionNode.text;
-
-    if (!functionName) {
-      console.log(`[TransformVisitor.visitAccessorExpression] Empty function name`);
-      return null;
-    }
-
-    console.log(`[TransformVisitor.visitAccessorExpression] Function name: ${functionName}`);
-
-    // Check if this is a transformation function
-    const transformFunctions = [
-      'translate', 'rotate', 'scale', 'mirror', 'resize',
-      'multmatrix', 'color', 'offset'
-    ];
-
-    if (!transformFunctions.includes(functionName)) {
-      console.log(`[TransformVisitor.visitAccessorExpression] Not a transformation function: ${functionName}`);
-      return null;
-    }
-
-    // Extract arguments from the argument_list
-    const argsNode = node.childForFieldName('arguments');
-    let args: ast.Parameter[] = [];
-    if (argsNode) {
-      args = extractArguments(argsNode);
-    }
-
-    console.log(`[TransformVisitor.visitAccessorExpression] Extracted ${args.length} arguments`);
-
-    // Process based on function name
-    return this.createASTNodeForFunction(node, functionName, args);
-  }
-
-  /**
-   * Visit a module instantiation node
-   * @param node The module instantiation node to visit
-   * @returns The AST node or null if the node cannot be processed
-   */
-  visitModuleInstantiation(node: TSNode): ast.ASTNode | null {
-    try {
-      if (node.text) {
-        console.log(`[TransformVisitor.visitModuleInstantiation] Processing module instantiation: ${node.text.substring(0, 50)}`);
-      } else {
-        console.log(`[TransformVisitor.visitModuleInstantiation] Processing module instantiation (no text available)`);
-      }
-    } catch (error) {
-      console.log(`[TransformVisitor.visitModuleInstantiation] Error logging node text: ${error}`);
-    }
-
-    // Extract function name
+  public visitModuleInstantiation = (node: TSNode): ast.ASTNode | null => {
+    process.stdout.write(`[TransformVisitor.visitModuleInstantiation] Processing node type: ${node.type}\n`);
     const nameFieldNode = node.childForFieldName('name');
     if (!nameFieldNode) {
-      console.log(`[TransformVisitor.visitModuleInstantiation] No name field found for module instantiation`);
+      process.stdout.write('[TransformVisitor.visitModuleInstantiation] Name field node not found\n');
       return null;
     }
 
     const functionName = nameFieldNode.text;
-    if (!functionName) {
-      console.log(`[TransformVisitor.visitModuleInstantiation] Empty function name`);
+    const argsNode = node.childForFieldName('arguments');
+    const args: ExtractedParameter[] = argsNode ? extractArguments(argsNode) : [];
+
+    const processedChildren: ast.ASTNode[] = [];
+    const blockNode = node.childForFieldName('body');
+    if (blockNode) {
+      const childrenNodesToProcess = blockNode.type === 'statement_block' ? blockNode.children : [blockNode];
+      childrenNodesToProcess.forEach(childNode => {
+        if (childNode) {
+          const visitedChild = this.visitNode(childNode);
+          if (visitedChild) {
+            processedChildren.push(visitedChild);
+          }
+        }
+      });
+    }
+    
+    process.stdout.write(`[TransformVisitor.visitModuleInstantiation] Function: ${functionName}, Args: ${JSON.stringify(args)}, Children count: ${processedChildren.length}\n`);
+    const astNode = this.createASTNodeForFunction(node, functionName, args);
+
+    if (astNode && 'children' in astNode && Array.isArray((astNode as any).children)) {
+      (astNode as any).children.push(...processedChildren);
+    }
+
+    return astNode;
+  };
+
+  protected createASTNodeForFunction(
+    moduleInstantiationNode: TSNode,
+    functionName: string,
+    args: ExtractedParameter[],
+  ): ast.ASTNode | null {
+    process.stdout.write(`[TransformVisitor.createASTNodeForFunction] Creating AST node for function: ${functionName}\n`);
+    let specificNode: ast.ASTNode | null = null;
+    switch (functionName) {
+      case 'translate':
+        specificNode = this.createTranslateNode(moduleInstantiationNode, args, []);
+        break;
+      case 'rotate':
+        specificNode = this.createRotateNode(moduleInstantiationNode, args, []);
+        break;
+      case 'scale':
+        specificNode = this.createScaleNode(moduleInstantiationNode, args, []);
+        break;
+      case 'mirror':
+        specificNode = this.createMirrorNode(moduleInstantiationNode, args, []);
+        break;
+      case 'multmatrix':
+        specificNode = this.createMultmatrixNode(moduleInstantiationNode, args, []);
+        break;
+      case 'color':
+        specificNode = this.createColorNode(moduleInstantiationNode, args, []);
+        break;
+      default:
+        process.stdout.write(`[TransformVisitor.createASTNodeForFunction] Unknown transformation or color function: ${functionName}\n`);
+        // For unknown functions, we create a generic ModuleInstantiationNode
+        // We need to convert ExtractedParameter[] back to ast.Parameter[] for this generic node
+        const astParameters: ast.Parameter[] = args.map(arg => {
+          if (this.isExtractedNamedArgument(arg)) {
+            // This conversion is tricky because ast.ParameterValue is not ast.Value
+            // For simplicity, we'll try to pass the raw value if it's a primitive, or stringify for now
+            // This part might need more robust conversion depending on how generic instantiations are used
+            let paramValue: ast.ParameterValue;
+            if (arg.value.type === 'number') paramValue = parseFloat(arg.value.value as string);
+            else if (arg.value.type === 'string') paramValue = arg.value.value as string;
+            else if (arg.value.type === 'boolean') paramValue = (arg.value.value as string).toLowerCase() === 'true';
+            else paramValue = JSON.stringify(arg.value); // Fallback
+            return { name: arg.name, value: paramValue };
+          }
+          // For unnamed ast.Value, it's harder to map directly to ast.ParameterValue without context
+          // For now, stringify. This needs refinement.
+          return { value: JSON.stringify(arg) }; 
+        });
+        return {
+          type: 'module_instantiation',
+          name: functionName,
+          arguments: astParameters, // This now uses the converted ast.Parameter[]
+          children: [], // Children are handled by the caller
+          location: getLocation(moduleInstantiationNode)
+        };
+    }
+    return specificNode;
+  }
+
+  // Type guard to check if a parameter is a named argument
+  private isExtractedNamedArgument(param: ExtractedParameter): param is ExtractedNamedArgument {
+    return typeof (param as ExtractedNamedArgument).name === 'string';
+  }
+
+  // Type guard to check if a parameter is a direct ast.Value (unnamed argument)
+  // This is essentially the case where it's not an ExtractedNamedArgument
+  private isExtractedValue(param: ExtractedParameter): param is ast.Value {
+    return typeof (param as ExtractedNamedArgument).name === 'undefined' && (param as ast.Value).type !== undefined;
+  }
+
+  private createTranslateNode(transformCstNode: TSNode, args: ExtractedParameter[], children: ast.ASTNode[]): ast.TranslateNode | null {
+    console.log('[TransformVisitor.createTranslateNode] Received args:', JSON.stringify(args, null, 2));
+    
+    // Default vector for the TranslateNode (will be number[])
+    let finalVector: ast.Vector3D = [0, 0, 0];
+
+    if (args.length > 0) {
+      const firstArg = args[0];
+      console.log('[TransformVisitor.createTranslateNode] Processing firstArg:', JSON.stringify(firstArg, null, 2));
+      console.log(`[TransformVisitor.createTranslateNode] isExtractedNamedArgument(firstArg): ${this.isExtractedNamedArgument(firstArg)}`);
+      console.log(`[TransformVisitor.createTranslateNode] isExtractedValue(firstArg): ${this.isExtractedValue(firstArg)}`);
+
+      let argValueToProcess: ast.Value | undefined = undefined;
+
+      if (this.isExtractedNamedArgument(firstArg) && firstArg.name === 'v') {
+        console.log('[TransformVisitor.createTranslateNode] Detected named argument \'v\'');
+        argValueToProcess = firstArg.value;
+      } else if (this.isExtractedValue(firstArg)) {
+        console.log(`[TransformVisitor.createTranslateNode] Detected unnamed argument (ast.Value)`);
+        argValueToProcess = firstArg;
+      } else if (args.length <= 3 && args.every(arg => this.isExtractedValue(arg) && (arg as ast.Value).type === 'number')){
+        console.log('[TransformVisitor.createTranslateNode] Detected multiple individual number arguments.');
+        const numValues = args.map(arg => parseFloat(((arg as ast.Value).value as string)));
+        finalVector = [
+          numValues[0] !== undefined && !isNaN(numValues[0]) ? numValues[0] : 0,
+          numValues[1] !== undefined && !isNaN(numValues[1]) ? numValues[1] : 0,
+          numValues[2] !== undefined && !isNaN(numValues[2]) ? numValues[2] : 0,
+        ];
+        argValueToProcess = undefined; // Handled directly
+      } else {
+        console.warn('[TransformVisitor.createTranslateNode] Arguments do not match expected patterns for translate. First arg:', JSON.stringify(firstArg));
+      }
+
+      if (argValueToProcess) {
+        if (argValueToProcess.type === 'vector') {
+          const vectorComponents = argValueToProcess.value as ast.Value[]; // value is Value[] for type 'vector'
+          const numbers = vectorComponents.map(comp => {
+            if (comp.type === 'number') {
+              return parseFloat(comp.value as string); // comp.value is string for type 'number'
+            }
+            return NaN; // Or some other indicator of a non-number component
+          }).filter(n => !isNaN(n));
+
+          if (numbers.length === 1) finalVector = [numbers[0], 0, 0];
+          else if (numbers.length === 2) finalVector = [numbers[0], numbers[1], 0] as ast.Vector2D; // Cast to Vector2D for type safety if needed by ast.TranslateNode
+          else if (numbers.length >= 3) finalVector = [numbers[0], numbers[1], numbers[2]];
+          
+          console.log('[TransformVisitor.createTranslateNode] Assigned vector from processed arg:', JSON.stringify(finalVector));
+        } else if (argValueToProcess.type === 'number') {
+          const numVal = parseFloat(argValueToProcess.value as string);
+          if (!isNaN(numVal)) {
+            finalVector = [numVal, 0, 0];
+            console.log('[TransformVisitor.createTranslateNode] Created vector from single number arg:', JSON.stringify(finalVector));
+          }
+        } else {
+          console.warn('[TransformVisitor.createTranslateNode] Argument value is not a vector or number. Type:', argValueToProcess.type);
+        }
+      }
+    } else {
+      console.log('[TransformVisitor.createTranslateNode] No arguments provided, using default vector.');
+    }
+
+    console.log('[TransformVisitor.createTranslateNode] Final vector for node:', JSON.stringify(finalVector));
+
+    try {
+      const nodeLocation = getLocation(transformCstNode);
+      return {
+        type: 'translate',
+        v: finalVector, 
+        children: children,
+        location: nodeLocation,
+      };
+    } catch (e: any) {
+      process.stdout.write(`[TransformVisitor.createTranslateNode] Error in getLocation: ${e.message}\n`);
+      return {
+        type: 'translate',
+        v: finalVector, 
+        children: children,
+        location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } },
+      };
+    }
+  }
+
+  private createRotateNode(transformCstNode: TSNode, args: ExtractedParameter[], children: ast.ASTNode[]): ast.RotateNode | null {
+    process.stdout.write(`[TransformVisitor.createRotateNode] Creating rotate node with ${args.length} arguments\n`);
+    const paramsMap = this.getParametersMap(args);
+    let a: number | ast.Vector3D | undefined;
+    let v: ast.Vector3D | undefined;
+    let nodeLocation: ast.SourceLocation | undefined;
+
+    try {
+      nodeLocation = getLocation(transformCstNode);
+    } catch (e: any) {
+      process.stdout.write(`[TransformVisitor.createRotateNode] Error in getLocation: ${e.message}\n`);
+      nodeLocation = { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }; 
+    }
+
+    const aParam = paramsMap.get('a');
+    const vParam = paramsMap.get('v');
+
+    if (aParam !== undefined) {
+      if (Array.isArray(aParam) && (aParam.length === 3 || aParam.length === 1) && aParam.every(n => typeof n === 'number')) {
+        a = aParam.length === 3 ? aParam as ast.Vector3D : aParam[0];
+      } else if (typeof aParam === 'number') {
+        a = aParam;
+      } else if (this.isExtractedValue(aParam as ExtractedParameter)) { // Ensure it's ExtractedParameter
+        const evaluatedVectorA = this.evaluateVectorExpression(aParam as ast.Value);
+        if (evaluatedVectorA) {
+          if (evaluatedVectorA.length === 3) a = evaluatedVectorA as ast.Vector3D;
+          else if (evaluatedVectorA.length === 1) a = evaluatedVectorA[0]; // Assuming single number if not 3D vector
+        }
+      } else {
+        process.stdout.write(`[TransformVisitor.createRotateNode] Parameter 'a' has unexpected type: ${typeof aParam}\n`);
+      }
+    }
+
+    if (vParam !== undefined) {
+      if (Array.isArray(vParam) && vParam.length === 3 && vParam.every(n => typeof n === 'number')) {
+        v = vParam as ast.Vector3D;
+      } else if (this.isExtractedValue(vParam as ExtractedParameter)) { // Ensure it's ExtractedParameter
+        const evaluatedVectorV = this.evaluateVectorExpression(vParam as ast.Value);
+        if (evaluatedVectorV && evaluatedVectorV.length === 3) {
+          v = evaluatedVectorV as ast.Vector3D;
+        }
+      } else {
+        process.stdout.write(`[TransformVisitor.createRotateNode] Parameter 'v' has unexpected type: ${typeof vParam}\n`);
+      }
+    }
+
+    // Handle single unnamed argument case for 'a'
+    if (a === undefined && v === undefined && args.length === 1 && !this.isExtractedNamedArgument(args[0])) {
+      const singleArgVal = args[0] as ast.Value; // It must be an ast.Value here
+      if (singleArgVal.type === 'number') {
+        const numValue = parseFloat(singleArgVal.value as string);
+        if(!isNaN(numValue)) a = numValue;
+      } else if (singleArgVal.type === 'vector'){
+        const vecValue = this.evaluateVectorExpression(singleArgVal);
+        if(vecValue) {
+            if (vecValue.length === 3) a = vecValue as ast.Vector3D;
+            else if (vecValue.length === 1) a = vecValue[0];
+        }
+      }
+    }
+
+    if (a === undefined) {
+      process.stdout.write(`[TransformVisitor.createRotateNode] Parameter 'a' is undefined, defaulting to 0.\n`);
+      a = 0; 
+    }
+
+    process.stdout.write(`[TransformVisitor.createRotateNode] Created rotate node with a=${JSON.stringify(a)}, v=${JSON.stringify(v)}, children=${children.length}\n`);
+
+    return {
+      type: 'rotate',
+      a: a, 
+      v: v, 
+      children: children,
+      location: nodeLocation,
+    };
+  }
+
+  private createScaleNode(transformCstNode: TSNode, args: ExtractedParameter[], children: ast.ASTNode[]): ast.ScaleNode | null {
+    process.stdout.write(`[TransformVisitor.createScaleNode] Creating scale node with ${args.length} arguments\n`);
+    const paramsMap = this.getParametersMap(args);
+    let v: ast.Vector3D | undefined;
+    let nodeLocation: ast.SourceLocation | undefined;
+
+    try {
+      nodeLocation = getLocation(transformCstNode);
+    } catch (e: any) {
+      process.stdout.write(`[TransformVisitor.createScaleNode] Error in getLocation: ${e.message}\n`);
+      nodeLocation = { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }; 
+    }
+
+    const vParam = paramsMap.get('v');
+
+    if (vParam !== undefined) {
+      if (Array.isArray(vParam) && vParam.length === 3 && vParam.every(n => typeof n === 'number')) {
+        v = vParam as ast.Vector3D;
+      } else if (this.isExtractedValue(vParam as ExtractedParameter)) {
+        const evaluatedVectorV = this.evaluateVectorExpression(vParam as ast.Value);
+        if (evaluatedVectorV && evaluatedVectorV.length === 3) {
+          v = evaluatedVectorV as ast.Vector3D;
+        }
+      }
+    } else if (args.length === 1 && !this.isExtractedNamedArgument(args[0])) {
+      const singleArgVal = args[0] as ast.Value;
+      if (singleArgVal.type === 'vector') {
+        const evaluatedVectorSingleArg = this.evaluateVectorExpression(singleArgVal);
+        if (evaluatedVectorSingleArg && evaluatedVectorSingleArg.length === 3) {
+          v = evaluatedVectorSingleArg as ast.Vector3D;
+        }
+      } else if (singleArgVal.type === 'number') { // Handle single number for uniform scaling
+        const numVal = parseFloat(singleArgVal.value as string);
+        if (!isNaN(numVal)) v = [numVal, numVal, numVal];
+      }
+    }
+
+    if (v === undefined) {
+      process.stdout.write(`[TransformVisitor.createScaleNode] Parameter 'v' is undefined or invalid, defaulting to [1,1,1].\n`);
+      v = [1, 1, 1]; 
+    }
+
+    process.stdout.write(`[TransformVisitor.createScaleNode] Created scale node with v=${JSON.stringify(v)}, children=${children.length}\n`);
+
+    return {
+      type: 'scale',
+      v: v, 
+      children: children,
+      location: nodeLocation,
+    };
+  }
+
+  private createMirrorNode(transformCstNode: TSNode, args: ExtractedParameter[], children: ast.ASTNode[]): ast.MirrorNode | null {
+    process.stdout.write(`[TransformVisitor.createMirrorNode] Creating mirror node with ${args.length} arguments\n`);
+    const paramsMap = this.getParametersMap(args);
+    let v: ast.Vector3D | undefined;
+    let nodeLocation: ast.SourceLocation | undefined;
+
+    try {
+      nodeLocation = getLocation(transformCstNode);
+    } catch (e: any) {
+      process.stdout.write(`[TransformVisitor.createMirrorNode] Error in getLocation: ${e.message}\n`);
+      nodeLocation = { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }; 
+    }
+
+    const vParam = paramsMap.get('v');
+
+    if (vParam !== undefined) {
+      if (Array.isArray(vParam) && vParam.length === 3 && vParam.every(n => typeof n === 'number')) {
+        v = vParam as ast.Vector3D;
+      } else if (this.isExtractedValue(vParam as ExtractedParameter)) {
+        const evaluatedVectorV = this.evaluateVectorExpression(vParam as ast.Value);
+        if (evaluatedVectorV && evaluatedVectorV.length === 3) {
+          v = evaluatedVectorV as ast.Vector3D;
+        }
+      }
+    } else if (args.length === 1 && !this.isExtractedNamedArgument(args[0])) {
+      const singleArgVal = args[0] as ast.Value;
+      if (singleArgVal.type === 'vector'){
+        const evaluatedVectorSingleArg = this.evaluateVectorExpression(singleArgVal);
+        if (evaluatedVectorSingleArg && evaluatedVectorSingleArg.length === 3) {
+          v = evaluatedVectorSingleArg as ast.Vector3D;
+        }
+      }
+    }
+
+    if (v === undefined) {
+      process.stdout.write(`[TransformVisitor.createMirrorNode] Parameter 'v' is undefined or invalid. Cannot create mirror node without a normal vector.\n`);
+      return null; 
+    }
+
+    process.stdout.write(`[TransformVisitor.createMirrorNode] Created mirror node with v=${JSON.stringify(v)}, children=${children.length}\n`);
+
+    return {
+      type: 'mirror',
+      v: v, 
+      children: children,
+      location: nodeLocation,
+    };
+  }
+
+  private createMultmatrixNode(transformCstNode: TSNode, args: ExtractedParameter[], children: ast.ASTNode[]): ast.MultmatrixNode | null {
+    process.stdout.write(`[TransformVisitor.createMultmatrixNode] Creating multmatrix node with ${args.length} arguments\n`);
+    const paramsMap = this.getParametersMap(args);
+    let m: number[][] | undefined;
+    let nodeLocation: ast.SourceLocation | undefined;
+
+    try {
+      nodeLocation = getLocation(transformCstNode);
+    } catch (e: any) {
+      process.stdout.write(`[TransformVisitor.createMultmatrixNode] Error in getLocation: ${e.message}\n`);
+      nodeLocation = { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }; 
+    }
+
+    const mParam = paramsMap.get('m');
+
+    if (mParam !== undefined) {
+      if (Array.isArray(mParam) && mParam.every(row => Array.isArray(row) && row.every(val => typeof val === 'number'))) {
+        m = mParam as number[][];
+      } else if (this.isExtractedValue(mParam as ExtractedParameter) && (mParam as ast.Value).type === 'vector'){ // Assuming matrix is passed as a vector of vectors
+        const outerVector = mParam as ast.VectorValue;
+        if (outerVector.value.every(rowVal => rowVal.type === 'vector')) {
+          m = (outerVector.value as ast.VectorValue[]).map(rowVec => 
+            (rowVec.value as ast.Value[]).map(numVal => 
+              numVal.type === 'number' ? parseFloat(numVal.value as string) : NaN
+            ).filter(n => !isNaN(n))
+          );
+        }
+        process.stdout.write(`[TransformVisitor.createMultmatrixNode] Parameter 'm' as ast.Value processed.\n`);
+      }
+    } else if (args.length === 1 && !this.isExtractedNamedArgument(args[0])) {
+      const singleArgVal = args[0] as ast.Value;
+      if (singleArgVal.type === 'vector') { // Assuming matrix is passed as a vector of vectors
+         const outerVector = singleArgVal as ast.VectorValue;
+        if (outerVector.value.every(rowVal => rowVal.type === 'vector')) {
+          m = (outerVector.value as ast.VectorValue[]).map(rowVec => 
+            (rowVec.value as ast.Value[]).map(numVal => 
+              numVal.type === 'number' ? parseFloat(numVal.value as string) : NaN
+            ).filter(n => !isNaN(n))
+          );
+        }
+      }
+    }
+
+    if (m === undefined) {
+      process.stdout.write(`[TransformVisitor.createMultmatrixNode] Parameter 'm' is undefined or invalid. Cannot create multmatrix node.\n`);
+      return null; 
+    }
+
+    if (!((m.length === 4 && m.every(row => row.length === 3)) || (m.length === 4 && m.every(row => row.length === 4)))) {
+      process.stdout.write(`[TransformVisitor.createMultmatrixNode] Matrix 'm' has invalid dimensions. Expected 4x3 or 4x4. Got ${m.length}x${m[0]?.length || 0}.\n`);
       return null;
     }
 
-    console.log(`[TransformVisitor.visitModuleInstantiation] Function name: ${functionName}`);
+    process.stdout.write(`[TransformVisitor.createMultmatrixNode] Created multmatrix node, children=${children.length}\n`);
 
-    // Extract arguments
-    const argsNode = node.childForFieldName('arguments');
-    const args = argsNode ? extractArguments(argsNode) : [];
+    return {
+      type: 'multmatrix',
+      m: m, 
+      children: children,
+      location: nodeLocation,
+    };
+  }
 
-    console.log(`[TransformVisitor.visitModuleInstantiation] Extracted ${args.length} arguments`);
+  private createColorNode(transformCstNode: TSNode, args: ExtractedParameter[], children: ast.ASTNode[]): ast.ColorNode | null {
+    process.stdout.write(`[TransformVisitor.createColorNode] Creating color node with args: ${JSON.stringify(args)}\n`);
+    let c: string | ast.Vector4D | undefined;
+    let alpha: number | undefined;
+    let nodeLocation: ast.SourceLocation | undefined;
 
-    // Process based on function name
-    return this.createASTNodeForFunction(node, functionName, args);
+    try {
+      nodeLocation = getLocation(transformCstNode);
+    } catch (e: any) {
+      process.stdout.write(`[TransformVisitor.createColorNode] Error in getLocation: ${e.message}\n`);
+      nodeLocation = { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } };
+    }
+
+    // Logic to find 'c' (color) and 'alpha' parameters from args array
+    const cParamArg = args.find(arg => arg.name === 'c' || arg.name === 'color');
+    const cParam = cParamArg?.value;
+    const alphaParamArg = args.find(arg => arg.name === 'alpha');
+    const alphaParam = alphaParamArg?.value;
+
+    if (cParam !== undefined) {
+      if (typeof cParam === 'string') {
+        c = cParam;
+      } else if (Array.isArray(cParam) && cParam.every(n => typeof n === 'number')) {
+        // cParam is an array of numbers
+        if (cParam.length === 4) {
+          c = cParam as ast.Vector4D;
+        } else if (cParam.length === 3) {
+          c = [...cParam, 1.0] as ast.Vector4D;
+        } else if (cParam.length === 2) {
+          c = [cParam[0], cParam[1], 0, 1.0] as ast.Vector4D;
+        }
+        // If cParam.length is not 2, 3, or 4, 'c' remains undefined here, handled by later checks
+      } else if (this.isExtractedValue(cParam as ExtractedParameter)) {
+        const exprNode = cParam as ast.Value;
+        if (exprNode.type === 'string') {
+          c = exprNode.value as string;
+        } else if (exprNode.type === 'vector') {
+          const evaluatedVectorC = this.evaluateVectorExpression(exprNode);
+          if (evaluatedVectorC) {
+            if (evaluatedVectorC.length === 4) c = evaluatedVectorC as ast.Vector4D;
+            else if (evaluatedVectorC.length === 3) c = [evaluatedVectorC[0], evaluatedVectorC[1], evaluatedVectorC[2], 1.0] as ast.Vector4D;
+            else if (evaluatedVectorC.length === 2) c = [evaluatedVectorC[0], evaluatedVectorC[1], 0, 1.0] as ast.Vector4D; // Treat as [R,G,0,A]
+          }
+        } else if (exprNode.type === 'literal' && typeof exprNode.value === 'string') { // Kept for safety, though ast.Value covers it
+           c = exprNode.value;
+        }
+      }
+    }
+    if (alphaParam !== undefined) {
+      if (typeof alphaParam === 'number') {
+        alpha = alphaParam;
+      } else if (this.isExtractedValue(alphaParam as ExtractedParameter)){
+        alpha = this.evaluateNumericExpression(alphaParam as ast.Value);
+      }
+    }
+
+    if (Array.isArray(c) && alpha !== undefined) {
+      c[3] = alpha;
+    }
+
+    if (c === undefined) {
+      process.stdout.write(`[TransformVisitor.createColorNode] Parameter 'c' is undefined or invalid. Cannot create color node.\n`);
+      return null; 
+    }
+
+    process.stdout.write(`[TransformVisitor.createColorNode] Created color node with c=${JSON.stringify(c)}, children=${children.length}\n`);
+
+    return {
+      type: 'color',
+      c: c, 
+      children: children,
+      location: nodeLocation,
+    };
+  }
+
+  protected evaluateVectorExpression(expression?: ast.Value): number[] | undefined { // Return number[] for flexibility
+    if (!expression) return undefined;
+    process.stdout.write(`[TransformVisitor.evaluateVectorExpression] Evaluating expression: ${JSON.stringify(expression)}\n`);
+
+    if (expression.type === 'vector') {
+      const values = expression.value as ast.Value[];
+      const numbers = values.map(val => {
+        if (val.type === 'number') {
+          const num = parseFloat(val.value as string);
+          return isNaN(num) ? undefined : num;
+        }
+        return undefined;
+      }).filter(n => n !== undefined) as number[];
+
+      if (numbers.length > 0) return numbers;
+    }
+    // Removed 'literal' array check as ast.Value for vector is specific
+    process.stdout.write(`[TransformVisitor.evaluateVectorExpression] Could not evaluate to vector: ${JSON.stringify(expression)}\n`);
+    return undefined;
+  }
+
+  protected evaluateNumericExpression(expression?: ast.Value): number | undefined {
+    if (!expression) return undefined;
+    process.stdout.write(`[TransformVisitor.evaluateNumericExpression] Evaluating expression: ${JSON.stringify(expression)}\n`);
+
+    if (expression.type === 'number') {
+      const num = parseFloat(expression.value as string);
+      return isNaN(num) ? undefined : num;
+    }
+    // Removed 'literal' number check as ast.Value for number is specific
+    process.stdout.write(`[TransformVisitor.evaluateNumericExpression] Could not evaluate to number: ${JSON.stringify(expression)}\n`);
+    return undefined;
+  }
+
+  protected getParametersMap(args: ExtractedParameter[]): Map<string, ast.Value> {
+    const map = new Map<string, ast.Value>();
+    args.forEach(arg => {
+      if (this.isExtractedNamedArgument(arg)) {
+        map.set(arg.name, arg.value);
+      }
+    });
+    return map;
   }
 }

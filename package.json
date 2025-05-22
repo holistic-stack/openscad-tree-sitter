@@ -26,7 +26,7 @@
     "tsc:lint:skip": "tsc --noEmit --skipLibCheck",
     "tsc:lint:ignore": "node scripts/tsc-check-ignore-errors.js",
     "tsc:lint": "node scripts/tsc-check-ignore-errors.js",
-    "test:unit": "vitest run",
+    "test:unit": "vitest run --no-color",
     "test:unit:watch": "vitest src/lib",
     "parse": "tree-sitter generate && tree-sitter parse",
     "parse:examples": "tree-sitter parse examples/real-world/*.scad",

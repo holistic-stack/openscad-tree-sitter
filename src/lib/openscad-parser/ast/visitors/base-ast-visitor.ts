@@ -3,7 +3,7 @@ import * as ast from '../ast-types';
 import { ASTVisitor } from './ast-visitor';
 import { findDescendantOfType } from '../utils/node-utils';
 // getLocation is not used in this file
-import { extractArguments } from '../extractors/argument-extractor';
+import { extractArguments, ExtractedParameter } from '../extractors/argument-extractor';
 
 /**
  * Base implementation of the ASTVisitor interface
@@ -108,7 +108,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
 
     // Extract arguments
     const argsNode = node.childForFieldName('arguments');
-    const args = argsNode ? extractArguments(argsNode) : [];
+    const args: ExtractedParameter[] = argsNode ? extractArguments(argsNode) : [];
 
     console.log(`[BaseASTVisitor.visitModuleInstantiation] Extracted ${args.length} arguments`);
 
@@ -123,7 +123,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
    * @param args The arguments to the function
    * @returns The AST node or null if the function is not supported
    */
-  protected abstract createASTNodeForFunction(node: TSNode, functionName: string, args: ast.Parameter[]): ast.ASTNode | null;
+  protected abstract createASTNodeForFunction(node: TSNode, functionName: string, args: ExtractedParameter[]): ast.ASTNode | null;
 
   /**
    * Visit a statement node
@@ -365,7 +365,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
     console.log(`[BaseASTVisitor.visitAccessorExpression] Function name: ${functionName}`);
 
     // For test cases, extract arguments from the text
-    const args: ast.Parameter[] = [];
+    const args: ExtractedParameter[] = [];
 
     if (node.text.includes('(')) {
       const startIndex = node.text.indexOf('(');
@@ -381,30 +381,30 @@ export abstract class BaseASTVisitor implements ASTVisitor {
               const [name, value] = argValue.split('=').map(p => p.trim());
               if (!isNaN(Number(value))) {
                 args.push({
-                  name,
-                  value: Number(value)
+                  type: 'number',
+                  value: String(Number(value))
                 });
               } else if (value === 'true' || value === 'false') {
                 args.push({
-                  name,
-                  value: value === 'true'
+                  type: 'boolean',
+                  value: String(value === 'true')
                 });
               } else {
                 args.push({
-                  name,
+                  type: 'string',
                   value: value
                 });
               }
             } else if (!isNaN(Number(argValue))) {
               // Positional number argument
               args.push({
-                name: undefined,
-                value: Number(argValue)
+                type: 'number',
+                value: String(Number(argValue))
               });
             } else {
               // Other positional argument
               args.push({
-                name: undefined,
+                type: 'identifier',
                 value: argValue
               });
             }
@@ -438,22 +438,47 @@ export abstract class BaseASTVisitor implements ASTVisitor {
 
       // Extract arguments from the text
       const argsText = node.text.substring(node.text.indexOf('(') + 1, node.text.lastIndexOf(')'));
-      const args: ast.Parameter[] = [];
+      const tempArgs: ExtractedParameter[] = [];
 
       if (argsText.trim()) {
         // Simple parsing for testing purposes
         const argValues = argsText.split(',').map(arg => arg.trim());
         for (const argValue of argValues) {
-          if (!isNaN(Number(argValue))) {
-            args.push({
-              name: undefined,
-              value: Number(argValue)
+          if (argValue.includes('=')) {
+            // Named argument
+            const [name, value] = argValue.split('=').map(p => p.trim());
+            if (!isNaN(Number(value))) {
+              tempArgs.push({
+                type: 'number',
+                value: String(Number(value))
+              });
+            } else if (value === 'true' || value === 'false') {
+              tempArgs.push({
+                type: 'boolean',
+                value: String(value === 'true')
+              });
+            } else {
+              tempArgs.push({
+                type: 'string',
+                value: value
+              });
+            }
+          } else if (!isNaN(Number(argValue))) {
+            // Positional number argument
+            tempArgs.push({
+              type: 'number',
+              value: String(Number(argValue))
+            });
+          } else {
+            // Other positional argument
+            tempArgs.push({
+              type: 'identifier',
+              value: argValue
             });
           }
         }
       }
-
-      return this.createASTNodeForFunction(node, functionName, args);
+      return this.createASTNodeForFunction(node, functionName, tempArgs);
     }
 
     return null;
