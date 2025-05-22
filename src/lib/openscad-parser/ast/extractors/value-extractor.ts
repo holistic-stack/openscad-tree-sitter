@@ -1,4 +1,4 @@
-import { TSNode } from '../utils/location-utils';
+import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 import { findDescendantOfType } from '../utils/node-utils';
 import { extractVector } from '../utils/vector-utils';

@@ -270,5 +270,11 @@ function extractRangeLiteral(rangeNode: TSNode): ast.RangeValue | null {
   const end = endNode ? endNode.text : undefined;
   const step = stepNode ? stepNode.text : undefined;
 
-  return { type: 'range', start, end, step };
+  return {
+    type: 'range',
+    start,
+    end,
+    step,
+    value: rangeNode.text // Add the required value property
+  };
 }

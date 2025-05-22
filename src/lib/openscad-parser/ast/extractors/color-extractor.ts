@@ -24,7 +24,6 @@ export function extractColorNode(node: TSNode): ast.ColorNode | null {
     return {
       type: 'color',
       c: color,
-      alpha,
       children: [],
       location: getLocation(node)
     };

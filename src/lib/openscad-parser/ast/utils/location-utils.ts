@@ -1,5 +1,19 @@
-import { Node as TSNode } from 'web-tree-sitter';
+import { Node as TSNode, Point } from 'web-tree-sitter';
 import * as ast from '../ast-types';
+
+/**
+ * Convert a tree-sitter Point to a Position
+ * @param point The tree-sitter Point
+ * @param offset Optional character offset
+ * @returns The Position
+ */
+export function pointToPosition(point: Point, offset: number = 0): ast.Position {
+  return {
+    line: point.row,
+    column: point.column,
+    offset: offset
+  };
+}
 
 /**
  * Get the location information from a node
@@ -10,14 +24,22 @@ export function getLocation(node: TSNode): ast.Location {
   // Check if the node has startPosition and endPosition properties
   // This is needed for mock nodes in tests
   if (node.startPosition && node.endPosition) {
+    // Calculate approximate character offsets
+    // This is a simplification - in a real implementation, you would need to
+    // calculate the actual character offsets based on the source code
+    const startOffset = node.startIndex;
+    const endOffset = node.endIndex;
+
     return {
       start: {
         line: node.startPosition.row,
-        column: node.startPosition.column
+        column: node.startPosition.column,
+        offset: startOffset
       },
       end: {
         line: node.endPosition.row,
-        column: node.endPosition.column
+        column: node.endPosition.column,
+        offset: endOffset
       }
     };
   }
@@ -26,11 +48,13 @@ export function getLocation(node: TSNode): ast.Location {
   return {
     start: {
       line: 0,
-      column: 0
+      column: 0,
+      offset: 0
     },
     end: {
       line: 0,
-      column: 0
+      column: 0,
+      offset: 0
     }
   };
 }

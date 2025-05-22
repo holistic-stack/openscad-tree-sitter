@@ -5,7 +5,11 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-      setupFiles:"./src/setupTests.ts",
+    setupFiles: "./src/setupTests.ts",
+    typecheck: {
+      enabled: true,
+      tsconfig: './tsconfig.vitest.json',
+    }
   },
   resolve: {
     alias: {

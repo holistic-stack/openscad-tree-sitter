@@ -25,7 +25,6 @@ export function extractSphereNode(node: TSNode): ast.SphereNode | null {
     console.log(`[extractSphereNode] No arguments found, using default values`);
     return {
       type: 'sphere',
-      r: radius,
       radius,
       location: getLocation(node)
     };
@@ -107,7 +106,6 @@ export function extractSphereNode(node: TSNode): ast.SphereNode | null {
   if (diameter !== undefined) {
     return {
       type: 'sphere',
-      r: radius,
       radius,
       diameter,
       fn,
@@ -118,7 +116,6 @@ export function extractSphereNode(node: TSNode): ast.SphereNode | null {
   } else {
     return {
       type: 'sphere',
-      r: radius,
       radius,
       fn,
       fa,
