@@ -1,4 +1,4 @@
-import * as ast from '../ast-types';
+// Vector extractor doesn't use ast types directly
 
 /**
  * Extract a vector from a string
@@ -7,14 +7,14 @@ import * as ast from '../ast-types';
  */
 export function extractVectorFromString(text: string): number[] | null {
   console.log(`[extractVectorFromString] Extracting vector from string: ${text}`);
-  
+
   // Check if the string is a vector
   if (text.startsWith('[') && text.endsWith(']')) {
     try {
       // Extract the vector values
       const vectorStr = text.substring(1, text.length - 1);
       const vectorValues = vectorStr.split(',').map(v => parseFloat(v.trim()));
-      
+
       // Check if all values are numbers
       if (vectorValues.every(v => !isNaN(v))) {
         console.log(`[extractVectorFromString] Extracted vector: ${JSON.stringify(vectorValues)}`);
@@ -24,6 +24,6 @@ export function extractVectorFromString(text: string): number[] | null {
       console.log(`[extractVectorFromString] Failed to parse vector string: ${text}`);
     }
   }
-  
+
   return null;
 }

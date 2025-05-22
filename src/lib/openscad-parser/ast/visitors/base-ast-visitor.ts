@@ -2,7 +2,7 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 import { ASTVisitor } from './ast-visitor';
 import { findDescendantOfType } from '../utils/node-utils';
-import { getLocation } from '../utils/location-utils';
+// getLocation is not used in this file
 import { extractArguments } from '../extractors/argument-extractor';
 
 /**
@@ -53,9 +53,10 @@ export abstract class BaseASTVisitor implements ASTVisitor {
         return this.visitExpressionStatement(node);
       case 'expression':
         return this.visitExpression(node);
-      case 'block':
+      case 'block': {
         const blockNodes = this.visitBlock(node);
         return blockNodes.length > 0 ? blockNodes[0] : null;
+      }
       default:
         return null;
     }

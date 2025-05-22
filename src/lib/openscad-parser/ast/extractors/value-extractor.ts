@@ -9,21 +9,23 @@ import { getLocation } from '../utils/location-utils';
  */
 export function extractValue(node: TSNode): ast.ParameterValue {
   console.log(`[extractValue] Attempting to extract from node: type='${node.type}', text='${node.text.substring(0,50)}'`);
-  
+
   switch (node.type) {
     case 'expression':
       console.log(`[extractValue] Unwrapping 'expression', calling extractValue on child: type='${node.child(0)?.type}', text='${node.child(0)?.text.substring(0,50)}'`);
       // Unwrap the expression and extract from its first child
       return node.childCount > 0 ? extractValue(node.child(0)!) : undefined;
-    case 'number':
+    case 'number': {
       const numValue = parseFloat(node.text);
       console.log(`[extractValue] Extracted number: ${numValue}`);
       return numValue;
-    case 'string_literal':
+    }
+    case 'string_literal': {
       // Remove quotes from string literals
       const stringValue = node.text.substring(1, node.text.length - 1);
       console.log(`[extractValue] Extracted string: "${stringValue}"`);
       return stringValue;
+    }
     case 'boolean':
     case 'true':
       console.log(`[extractValue] Extracted boolean: true`);
@@ -34,7 +36,7 @@ export function extractValue(node: TSNode): ast.ParameterValue {
     case 'array_literal':
       console.log(`[extractValue] Calling extractVector for array_literal: ${node.text.substring(0,20)}`); // DEBUG
       return extractVector(node);
-    case 'unary_expression':
+    case 'unary_expression': {
       if (node.childCount === 2) {
         const operatorNode = node.child(0);
         const operandNode = node.child(1);
@@ -47,13 +49,14 @@ export function extractValue(node: TSNode): ast.ParameterValue {
       }
       console.warn(`[extractValue] Unhandled unary_expression: ${node.text.substring(0,30)}`);
       return undefined;
+    }
     case 'logical_or_expression':
     case 'logical_and_expression':
     case 'equality_expression':
     case 'relational_expression':
     case 'additive_expression':
     case 'multiplicative_expression':
-    case 'exponentiation_expression':
+    case 'exponentiation_expression': {
       // For now, just try to parse as a number if it's a simple expression
       const potentialNumText = node.text.trim();
       const num = parseFloat(potentialNumText);
@@ -69,7 +72,8 @@ export function extractValue(node: TSNode): ast.ParameterValue {
       // However, for something like '1+2', it should ideally be an expression node or evaluated.
       // For now, returning undefined as a safer default for unhandled complex expressions.
       return undefined;
-    case 'identifier':
+    }
+    case 'identifier': {
       if (node.text === 'true') return true;
       if (node.text === 'false') return false;
       return {
@@ -78,7 +82,8 @@ export function extractValue(node: TSNode): ast.ParameterValue {
         name: node.text,
         location: getLocation(node)
       } as ast.VariableNode;
-    case 'conditional_expression':
+    }
+    case 'conditional_expression': {
       console.log(`[extractValue] Processing conditional_expression: '${node.text.substring(0,30)}'`);
       // Check if this is a wrapper for an array_literal
       if (node.text.startsWith('[') && node.text.endsWith(']')) {
@@ -89,7 +94,7 @@ export function extractValue(node: TSNode): ast.ParameterValue {
           return extractVector(arrayLiteralNode);
         }
       }
-      
+
       // If not an array literal, try to extract from the first child
       if (node.childCount > 0) {
         const firstChild = node.child(0);
@@ -98,7 +103,7 @@ export function extractValue(node: TSNode): ast.ParameterValue {
           return extractValue(firstChild);
         }
       }
-      
+
       // Fallback to parsing as number or returning text
       const potentialCondExprText = node.text.trim();
       const condExprNum = parseFloat(potentialCondExprText);
@@ -108,6 +113,7 @@ export function extractValue(node: TSNode): ast.ParameterValue {
       }
       console.warn(`[extractValue] Returning raw text for conditional_expression: '${node.text.substring(0,30)}'`);
       return node.text;
+    }
     default:
       console.warn(`[extractValue] Unhandled node type: '${node.type}', text: '${node.text.substring(0,30)}'`);
       return undefined;

@@ -17,7 +17,7 @@ import * as ast from '../ast-types';
 import { BaseASTVisitor } from './base-ast-visitor';
 import { getLocation } from '../utils/location-utils';
 import { findDescendantOfType } from '../utils/node-utils';
-import { extractArguments } from '../extractors/argument-extractor';
+// extractArguments is not used in this file
 import { extractValue } from '../extractors/value-extractor';
 
 /**
@@ -1586,20 +1586,22 @@ export class ExpressionVisitor extends BaseASTVisitor {
         return this.visitLiteral(node);
       case 'array_literal':
         return this.visitArrayExpression(node);
-      case 'expression':
+      case 'expression': {
         // Unwrap the expression and process its first child
         const expressionChild = node.namedChild(0);
         if (expressionChild) {
           return this.createExpressionNode(expressionChild);
         }
         break;
-      case 'accessor_expression':
+      }
+      case 'accessor_expression': {
         // For accessor expressions, just process the primary expression
         const primaryExpr = findDescendantOfType(node, 'primary_expression');
         if (primaryExpr) {
           return this.createExpressionNode(primaryExpr);
         }
         break;
+      }
       case 'primary_expression':
         // For primary expressions, process the first child
         if (node.childCount > 0) {

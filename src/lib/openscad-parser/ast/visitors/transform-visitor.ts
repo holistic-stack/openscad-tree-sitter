@@ -3,7 +3,7 @@ import * as ast from '../ast-types';
 import { BaseASTVisitor } from './base-ast-visitor';
 import { getLocation } from '../utils/location-utils';
 import { extractVectorParameter, extractNumberParameter, extractBooleanParameter, extractStringParameter } from '../extractors/parameter-extractor';
-import { extractVectorFromString } from '../extractors/vector-extractor';
+// extractVectorFromString is not used in this file
 import { findDescendantOfType } from '../utils/node-utils';
 import { extractArguments } from '../extractors/argument-extractor';
 import { extractColorNode } from '../extractors/color-extractor';
@@ -26,7 +26,7 @@ export class TransformVisitor extends BaseASTVisitor {
     console.log(`[TransformVisitor.createASTNodeForFunction] Processing function: ${functionName}`);
 
     // Get the location information
-    const location = getLocation(node);
+    // const location = getLocation(node); // Unused variable
 
     // Process based on function name
     switch (functionName) {

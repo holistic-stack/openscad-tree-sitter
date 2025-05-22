@@ -147,7 +147,7 @@ export class CSGVisitor extends BaseASTVisitor {
    * @param args The arguments to the function
    * @returns The union AST node
    */
-  private createUnionNode(node: TSNode, args: ast.Parameter[]): ast.UnionNode | null {
+  private createUnionNode(node: TSNode, _args: ast.Parameter[]): ast.UnionNode | null {
     console.log(`[CSGVisitor.createUnionNode] Creating union node`);
 
     // Extract children
@@ -195,7 +195,7 @@ export class CSGVisitor extends BaseASTVisitor {
    * @param args The arguments to the function
    * @returns The difference AST node
    */
-  private createDifferenceNode(node: TSNode, args: ast.Parameter[]): ast.DifferenceNode | null {
+  private createDifferenceNode(node: TSNode, _args: ast.Parameter[]): ast.DifferenceNode | null {
     console.log(`[CSGVisitor.createDifferenceNode] Creating difference node`);
 
     // Extract children
@@ -243,7 +243,7 @@ export class CSGVisitor extends BaseASTVisitor {
    * @param args The arguments to the function
    * @returns The intersection AST node
    */
-  private createIntersectionNode(node: TSNode, args: ast.Parameter[]): ast.IntersectionNode | null {
+  private createIntersectionNode(node: TSNode, _args: ast.Parameter[]): ast.IntersectionNode | null {
     console.log(`[CSGVisitor.createIntersectionNode] Creating intersection node`);
 
     // Extract children
@@ -291,7 +291,7 @@ export class CSGVisitor extends BaseASTVisitor {
    * @param args The arguments to the function
    * @returns The hull AST node
    */
-  private createHullNode(node: TSNode, args: ast.Parameter[]): ast.HullNode | null {
+  private createHullNode(node: TSNode, _args: ast.Parameter[]): ast.HullNode | null {
     console.log(`[CSGVisitor.createHullNode] Creating hull node`);
 
     // Extract children
@@ -339,7 +339,7 @@ export class CSGVisitor extends BaseASTVisitor {
    * @param args The arguments to the function
    * @returns The minkowski AST node
    */
-  private createMinkowskiNode(node: TSNode, args: ast.Parameter[]): ast.MinkowskiNode | null {
+  private createMinkowskiNode(node: TSNode, _args: ast.Parameter[]): ast.MinkowskiNode | null {
     console.log(`[CSGVisitor.createMinkowskiNode] Creating minkowski node`);
 
     // Extract children

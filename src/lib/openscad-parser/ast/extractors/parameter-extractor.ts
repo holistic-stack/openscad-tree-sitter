@@ -160,12 +160,12 @@ export function extractVectorParameter(param: ast.Parameter): number[] | null {
 
   // Try to parse the value as a vector if it's a string
   if (typeof param.value === 'string') {
-    const matches = param.value.match(/\[\s*([\d\.\-\+]+)\s*,\s*([\d\.\-\+]+)\s*,\s*([\d\.\-\+]+)\s*\]/);
+    const matches = param.value.match(/\[\s*([\d.+-]+)\s*,\s*([\d.+-]+)\s*,\s*([\d.+-]+)\s*\]/);
     if (matches && matches.length === 4) {
       return [parseFloat(matches[1]), parseFloat(matches[2]), parseFloat(matches[3])];
     }
 
-    const matches2D = param.value.match(/\[\s*([\d\.\-\+]+)\s*,\s*([\d\.\-\+]+)\s*\]/);
+    const matches2D = param.value.match(/\[\s*([\d.+-]+)\s*,\s*([\d.+-]+)\s*\]/);
     if (matches2D && matches2D.length === 3) {
       return [parseFloat(matches2D[1]), parseFloat(matches2D[2])];
     }
@@ -201,12 +201,12 @@ export function extractRangeParameter(param: ast.Parameter): [number, number, nu
 
   // Try to parse the value as a range if it's a string
   if (typeof param.value === 'string') {
-    const matches = param.value.match(/\[\s*([\d\.\-\+]+)\s*:\s*([\d\.\-\+]+)\s*:\s*([\d\.\-\+]+)\s*\]/);
+    const matches = param.value.match(/\[\s*([\d.+-]+)\s*:\s*([\d.+-]+)\s*:\s*([\d.+-]+)\s*\]/);
     if (matches && matches.length === 4) {
       return [parseFloat(matches[1]), parseFloat(matches[3]), parseFloat(matches[2])];
     }
 
-    const matches2 = param.value.match(/\[\s*([\d\.\-\+]+)\s*:\s*([\d\.\-\+]+)\s*\]/);
+    const matches2 = param.value.match(/\[\s*([\d.+-]+)\s*:\s*([\d.+-]+)\s*\]/);
     if (matches2 && matches2.length === 3) {
       return [parseFloat(matches2[1]), parseFloat(matches2[2]), 1];
     }

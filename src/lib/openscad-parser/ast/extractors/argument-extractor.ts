@@ -151,7 +151,7 @@ function extractValue(valueNode: TSNode): ast.Value | null {
   console.log(`[extractValue] Processing value node: type=${valueNode.type}, text=${valueNode.text}`);
 
   switch (valueNode.type) {
-    case 'expression':
+    case 'expression': {
       // Unwrap the expression and extract from its first child
       const expressionChild = valueNode.namedChild(0);
       if (expressionChild) {
@@ -159,6 +159,7 @@ function extractValue(valueNode: TSNode): ast.Value | null {
         return extractValue(expressionChild);
       }
       return null;
+    }
 
     case 'conditional_expression':
     case 'logical_or_expression':
@@ -168,7 +169,7 @@ function extractValue(valueNode: TSNode): ast.Value | null {
     case 'additive_expression':
     case 'multiplicative_expression':
     case 'exponentiation_expression':
-    case 'unary_expression':
+    case 'unary_expression': {
       // Unwrap nested expressions
       const child = valueNode.namedChild(0);
       if (child) {
@@ -176,8 +177,9 @@ function extractValue(valueNode: TSNode): ast.Value | null {
         return extractValue(child);
       }
       return null;
+    }
 
-    case 'accessor_expression':
+    case 'accessor_expression': {
       // Handle accessor expressions (e.g., primary_expression)
       const primaryExpression = valueNode.namedChild(0);
       if (primaryExpression) {
@@ -185,8 +187,9 @@ function extractValue(valueNode: TSNode): ast.Value | null {
         return extractValue(primaryExpression);
       }
       return null;
+    }
 
-    case 'primary_expression':
+    case 'primary_expression': {
       // Handle primary expressions (e.g., number, string, etc.)
       const primaryChild = valueNode.namedChild(0);
       if (primaryChild) {
@@ -194,23 +197,26 @@ function extractValue(valueNode: TSNode): ast.Value | null {
         return extractValue(primaryChild);
       }
       return null;
+    }
 
     case 'number':
       console.log(`[extractValue] Extracted number: ${valueNode.text}`);
       return { type: 'number', value: valueNode.text };
 
-    case 'string_literal':
+    case 'string_literal': {
       // Remove quotes from string
       const stringValue = valueNode.text.substring(1, valueNode.text.length - 1);
       console.log(`[extractValue] Extracted string: ${stringValue}`);
       return { type: 'string', value: stringValue };
+    }
 
     case 'boolean_literal':
     case 'true':
-    case 'false':
+    case 'false': {
       const boolValue = valueNode.text === 'true';
       console.log(`[extractValue] Extracted boolean: ${boolValue}`);
       return { type: 'boolean', value: valueNode.text };
+    }
 
     case 'identifier':
       console.log(`[extractValue] Extracted identifier: ${valueNode.text}`);

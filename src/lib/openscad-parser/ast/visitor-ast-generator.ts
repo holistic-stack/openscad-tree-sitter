@@ -1,4 +1,4 @@
-import { Tree, Node as TSNode, Edit } from 'web-tree-sitter';
+import { Tree } from 'web-tree-sitter'; // TSNode is not used in this file after removing findChildOfType
 import * as ast from './ast-types';
 import { ASTVisitor } from './visitors/ast-visitor';
 import { CompositeVisitor } from './visitors/composite-visitor';
@@ -10,23 +10,24 @@ import { FunctionVisitor } from './visitors/function-visitor';
 import { ControlStructureVisitor } from './visitors/control-structure-visitor';
 import { ExpressionVisitor } from './visitors/expression-visitor';
 import { QueryVisitor } from './visitors/query-visitor';
-import { Change } from './changes/change-tracker';
+// Change is not used in this file
 
-/**
- * Find a child node of a specific type
- * @param node The parent node
- * @param type The type of child to find
- * @returns The child node or null if not found
- */
-function findChildOfType(node: TSNode, type: string): TSNode | null {
-  for (let i = 0; i < node.childCount; i++) {
-    const child = node.child(i);
-    if (child && child.type === type) {
-      return child;
-    }
-  }
-  return null;
-}
+// This function is not used in this file
+// /**
+//  * Find a child node of a specific type
+//  * @param node The parent node
+//  * @param type The type of child to find
+//  * @returns The child node or null if not found
+//  */
+// function findChildOfType(node: TSNode, type: string): TSNode | null {
+//   for (let i = 0; i < node.childCount; i++) {
+//     const child = node.child(i);
+//     if (child && child.type === type) {
+//       return child;
+//     }
+//   }
+//   return null;
+// }
 
 /**
  * Converts a Tree-sitter CST to an OpenSCAD AST using the visitor pattern
@@ -106,7 +107,7 @@ export class VisitorASTGenerator {
           console.log(`[VisitorASTGenerator.generate] Module name: ${moduleName}`);
 
           // Extract the body of the module instantiation
-          const bodyNode = findChildOfType(child, 'block');
+          // const bodyNode = findChildOfType(child, 'block'); // Unused variable
 
           // Try to use the appropriate visitor to process the node
           let processedNode = null;

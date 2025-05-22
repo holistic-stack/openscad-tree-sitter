@@ -1,5 +1,6 @@
-import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
+// These imports are not used directly in this file
+// import { Node as TSNode } from 'web-tree-sitter';
+// import * as ast from '../ast-types';
 import { NodeHandler, NodeHandlerRegistry } from './node-handler-registry';
 
 /**

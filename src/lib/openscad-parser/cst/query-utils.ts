@@ -98,10 +98,10 @@ export class QueryManager {
     await this.loadQuery('highlights');
     const results = this.queryTree('highlights');
     return results
-      .filter(result => 
+      .filter(result =>
         result.captures.some(c => c.name === 'module_definition')
       )
-      .map(result => 
+      .map(result =>
         result.captures.find(c => c.name === 'module_name')?.node
       )
       .filter((node): node is OpenSCADNode => node !== undefined);
@@ -114,10 +114,10 @@ export class QueryManager {
     await this.loadQuery('highlights');
     const results = this.queryTree('highlights');
     return results
-      .filter(result => 
+      .filter(result =>
         result.captures.some(c => c.name === 'function_definition')
       )
-      .map(result => 
+      .map(result =>
         result.captures.find(c => c.name === 'function_name')?.node
       )
       .filter((node): node is OpenSCADNode => node !== undefined);
@@ -129,14 +129,14 @@ export class QueryManager {
   public async findDependencies(): Promise<{file: string, type: 'include' | 'use'}[]> {
     await this.loadQuery('dependencies');
     const results = this.queryTree('dependencies');
-    
+
     const dependencies: {file: string, type: 'include' | 'use'}[] = [];
-    
+
     for (const result of results) {
       const includeMatch = result.captures.find(c => c.name === 'include');
       const useMatch = result.captures.find(c => c.name === 'use');
       const fileMatch = result.captures.find(c => c.name === 'file_path');
-      
+
       if (includeMatch && fileMatch?.node.text) {
         dependencies.push({
           file: fileMatch.node.text.replace(/^["']|["']$/g, ''),
@@ -149,7 +149,7 @@ export class QueryManager {
         });
       }
     }
-    
+
     return dependencies;
   }
 
@@ -160,15 +160,15 @@ export class QueryManager {
     if (!this.tree) {
       throw new Error('No tree parsed. Call parse() first.');
     }
-    
+
     const types = Array.isArray(type) ? type : [type];
     const nodes: Node[] = [];
-    
-    const visit = (node: Node) => {
+
+    const visit = (node: Node): void => {
       if (types.includes(node.type)) {
         nodes.push(node);
       }
-      
+
       for (let i = 0; i < node.childCount; i++) {
         const child = node.child(i);
         if (child) {
@@ -176,7 +176,7 @@ export class QueryManager {
         }
       }
     };
-    
+
     visit(this.tree.rootNode);
     return nodes;
   }
@@ -188,14 +188,14 @@ export class QueryManager {
     if (!this.tree) {
       throw new Error('No tree parsed. Call parse() first.');
     }
-    
+
     const types = Array.isArray(type) ? type : [type];
-    
+
     const find = (node: Node): Node | null => {
       if (types.includes(node.type)) {
         return node;
       }
-      
+
       for (let i = 0; i < node.childCount; i++) {
         const child = node.child(i);
         if (child) {
@@ -203,10 +203,10 @@ export class QueryManager {
           if (found) return found;
         }
       }
-      
+
       return null;
     };
-    
+
     return find(this.tree.rootNode);
   }
 
@@ -216,28 +216,28 @@ export class QueryManager {
   public hasAncestorOfType(node: Node, ancestorType: string | string[]): boolean {
     const types = Array.isArray(ancestorType) ? ancestorType : [ancestorType];
     let current = node.parent;
-    
+
     while (current) {
       if (types.includes(current.type)) {
         return true;
       }
       current = current.parent;
     }
-    
+
     return false;
   }
-  
+
   /**
    * Get the text of a node, including any trailing semicolon if present
    */
   public getNodeTextWithSemicolon(node: Node, source: string): string {
     let text = node.text;
-    
+
     // Check if there's a semicolon immediately after the node
     if (node.endIndex < source.length && source[node.endIndex] === ';') {
       text += ';';
     }
-    
+
     return text;
   }
 
@@ -247,11 +247,11 @@ export class QueryManager {
   public getNodeFullText(node: Node, source: string): string {
     return source.slice(node.startIndex, node.endIndex);
   }
-  
+
   /**
    * Get the location of a node in the source code
    */
-  public getNodeLocation(node: Node) {
+  public getNodeLocation(node: Node): { start: { line: number; column: number; index: number }; end: { line: number; column: number; index: number } } {
     return {
       start: {
         line: node.startPosition.row + 1,
@@ -269,7 +269,7 @@ export class QueryManager {
   /**
    * Process a query match into a more usable format
    */
-  private processQueryMatch(match: QueryMatch, query: Query): QueryResult {
+  private processQueryMatch(match: QueryMatch, _query: Query): QueryResult {
     const captures = match.captures.map((capture, index) => {
       // Use the index as a fallback name if we can't determine the capture name
       const name = `capture_${index}`;
@@ -297,7 +297,7 @@ export class QueryManager {
   ): Array<{ node: Node; text: string; start: { row: number; column: number }; end: { row: number; column: number } }> {
     const names = Array.isArray(name) ? name : [name];
     const captures: Array<{ node: Node; text: string; start: { row: number; column: number }; end: { row: number; column: number } }> = [];
-    
+
     for (const result of results) {
       for (const capture of result.captures) {
         if (names.includes(capture.name)) {
@@ -310,17 +310,17 @@ export class QueryManager {
         }
       }
     }
-    
+
     return captures;
   }
-  
+
   /**
    * Get the source code for a range
    */
   public getSourceForRange(start: number, end: number, source: string): string {
     return source.slice(start, end);
   }
-  
+
   /**
    * Dispose of resources
    */

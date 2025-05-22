@@ -7,7 +7,7 @@ import { getLocation } from '../utils/location-utils';
 // Create a test class that extends PrimitiveVisitor to expose the private methods
 class TestPrimitiveVisitor extends PrimitiveVisitor {
   public testCreateCubeNode(node: TSNode, args: ast.Parameter[]): ast.CubeNode | null {
-    // @ts-ignore - Accessing private method for testing
+    // @ts-expect-error - Accessing private method for testing
     return this.createCubeNode(node, args);
   }
 }

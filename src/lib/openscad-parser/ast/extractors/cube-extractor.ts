@@ -3,7 +3,7 @@ import * as ast from '../ast-types';
 import { extractArguments } from './argument-extractor';
 import { getLocation } from '../utils/location-utils';
 import { extractNumberParameter, extractBooleanParameter, extractVectorParameter } from '../extractors/parameter-extractor';
-import { findDescendantOfType } from '../utils/node-utils';
+// findDescendantOfType is not used in this file
 
 /**
  * Extract a cube node from an accessor expression node

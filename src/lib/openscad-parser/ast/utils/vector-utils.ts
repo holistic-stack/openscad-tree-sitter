@@ -10,7 +10,7 @@ import { findDescendantOfType } from './node-utils';
  * @returns A 2D or 3D vector, or undefined if extraction fails
  */
 export function extractVector(node: TSNode): ast.Vector2D | ast.Vector3D | undefined {
-  const numbers: number[] = [];
+  // const numbers: number[] = []; // Unused variable
 
   // Handle different node types
   if (node.type === 'array_literal') {
@@ -109,7 +109,7 @@ function extractVectorFromText(text: string): ast.Vector2D | ast.Vector3D | unde
   console.log(`[extractVectorFromText] Trying to extract vector from text: ${text}`);
 
   // Try to extract 3D vector
-  const matches = text.match(/\[\s*([\d\.\-\+]+)\s*,\s*([\d\.\-\+]+)\s*,\s*([\d\.\-\+]+)\s*\]/);
+  const matches = text.match(/\[\s*([\d.+-]+)\s*,\s*([\d.+-]+)\s*,\s*([\d.+-]+)\s*\]/);
   if (matches && matches.length === 4) {
     const vector = [parseFloat(matches[1]), parseFloat(matches[2]), parseFloat(matches[3])];
     console.log(`[extractVectorFromText] Extracted 3D vector from text: ${JSON.stringify(vector)}`);
@@ -117,7 +117,7 @@ function extractVectorFromText(text: string): ast.Vector2D | ast.Vector3D | unde
   }
 
   // Try to extract 2D vector
-  const matches2D = text.match(/\[\s*([\d\.\-\+]+)\s*,\s*([\d\.\-\+]+)\s*\]/);
+  const matches2D = text.match(/\[\s*([\d.+-]+)\s*,\s*([\d.+-]+)\s*\]/);
   if (matches2D && matches2D.length === 3) {
     const vector = [parseFloat(matches2D[1]), parseFloat(matches2D[2])];
     console.log(`[extractVectorFromText] Extracted 2D vector from text: ${JSON.stringify(vector)}`);

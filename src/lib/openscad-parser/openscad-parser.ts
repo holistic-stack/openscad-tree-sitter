@@ -39,9 +39,9 @@
 import * as TreeSitter from "web-tree-sitter";
 import { VisitorASTGenerator } from "./ast/visitor-ast-generator";
 import { ASTNode } from "./ast/ast-types";
-import { cstTreeCursorWalkLog } from "@/lib/openscad-parser/cst/cursor-utils/cstTreeCursorWalkLog";
-import { ParserError, SyntaxError, SemanticError, RecoveryStrategyFactory } from "./ast/errors";
-import { ChangeTracker, Change } from "./ast/changes/change-tracker";
+// cstTreeCursorWalkLog is not used in this file
+import { ParserError, SyntaxError, RecoveryStrategyFactory } from "./ast/errors"; // SemanticError is not used
+import { ChangeTracker } from "./ast/changes/change-tracker"; // Change is not used
 
 /**
  * A parser for OpenSCAD code using the Tree-sitter library.
@@ -312,7 +312,7 @@ export class OpenscadParser {
         }
 
         // Get the changes since the last update
-        const changes = this.changeTracker.getChanges();
+        // const changes = this.changeTracker.getChanges(); // Unused variable
 
         // Generate the AST with the changes
         const generator = new VisitorASTGenerator(updatedCST, newCode, this.language);

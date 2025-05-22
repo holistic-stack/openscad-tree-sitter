@@ -32,7 +32,7 @@ describe('cursor-utils', () => {
       console.log('Created cursor, node type:', cursor.nodeType);
 
       // Mock the cursor.nodeText property if it doesn't exist
-      if (!cursor.hasOwnProperty('nodeText')) {
+      if (!Object.prototype.hasOwnProperty.call(cursor, 'nodeText')) {
         Object.defineProperty(cursor, 'nodeText', {
           get: function() {
             return code.substring(

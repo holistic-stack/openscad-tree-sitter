@@ -1,13 +1,13 @@
 /**
  * Base class for all parser errors
- * 
+ *
  * This class provides a common interface for all parser errors, including
  * position information, suggestions for fixes, and error codes.
- * 
+ *
  * @module lib/openscad-parser/ast/errors/parser-error
  */
 
-import { Position } from '../ast-types';
+// Position type is defined locally as ErrorPosition
 
 /**
  * Interface for error position information
@@ -52,7 +52,7 @@ export class ParserError extends Error {
 
   /**
    * Create a new ParserError
-   * 
+   *
    * @param message - The error message
    * @param code - The error code
    * @param source - The source code that caused the error
@@ -72,7 +72,7 @@ export class ParserError extends Error {
 
     // Set the name of the error for better debugging
     this.name = 'ParserError';
-    
+
     // Store the error details
     this.code = code;
     this.source = source;
@@ -87,7 +87,7 @@ export class ParserError extends Error {
 
   /**
    * Get the source line where the error occurred
-   * 
+   *
    * @returns The source line
    */
   public getSourceLine(): string {
@@ -97,17 +97,17 @@ export class ParserError extends Error {
 
   /**
    * Get a formatted error message with context
-   * 
+   *
    * @returns A formatted error message with context
    */
   public getFormattedMessage(): string {
     const sourceLine = this.getSourceLine();
     const pointer = ' '.repeat(this.position.column) + '^';
-    
+
     let message = `${this.message}\n\n`;
     message += `${sourceLine}\n`;
     message += `${pointer}\n\n`;
-    
+
     if (this.suggestions.length > 0) {
       message += 'Suggestions:\n';
       this.suggestions.forEach((suggestion, index) => {
@@ -117,13 +117,13 @@ export class ParserError extends Error {
         }
       });
     }
-    
+
     return message;
   }
 
   /**
    * Convert a tree-sitter position to an ErrorPosition
-   * 
+   *
    * @param position - The tree-sitter position
    * @returns An ErrorPosition
    */
@@ -137,7 +137,7 @@ export class ParserError extends Error {
 
   /**
    * Create a ParserError from a tree-sitter node
-   * 
+   *
    * @param message - The error message
    * @param code - The error code
    * @param source - The source code

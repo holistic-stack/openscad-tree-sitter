@@ -2,8 +2,9 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 import { BaseASTVisitor } from './base-ast-visitor';
 import { getLocation } from '../utils/location-utils';
-import { extractArguments } from '../extractors/argument-extractor';
-import { findDescendantOfType } from '../utils/node-utils';
+// These imports are not used in this file
+// import { extractArguments } from '../extractors/argument-extractor';
+// import { findDescendantOfType } from '../utils/node-utils';
 
 /**
  * Visitor for module definitions and instantiations
