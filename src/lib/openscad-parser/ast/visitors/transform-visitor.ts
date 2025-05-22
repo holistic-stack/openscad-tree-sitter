@@ -30,12 +30,12 @@ export class TransformVisitor extends BaseASTVisitor {
         // Named argument
         return {
           name: arg.name,
-          value: this.convertExtractedValueToParameterValue(arg.value)
+          value: this.convertExtractedValueToParameterValue(arg.value as unknown as ExtractedParameter)
         };
       } else {
         // Positional argument
         return {
-          value: this.convertExtractedValueToParameterValue(arg)
+          value: this.convertExtractedValueToParameterValue(arg as ExtractedParameter)
         };
       }
     });
@@ -206,45 +206,48 @@ export class TransformVisitor extends BaseASTVisitor {
     switch (functionName) {
       case 'translate':
         this.currentTransformType = 'translate';
-        specificNode = this.createTranslateNode(node, args, children);
+        specificNode = this.createTranslateNode(node, args as unknown as ExtractedParameter[], children);
         break;
       case 'rotate':
         this.currentTransformType = 'rotate';
-        specificNode = this.createRotateNode(node, args, children);
+        specificNode = this.createRotateNode(node, args as unknown as ExtractedParameter[], children);
         break;
       case 'scale':
         this.currentTransformType = 'scale';
-        specificNode = this.createScaleNode(node, args, children);
+        specificNode = this.createScaleNode(node, args as unknown as ExtractedParameter[], children);
         break;
       case 'mirror':
         this.currentTransformType = 'mirror';
-        specificNode = this.createMirrorNode(node, args, children);
+        specificNode = this.createMirrorNode(node, args as unknown as ExtractedParameter[], children);
         break;
       case 'multmatrix':
         this.currentTransformType = 'multmatrix';
-        specificNode = this.createMultmatrixNode(node, args, children);
+        specificNode = this.createMultmatrixNode(node, args as unknown as ExtractedParameter[], children);
         break;
       case 'color':
         this.currentTransformType = 'color';
-        specificNode = this.createColorNode(node, args, children);
+        specificNode = this.createColorNode(node, args as unknown as ExtractedParameter[], children);
         break;
       case 'offset':
         this.currentTransformType = 'offset';
-        specificNode = this.createOffsetNode(node, args, children);
+        specificNode = this.createOffsetNode(node, args as unknown as ExtractedParameter[], children);
         break;
       default:
         process.stdout.write(`[TransformVisitor.createASTNodeForFunction] Unknown transformation or color function: ${functionName}\n`);
         // For unknown functions, we create a generic ModuleInstantiationNode
         // We need to convert ExtractedParameter[] back to ast.Parameter[] for this generic node
         const astParameters: ast.Parameter[] = args.map(arg => {
-          if (this.isExtractedNamedArgument(arg)) {
+          if (this.isExtractedNamedArgument(arg as unknown as ExtractedParameter)) {
             // This conversion is tricky because ast.ParameterValue is not ast.Value
             // For simplicity, we'll try to pass the raw value if it's a primitive, or stringify for now
             // This part might need more robust conversion depending on how generic instantiations are used
             let paramValue: ast.ParameterValue;
-            if (arg.value.type === 'number') paramValue = parseFloat(arg.value.value as string);
-            else if (arg.value.type === 'boolean') paramValue = arg.value.value === 'true';
-            else if (arg.value.type === 'string') paramValue = arg.value.value as string;
+            if (arg.value && typeof arg.value === 'object' && 'type' in arg.value) {
+              const valueObj = arg.value as unknown as ast.Value;
+              if (valueObj.type === 'number') paramValue = parseFloat(valueObj.value as string);
+              else if (valueObj.type === 'boolean') paramValue = valueObj.value === 'true';
+              else if (valueObj.type === 'string') paramValue = valueObj.value as string;
+            }
             else paramValue = JSON.stringify(arg.value);
 
             return { name: arg.name, value: paramValue };
@@ -252,9 +255,10 @@ export class TransformVisitor extends BaseASTVisitor {
             // For unnamed arguments, we can't directly use them in an ast.Parameter
             // We'll just use a placeholder or extract literal value
             let paramValue: ast.ParameterValue;
-            if (arg.type === 'number') paramValue = parseFloat(arg.value as string);
-            else if (arg.type === 'boolean') paramValue = arg.value === 'true';
-            else if (arg.type === 'string' || arg.type === 'identifier') paramValue = arg.value as string;
+            const typedArg = arg as unknown as ast.Value;
+            if (typedArg.type === 'number') paramValue = parseFloat(typedArg.value as string);
+            else if (typedArg.type === 'boolean') paramValue = typedArg.value === 'true';
+            else if (typedArg.type === 'string' || typedArg.type === 'identifier') paramValue = typedArg.value as string;
             else paramValue = JSON.stringify(arg.value);
 
             return { value: paramValue };
@@ -676,9 +680,9 @@ export class TransformVisitor extends BaseASTVisitor {
     }
 
     // Logic to find 'c' (color) and 'alpha' parameters from args array
-    const cParamArg = args.find(arg => arg.name === 'c' || arg.name === 'color');
+    const cParamArg = args.find(arg => 'name' in arg && (arg.name === 'c' || arg.name === 'color'));
     const cParam = cParamArg?.value;
-    const alphaParamArg = args.find(arg => arg.name === 'alpha');
+    const alphaParamArg = args.find(arg => 'name' in arg && arg.name === 'alpha');
     const alphaParam = alphaParamArg?.value;
 
     if (cParam !== undefined) {
@@ -705,7 +709,7 @@ export class TransformVisitor extends BaseASTVisitor {
             else if (evaluatedVectorC.length === 3) c = [evaluatedVectorC[0], evaluatedVectorC[1], evaluatedVectorC[2], 1.0] as ast.Vector4D;
             else if (evaluatedVectorC.length === 2) c = [evaluatedVectorC[0], evaluatedVectorC[1], 0, 1.0] as ast.Vector4D; // Treat as [R,G,0,A]
           }
-        } else if (exprNode.type === 'string') { // Use string type instead of literal
+        } else if (exprNode.type === 'string' as any) {
            c = exprNode.value as string;
         }
       }

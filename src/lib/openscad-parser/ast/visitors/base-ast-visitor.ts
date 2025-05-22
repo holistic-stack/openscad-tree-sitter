@@ -198,12 +198,12 @@ export abstract class BaseASTVisitor implements ASTVisitor {
         // Named argument
         return {
           name: arg.name,
-          value: convertExtractedValueToParameterValue(arg.value)
+          value: convertExtractedValueToParameterValue(arg.value as unknown as ExtractedParameter)
         };
       } else {
         // Positional argument
         return {
-          value: convertExtractedValueToParameterValue(arg)
+          value: convertExtractedValueToParameterValue(arg as ExtractedParameter)
         };
       }
     });

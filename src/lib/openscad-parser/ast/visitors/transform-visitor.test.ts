@@ -204,7 +204,8 @@ describe('TransformVisitor', () => {
           location: mockLocation
         } as ast.LiteralNode
       };
-      const result = visitor.createASTNodeForFunction(mockRotateCstNode, 'rotate', [mockAngleParam], []) as ast.RotateNode | null;
+      // Access protected method for testing
+      const result = (visitor as any).createASTNodeForFunction(mockRotateCstNode, 'rotate', [mockAngleParam]) as ast.RotateNode | null;
       expect(result?.type).toBe('rotate');
       // expect(result?.angle).toBe(90); // or result.a depending on ast-types
       // expect(result?.v).toBeUndefined(); // or some default if applicable
