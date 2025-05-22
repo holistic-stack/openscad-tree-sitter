@@ -1,6 +1,7 @@
 import { OpenscadParser } from '../../openscad-parser';
 import { afterAll, beforeAll, describe, it, expect, vi } from 'vitest';
 import { getLocation } from '../utils/location-utils';
+import { CompositeVisitor } from '../visitors/composite-visitor';
 
 describe('Control Structures AST Generation', () => {
   let parser: OpenscadParser;
@@ -10,7 +11,7 @@ describe('Control Structures AST Generation', () => {
     await parser.init("./tree-sitter-openscad.wasm");
 
     // Mock the parseAST method to return hardcoded values for tests
-    vi.spyOn(parser, 'parseAST').mockImplementation((code: string) => {
+    vi.spyOn(parser, 'parseAST').mockImplementation((code: string, visitor?: any) => {
       // Basic if statement test
       if (code.includes('if (x > 5)') && !code.includes('else')) {
         return [
@@ -329,7 +330,8 @@ describe('Control Structures AST Generation', () => {
       const code = `if (x > 5) {
         cube(10);
       }`;
-      const ast = parser.parseAST(code);
+      const visitor = new CompositeVisitor(code);
+      const ast = parser.parseAST(code, visitor);
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);
@@ -348,7 +350,8 @@ describe('Control Structures AST Generation', () => {
       } else {
         sphere(5);
       }`;
-      const ast = parser.parseAST(code);
+      const visitor = new CompositeVisitor(code);
+      const ast = parser.parseAST(code, visitor);
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);
@@ -370,7 +373,8 @@ describe('Control Structures AST Generation', () => {
       } else {
         cylinder(h=10, r=2);
       }`;
-      const ast = parser.parseAST(code);
+      const visitor = new CompositeVisitor(code);
+      const ast = parser.parseAST(code, visitor);
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);
@@ -394,7 +398,8 @@ describe('Control Structures AST Generation', () => {
       const code = `for (i = [0:5]) {
         translate([i, 0, 0]) cube(10);
       }`;
-      const ast = parser.parseAST(code);
+      const visitor = new CompositeVisitor(code);
+      const ast = parser.parseAST(code, visitor);
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);
@@ -412,7 +417,8 @@ describe('Control Structures AST Generation', () => {
       const code = `for (i = [0:0.5:5]) {
         translate([i, 0, 0]) cube(10);
       }`;
-      const ast = parser.parseAST(code);
+      const visitor = new CompositeVisitor(code);
+      const ast = parser.parseAST(code, visitor);
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);
@@ -431,7 +437,8 @@ describe('Control Structures AST Generation', () => {
       const code = `for (i = [0:5], j = [0:5]) {
         translate([i, j, 0]) cube(10);
       }`;
-      const ast = parser.parseAST(code);
+      const visitor = new CompositeVisitor(code);
+      const ast = parser.parseAST(code, visitor);
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);
@@ -453,7 +460,8 @@ describe('Control Structures AST Generation', () => {
       const code = `let (a = 10) {
         cube(a);
       }`;
-      const ast = parser.parseAST(code);
+      const visitor = new CompositeVisitor(code);
+      const ast = parser.parseAST(code, visitor);
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);
@@ -470,7 +478,8 @@ describe('Control Structures AST Generation', () => {
       const code = `let (a = 10, b = 20) {
         translate([a, b, 0]) cube(10);
       }`;
-      const ast = parser.parseAST(code);
+      const visitor = new CompositeVisitor(code);
+      const ast = parser.parseAST(code, visitor);
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);
@@ -488,7 +497,8 @@ describe('Control Structures AST Generation', () => {
   describe('each statements', () => {
     it('should parse a basic each statement', () => {
       const code = `each [1, 2, 3]`;
-      const ast = parser.parseAST(code);
+      const visitor = new CompositeVisitor(code);
+      const ast = parser.parseAST(code, visitor);
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);

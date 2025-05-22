@@ -7,53 +7,6 @@ import { OpenscadParser } from '../../openscad-parser';
 import { Node as TSNode } from 'web-tree-sitter';
 import { findDescendantOfType } from '../utils/node-utils';
 
-// Mock the OpenscadParser class
-vi.mock('../../openscad-parser', () => {
-  return {
-    OpenscadParser: vi.fn().mockImplementation(() => {
-      return {
-        init: vi.fn().mockResolvedValue(undefined),
-        dispose: vi.fn(),
-        parseCST: vi.fn().mockReturnValue({
-          rootNode: {
-            type: 'source_file',
-            text: 'cube(10); sphere(5);',
-            childCount: 2,
-            child: (index: number) => {
-              if (index === 0) {
-                return {
-                  type: 'statement',
-                  text: 'cube(10);',
-                  childCount: 1,
-                  child: () => ({
-                    type: 'module_instantiation',
-                    text: 'cube(10)',
-                    childCount: 0,
-                    child: () => null
-                  })
-                };
-              } else if (index === 1) {
-                return {
-                  type: 'statement',
-                  text: 'sphere(5);',
-                  childCount: 1,
-                  child: () => ({
-                    type: 'module_instantiation',
-                    text: 'sphere(5)',
-                    childCount: 0,
-                    child: () => null
-                  })
-                };
-              }
-              return null;
-            }
-          }
-        })
-      };
-    })
-  };
-});
-
 // Mock AST nodes for testing
 const mockCubeNode = {
   type: 'cube',
@@ -79,8 +32,9 @@ describe('CompositeVisitor', () => {
   let parser: OpenscadParser;
   let visitor: CompositeVisitor;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     parser = new OpenscadParser();
+    await parser.init("./tree-sitter-openscad.wasm");
   });
 
   afterAll(() => {

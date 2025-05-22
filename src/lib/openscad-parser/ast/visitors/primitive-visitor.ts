@@ -6,6 +6,7 @@ import { extractNumberParameter, extractBooleanParameter, extractVectorParameter
 import { findDescendantOfType } from '../utils/node-utils';
 import { extractArguments } from '../extractors/argument-extractor';
 import { extractCubeNode } from '../extractors/cube-extractor';
+import { extractSphereNode } from '../extractors/sphere-extractor';
 
 /**
  * Visitor for primitive shapes (cube, sphere, cylinder, etc.)
@@ -28,7 +29,8 @@ export class PrimitiveVisitor extends BaseASTVisitor {
         // Use the specialized cube extractor first, fall back to the old method if it fails
         return extractCubeNode(node) || this.createCubeNode(node, args);
       case 'sphere':
-        return this.createSphereNode(node, args);
+        // Use the specialized sphere extractor first, fall back to the old method if it fails
+        return extractSphereNode(node) || this.createSphereNode(node, args);
       case 'cylinder':
         return this.createCylinderNode(node, args);
       case 'polyhedron':

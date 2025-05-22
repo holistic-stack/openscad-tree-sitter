@@ -2,10 +2,12 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 import { BaseASTVisitor } from './base-ast-visitor';
 import { getLocation } from '../utils/location-utils';
-import { extractVectorParameter } from '../extractors/parameter-extractor';
+import { extractVectorParameter, extractNumberParameter, extractBooleanParameter, extractStringParameter } from '../extractors/parameter-extractor';
 import { extractVectorFromString } from '../extractors/vector-extractor';
 import { findDescendantOfType } from '../utils/node-utils';
 import { extractArguments } from '../extractors/argument-extractor';
+import { extractColorNode } from '../extractors/color-extractor';
+import { extractOffsetNode } from '../extractors/offset-extractor';
 
 /**
  * Visitor for transformations (translate, rotate, scale, etc.)
@@ -41,11 +43,14 @@ export class TransformVisitor extends BaseASTVisitor {
       case 'multmatrix':
         return this.createMultmatrixNode(node, args);
       case 'color':
-        return this.createColorNode(node, args);
+        // Use the specialized color extractor first, fall back to the old method if it fails
+        return extractColorNode(node) || this.createColorNode(node, args);
       case 'offset':
-        return this.createOffsetNode(node, args);
+        // Use the specialized offset extractor first, fall back to the old method if it fails
+        return extractOffsetNode(node) || this.createOffsetNode(node, args);
       case 'color(':
-        return this.createColorNode(node, args);
+        // Use the specialized color extractor first, fall back to the old method if it fails
+        return extractColorNode(node) || this.createColorNode(node, args);
       case 'mirror(':
         return this.createMirrorNode(node, args);
       case 'multmatrix(':
@@ -515,24 +520,35 @@ export class TransformVisitor extends BaseASTVisitor {
     const alphaParam = args.find(arg => arg.name === 'alpha');
 
     if (colorParam) {
-      if (colorParam.value.type === 'string') {
-        color = colorParam.value.value;
-      } else if (colorParam.value.type === 'vector') {
+      // Try to extract as a string parameter first
+      const stringValue = extractStringParameter(colorParam);
+      if (stringValue !== null) {
+        color = stringValue;
+        console.log(`[TransformVisitor.createColorNode] Found color name: ${color}`);
+      } else {
+        // Try to extract as a vector parameter
         const vector = extractVectorParameter(colorParam);
         if (vector && vector.length === 3) {
           color = [vector[0], vector[1], vector[2]];
+          console.log(`[TransformVisitor.createColorNode] Found RGB color: ${JSON.stringify(color)}`);
         } else if (vector && vector.length === 4) {
           color = [vector[0], vector[1], vector[2], vector[3]];
+          alpha = vector[3];
+          console.log(`[TransformVisitor.createColorNode] Found RGBA color: ${JSON.stringify(color)}`);
         } else {
-          console.log(`[TransformVisitor.createColorNode] Invalid color vector: ${vector}`);
+          console.log(`[TransformVisitor.createColorNode] Invalid color parameter: ${JSON.stringify(colorParam.value)}`);
         }
-      } else {
-        console.log(`[TransformVisitor.createColorNode] Invalid color parameter: ${colorParam.value}`);
       }
     }
 
-    if (alphaParam && alphaParam.value.type === 'number') {
-      alpha = parseFloat(alphaParam.value.value);
+    if (alphaParam) {
+      const alphaValue = extractNumberParameter(alphaParam);
+      if (alphaValue !== null) {
+        alpha = alphaValue;
+        console.log(`[TransformVisitor.createColorNode] Found alpha parameter: ${alpha}`);
+      } else {
+        console.log(`[TransformVisitor.createColorNode] Invalid alpha parameter: ${JSON.stringify(alphaParam.value)}`);
+      }
     }
 
     // No more hardcoded special cases for testing
@@ -578,16 +594,34 @@ export class TransformVisitor extends BaseASTVisitor {
     const deltaParam = args.find(arg => arg.name === 'delta');
     const chamferParam = args.find(arg => arg.name === 'chamfer');
 
-    if (radiusParam && radiusParam.value.type === 'number') {
-      radius = parseFloat(radiusParam.value.value);
+    if (radiusParam) {
+      const radiusValue = extractNumberParameter(radiusParam);
+      if (radiusValue !== null) {
+        radius = radiusValue;
+        console.log(`[TransformVisitor.createOffsetNode] Found radius parameter: ${radius}`);
+      } else {
+        console.log(`[TransformVisitor.createOffsetNode] Invalid radius parameter: ${JSON.stringify(radiusParam.value)}`);
+      }
     }
 
-    if (deltaParam && deltaParam.value.type === 'number') {
-      delta = parseFloat(deltaParam.value.value);
+    if (deltaParam) {
+      const deltaValue = extractNumberParameter(deltaParam);
+      if (deltaValue !== null) {
+        delta = deltaValue;
+        console.log(`[TransformVisitor.createOffsetNode] Found delta parameter: ${delta}`);
+      } else {
+        console.log(`[TransformVisitor.createOffsetNode] Invalid delta parameter: ${JSON.stringify(deltaParam.value)}`);
+      }
     }
 
-    if (chamferParam && chamferParam.value.type === 'boolean') {
-      chamfer = chamferParam.value.value === 'true';
+    if (chamferParam) {
+      const chamferValue = extractBooleanParameter(chamferParam);
+      if (chamferValue !== null) {
+        chamfer = chamferValue;
+        console.log(`[TransformVisitor.createOffsetNode] Found chamfer parameter: ${chamfer}`);
+      } else {
+        console.log(`[TransformVisitor.createOffsetNode] Invalid chamfer parameter: ${JSON.stringify(chamferParam.value)}`);
+      }
     }
 
     // No more hardcoded special cases for testing

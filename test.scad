@@ -1,11 +1,8 @@
-// Simple cube with size parameter
-cube(10);
+// Color transformation with string parameter
+color("red") cube(10);
 
-// Cube with vector size
-cube([10, 20, 30]);
+// Color transformation with vector parameter
+color([1, 0, 0]) cube(10);
 
-// Cube with named parameters
-cube(size=10, center=true);
-
-// Cube with named vector size
-cube(size=[10, 20, 30], center=true);
+// Offset transformation with r parameter
+offset(r=2) square(10);

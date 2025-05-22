@@ -4,49 +4,13 @@ import { OpenscadParser } from '../../openscad-parser';
 import { Node as TSNode } from 'web-tree-sitter';
 import { findDescendantOfType } from '../utils/node-utils';
 
-// Mock the OpenscadParser class
-vi.mock('../../openscad-parser', () => {
-  return {
-    OpenscadParser: vi.fn().mockImplementation(() => {
-      return {
-        init: vi.fn().mockResolvedValue(undefined),
-        dispose: vi.fn(),
-        parseCST: vi.fn().mockImplementation((code: string) => {
-          return {
-            rootNode: {
-              type: 'source_file',
-              text: code,
-              childCount: 1,
-              child: () => ({
-                type: 'statement',
-                text: code,
-                childCount: 1,
-                child: () => ({
-                  type: 'expression_statement',
-                  text: code.replace(';', ''),
-                  childCount: 1,
-                  child: () => ({
-                    type: 'accessor_expression',
-                    text: code.replace(';', ''),
-                    childCount: 0,
-                    child: () => null
-                  })
-                })
-              })
-            }
-          };
-        })
-      };
-    })
-  };
-});
-
 describe('PrimitiveVisitor', () => {
   let parser: OpenscadParser;
   let visitor: PrimitiveVisitor;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     parser = new OpenscadParser();
+    await parser.init("./tree-sitter-openscad.wasm");
   });
 
   afterAll(() => {

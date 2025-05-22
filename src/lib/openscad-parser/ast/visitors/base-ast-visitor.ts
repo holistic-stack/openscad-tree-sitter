@@ -180,7 +180,33 @@ export abstract class BaseASTVisitor implements ASTVisitor {
    */
   visitBlock(node: TSNode): ast.ASTNode[] {
     console.log(`[BaseASTVisitor.visitBlock] Processing block: ${node.text.substring(0, 50)}`);
-    return this.visitChildren(node);
+
+    const children: ast.ASTNode[] = [];
+
+    // Process each statement in the block
+    if (node.type === 'block') {
+      console.log(`[BaseASTVisitor.visitBlock] Found block node with ${node.namedChildCount} named children`);
+
+      // Process each statement in the block
+      for (let i = 0; i < node.namedChildCount; i++) {
+        const childNode = node.namedChild(i);
+        if (!childNode) continue;
+
+        console.log(`[BaseASTVisitor.visitBlock] Processing child ${i}: ${childNode.type}`);
+
+        // Visit the child node
+        const childAst = this.visitNode(childNode);
+        if (childAst) {
+          console.log(`[BaseASTVisitor.visitBlock] Added child: ${childAst.type}`);
+          children.push(childAst);
+        }
+      }
+    } else {
+      // If it's not a block, try to visit it directly
+      return this.visitChildren(node);
+    }
+
+    return children;
   }
 
   /**

@@ -4,32 +4,13 @@ import { ExpressionVisitor } from './expression-visitor';
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 
-// Mock the OpenscadParser class
-vi.mock('../../openscad-parser', () => {
-  return {
-    OpenscadParser: vi.fn().mockImplementation(() => {
-      return {
-        init: vi.fn().mockResolvedValue(undefined),
-        dispose: vi.fn(),
-        parseCST: vi.fn().mockReturnValue({
-          rootNode: {
-            type: 'source_file',
-            text: 'mock source file',
-            childCount: 0,
-            child: () => null
-          }
-        })
-      };
-    })
-  };
-});
-
 describe('ExpressionVisitor Integration', () => {
   let parser: OpenscadParser;
   let visitor: ExpressionVisitor;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     parser = new OpenscadParser();
+    await parser.init("./tree-sitter-openscad.wasm");
     visitor = new ExpressionVisitor('');
   });
 

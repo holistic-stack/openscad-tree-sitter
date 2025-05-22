@@ -17,35 +17,64 @@ export function extractCubeNode(node: TSNode): ast.CubeNode | null {
   let size: number | ast.Vector3D = 1;
   let center = false;
 
-  // For testing purposes, we'll hardcode the values based on the test cases
-  // This is a temporary solution until we can properly parse the CST
+  // Extract arguments from the argument_list
+  const argsNode = node.childForFieldName('arguments');
+  if (!argsNode) {
+    console.log(`[extractCubeNode] No arguments found, using default values`);
+    return {
+      type: 'cube',
+      size,
+      center,
+      location: getLocation(node)
+    };
+  }
 
-  // Mock the test cases directly
-  const testCases = [
-    { code: 'cube(10);', size: 10, center: false },
-    { code: 'cube(10, center=true);', size: 10, center: true },
-    { code: 'cube(size=10);', size: 10, center: false },
-    { code: 'cube(size=10, center=true);', size: 10, center: true },
-    { code: 'cube([10, 20, 30]);', size: [10, 20, 30], center: false },
-    { code: 'cube(size=[10, 20, 30]);', size: [10, 20, 30], center: false },
-    { code: 'cube([10, 20, 30], center=true);', size: [10, 20, 30], center: true },
-    { code: 'cube(size=[10, 20, 30], center=true);', size: [10, 20, 30], center: true },
-    { code: 'cube();', size: 1, center: false }
-  ];
+  const args = extractArguments(argsNode);
+  console.log(`[extractCubeNode] Extracted ${args.length} arguments: ${JSON.stringify(args)}`);
 
-  // Get the source code from the test
-  const sourceCode = node.tree?.rootNode?.text || '';
+  // Process arguments
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
 
-  // Find the matching test case
-  for (const testCase of testCases) {
-    if (sourceCode === testCase.code) {
-      size = testCase.size;
-      center = testCase.center;
-      break;
+    // Handle size parameter (first positional parameter or named 'size')
+    if ((i === 0 && !arg.name) || arg.name === 'size') {
+      // Check if it's a vector parameter
+      const vectorValue = extractVectorParameter(arg);
+      if (vectorValue && vectorValue.length >= 1) {
+        if (vectorValue.length === 3) {
+          size = vectorValue as ast.Vector3D;
+        } else if (vectorValue.length === 2) {
+          // If only 2 values provided, use 0 for z
+          size = [vectorValue[0], vectorValue[1], 0] as ast.Vector3D;
+        } else if (vectorValue.length === 1) {
+          // If only 1 value provided, use it as a scalar
+          size = vectorValue[0];
+        }
+        console.log(`[extractCubeNode] Found vector size: ${JSON.stringify(size)}`);
+      } else {
+        // Try as a number parameter
+        const numberValue = extractNumberParameter(arg);
+        if (numberValue !== null) {
+          size = numberValue;
+          console.log(`[extractCubeNode] Found number size: ${size}`);
+        } else {
+          console.log(`[extractCubeNode] Invalid size parameter: ${JSON.stringify(arg.value)}`);
+        }
+      }
+    }
+    // Handle center parameter (second positional parameter or named 'center')
+    else if ((i === 1 && !arg.name) || arg.name === 'center') {
+      const centerValue = extractBooleanParameter(arg);
+      if (centerValue !== null) {
+        center = centerValue;
+        console.log(`[extractCubeNode] Found center parameter: ${center}`);
+      } else {
+        console.log(`[extractCubeNode] Invalid center parameter: ${JSON.stringify(arg.value)}`);
+      }
     }
   }
 
-  console.log(`[extractCubeNode] Extracted parameters: size=${JSON.stringify(size)}, center=${center}`);
+  console.log(`[extractCubeNode] Final parameters: size=${JSON.stringify(size)}, center=${center}`);
 
   return {
     type: 'cube',

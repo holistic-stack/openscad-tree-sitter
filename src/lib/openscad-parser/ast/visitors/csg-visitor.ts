@@ -155,8 +155,29 @@ export class CSGVisitor extends BaseASTVisitor {
     const children: ast.ASTNode[] = [];
 
     if (bodyNode) {
-      const blockChildren = this.visitBlock(bodyNode);
-      children.push(...blockChildren);
+      console.log(`[CSGVisitor.createUnionNode] Found body node: ${bodyNode.text.substring(0, 50)}`);
+
+      // Process the block node
+      if (bodyNode.type === 'block') {
+        // Process each statement in the block
+        for (let i = 0; i < bodyNode.namedChildCount; i++) {
+          const childNode = bodyNode.namedChild(i);
+          if (!childNode) continue;
+
+          console.log(`[CSGVisitor.createUnionNode] Processing child ${i}: ${childNode.type}`);
+
+          // Visit the child node
+          const childAst = this.visitNode(childNode);
+          if (childAst) {
+            console.log(`[CSGVisitor.createUnionNode] Added child: ${childAst.type}`);
+            children.push(childAst);
+          }
+        }
+      } else {
+        // If it's not a block, try to visit it directly
+        const blockChildren = this.visitBlock(bodyNode);
+        children.push(...blockChildren);
+      }
     }
 
     console.log(`[CSGVisitor.createUnionNode] Created union node with ${children.length} children`);
@@ -182,8 +203,29 @@ export class CSGVisitor extends BaseASTVisitor {
     const children: ast.ASTNode[] = [];
 
     if (bodyNode) {
-      const blockChildren = this.visitBlock(bodyNode);
-      children.push(...blockChildren);
+      console.log(`[CSGVisitor.createDifferenceNode] Found body node: ${bodyNode.text.substring(0, 50)}`);
+
+      // Process the block node
+      if (bodyNode.type === 'block') {
+        // Process each statement in the block
+        for (let i = 0; i < bodyNode.namedChildCount; i++) {
+          const childNode = bodyNode.namedChild(i);
+          if (!childNode) continue;
+
+          console.log(`[CSGVisitor.createDifferenceNode] Processing child ${i}: ${childNode.type}`);
+
+          // Visit the child node
+          const childAst = this.visitNode(childNode);
+          if (childAst) {
+            console.log(`[CSGVisitor.createDifferenceNode] Added child: ${childAst.type}`);
+            children.push(childAst);
+          }
+        }
+      } else {
+        // If it's not a block, try to visit it directly
+        const blockChildren = this.visitBlock(bodyNode);
+        children.push(...blockChildren);
+      }
     }
 
     console.log(`[CSGVisitor.createDifferenceNode] Created difference node with ${children.length} children`);
@@ -209,8 +251,29 @@ export class CSGVisitor extends BaseASTVisitor {
     const children: ast.ASTNode[] = [];
 
     if (bodyNode) {
-      const blockChildren = this.visitBlock(bodyNode);
-      children.push(...blockChildren);
+      console.log(`[CSGVisitor.createIntersectionNode] Found body node: ${bodyNode.text.substring(0, 50)}`);
+
+      // Process the block node
+      if (bodyNode.type === 'block') {
+        // Process each statement in the block
+        for (let i = 0; i < bodyNode.namedChildCount; i++) {
+          const childNode = bodyNode.namedChild(i);
+          if (!childNode) continue;
+
+          console.log(`[CSGVisitor.createIntersectionNode] Processing child ${i}: ${childNode.type}`);
+
+          // Visit the child node
+          const childAst = this.visitNode(childNode);
+          if (childAst) {
+            console.log(`[CSGVisitor.createIntersectionNode] Added child: ${childAst.type}`);
+            children.push(childAst);
+          }
+        }
+      } else {
+        // If it's not a block, try to visit it directly
+        const blockChildren = this.visitBlock(bodyNode);
+        children.push(...blockChildren);
+      }
     }
 
     console.log(`[CSGVisitor.createIntersectionNode] Created intersection node with ${children.length} children`);
@@ -236,8 +299,29 @@ export class CSGVisitor extends BaseASTVisitor {
     const children: ast.ASTNode[] = [];
 
     if (bodyNode) {
-      const blockChildren = this.visitBlock(bodyNode);
-      children.push(...blockChildren);
+      console.log(`[CSGVisitor.createHullNode] Found body node: ${bodyNode.text.substring(0, 50)}`);
+
+      // Process the block node
+      if (bodyNode.type === 'block') {
+        // Process each statement in the block
+        for (let i = 0; i < bodyNode.namedChildCount; i++) {
+          const childNode = bodyNode.namedChild(i);
+          if (!childNode) continue;
+
+          console.log(`[CSGVisitor.createHullNode] Processing child ${i}: ${childNode.type}`);
+
+          // Visit the child node
+          const childAst = this.visitNode(childNode);
+          if (childAst) {
+            console.log(`[CSGVisitor.createHullNode] Added child: ${childAst.type}`);
+            children.push(childAst);
+          }
+        }
+      } else {
+        // If it's not a block, try to visit it directly
+        const blockChildren = this.visitBlock(bodyNode);
+        children.push(...blockChildren);
+      }
     }
 
     console.log(`[CSGVisitor.createHullNode] Created hull node with ${children.length} children`);
@@ -263,8 +347,29 @@ export class CSGVisitor extends BaseASTVisitor {
     const children: ast.ASTNode[] = [];
 
     if (bodyNode) {
-      const blockChildren = this.visitBlock(bodyNode);
-      children.push(...blockChildren);
+      console.log(`[CSGVisitor.createMinkowskiNode] Found body node: ${bodyNode.text.substring(0, 50)}`);
+
+      // Process the block node
+      if (bodyNode.type === 'block') {
+        // Process each statement in the block
+        for (let i = 0; i < bodyNode.namedChildCount; i++) {
+          const childNode = bodyNode.namedChild(i);
+          if (!childNode) continue;
+
+          console.log(`[CSGVisitor.createMinkowskiNode] Processing child ${i}: ${childNode.type}`);
+
+          // Visit the child node
+          const childAst = this.visitNode(childNode);
+          if (childAst) {
+            console.log(`[CSGVisitor.createMinkowskiNode] Added child: ${childAst.type}`);
+            children.push(childAst);
+          }
+        }
+      } else {
+        // If it's not a block, try to visit it directly
+        const blockChildren = this.visitBlock(bodyNode);
+        children.push(...blockChildren);
+      }
     }
 
     console.log(`[CSGVisitor.createMinkowskiNode] Created minkowski node with ${children.length} children`);

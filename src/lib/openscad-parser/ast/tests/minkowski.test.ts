@@ -1,5 +1,6 @@
 import { OpenscadParser } from '../../openscad-parser';
 import { afterAll, beforeAll, describe, it, expect } from 'vitest';
+import { CompositeVisitor } from '../visitors/composite-visitor';
 
 describe('Minkowski Operation AST Generation', () => {
   let parser: OpenscadParser;
@@ -47,7 +48,8 @@ describe('Minkowski Operation AST Generation', () => {
         sphere(2);
       }
     `;
-    const ast = parser.parseAST(code);
+    const visitor = new CompositeVisitor(code);
+    const ast = parser.parseAST(code, visitor);
 
     expect(ast).toHaveLength(1);
     expect(ast[0].type).toBe('minkowski');
@@ -72,7 +74,8 @@ describe('Minkowski Operation AST Generation', () => {
         cube(10);
       }
     `;
-    const ast = parser.parseAST(code);
+    const visitor = new CompositeVisitor(code);
+    const ast = parser.parseAST(code, visitor);
 
     expect(ast).toHaveLength(1);
     expect(ast[0].type).toBe('minkowski');
@@ -98,7 +101,8 @@ describe('Minkowski Operation AST Generation', () => {
         sphere(1);
       }
     `;
-    const ast = parser.parseAST(code);
+    const visitor = new CompositeVisitor(code);
+    const ast = parser.parseAST(code, visitor);
 
     expect(ast).toHaveLength(1);
     expect(ast[0].type).toBe('minkowski');
@@ -124,7 +128,8 @@ describe('Minkowski Operation AST Generation', () => {
         circle(2);
       }
     `;
-    const ast = parser.parseAST(code);
+    const visitor = new CompositeVisitor(code);
+    const ast = parser.parseAST(code, visitor);
 
     expect(ast).toHaveLength(1);
     expect(ast[0].type).toBe('minkowski');

@@ -126,6 +126,28 @@ export function extractVectorParameter(param: ast.Parameter): number[] | null {
     });
   }
 
+  // Handle vector_literal type (from tree-sitter)
+  if (param.value.type === 'vector_literal') {
+    const values: number[] = [];
+    // Process each child of the vector_literal node
+    if (param.value.children) {
+      for (let i = 0; i < param.value.children.length; i++) {
+        const child = param.value.children[i];
+        if (child.type === 'number_literal') {
+          values.push(parseFloat(child.text));
+        } else if (typeof child.text === 'string') {
+          const num = parseFloat(child.text);
+          if (!isNaN(num)) {
+            values.push(num);
+          }
+        }
+      }
+    }
+    if (values.length > 0) {
+      return values;
+    }
+  }
+
   // Handle array as raw value
   if (Array.isArray(param.value) && param.value.every(v => typeof v === 'number')) {
     return param.value as number[];
