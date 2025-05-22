@@ -22,7 +22,6 @@
     "build:ts": "tsc --project tsconfig.build.json",
     "lint": "eslint ./src/lib",
     "lint:fix": "eslint ./src/lib --fix",
-    "lint:ts": "node scripts/lint-typescript.js",
     "tsc:lint": "tsc --noEmit",
     "test:unit": "vitest run --no-color",
     "test:unit:watch": "vitest src/lib",

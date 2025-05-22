@@ -19,11 +19,26 @@ import { getLocation } from '../utils/location-utils';
 import { findDescendantOfType } from '../utils/node-utils';
 // extractArguments is not used in this file
 import { extractValue } from '../extractors/value-extractor';
+import { FunctionCallVisitor } from './expression-visitor/function-call-visitor';
 
 /**
  * Visitor for expressions
  */
 export class ExpressionVisitor extends BaseASTVisitor {
+  /**
+   * Function call visitor for handling function calls in expressions
+   */
+  private functionCallVisitor: FunctionCallVisitor;
+
+  /**
+   * Create a new ExpressionVisitor
+   * @param source The source code
+   */
+  constructor(source: string) {
+    super(source);
+    this.functionCallVisitor = new FunctionCallVisitor(source);
+  }
+
   /**
    * Create an AST node for a function call
    * @param node The function call node
@@ -32,17 +47,20 @@ export class ExpressionVisitor extends BaseASTVisitor {
   createASTNodeForFunction(node: TSNode): ast.ASTNode | null {
     console.log(`[ExpressionVisitor.createASTNodeForFunction] Processing function call: ${node.text.substring(0, 50)}`);
 
-    // This is a placeholder implementation
-    // In a real implementation, we would extract the function name and arguments
-    // and create a proper function call node
-    return null;
+    // Delegate to the function call visitor
+    return this.functionCallVisitor.visitFunctionCall(node);
   }
+
   /**
-   * Create a new ExpressionVisitor
-   * @param source The source code
+   * Visit an accessor expression node (function calls like cube(10))
+   * @param node The accessor expression node to visit
+   * @returns The AST node or null if the node cannot be processed
    */
-  constructor(source: string) {
-    super(source);
+  visitAccessorExpression(node: TSNode): ast.ASTNode | null {
+    console.log(`[ExpressionVisitor.visitAccessorExpression] Processing accessor expression: ${node.text.substring(0, 50)}`);
+
+    // Delegate to the function call visitor
+    return this.functionCallVisitor.visitFunctionCall(node);
   }
 
   /**
@@ -1725,7 +1743,20 @@ export class ExpressionVisitor extends BaseASTVisitor {
         break;
       }
       case 'accessor_expression': {
-        // For accessor expressions, just process the primary expression
+        // For accessor expressions, delegate to the function call visitor
+        const functionCallNode = this.functionCallVisitor.visitFunctionCall(node);
+        if (functionCallNode && functionCallNode.type === 'function_call') {
+          // Convert function call to expression node
+          return {
+            type: 'expression',
+            expressionType: 'function_call',
+            name: functionCallNode.name,
+            arguments: functionCallNode.arguments,
+            location: functionCallNode.location
+          } as ast.ExpressionNode;
+        }
+
+        // Fallback to processing the primary expression
         const primaryExpr = findDescendantOfType(node, 'primary_expression');
         if (primaryExpr) {
           return this.createExpressionNode(primaryExpr);

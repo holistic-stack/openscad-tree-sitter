@@ -1,5 +1,65 @@
 # OpenSCAD Tree-sitter Parser - Progress Log
 
+## 2025-05-25: Implemented Function Call Visitor
+
+### Completed Tasks
+
+1. **Expression Visitor Enhancement**:
+   - Implemented FunctionCallVisitor for handling function calls in expressions
+   - Created function-call-visitor.ts to extract function names and arguments from CST nodes
+   - Updated ExpressionVisitor to use FunctionCallVisitor for function calls
+   - Added comprehensive tests with real CST nodes (no mocks)
+   - Ensured proper handling of positional and named arguments
+
+## 2025-05-24: Implemented Control Structure Visitors
+
+### Completed Tasks
+
+1. **Control Structure Visitor Refactoring**:
+   - Implemented specialized visitors for if-else statements and for loops
+   - Created if-else-visitor.ts to handle if-else statements with proper condition evaluation
+   - Created for-loop-visitor.ts to handle for loops with various parameter formats
+   - Updated control-structure-visitor.ts to use the specialized visitors
+
+2. **If-Else Statement Handling**:
+   - Implemented proper parsing of if-else statements with complex conditions
+   - Added support for else-if chains and nested if statements
+   - Enhanced condition evaluation with integration with the ExpressionVisitor
+   - Added comprehensive tests for various if-else statement formats
+
+3. **For Loop Handling**:
+   - Implemented proper parsing of for loops with different parameter formats
+   - Added support for step values in ranges (e.g., [0:0.5:5])
+   - Added support for multiple variables in for loops (e.g., for(i=[0:5], j=[0:5]))
+   - Enhanced range expression handling with proper type checking
+   - Added comprehensive tests for various for loop formats
+
+4. **Special Case Handling**:
+   - Implemented special case handling for step values in for loops
+   - Added support for multiple variables in for loops
+   - Created fallback mechanisms for different node structures
+   - Enhanced error handling and logging for better debugging
+
+### Key Decisions
+
+1. **Visitor Specialization Strategy**:
+   - Created dedicated visitors for specific control structures to improve maintainability
+   - Used composition in the main ControlStructureVisitor to delegate to specialized visitors
+   - Maintained backward compatibility with existing tests
+   - Added extensive logging for better debugging and traceability
+
+2. **Node Structure Handling**:
+   - Implemented robust node traversal to handle the complex structure of control statements
+   - Added fallback mechanisms to handle different node structures in the CST
+   - Used field names when available and child indices as fallback
+   - Created utility functions for common node traversal patterns
+
+3. **Testing Approach**:
+   - Created comprehensive tests for various control structure formats
+   - Used real OpenscadParser instances in tests for better integration testing
+   - Added tests for edge cases and special formats
+   - Ensured backward compatibility with existing tests
+
 ## 2025-05-23: Implemented Module and Function Definition Handling
 
 ### Completed Tasks

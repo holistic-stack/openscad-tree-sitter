@@ -16,17 +16,27 @@ import { BaseASTVisitor } from './base-ast-visitor';
 import { getLocation } from '../utils/location-utils';
 import { findDescendantOfType } from '../utils/node-utils';
 import { extractArguments } from '../extractors/argument-extractor';
+import { IfElseVisitor } from './control-structure-visitor/if-else-visitor';
+import { ForLoopVisitor } from './control-structure-visitor/for-loop-visitor';
+import { ExpressionVisitor } from './expression-visitor';
 
 /**
  * Visitor for control structures
  */
 export class ControlStructureVisitor extends BaseASTVisitor {
+  private ifElseVisitor: IfElseVisitor;
+  private forLoopVisitor: ForLoopVisitor;
+  private expressionVisitor: ExpressionVisitor;
+
   /**
    * Create a new ControlStructureVisitor
    * @param source The source code (optional, defaults to empty string)
    */
   constructor(source: string = '') {
     super(source);
+    this.ifElseVisitor = new IfElseVisitor(source);
+    this.forLoopVisitor = new ForLoopVisitor(source);
+    this.expressionVisitor = new ExpressionVisitor(source);
   }
 
   /**
@@ -37,57 +47,8 @@ export class ControlStructureVisitor extends BaseASTVisitor {
   visitIfStatement(node: TSNode): ast.IfNode | null {
     console.log(`[ControlStructureVisitor.visitIfStatement] Processing if statement: ${node.text.substring(0, 50)}`);
 
-    // Extract condition
-    const conditionNode = node.childForFieldName('condition');
-    if (!conditionNode) {
-      console.log(`[ControlStructureVisitor.visitIfStatement] No condition found`);
-      return null;
-    }
-
-    // Create a simple expression node for the condition
-    // In a real implementation, this would use an expression visitor
-    const condition: ast.ExpressionNode = {
-      type: 'expression',
-      expressionType: 'literal',
-      value: conditionNode.text,
-      location: getLocation(conditionNode)
-    };
-
-    // Extract then branch
-    const thenNode = node.childForFieldName('consequence');
-    if (!thenNode) {
-      console.log(`[ControlStructureVisitor.visitIfStatement] No then branch found`);
-      return null;
-    }
-
-    const thenBranch = this.visitBlock(thenNode);
-
-    // Extract else branch if it exists
-    const elseNode = node.childForFieldName('alternative');
-    let elseBranch: ast.ASTNode[] | undefined = undefined;
-
-    if (elseNode) {
-      // Check if this is an else-if or a simple else
-      const elseIfNode = findDescendantOfType(elseNode, 'if_statement');
-      if (elseIfNode) {
-        // This is an else-if, so process it as an if statement
-        const elseIfResult = this.visitIfStatement(elseIfNode);
-        if (elseIfResult) {
-          elseBranch = [elseIfResult];
-        }
-      } else {
-        // This is a simple else, so process its block
-        elseBranch = this.visitBlock(elseNode);
-      }
-    }
-
-    return {
-      type: 'if',
-      condition,
-      thenBranch,
-      elseBranch,
-      location: getLocation(node)
-    };
+    // Delegate to the specialized IfElseVisitor
+    return this.ifElseVisitor.visitIfStatement(node);
   }
 
   /**
@@ -98,109 +59,8 @@ export class ControlStructureVisitor extends BaseASTVisitor {
   visitForStatement(node: TSNode): ast.ForLoopNode | null {
     console.log(`[ControlStructureVisitor.visitForStatement] Processing for statement: ${node.text.substring(0, 50)}`);
 
-    // Extract variables and ranges
-    const argumentsNode = node.childForFieldName('arguments');
-    if (!argumentsNode) {
-      console.log(`[ControlStructureVisitor.visitForStatement] No arguments found`);
-      return null;
-    }
-
-    // Extract variables from the arguments
-    const variables: ast.ForLoopVariable[] = [];
-
-    // In OpenSCAD, for loops can have multiple variables
-    // For example: for (i = [0:10], j = [0:5])
-    const args = extractArguments(argumentsNode);
-
-    for (const arg of args) {
-      if (arg.name) {
-        // This is a variable with a range
-        const variable: ast.ForLoopVariable = {
-          variable: arg.name,
-          range: {
-            type: 'expression',
-            expressionType: 'literal',
-            value: typeof arg.value === 'object' && !Array.isArray(arg.value) && arg.value.type === 'expression'
-              ? arg.value.value
-              : typeof arg.value === 'string' || typeof arg.value === 'number' || typeof arg.value === 'boolean'
-                ? arg.value
-                : JSON.stringify(arg.value),
-            location: getLocation(argumentsNode)
-          }
-        };
-
-        variables.push(variable);
-      }
-    }
-
-    // If no variables were found, try to extract them from the text
-    if (variables.length === 0) {
-      // Simple parsing for testing purposes
-      const forHeaderMatch = node.text.match(/for\s*\(\s*([^)]+)\s*\)/);
-      if (forHeaderMatch) {
-        const variablesText = forHeaderMatch[1];
-        const variableParts = variablesText.split(',').map(part => part.trim());
-
-        for (const part of variableParts) {
-          const [varName, rangeText] = part.split('=').map(p => p.trim());
-
-          if (varName && rangeText) {
-            // Check if this is a range with step
-            const rangeWithStepMatch = rangeText.match(/\[\s*([^:]+)\s*:\s*([^:]+)\s*:\s*([^\]]+)\s*\]/);
-            if (rangeWithStepMatch) {
-              const start = parseFloat(rangeWithStepMatch[1]);
-              const step = parseFloat(rangeWithStepMatch[2]);
-              const end = parseFloat(rangeWithStepMatch[3]);
-
-              variables.push({
-                variable: varName,
-                range: [start, end],
-                step
-              });
-            } else {
-              // Check if this is a simple range
-              const rangeMatch = rangeText.match(/\[\s*([^:]+)\s*:\s*([^\]]+)\s*\]/);
-              if (rangeMatch) {
-                const start = parseFloat(rangeMatch[1]);
-                const end = parseFloat(rangeMatch[2]);
-
-                variables.push({
-                  variable: varName,
-                  range: [start, end]
-                });
-              } else {
-                // This is a variable with an expression
-                variables.push({
-                  variable: varName,
-                  range: {
-                    type: 'expression',
-                    expressionType: 'literal',
-                    value: rangeText,
-                    location: getLocation(argumentsNode)
-                  }
-                });
-              }
-            }
-          }
-        }
-      }
-    }
-
-    // Extract body
-    const bodyNode = node.childForFieldName('body');
-    if (!bodyNode) {
-      console.log(`[ControlStructureVisitor.visitForStatement] No body found`);
-      return null;
-    }
-
-    const body = this.visitBlock(bodyNode);
-
-    return {
-      type: 'for_loop',
-      variables,
-      body,
-      location: getLocation(node)
-    };
+    // Delegate to the specialized ForLoopVisitor
+    return this.forLoopVisitor.visitForStatement(node);
   }
 
   /**
@@ -292,9 +152,9 @@ export class ControlStructureVisitor extends BaseASTVisitor {
     // Handle control structure functions
     switch (functionName.trim()) {
       case 'if':
-        return this.createIfNode(node, args);
+        return this.ifElseVisitor.createIfNode(node, args);
       case 'for':
-        return this.createForNode(node, args);
+        return this.forLoopVisitor.createForNode(node, args);
       case 'let':
         return this.createLetNode(node, args);
       case 'each':
@@ -303,107 +163,6 @@ export class ControlStructureVisitor extends BaseASTVisitor {
         console.log(`[ControlStructureVisitor.createASTNodeForFunction] Unsupported function: ${functionName}`);
         return null;
     }
-  }
-
-  /**
-   * Create an if node
-   * @param node The node containing the if statement
-   * @param args The arguments to the if statement
-   * @returns The if AST node or null if the arguments are invalid
-   */
-  private createIfNode(node: TSNode, args: ast.Parameter[]): ast.IfNode | null {
-    console.log(`[ControlStructureVisitor.createIfNode] Creating if node with ${args.length} arguments`);
-
-    // For testing purposes, create a condition even if no arguments are provided
-    let condition: ast.ExpressionNode;
-
-    if (args.length >= 1 && args[0].value) {
-      condition = {
-        type: 'expression',
-        expressionType: 'literal',
-        value: typeof args[0].value === 'object' && !Array.isArray(args[0].value) && args[0].value.type === 'expression'
-          ? args[0].value.value
-          : typeof args[0].value === 'string' || typeof args[0].value === 'number' || typeof args[0].value === 'boolean'
-            ? args[0].value
-            : JSON.stringify(args[0].value),
-        location: getLocation(node)
-      };
-    } else {
-      // Default condition for testing
-      condition = {
-        type: 'expression',
-        expressionType: 'literal',
-        value: 'true',
-        location: getLocation(node)
-      };
-    }
-
-    // For testing purposes, create empty then and else branches
-    return {
-      type: 'if',
-      condition,
-      thenBranch: [],
-      elseBranch: undefined,
-      location: getLocation(node)
-    };
-  }
-
-  /**
-   * Create a for node
-   * @param node The node containing the for statement
-   * @param args The arguments to the for statement
-   * @returns The for loop AST node or null if the arguments are invalid
-   */
-  private createForNode(node: TSNode, args: ast.Parameter[]): ast.ForLoopNode | null {
-    console.log(`[ControlStructureVisitor.createForNode] Creating for node with ${args.length} arguments`);
-
-    // Extract variables from the arguments
-    const variables: ast.ForLoopVariable[] = [];
-
-    // Process arguments if available
-    if (args.length > 0) {
-      for (const arg of args) {
-        if (arg.name) {
-          // This is a variable with a range
-          const variable: ast.ForLoopVariable = {
-            variable: arg.name,
-            range: {
-              type: 'expression',
-              expressionType: 'literal',
-              value: typeof arg.value === 'object' && !Array.isArray(arg.value) && arg.value.type === 'expression'
-                ? arg.value.value
-                : typeof arg.value === 'string' || typeof arg.value === 'number' || typeof arg.value === 'boolean'
-                  ? arg.value
-                  : JSON.stringify(arg.value),
-              location: getLocation(node)
-            }
-          };
-
-          variables.push(variable);
-        }
-      }
-    }
-
-    // If no variables were found, create a default one for testing
-    if (variables.length === 0) {
-      variables.push({
-        variable: 'i',
-        range: {
-          type: 'expression',
-          expressionType: 'literal',
-          value: '[0:10]',
-          location: getLocation(node)
-        }
-      });
-    }
-
-    // For testing purposes, create an empty body
-    return {
-      type: 'for_loop',
-      variables,
-      body: [],
-      location: getLocation(node)
-    };
   }
 
   /**

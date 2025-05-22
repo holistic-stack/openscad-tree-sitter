@@ -2,67 +2,87 @@
 
 ## High Priority Tasks
 
-### 1. Implement Control Structure Visitors [NEXT]
-- **Goal**: Support control flow structures like if-else, for loops, etc.
-- **Status**: Next up
-- **Description**: Create visitor implementations for control structures
-- **Subtasks**:
-  - [ ] Implement IfElseVisitor
-  - [ ] Implement ForLoopVisitor
-  - [ ] Add support for conditional expressions
-  - [ ] Implement iterator handling for loop constructs
-  - [ ] Add tests for control structures
-- **Dependencies**: None
-- **Priority**: High
-- **Assignee**: TBD
-- **Estimated Time**: 5 hours
-
-### 2. Enhance Expression Handling
+### 1. Enhance Expression Handling [IN PROGRESS]
 - **Goal**: Improve support for complex expressions
-- **Status**: Planned
-- **Description**: Create visitor implementations for expression types
+- **Status**: In progress
+- **Description**: Refactor and enhance the ExpressionVisitor to properly handle all expression types
 - **Subtasks**:
-  - [ ] Implement binary operation visitors (arithmetic, logical, relational)
-  - [ ] Support unary operations (negation, logical not)
-  - [ ] Add support for function calls in expressions
-  - [ ] Implement variable references
-  - [ ] Add tests for expression handling
+  - [x] Create specialized visitors for different expression types
+  - [x] Implement FunctionCallVisitor to handle function calls in expressions
+  - [x] Update ExpressionVisitor to use FunctionCallVisitor
+  - [ ] Implement BinaryExpressionVisitor to handle binary operations
+  - [ ] Enhance visitBinaryExpression to handle all binary operators with proper precedence
+  - [ ] Implement UnaryExpressionVisitor to handle unary operations
+  - [ ] Improve visitUnaryExpression to handle all unary operators
+  - [ ] Add support for nested expressions with different operators
+  - [ ] Implement proper handling of parenthesized expressions
+  - [ ] Add comprehensive tests with real CST nodes
 - **Dependencies**: None
 - **Priority**: High
 - **Assignee**: TBD
-- **Estimated Time**: 4 hours
+- **Estimated Time**: 8 hours
+- **Implementation Details**:
+  - The current ExpressionVisitor implementation relies heavily on string manipulation
+  - Need to refactor to use proper CST traversal with node.childForFieldName and node.child methods
+  - Binary operations should handle: +, -, *, /, %, ==, !=, <, <=, >, >=, &&, ||
+  - Unary operations should handle: +, -, !
+  - Function calls should extract function name and arguments properly
+  - Tests should use real OpenscadParser instances and CST nodes
 
-### 3. Improve Error Handling and Reporting
+### 2. Improve Error Handling and Reporting
 - **Goal**: Enhance error messages and recovery mechanisms
 - **Status**: Planned
 - **Description**: Add better error handling and recovery strategies throughout the parser
 - **Subtasks**:
+  - [ ] Create a centralized error handling system
   - [ ] Implement detailed error messages for parsing failures
-  - [ ] Add context information to error messages
+  - [ ] Add context information to error messages (line numbers, code snippets)
   - [ ] Implement error recovery strategies for common syntax errors
   - [ ] Add error logging and telemetry
-- **Dependencies**: None
-- **Priority**: Medium
-- **Assignee**: TBD
-- **Estimated Time**: 4 hours
-
-## Medium Priority Tasks
-
-### 4. Enhance AST with Semantic Information
-- **Goal**: Add semantic information to AST nodes for better downstream processing
-- **Status**: Planned
-- **Description**: Augment AST nodes with additional semantic information
-- **Subtasks**:
-  - [ ] Add type information to expressions
-  - [ ] Implement scope tracking for variables
-  - [ ] Add symbol resolution for identifiers
-  - [ ] Implement basic semantic validation
+  - [ ] Create error types for different kinds of parsing errors
+  - [ ] Add error handling for expression parsing
+  - [ ] Implement graceful degradation for unparseable expressions
 - **Dependencies**: None
 - **Priority**: Medium
 - **Assignee**: TBD
 - **Estimated Time**: 6 hours
+- **Implementation Details**:
+  - Create a centralized ErrorHandler class to manage error reporting
+  - Use location information from CST nodes to provide context
+  - Implement specific error types for different parsing failures
+  - Add recovery strategies to continue parsing after errors
+  - Provide helpful suggestions for fixing common errors
+  - Add logging with different severity levels
 
-### 5. Optimize Parser Performance
+## Medium Priority Tasks
+
+### 3. Enhance AST with Semantic Information
+- **Goal**: Add semantic information to AST nodes for better downstream processing
+- **Status**: Planned
+- **Description**: Augment AST nodes with additional semantic information
+- **Subtasks**:
+  - [ ] Create a type system for OpenSCAD expressions
+  - [ ] Add type inference for expressions
+  - [ ] Implement scope tracking for variables
+  - [ ] Create a symbol table for variable and function declarations
+  - [ ] Add symbol resolution for identifiers
+  - [ ] Implement basic semantic validation
+  - [ ] Add type checking for function arguments
+  - [ ] Implement warnings for type mismatches
+- **Dependencies**: Task #1 (Enhance Expression Handling)
+- **Priority**: Medium
+- **Assignee**: TBD
+- **Estimated Time**: 8 hours
+- **Implementation Details**:
+  - Create a TypeSystem class to manage type information
+  - Implement type inference rules for OpenSCAD expressions
+  - Create a ScopeManager to track variable scopes
+  - Implement a SymbolTable for variable and function declarations
+  - Add type checking for function arguments
+  - Provide warnings for potential type mismatches
+  - Enhance AST nodes with type and scope information
+
+### 4. Optimize Parser Performance
 - **Goal**: Improve parsing speed and memory usage
 - **Status**: Planned
 - **Description**: Profile and optimize parser performance
@@ -76,7 +96,7 @@
 - **Assignee**: TBD
 - **Estimated Time**: 5 hours
 
-### 6. Add Support for Include and Use Statements
+### 5. Add Support for Include and Use Statements
 - **Goal**: Handle file inclusion and library usage
 - **Status**: Planned
 - **Description**: Implement handling for include and use statements
@@ -92,7 +112,7 @@
 
 ## Low Priority Tasks
 
-### 7. Implement Pretty Printer
+### 6. Implement Pretty Printer
 - **Goal**: Create a pretty printer for AST nodes
 - **Status**: Planned
 - **Description**: Implement a pretty printer to convert AST back to formatted OpenSCAD code
@@ -106,7 +126,7 @@
 - **Assignee**: TBD
 - **Estimated Time**: 5 hours
 
-### 8. Add Documentation Generator
+### 7. Add Documentation Generator
 - **Goal**: Generate documentation from OpenSCAD code
 - **Status**: Planned
 - **Description**: Create a documentation generator based on AST analysis
@@ -121,6 +141,18 @@
 - **Estimated Time**: 6 hours
 
 ## Completed Tasks
+
+### Implemented Control Structure Visitors
+- **Goal**: Support control flow structures like if-else, for loops, etc.
+- **Status**: Completed
+- **Description**: Created visitor implementations for control structures
+- **Subtasks**:
+  - [x] Implement IfElseVisitor
+  - [x] Implement ForLoopVisitor
+  - [x] Add support for conditional expressions
+  - [x] Implement iterator handling for loop constructs
+  - [x] Add tests for control structures
+- **Completed Date**: 2025-05-24
 
 ### Implemented Module and Function Definition Handling
 - **Goal**: Support parsing and AST generation for module and function definitions
