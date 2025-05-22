@@ -14,7 +14,7 @@ export function extractColorNode(node: TSNode): ast.ColorNode | null {
   console.log(`[extractColorNode] Processing color node: ${node.text.substring(0, 50)}`);
 
   // Default values
-  let color: string | [number, number, number] | [number, number, number, number] = "red";
+  let color: string | ast.Vector4D = "red";
   let alpha: number | undefined = undefined;
 
   // Extract arguments from the argument_list
@@ -42,10 +42,11 @@ export function extractColorNode(node: TSNode): ast.ColorNode | null {
       const vectorValue = extractVectorParameter(arg);
       if (vectorValue) {
         if (vectorValue.length === 3) {
-          color = vectorValue as [number, number, number];
-          console.log(`[extractColorNode] Found RGB color: ${JSON.stringify(color)}`);
+          // Convert RGB to RGBA by adding alpha=1
+          color = [vectorValue[0], vectorValue[1], vectorValue[2], 1.0] as ast.Vector4D;
+          console.log(`[extractColorNode] Found RGB color, converted to RGBA: ${JSON.stringify(color)}`);
         } else if (vectorValue.length === 4) {
-          color = vectorValue as [number, number, number, number];
+          color = [vectorValue[0], vectorValue[1], vectorValue[2], vectorValue[3]] as ast.Vector4D;
           alpha = vectorValue[3];
           console.log(`[extractColorNode] Found RGBA color: ${JSON.stringify(color)}`);
         } else {
@@ -83,7 +84,6 @@ export function extractColorNode(node: TSNode): ast.ColorNode | null {
   return {
     type: 'color',
     c: color,
-    alpha,
     children,
     location: getLocation(node)
   };

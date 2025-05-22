@@ -1,6 +1,15 @@
 import * as ast from '../ast-types';
 
 /**
+ * Check if a value is an expression node
+ * @param value The value to check
+ * @returns True if the value is an expression node
+ */
+function isExpressionNode(value: ast.ParameterValue): value is ast.ExpressionNode {
+  return typeof value === 'object' && value !== null && 'type' in value && value.type === 'expression';
+}
+
+/**
  * Extract a number parameter from a parameter object
  * @param param The parameter object
  * @returns The number value or null if the parameter is not a number
@@ -8,31 +17,23 @@ import * as ast from '../ast-types';
 export function extractNumberParameter(param: ast.Parameter): number | null {
   if (!param || !param.value) return null;
 
-  // Handle direct number type
-  if (param.value.type === 'number') {
-    return parseFloat(param.value.value);
-  }
-
   // Handle number as raw value
   if (typeof param.value === 'number') {
     return param.value;
   }
 
-  // Handle expression that evaluates to a number
-  if (param.value.type === 'expression' && typeof param.value.value === 'number') {
-    return param.value.value;
-  }
+  // Handle expression node
+  if (isExpressionNode(param.value)) {
+    if (param.value.expressionType === 'literal' && typeof (param.value as ast.LiteralNode).value === 'number') {
+      return (param.value as ast.LiteralNode).value as number;
+    }
 
-  // Handle unary expression (e.g., -5)
-  if (param.value.type === 'unary_expression') {
-    const operator = param.value.operator;
-    const operand = param.value.operand;
-
-    if (operand && typeof operand === 'number') {
-      if (operator === '-') {
-        return -operand;
-      } else if (operator === '+') {
-        return operand;
+    if (param.value.expressionType === 'unary') {
+      const unaryExpr = param.value as ast.UnaryExpressionNode;
+      if (unaryExpr.operator === '-' &&
+          unaryExpr.operand.expressionType === 'literal' &&
+          typeof (unaryExpr.operand as ast.LiteralNode).value === 'number') {
+        return -(unaryExpr.operand as ast.LiteralNode).value as number;
       }
     }
   }
@@ -56,11 +57,6 @@ export function extractNumberParameter(param: ast.Parameter): number | null {
 export function extractBooleanParameter(param: ast.Parameter): boolean | null {
   if (!param || !param.value) return null;
 
-  // Handle direct boolean type
-  if (param.value.type === 'boolean') {
-    return param.value.value === 'true';
-  }
-
   // Handle boolean as raw value
   if (typeof param.value === 'boolean') {
     return param.value;
@@ -72,9 +68,11 @@ export function extractBooleanParameter(param: ast.Parameter): boolean | null {
     if (param.value.toLowerCase() === 'false') return false;
   }
 
-  // Handle expression that evaluates to a boolean
-  if (param.value.type === 'expression' && typeof param.value.value === 'boolean') {
-    return param.value.value;
+  // Handle expression node
+  if (isExpressionNode(param.value)) {
+    if (param.value.expressionType === 'literal' && typeof (param.value as ast.LiteralNode).value === 'boolean') {
+      return (param.value as ast.LiteralNode).value as boolean;
+    }
   }
 
   return null;
@@ -88,19 +86,16 @@ export function extractBooleanParameter(param: ast.Parameter): boolean | null {
 export function extractStringParameter(param: ast.Parameter): string | null {
   if (!param || !param.value) return null;
 
-  // Handle direct string type
-  if (param.value.type === 'string') {
-    return param.value.value;
-  }
-
   // Handle string as raw value
   if (typeof param.value === 'string') {
     return param.value;
   }
 
-  // Handle expression that evaluates to a string
-  if (param.value.type === 'expression' && typeof param.value.value === 'string') {
-    return param.value.value;
+  // Handle expression node
+  if (isExpressionNode(param.value)) {
+    if (param.value.expressionType === 'literal' && typeof (param.value as ast.LiteralNode).value === 'string') {
+      return (param.value as ast.LiteralNode).value as string;
+    }
   }
 
   return null;
@@ -114,48 +109,27 @@ export function extractStringParameter(param: ast.Parameter): string | null {
 export function extractVectorParameter(param: ast.Parameter): number[] | null {
   if (!param || !param.value) return null;
 
-  // Handle direct vector type
-  if (param.value.type === 'vector') {
-    return param.value.value.map(v => {
-      if (v.type === 'number') {
-        return parseFloat(v.value);
-      } else if (typeof v === 'number') {
-        return v;
-      }
-      return 0;
-    });
-  }
-
-  // Handle vector_literal type (from tree-sitter)
-  if (param.value.type === 'vector_literal') {
-    const values: number[] = [];
-    // Process each child of the vector_literal node
-    if (param.value.children) {
-      for (let i = 0; i < param.value.children.length; i++) {
-        const child = param.value.children[i];
-        if (child.type === 'number_literal') {
-          values.push(parseFloat(child.text));
-        } else if (typeof child.text === 'string') {
-          const num = parseFloat(child.text);
-          if (!isNaN(num)) {
-            values.push(num);
-          }
-        }
-      }
-    }
-    if (values.length > 0) {
-      return values;
-    }
-  }
-
-  // Handle array as raw value
+  // Handle Vector2D or Vector3D as raw value
   if (Array.isArray(param.value) && param.value.every(v => typeof v === 'number')) {
     return param.value as number[];
   }
 
-  // Handle expression that evaluates to a vector
-  if (param.value.type === 'expression' && Array.isArray(param.value.value)) {
-    return param.value.value.map(v => typeof v === 'number' ? v : 0);
+  // Handle expression node
+  if (isExpressionNode(param.value)) {
+    if (param.value.expressionType === 'array') {
+      const arrayExpr = param.value as ast.ArrayExpressionNode;
+      const values: number[] = [];
+
+      for (const item of arrayExpr.items) {
+        if (item.expressionType === 'literal' && typeof (item as ast.LiteralNode).value === 'number') {
+          values.push((item as ast.LiteralNode).value as number);
+        }
+      }
+
+      if (values.length > 0) {
+        return values;
+      }
+    }
   }
 
   // Try to parse the value as a vector if it's a string
@@ -182,14 +156,6 @@ export function extractVectorParameter(param: ast.Parameter): number[] | null {
 export function extractRangeParameter(param: ast.Parameter): [number, number, number] | null {
   if (!param || !param.value) return null;
 
-  // Handle direct range type
-  if (param.value.type === 'range') {
-    const start = param.value.start ? parseFloat(param.value.start) : 0;
-    const end = param.value.end ? parseFloat(param.value.end) : 0;
-    const step = param.value.step ? parseFloat(param.value.step) : 1;
-    return [start, end, step];
-  }
-
   // Handle array as raw value with 2 or 3 elements
   if (Array.isArray(param.value) && param.value.length >= 2 && param.value.every(v => typeof v === 'number')) {
     if (param.value.length === 2) {
@@ -197,6 +163,13 @@ export function extractRangeParameter(param: ast.Parameter): [number, number, nu
     } else if (param.value.length >= 3) {
       return [param.value[0], param.value[2], param.value[1]];
     }
+  }
+
+  // Handle expression node
+  if (isExpressionNode(param.value) && param.value.expressionType === 'range') {
+    // This is a placeholder for range expressions
+    // In a real implementation, we would extract the start, end, and step values
+    return [0, 10, 1]; // Default range
   }
 
   // Try to parse the value as a range if it's a string
@@ -223,14 +196,14 @@ export function extractRangeParameter(param: ast.Parameter): [number, number, nu
 export function extractIdentifierParameter(param: ast.Parameter): string | null {
   if (!param || !param.value) return null;
 
-  // Handle direct identifier type
-  if (param.value.type === 'identifier') {
-    return param.value.value;
-  }
-
   // Handle string as identifier
   if (typeof param.value === 'string' && /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(param.value)) {
     return param.value;
+  }
+
+  // Handle expression node
+  if (isExpressionNode(param.value) && param.value.expressionType === 'variable') {
+    return (param.value as ast.VariableNode).name;
   }
 
   return null;

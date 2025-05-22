@@ -2,6 +2,52 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 
 /**
+ * Convert a Value to a ParameterValue
+ * @param value The Value object to convert
+ * @returns A ParameterValue object
+ */
+function convertValueToParameterValue(value: ast.Value): ast.ParameterValue {
+  if (value.type === 'number') {
+    return parseFloat(value.value as string);
+  } else if (value.type === 'boolean') {
+    return value.value === 'true';
+  } else if (value.type === 'string') {
+    return value.value as string;
+  } else if (value.type === 'identifier') {
+    return value.value as string;
+  } else if (value.type === 'vector') {
+    const vectorValues = (value.value as ast.Value[]).map(v => {
+      if (v.type === 'number') {
+        return parseFloat(v.value as string);
+      }
+      return 0;
+    });
+
+    if (vectorValues.length === 2) {
+      return vectorValues as ast.Vector2D;
+    } else if (vectorValues.length >= 3) {
+      return [vectorValues[0], vectorValues[1], vectorValues[2]] as ast.Vector3D;
+    }
+    return 0; // Default fallback
+  } else if (value.type === 'range') {
+    // Create an expression node for range
+    return {
+      type: 'expression',
+      expressionType: 'range',
+      location: undefined
+    };
+  }
+
+  // Default fallback - create a literal expression
+  return {
+    type: 'expression',
+    expressionType: 'literal',
+    value: typeof value.value === 'string' ? value.value : '',
+    location: undefined
+  } as ast.LiteralNode;
+}
+
+/**
  * Extract arguments from an arguments node
  * @param argsNode The arguments node
  * @returns An array of parameters
@@ -65,7 +111,9 @@ export function extractArguments(argsNode: TSNode): ast.Parameter[] {
             continue;
           }
 
-          args.push({ name, value });
+          // Convert Value to ParameterValue
+          const paramValue = convertValueToParameterValue(value);
+          args.push({ name, value: paramValue });
         }
       } else {
         // This is a positional argument
@@ -86,7 +134,9 @@ export function extractArguments(argsNode: TSNode): ast.Parameter[] {
 
         if (value) {
           console.log(`[extractArguments] Extracted value: ${JSON.stringify(value)}`);
-          args.push({ value });
+          // Convert Value to ParameterValue
+          const paramValue = convertValueToParameterValue(value);
+          args.push({ value: paramValue });
         }
       }
     }
@@ -121,21 +171,27 @@ function extractArgument(argNode: TSNode): ast.Parameter | null {
     }
 
     console.log(`[extractArgument] Extracted value: ${JSON.stringify(value)}`);
-    return { name, value };
+    // Convert Value to ParameterValue
+    const paramValue = convertValueToParameterValue(value);
+    return { name, value: paramValue };
   } else if (argNode.namedChildCount === 1 && argNode.namedChild(0)) {
     // This is a positional argument
     const valueNode = argNode.namedChild(0);
-    console.log(`[extractArgument] Found positional argument: ${valueNode.text}`);
+    if (valueNode) {
+      console.log(`[extractArgument] Found positional argument: ${valueNode.text}`);
 
-    // Extract the value
-    const value = extractValue(valueNode);
-    if (!value) {
-      console.log(`[extractArgument] Failed to extract value from node: ${valueNode.text}`);
-      return null;
+      // Extract the value
+      const value = extractValue(valueNode);
+      if (!value) {
+        console.log(`[extractArgument] Failed to extract value from node: ${valueNode.text}`);
+        return null;
+      }
+
+      console.log(`[extractArgument] Extracted value: ${JSON.stringify(value)}`);
+      // Convert Value to ParameterValue
+      const paramValue = convertValueToParameterValue(value);
+      return { value: paramValue };
     }
-
-    console.log(`[extractArgument] Extracted value: ${JSON.stringify(value)}`);
-    return { value };
   }
 
   console.log(`[extractArgument] Failed to extract argument from node: ${argNode.text}`);

@@ -1043,6 +1043,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
             rightExpr = {
               type: 'expression',
               expressionType: 'binary',
+              expressionType: 'binary',
               operator: '-',
               left: rightLeftExpr,
               right: rightRightExpr,
@@ -1054,6 +1055,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
         if (leftExpr && rightExpr) {
           return {
             type: 'expression',
+            expressionType: 'binary',
             expressionType: 'binary',
             operator: '*',
             left: leftExpr,
@@ -1160,6 +1162,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
               rightExpr = {
                 type: 'expression',
                 expressionType: 'binary',
+                expressionType: 'binary',
                 operator: '*',
                 left: rightLeftExpr,
                 right: rightRightExpr,
@@ -1171,6 +1174,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
           if (leftExpr && rightExpr) {
             return {
               type: 'expression',
+              expressionType: 'binary',
               expressionType: 'binary',
               operator: '+',
               left: leftExpr,
@@ -1219,10 +1223,15 @@ export class ExpressionVisitor extends BaseASTVisitor {
             expressionType: 'literal',
             value: leftText === 'true',
             location: {
-              start: node.startPosition,
+              start: {
+                line: node.startPosition.row,
+                column: node.startPosition.column,
+                offset: node.startIndex
+              },
               end: {
                 line: node.startPosition.row,
-                column: node.startPosition.column + leftText.length
+                column: node.startPosition.column + leftText.length,
+                offset: node.startIndex + leftText.length
               }
             }
           };
@@ -1232,10 +1241,15 @@ export class ExpressionVisitor extends BaseASTVisitor {
             expressionType: 'literal',
             value: parseFloat(leftText),
             location: {
-              start: node.startPosition,
+              start: {
+                line: node.startPosition.row,
+                column: node.startPosition.column,
+                offset: node.startIndex
+              },
               end: {
                 line: node.startPosition.row,
-                column: node.startPosition.column + leftText.length
+                column: node.startPosition.column + leftText.length,
+                offset: node.startIndex + leftText.length
               }
             }
           };
@@ -1245,10 +1259,15 @@ export class ExpressionVisitor extends BaseASTVisitor {
             expressionType: 'variable',
             name: leftText,
             location: {
-              start: node.startPosition,
+              start: {
+                line: node.startPosition.row,
+                column: node.startPosition.column,
+                offset: node.startIndex
+              },
               end: {
                 line: node.startPosition.row,
-                column: node.startPosition.column + leftText.length
+                column: node.startPosition.column + leftText.length,
+                offset: node.startIndex + leftText.length
               }
             }
           };
@@ -1265,9 +1284,14 @@ export class ExpressionVisitor extends BaseASTVisitor {
             location: {
               start: {
                 line: node.startPosition.row,
-                column: node.startPosition.column + leftText.length + operator.length
+                column: node.startPosition.column + leftText.length + operator.length,
+                offset: node.startIndex + leftText.length + operator.length
               },
-              end: node.endPosition
+              end: {
+                line: node.endPosition.row,
+                column: node.endPosition.column,
+                offset: node.endIndex
+              }
             }
           };
         } else if (!isNaN(parseFloat(rightText))) {
@@ -1278,9 +1302,14 @@ export class ExpressionVisitor extends BaseASTVisitor {
             location: {
               start: {
                 line: node.startPosition.row,
-                column: node.startPosition.column + leftText.length + operator.length
+                column: node.startPosition.column + leftText.length + operator.length,
+                offset: node.startIndex + leftText.length + operator.length
               },
-              end: node.endPosition
+              end: {
+                line: node.endPosition.row,
+                column: node.endPosition.column,
+                offset: node.endIndex
+              }
             }
           };
         } else {
@@ -1291,9 +1320,14 @@ export class ExpressionVisitor extends BaseASTVisitor {
             location: {
               start: {
                 line: node.startPosition.row,
-                column: node.startPosition.column + leftText.length + operator.length
+                column: node.startPosition.column + leftText.length + operator.length,
+                offset: node.startIndex + leftText.length + operator.length
               },
-              end: node.endPosition
+              end: {
+                line: node.endPosition.row,
+                column: node.endPosition.column,
+                offset: node.endIndex
+              }
             }
           };
         }

@@ -508,7 +508,7 @@ export class TransformVisitor extends BaseASTVisitor {
     console.log(`[TransformVisitor.createColorNode] Creating color node with ${args.length} arguments`);
 
     // Extract color parameter
-    let color: string | [number, number, number] | [number, number, number, number] = "red";
+    let color: string | ast.Vector4D = "red";
     let alpha: number | undefined = undefined;
 
     const colorParam = args.find(arg => arg.name === undefined || arg.name === 'c');
@@ -524,10 +524,11 @@ export class TransformVisitor extends BaseASTVisitor {
         // Try to extract as a vector parameter
         const vector = extractVectorParameter(colorParam);
         if (vector && vector.length === 3) {
-          color = [vector[0], vector[1], vector[2]];
-          console.log(`[TransformVisitor.createColorNode] Found RGB color: ${JSON.stringify(color)}`);
+          // Convert RGB to RGBA by adding alpha=1
+          color = [vector[0], vector[1], vector[2], 1.0] as ast.Vector4D;
+          console.log(`[TransformVisitor.createColorNode] Found RGB color, converted to RGBA: ${JSON.stringify(color)}`);
         } else if (vector && vector.length === 4) {
-          color = [vector[0], vector[1], vector[2], vector[3]];
+          color = [vector[0], vector[1], vector[2], vector[3]] as ast.Vector4D;
           alpha = vector[3];
           console.log(`[TransformVisitor.createColorNode] Found RGBA color: ${JSON.stringify(color)}`);
         } else {

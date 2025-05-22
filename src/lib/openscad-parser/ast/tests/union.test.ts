@@ -20,7 +20,7 @@ describe('Union AST Generation', () => {
         cube(10, center=true);
         translate([5, 5, 5]) sphere(5);
       }`;
-      const ast = parser.parseAST(code, 'visitor');
+      const ast = parser.parseAST(code);
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);
@@ -39,7 +39,7 @@ describe('Union AST Generation', () => {
         cube(10, center=true);
         translate([5, 5, 5]) sphere(5);
       }`;
-      const ast = parser.parseAST(code, 'visitor');
+      const ast = parser.parseAST(code);
 
       expect(ast).toBeDefined();
       // With the real parser, the AST might be different
@@ -52,7 +52,7 @@ describe('Union AST Generation', () => {
       const code = `union() {
         cube(10);
       }`;
-      const ast = parser.parseAST(code, 'visitor');
+      const ast = parser.parseAST(code);
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);
@@ -68,7 +68,7 @@ describe('Union AST Generation', () => {
 
     it('should parse empty union', () => {
       const code = `union() { }`;
-      const ast = parser.parseAST(code, 'visitor');
+      const ast = parser.parseAST(code);
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);

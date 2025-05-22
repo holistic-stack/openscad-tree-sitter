@@ -119,7 +119,7 @@ describe('Scale AST Generation', () => {
   describe('scale transformation', () => {
     it('should parse scale with vector parameter', () => {
       const code = `scale([2, 1, 0.5]) cube(10);`;
-      const ast = parser.parseAST(code, 'visitor');
+      const ast = parser.parseAST(code);
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);
@@ -136,7 +136,7 @@ describe('Scale AST Generation', () => {
 
     it('should parse scale with scalar parameter (uniform)', () => {
       const code = `scale(2) cube(10);`;
-      const ast = parser.parseAST(code, 'visitor');
+      const ast = parser.parseAST(code);
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);
@@ -153,7 +153,7 @@ describe('Scale AST Generation', () => {
 
     it('should parse scale with named v parameter', () => {
       const code = `scale(v=[2, 1, 0.5]) cube(10);`;
-      const ast = parser.parseAST(code, 'visitor');
+      const ast = parser.parseAST(code);
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);
@@ -170,7 +170,7 @@ describe('Scale AST Generation', () => {
 
     it('should parse scale with 2D vector parameter', () => {
       const code = `scale([2, 1]) cube(10);`;
-      const ast = parser.parseAST(code, 'visitor');
+      const ast = parser.parseAST(code);
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);
@@ -190,7 +190,7 @@ describe('Scale AST Generation', () => {
         cube(10);
         sphere(5);
       }`;
-      const ast = parser.parseAST(code, 'visitor');
+      const ast = parser.parseAST(code);
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);
