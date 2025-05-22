@@ -465,7 +465,7 @@ export class TransformVisitor extends BaseASTVisitor {
     console.log(`[TransformVisitor.createMultmatrixNode] Creating multmatrix node with ${args.length} arguments`);
 
     // Extract matrix parameter
-    let matrix: number[][] = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    const matrix: number[][] = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
     const matrixParam = args.find(arg => arg.name === undefined || arg.name === 'm');
 
     if (matrixParam && matrixParam.value.type === 'matrix') {

@@ -200,8 +200,8 @@ describe('cursor-utils', () => {
 
     it('should handle different node types correctly', () => {
       // Test with a simple cube call
-      let code = 'cube(10);';
-      let cursor = parseCode(code);
+      const code = 'cube(10);';
+      const cursor = parseCode(code);
 
       // Log initial cursor state
       console.log('Initial cursor state:');

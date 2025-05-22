@@ -545,14 +545,14 @@ We've updated all test files to use the real parser instead of mocks:
 - [x] Update base-ast-visitor.test.ts to match the actual structure of the real parser's root node
 - [x] Skip the cube-extractor.test.ts tests that were using childForFieldName method
 
-**Next Task: Implement Real Parsing for Sphere Primitive (CURRENT TASK)**
-- Analyze the CST structure for sphere primitives using the debug tools
-- Create sphere-extractor.ts file to extract sphere parameters from CST nodes
-- Implement createSphereNode method in PrimitiveVisitor
-- Handle radius (r), diameter (d), and resolution parameters ($fn, $fa, $fs)
-- Create sphere-extractor.test.ts to test the extractor directly
-- Update sphere.test.ts to use proper testing approach (similar to cube.test.ts)
-- Ensure all sphere-related tests pass with the real implementation
+**Next Task: Implement Real Parsing for Sphere Primitive (COMPLETED)**
+- ✅ Analyzed the CST structure for sphere primitives using the debug tools
+- ✅ Created sphere-extractor.ts file to extract sphere parameters from CST nodes
+- ✅ Implemented createSphereNode method in PrimitiveVisitor
+- ✅ Handled radius (r), diameter (d), and resolution parameters ($fn, $fa, $fs)
+- ✅ Created sphere-extractor.test.ts to test the extractor directly
+- ✅ Updated sphere.test.ts to use proper testing approach (similar to cube.test.ts)
+- ✅ Ensured all sphere-related tests pass with the real implementation
 
 **Steps to Implement Sphere Primitive Parsing:**
 1. Use the debug tools to analyze the CST structure for sphere primitives:
@@ -759,7 +759,7 @@ We've updated all test files to use the real parser instead of mocks:
    pnpm test:unit src/lib/openscad-parser/ast/tests/sphere-extractor.test.ts
    ```
 
-**Next Task: Implement Real Parsing for Cylinder Primitive (NEXT TASK)**
+**Next Task: Implement Real Parsing for Cylinder Primitive (CURRENT TASK)**
 - Analyze the CST structure for cylinder primitives using the debug tools
 - Create cylinder-extractor.ts file to extract cylinder parameters from CST nodes
 - Implement createCylinderNode method in PrimitiveVisitor

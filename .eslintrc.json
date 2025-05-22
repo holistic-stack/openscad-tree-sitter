@@ -23,11 +23,20 @@
   "overrides": [
     {
       "files": ["**/*.test.ts"],
-      "env": {
-        "vitest": true
-      },
       "rules": {
         "no-console": "off"
+      },
+      "globals": {
+        "describe": "readonly",
+        "it": "readonly",
+        "expect": "readonly",
+        "vi": "readonly",
+        "beforeEach": "readonly",
+        "afterEach": "readonly",
+        "beforeAll": "readonly",
+        "afterAll": "readonly",
+        "test": "readonly",
+        "jest": "readonly"
       }
     }
   ]

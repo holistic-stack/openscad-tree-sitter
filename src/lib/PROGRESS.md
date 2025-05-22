@@ -343,21 +343,21 @@ See [TODO.md](./TODO.md) for detailed next steps and implementation tasks.
 - Expression handling needs improvement
 
 ### Next Steps
-- Fix failing tests with real parser implementation (TOP PRIORITY)
-  - Update primitive-visitor.ts to handle vector sizes correctly for cubes
-  - Fix sphere-visitor.ts to handle diameter and special parameters correctly
-  - Update csg-visitor.ts to correctly populate the children array for intersection and union nodes
-  - Fix transform-visitor.ts to handle color and offset transformations correctly
-  - Update base-ast-visitor.test.ts to match the actual structure of the real parser's root node
-- Implement real parsing logic for sphere primitive (CURRENT TASK)
-  - Analyze the CST structure for sphere primitives using the debug tools
-  - Create sphere-extractor.ts file to extract sphere parameters from CST nodes
-  - Implement createSphereNode method in PrimitiveVisitor
-  - Handle radius (r), diameter (d), and resolution parameters ($fn, $fa, $fs)
-  - Create sphere-extractor.test.ts to test the extractor directly
-  - Update sphere.test.ts to use proper testing approach (similar to cube.test.ts)
-  - Ensure all sphere-related tests pass with the real implementation
-- Implement real parsing logic for cylinder primitive (NEXT TASK)
+- Fix failing tests with real parser implementation (COMPLETED)
+  - ✅ Updated primitive-visitor.ts to handle vector sizes correctly for cubes
+  - ✅ Fixed sphere-visitor.ts to handle diameter and special parameters correctly
+  - ✅ Updated csg-visitor.ts to correctly populate the children array for intersection and union nodes
+  - ✅ Fixed transform-visitor.ts to handle color and offset transformations correctly
+  - ✅ Updated base-ast-visitor.test.ts to match the actual structure of the real parser's root node
+- Implement real parsing logic for sphere primitive (COMPLETED)
+  - ✅ Analyzed the CST structure for sphere primitives using the debug tools
+  - ✅ Created sphere-extractor.ts file to extract sphere parameters from CST nodes
+  - ✅ Implemented createSphereNode method in PrimitiveVisitor
+  - ✅ Handled radius (r), diameter (d), and resolution parameters ($fn, $fa, $fs)
+  - ✅ Created sphere-extractor.test.ts to test the extractor directly
+  - ✅ Updated sphere.test.ts to use proper testing approach (similar to cube.test.ts)
+  - ✅ Ensured all sphere-related tests pass with the real implementation
+- Implement real parsing logic for cylinder primitive (CURRENT TASK)
   - Analyze the CST structure for cylinder primitives using the debug tools
   - Create cylinder-extractor.ts file to extract cylinder parameters from CST nodes
   - Implement createCylinderNode method in PrimitiveVisitor
@@ -373,6 +373,14 @@ See [TODO.md](./TODO.md) for detailed next steps and implementation tasks.
 - Add more comprehensive tests for all OpenSCAD constructs
 
 ### Recently Completed
+- Implemented real parsing for sphere primitives:
+  - Created sphere-extractor.ts to extract sphere parameters from CST nodes
+  - Updated createSphereNode method in PrimitiveVisitor to use proper parameter extraction
+  - Handled radius (r), diameter (d), and resolution parameters ($fn, $fa, $fs)
+  - Created sphere-extractor.test.ts to test the extractor directly
+  - Updated sphere.test.ts to use proper testing approach
+  - Ensured all sphere-related tests pass with the real implementation
+
 - Implemented proper testing for cube primitive parsing:
   - Created cube-extractor.test.ts to test the cube extractor directly
   - Created primitive-visitor.test.ts to test the createCubeNode method
@@ -404,6 +412,7 @@ See [TODO.md](./TODO.md) for detailed next steps and implementation tasks.
 - Performance optimizations may be needed for large files
 - Some AST node types may need refinement based on real-world usage
 - Module and function definitions and calls need more work
-- The real parsing logic for sphere and cylinder primitives is not yet implemented
+- The real parsing logic for sphere primitives is now implemented
+- The real parsing logic for cylinder primitives is not yet implemented
 - The real parsing logic for CSG operations is not yet implemented
 - The real parsing logic for transformations is partially implemented (color and offset are done)

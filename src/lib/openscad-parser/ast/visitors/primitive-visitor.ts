@@ -28,9 +28,14 @@ export class PrimitiveVisitor extends BaseASTVisitor {
       case 'cube':
         // Use the specialized cube extractor first, fall back to the old method if it fails
         return extractCubeNode(node) || this.createCubeNode(node, args);
-      case 'sphere':
+      case 'sphere': {
         // Use the specialized sphere extractor first, fall back to the old method if it fails
-        return extractSphereNode(node) || this.createSphereNode(node, args);
+        const sphereNode = extractSphereNode(node);
+        if (sphereNode) {
+          return sphereNode;
+        }
+        return this.createSphereNode(node, args);
+      }
       case 'cylinder':
         return this.createCylinderNode(node, args);
       case 'polyhedron':
@@ -227,53 +232,60 @@ export class PrimitiveVisitor extends BaseASTVisitor {
     let fs: number | undefined = undefined;
     let fn: number | undefined = undefined;
 
-    // Check for diameter parameter first (takes precedence over radius)
-    const diameterParam = args.find(arg => arg.name === 'd');
-    if (diameterParam) {
-      const diameterValue = extractNumberParameter(diameterParam);
-      if (diameterValue !== null) {
-        diameter = diameterValue;
-        radius = diameter / 2; // Set radius based on diameter
-      }
-    } else {
-      // If no diameter, check for radius
-      const radiusParam = args.find(arg => arg.name === undefined || arg.name === 'r');
-      if (radiusParam) {
-        const radiusValue = extractNumberParameter(radiusParam);
+    // Process all parameters
+    for (let i = 0; i < args.length; i++) {
+      const arg = args[i];
+
+      // Handle radius parameter (first positional parameter or named 'r')
+      if ((i === 0 && !arg.name) || arg.name === 'r') {
+        const radiusValue = extractNumberParameter(arg);
         if (radiusValue !== null) {
           radius = radiusValue;
-        }
-      } else if (args.length === 1 && args[0].name === undefined) {
-        // Handle case where radius is provided as a positional parameter
-        const radiusValue = extractNumberParameter(args[0]);
-        if (radiusValue !== null) {
-          radius = radiusValue;
+          console.log(`[PrimitiveVisitor.createSphereNode] Found radius parameter: ${radius}`);
+        } else {
+          console.log(`[PrimitiveVisitor.createSphereNode] Invalid radius parameter: ${JSON.stringify(arg.value)}`);
         }
       }
-    }
-
-    // Extract $fa, $fs, $fn parameters
-    const faParam = args.find(arg => arg.name === '$fa');
-    if (faParam) {
-      const faValue = extractNumberParameter(faParam);
-      if (faValue !== null) {
-        fa = faValue;
+      // Handle diameter parameter (named 'd')
+      else if (arg.name === 'd') {
+        const diameterValue = extractNumberParameter(arg);
+        if (diameterValue !== null) {
+          diameter = diameterValue;
+          radius = diameterValue / 2; // Set radius based on diameter
+          console.log(`[PrimitiveVisitor.createSphereNode] Found diameter parameter: ${diameter}, calculated radius: ${radius}`);
+        } else {
+          console.log(`[PrimitiveVisitor.createSphereNode] Invalid diameter parameter: ${JSON.stringify(arg.value)}`);
+        }
       }
-    }
-
-    const fsParam = args.find(arg => arg.name === '$fs');
-    if (fsParam) {
-      const fsValue = extractNumberParameter(fsParam);
-      if (fsValue !== null) {
-        fs = fsValue;
+      // Handle $fn parameter
+      else if (arg.name === '$fn') {
+        const fnValue = extractNumberParameter(arg);
+        if (fnValue !== null) {
+          fn = fnValue;
+          console.log(`[PrimitiveVisitor.createSphereNode] Found $fn parameter: ${fn}`);
+        } else {
+          console.log(`[PrimitiveVisitor.createSphereNode] Invalid $fn parameter: ${JSON.stringify(arg.value)}`);
+        }
       }
-    }
-
-    const fnParam = args.find(arg => arg.name === '$fn');
-    if (fnParam) {
-      const fnValue = extractNumberParameter(fnParam);
-      if (fnValue !== null) {
-        fn = fnValue;
+      // Handle $fa parameter
+      else if (arg.name === '$fa') {
+        const faValue = extractNumberParameter(arg);
+        if (faValue !== null) {
+          fa = faValue;
+          console.log(`[PrimitiveVisitor.createSphereNode] Found $fa parameter: ${fa}`);
+        } else {
+          console.log(`[PrimitiveVisitor.createSphereNode] Invalid $fa parameter: ${JSON.stringify(arg.value)}`);
+        }
+      }
+      // Handle $fs parameter
+      else if (arg.name === '$fs') {
+        const fsValue = extractNumberParameter(arg);
+        if (fsValue !== null) {
+          fs = fsValue;
+          console.log(`[PrimitiveVisitor.createSphereNode] Found $fs parameter: ${fs}`);
+        } else {
+          console.log(`[PrimitiveVisitor.createSphereNode] Invalid $fs parameter: ${JSON.stringify(arg.value)}`);
+        }
       }
     }
 

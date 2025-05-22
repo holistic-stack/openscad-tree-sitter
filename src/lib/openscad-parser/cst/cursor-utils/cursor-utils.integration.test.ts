@@ -103,7 +103,7 @@ describe('Cursor Utils Integration', () => {
       expect(cursorUtils.getNodeText(cursor, code)).toBe('[10, 20, 30]');
       log(`Node text for array_literal: "${cursorUtils.getNodeText(cursor, code)}"`);
 
-      while(cursor.nodeType !== 'module_instantiation' && cursor.gotoParent()) {};
+      while(cursor.nodeType !== 'module_instantiation' && cursor.gotoParent()) {}
       expect(cursor.nodeType).toBe('module_instantiation');
       
       cursor.gotoFirstChild(); 
@@ -180,7 +180,7 @@ describe('Cursor Utils Integration', () => {
       cursor.gotoFirstChild(); 
 
       let depth = 0;
-      let maxDepth = 10;
+      const maxDepth = 10;
       let foundArgs = false;
 
       while (cursor.gotoFirstChild() && depth < maxDepth) {

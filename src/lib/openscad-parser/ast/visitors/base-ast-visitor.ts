@@ -364,7 +364,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
     console.log(`[BaseASTVisitor.visitAccessorExpression] Function name: ${functionName}`);
 
     // For test cases, extract arguments from the text
-    let args: ast.Parameter[] = [];
+    const args: ast.Parameter[] = [];
 
     if (node.text.includes('(')) {
       const startIndex = node.text.indexOf('(');
