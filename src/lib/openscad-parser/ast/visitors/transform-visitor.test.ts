@@ -4,7 +4,7 @@ import { OpenscadParser } from '../../openscad-parser';
 import * as ast from '../ast-types';
 import { TransformVisitor } from './transform-visitor';
 import { extractArguments } from '../../ast/extractors/argument-extractor';
-import { getLocation } from '../utils/location-utils'; 
+import { getLocation } from '../utils/location-utils';
 
 describe('TransformVisitor', () => {
   let parser: OpenscadParser;
@@ -12,7 +12,7 @@ describe('TransformVisitor', () => {
 
   beforeEach(async () => {
     parser = new OpenscadParser();
-    await parser.init('/tree-sitter-openscad.wasm'); 
+    await parser.init('/tree-sitter-openscad.wasm');
     visitor = new TransformVisitor('');
   });
 
@@ -33,8 +33,10 @@ describe('TransformVisitor', () => {
         }
       }
       for (const child of node.children) {
-        const found = findNode(child);
-        if (found) return found;
+        if (child) {
+          const found = findNode(child);
+          if (found) return found;
+        }
       }
       return null;
     }
@@ -54,7 +56,7 @@ describe('TransformVisitor', () => {
       expect(resultNode).not.toBeNull();
       expect(resultNode?.type).toBe('translate');
       expect(resultNode?.v).toEqual([10, 20, 30]);
-      expect(resultNode?.children).toEqual([]); 
+      expect(resultNode?.children).toEqual([]);
     });
 
     it('should parse translate(v = [1, 2, 3]) cube(1);', () => {
@@ -83,7 +85,7 @@ describe('TransformVisitor', () => {
       const resultNode = visitor.visitModuleInstantiation(transformCstNode) as ast.TranslateNode | null;
       expect(resultNode).not.toBeNull();
       expect(resultNode?.type).toBe('translate');
-      expect(resultNode?.v).toEqual([10, 20]); 
+      expect(resultNode?.v).toEqual([10, 20]);
       expect(resultNode?.children).toEqual([]);
     });
 
@@ -98,7 +100,7 @@ describe('TransformVisitor', () => {
       const resultNode = visitor.visitModuleInstantiation(transformCstNode) as ast.TranslateNode | null;
       expect(resultNode).not.toBeNull();
       expect(resultNode?.type).toBe('translate');
-      expect(resultNode?.v).toEqual([5, 0, 0]); 
+      expect(resultNode?.v).toEqual([5, 0, 0]);
       // Children will be populated with child nodes that are handled by different visitor methods
       // This is expected behavior and doesn't need to be tested here
     });
@@ -144,7 +146,7 @@ describe('TransformVisitor', () => {
       const resultNode = visitor.visitModuleInstantiation(transformCstNode) as ast.TranslateNode | null;
       expect(resultNode).not.toBeNull();
       expect(resultNode?.type).toBe('translate');
-      expect(resultNode?.v).toEqual([0, 0, 0]); 
+      expect(resultNode?.v).toEqual([0, 0, 0]);
       // Children will be populated with child nodes that are handled by different visitor methods
       // This is expected behavior and doesn't need to be tested here
     });
@@ -158,13 +160,13 @@ describe('TransformVisitor', () => {
       const transformCstNode = getTransformCstNode(code, 'translate');
       expect(transformCstNode).not.toBeNull();
       if (!transformCstNode) return;
-      
+
       const argsNode = transformCstNode.childForFieldName('arguments');
       const params = argsNode ? extractArguments(argsNode) : [];
-      
+
       // Debug output to understand what's being passed
       console.log('Test Debug - params:', JSON.stringify(params, null, 2));
-      
+
       // Force the right vector for this test specifically
       const mockParams = [
         {
@@ -176,14 +178,14 @@ describe('TransformVisitor', () => {
           ]
         }
       ];
-      
+
       // @ts-expect-error Accessing protected method for testing purposes
       const result = visitor.createASTNodeForFunction(transformCstNode, 'translate', mockParams, []) as ast.TranslateNode | null;
 
       expect(result).not.toBeNull();
       if (!result) return;
       expect(result.type).toBe('translate');
-      expect(result.v).toEqual([1, 2, 3]); 
+      expect(result.v).toEqual([1, 2, 3]);
       expect(result.children).toEqual([]);
     });
 
@@ -192,17 +194,16 @@ describe('TransformVisitor', () => {
         start: { line: 1, column: 1, offset: 0 },
         end: { line: 1, column: 28, offset: 27 },
       };
-      const mockRotateCstNode = { type: 'rotate', loc: mockLocation, childForFieldName: () => null, children: [] } as any; 
+      const mockRotateCstNode = { type: 'rotate', loc: mockLocation, childForFieldName: () => null, children: [] } as any;
       const mockAngleParam: ast.Parameter = {
         name: 'a',
-        value: { 
+        value: {
           type: 'expression',
           expressionType: 'literal',
           value: 90,
           location: mockLocation
         } as ast.LiteralNode
       };
-      // @ts-expect-error Accessing protected method for testing purposes
       const result = visitor.createASTNodeForFunction(mockRotateCstNode, 'rotate', [mockAngleParam], []) as ast.RotateNode | null;
       expect(result?.type).toBe('rotate');
       // expect(result?.angle).toBe(90); // or result.a depending on ast-types
@@ -214,7 +215,7 @@ describe('TransformVisitor', () => {
         start: { line: 1, column: 1, offset: 0 },
         end: { line: 1, column: 10, offset: 9 },
       };
-      const mockSphereCstNode = { type: 'sphere', loc: mockLocation, childForFieldName: () => null, children: [] } as any; 
+      const mockSphereCstNode = { type: 'sphere', loc: mockLocation, childForFieldName: () => null, children: [] } as any;
       // @ts-expect-error Accessing protected method for testing purposes
       const result = visitor.createASTNodeForFunction(mockSphereCstNode, 'sphere', [], []) as ast.SphereNode | null;
       expect(result?.type).toBe('sphere');

@@ -24,6 +24,9 @@ describe('ModuleVisitor', () => {
         }
       `;
       const tree = parser.parse(code);
+      if (!tree) {
+        throw new Error('Failed to parse code');
+      }
       const rootNode = tree.rootNode;
 
       // Debug: Print all node types at the root level
@@ -37,8 +40,10 @@ describe('ModuleVisitor', () => {
 
       // Find the module definition node - use the correct node type
       const moduleDefNode = rootNode.namedChildren.find(child =>
-        child.type === 'module_definition' ||
-        (child.type === 'statement' && child.text.includes('module'))
+        child && (
+          child.type === 'module_definition' ||
+          (child.type === 'statement' && child.text.includes('module'))
+        )
       );
 
       expect(moduleDefNode).toBeDefined();
@@ -65,12 +70,17 @@ describe('ModuleVisitor', () => {
         }
       `;
       const tree = parser.parse(code);
+      if (!tree) {
+        throw new Error('Failed to parse code');
+      }
       const rootNode = tree.rootNode;
 
       // Find the module definition node - use the correct node type
       const moduleDefNode = rootNode.namedChildren.find(child =>
-        child.type === 'module_definition' ||
-        (child.type === 'statement' && child.text.includes('module'))
+        child && (
+          child.type === 'module_definition' ||
+          (child.type === 'statement' && child.text.includes('module'))
+        )
       );
 
       expect(moduleDefNode).toBeDefined();
@@ -97,12 +107,17 @@ describe('ModuleVisitor', () => {
         }
       `;
       const tree = parser.parse(code);
+      if (!tree) {
+        throw new Error('Failed to parse code');
+      }
       const rootNode = tree.rootNode;
 
       // Find the module definition node - use the correct node type
       const moduleDefNode = rootNode.namedChildren.find(child =>
-        child.type === 'module_definition' ||
-        (child.type === 'statement' && child.text.includes('module'))
+        child && (
+          child.type === 'module_definition' ||
+          (child.type === 'statement' && child.text.includes('module'))
+        )
       );
 
       expect(moduleDefNode).toBeDefined();
@@ -132,12 +147,17 @@ describe('ModuleVisitor', () => {
         }
       `;
       const tree = parser.parse(code);
+      if (!tree) {
+        throw new Error('Failed to parse code');
+      }
       const rootNode = tree.rootNode;
 
       // Find the module definition node - use the correct node type
       const moduleDefNode = rootNode.namedChildren.find(child =>
-        child.type === 'module_definition' ||
-        (child.type === 'statement' && child.text.includes('module'))
+        child && (
+          child.type === 'module_definition' ||
+          (child.type === 'statement' && child.text.includes('module'))
+        )
       );
 
       expect(moduleDefNode).toBeDefined();
@@ -166,6 +186,9 @@ describe('ModuleVisitor', () => {
         mycube(10);
       `;
       const tree = parser.parse(code);
+      if (!tree) {
+        throw new Error('Failed to parse code');
+      }
       const rootNode = tree.rootNode;
 
       // Debug: Print all node types at the root level
@@ -179,9 +202,11 @@ describe('ModuleVisitor', () => {
 
       // Find the module instantiation node - use the correct node type
       const moduleInstNode = rootNode.namedChildren.find(child =>
-        child.type === 'module_instantiation' ||
-        child.type === 'expression_statement' ||
-        (child.type === 'statement' && !child.text.includes('module'))
+        child && (
+          child.type === 'module_instantiation' ||
+          child.type === 'expression_statement' ||
+          (child.type === 'statement' && !child.text.includes('module'))
+        )
       );
 
       expect(moduleInstNode).toBeDefined();
@@ -207,13 +232,18 @@ describe('ModuleVisitor', () => {
         }
       `;
       const tree = parser.parse(code);
+      if (!tree) {
+        throw new Error('Failed to parse code');
+      }
       const rootNode = tree.rootNode;
 
       // Find the module instantiation node - use the correct node type
       const moduleInstNode = rootNode.namedChildren.find(child =>
-        child.type === 'module_instantiation' ||
-        child.type === 'expression_statement' ||
-        (child.type === 'statement' && !child.text.includes('module'))
+        child && (
+          child.type === 'module_instantiation' ||
+          child.type === 'expression_statement' ||
+          (child.type === 'statement' && !child.text.includes('module'))
+        )
       );
 
       expect(moduleInstNode).toBeDefined();

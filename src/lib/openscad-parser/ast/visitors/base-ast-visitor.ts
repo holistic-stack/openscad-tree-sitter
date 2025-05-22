@@ -2,8 +2,90 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 import { ASTVisitor } from './ast-visitor';
 import { findDescendantOfType } from '../utils/node-utils';
-// getLocation is not used in this file
+import { getLocation } from '../utils/location-utils';
 import { extractArguments, ExtractedParameter } from '../extractors/argument-extractor';
+
+/**
+ * Convert an ExtractedParameter to a ParameterValue
+ * @param value The ExtractedParameter object to convert
+ * @returns A ParameterValue object
+ */
+function convertExtractedValueToParameterValue(value: ExtractedParameter | string | number | boolean | any[]): ast.ParameterValue {
+  // Handle primitive types directly
+  if (typeof value === 'number') {
+    return value;
+  } else if (typeof value === 'boolean') {
+    return value;
+  } else if (typeof value === 'string') {
+    return value;
+  } else if (Array.isArray(value)) {
+    if (value.length === 2) {
+      return value as ast.Vector2D;
+    } else if (value.length >= 3) {
+      return [value[0], value[1], value[2]] as ast.Vector3D;
+    }
+    return 0; // Default fallback for empty arrays
+  }
+
+  // Handle Value objects
+  if ('type' in value) {
+    return convertValueToParameterValue(value);
+  }
+
+  // Default fallback
+  return {
+    type: 'expression',
+    expressionType: 'literal',
+    value: '',
+    location: undefined
+  } as ast.LiteralNode;
+}
+
+/**
+ * Convert a Value to a ParameterValue
+ * @param value The Value object to convert
+ * @returns A ParameterValue object
+ */
+function convertValueToParameterValue(value: ast.Value): ast.ParameterValue {
+  if (value.type === 'number') {
+    return parseFloat(value.value as string);
+  } else if (value.type === 'boolean') {
+    return value.value === 'true';
+  } else if (value.type === 'string') {
+    return value.value as string;
+  } else if (value.type === 'identifier') {
+    return value.value as string;
+  } else if (value.type === 'vector') {
+    const vectorValues = (value.value as ast.Value[]).map(v => {
+      if (v.type === 'number') {
+        return parseFloat(v.value as string);
+      }
+      return 0;
+    });
+
+    if (vectorValues.length === 2) {
+      return vectorValues as ast.Vector2D;
+    } else if (vectorValues.length >= 3) {
+      return [vectorValues[0], vectorValues[1], vectorValues[2]] as ast.Vector3D;
+    }
+    return 0; // Default fallback
+  } else if (value.type === 'range') {
+    // Create an expression node for range
+    return {
+      type: 'expression',
+      expressionType: 'range',
+      location: undefined
+    };
+  }
+
+  // Default fallback - create a literal expression
+  return {
+    type: 'expression',
+    expressionType: 'literal',
+    value: typeof value.value === 'string' ? value.value : '',
+    location: undefined
+  } as ast.LiteralNode;
+}
 
 /**
  * Base implementation of the ASTVisitor interface
@@ -108,7 +190,23 @@ export abstract class BaseASTVisitor implements ASTVisitor {
 
     // Extract arguments
     const argsNode = node.childForFieldName('arguments');
-    const args: ExtractedParameter[] = argsNode ? extractArguments(argsNode) : [];
+    const extractedArgs = argsNode ? extractArguments(argsNode) : [];
+
+    // Convert ExtractedParameter[] to Parameter[]
+    const args: ast.Parameter[] = extractedArgs.map(arg => {
+      if ('name' in arg) {
+        // Named argument
+        return {
+          name: arg.name,
+          value: convertExtractedValueToParameterValue(arg.value)
+        };
+      } else {
+        // Positional argument
+        return {
+          value: convertExtractedValueToParameterValue(arg)
+        };
+      }
+    });
 
     console.log(`[BaseASTVisitor.visitModuleInstantiation] Extracted ${args.length} arguments`);
 
@@ -123,7 +221,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
    * @param args The arguments to the function
    * @returns The AST node or null if the function is not supported
    */
-  protected abstract createASTNodeForFunction(node: TSNode, functionName: string, args: ExtractedParameter[]): ast.ASTNode | null;
+  protected abstract createASTNodeForFunction(node: TSNode, functionName: string, args: ast.Parameter[]): ast.ASTNode | null;
 
   /**
    * Visit a statement node
@@ -133,77 +231,16 @@ export abstract class BaseASTVisitor implements ASTVisitor {
   visitStatement(node: TSNode): ast.ASTNode | null {
     console.log(`[BaseASTVisitor.visitStatement] Processing statement: ${node.text.substring(0, 50)}`);
 
-    // Check for module_definition
-    if (node.text.startsWith('module ')) {
-      console.log(`[BaseASTVisitor.visitStatement] Found module_definition in statement`);
-      return this.visitModuleDefinition(node);
+    // Check for function_definition
+    if (node.type === 'function_definition' || node.text.trim().startsWith('function ')) {
+      console.log(`[BaseASTVisitor.visitStatement] Found function_definition in statement`);
+      return this.visitFunctionDefinition(node);
     }
 
-    // Check for function_definition
-    if (node.text.startsWith('function ')) {
-      console.log(`[BaseASTVisitor.visitStatement] Found function_definition in statement`);
-
-      // For function calls like add(1, 2), we need to check if it's a call or a definition
-      if (node.text.includes(' = ')) {
-        // This is a function definition
-        return this.visitFunctionDefinition(node);
-      } else {
-        // This might be a function call
-        const functionNameMatch = node.text.match(/^(\w+)\s*\(/);
-        if (functionNameMatch) {
-          const functionName = functionNameMatch[1];
-          console.log(`[BaseASTVisitor.visitStatement] Found potential function call in statement: ${functionName}`);
-
-          // Extract arguments
-          const argsStartIndex = node.text.indexOf('(') + 1;
-          const argsEndIndex = node.text.indexOf(')', argsStartIndex);
-          const argsText = node.text.substring(argsStartIndex, argsEndIndex).trim();
-
-          // Parse arguments
-          const args: ExtractedParameter[] = [];
-          if (argsText) {
-            // For simple numeric arguments
-            if (!isNaN(Number(argsText))) {
-              args.push({
-                value: Number(argsText)
-              });
-            }
-            // For vector arguments like [0,0,10]
-            else if (argsText.startsWith('[') && argsText.endsWith(']')) {
-              const vectorText = argsText.substring(1, argsText.length - 1);
-              const vectorValues = vectorText.split(',').map(v => parseFloat(v.trim()));
-              args.push({
-                value: vectorValues
-              });
-            }
-            // For multiple arguments
-            else if (argsText.includes(',')) {
-              const argParts = argsText.split(',').map(a => a.trim());
-              for (const argPart of argParts) {
-                if (!isNaN(Number(argPart))) {
-                  args.push({
-                    value: Number(argPart)
-                  });
-                } else {
-                  args.push({
-                    value: argPart
-                  });
-                }
-              }
-            }
-          }
-
-          // Create a function call node
-          return {
-            type: 'function_call',
-            name: functionName,
-            arguments: args,
-            location: getLocation(node)
-          } as ast.FunctionCallNode;
-        }
-      }
-
-      return this.visitFunctionDefinition(node);
+    // Check for module_definition
+    if (node.type === 'module_definition' || node.text.trim().startsWith('module ')) {
+      console.log(`[BaseASTVisitor.visitStatement] Found module_definition in statement`);
+      return this.visitModuleDefinition(node);
     }
 
     // Special handling for test cases - check for module instantiation patterns in the text
@@ -235,7 +272,8 @@ export abstract class BaseASTVisitor implements ASTVisitor {
           // For simple numeric arguments
           if (!isNaN(Number(argsText))) {
             args.push({
-              value: Number(argsText)
+              type: 'number',
+              value: String(Number(argsText))
             });
           }
           // For vector arguments like [0,0,10]
@@ -243,7 +281,11 @@ export abstract class BaseASTVisitor implements ASTVisitor {
             const vectorText = argsText.substring(1, argsText.length - 1);
             const vectorValues = vectorText.split(',').map(v => parseFloat(v.trim()));
             args.push({
-              value: vectorValues
+              type: 'vector',
+              value: vectorValues.map(v => ({
+                type: 'number',
+                value: String(v)
+              }))
             });
           }
         }
@@ -288,8 +330,24 @@ export abstract class BaseASTVisitor implements ASTVisitor {
           }
         } as TSNode;
 
+        // Convert ExtractedParameter[] to Parameter[]
+        const convertedArgs: ast.Parameter[] = args.map(arg => {
+          if ('name' in arg) {
+            // Named argument
+            return {
+              name: arg.name,
+              value: convertExtractedValueToParameterValue(arg.value)
+            };
+          } else {
+            // Positional argument
+            return {
+              value: convertExtractedValueToParameterValue(arg)
+            };
+          }
+        });
+
         // Process as a module instantiation
-        return this.createASTNodeForFunction(mockNode, functionName, args);
+        return this.createASTNodeForFunction(mockNode, functionName, convertedArgs);
       }
     }
 
@@ -561,8 +619,24 @@ export abstract class BaseASTVisitor implements ASTVisitor {
       }
     }
 
+    // Convert ExtractedParameter[] to Parameter[]
+    const convertedArgs: ast.Parameter[] = args.map(arg => {
+      if ('name' in arg) {
+        // Named argument
+        return {
+          name: arg.name,
+          value: convertExtractedValueToParameterValue(arg.value)
+        };
+      } else {
+        // Positional argument
+        return {
+          value: convertExtractedValueToParameterValue(arg)
+        };
+      }
+    });
+
     // Use the createASTNodeForFunction method to create the appropriate node type
-    return this.createASTNodeForFunction(node, functionName, args);
+    return this.createASTNodeForFunction(node, functionName, convertedArgs);
   }
 
   /**
@@ -626,7 +700,23 @@ export abstract class BaseASTVisitor implements ASTVisitor {
           }
         }
       }
-      return this.createASTNodeForFunction(node, functionName, tempArgs);
+      // Convert ExtractedParameter[] to Parameter[]
+      const convertedArgs: ast.Parameter[] = tempArgs.map(arg => {
+        if ('name' in arg) {
+          // Named argument
+          return {
+            name: arg.name,
+            value: convertExtractedValueToParameterValue(arg.value)
+          };
+        } else {
+          // Positional argument
+          return {
+            value: convertExtractedValueToParameterValue(arg)
+          };
+        }
+      });
+
+      return this.createASTNodeForFunction(node, functionName, convertedArgs);
     }
 
     return null;

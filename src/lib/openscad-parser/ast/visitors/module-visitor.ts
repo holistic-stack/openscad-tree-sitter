@@ -2,7 +2,6 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 import { BaseASTVisitor } from './base-ast-visitor';
 import { getLocation } from '../utils/location-utils';
-import { extractArguments } from '../extractors/argument-extractor';
 import { extractModuleParameters, extractModuleParametersFromText } from '../extractors/module-parameter-extractor';
 
 /**

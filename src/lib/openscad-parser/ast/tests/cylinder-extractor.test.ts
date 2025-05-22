@@ -36,7 +36,7 @@ describe('Cylinder Extractor', () => {
     // For a simple call like `cylinder(...);`
     // The relevant node for the extractor is usually the 'call_expression' or similar
     // This might need adjustment based on actual CST structure for `cylinder` calls
-    let rootNode = tree?.rootNode;
+    const rootNode = tree?.rootNode;
     // console.log('Root node:', rootNode?.toString());
     // rootNode?.children.forEach(child => console.log('Child of root:', child.type, child.text));
 
