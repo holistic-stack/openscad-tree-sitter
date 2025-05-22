@@ -295,7 +295,7 @@ export class PrimitiveVisitor extends BaseASTVisitor {
     if (diameter !== undefined) {
       return {
         type: 'sphere',
-        r: radius, // For backward compatibility
+        // r property removed to match the SphereNode interface
         radius, // For tests that expect radius
         diameter,
         fa,
@@ -306,7 +306,7 @@ export class PrimitiveVisitor extends BaseASTVisitor {
     } else {
       return {
         type: 'sphere',
-        r: radius,
+        // r property removed to match the SphereNode interface
         radius, // For tests that expect radius
         fa,
         fs,
@@ -449,7 +449,7 @@ export class PrimitiveVisitor extends BaseASTVisitor {
 
     return {
       type: 'cylinder',
-      height,
+      h: height, // Use h instead of height to match the CylinderNode interface
       radius1,
       radius2,
       center,

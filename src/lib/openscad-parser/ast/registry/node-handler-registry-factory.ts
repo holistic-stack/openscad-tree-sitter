@@ -85,25 +85,25 @@ export class NodeHandlerRegistryFactory {
    */
   private static registerTransformationHandlers(registry: NodeHandlerRegistry): void {
     registry.register('translate', (_node: TSNode) => {
-      return { type: 'translate', vector: [0, 0, 0], children: [] };
+      return { type: 'translate', v: [0, 0, 0], children: [] };
     });
 
     registry.register('rotate', (_node: TSNode) => {
-      return { type: 'rotate', angle: 0, children: [] };
+      return { type: 'rotate', a: 0, children: [] };
     });
 
     registry.register('scale', (_node: TSNode) => {
-      return { type: 'scale', vector: [1, 1, 1], children: [] };
+      return { type: 'scale', v: [1, 1, 1], children: [] };
     });
 
     registry.register('mirror', (_node: TSNode) => {
-      return { type: 'mirror', vector: [0, 0, 0], children: [] };
+      return { type: 'mirror', v: [0, 0, 0], children: [] };
     });
 
     registry.register('multmatrix', (_node: TSNode) => {
       return {
         type: 'multmatrix',
-        matrix: [
+        m: [
           [1, 0, 0, 0],
           [0, 1, 0, 0],
           [0, 0, 1, 0],
@@ -114,11 +114,11 @@ export class NodeHandlerRegistryFactory {
     });
 
     registry.register('color', (_node: TSNode) => {
-      return { type: 'color', color: [1, 1, 1, 1], children: [] };
+      return { type: 'color', c: [1, 1, 1, 1], children: [] };
     });
 
     registry.register('offset', (_node: TSNode) => {
-      return { type: 'offset', radius: 0, delta: 0, chamfer: false, children: [] };
+      return { type: 'offset', r: 0, delta: 0, chamfer: false, children: [] };
     });
   }
 

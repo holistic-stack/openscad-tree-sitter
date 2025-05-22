@@ -180,7 +180,7 @@ export class ModuleVisitor extends BaseASTVisitor {
     } else if (node.text.includes('module wrapper()')) {
       body.push({
         type: 'translate',
-        vector: [0, 0, 10],
+        v: [0, 0, 10], // Use v instead of vector to match the TranslateNode interface
         children: [{
           type: 'children',
           index: -1,
@@ -333,8 +333,7 @@ export class ModuleVisitor extends BaseASTVisitor {
 
     return {
       type: 'translate',
-      vector,
-      v: vector, // Add v property for backward compatibility with tests
+      v: vector, // Use v property to match the TranslateNode interface
       children,
       location: getLocation(node)
     };
@@ -395,8 +394,7 @@ export class ModuleVisitor extends BaseASTVisitor {
 
     return {
       type: 'rotate',
-      angle,
-      a: angle, // Add a property for backward compatibility with tests
+      a: angle, // Use a property to match the RotateNode interface
       v, // Add v property for axis-angle rotation
       children,
       location: getLocation(node)
@@ -449,8 +447,7 @@ export class ModuleVisitor extends BaseASTVisitor {
 
     return {
       type: 'scale',
-      vector,
-      v: vector, // Add v property for backward compatibility with tests
+      v: vector, // Use v property to match the ScaleNode interface
       children,
       location: getLocation(node)
     };
@@ -495,8 +492,7 @@ export class ModuleVisitor extends BaseASTVisitor {
 
     return {
       type: 'mirror',
-      vector,
-      v: vector, // Add v property for backward compatibility with tests
+      v: vector, // Use v property to match the MirrorNode interface
       children,
       location: getLocation(node)
     };
@@ -545,8 +541,7 @@ export class ModuleVisitor extends BaseASTVisitor {
 
     return {
       type: 'multmatrix',
-      matrix,
-      m: matrix, // Add m property for backward compatibility with tests
+      m: matrix, // Use m property to match the MultmatrixNode interface
       children,
       location: getLocation(node)
     };
@@ -617,8 +612,7 @@ export class ModuleVisitor extends BaseASTVisitor {
 
     return {
       type: 'color',
-      color,
-      c: color, // Add c property for backward compatibility with tests
+      c: color, // Use c property to match the ColorNode interface
       alpha,
       children,
       location: getLocation(node)
@@ -680,8 +674,7 @@ export class ModuleVisitor extends BaseASTVisitor {
 
     return {
       type: 'offset',
-      radius,
-      r: radius, // Add r property for backward compatibility with tests
+      r: radius, // Use r property to match the OffsetNode interface
       delta,
       chamfer,
       children,

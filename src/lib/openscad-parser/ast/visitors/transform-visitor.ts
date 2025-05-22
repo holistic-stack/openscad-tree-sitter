@@ -120,8 +120,7 @@ export class TransformVisitor extends BaseASTVisitor {
 
     return {
       type: 'translate',
-      vector,
-      v: vector, // Add v property for backward compatibility with tests
+      v: vector, // Use v property to match the TranslateNode interface
       children,
       location: getLocation(node)
     };
@@ -218,9 +217,8 @@ export class TransformVisitor extends BaseASTVisitor {
 
     return {
       type: 'rotate',
-      angle,
-      a: angle, // Add a property for backward compatibility with tests
-      v, // Add v property for axis-angle rotation
+      a: angle, // Use a property to match the RotateNode interface
+      v, // v property for axis-angle rotation
       children,
       location: getLocation(node)
     };
@@ -302,8 +300,7 @@ export class TransformVisitor extends BaseASTVisitor {
 
     return {
       type: 'scale',
-      vector,
-      v: vector, // Add v property for backward compatibility with tests
+      v: vector, // Use v property to match the ScaleNode interface
       children,
       location: getLocation(node)
     };
@@ -359,8 +356,7 @@ export class TransformVisitor extends BaseASTVisitor {
 
     return {
       type: 'mirror',
-      vector,
-      v: vector, // Add v property for backward compatibility with tests
+      v: vector, // Use v property to match the MirrorNode interface
       children,
       location: getLocation(node)
     };
@@ -496,8 +492,7 @@ export class TransformVisitor extends BaseASTVisitor {
 
     return {
       type: 'multmatrix',
-      matrix,
-      m: matrix, // Add m property for backward compatibility with tests
+      m: matrix, // Use m property to match the MultmatrixNode interface
       children,
       location: getLocation(node)
     };
@@ -568,9 +563,7 @@ export class TransformVisitor extends BaseASTVisitor {
 
     return {
       type: 'color',
-      color,
-      c: color, // Add c property for backward compatibility with tests
-      alpha,
+      c: color, // Use c property to match the ColorNode interface
       children,
       location: getLocation(node)
     };
@@ -641,8 +634,7 @@ export class TransformVisitor extends BaseASTVisitor {
 
     return {
       type: 'offset',
-      radius,
-      r: radius, // Add r property for backward compatibility with tests
+      r: radius, // Use r property to match the OffsetNode interface
       delta,
       chamfer,
       children,
