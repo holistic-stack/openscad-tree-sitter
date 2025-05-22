@@ -17,12 +17,8 @@
             },
             "cache": true,
             "inputs": [
-              "{projectRoot}/package.json",
-              "{projectRoot}/tsconfig.json",
-              "{projectRoot}/src/**/*",
-              "!{projectRoot}/node_modules",
-              "!{projectRoot}/dist",
-              "^production",
+              "default",
+              "^default",
               {
                 "externalDependencies": [
                   "typescript"
@@ -66,6 +62,18 @@
             "configurations": {},
             "parallelism": true
           },
+          "build:web": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "build:web"
+            },
+            "metadata": {
+              "scriptContent": "node -e \"const fs=require('fs'); const path=require('path'); const src=path.resolve(__dirname, 'bindings/wasm/tree-sitter-openscad.wasm'); const dest=path.resolve(__dirname, 'bindings/web/tree-sitter-openscad.wasm'); fs.copyFileSync(src, dest); console.log('Copied WASM file from', src, 'to', dest);\"",
+              "runCommand": "pnpm run build:web"
+            },
+            "configurations": {},
+            "parallelism": true
+          },
           "install": {
             "executor": "nx:run-script",
             "options": {
@@ -86,6 +94,18 @@
             "metadata": {
               "scriptContent": "prebuildify --napi --strip",
               "runCommand": "pnpm run prebuildify"
+            },
+            "configurations": {},
+            "parallelism": true
+          },
+          "prepare": {
+            "executor": "nx:run-script",
+            "options": {
+              "script": "prepare"
+            },
+            "metadata": {
+              "scriptContent": "npm run build:web",
+              "runCommand": "pnpm run prepare"
             },
             "configurations": {},
             "parallelism": true
@@ -179,14 +199,16 @@
           "targetGroups": {
             "NPM Scripts": [
               "build:node",
+              "build:web",
               "install",
-              "prebuildify"
+              "prebuildify",
+              "prepare"
             ]
           },
           "description": "Tree-sitter grammar for OpenSCAD",
           "js": {
             "packageName": "@openscad/tree-sitter-openscad",
-            "packageMain": "src/index.js",
+            "packageMain": "bindings/node",
             "isInPackageManagerWorkspaces": true
           }
         },
@@ -6227,17 +6249,12 @@
     "tree-sitter-openscad": [
       {
         "source": "tree-sitter-openscad",
-        "target": "npm:node-gyp-build",
-        "type": "dynamic"
-      },
-      {
-        "source": "tree-sitter-openscad",
-        "target": "npm:node-gyp-build",
+        "target": "npm:tree-sitter",
         "type": "static"
       },
       {
         "source": "tree-sitter-openscad",
-        "target": "npm:tree-sitter",
+        "target": "npm:web-tree-sitter",
         "type": "static"
       },
       {
@@ -6262,7 +6279,7 @@
       },
       {
         "source": "tree-sitter-openscad",
-        "target": "npm:web-tree-sitter",
+        "target": "npm:node-gyp-build",
         "type": "static"
       }
     ],
@@ -6321,11 +6338,6 @@
         "source": "openscad-parser",
         "target": "tree-sitter-openscad",
         "type": "static"
-      },
-      {
-        "source": "openscad-parser",
-        "target": "tree-sitter-openscad",
-        "type": "dynamic"
       },
       {
         "source": "openscad-parser",
@@ -13086,5 +13098,5 @@
   },
   "version": "6.0",
   "errors": [],
-  "computedAt": 1747953322626
+  "computedAt": 1747957399822
 }

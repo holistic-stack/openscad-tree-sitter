@@ -2,13 +2,16 @@
   "name": "@openscad/tree-sitter-openscad",
   "version": "0.1.0",
   "description": "Tree-sitter grammar for OpenSCAD",
-  "main": "src/index.js",
-  "types": "src/index.d.ts",
+  "main": "bindings/node",
+  "types": "bindings/node/index.d.ts",
+  "browser": "bindings/web/index.js",
   "scripts": {
     "build": "nx exec -- tree-sitter generate && nx exec -- tree-sitter build --wasm",
     "build:node": "node-gyp rebuild",
+    "build:web": "node -e \"const fs=require('fs'); const path=require('path'); const src=path.resolve(__dirname, 'bindings/wasm/tree-sitter-openscad.wasm'); const dest=path.resolve(__dirname, 'bindings/web/tree-sitter-openscad.wasm'); fs.copyFileSync(src, dest); console.log('Copied WASM file from', src, 'to', dest);\"",
     "install": "node-gyp-build",
     "prebuildify": "prebuildify --napi --strip",
+    "prepare": "npm run build:web",
     "test": "nx exec -- tree-sitter test",
     "parse": "nx exec -- tree-sitter parse",
     "playground": "nx exec -- tree-sitter playground",
@@ -31,25 +34,32 @@
     "queries/*",
     "src/**",
     "bindings/node/**",
-    "bindings/wasm/**"
+    "bindings/web/**",
+    "bindings/wasm/**",
+    "binding.gyp",
+    "prebuilds/**"
   ],
   "author": "OpenSCAD Community",
   "license": "MIT",
   "dependencies": {
-    "node-gyp-build": "^4.8.0",
-    "web-tree-sitter": "0.25.3"
+    "node-gyp-build": "^4.8.0"
   },
   "devDependencies": {
     "tree-sitter-cli": "0.25.3",
     "node-addon-api": "^8.3.1",
     "node-gyp": "^11.2.0",
-    "prebuildify": "^6.0.0"
+    "prebuildify": "^6.0.0",
+    "web-tree-sitter": "0.25.3"
   },
   "peerDependencies": {
-    "tree-sitter": "0.22.4"
+    "tree-sitter": "0.22.4",
+    "web-tree-sitter": "0.25.3"
   },
   "peerDependenciesMeta": {
-    "tree_sitter": {
+    "tree-sitter": {
+      "optional": true
+    },
+    "web-tree-sitter": {
       "optional": true
     }
   },

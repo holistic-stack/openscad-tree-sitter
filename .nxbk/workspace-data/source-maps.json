@@ -450,6 +450,14 @@
       "packages/tree-sitter-openscad/package.json",
       "nx/core/package-json"
     ],
+    "metadata.targetGroups.NPM Scripts.3": [
+      "packages/tree-sitter-openscad/package.json",
+      "nx/core/package-json"
+    ],
+    "metadata.targetGroups.NPM Scripts.4": [
+      "packages/tree-sitter-openscad/package.json",
+      "nx/core/package-json"
+    ],
     "metadata.description": [
       "packages/tree-sitter-openscad/package.json",
       "nx/core/package-json"
@@ -495,6 +503,34 @@
       "nx/core/package-json"
     ],
     "targets.build:node.metadata.runCommand": [
+      "packages/tree-sitter-openscad/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:web": [
+      "packages/tree-sitter-openscad/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:web.executor": [
+      "packages/tree-sitter-openscad/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:web.options": [
+      "packages/tree-sitter-openscad/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:web.metadata": [
+      "packages/tree-sitter-openscad/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:web.options.script": [
+      "packages/tree-sitter-openscad/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:web.metadata.scriptContent": [
+      "packages/tree-sitter-openscad/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.build:web.metadata.runCommand": [
       "packages/tree-sitter-openscad/package.json",
       "nx/core/package-json"
     ],
@@ -551,6 +587,34 @@
       "nx/core/package-json"
     ],
     "targets.prebuildify.metadata.runCommand": [
+      "packages/tree-sitter-openscad/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepare": [
+      "packages/tree-sitter-openscad/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepare.executor": [
+      "packages/tree-sitter-openscad/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepare.options": [
+      "packages/tree-sitter-openscad/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepare.metadata": [
+      "packages/tree-sitter-openscad/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepare.options.script": [
+      "packages/tree-sitter-openscad/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepare.metadata.scriptContent": [
+      "packages/tree-sitter-openscad/package.json",
+      "nx/core/package-json"
+    ],
+    "targets.prepare.metadata.runCommand": [
       "packages/tree-sitter-openscad/package.json",
       "nx/core/package-json"
     ],

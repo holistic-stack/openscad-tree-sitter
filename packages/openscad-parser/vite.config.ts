@@ -1,6 +1,30 @@
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
-import { join } from 'path';
+import { join, resolve } from 'path';
+import { copyFileSync, existsSync, mkdirSync } from 'fs';
+
+// Copy WASM file from tree-sitter-openscad to dist
+const copyWasmFile = () => {
+  return {
+    name: 'copy-wasm-file',
+    closeBundle() {
+      const srcWasmPath = resolve(__dirname, '../tree-sitter-openscad/bindings/wasm/tree-sitter-openscad.wasm');
+      const destDir = resolve(__dirname, 'dist');
+      const destWasmPath = resolve(destDir, 'tree-sitter-openscad.wasm');
+
+      if (!existsSync(destDir)) {
+        mkdirSync(destDir, { recursive: true });
+      }
+
+      if (existsSync(srcWasmPath)) {
+        console.log(`Copying WASM file from ${srcWasmPath} to ${destWasmPath}`);
+        copyFileSync(srcWasmPath, destWasmPath);
+      } else {
+        console.error(`WASM file not found at ${srcWasmPath}`);
+      }
+    }
+  };
+};
 
 export default defineConfig({
   plugins: [
@@ -8,6 +32,7 @@ export default defineConfig({
       entryRoot: 'src',
       tsConfigFilePath: join(__dirname, 'tsconfig.json'),
     }),
+    copyWasmFile(),
   ],
   build: {
     lib: {
