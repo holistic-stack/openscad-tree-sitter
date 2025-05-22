@@ -1,52 +1,38 @@
-# OpenSCAD Tree-sitter Grammar
+# OpenSCAD Tree-Sitter Monorepo
 
-A Tree-sitter grammar for the OpenSCAD language, providing parsing capabilities for Node.js applications. This project enables syntax highlighting, code navigation, and incremental parsing for OpenSCAD files.
+This monorepo contains packages for parsing and working with OpenSCAD files using Tree-sitter.
 
-## Project Structure
+## Repository Structure
 
-This project follows the recommended Tree-sitter project organization with a focus on Node.js bindings:
+This is an Nx monorepo with PNPM workspaces containing the following packages:
+
+- **packages/tree-sitter-openscad**: Tree-sitter grammar for OpenSCAD
+- **packages/openscad-parser**: TypeScript parser for OpenSCAD using the tree-sitter grammar
 
 ```
 openscad-tree-sitter/
-├── bindings/            # Language bindings
-│   ├── node/            # Node.js bindings (active)
-│   │   ├── binding.cc   # C++ binding code for Node.js
-│   │   ├── index.js     # JavaScript interface
-│   │   └── index.d.ts   # TypeScript type definitions
-│   └── wasm/            # WebAssembly bindings
-│       ├── tree-sitter-openscad.wasm  # Compiled WASM module
-│       └── README.md    # WASM usage documentation
-├── examples/            # Example OpenSCAD files
-│   ├── control-structures.scad  # Examples of control structures
-│   ├── indentation-test.scad    # Examples for testing indentation
-│   ├── object-literals.scad     # Examples of object literals
-│   ├── sample.scad              # Basic sample code
-│   └── real-world/              # Real-world examples
-│       ├── architectural_model.scad  # Architectural model example
-│       ├── mathematical_surfaces.scad # Mathematical surfaces
-│       └── mechanical_gearbox.scad    # Mechanical parts
-├── grammar.js           # The grammar definition (main source file)
-├── queries/             # Tree-sitter queries
-│   ├── highlights.scm   # Syntax highlighting rules
-│   ├── folds.scm        # Code folding rules
-│   ├── indents.scm      # Indentation rules
-│   ├── injections.scm   # Language injection rules
-│   ├── locals.scm       # Local variable tracking
-│   └── tags.scm         # Code navigation tags
-├── src/                 # Generated parser code (created by build)
-│   ├── parser.c         # Generated C parser
-│   ├── grammar.json     # Generated grammar specification
-│   ├── node-types.json  # Node type definitions
-│   ├── tree_sitter/     # Tree-sitter headers
-│   └── web/             # Web-specific code
-│       └── openscad-wasm.js  # JavaScript for WASM integration
-├── test/                # Test files
-│   ├── assets/          # Test assets
-│   │   └── all-features-openscad.scad  # Comprehensive test file
-│   ├── benchmark/       # Performance benchmark files
-│   ├── corpus/          # Test corpus for grammar validation
-│   ├── nodejs/          # Node.js specific tests
-│   └── browser/         # Browser-specific tests
+├── packages/
+│   ├── tree-sitter-openscad/   # Tree-sitter grammar package
+│   │   ├── bindings/           # Language bindings
+│   │   │   ├── node/           # Node.js bindings
+│   │   │   └── wasm/           # WebAssembly bindings
+│   │   ├── examples/           # Example OpenSCAD files
+│   │   ├── grammar.js          # The grammar definition
+│   │   ├── queries/            # Tree-sitter queries
+│   │   ├── src/                # Source code
+│   │   └── test/               # Tests for the grammar
+│   │
+│   └── openscad-parser/        # TypeScript parser package
+│       ├── src/                # Source code
+│       │   └── lib/            # Library code
+│       │       ├── ast/        # Abstract Syntax Tree
+│       │       ├── openscad-parser/ # Parser implementation
+│       │       └── test-utils/ # Testing utilities
+│       └── test/               # Tests for the parser
+│
+├── docs/                       # Documentation
+├── nx.json                     # Nx configuration
+└── pnpm-workspace.yaml         # PNPM workspace configuration
 ```
 
 ## Key Files and Their Purposes
@@ -98,17 +84,19 @@ Queries define how editors and tools interact with the parsed syntax tree:
 ## Installation
 
 ```bash
-npm install openscad-tree-sitter
-# or
-pnpm add openscad-tree-sitter
-# or
-yarn add openscad-tree-sitter
+# Clone the repository
+git clone https://github.com/user/openscad-tree-sitter.git
+cd openscad-tree-sitter
+
+# Install dependencies
+pnpm install
 ```
 
 ## Usage with Node.js
 
 ```javascript
-const Parser = require('openscad-tree-sitter');
+// Using the tree-sitter grammar
+const Parser = require('@openscad/tree-sitter-openscad');
 
 // Parse OpenSCAD code
 const code = `cylinder(h=10, r=5);`;
@@ -116,12 +104,29 @@ const tree = Parser.parse(code);
 
 // Access the parsed syntax tree
 console.log(tree.rootNode.toString());
+
+// Using the TypeScript parser
+const { OpenscadParser } = require('@openscad/parser');
+
+// Create a parser instance
+const parser = new OpenscadParser();
+
+// Initialize the parser (must be done before parsing)
+await parser.init();
+
+// Parse OpenSCAD code
+const ast = parser.parseAST('cube([10, 10, 10]);');
+console.log(ast);
+
+// Clean up when done
+parser.dispose();
 ```
 
 ## Usage with TypeScript
 
 ```typescript
-import { Parser } from 'openscad-tree-sitter';
+// Using the tree-sitter grammar
+import * as Parser from '@openscad/tree-sitter-openscad';
 
 // Parse OpenSCAD code
 const code = `cylinder(h=10, r=5);`;
@@ -129,6 +134,22 @@ const tree = Parser.parse(code);
 
 // Access the parsed syntax tree
 console.log(tree.rootNode.toString());
+
+// Using the TypeScript parser
+import { OpenscadParser } from '@openscad/parser';
+
+// Create a parser instance
+const parser = new OpenscadParser();
+
+// Initialize the parser (must be done before parsing)
+await parser.init();
+
+// Parse OpenSCAD code
+const ast = parser.parseAST('cube([10, 10, 10]);');
+console.log(ast);
+
+// Clean up when done
+parser.dispose();
 ```
 
 ## Development
@@ -136,104 +157,121 @@ console.log(tree.rootNode.toString());
 ### Prerequisites
 
 - Node.js 16+ (recommended: Node.js 18 or newer)
-- pnpm (recommended) or npm
+- PNPM 7+ (required)
 - Git
+- Docker (for WebAssembly builds)
+- Python (for node-gyp)
 
 ### Building the Project
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/openscad-tree-sitter.git
+git clone https://github.com/user/openscad-tree-sitter.git
 cd openscad-tree-sitter
 
 # Install dependencies
 pnpm install
 
-# Generate the parser
+# Build all packages
 pnpm build
 
-# Run tests
+# Or build specific packages
+pnpm build:grammar  # Build the tree-sitter grammar
+pnpm build:parser   # Build the TypeScript parser
+
+# Run all tests
 pnpm test
+
+# Or run tests for specific packages
+pnpm test:grammar   # Test the tree-sitter grammar
+pnpm test:parser    # Test the TypeScript parser
 ```
+
+### Known Issues and Workarounds
+
+- **WebAssembly Build**: If you encounter issues with the WebAssembly build, ensure Docker is running and properly configured.
+- **Node.js Bindings**: If you have issues with the Node.js bindings, ensure Python is installed and available in your PATH.
+- **Dependency Issues**: If you encounter dependency issues, try running `pnpm install --force` to force reinstallation of dependencies.
 
 ### Build Process Explained
 
 The build process consists of several steps:
 
-1. **Grammar Generation**: `pnpm build` runs `tree-sitter generate`, which:
+1. **Tree-Sitter Grammar Package**:
+   - `pnpm nx build tree-sitter-openscad` builds the tree-sitter grammar
    - Processes `grammar.js` to create the parser implementation
-   - Generates `src/parser.c`, `src/grammar.json`, and `src/node-types.json`
-   - Creates language binding code in `bindings/node/binding.cc`
+   - Generates parser code and WebAssembly bindings
 
-2. **WebAssembly Build**: `pnpm build:wasm` runs `tree-sitter build --wasm`, which:
-   - Compiles the parser to WebAssembly
-   - Outputs to `bindings/wasm/tree-sitter-openscad.wasm`
-   - Enables browser-based parsing
-
-3. **Complete Build**: `pnpm build:all` runs both steps above
+2. **OpenSCAD Parser Package**:
+   - `pnpm nx build openscad-parser` builds the TypeScript parser
+   - Compiles TypeScript code to JavaScript
+   - Generates type definitions
 
 ### Development Workflow
 
-1. **Edit Grammar**: Modify `grammar.js` to update language rules
-2. **Build**: Run `pnpm build` to generate updated parser code
-3. **Test**: Run `pnpm test` to verify changes
-4. **Parse Examples**: Run `pnpm parse:examples` to test with real-world examples
-5. **Playground**: Run `pnpm playground` to interactively test the grammar
+1. **Edit Grammar**: Modify `packages/tree-sitter-openscad/grammar.js` to update language rules
+2. **Build Grammar**: Run `pnpm nx build tree-sitter-openscad` to generate updated parser code
+3. **Edit Parser**: Modify files in `packages/openscad-parser/src/lib` to update the parser
+4. **Build Parser**: Run `pnpm nx build openscad-parser` to compile the parser
+5. **Test**: Run `pnpm nx run-many --target=test --all` to verify changes
+6. **Parse Examples**: Run `pnpm nx exec -- cd packages/tree-sitter-openscad && tree-sitter parse examples/*.scad` to test with examples
+7. **Playground**: Run `pnpm nx exec -- cd packages/tree-sitter-openscad && tree-sitter playground` to interactively test the grammar
 
 ### Debugging the Grammar
 
 When encountering parsing issues:
 
-1. Use `pnpm parse <file.scad>` to see how a specific file is parsed
+1. Use `pnpm nx exec -- cd packages/tree-sitter-openscad && tree-sitter parse <file.scad>` to see how a specific file is parsed
 2. Check the parse tree for unexpected structures
-3. Run `pnpm test:wasm` to verify WebAssembly compatibility
-4. Use the playground (`pnpm playground`) for interactive debugging
+3. Run `pnpm nx test tree-sitter-openscad` to verify grammar functionality
+4. Use the playground for interactive debugging
 
 ## Testing
 
-The project includes comprehensive tests to ensure the grammar correctly parses OpenSCAD code.
+The project includes comprehensive tests to ensure both the grammar and parser correctly handle OpenSCAD code.
 
 ### Test Organization
 
-- **test/corpus/**: Contains test files that validate specific grammar features
-- **test/nodejs/**: Contains tests for the Node.js bindings
-- **test/assets/**: Contains sample OpenSCAD files for testing
-- **test/benchmark/**: Contains files for performance testing
+- **packages/tree-sitter-openscad/test/corpus/**: Contains test files that validate specific grammar features
+- **packages/tree-sitter-openscad/test/nodejs/**: Contains tests for the Node.js bindings
+- **packages/openscad-parser/src/lib/**/*.test.ts**: Contains tests for the TypeScript parser
 
 ### Available Test Commands
 
 ```bash
 # Run all tests
-pnpm test
+pnpm nx run-many --target=test --all
 
-# Run specific test categories
-pnpm test:all        # Run all test suites
-pnpm test:wasm       # Test WebAssembly build
-pnpm test:parsing    # Test parsing functionality
-pnpm test:native     # Test native Node.js bindings
-pnpm test:examples   # Test with example files
+# Run tests for specific packages
+pnpm nx test tree-sitter-openscad  # Test the grammar
+pnpm nx test openscad-parser       # Test the parser
 
-# Run browser tests
-pnpm test:browser    # Test in browser environment
+# Run tests with coverage
+pnpm nx test openscad-parser --coverage
+
+# Run tests in watch mode
+pnpm nx test openscad-parser --watch
 ```
 
 ### What the Tests Verify
 
-The test suite checks various aspects of the grammar, including:
+The test suite checks various aspects of the grammar and parser, including:
 
 - **Basic Syntax**: Comments, variable assignments, modules, functions
 - **Control Structures**: If statements, for loops, conditionals
 - **Expressions**: Mathematical operations, function calls, array access
 - **Advanced Features**: List comprehensions, special variables, object literals
 - **Edge Cases**: Error recovery, ambiguous syntax, precedence rules
+- **AST Generation**: Correct conversion from CST to AST
+- **Parser Features**: Error handling, initialization, cleanup
 
 ### Adding New Tests
 
 To add new tests:
 
-1. For corpus tests, add a new section to an existing file in `test/corpus/` or create a new file
-2. For specific feature tests, add test cases to the appropriate test file in `test/nodejs/`
-3. For real-world examples, add OpenSCAD files to `examples/real-world/`
+1. For grammar corpus tests, add a new section to an existing file in `packages/tree-sitter-openscad/test/corpus/` or create a new file
+2. For parser tests, add test files to `packages/openscad-parser/src/lib/` alongside the code being tested
+3. For real-world examples, add OpenSCAD files to `packages/tree-sitter-openscad/examples/real-world/`
 
 ## Improved Grammar Features
 
@@ -308,6 +346,17 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 - Update documentation to reflect changes
 - Ensure all tests pass before submitting a PR
 - Keep PRs focused on a single change to simplify review
+
+### Monorepo Contribution Workflow
+
+When contributing to this monorepo, follow these steps:
+
+1. **Identify the package**: Determine which package your change affects (tree-sitter-openscad or openscad-parser)
+2. **Make changes**: Make your changes to the appropriate package
+3. **Add tests**: Add tests for your changes in the same package
+4. **Build and test**: Run `pnpm nx build <package>` and `pnpm nx test <package>` to verify your changes
+5. **Check affected packages**: Run `pnpm nx affected:test` to ensure your changes don't break other packages
+6. **Submit PR**: Submit a pull request with your changes
 
 ## License
 

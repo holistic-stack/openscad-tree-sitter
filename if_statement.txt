@@ -1,9 +1,0 @@
-
-> openscad-tree-sitter@0.1.0 parse C:\Users\luciano\git\openscad-tree-sitter
-> tree-sitter generate && tree-sitter parse "if (true) { cube(10); }"
-
-Warning: unnecessary conflicts
-  `_module_instantiation_with_body`, `expression`
-  `statement`
-  `module_instantiation`
-ÔÇëELIFECYCLEÔÇë Command failed with exit code 1.

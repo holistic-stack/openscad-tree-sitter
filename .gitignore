@@ -18,20 +18,23 @@ dist/
 *.node
 
 # Generated parser files
-src/parser.c
-src/grammar.json
-src/node-types.json
-src/tree_sitter/
-bindings/node/binding.cc
-bindings/wasm/*.wasm
+packages/tree-sitter-openscad/src/parser.c
+packages/tree-sitter-openscad/src/grammar.json
+packages/tree-sitter-openscad/src/node-types.json
+packages/tree-sitter-openscad/src/tree_sitter/
+packages/tree-sitter-openscad/bindings/node/binding.cc
+packages/tree-sitter-openscad/bindings/wasm/*.wasm
+
+# Nx cache
+.nx/cache
 
 # Unused bindings (disabled in tree-sitter.json)
-bindings/rust/
-bindings/c/
-bindings/go/
-bindings/python/
-bindings/swift/
-bindings/zig/
+packages/tree-sitter-openscad/bindings/rust/
+packages/tree-sitter-openscad/bindings/c/
+packages/tree-sitter-openscad/bindings/go/
+packages/tree-sitter-openscad/bindings/python/
+packages/tree-sitter-openscad/bindings/swift/
+packages/tree-sitter-openscad/bindings/zig/
 
 # Compiled binaries
 *.a

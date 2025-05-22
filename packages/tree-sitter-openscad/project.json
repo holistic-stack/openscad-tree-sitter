@@ -1,0 +1,43 @@
+{
+  "name": "tree-sitter-openscad",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/tree-sitter-openscad/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "cd packages/tree-sitter-openscad && tree-sitter generate",
+          "cd packages/tree-sitter-openscad && tree-sitter build --wasm"
+        ],
+        "parallel": false
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd packages/tree-sitter-openscad && tree-sitter test"
+      }
+    },
+    "parse": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd packages/tree-sitter-openscad && tree-sitter parse"
+      }
+    },
+    "playground": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd packages/tree-sitter-openscad && tree-sitter playground"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd packages/tree-sitter-openscad && eslint ."
+      }
+    }
+  },
+  "tags": []
+}

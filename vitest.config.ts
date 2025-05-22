@@ -5,21 +5,17 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    setupFiles: "./src/setupTests.ts",
-    typecheck: {
-      enabled: true,
-      tsconfig: './tsconfig.vitest.json',
-    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       exclude: ['**/node_modules/**', '**/dist/**', '**/test/**']
     },
-    include: ['src/lib/**/*.test.ts']
+    include: ['packages/*/src/**/*.test.ts']
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src')
+      '@openscad/tree-sitter-openscad': path.resolve(__dirname, './packages/tree-sitter-openscad'),
+      '@openscad/parser': path.resolve(__dirname, './packages/openscad-parser/src')
     }
   }
 });

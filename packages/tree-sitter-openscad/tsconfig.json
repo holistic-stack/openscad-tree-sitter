@@ -7,18 +7,11 @@
     "strict": true,
     "declaration": true,
     "sourceMap": true,
+    "outDir": "dist",
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "types": ["vitest/globals"]
+    "resolveJsonModule": true
   },
-  "files": [],
-  "references": [
-    {
-      "path": "./packages/tree-sitter-openscad/tsconfig.json"
-    },
-    {
-      "path": "./packages/openscad-parser/tsconfig.json"
-    }
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

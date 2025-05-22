@@ -1,104 +1,57 @@
 {
-  "name": "openscad-tree-sitter",
+  "name": "openscad-tree-sitter-monorepo",
   "version": "0.1.0",
-  "description": "Tree-sitter grammar for OpenSCAD for Node.js",
-  "main": "bindings/node/index.js",
+  "description": "Monorepo for OpenSCAD Tree-sitter grammar and parser",
+  "private": true,
   "scripts": {
-    "test": "node --test test/nodejs/comprehensive-node-binding-test.js",
-    "test:all": "node scripts/test-all.js",
-    "test:examples": "tree-sitter parse examples/*.scad",
-    "test:wasm": "node --test test/nodejs/test-wasm-build.js",
-    "test:parsing": "node --test test/nodejs/test-parsing.js",
-    "test:web-tree-sitter": "node --test test/nodejs/test-web-tree-sitter.js",
-    "test:fallback": "node --test test/nodejs/test-fallback-parser-async.js",
-    "test:native": "node --test test/nodejs/test-native-binding.js",
-    "test:node": "node --test test/nodejs/*.js",
-    "test:browser": "node scripts/serve-browser-test.js",
-    "test:nesting": "node --test test/nodejs/test-nesting-statements.js",
-    "test:browser:improved": "node scripts/serve-browser-test.js improved",
-    "build": "tree-sitter generate",
-    "build:wasm": "tree-sitter build --wasm",
-    "build:all": "npm run build && npm run build:wasm",
-    "build:ts": "tsc --project tsconfig.build.json",
-    "lint": "eslint ./src/lib",
-    "lint:fix": "eslint ./src/lib --fix",
-    "tsc:lint": "tsc --noEmit",
-    "test:unit": "vitest run --no-color",
-    "test:unit:watch": "vitest src/lib",
-    "test:unit:coverage": "vitest run --coverage",
-    "parse": "tree-sitter generate && tree-sitter parse",
-    "parse:examples": "tree-sitter parse examples/real-world/*.scad",
-    "playground": "tree-sitter playground",
-    "serve": "node scripts/serve-browser-test.js",
-    "install": "node-gyp-build",
-    "prebuildify": "prebuildify --napi --strip"
+    "build": "nx run-many --target=build --all",
+    "build:grammar": "nx build tree-sitter-openscad",
+    "build:parser": "nx build openscad-parser",
+    "test": "nx run-many --target=test --all",
+    "test:grammar": "nx test tree-sitter-openscad",
+    "test:parser": "nx test openscad-parser",
+    "lint": "nx run-many --target=lint --all",
+    "graph": "nx graph",
+    "parse": "cd packages/tree-sitter-openscad && tree-sitter parse",
+    "playground": "cd packages/tree-sitter-openscad && tree-sitter playground"
   },
   "keywords": [
-    "parser",
-    "tree-sitter",
     "openscad",
+    "tree-sitter",
+    "parser",
     "grammar",
-    "syntax",
-    "highlighting",
-    "incremental",
-    "parsing",
-    "3d",
-    "cad",
-    "nodejs"
-  ],
-  "files": [
-    "grammar.js",
-    "queries/*",
-    "src/**",
-    "bindings/node/**",
-    "bindings/wasm/**"
+    "monorepo"
   ],
   "author": "OpenSCAD Community",
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",
   "devDependencies": {
     "@eslint/eslintrc": "^3.0.2",
+    "@nx/devkit": "^21.1.1",
+    "@nx/eslint": "^21.1.1",
+    "@nx/js": "^21.1.1",
+    "@nx/vite": "^21.1.1",
+    "@nx/workspace": "^21.1.1",
+    "@swc-node/register": "~1.9.1",
+    "@swc/core": "~1.5.7",
+    "@swc/helpers": "~0.5.11",
     "@types/node": "^22.15.18",
     "@typescript-eslint/eslint-plugin": "^8.32.1",
     "@typescript-eslint/parser": "^8.32.1",
     "eslint": "^9.27.0",
     "eslint-plugin-vitest": "^0.5.4",
-    "node-addon-api": "^8.3.1",
-    "node-gyp": "^11.2.0",
-    "prebuildify": "^6.0.0",
-    "tree-sitter-cli": "0.25.3",
+    "nx": "^21.1.1",
+    "prettier": "^2.6.2",
+    "tslib": "^2.3.0",
     "typescript": "^5.8.3",
     "vitest": "^3.1.4",
     "vitest-fetch-mock": "^0.4.5"
   },
+  "workspaces": [
+    "packages/*"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/user/openscad-tree-sitter.git"
-  },
-  "tree-sitter": [
-    {
-      "scope": "source.openscad",
-      "file-types": [
-        "scad"
-      ],
-      "highlights": [
-        "queries/highlights.scm"
-      ],
-      "tags": [
-        "queries/tags.scm"
-      ]
-    }
-  ],
-  "dependencies": {
-    "node-gyp-build": "^4.8.0",
-    "web-tree-sitter": "0.25.3"
-  },
-  "peerDependencies": {
-    "tree-sitter": "0.22.4"
-  },
-  "peerDependenciesMeta": {
-    "tree_sitter": {
-      "optional": true
-    }
   }
 }

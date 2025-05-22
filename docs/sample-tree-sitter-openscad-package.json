@@ -1,0 +1,67 @@
+{
+  "name": "@openscad/tree-sitter-openscad",
+  "version": "0.1.0",
+  "description": "Tree-sitter grammar for OpenSCAD",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "scripts": {
+    "build": "nx exec -- tree-sitter generate && nx exec -- tree-sitter build --wasm",
+    "test": "nx exec -- tree-sitter test",
+    "parse": "nx exec -- tree-sitter parse",
+    "playground": "nx exec -- tree-sitter playground",
+    "lint": "nx exec -- eslint ."
+  },
+  "keywords": [
+    "parser",
+    "tree-sitter",
+    "openscad",
+    "grammar",
+    "syntax",
+    "highlighting",
+    "incremental",
+    "parsing",
+    "3d",
+    "cad"
+  ],
+  "files": [
+    "grammar.js",
+    "queries/*",
+    "src/**",
+    "bindings/node/**",
+    "bindings/wasm/**"
+  ],
+  "author": "OpenSCAD Community",
+  "license": "MIT",
+  "dependencies": {
+    "node-gyp-build": "^4.8.0",
+    "web-tree-sitter": "0.25.3"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "0.25.3",
+    "node-addon-api": "^8.3.1",
+    "node-gyp": "^11.2.0",
+    "prebuildify": "^6.0.0"
+  },
+  "peerDependencies": {
+    "tree-sitter": "0.22.4"
+  },
+  "peerDependenciesMeta": {
+    "tree_sitter": {
+      "optional": true
+    }
+  },
+  "tree-sitter": [
+    {
+      "scope": "source.openscad",
+      "file-types": [
+        "scad"
+      ],
+      "highlights": [
+        "queries/highlights.scm"
+      ],
+      "tags": [
+        "queries/tags.scm"
+      ]
+    }
+  ]
+}
