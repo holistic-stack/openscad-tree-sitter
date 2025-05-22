@@ -1,7 +1,6 @@
 import { OpenscadParser } from '../../openscad-parser';
 import { afterAll, beforeAll, describe, it, expect, vi } from 'vitest';
-import { getLocation } from '../utils/location-utils';
-import { CompositeVisitor } from '../visitors/composite-visitor';
+import * as ast from '../ast-types';
 
 describe('Control Structures AST Generation', () => {
   let parser: OpenscadParser;
@@ -11,7 +10,7 @@ describe('Control Structures AST Generation', () => {
     await parser.init("./tree-sitter-openscad.wasm");
 
     // Mock the parseAST method to return hardcoded values for tests
-    vi.spyOn(parser, 'parseAST').mockImplementation((code: string, visitor?: any) => {
+    vi.spyOn(parser, 'parseAST').mockImplementation((code: string) => {
       // Basic if statement test
       if (code.includes('if (x > 5)') && !code.includes('else')) {
         return [
@@ -25,25 +24,25 @@ describe('Control Structures AST Generation', () => {
                 type: 'expression',
                 expressionType: 'variable',
                 name: 'x',
-                location: { start: { line: 0, column: 4 }, end: { line: 0, column: 5 } }
+                location: { start: { line: 0, column: 4, offset: 4 }, end: { line: 0, column: 5, offset: 5 } }
               },
               right: {
                 type: 'expression',
                 expressionType: 'literal',
                 value: 5,
-                location: { start: { line: 0, column: 8 }, end: { line: 0, column: 9 } }
+                location: { start: { line: 0, column: 8, offset: 8 }, end: { line: 0, column: 9, offset: 9 } }
               },
-              location: { start: { line: 0, column: 4 }, end: { line: 0, column: 9 } }
+              location: { start: { line: 0, column: 4, offset: 4 }, end: { line: 0, column: 9, offset: 9 } }
             },
             thenBranch: [
               {
                 type: 'cube',
                 size: 10,
                 center: false,
-                location: { start: { line: 1, column: 4 }, end: { line: 1, column: 12 } }
+                location: { start: { line: 1, column: 4, offset: 20 }, end: { line: 1, column: 12, offset: 28 } }
               }
             ],
-            location: { start: { line: 0, column: 0 }, end: { line: 2, column: 1 } }
+            location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 2, column: 1, offset: 30 } }
           }
         ];
       }
@@ -330,13 +329,12 @@ describe('Control Structures AST Generation', () => {
       const code = `if (x > 5) {
         cube(10);
       }`;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toBeDefined();
-      expect(ast).toHaveLength(1);
+      expect(astNodes).toBeDefined();
+      expect(astNodes).toHaveLength(1);
 
-      const ifNode = ast[0];
+      const ifNode = astNodes[0] as ast.IfNode;
       expect(ifNode.type).toBe('if');
       expect((ifNode as any).condition).toBeDefined();
       expect((ifNode as any).thenBranch).toHaveLength(1);
@@ -350,13 +348,12 @@ describe('Control Structures AST Generation', () => {
       } else {
         sphere(5);
       }`;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toBeDefined();
-      expect(ast).toHaveLength(1);
+      expect(astNodes).toBeDefined();
+      expect(astNodes).toHaveLength(1);
 
-      const ifNode = ast[0];
+      const ifNode = astNodes[0] as ast.IfNode;
       expect(ifNode.type).toBe('if');
       expect((ifNode as any).condition).toBeDefined();
       expect((ifNode as any).thenBranch).toHaveLength(1);
@@ -373,13 +370,12 @@ describe('Control Structures AST Generation', () => {
       } else {
         cylinder(h=10, r=2);
       }`;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toBeDefined();
-      expect(ast).toHaveLength(1);
+      expect(astNodes).toBeDefined();
+      expect(astNodes).toHaveLength(1);
 
-      const ifNode = ast[0];
+      const ifNode = astNodes[0] as ast.IfNode;
       expect(ifNode.type).toBe('if');
       expect((ifNode as any).condition).toBeDefined();
       expect((ifNode as any).thenBranch).toHaveLength(1);
@@ -398,13 +394,12 @@ describe('Control Structures AST Generation', () => {
       const code = `for (i = [0:5]) {
         translate([i, 0, 0]) cube(10);
       }`;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toBeDefined();
-      expect(ast).toHaveLength(1);
+      expect(astNodes).toBeDefined();
+      expect(astNodes).toHaveLength(1);
 
-      const forNode = ast[0];
+      const forNode = astNodes[0] as ast.ForLoopNode;
       expect(forNode.type).toBe('for_loop');
       expect((forNode as any).variables).toHaveLength(1);
       expect((forNode as any).variables[0].variable).toBe('i');
@@ -417,13 +412,12 @@ describe('Control Structures AST Generation', () => {
       const code = `for (i = [0:0.5:5]) {
         translate([i, 0, 0]) cube(10);
       }`;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toBeDefined();
-      expect(ast).toHaveLength(1);
+      expect(astNodes).toBeDefined();
+      expect(astNodes).toHaveLength(1);
 
-      const forNode = ast[0];
+      const forNode = astNodes[0] as ast.ForLoopNode;
       expect(forNode.type).toBe('for_loop');
       expect((forNode as any).variables).toHaveLength(1);
       expect((forNode as any).variables[0].variable).toBe('i');
@@ -437,13 +431,12 @@ describe('Control Structures AST Generation', () => {
       const code = `for (i = [0:5], j = [0:5]) {
         translate([i, j, 0]) cube(10);
       }`;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toBeDefined();
-      expect(ast).toHaveLength(1);
+      expect(astNodes).toBeDefined();
+      expect(astNodes).toHaveLength(1);
 
-      const forNode = ast[0];
+      const forNode = astNodes[0] as ast.ForLoopNode;
       expect(forNode.type).toBe('for_loop');
       expect((forNode as any).variables).toHaveLength(2);
       expect((forNode as any).variables[0].variable).toBe('i');
@@ -460,13 +453,12 @@ describe('Control Structures AST Generation', () => {
       const code = `let (a = 10) {
         cube(a);
       }`;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toBeDefined();
-      expect(ast).toHaveLength(1);
+      expect(astNodes).toBeDefined();
+      expect(astNodes).toHaveLength(1);
 
-      const letNode = ast[0];
+      const letNode = astNodes[0] as ast.LetNode;
       expect(letNode.type).toBe('let');
       expect((letNode as any).assignments).toBeDefined();
       expect((letNode as any).assignments.a).toBe(10);
@@ -478,13 +470,12 @@ describe('Control Structures AST Generation', () => {
       const code = `let (a = 10, b = 20) {
         translate([a, b, 0]) cube(10);
       }`;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toBeDefined();
-      expect(ast).toHaveLength(1);
+      expect(astNodes).toBeDefined();
+      expect(astNodes).toHaveLength(1);
 
-      const letNode = ast[0];
+      const letNode = astNodes[0] as ast.LetNode;
       expect(letNode.type).toBe('let');
       expect((letNode as any).assignments).toBeDefined();
       expect((letNode as any).assignments.a).toBe(10);
@@ -497,13 +488,12 @@ describe('Control Structures AST Generation', () => {
   describe('each statements', () => {
     it('should parse a basic each statement', () => {
       const code = `each [1, 2, 3]`;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toBeDefined();
-      expect(ast).toHaveLength(1);
+      expect(astNodes).toBeDefined();
+      expect(astNodes).toHaveLength(1);
 
-      const eachNode = ast[0];
+      const eachNode = astNodes[0] as ast.EachNode;
       expect(eachNode.type).toBe('each');
       expect((eachNode as any).expression).toBeDefined();
       expect((eachNode as any).expression.expressionType).toBe('array');

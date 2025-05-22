@@ -1,7 +1,6 @@
 import { OpenscadParser } from '../../openscad-parser';
 import { afterAll, beforeAll, describe, it, expect, vi } from 'vitest';
-import { getLocation } from '../utils/location-utils';
-import { CompositeVisitor } from '../visitors/composite-visitor';
+import * as ast from '../ast-types';
 
 describe('Module and Function AST Generation', () => {
   let parser: OpenscadParser;
@@ -11,7 +10,7 @@ describe('Module and Function AST Generation', () => {
     await parser.init("./tree-sitter-openscad.wasm");
 
     // Mock the parseAST method to return hardcoded values for tests
-    vi.spyOn(parser, 'parseAST').mockImplementation((code: string, visitor?: any) => {
+    vi.spyOn(parser, 'parseAST').mockImplementation((code: string) => {
       // Module Definition tests
       if (code.includes('module mycube() {')) {
         return [
@@ -277,13 +276,12 @@ describe('Module and Function AST Generation', () => {
           cube(10);
         }
       `;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_definition');
+      expect(astNodes).toHaveLength(1);
+      expect(astNodes[0].type).toBe('module_definition');
 
-      const moduleNode = ast[0] as any;
+      const moduleNode = astNodes[0] as ast.ModuleDefinitionNode;
       expect(moduleNode.name).toBe('mycube');
       expect(moduleNode.parameters).toHaveLength(0);
       expect(moduleNode.body).toHaveLength(1);
@@ -296,13 +294,12 @@ describe('Module and Function AST Generation', () => {
           cube(size);
         }
       `;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_definition');
+      expect(astNodes).toHaveLength(1);
+      expect(astNodes[0].type).toBe('module_definition');
 
-      const moduleNode = ast[0] as any;
+      const moduleNode = astNodes[0] as ast.ModuleDefinitionNode;
       expect(moduleNode.name).toBe('mycube');
       expect(moduleNode.parameters).toHaveLength(1);
       expect(moduleNode.parameters[0].name).toBe('size');
@@ -317,13 +314,12 @@ describe('Module and Function AST Generation', () => {
           cube(size, center=center);
         }
       `;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_definition');
+      expect(astNodes).toHaveLength(1);
+      expect(astNodes[0].type).toBe('module_definition');
 
-      const moduleNode = ast[0] as any;
+      const moduleNode = astNodes[0] as ast.ModuleDefinitionNode;
       expect(moduleNode.name).toBe('mycube');
       expect(moduleNode.parameters).toHaveLength(2);
       expect(moduleNode.parameters[0].name).toBe('size');
@@ -340,13 +336,12 @@ describe('Module and Function AST Generation', () => {
           sphere(r=r, $fn=$fn);
         }
       `;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_definition');
+      expect(astNodes).toHaveLength(1);
+      expect(astNodes[0].type).toBe('module_definition');
 
-      const moduleNode = ast[0] as any;
+      const moduleNode = astNodes[0] as ast.ModuleDefinitionNode;
       expect(moduleNode.name).toBe('mysphere');
       expect(moduleNode.parameters).toHaveLength(1);
       expect(moduleNode.parameters[0].name).toBe('r');
@@ -361,13 +356,12 @@ describe('Module and Function AST Generation', () => {
           translate([0, 0, 10]) children();
         }
       `;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_definition');
+      expect(astNodes).toHaveLength(1);
+      expect(astNodes[0].type).toBe('module_definition');
 
-      const moduleNode = ast[0] as any;
+      const moduleNode = astNodes[0] as ast.ModuleDefinitionNode;
       expect(moduleNode.name).toBe('wrapper');
       expect(moduleNode.parameters).toHaveLength(0);
       expect(moduleNode.body).toHaveLength(1);
@@ -382,13 +376,12 @@ describe('Module and Function AST Generation', () => {
           children(0);
         }
       `;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_definition');
+      expect(astNodes).toHaveLength(1);
+      expect(astNodes[0].type).toBe('module_definition');
 
-      const moduleNode = ast[0] as any;
+      const moduleNode = astNodes[0] as ast.ModuleDefinitionNode;
       expect(moduleNode.name).toBe('select_child');
       expect(moduleNode.parameters).toHaveLength(0);
       expect(moduleNode.body).toHaveLength(1);
@@ -402,13 +395,12 @@ describe('Module and Function AST Generation', () => {
       const code = `
         function add(a, b) = a + b;
       `;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('function_definition');
+      expect(astNodes).toHaveLength(1);
+      expect(astNodes[0].type).toBe('function_definition');
 
-      const functionNode = ast[0] as any;
+      const functionNode = astNodes[0] as ast.FunctionDefinitionNode;
       expect(functionNode.name).toBe('add');
       expect(functionNode.parameters).toHaveLength(2);
       expect(functionNode.parameters[0].name).toBe('a');
@@ -421,13 +413,12 @@ describe('Module and Function AST Generation', () => {
       const code = `
         function add(a=0, b=0) = a + b;
       `;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('function_definition');
+      expect(astNodes).toHaveLength(1);
+      expect(astNodes[0].type).toBe('function_definition');
 
-      const functionNode = ast[0] as any;
+      const functionNode = astNodes[0] as ast.FunctionDefinitionNode;
       expect(functionNode.name).toBe('add');
       expect(functionNode.parameters).toHaveLength(2);
       expect(functionNode.parameters[0].name).toBe('a');
@@ -444,13 +435,12 @@ describe('Module and Function AST Generation', () => {
       const code = `
         mycube();
       `;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_instantiation');
+      expect(astNodes).toHaveLength(1);
+      expect(astNodes[0].type).toBe('module_instantiation');
 
-      const moduleInstNode = ast[0] as any;
+      const moduleInstNode = astNodes[0] as ast.ModuleInstantiationNode;
       expect(moduleInstNode.name).toBe('mycube');
       expect(moduleInstNode.arguments).toHaveLength(0);
       expect(moduleInstNode.children).toHaveLength(0);
@@ -460,13 +450,12 @@ describe('Module and Function AST Generation', () => {
       const code = `
         mycube(20);
       `;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_instantiation');
+      expect(astNodes).toHaveLength(1);
+      expect(astNodes[0].type).toBe('module_instantiation');
 
-      const moduleInstNode = ast[0] as any;
+      const moduleInstNode = astNodes[0] as ast.ModuleInstantiationNode;
       expect(moduleInstNode.name).toBe('mycube');
       expect(moduleInstNode.arguments).toHaveLength(1);
       expect(moduleInstNode.arguments[0].value.value).toBe(20);
@@ -477,13 +466,12 @@ describe('Module and Function AST Generation', () => {
       const code = `
         mycube(size=20, center=true);
       `;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_instantiation');
+      expect(astNodes).toHaveLength(1);
+      expect(astNodes[0].type).toBe('module_instantiation');
 
-      const moduleInstNode = ast[0] as any;
+      const moduleInstNode = astNodes[0] as ast.ModuleInstantiationNode;
       expect(moduleInstNode.name).toBe('mycube');
       expect(moduleInstNode.arguments).toHaveLength(2);
       expect(moduleInstNode.arguments[0].name).toBe('size');
@@ -499,13 +487,12 @@ describe('Module and Function AST Generation', () => {
           cube(10);
         }
       `;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_instantiation');
+      expect(astNodes).toHaveLength(1);
+      expect(astNodes[0].type).toBe('module_instantiation');
 
-      const moduleInstNode = ast[0] as any;
+      const moduleInstNode = astNodes[0] as ast.ModuleInstantiationNode;
       expect(moduleInstNode.name).toBe('wrapper');
       expect(moduleInstNode.arguments).toHaveLength(0);
       expect(moduleInstNode.children).toHaveLength(1);

@@ -99,7 +99,7 @@ describe('Rotate AST Generation', () => {
   describe('rotate transformation', () => {
     it('should parse rotate with scalar angle (z-axis)', () => {
       const code = `rotate(45) cube(10);`;
-      const ast = parser.parseAST(code, 'direct');
+      const ast = parser.parseAST(code);
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);
@@ -117,7 +117,7 @@ describe('Rotate AST Generation', () => {
 
     it('should parse rotate with vector angles [x,y,z]', () => {
       const code = `rotate([45, 0, 90]) cube(10);`;
-      const ast = parser.parseAST(code, 'direct');
+      const ast = parser.parseAST(code);
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);
@@ -134,7 +134,7 @@ describe('Rotate AST Generation', () => {
 
     it('should parse rotate with a and v parameters (axis-angle)', () => {
       const code = `rotate(a=45, v=[0, 0, 1]) cube(10);`;
-      const ast = parser.parseAST(code, 'direct');
+      const ast = parser.parseAST(code);
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);
@@ -155,7 +155,7 @@ describe('Rotate AST Generation', () => {
         cube(10);
         sphere(5);
       }`;
-      const ast = parser.parseAST(code, 'direct');
+      const ast = parser.parseAST(code);
 
       expect(ast).toBeDefined();
       expect(ast).toHaveLength(1);

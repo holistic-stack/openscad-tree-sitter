@@ -12,7 +12,7 @@ export class CompositeVisitor implements ASTVisitor {
    * Create a new CompositeVisitor
    * @param visitors The visitors to delegate to
    */
-  constructor(private visitors: ASTVisitor[]) {}
+  constructor(protected visitors: ASTVisitor[]) {}
 
   /**
    * Visit a node and return the corresponding AST node

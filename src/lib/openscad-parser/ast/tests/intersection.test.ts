@@ -1,7 +1,6 @@
 import { OpenscadParser } from '../../openscad-parser';
-import { afterAll, beforeAll, describe, it, expect, vi } from 'vitest';
-import { getLocation } from '../utils/location-utils';
-import { CompositeVisitor } from '../visitors/composite-visitor';
+import { afterAll, beforeAll, describe, it, expect } from 'vitest';
+import * as ast from '../ast-types';
 
 describe('Intersection AST Generation', () => {
   let parser: OpenscadParser;
@@ -21,13 +20,12 @@ describe('Intersection AST Generation', () => {
         cube(20, center=true);
         sphere(15);
       }`;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toBeDefined();
-      expect(ast).toHaveLength(1);
+      expect(astNodes).toBeDefined();
+      expect(astNodes).toHaveLength(1);
 
-      const intersectionNode = ast[0];
+      const intersectionNode = astNodes[0] as ast.IntersectionNode;
       expect(intersectionNode.type).toBe('intersection');
 
       // With the real parser, the children array might be empty initially
@@ -41,13 +39,12 @@ describe('Intersection AST Generation', () => {
         cylinder(h=20, r=10, center=true);
         cube(15, center=true);
       }`;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toBeDefined();
-      expect(ast).toHaveLength(1);
+      expect(astNodes).toBeDefined();
+      expect(astNodes).toHaveLength(1);
 
-      const intersectionNode = ast[0];
+      const intersectionNode = astNodes[0] as ast.IntersectionNode;
       expect(intersectionNode.type).toBe('intersection');
 
       // With the real parser, the children array might be empty initially
@@ -58,13 +55,12 @@ describe('Intersection AST Generation', () => {
 
     it('should parse empty intersection', () => {
       const code = `intersection() {}`;
-      const visitor = new CompositeVisitor(code);
-      const ast = parser.parseAST(code, visitor);
+      const astNodes = parser.parseAST(code);
 
-      expect(ast).toBeDefined();
-      expect(ast).toHaveLength(1);
+      expect(astNodes).toBeDefined();
+      expect(astNodes).toHaveLength(1);
 
-      const intersectionNode = ast[0];
+      const intersectionNode = astNodes[0] as ast.IntersectionNode;
       expect(intersectionNode.type).toBe('intersection');
 
       // With the real parser, the children array might be empty initially

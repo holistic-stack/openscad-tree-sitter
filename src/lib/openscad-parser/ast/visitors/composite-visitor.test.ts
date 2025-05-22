@@ -6,27 +6,7 @@ import { CSGVisitor } from './csg-visitor';
 import { OpenscadParser } from '../../openscad-parser';
 import { Node as TSNode } from 'web-tree-sitter';
 import { findDescendantOfType } from '../utils/node-utils';
-
-// Mock AST nodes for testing
-const mockCubeNode = {
-  type: 'cube',
-  size: 10,
-  center: false,
-  location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-};
-
-const mockSphereNode = {
-  type: 'sphere',
-  radius: 5,
-  location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-};
-
-const mockTranslateNode = {
-  type: 'translate',
-  vector: [1, 2, 3],
-  children: [],
-  location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-};
+import * as ast from '../ast-types';
 
 describe('CompositeVisitor', () => {
   let parser: OpenscadParser;
@@ -44,11 +24,15 @@ describe('CompositeVisitor', () => {
 
   beforeEach(() => {
     // Create a composite visitor with primitive, transform, and CSG visitors
-    visitor = new CompositeVisitor([
+    const visitors = [
       new PrimitiveVisitor(''),
       new TransformVisitor(''),
       new CSGVisitor('')
-    ]);
+    ];
+    visitor = new CompositeVisitor(visitors);
+
+    // Add visitors as a property for testing
+    (visitor as any).visitors = visitors;
   });
 
   describe('visitNode', () => {
@@ -122,10 +106,10 @@ describe('CompositeVisitor', () => {
 
       // Mock the CSGVisitor to return a union node
       const mockUnionNode = {
-        type: 'union',
+        type: 'union' as const,
         children: [],
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      };
+        location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
+      } as ast.UnionNode;
 
       // Mock the first two visitors to return null
       const visitNodeSpy1 = vi.spyOn(visitor.visitors[0], 'visitNode').mockReturnValue(null);
@@ -243,69 +227,68 @@ describe('CompositeVisitor', () => {
   describe('complex scenarios', () => {
     // Define mock nodes for complex scenarios
     const mockNestedTransformNode = {
-      type: 'translate',
-      vector: [1, 2, 3],
+      type: 'translate' as const,
+      v: [1, 2, 3],
       children: [
         {
-          type: 'rotate',
+          type: 'rotate' as const,
           a: [30, 60, 90],
-          angle: [30, 60, 90],
           children: [
             {
-              type: 'cube',
+              type: 'cube' as const,
               size: 10,
               center: false,
-              location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-            }
+              location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
+            } as ast.CubeNode
           ],
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-        }
+          location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
+        } as ast.RotateNode
       ],
-      location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-    };
+      location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
+    } as ast.TranslateNode;
 
     const mockUnionWithChildrenNode = {
-      type: 'union',
+      type: 'union' as const,
       children: [
         {
-          type: 'cube',
+          type: 'cube' as const,
           size: 10,
           center: false,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-        },
+          location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
+        } as ast.CubeNode,
         {
-          type: 'sphere',
+          type: 'sphere' as const,
           radius: 5,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-        }
+          location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
+        } as ast.SphereNode
       ],
-      location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-    };
+      location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
+    } as ast.UnionNode;
 
     const mockDifferenceNode = {
-      type: 'difference',
+      type: 'difference' as const,
       children: [
         {
-          type: 'cube',
+          type: 'cube' as const,
           size: 20,
           center: true,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-        },
+          location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
+        } as ast.CubeNode,
         {
-          type: 'translate',
-          vector: [0, 0, 5],
+          type: 'translate' as const,
+          v: [0, 0, 5],
           children: [
             {
-              type: 'sphere',
+              type: 'sphere' as const,
               radius: 10,
-              location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-            }
+              location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
+            } as ast.SphereNode
           ],
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-        }
+          location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
+        } as ast.TranslateNode
       ],
-      location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-    };
+      location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
+    } as ast.DifferenceNode;
 
     it('should handle nested transformations', () => {
       // Create a mock module_instantiation node
@@ -421,31 +404,4 @@ describe('CompositeVisitor', () => {
   });
 });
 
-// Helper function to find a node of a specific type
-function findNodeOfType(node: TSNode, type: string): TSNode | null {
-  // Direct match
-  if (node.type === type) {
-    return node;
-  }
-
-  // Special case for module_instantiation tests
-  if (type === 'module_instantiation') {
-    // For our test cases, we'll consider accessor_expression nodes as module_instantiation
-    if (node.type === 'accessor_expression') {
-      return node;
-    }
-  }
-
-  // Recursively search children
-  for (let i = 0; i < node.childCount; i++) {
-    const child = node.child(i);
-    if (!child) continue;
-
-    const result = findNodeOfType(child, type);
-    if (result) {
-      return result;
-    }
-  }
-
-  return null;
-}
+// Note: findNodeOfType function is available from utils/node-utils.ts if needed

@@ -1,6 +1,6 @@
 import { OpenscadParser } from '../../openscad-parser';
 import { afterAll, beforeAll, describe, it, expect } from 'vitest';
-import { CompositeVisitor } from '../visitors/composite-visitor';
+import * as ast from '../ast-types';
 
 describe('Minkowski Operation AST Generation', () => {
   let parser: OpenscadParser;
@@ -22,14 +22,14 @@ describe('Minkowski Operation AST Generation', () => {
         cylinder(r=2, h=1);
       }
     `;
-    const ast = parser.parseAST(code);
+    const astNodes = parser.parseAST(code);
 
-    expect(ast).toHaveLength(1);
-    expect(ast[0].type).toBe('minkowski');
+    expect(astNodes).toHaveLength(1);
+    expect(astNodes[0].type).toBe('minkowski');
 
     // The CSG Generator should create a minkowski node, but it might not have children
     // depending on how the parser processes the nodes
-    const minkowskiNode = ast[0] as any;
+    const minkowskiNode = astNodes[0] as ast.MinkowskiNode;
 
     // If there are children, check for cube and cylinder nodes
     if (minkowskiNode.children && minkowskiNode.children.length > 0) {
@@ -48,15 +48,14 @@ describe('Minkowski Operation AST Generation', () => {
         sphere(2);
       }
     `;
-    const visitor = new CompositeVisitor(code);
-    const ast = parser.parseAST(code, visitor);
+    const astNodes = parser.parseAST(code);
 
-    expect(ast).toHaveLength(1);
-    expect(ast[0].type).toBe('minkowski');
+    expect(astNodes).toHaveLength(1);
+    expect(astNodes[0].type).toBe('minkowski');
 
     // The CSG Generator should create a minkowski node, but it might not have children
     // depending on how the parser processes the nodes
-    const minkowskiNode = ast[0] as any;
+    const minkowskiNode = astNodes[0] as ast.MinkowskiNode;
 
     // If there are children, check for cube and sphere nodes
     if (minkowskiNode.children && minkowskiNode.children.length > 0) {
@@ -74,15 +73,14 @@ describe('Minkowski Operation AST Generation', () => {
         cube(10);
       }
     `;
-    const visitor = new CompositeVisitor(code);
-    const ast = parser.parseAST(code, visitor);
+    const astNodes = parser.parseAST(code);
 
-    expect(ast).toHaveLength(1);
-    expect(ast[0].type).toBe('minkowski');
+    expect(astNodes).toHaveLength(1);
+    expect(astNodes[0].type).toBe('minkowski');
 
     // The CSG Generator should create a minkowski node, but it might not have children
     // depending on how the parser processes the nodes
-    const minkowskiNode = ast[0] as any;
+    const minkowskiNode = astNodes[0] as ast.MinkowskiNode;
 
     // If there are children, check for cube node
     if (minkowskiNode.children && minkowskiNode.children.length > 0) {
@@ -101,15 +99,14 @@ describe('Minkowski Operation AST Generation', () => {
         sphere(1);
       }
     `;
-    const visitor = new CompositeVisitor(code);
-    const ast = parser.parseAST(code, visitor);
+    const astNodes = parser.parseAST(code);
 
-    expect(ast).toHaveLength(1);
-    expect(ast[0].type).toBe('minkowski');
+    expect(astNodes).toHaveLength(1);
+    expect(astNodes[0].type).toBe('minkowski');
 
     // The CSG Generator should create a minkowski node, but it might not have children
     // depending on how the parser processes the nodes
-    const minkowskiNode = ast[0] as any;
+    const minkowskiNode = astNodes[0] as ast.MinkowskiNode;
 
     // If there are children, check for difference and sphere nodes
     if (minkowskiNode.children && minkowskiNode.children.length > 0) {
@@ -128,15 +125,14 @@ describe('Minkowski Operation AST Generation', () => {
         circle(2);
       }
     `;
-    const visitor = new CompositeVisitor(code);
-    const ast = parser.parseAST(code, visitor);
+    const astNodes = parser.parseAST(code);
 
-    expect(ast).toHaveLength(1);
-    expect(ast[0].type).toBe('minkowski');
+    expect(astNodes).toHaveLength(1);
+    expect(astNodes[0].type).toBe('minkowski');
 
     // The CSG Generator should create a minkowski node, but it might not have children
     // depending on how the parser processes the nodes
-    const minkowskiNode = ast[0] as any;
+    const minkowskiNode = astNodes[0] as ast.MinkowskiNode;
 
     // If there are children, check for square and circle nodes
     if (minkowskiNode.children && minkowskiNode.children.length > 0) {
