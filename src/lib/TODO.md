@@ -2,46 +2,51 @@
 
 ## High Priority Tasks
 
-### 1. Complete Transform Visitor Implementation [IN PROGRESS]
-- **Goal**: Ensure robust handling of all transform parameters
-- **Status**: In progress
-- **Description**: Fix type compatibility issues and parameter handling in transform-visitor.ts
-- **Subtasks**:
-  - [x] Export `ExtractedParameter` and `ExtractedNamedArgument` types from argument-extractor.ts
-  - [x] Update `BaseASTVisitor.createASTNodeForFunction` to use `ExtractedParameter[]`
-  - [ ] Fix vector dimension handling in transform node creators (Vector2D vs Vector3D)
-  - [ ] Implement proper type guards for parameter access in `getParametersMap`
-  - [ ] Fix color node handling for both string and vector color formats
-  - [ ] Add comprehensive error handling and validation for all transform parameters
-  - [ ] Ensure consistent handling of default values across all transform types
-- **Dependencies**: None
-- **Priority**: High
-- **Assignee**: TBD
-- **Estimated Time**: 4 hours
-
-### 2. Expand Test Coverage for Transform Parameters
-- **Goal**: Ensure all parameter variations and edge cases are tested
-- **Status**: Planned
-- **Description**: Create comprehensive tests for different parameter patterns in transform nodes
-- **Subtasks**:
-  - [ ] Add tests for named vs. unnamed parameters
-  - [ ] Test vector dimension handling (2D vs 3D)
-  - [ ] Test default value handling for missing parameters
-  - [ ] Test error handling for invalid parameters
-  - [ ] Add tests for color handling (string vs vector)
-- **Dependencies**: Task #1
-- **Priority**: High
-- **Assignee**: TBD
-- **Estimated Time**: 3 hours
-
-### 3. Implement Module and Function Definition Handling
+### 1. Implement Module and Function Definition Handling [NEXT]
 - **Goal**: Support parsing and AST generation for module and function definitions
-- **Status**: Planned
+- **Status**: Next up
 - **Description**: Create visitor implementations for module and function definitions
 - **Subtasks**:
   - [ ] Implement ModuleDefinitionVisitor
   - [ ] Implement FunctionDefinitionVisitor
-  - [ ] Add parameter extraction utilities for function parameters
+  - [ ] Add parameter extraction utilities for function and module parameters
+  - [ ] Support default values for parameters
+  - [ ] Handle nested scopes and variable environments
+  - [ ] Add tests for module and function definitions
+- **Dependencies**: None
+- **Priority**: High
+- **Assignee**: TBD
+- **Estimated Time**: 6 hours
+
+### 2. Implement Control Structure Visitors
+- **Goal**: Support control flow structures like if-else, for loops, etc.
+- **Status**: Planned
+- **Description**: Create visitor implementations for control structures
+- **Subtasks**:
+  - [ ] Implement IfElseVisitor
+  - [ ] Implement ForLoopVisitor
+  - [ ] Add support for conditional expressions
+  - [ ] Implement iterator handling for loop constructs
+  - [ ] Add tests for control structures
+- **Dependencies**: None
+- **Priority**: High
+- **Assignee**: TBD
+- **Estimated Time**: 5 hours
+
+### 3. Enhance Expression Handling
+- **Goal**: Improve support for complex expressions
+- **Status**: Planned
+- **Description**: Create visitor implementations for expression types
+- **Subtasks**:
+  - [ ] Implement binary operation visitors (arithmetic, logical, relational)
+  - [ ] Support unary operations (negation, logical not)
+  - [ ] Add support for function calls in expressions
+  - [ ] Implement variable references
+  - [ ] Add tests for expression handling
+- **Dependencies**: None
+- **Priority**: High
+- **Assignee**: TBD
+- **Estimated Time**: 4 hourson parameters
   - [ ] Implement scope handling for nested definitions
   - [ ] Add tests for module and function definitions
 - **Dependencies**: None
