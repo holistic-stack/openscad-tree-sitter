@@ -9,7 +9,13 @@ export default defineConfig({
     typecheck: {
       enabled: true,
       tsconfig: './tsconfig.vitest.json',
-    }
+    },
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: ['**/node_modules/**', '**/dist/**', '**/test/**']
+    },
+    include: ['src/lib/**/*.test.ts']
   },
   resolve: {
     alias: {
