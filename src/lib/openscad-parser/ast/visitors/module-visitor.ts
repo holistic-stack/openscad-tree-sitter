@@ -2,9 +2,8 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 import { BaseASTVisitor } from './base-ast-visitor';
 import { getLocation } from '../utils/location-utils';
-// These imports are not used in this file
-// import { extractArguments } from '../extractors/argument-extractor';
-// import { findDescendantOfType } from '../utils/node-utils';
+import { extractArguments } from '../extractors/argument-extractor';
+import { extractModuleParameters, extractModuleParametersFromText } from '../extractors/module-parameter-extractor';
 
 /**
  * Visitor for module definitions and instantiations
@@ -35,21 +34,20 @@ export class ModuleVisitor extends BaseASTVisitor {
     console.log(`[ModuleVisitor.visitModuleDefinition] Processing module definition: ${node.text.substring(0, 50)}`);
 
     // Extract module name
-    // For the test cases, extract the name from the text
     let name = '';
-    if (node.text.startsWith('module ')) {
+
+    // Extract module name from the node
+    const nameNode = node.childForFieldName('name');
+    if (nameNode) {
+      name = nameNode.text;
+    }
+
+    // For the test cases, extract the name from the text if not found in the node
+    if (!name && node.text.startsWith('module ')) {
       const moduleText = node.text.substring(7); // Skip 'module '
       const nameEndIndex = moduleText.indexOf('(');
       if (nameEndIndex > 0) {
         name = moduleText.substring(0, nameEndIndex);
-      }
-    }
-
-    // If we couldn't extract the name from the text, try to get it from the node
-    if (!name) {
-      const nameNode = node.childForFieldName('name');
-      if (nameNode) {
-        name = nameNode.text;
       }
     }
 
@@ -59,84 +57,22 @@ export class ModuleVisitor extends BaseASTVisitor {
     }
 
     // Extract parameters
-    const moduleParameters: ast.ModuleParameter[] = [];
+    let moduleParameters: ast.ModuleParameter[] = [];
 
-    // For test cases, extract parameters from the text
-    if (node.text.includes('(')) {
+    // Extract parameters from the node
+    const paramListNode = node.childForFieldName('parameters');
+    if (paramListNode) {
+      moduleParameters = extractModuleParameters(paramListNode);
+    }
+
+    // For test cases, extract parameters from the text if none were found in the node
+    if (moduleParameters.length === 0 && node.text.includes('(')) {
       const startIndex = node.text.indexOf('(');
       const endIndex = node.text.indexOf(')', startIndex);
       if (startIndex > 0 && endIndex > startIndex) {
         const paramsText = node.text.substring(startIndex + 1, endIndex).trim();
         if (paramsText) {
-          const paramsList = paramsText.split(',').map(p => p.trim());
-          for (const param of paramsList) {
-            if (param.includes('=')) {
-              // Parameter with default value
-              const [paramName, defaultValueText] = param.split('=').map(p => p.trim());
-              let defaultValue: any = defaultValueText;
-
-              // Try to parse the default value
-              if (!isNaN(Number(defaultValueText))) {
-                defaultValue = Number(defaultValueText);
-              } else if (defaultValueText === 'true') {
-                defaultValue = true;
-              } else if (defaultValueText === 'false') {
-                defaultValue = false;
-              }
-
-              moduleParameters.push({
-                name: paramName,
-                defaultValue: defaultValue
-              });
-            } else {
-              // Parameter without default value
-              moduleParameters.push({
-                name: param
-              });
-            }
-          }
-        }
-      }
-    }
-
-    // If we couldn't extract parameters from the text, try to get them from the node
-    if (moduleParameters.length === 0) {
-      const paramListNode = node.childForFieldName('parameters');
-      if (paramListNode) {
-        // Process parameter list
-        for (let i = 0; i < paramListNode.namedChildCount; i++) {
-          const paramNode = paramListNode.namedChild(i);
-          if (paramNode && paramNode.type === 'parameter') {
-            const paramName = paramNode.childForFieldName('name')?.text;
-            if (paramName) {
-              // Check for default value
-              const defaultValueNode = paramNode.childForFieldName('default_value');
-              if (defaultValueNode) {
-                // Parameter with default value
-                const defaultValueText = defaultValueNode.text;
-                let defaultValue: any = defaultValueText;
-
-                // Try to parse the default value
-                if (!isNaN(Number(defaultValueText))) {
-                  defaultValue = Number(defaultValueText);
-                } else if (defaultValueText === 'true') {
-                  defaultValue = true;
-                } else if (defaultValueText === 'false') {
-                  defaultValue = false;
-                }
-
-                moduleParameters.push({
-                  name: paramName,
-                  defaultValue: defaultValue
-                });
-              } else {
-                // Parameter without default value
-                moduleParameters.push({
-                  name: paramName
-                });
-              }
-            }
-          }
+          moduleParameters = extractModuleParametersFromText(paramsText);
         }
       }
     }

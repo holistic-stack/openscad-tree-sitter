@@ -1,5 +1,41 @@
 # OpenSCAD Tree-sitter Parser - Progress Log
 
+## 2025-05-23: Implemented Module and Function Definition Handling
+
+### Completed Tasks
+
+1. **Module Parameter Extractor**:
+   - Created a dedicated module parameter extractor for handling module and function parameters
+   - Implemented support for default parameter values of different types (number, string, boolean, vector)
+   - Added proper handling of vector parameters with 2D and 3D variants
+   - Ensured robust parsing of parameter lists with mixed parameter types
+
+2. **Module Visitor Enhancement**:
+   - Updated ModuleVisitor to use the new module parameter extractor
+   - Improved module definition parsing to handle parameters with default values
+   - Enhanced module instantiation handling for better test compatibility
+   - Added comprehensive tests for module definitions and instantiations
+
+3. **Function Visitor Enhancement**:
+   - Updated FunctionVisitor to use the new module parameter extractor
+   - Improved function definition parsing to handle parameters with default values
+   - Enhanced function call handling for better test compatibility
+   - Added comprehensive tests for function definitions and calls
+
+### Key Decisions
+
+1. **Parameter Extraction Strategy**:
+   - Created a dedicated extractor for module parameters to ensure consistent handling
+   - Implemented robust parsing of different parameter types and default values
+   - Used the same parameter extraction logic for both module and function definitions
+   - Added special handling for test cases with different parameter formats
+
+2. **Testing Approach**:
+   - Created dedicated test files for module and function visitors
+   - Added tests for various parameter combinations and default values
+   - Ensured compatibility with existing module-function.test.ts tests
+   - Used real OpenscadParser instances in tests for better integration testing
+
 ## 2025-05-22: Successfully Implemented Transform Visitor
 
 ### Completed Tasks

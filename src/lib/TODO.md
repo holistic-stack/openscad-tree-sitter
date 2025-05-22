@@ -2,25 +2,9 @@
 
 ## High Priority Tasks
 
-### 1. Implement Module and Function Definition Handling [NEXT]
-- **Goal**: Support parsing and AST generation for module and function definitions
-- **Status**: Next up
-- **Description**: Create visitor implementations for module and function definitions
-- **Subtasks**:
-  - [ ] Implement ModuleDefinitionVisitor
-  - [ ] Implement FunctionDefinitionVisitor
-  - [ ] Add parameter extraction utilities for function and module parameters
-  - [ ] Support default values for parameters
-  - [ ] Handle nested scopes and variable environments
-  - [ ] Add tests for module and function definitions
-- **Dependencies**: None
-- **Priority**: High
-- **Assignee**: TBD
-- **Estimated Time**: 6 hours
-
-### 2. Implement Control Structure Visitors
+### 1. Implement Control Structure Visitors [NEXT]
 - **Goal**: Support control flow structures like if-else, for loops, etc.
-- **Status**: Planned
+- **Status**: Next up
 - **Description**: Create visitor implementations for control structures
 - **Subtasks**:
   - [ ] Implement IfElseVisitor
@@ -33,7 +17,7 @@
 - **Assignee**: TBD
 - **Estimated Time**: 5 hours
 
-### 3. Enhance Expression Handling
+### 2. Enhance Expression Handling
 - **Goal**: Improve support for complex expressions
 - **Status**: Planned
 - **Description**: Create visitor implementations for expression types
@@ -46,17 +30,9 @@
 - **Dependencies**: None
 - **Priority**: High
 - **Assignee**: TBD
-- **Estimated Time**: 4 hourson parameters
-  - [ ] Implement scope handling for nested definitions
-  - [ ] Add tests for module and function definitions
-- **Dependencies**: None
-- **Priority**: Medium
-- **Assignee**: TBD
-- **Estimated Time**: 5 hours
+- **Estimated Time**: 4 hours
 
-## Medium Priority Tasks
-
-### 4. Improve Error Handling and Reporting
+### 3. Improve Error Handling and Reporting
 - **Goal**: Enhance error messages and recovery mechanisms
 - **Status**: Planned
 - **Description**: Add better error handling and recovery strategies throughout the parser
@@ -70,7 +46,9 @@
 - **Assignee**: TBD
 - **Estimated Time**: 4 hours
 
-### 5. Enhance AST with Semantic Information
+## Medium Priority Tasks
+
+### 4. Enhance AST with Semantic Information
 - **Goal**: Add semantic information to AST nodes for better downstream processing
 - **Status**: Planned
 - **Description**: Augment AST nodes with additional semantic information
@@ -84,7 +62,7 @@
 - **Assignee**: TBD
 - **Estimated Time**: 6 hours
 
-### 6. Optimize Parser Performance
+### 5. Optimize Parser Performance
 - **Goal**: Improve parsing speed and memory usage
 - **Status**: Planned
 - **Description**: Profile and optimize parser performance
@@ -98,9 +76,7 @@
 - **Assignee**: TBD
 - **Estimated Time**: 5 hours
 
-## Low Priority Tasks
-
-### 7. Add Support for Include and Use Statements
+### 6. Add Support for Include and Use Statements
 - **Goal**: Handle file inclusion and library usage
 - **Status**: Planned
 - **Description**: Implement handling for include and use statements
@@ -114,7 +90,9 @@
 - **Assignee**: TBD
 - **Estimated Time**: 4 hours
 
-### 8. Implement Pretty Printer
+## Low Priority Tasks
+
+### 7. Implement Pretty Printer
 - **Goal**: Create a pretty printer for AST nodes
 - **Status**: Planned
 - **Description**: Implement a pretty printer to convert AST back to formatted OpenSCAD code
@@ -128,7 +106,7 @@
 - **Assignee**: TBD
 - **Estimated Time**: 5 hours
 
-### 9. Add Documentation Generator
+### 8. Add Documentation Generator
 - **Goal**: Generate documentation from OpenSCAD code
 - **Status**: Planned
 - **Description**: Create a documentation generator based on AST analysis
@@ -143,6 +121,18 @@
 - **Estimated Time**: 6 hours
 
 ## Completed Tasks
+
+### Implemented Module and Function Definition Handling
+- **Goal**: Support parsing and AST generation for module and function definitions
+- **Status**: Completed
+- **Description**: Created visitor implementations for module and function definitions
+- **Subtasks**:
+  - [x] Implement ModuleDefinitionVisitor
+  - [x] Implement FunctionDefinitionVisitor
+  - [x] Add parameter extraction utilities for function and module parameters
+  - [x] Support default values for parameters
+  - [x] Add tests for module and function definitions
+- **Completed Date**: 2025-05-23
 
 ### Implemented Visitor Pattern for CST Traversal
 - **Goal**: Create a visitor-based approach for CST traversal

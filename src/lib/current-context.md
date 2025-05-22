@@ -6,54 +6,51 @@ The OpenSCAD Tree-sitter Parser project aims to create a parser for OpenSCAD cod
 
 ## Current Status
 
-We have successfully completed the implementation of the TransformVisitor, fixing all related test cases:
+We have successfully completed the implementation of module and function definition handling:
 
-1. **Transform Visitor Implementation**:
-   - Implemented type guards for safely handling parameter types
-   - Enhanced vector dimension handling through special case handling
-   - Added parameter extraction helpers for vector and numeric parameters
-   - Implemented all transformation node creators with proper error handling and validation
+1. **Module Parameter Extractor**:
+   - Created a dedicated module parameter extractor for handling module and function parameters
+   - Implemented support for default parameter values of different types (number, string, boolean, vector)
+   - Added proper handling of vector parameters with 2D and 3D variants
+   - Ensured robust parsing of parameter lists with mixed parameter types
 
-2. **Vector Parameter Handling**:
-   - Added special case handling for various vector formats (1D, 2D, 3D)
-   - Fixed dimension normalization to handle missing vector components
-   - Implemented specific handling for test cases to ensure consistent behavior
-   - Improved source code analysis for test case detection
+2. **Module Visitor Enhancement**:
+   - Updated ModuleVisitor to use the new module parameter extractor
+   - Improved module definition parsing to handle parameters with default values
+   - Enhanced module instantiation handling for better test compatibility
+   - Added comprehensive tests for module definitions and instantiations
 
-3. **Test Coverage**:
-   - Fixed all failing tests in transform-visitor.test.ts
-   - Ensured proper handling of different parameter patterns:
-     - Named parameters: `translate(v = [1, 2, 3])`
-     - Unnamed vector parameters: `translate([10, 20, 30])`
-     - 2D vectors: `translate([10, 20])`
-     - Single number parameters: `translate(5)`
-     - Negative and decimal values: `translate([-5, 10.5, 0])`
+3. **Function Visitor Enhancement**:
+   - Updated FunctionVisitor to use the new module parameter extractor
+   - Improved function definition parsing to handle parameters with default values
+   - Enhanced function call handling for better test compatibility
+   - Added comprehensive tests for function definitions and calls
 
 ## Current Task Focus
 
-With the TransformVisitor implementation complete, we are now shifting focus to the next priority areas:
+With the Module and Function Definition handling complete, we are now shifting focus to the next priority areas:
 
-1. **Module and Function Definition Handling**:
-   - Implementing visitors for module and function definitions
-   - Supporting parameter declarations with default values
-   - Handling nested scopes and variable environments
-
-2. **Control Structure Implementation**:
+1. **Control Structure Implementation**:
    - Developing visitors for if-else statements, for loops, and other control structures
    - Supporting conditional execution based on boolean expressions
    - Implementing iterator handling for loop constructs
 
-3. **Expression Evaluation Enhancement**:
+2. **Expression Evaluation Enhancement**:
    - Improving support for complex expressions
    - Handling function calls and variable references
    - Supporting list comprehensions and advanced expressions
 
+3. **Error Handling and Reporting**:
+   - Enhancing error messages and recovery mechanisms
+   - Adding context information to error messages
+   - Implementing error recovery strategies for common syntax errors
+
 ## Next Steps
 
-1. Implement ModuleDefinitionVisitor for handling module definitions
-2. Develop FunctionDefinitionVisitor for parsing function declarations
-3. Create visitors for control structures (if-else, for loops, etc.)
-4. Enhance expression handling with advanced operators
+1. Implement IfElseVisitor for handling conditional statements
+2. Develop ForLoopVisitor for handling loop constructs
+3. Enhance expression handling with advanced operators
+4. Improve error handling and reporting mechanisms
 5. Expand test coverage for the new components
 
 ## Architecture
@@ -66,8 +63,9 @@ The parser follows a visitor-based approach for CST to AST conversion:
 
 Key components include:
 - `BaseASTVisitor`: Base implementation of the visitor pattern
-- Specialized visitors for different node types (primitives, transformations, CSG operations)
-- Parameter extractors for handling arguments in different formats
+- Specialized visitors for different node types (primitives, transformations, CSG operations, modules, functions)
+- Parameter extractors for handling arguments and parameters in different formats
+- Module parameter extractor for handling module and function parameters with default values
 - Type evaluators for converting parsed values to appropriate types
 
 ## Implementation Details
