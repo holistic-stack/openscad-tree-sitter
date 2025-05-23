@@ -10,7 +10,13 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "types": ["vitest/globals"]
+    "types": [
+      "node",
+      // Include type definitions for:
+      "vite/client", // - Vite client types
+      "vitest/globals", // - Vitest globals for testing
+      "vitest" // - Vitest types for testing
+    ]
   },
   "files": [],
   "references": [

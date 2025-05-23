@@ -42,7 +42,6 @@ import { ASTNode } from "./ast/ast-types";
 // cstTreeCursorWalkLog is not used in this file
 import { ParserError, SyntaxError, RecoveryStrategyFactory } from "./ast/errors"; // SemanticError is not used
 import { ChangeTracker } from "./ast/changes/change-tracker"; // Change is not used
-import { getWasmPath } from "./wasm-path-helper";
 
 /**
  * A parser for OpenSCAD code using the Tree-sitter library.
@@ -97,30 +96,25 @@ export class OpenscadParser {
      */
     public async init(openscadWasmPath?: string): Promise<void> {
         try {
+            const bytes = await fetch(openscadWasmPath || "./tree-sitter-openscad.wasm").then(
+                (response) => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.bytes();
+                }
+            );
+
             // Initialize the TreeSitter parser
             await TreeSitter.Parser.init();
             this.parser = new TreeSitter.Parser();
 
-            // If we're in a test environment, use a mock language
-            if (process.env.NODE_ENV === 'test') {
-                console.log("Test environment detected, using mock language");
-                this.language = {} as TreeSitter.Language; // Mock language object
-                this.parser.setLanguage(this.language);
-                this.isInitialized = true;
-                return;
-            }
-
-            // Use the provided path or get one from our helper
-            const wasmPath = openscadWasmPath || getWasmPath();
-            console.log(`Loading Tree-sitter OpenSCAD WebAssembly module from path: ${wasmPath}`);
-
             try {
                 // Load the language from the WASM file
-                this.language = await TreeSitter.Language.load(wasmPath);
+                this.language = await TreeSitter.Language.load(bytes);
                 this.parser.setLanguage(this.language);
                 this.isInitialized = true;
             } catch (err) {
-                console.error(`Failed to load language from ${wasmPath}:`, err);
                 throw new Error(`Failed to load language: ${err}`);
             }
         } catch (err) {

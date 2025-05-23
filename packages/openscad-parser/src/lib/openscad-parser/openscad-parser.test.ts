@@ -16,8 +16,6 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { OpenscadParser } from "./openscad-parser";
-import * as TreeSitter from "web-tree-sitter";
-import { setupTreeSitterMocks, cleanupTreeSitterMocks } from "../test-setup";
 
 // Sample OpenSCAD code for testing
 const SAMPLE_OPENSCAD_CODE = `
@@ -64,9 +62,6 @@ describe("OpenSCADParser", () => {
   let parser: OpenscadParser;
 
   beforeEach(async () => {
-    // Set up mocks for Tree-sitter
-    setupTreeSitterMocks();
-
     // Create a new parser instance before each test
     parser = new OpenscadParser();
 
@@ -77,7 +72,6 @@ describe("OpenSCADParser", () => {
   afterEach(() => {
     // Clean up after each test
     parser.dispose();
-    cleanupTreeSitterMocks();
   });
 
   it("should initialize automatically in the constructor", async () => {
