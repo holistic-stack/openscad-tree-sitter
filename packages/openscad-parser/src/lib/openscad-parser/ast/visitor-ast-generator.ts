@@ -47,11 +47,11 @@ export class VisitorASTGenerator {
    */
   constructor(private tree: Tree, private source: string, private language: any) {
     // Create a composite visitor that delegates to specialized visitors
-    // Order matters here - TransformVisitor should be first to handle transformation nodes
+    // Order matters here - PrimitiveVisitor should be first to handle primitive shapes
     const transformVisitor = new TransformVisitor(source);
     const compositeVisitor = new CompositeVisitor([
-      transformVisitor,
       new PrimitiveVisitor(source),
+      transformVisitor,
       new CSGVisitor(source),
       new ControlStructureVisitor(source),
       new ExpressionVisitor(source),

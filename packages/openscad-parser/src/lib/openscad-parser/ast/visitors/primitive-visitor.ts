@@ -80,16 +80,42 @@ export class PrimitiveVisitor extends BaseASTVisitor {
       console.log(`[PrimitiveVisitor.visitAccessorExpression] Error logging node text: ${error}`);
     }
 
-    // Extract function name from the accessor_expression
-    const functionNode = findDescendantOfType(node, 'identifier');
-    if (!functionNode) {
-      console.log(`[PrimitiveVisitor.visitAccessorExpression] No function name found`);
+    // Based on CST structure analysis:
+    // accessor_expression has two children:
+    // - child[0] (field: function): accessor_expression containing the function name
+    // - child[1]: argument_list containing the arguments
+
+    let functionName: string | null = null;
+    let argsNode: TSNode | null = null;
+
+    // Check if this accessor_expression has an argument_list (indicating it's a function call)
+    for (let i = 0; i < node.childCount; i++) {
+      const child = node.child(i);
+      if (child && child.type === 'argument_list') {
+        argsNode = child;
+        console.log(`[PrimitiveVisitor.visitAccessorExpression] Found argument_list as child[${i}]`);
+
+        // The function name should be in the first child (field: function)
+        const functionChild = node.child(0);
+        if (functionChild && functionChild.type === 'accessor_expression') {
+          const identifierNode = findDescendantOfType(functionChild, 'identifier');
+          if (identifierNode) {
+            functionName = identifierNode.text;
+            console.log(`[PrimitiveVisitor.visitAccessorExpression] Found function name: ${functionName}`);
+          }
+        }
+        break;
+      }
+    }
+
+    // If no argument_list found, this might be just an identifier, not a function call
+    if (!argsNode) {
+      console.log(`[PrimitiveVisitor.visitAccessorExpression] No argument_list found, not a function call`);
       return null;
     }
 
-    const functionName = functionNode.text;
     if (!functionName) {
-      console.log(`[PrimitiveVisitor.visitAccessorExpression] Empty function name`);
+      console.log(`[PrimitiveVisitor.visitAccessorExpression] No function name found`);
       return null;
     }
 
@@ -101,24 +127,51 @@ export class PrimitiveVisitor extends BaseASTVisitor {
       return null;
     }
 
-    // Extract arguments from the argument_list
-    const argsNode = node.childForFieldName('argument_list') ||
-                     node.namedChildren.find(child => child && child.type === 'argument_list');
-
+    // Extract arguments from the argument_list (already found above)
     let args: ast.Parameter[] = [];
     if (argsNode) {
-      const argumentsNode = argsNode.childForFieldName('arguments') ||
-                            argsNode.namedChildren.find(child => child && child.type === 'arguments');
+      console.log(`[PrimitiveVisitor.visitAccessorExpression] Processing argument_list: ${argsNode.text}`);
+
+      // Based on CST structure: argument_list contains 'arguments' node which contains the actual arguments
+      const argumentsNode = argsNode.namedChildren.find(child => child && child.type === 'arguments');
 
       if (argumentsNode) {
         console.log(`[PrimitiveVisitor.visitAccessorExpression] Found arguments node: ${argumentsNode.text}`);
         args = extractArguments(argumentsNode);
         console.log(`[PrimitiveVisitor.visitAccessorExpression] Extracted ${args.length} arguments`);
+      } else {
+        console.log(`[PrimitiveVisitor.visitAccessorExpression] No arguments node found in argument_list`);
+        // Try to extract arguments directly from the argument_list
+        args = extractArguments(argsNode);
+        console.log(`[PrimitiveVisitor.visitAccessorExpression] Extracted ${args.length} arguments directly from argument_list`);
       }
+    } else {
+      console.log(`[PrimitiveVisitor.visitAccessorExpression] No argument_list found`);
     }
 
     // Process based on function name
     return this.createASTNodeForFunction(node, functionName, args);
+  }
+
+  /**
+   * Visit an expression statement node
+   * @param node The expression statement node to visit
+   * @returns The AST node or null if the node cannot be processed
+   */
+  visitExpressionStatement(node: TSNode): ast.ASTNode | null {
+    console.log(`[PrimitiveVisitor.visitExpressionStatement] Processing expression statement: ${node.text.substring(0, 50)}`);
+
+    // Look for accessor_expression in the expression_statement
+    for (let i = 0; i < node.childCount; i++) {
+      const child = node.child(i);
+      if (child && child.type === 'accessor_expression') {
+        console.log(`[PrimitiveVisitor.visitExpressionStatement] Found accessor_expression as child[${i}]`);
+        return this.visitAccessorExpression(child);
+      }
+    }
+
+    // Fallback to base implementation
+    return super.visitExpressionStatement(node);
   }
 
   /**

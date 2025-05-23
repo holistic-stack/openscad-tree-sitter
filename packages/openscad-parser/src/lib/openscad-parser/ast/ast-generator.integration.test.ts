@@ -1,6 +1,5 @@
 import { OpenscadParser } from '../openscad-parser';
 import { afterAll, beforeAll, describe, it, expect, beforeEach } from 'vitest';
-import {cstTreeCursorWalkLog} from "@/lib/openscad-parser/cst/cursor-utils/cstTreeCursorWalkLog";
 
 describe('AST Generator Integration Tests', () => {
   let parser: OpenscadParser;

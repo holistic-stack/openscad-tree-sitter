@@ -189,7 +189,7 @@ export function extractValue(valueNode: TSNode): ast.Value | null {
       return null;
     }
     case 'arguments': { // Added case for 'arguments'
-      // This case handles when a single, unnamed argument is passed, 
+      // This case handles when a single, unnamed argument is passed,
       // and it's wrapped in an 'arguments' node by the parser.
       // e.g., translate([1,2,3]) -> argument_list has child 'arguments' (text: [1,2,3])
       // We expect the actual value (e.g., array_literal) to be the first child of this 'arguments' node.
@@ -236,11 +236,58 @@ export function extractValue(valueNode: TSNode): ast.Value | null {
       return { type: 'identifier', value: valueNode.text };
 
     case 'vector_literal': // Fallthrough
-    case 'array_literal': 
+    case 'array_literal':
       return extractVectorLiteral(valueNode);
 
     case 'range_literal':
       return extractRangeLiteral(valueNode);
+
+    // Handle expression hierarchy - these nodes typically have a single child that contains the actual value
+    case 'conditional_expression':
+    case 'logical_or_expression':
+    case 'logical_and_expression':
+    case 'equality_expression':
+    case 'relational_expression':
+    case 'additive_expression':
+    case 'multiplicative_expression':
+    case 'exponentiation_expression':
+    case 'unary_expression':
+    case 'postfix_expression':
+    case 'accessor_expression':
+    case 'primary_expression': {
+      // These expression types typically have a single child that contains the actual value
+      // Traverse down the expression hierarchy to find the leaf value
+      console.log(`[extractValue] Processing expression hierarchy node: ${valueNode.type}`);
+
+      // Try to find the first named child that contains a value
+      for (let i = 0; i < valueNode.namedChildCount; i++) {
+        const child = valueNode.namedChild(i);
+        if (child) {
+          console.log(`[extractValue] Trying child ${i}: type=${child.type}, text='${child.text}'`);
+          const result = extractValue(child);
+          if (result) {
+            console.log(`[extractValue] Successfully extracted from ${valueNode.type} via child ${i}`);
+            return result;
+          }
+        }
+      }
+
+      // If no named children worked, try all children
+      for (let i = 0; i < valueNode.childCount; i++) {
+        const child = valueNode.child(i);
+        if (child && child.isNamed) {
+          console.log(`[extractValue] Trying unnamed child ${i}: type=${child.type}, text='${child.text}'`);
+          const result = extractValue(child);
+          if (result) {
+            console.log(`[extractValue] Successfully extracted from ${valueNode.type} via unnamed child ${i}`);
+            return result;
+          }
+        }
+      }
+
+      console.log(`[extractValue] Could not extract value from expression hierarchy node: ${valueNode.type}`);
+      return null;
+    }
 
     default:
       console.log(`[extractValue] Unsupported value type: ${valueNode.type}`);

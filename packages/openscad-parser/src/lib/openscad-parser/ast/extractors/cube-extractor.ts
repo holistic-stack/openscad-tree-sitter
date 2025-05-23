@@ -12,13 +12,30 @@ import { extractNumberParameter, extractBooleanParameter, extractVectorParameter
  */
 export function extractCubeNode(node: TSNode): ast.CubeNode | null {
   console.log(`[extractCubeNode] Processing cube node: ${node.text.substring(0, 50)}`);
+  console.log(`[extractCubeNode] Node type: ${node.type}, childCount: ${node.childCount}`);
 
   // Default values
   let size: number | ast.Vector3D = 1;
   let center = false;
 
-  // Extract arguments from the argument_list
-  const argsNode = node.childForFieldName('arguments');
+  // Find the argument_list node - it could be a direct child or a field
+  let argsNode: TSNode | null = null;
+
+  // First try to get it as a field (for module_instantiation nodes)
+  argsNode = node.childForFieldName('arguments');
+
+  // If not found as field, look for argument_list as a direct child (for accessor_expression nodes)
+  if (!argsNode) {
+    for (let i = 0; i < node.childCount; i++) {
+      const child = node.child(i);
+      if (child && child.type === 'argument_list') {
+        argsNode = child;
+        console.log(`[extractCubeNode] Found argument_list as child[${i}]`);
+        break;
+      }
+    }
+  }
+
   if (!argsNode) {
     console.log(`[extractCubeNode] No arguments found, using default values`);
     return {
@@ -28,6 +45,8 @@ export function extractCubeNode(node: TSNode): ast.CubeNode | null {
       location: getLocation(node)
     };
   }
+
+  console.log(`[extractCubeNode] Found arguments node: type=${argsNode.type}, text='${argsNode.text}'`);
 
   const args = extractArguments(argsNode);
   console.log(`[extractCubeNode] Extracted ${args.length} arguments: ${JSON.stringify(args)}`);

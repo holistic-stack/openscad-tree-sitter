@@ -243,111 +243,15 @@ export abstract class BaseASTVisitor implements ASTVisitor {
       return this.visitModuleDefinition(node);
     }
 
-    // Special handling for test cases - check for module instantiation patterns in the text
-    const text = node.text.trim();
-    const moduleNameMatch = text.match(/^(\w+)\s*\(/);
-    if (moduleNameMatch) {
-      const functionName = moduleNameMatch[1];
-      console.log(`[BaseASTVisitor.visitStatement] Found potential module instantiation in statement: ${functionName}`);
+    // First, try to find and route to the actual CST nodes
+    // Look for expression_statement as a direct child
+    for (let i = 0; i < node.childCount; i++) {
+      const child = node.child(i);
+      if (!child) continue;
 
-      // For test cases, handle common module names directly
-      if (functionName === 'translate' ||
-          functionName === 'rotate' ||
-          functionName === 'scale' ||
-          functionName === 'mirror' ||
-          functionName === 'color' ||
-          functionName === 'cube' ||
-          functionName === 'sphere' ||
-          functionName === 'cylinder' ||
-          functionName === 'mycube') {
-
-        // Extract arguments
-        const argsStartIndex = text.indexOf('(') + 1;
-        const argsEndIndex = text.indexOf(')', argsStartIndex);
-        const argsText = text.substring(argsStartIndex, argsEndIndex).trim();
-
-        // Parse arguments
-        const args: ExtractedParameter[] = [];
-        if (argsText) {
-          // For simple numeric arguments
-          if (!isNaN(Number(argsText))) {
-            args.push({
-              type: 'number',
-              value: String(Number(argsText))
-            });
-          }
-          // For vector arguments like [0,0,10]
-          else if (argsText.startsWith('[') && argsText.endsWith(']')) {
-            const vectorText = argsText.substring(1, argsText.length - 1);
-            const vectorValues = vectorText.split(',').map(v => parseFloat(v.trim()));
-            args.push({
-              type: 'vector',
-              value: vectorValues.map(v => ({
-                type: 'number',
-                value: String(v)
-              }))
-            });
-          }
-        }
-
-        // Create a mock module_instantiation node for processing
-        const mockNode = {
-          ...node,
-          text: text,
-          type: 'module_instantiation',
-          childForFieldName: (name: string) => {
-            if (name === 'name') {
-              return { text: functionName } as TSNode;
-            } else if (name === 'arguments') {
-              return null; // We'll use the parsed args directly
-            } else if (name === 'body') {
-              // If this is a translate statement with a body
-              if (functionName === 'translate' && text.includes('{')) {
-                return {
-                  type: 'block',
-                  text: 'cube(10);',
-                  namedChildCount: 1,
-                  namedChild: (index: number) => {
-                    if (index === 0) {
-                      return {
-                        type: 'statement',
-                        text: 'cube(10);',
-                        childForFieldName: (name: string) => {
-                          if (name === 'name') {
-                            return { text: 'cube' } as TSNode;
-                          }
-                          return null;
-                        }
-                      } as TSNode;
-                    }
-                    return null;
-                  }
-                } as TSNode;
-              }
-              return null;
-            }
-            return null;
-          }
-        } as TSNode;
-
-        // Convert ExtractedParameter[] to Parameter[]
-        const convertedArgs: ast.Parameter[] = args.map(arg => {
-          if ('name' in arg) {
-            // Named argument
-            return {
-              name: arg.name,
-              value: convertExtractedValueToParameterValue(arg.value)
-            };
-          } else {
-            // Positional argument
-            return {
-              value: convertExtractedValueToParameterValue(arg)
-            };
-          }
-        });
-
-        // Process as a module instantiation
-        return this.createASTNodeForFunction(mockNode, functionName, convertedArgs);
+      if (child.type === 'expression_statement') {
+        console.log(`[BaseASTVisitor.visitStatement] Found expression_statement as direct child`);
+        return this.visitExpressionStatement(child);
       }
     }
 
@@ -363,17 +267,6 @@ export abstract class BaseASTVisitor implements ASTVisitor {
     if (accessorExpression) {
       console.log(`[BaseASTVisitor.visitStatement] Found accessor_expression in statement`);
       return this.visitAccessorExpression(accessorExpression);
-    }
-
-    // Check for expression_statement as a direct child
-    for (let i = 0; i < node.childCount; i++) {
-      const child = node.child(i);
-      if (!child) continue;
-
-      if (child.type === 'expression_statement') {
-        console.log(`[BaseASTVisitor.visitStatement] Found expression_statement as direct child`);
-        return this.visitExpressionStatement(child);
-      }
     }
 
     console.log(`[BaseASTVisitor.visitStatement] No module_definition, function_definition, module_instantiation, accessor_expression, or expression_statement found in statement`);

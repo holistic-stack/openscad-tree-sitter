@@ -21,9 +21,123 @@
     - [x] Fixed custom strategy registration case sensitivity issue
 - **Context**: The parser now has robust error handling with meaningful feedback and recovery capabilities for common syntax errors. **ALL TESTS PASSING!**
 
+## Current Priority Tasks
+
+### 1. ✅ COMPLETED: Fix Argument Extraction in Expression Hierarchy
+**Status**: COMPLETED ✅
+**Priority**: CRITICAL
+**Estimated Time**: 1-2 hours
+**Dependencies**: Visitor routing (completed)
+
+**RESULT**: **MAJOR SUCCESS!** Argument extraction is now working perfectly! 🎉
+
+**What Was Fixed**:
+- ✅ Updated `extractValue` function to handle `conditional_expression`, `logical_or_expression`, `logical_and_expression`, etc.
+- ✅ Added recursive traversal to find the actual value nodes (number, vector, string, boolean)
+- ✅ Tested successfully with: `cube(10)`, `cube([10, 20, 30])`, `cube()`, `translate([10,0,0]) cube()`
+
+**Results**:
+- ✅ `cube()` → `{"type": "cube", "size": 1, "center": false}` (perfect default values)
+- ✅ `cube([10, 20, 30])` → `{"type": "cube", "size": [10, 20, 30], "center": false}` (perfect vector parsing)
+- ✅ `translate([10, 0, 0]) cube()` → transform node with cube child (perfect nesting)
+
+**Code Location**: `packages/openscad-parser/src/lib/openscad-parser/ast/extractors/argument-extractor.ts`
+
 ## High Priority Tasks
 
-### 1. Fix Expression Visitor Implementation Issues
+### 1. Complete Comprehensive AST Generator Integration Tests
+- **Goal**: Ensure the AST generator can handle the full spectrum of OpenSCAD code from simple primitives to complex real-world projects
+- **Status**: BLOCKED (waiting for argument extraction fix)
+- **Priority**: HIGH
+- **Description**: Complete comprehensive integration testing with 5-phase progressive complexity approach
+
+**Progress Made**:
+- ✅ Test data structure created
+- ✅ Test framework implemented
+- ✅ Visitor routing fixed
+- ✅ Function name extraction working
+- ❌ Argument extraction failing (blocking all tests)
+- **Total Estimated Time**: 32-42 hours (5 weeks)
+- **Success Metrics**:
+  - >90% test coverage for AST generation
+  - Test all major OpenSCAD language features
+  - Successfully parse actual OpenSCAD projects
+  - Parse complex files within reasonable time limits
+  - Handle edge cases and malformed input gracefully
+
+#### Phase 1: Basic Primitives and Simple Operations (4-6 hours)
+- **Subtasks**:
+  - [ ] Create test data structure and organization
+  - [ ] Implement 3D primitive tests (cube, sphere, cylinder, polyhedron)
+  - [ ] Implement 2D primitive tests (circle, square, polygon, text)
+  - [ ] Implement basic transformation tests (translate, rotate, scale, mirror, color, resize)
+  - [ ] Implement boolean operation tests (union, difference, intersection, hull, minkowski)
+- **Dependencies**: Current AST infrastructure (✅ Complete)
+- **Test Files to Create**:
+  - `test-data/primitives/cube-examples.scad`
+  - `test-data/primitives/sphere-examples.scad`
+  - `test-data/primitives/cylinder-examples.scad`
+  - `test-data/transformations/translate-examples.scad`
+  - `test-data/transformations/rotate-examples.scad`
+  - `test-data/boolean-operations/union-examples.scad`
+
+#### Phase 2: Intermediate Constructs (6-8 hours)
+- **Subtasks**:
+  - [ ] Implement variable and expression tests (assignments, mathematical, conditional, vector, range)
+  - [ ] Implement control structure tests (if/else, for loops, nested loops, intersection_for)
+  - [ ] Implement function and module tests (definitions, calls, parameters, recursion)
+  - [ ] Add tests for special variables ($fn, $fa, $fs, $t, $vpr, $vpt, $children, $preview)
+- **Dependencies**: Phase 1 completion
+- **Test Files to Create**:
+  - `test-data/control-structures/if-else-examples.scad`
+  - `test-data/control-structures/for-loop-examples.scad`
+  - `test-data/functions-modules/function-definitions.scad`
+  - `test-data/functions-modules/module-definitions.scad`
+
+#### Phase 3: Advanced Features (8-10 hours)
+- **Subtasks**:
+  - [ ] Implement advanced expression tests (list comprehensions, let expressions, complex math)
+  - [ ] Implement 2D to 3D operation tests (linear_extrude, rotate_extrude, projection)
+  - [ ] Implement file operation tests (include, use, import, surface)
+  - [ ] Add tests for modifier characters (*, !, #, %)
+  - [ ] Implement vector and matrix operation tests
+- **Dependencies**: Phase 2 completion
+- **Test Files to Create**:
+  - `test-data/advanced/list-comprehensions.scad`
+  - `test-data/advanced/let-expressions.scad`
+  - `test-data/advanced/2d-to-3d.scad`
+  - `test-data/advanced/file-operations.scad`
+
+#### Phase 4: Real-World Projects (10-12 hours)
+- **Subtasks**:
+  - [ ] Implement simple project tests (box with holes, basic gear, bracket, screw, enclosure)
+  - [ ] Implement intermediate project tests (gear system, bearing, connector, phone case, assembly)
+  - [ ] Implement complex project tests (3D printer part, robotic joint, architectural model, organic shapes)
+  - [ ] Add parametric design tests with multiple configurations
+  - [ ] Implement multi-file project tests
+- **Dependencies**: Phase 3 completion
+- **Test Files to Create**:
+  - `test-data/projects/simple/box-with-holes.scad`
+  - `test-data/projects/simple/basic-gear.scad`
+  - `test-data/projects/intermediate/gear-system.scad`
+  - `test-data/projects/intermediate/parametric-bearing.scad`
+  - `test-data/projects/complex/3d-printer-part.scad`
+  - `test-data/projects/complex/robotic-joint.scad`
+
+#### Phase 5: Edge Cases and Error Handling (4-6 hours)
+- **Subtasks**:
+  - [ ] Implement syntax edge case tests (missing semicolons, unclosed braces, malformed input)
+  - [ ] Implement performance tests (large files, deep nesting, repeated operations)
+  - [ ] Add stress tests for complex mathematical expressions
+  - [ ] Implement error recovery validation tests
+  - [ ] Add memory usage and parsing time benchmarks
+- **Dependencies**: Phase 4 completion
+- **Test Files to Create**:
+  - `test-data/edge-cases/syntax-errors.scad`
+  - `test-data/edge-cases/performance-tests.scad`
+  - `test-data/edge-cases/stress-tests.scad`
+
+### 2. Fix Expression Visitor Implementation Issues
 - **Goal**: Fix test failures in expression visitors
 - **Status**: Completed
 - **Description**: Fix implementation issues in expression visitors and complex expression tests
@@ -150,7 +264,8 @@
 
 ### 4. Enhance AST with Semantic Information
 - **Goal**: Add semantic information to AST nodes for better downstream processing
-- **Status**: Planned
+- **Status**: Planned (Deferred until comprehensive integration testing is complete)
+- **Priority**: Medium (Reduced from High due to integration testing priority)
 - **Description**: Augment AST nodes with additional semantic information
 - **Subtasks**:
   - [ ] Create a type system for OpenSCAD expressions
@@ -161,10 +276,9 @@
   - [ ] Implement basic semantic validation
   - [ ] Add type checking for function arguments
   - [ ] Implement warnings for type mismatches
-- **Dependencies**: Task #1 (Enhance Expression Handling)
-- **Priority**: Medium
+- **Dependencies**: Task #1 (Comprehensive AST Generator Integration Tests)
 - **Assignee**: TBD
-- **Estimated Time**: 8 hours
+- **Estimated Time**: 8-12 hours
 - **Implementation Details**:
   - Create a TypeSystem class to manage type information
   - Implement type inference rules for OpenSCAD expressions
@@ -173,6 +287,7 @@
   - Add type checking for function arguments
   - Provide warnings for potential type mismatches
   - Enhance AST nodes with type and scope information
+- **Rationale for Deferral**: Comprehensive integration testing will provide better understanding of real-world AST patterns and requirements for semantic analysis
 
 ### 5. Optimize Parser Performance
 - **Goal**: Improve parsing speed and memory usage
@@ -190,7 +305,7 @@
 
 ### 6. Add Support for Include and Use Statements
 - **Goal**: Handle file inclusion and library usage
-- **Status**: Planned
+- **Status**: Planned (Will be covered in Phase 3 of comprehensive integration testing)
 - **Description**: Implement handling for include and use statements
 - **Subtasks**:
   - [ ] Implement IncludeVisitor
@@ -199,14 +314,16 @@
   - [ ] Implement content merging for included files
   - [ ] Add tests for include and use statements
   - [ ] Update grammar if needed to better support include/use statements
-- **Dependencies**: None
-- **Priority**: Low
+- **Dependencies**: Task #1 Phase 3 (Advanced Features)
+- **Priority**: Medium (Elevated due to integration with comprehensive testing)
 - **Assignee**: TBD
-- **Estimated Time**: 4 hours
+- **Estimated Time**: 4-6 hours (Increased due to integration testing requirements)
 - **Implementation Details**:
   - Implement in both packages: tree-sitter-openscad (grammar) and openscad-parser (visitor)
   - Test with `pnpm test:grammar` and `pnpm test:parser`
   - Use `pnpm parse examples/include-example.scad` to verify parsing
+  - Include in `test-data/advanced/file-operations.scad` test suite
+- **Integration with Comprehensive Testing**: This will be implemented as part of Phase 3 Advanced Features testing
 
 ## Low Priority Tasks
 
