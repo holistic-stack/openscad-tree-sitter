@@ -42,55 +42,157 @@
 
 ## Current Priority Tasks
 
-### 1. Debug and Fix Variable Assignment Parsing
-**Status**: IN PROGRESS - Major Infrastructure Complete
+### 1. Implement Phase 2: Enhanced Variable and Expression Handling
+**Status**: READY TO START - Phase 1 COMPLETED (30/30 tests passing)
 **Priority**: HIGH
-**Estimated Time**: 2-3 hours
+**Estimated Time**: 6-8 hours
 **Dependencies**: Phase 1 completion (✅ COMPLETED)
 
-**Goal**: Complete the variable assignment parsing implementation that's currently returning empty AST arrays.
-
-**Major Progress Made**:
-- ✅ Fixed infinite loop issue in CompositeVisitor routing
-- ✅ Enhanced extractValue function for multiple expression types
-- ✅ Implemented AssignmentNode type and VariableVisitor
-- ✅ Added proper field access using childForFieldName
-- ✅ Tests no longer hang - infrastructure is working
-
-**Current Issue**: AST returns empty array instead of assignment nodes
-**Root Cause**: Need to debug CST structure and visitor routing
-
-**Next Steps**:
-1. Debug CST structure for `x = 10;` to understand node hierarchy
-2. Verify VariableVisitor is being called by CompositeVisitor
-3. Fix assignment statement recognition and processing
-4. Test with different assignment types (number, string, boolean)
-5. Expand to vector assignments and expressions
-
-**Success Metrics**: Simple assignments like `x = 10;` produce correct AST nodes
-
-### 2. Implement Comprehensive Integration Tests Phase 2 - Intermediate Constructs
-**Status**: READY TO START (after assignment parsing is fixed)
-**Priority**: HIGH
-**Estimated Time**: 4-6 hours
-**Dependencies**: Variable assignment parsing (in progress)
-
-**Goal**: Extend the parser to handle intermediate OpenSCAD constructs including control structures and function/module definitions.
+**Goal**: Implement comprehensive variable assignment and expression handling for intermediate OpenSCAD constructs.
 
 **Scope**:
-- Control structures (if/else, for loops, nested loops, intersection_for)
-- Function and module definitions (definitions, calls, parameters, recursion)
+- Complex variable assignments with mathematical expressions
+- Vector expressions and operations
+- Range expressions `[start:step:end]`
 - Special variables ($fn, $fa, $fs, $t, $vpr, $vpt, $children, $preview)
-- Complex expressions (mathematical, conditional, vector, range)
+- Function calls in expressions
+- Conditional expressions (ternary operator)
 
-**Test Files Created**:
-- ✅ `test-data/variables/assignment-examples.scad`
-- ✅ `test-data/control-structures/if-else-examples.scad`
-- ✅ `test-data/control-structures/for-loop-examples.scad`
-- ✅ `test-data/functions-modules/function-definitions.scad`
-- ✅ `test-data/functions-modules/module-definitions.scad`
+**Detailed Subtasks**:
+1. **Enhance VariableVisitor** (2 hours)
+   - Improve assignment statement parsing for complex expressions
+   - Add support for special variable references (`$fn`, `$fa`, etc.)
+   - Handle vector and range assignment expressions
 
-**Success Metrics**: >90% test coverage for intermediate constructs, all major control flow patterns working
+2. **Extend Expression Support** (2 hours)
+   - Add vector expression handling `[x, y, z]`
+   - Implement range expression parsing `[start:step:end]`
+   - Enhance function call expression support in assignments
+
+3. **Mathematical Expression Enhancement** (2 hours)
+   - Add trigonometric function support (sin, cos, tan, etc.)
+   - Implement array indexing expressions `array[index]`
+   - Add string concatenation and operations
+
+4. **Integration Tests** (2 hours)
+   - Create 15 comprehensive tests for variable assignments
+   - Test mathematical, conditional, vector, and range expressions
+   - Validate special variable handling and context
+
+**Success Metrics**: 15/15 variable and expression tests passing
+
+### 2. Implement Phase 2: Advanced Control Structure Support
+**Status**: READY TO START (after Task 1 completion)
+**Priority**: HIGH
+**Estimated Time**: 4-6 hours
+**Dependencies**: Task 1 completion
+
+**Goal**: Implement comprehensive control structure support for intermediate OpenSCAD constructs.
+
+**Scope**:
+- If-else statements with complex conditions and else-if chains
+- For loops (simple, nested, with step parameters)
+- Intersection_for operations
+- Let expressions for local variables
+- Nested control structures
+
+**Detailed Subtasks**:
+1. **Enhance If-Else Visitor** (1.5 hours)
+   - Improve condition expression parsing with complex expressions
+   - Add support for else-if chains and nested if statements
+   - Handle complex boolean conditions
+
+2. **Enhance For-Loop Visitor** (1.5 hours)
+   - Add support for range expressions in loops `[start:step:end]`
+   - Implement step parameter handling
+   - Support nested for loops and complex iteration
+
+3. **Add Intersection_for Support** (1 hour)
+   - Implement intersection_for parsing and AST generation
+   - Handle intersection_for with complex expressions and nested structures
+
+4. **Integration Tests** (2 hours)
+   - Create 12 comprehensive tests for control structures
+   - Test nested structures and complex conditions
+   - Validate intersection_for operations and edge cases
+
+**Success Metrics**: 12/12 control structure tests passing
+
+### 3. Implement Phase 2: Function and Module Definition Support
+**Status**: READY TO START (after Task 2 completion)
+**Priority**: HIGH
+**Estimated Time**: 6-8 hours
+**Dependencies**: Task 2 completion
+
+**Goal**: Implement comprehensive function and module definition support.
+
+**Scope**:
+- Function definitions with parameters and default values
+- Module definitions with parameters and default values
+- Function and module calls with named/positional arguments
+- Recursive function/module support
+- Children() handling in modules
+
+**Detailed Subtasks**:
+1. **Enhance FunctionVisitor** (2 hours)
+   - Implement function definition parsing with parameter extraction
+   - Add parameter handling with default values
+   - Handle function body expression parsing and validation
+
+2. **Enhance ModuleVisitor** (3 hours)
+   - Implement module definition parsing with parameter extraction
+   - Add parameter handling with default values
+   - Handle module body statement parsing
+   - Implement children() call support and context handling
+
+3. **Recursive Support** (1 hour)
+   - Add recursive function call handling and validation
+   - Implement recursive module instantiation support
+
+4. **Integration Tests** (2 hours)
+   - Create 18 comprehensive tests for functions and modules
+   - Test parameter handling, default values, and recursion
+   - Validate children() handling and module instantiation
+
+**Success Metrics**: 18/18 function and module tests passing
+
+### 4. Implement Phase 2: Special Variables and Context Support
+**Status**: READY TO START (after Task 3 completion)
+**Priority**: MEDIUM
+**Estimated Time**: 2-3 hours
+**Dependencies**: Task 3 completion
+
+**Goal**: Implement comprehensive special variable support and context handling.
+
+**Scope**:
+- Resolution parameters: `$fn`, `$fa`, `$fs`
+- Animation variables: `$t`
+- View parameters: `$vpr`, `$vpt`, `$vpd`
+- Module context: `$children`, `$preview`
+- Integration with existing visitors
+
+**Detailed Subtasks**:
+1. **Special Variable Recognition** (1 hour)
+   - Add `$fn`, `$fa`, `$fs` parsing and validation
+   - Implement `$t`, `$vpr`, `$vpt` support
+   - Handle `$children`, `$preview` variables
+
+2. **Context Integration** (1 hour)
+   - Integrate special variables with existing visitors
+   - Add special variable validation and type checking
+   - Handle context-dependent behavior
+
+3. **Integration Tests** (1 hour)
+   - Create tests for all special variables
+   - Validate context-dependent behavior
+   - Test integration with existing constructs
+
+**Success Metrics**: All special variables recognized and properly integrated
+
+## PHASE 2 SUMMARY
+**Total Estimated Time**: 18-25 hours
+**Total Target Tests**: 45 comprehensive integration tests
+**Success Criteria**: 45/45 tests passing (100% success rate)
 
 ### 2. ✅ COMPLETED: Fix Argument Extraction in Expression Hierarchy
 **Status**: COMPLETED ✅

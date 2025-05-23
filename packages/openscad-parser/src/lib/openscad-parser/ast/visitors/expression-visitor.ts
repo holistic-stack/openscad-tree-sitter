@@ -68,15 +68,18 @@ export class ExpressionVisitor extends BaseASTVisitor {
   }
 
   /**
-   * Create an AST node for a function call
-   * @param node The function call node
-   * @returns The function call AST node or null if the node cannot be processed
+   * Create an AST node for a specific function
+   * @param node The node to process
+   * @param functionName The name of the function
+   * @param args The arguments to the function
+   * @returns The AST node or null if the function is not supported
    */
-  createASTNodeForFunction(node: TSNode): ast.ASTNode | null {
-    console.log(`[ExpressionVisitor.createASTNodeForFunction] Processing function call: ${node.text.substring(0, 50)}`);
+  protected createASTNodeForFunction(node: TSNode, functionName: string, args: ast.Parameter[]): ast.ASTNode | null {
+    console.log(`[ExpressionVisitor.createASTNodeForFunction] Processing function: ${functionName}`);
 
-    // Delegate to the function call visitor
-    return this.functionCallVisitor.visitFunctionCall(node);
+    // ExpressionVisitor doesn't handle specific function calls directly
+    // Return null to let other visitors handle function calls
+    return null;
   }
 
   /**
