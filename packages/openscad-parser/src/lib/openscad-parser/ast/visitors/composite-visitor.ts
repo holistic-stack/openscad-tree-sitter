@@ -22,17 +22,50 @@ export class CompositeVisitor implements ASTVisitor {
   visitNode(node: TSNode): ast.ASTNode | null {
     console.log(`[CompositeVisitor.visitNode] Processing node - Type: ${node.type}, Text: ${node.text.substring(0, 50)}`);
 
-    // Try each visitor in sequence
-    for (const visitor of this.visitors) {
-      const result = visitor.visitNode(node);
-      if (result) {
-        console.log(`[CompositeVisitor.visitNode] Visitor ${visitor.constructor.name} processed node`);
-        return result;
-      }
+    // Route to specific visitor methods based on node type
+    switch (node.type) {
+      case 'assignment_statement':
+        return this.visitAssignmentStatement(node);
+      case 'statement':
+        return this.visitStatement(node);
+      case 'module_instantiation':
+        return this.visitModuleInstantiation(node);
+      case 'module_definition':
+        return this.visitModuleDefinition(node);
+      case 'function_definition':
+        return this.visitFunctionDefinition(node);
+      case 'if_statement':
+        return this.visitIfStatement(node);
+      case 'for_statement':
+        return this.visitForStatement(node);
+      case 'let_expression':
+        return this.visitLetExpression(node);
+      case 'conditional_expression':
+        return this.visitConditionalExpression(node);
+      case 'expression_statement':
+        return this.visitExpressionStatement(node);
+      case 'accessor_expression':
+        return this.visitAccessorExpression(node);
+      case 'call_expression':
+        return this.visitCallExpression(node);
+      case 'expression':
+        return this.visitExpression(node);
+      case 'block':
+        // For block nodes, return the first child that produces a result
+        const blockResults = this.visitBlock(node);
+        return blockResults.length > 0 ? blockResults[0] : null;
+      default:
+        // For unknown node types, try each visitor in sequence
+        for (const visitor of this.visitors) {
+          const result = visitor.visitNode(node);
+          if (result) {
+            console.log(`[CompositeVisitor.visitNode] Visitor ${visitor.constructor.name} processed node`);
+            return result;
+          }
+        }
+        console.log(`[CompositeVisitor.visitNode] No visitor could process node`);
+        return null;
     }
-
-    console.log(`[CompositeVisitor.visitNode] No visitor could process node`);
-    return null;
   }
 
   /**

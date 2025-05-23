@@ -551,6 +551,15 @@ export interface FunctionDefinitionNode extends BaseNode {
 }
 
 /**
+ * Represents a variable assignment
+ */
+export interface AssignmentNode extends BaseNode {
+  type: 'assignment';
+  variable: string;
+  value: ExpressionNode | ParameterValue;
+}
+
+/**
  * Represents a children() call in a module
  */
 export interface ChildrenNode extends BaseNode {
@@ -589,6 +598,7 @@ export type ASTNode =
   | ForLoopNode
   | LetNode
   | EachNode
+  | AssignmentNode
   | ModuleDefinitionNode
   | ModuleInstantiationNode
   | FunctionDefinitionNode

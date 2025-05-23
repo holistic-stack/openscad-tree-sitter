@@ -74,8 +74,28 @@ export function extractArguments(argsNode: TSNode): ast.Parameter[] {
 
     console.log(`[extractArguments] Processing structured child ${i}: type=${argNode.type}, text=${argNode.text}`);
 
+    // Handle 'arguments' node that contains 'argument' nodes
+    if (argNode.type === 'arguments') {
+      console.log(`[extractArguments] Found 'arguments' node, processing its children`);
+
+      // Process each child of the 'arguments' node
+      for (let j = 0; j < argNode.namedChildCount; j++) {
+        const innerArgNode = argNode.namedChild(j);
+        if (!innerArgNode) continue;
+
+        console.log(`[extractArguments] Processing inner argument ${j}: type=${innerArgNode.type}, text=${innerArgNode.text}`);
+
+        if (innerArgNode.type === 'argument') {
+          const param = extractArgument(innerArgNode);
+          if (param) {
+            console.log(`[extractArguments] Extracted parameter from inner argument: ${JSON.stringify(param)}`);
+            args.push(param);
+          }
+        }
+      }
+    }
     // Expecting 'argument' nodes which contain either 'named_argument' or an expression directly
-    if (argNode.type === 'argument') {
+    else if (argNode.type === 'argument') {
       const param = extractArgument(argNode); // extractArgument should handle named vs positional within 'argument'
       if (param) {
         console.log(`[extractArguments] Extracted parameter from structured child: ${JSON.stringify(param)}`);
@@ -123,26 +143,51 @@ export function extractArguments(argsNode: TSNode): ast.Parameter[] {
 function extractArgument(argNode: TSNode): ast.Parameter | null {
   console.log(`[extractArgument] Processing argument node: ${argNode.text}`);
 
-  // Check if this is a named argument (has identifier and '=' as children)
-  const identifierNode = argNode.namedChild(0);
-  const expressionNode = argNode.namedChild(1);
+  // Check if this is a named argument by looking for '=' in the text
+  // Named arguments have the pattern: identifier = expression
+  if (argNode.text.includes('=')) {
+    console.log(`[extractArgument] Detected named argument pattern with '=' in text`);
 
-  if (identifierNode && identifierNode.type === 'identifier' && expressionNode) {
-    // This is a named argument
-    const name = identifierNode.text;
-    console.log(`[extractArgument] Found named argument: ${name}`);
+    // Find the identifier and expression parts
+    let identifierNode: TSNode | null = null;
+    let expressionNode: TSNode | null = null;
 
-    // Extract the value from the expression
-    const value = extractValue(expressionNode);
-    if (!value) {
-      console.log(`[extractArgument] Failed to extract value from expression: ${expressionNode.text}`);
-      return null;
+    // Look through all children to find identifier and expression
+    for (let i = 0; i < argNode.childCount; i++) {
+      const child = argNode.child(i);
+      if (!child) continue;
+
+      console.log(`[extractArgument] Examining child ${i}: type=${child.type}, text='${child.text}'`);
+
+      if (child.type === 'identifier' && !identifierNode) {
+        identifierNode = child;
+        console.log(`[extractArgument] Found identifier: ${child.text}`);
+      } else if (child.type !== '=' && child.type !== 'identifier' && child.isNamed && !expressionNode) {
+        // This should be the expression part (not the '=' operator or identifier)
+        expressionNode = child;
+        console.log(`[extractArgument] Found expression: type=${child.type}, text='${child.text}'`);
+      }
     }
 
-    console.log(`[extractArgument] Extracted value: ${JSON.stringify(value)}`);
-    // Convert Value to ParameterValue
-    const paramValue = convertValueToParameterValue(value);
-    return { name, value: paramValue };
+    if (identifierNode && expressionNode) {
+      const name = identifierNode.text;
+      console.log(`[extractArgument] Processing named argument: ${name} = ${expressionNode.text}`);
+
+      // Extract the value from the expression
+      const value = extractValue(expressionNode);
+      if (!value) {
+        console.log(`[extractArgument] Failed to extract value from expression: ${expressionNode.text}`);
+        return null;
+      }
+
+      console.log(`[extractArgument] Extracted value: ${JSON.stringify(value)}`);
+      // Convert Value to ParameterValue
+      const paramValue = convertValueToParameterValue(value);
+      return { name, value: paramValue };
+    } else {
+      console.log(`[extractArgument] Failed to find identifier and expression in named argument`);
+      return null;
+    }
   } else if (argNode.namedChildCount === 1 && argNode.namedChild(0)) {
     // This is a positional argument
     const valueNode = argNode.namedChild(0);

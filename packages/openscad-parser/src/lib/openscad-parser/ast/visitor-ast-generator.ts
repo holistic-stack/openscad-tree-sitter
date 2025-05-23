@@ -9,6 +9,7 @@ import { ModuleVisitor } from './visitors/module-visitor';
 import { FunctionVisitor } from './visitors/function-visitor';
 import { ControlStructureVisitor } from './visitors/control-structure-visitor';
 import { ExpressionVisitor } from './visitors/expression-visitor';
+import { VariableVisitor } from './visitors/variable-visitor';
 import { QueryVisitor } from './visitors/query-visitor';
 // Change is not used in this file
 
@@ -60,6 +61,7 @@ export class VisitorASTGenerator {
       new CSGVisitor(source),
       new ControlStructureVisitor(source),
       new ExpressionVisitor(source),
+      new VariableVisitor(source),
       new ModuleVisitor(source),
       new FunctionVisitor(source)
     ];

@@ -20,10 +20,11 @@ export function extractValue(node: TSNode): ast.ParameterValue {
       console.log(`[extractValue] Extracted number: ${numValue}`);
       return numValue;
     }
-    case 'string_literal': {
+    case 'string_literal':
+    case 'string': {
       // Remove quotes from string literals
       const stringValue = node.text.substring(1, node.text.length - 1);
-      console.log(`[extractValue] Extracted string: "${stringValue}"`);
+      console.log(`[extractValue] Extracted string from ${node.type}: "${stringValue}"`);
       return stringValue;
     }
     case 'boolean':
@@ -37,16 +38,62 @@ export function extractValue(node: TSNode): ast.ParameterValue {
       console.log(`[extractValue] Calling extractVector for array_literal: ${node.text.substring(0,20)}`); // DEBUG
       return extractVector(node);
     case 'unary_expression': {
+      console.log(`[extractValue] Processing unary_expression with ${node.childCount} children: '${node.text}'`);
+
+      // Handle actual unary operators (-, +)
       if (node.childCount === 2) {
         const operatorNode = node.child(0);
         const operandNode = node.child(1);
         if (operatorNode && operandNode) {
           const operator = operatorNode.text;
           const operandValue = extractValue(operandNode);
-          if (operator === '-' && typeof operandValue === 'number') return -operandValue;
-          if (operator === '+' && typeof operandValue === 'number') return operandValue;
+          if (operator === '-' && typeof operandValue === 'number') {
+            console.log(`[extractValue] Applied unary minus: -${operandValue}`);
+            return -operandValue;
+          }
+          if (operator === '+' && typeof operandValue === 'number') {
+            console.log(`[extractValue] Applied unary plus: +${operandValue}`);
+            return operandValue;
+          }
         }
       }
+
+      // Handle single child (wrapped value)
+      if (node.childCount === 1) {
+        const child = node.child(0);
+        if (child) {
+          console.log(`[extractValue] Single child in unary_expression: type='${child.type}', text='${child.text}'`);
+          return extractValue(child);
+        }
+      }
+
+      // Try to parse the text directly for simple values
+      const text = node.text.trim();
+
+      // Check for numbers
+      const num = parseFloat(text);
+      if (!isNaN(num)) {
+        console.log(`[extractValue] Parsed unary_expression text '${text}' as number: ${num}`);
+        return num;
+      }
+
+      // Check for strings
+      if (text.startsWith('"') && text.endsWith('"')) {
+        const stringValue = text.substring(1, text.length - 1);
+        console.log(`[extractValue] Extracted string from unary_expression: "${stringValue}"`);
+        return stringValue;
+      }
+
+      // Check for booleans
+      if (text === 'true') {
+        console.log(`[extractValue] Extracted boolean from unary_expression: true`);
+        return true;
+      }
+      if (text === 'false') {
+        console.log(`[extractValue] Extracted boolean from unary_expression: false`);
+        return false;
+      }
+
       console.warn(`[extractValue] Unhandled unary_expression: ${node.text.substring(0,30)}`);
       return undefined;
     }
@@ -57,20 +104,43 @@ export function extractValue(node: TSNode): ast.ParameterValue {
     case 'additive_expression':
     case 'multiplicative_expression':
     case 'exponentiation_expression': {
-      // For now, just try to parse as a number if it's a simple expression
+      console.log(`[extractValue] Processing ${node.type} with ${node.childCount} children`);
+
+      // These expression types often wrap simpler values, so try to extract from children
+      if (node.childCount === 1) {
+        const child = node.child(0);
+        if (child) {
+          console.log(`[extractValue] Single child in ${node.type}: type='${child.type}', text='${child.text}'`);
+          return extractValue(child);
+        }
+      }
+
+      // For complex expressions with multiple children, try to parse as number first
       const potentialNumText = node.text.trim();
       const num = parseFloat(potentialNumText);
       if (!isNaN(num)) {
-        console.log(`[extractValue] Default case parsed text '${potentialNumText}' as number: ${num}`);
+        console.log(`[extractValue] Parsed ${node.type} text '${potentialNumText}' as number: ${num}`);
         return num;
       }
-      console.warn(`[extractValue] Default case for node type: '${node.type}', text: '${node.text.substring(0,30)}'`);
-      // Fallback for complex expressions or expressions that evaluate to strings not yet handled.
-      // This might need to be an actual expression object in the AST later.
-      console.warn(`[extractValue] Complex 'expression' node text '${node.text.substring(0,30)}' returned as string or undefined. Consider specific handlers.`);
-      // Returning node.text might be appropriate if the expression is a variable name not caught by 'identifier'.
-      // However, for something like '1+2', it should ideally be an expression node or evaluated.
-      // For now, returning undefined as a safer default for unhandled complex expressions.
+
+      // Check for string literals in the text
+      if (potentialNumText.startsWith('"') && potentialNumText.endsWith('"')) {
+        const stringValue = potentialNumText.substring(1, potentialNumText.length - 1);
+        console.log(`[extractValue] Extracted string from ${node.type}: "${stringValue}"`);
+        return stringValue;
+      }
+
+      // Check for boolean literals
+      if (potentialNumText === 'true') {
+        console.log(`[extractValue] Extracted boolean from ${node.type}: true`);
+        return true;
+      }
+      if (potentialNumText === 'false') {
+        console.log(`[extractValue] Extracted boolean from ${node.type}: false`);
+        return false;
+      }
+
+      console.warn(`[extractValue] Unhandled ${node.type}: '${node.text.substring(0,30)}'`);
       return undefined;
     }
     case 'identifier': {
@@ -113,6 +183,49 @@ export function extractValue(node: TSNode): ast.ParameterValue {
       }
       console.warn(`[extractValue] Returning raw text for conditional_expression: '${node.text.substring(0,30)}'`);
       return node.text;
+    }
+    case 'accessor_expression':
+    case 'primary_expression': {
+      console.log(`[extractValue] Processing ${node.type} with ${node.childCount} children: '${node.text}'`);
+
+      // Handle single child (wrapped value)
+      if (node.childCount === 1) {
+        const child = node.child(0);
+        if (child) {
+          console.log(`[extractValue] Single child in ${node.type}: type='${child.type}', text='${child.text}'`);
+          return extractValue(child);
+        }
+      }
+
+      // Try to parse the text directly for simple values
+      const text = node.text.trim();
+
+      // Check for numbers
+      const num = parseFloat(text);
+      if (!isNaN(num)) {
+        console.log(`[extractValue] Parsed ${node.type} text '${text}' as number: ${num}`);
+        return num;
+      }
+
+      // Check for strings
+      if (text.startsWith('"') && text.endsWith('"')) {
+        const stringValue = text.substring(1, text.length - 1);
+        console.log(`[extractValue] Extracted string from ${node.type}: "${stringValue}"`);
+        return stringValue;
+      }
+
+      // Check for booleans
+      if (text === 'true') {
+        console.log(`[extractValue] Extracted boolean from ${node.type}: true`);
+        return true;
+      }
+      if (text === 'false') {
+        console.log(`[extractValue] Extracted boolean from ${node.type}: false`);
+        return false;
+      }
+
+      console.warn(`[extractValue] Unhandled ${node.type}: ${node.text.substring(0,30)}`);
+      return undefined;
     }
     default:
       console.warn(`[extractValue] Unhandled node type: '${node.type}', text: '${node.text.substring(0,30)}'`);
