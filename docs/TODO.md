@@ -23,7 +23,26 @@
 
 ## Current Priority Tasks
 
-### 1. ✅ COMPLETED: Fix Argument Extraction in Expression Hierarchy
+### 1. Fix TransformVisitor Parameter Extraction
+**Status**: IN PROGRESS
+**Priority**: HIGH
+**Estimated Time**: 1-2 hours
+**Dependencies**: Core argument extraction (completed)
+
+**Goal**: Fix the 6 remaining transformation parameter extraction issues in comprehensive integration tests.
+
+**Current Issue**: TransformVisitor children processing - the parameter extraction is working correctly now with the simplified TransformVisitor, but the children are not being processed correctly:
+- `translate([10, 0, 0]) cube()` → getting `children: []` instead of `children: [cube_node]`
+- `rotate(45) cube()` → getting `children: []` instead of `children: [cube_node]`
+- `scale(2) cube()` → getting `children: []` instead of `children: [cube_node]`
+
+**Root Cause**: The simplified TransformVisitor is creating transform nodes correctly and extracting parameters correctly, but the children processing logic is not working properly.
+
+**Solution Needed**: Fix the children processing in the TransformVisitor.visitModuleInstantiation method to properly process child nodes.
+
+**Code Location**: `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/transform-visitor.ts`
+
+### 2. ✅ COMPLETED: Fix Argument Extraction in Expression Hierarchy
 **Status**: COMPLETED ✅
 **Priority**: CRITICAL
 **Estimated Time**: 1-2 hours

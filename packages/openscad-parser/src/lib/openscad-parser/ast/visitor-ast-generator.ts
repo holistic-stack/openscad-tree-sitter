@@ -47,9 +47,14 @@ export class VisitorASTGenerator {
    */
   constructor(private tree: Tree, private source: string, private language: any) {
     // Create a composite visitor that delegates to specialized visitors
+    // Create the composite visitor first so we can pass it to visitors that need it
+    const compositeVisitor = new CompositeVisitor([]);
+
     // Order matters here - PrimitiveVisitor should be first to handle primitive shapes
-    const transformVisitor = new TransformVisitor(source);
-    const compositeVisitor = new CompositeVisitor([
+    const transformVisitor = new TransformVisitor(source, compositeVisitor);
+
+    // Add all visitors to the composite visitor
+    compositeVisitor['visitors'] = [
       new PrimitiveVisitor(source),
       transformVisitor,
       new CSGVisitor(source),
@@ -57,7 +62,7 @@ export class VisitorASTGenerator {
       new ExpressionVisitor(source),
       new ModuleVisitor(source),
       new FunctionVisitor(source)
-    ]);
+    ];
 
     // Create a query visitor that uses the composite visitor
     this.queryVisitor = new QueryVisitor(source, tree, language, compositeVisitor);
