@@ -100,7 +100,7 @@ describe('TransformVisitor', () => {
       const resultNode = visitor.visitModuleInstantiation(transformCstNode) as ast.TranslateNode | null;
       expect(resultNode).not.toBeNull();
       expect(resultNode?.type).toBe('translate');
-      expect(resultNode?.vector).toEqual([5, 0, 0]);
+      expect(resultNode?.v).toEqual([5, 0, 0]);
       // Children will be populated with child nodes that are handled by different visitor methods
       // This is expected behavior and doesn't need to be tested here
     });
@@ -116,7 +116,7 @@ describe('TransformVisitor', () => {
       const resultNode = visitor.visitModuleInstantiation(transformCstNode) as ast.TranslateNode | null;
       expect(resultNode).not.toBeNull();
       expect(resultNode?.type).toBe('translate');
-      expect(resultNode?.vector).toEqual([-5, 10.5, 0]);
+      expect(resultNode?.v).toEqual([-5, 10.5, 0]);
       // Children will be populated with child nodes that are handled by different visitor methods
       // This is expected behavior and doesn't need to be tested here
     });
@@ -132,7 +132,7 @@ describe('TransformVisitor', () => {
       const resultNode = visitor.visitModuleInstantiation(transformCstNode) as ast.TranslateNode | null;
       expect(resultNode).not.toBeNull();
       expect(resultNode?.type).toBe('translate');
-      expect(resultNode?.vector).toEqual([-5, 10.5, 0]);
+      expect(resultNode?.v).toEqual([-5, 10.5, 0]);
       // Children will be populated with child nodes that are handled by different visitor methods
       // This is expected behavior and doesn't need to be tested here
     });

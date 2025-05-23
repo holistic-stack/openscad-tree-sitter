@@ -15,3 +15,4 @@ export * from './openscad-parser/ast/visitors/primitive-visitor';
 export * from './openscad-parser/ast/visitors/query-visitor';
 export * from './openscad-parser/ast/visitors/transform-visitor';
 export * from './openscad-parser/openscad-parser';
+export * from './openscad-parser/error-handling';

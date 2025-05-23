@@ -125,13 +125,21 @@ describe("OpenSCADParser", () => {
     // Wait for initialization to complete
     await parser.init();
 
+    // Configure the parser to not throw errors
+    parser.getErrorHandler().options.throwErrors = false;
+
+    // Spy on the error handler's createSyntaxError method
+    const createSyntaxErrorSpy = vi.spyOn(parser.getErrorHandler(), 'createSyntaxError');
+
     // Parse the invalid code
     const result = parser.parse(INVALID_OPENSCAD_CODE);
-    console.log("result", JSON.stringify(result));
 
     // Should still parse but with syntax errors in the tree
     expect(result).toBeDefined();
     expect(result?.rootNode).toBeDefined();
+
+    // Should have created a syntax error
+    expect(createSyntaxErrorSpy).toHaveBeenCalled();
 
     // The tree should contain ERROR nodes
     const rootNodeString = result?.rootNode.toString();

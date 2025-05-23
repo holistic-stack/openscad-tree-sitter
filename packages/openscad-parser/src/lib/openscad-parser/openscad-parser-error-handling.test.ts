@@ -14,7 +14,12 @@ describe('OpenscadParser Error Handling', () => {
   const INVALID_OPENSCAD_CODE = 'cube([10, 10, 10);'; // Missing closing bracket
 
   beforeEach(async () => {
-    parser = new OpenscadParser();
+    // Configure parser for graceful error handling
+    parser = new OpenscadParser({
+      throwErrors: false,  // Don't throw errors, handle them gracefully
+      attemptRecovery: true,
+      includeSource: true
+    });
     await parser.init('./tree-sitter-openscad.wasm');
   });
 

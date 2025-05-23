@@ -168,13 +168,21 @@ export class IfElseVisitor {
 
       // For now, just create placeholder nodes for the children
       // In a real implementation, this would delegate to other visitors
-      const childNode: ast.ASTNode = {
-        type: child.type === 'module_instantiation' ?
-          (child.namedChildren[0]?.text || 'unknown') : child.type,
-        location: getLocation(child)
-      };
+      // Make sure child is not null before accessing its properties
+      if (child) {
+        const childType = child.type === 'module_instantiation' && child.namedChildren[0]
+          ? child.namedChildren[0].text || 'expression'
+          : 'expression';
 
-      result.push(childNode);
+        const childNode: ast.ASTNode = {
+          type: 'expression' as const,
+          expressionType: 'literal',
+          value: childType,
+          location: getLocation(child)
+        };
+
+        result.push(childNode);
+      }
     }
 
     return result;

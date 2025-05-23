@@ -134,6 +134,8 @@ export interface ExpressionNode extends BaseNode {
   thenBranch?: ExpressionNode;
   elseBranch?: ExpressionNode;
   items?: ExpressionNode[];
+  operand?: ExpressionNode;
+  arguments?: Parameter[];
 }
 
 /**
