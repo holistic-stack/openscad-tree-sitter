@@ -14,8 +14,10 @@
   - [x] Enhance visitBinaryExpression to handle all binary operators with proper precedence
   - [x] Implement UnaryExpressionVisitor to handle unary operations
   - [x] Improve visitUnaryExpression to handle all unary operators
-  - [ ] Implement ConditionalExpressionVisitor to handle conditional expressions
-  - [ ] Enhance visitConditionalExpression to use ConditionalExpressionVisitor
+  - [x] Implement ConditionalExpressionVisitor to handle conditional expressions
+  - [x] Enhance visitConditionalExpression to use ConditionalExpressionVisitor
+  - [x] Implement ParenthesizedExpressionVisitor to handle parenthesized expressions
+  - [x] Enhance visitExpression to use ParenthesizedExpressionVisitor
   - [ ] Add support for nested expressions with different operators
   - [ ] Implement proper handling of parenthesized expressions
   - [ ] Add comprehensive tests with real CST nodes
@@ -27,11 +29,14 @@
   - ✅ Binary operations now handle: +, -, *, /, %, ==, !=, <, <=, >, >=, &&, ||
   - ✅ Unary operations now handle: +, -, !
   - ✅ Function calls now extract function name and arguments properly
-  - The current visitConditionalExpression implementation still relies on string manipulation
-  - Need to implement ConditionalExpressionVisitor following the same pattern as other expression visitors
-  - Create conditional-expression-visitor.ts in the expression-visitor directory
-  - Add ConditionalExpressionVisitor to ExpressionVisitor constructor
-  - Update visitConditionalExpression to delegate to ConditionalExpressionVisitor
+  - ✅ Conditional expressions now use a dedicated visitor with proper CST traversal
+  - ✅ Parenthesized expressions now use a dedicated visitor with proper CST traversal
+  - ✅ Created conditional-expression-visitor.ts in the expression-visitor directory
+  - ✅ Created parenthesized-expression-visitor.ts in the expression-visitor directory
+  - ✅ Added ConditionalExpressionVisitor to ExpressionVisitor constructor
+  - ✅ Added ParenthesizedExpressionVisitor to ExpressionVisitor constructor
+  - ✅ Updated visitConditionalExpression to delegate to ConditionalExpressionVisitor
+  - ✅ Updated visitExpression to delegate to ParenthesizedExpressionVisitor
   - Implement proper handling of parenthesized expressions
   - Tests should use real OpenscadParser instances and CST nodes
   - Use `pnpm test:parser` to run tests for the parser package

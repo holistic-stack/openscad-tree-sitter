@@ -4,6 +4,25 @@
 
 ### Completed Tasks
 
+### Implemented ParenthesizedExpressionVisitor
+
+- Created a dedicated ParenthesizedExpressionVisitor class to handle expressions enclosed in parentheses
+- Implemented methods to extract inner expressions from parenthesized expression nodes
+- Added support for nested parenthesized expressions
+- Added support for binary expressions inside parentheses
+- Updated ExpressionVisitor to use the new ParenthesizedExpressionVisitor
+- Added tests for basic, nested, and binary parenthesized expressions
+- Removed string manipulation approach for parenthesized expressions in ExpressionVisitor
+
+### Implemented ConditionalExpressionVisitor
+
+- Created a dedicated ConditionalExpressionVisitor class to handle conditional (ternary) expressions
+- Implemented methods to extract condition, consequence, and alternative nodes from CST
+- Added fallback mechanisms for different node structures
+- Updated ExpressionVisitor to use the new ConditionalExpressionVisitor
+- Added tests for basic and nested conditional expressions
+- Removed string manipulation approach for conditional expressions in ExpressionVisitor
+
 1. **Expression Visitor Enhancement**:
    - Implemented UnaryExpressionVisitor for handling unary operations in expressions
    - Created unary-expression-visitor.ts to extract operators and operands from CST nodes

@@ -25,16 +25,15 @@ We have successfully completed the implementation of control structure visitors 
 2. **Expression Types to Support**:
    - Binary expressions (arithmetic, logical, relational): +, -, *, /, %, ==, !=, <, <=, >, >=, &&, || (✓ Implemented)
    - Unary expressions: +, -, ! (negation, logical not) (✓ Implemented)
-   - Conditional expressions: condition ? thenExpr : elseExpr (Partially implemented)
+   - Conditional expressions: condition ? thenExpr : elseExpr (✓ Implemented)
    - Variable references: identifiers that refer to variables (✓ Implemented)
    - Literal values: numbers, strings, booleans (✓ Implemented)
    - Array/vector expressions: [1, 2, 3] (✓ Implemented)
    - Function calls: len(v), sin(x), etc. (✓ Implemented)
 
 3. **Next Priority Tasks**:
-   - Implement ConditionalExpressionVisitor to handle conditional expressions (ternary operator)
-   - Enhance visitConditionalExpression to use proper CST traversal instead of string manipulation
-   - Implement proper handling of parenthesized expressions
+   - Implement proper handling of array expressions
+   - Add support for nested expressions with different operators
    - Add support for complex nested expressions with mixed operators
    - Add comprehensive tests for conditional expressions and parenthesized expressions
 
@@ -73,12 +72,20 @@ With the UnaryExpressionVisitor implementation complete, we are now shifting foc
    - ✅ Support nested function calls
 
 5. **Conditional Expression Enhancement**:
-   - [ ] Implement ConditionalExpressionVisitor class
-   - [ ] Extract condition, then branch, and else branch from CST nodes
-   - [ ] Handle different node structures with fallback mechanisms
-   - [ ] Support nested conditional expressions
-   - [ ] Handle conditional expressions with complex conditions and branches
-   - [ ] Update ExpressionVisitor to use ConditionalExpressionVisitor
+   - ✅ Implement ConditionalExpressionVisitor class
+   - ✅ Extract condition, then branch, and else branch from CST nodes
+   - ✅ Handle different node structures with fallback mechanisms
+   - ✅ Support nested conditional expressions
+   - ✅ Handle conditional expressions with complex conditions and branches
+   - ✅ Update ExpressionVisitor to use ConditionalExpressionVisitor
+
+6. **Parenthesized Expression Enhancement**:
+   - ✅ Implement ParenthesizedExpressionVisitor class
+   - ✅ Extract inner expressions from parenthesized expression nodes
+   - ✅ Handle different node structures with fallback mechanisms
+   - ✅ Support nested parenthesized expressions
+   - ✅ Handle binary expressions inside parentheses
+   - ✅ Update ExpressionVisitor to use ParenthesizedExpressionVisitor
 
 ## Next Steps
 
@@ -88,11 +95,16 @@ With the UnaryExpressionVisitor implementation complete, we are now shifting foc
    - ✅ Implement specialized visitors for different binary operation types
    - ✅ Implement UnaryExpressionVisitor for handling unary operations
    - ✅ Enhance visitUnaryExpression to use the UnaryExpressionVisitor
-   - [ ] Create conditional-expression-visitor.ts file in the expression-visitor directory
-   - [ ] Implement ConditionalExpressionVisitor class with proper CST traversal
-   - [ ] Add ConditionalExpressionVisitor to ExpressionVisitor constructor
-   - [ ] Update visitConditionalExpression to delegate to ConditionalExpressionVisitor
-   - [ ] Implement proper handling of parenthesized expressions
+   - ✅ Create conditional-expression-visitor.ts file in the expression-visitor directory
+   - ✅ Implement ConditionalExpressionVisitor class with proper CST traversal
+   - ✅ Add ConditionalExpressionVisitor to ExpressionVisitor constructor
+   - ✅ Update visitConditionalExpression to delegate to ConditionalExpressionVisitor
+   - ✅ Create parenthesized-expression-visitor.ts file in the expression-visitor directory
+   - ✅ Implement ParenthesizedExpressionVisitor class with proper CST traversal
+   - ✅ Add ParenthesizedExpressionVisitor to ExpressionVisitor constructor
+   - ✅ Update visitExpression to delegate to ParenthesizedExpressionVisitor
+   - Implement proper handling of array expressions
+   - Add support for nested expressions with different operators
    - [ ] Add support for complex nested expressions with mixed operators
 
 2. **Testing Strategy**:
@@ -100,21 +112,35 @@ With the UnaryExpressionVisitor implementation complete, we are now shifting foc
    - ✅ Test binary expressions with different operators
    - ✅ Test expressions with function calls
    - ✅ Test expressions with unary operations
-   - [ ] Create conditional-expression-visitor.test.ts file
-   - [ ] Test conditional expressions with different condition types
-   - [ ] Test conditional expressions with complex then/else branches
-   - [ ] Test nested conditional expressions
+   - ✅ Create conditional-expression-visitor.test.ts file
+   - ✅ Test conditional expressions with different condition types
+   - ✅ Test conditional expressions with complex then/else branches
+   - ✅ Test nested conditional expressions
+   - ✅ Create parenthesized-expression-visitor.test.ts file
+   - ✅ Test basic parenthesized expressions
+   - ✅ Test nested parenthesized expressions
+   - ✅ Test parenthesized binary expressions
    - [ ] Test expressions with parentheses
    - [ ] Test complex nested expressions with different operators
    - [ ] Ensure proper operator precedence handling in complex expressions
 
 3. **Implementation Details for ConditionalExpressionVisitor**:
-   - Follow the same pattern as BinaryExpressionVisitor and UnaryExpressionVisitor
-   - Use node.childForFieldName to extract condition, consequence, and alternative nodes
-   - Implement fallback mechanisms for different node structures
-   - Handle nested conditional expressions
-   - Support complex conditions and branches
-   - Add comprehensive logging for better debugging
+   - ✅ Followed the same pattern as BinaryExpressionVisitor and UnaryExpressionVisitor
+   - ✅ Used node.childForFieldName to extract condition, consequence, and alternative nodes
+   - ✅ Implemented fallback mechanisms for different node structures
+   - ✅ Added support for nested conditional expressions
+   - ✅ Handled complex conditions and branches
+   - ✅ Added comprehensive logging for better debugging
+   - ✅ Created tests with real CST nodes (no mocks)
+
+4. **Implementation Details for ParenthesizedExpressionVisitor**:
+   - ✅ Followed the same pattern as other expression visitors
+   - ✅ Used node.namedChild to extract inner expression nodes
+   - ✅ Implemented fallback mechanisms for different node structures
+   - ✅ Added support for nested parenthesized expressions
+   - ✅ Handled binary expressions inside parentheses
+   - ✅ Added comprehensive logging for better debugging
+   - ✅ Created tests with real CST nodes (no mocks)
 
 ## Architecture
 

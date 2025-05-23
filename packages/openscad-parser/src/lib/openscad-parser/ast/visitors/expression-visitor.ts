@@ -22,6 +22,8 @@ import { extractValue } from '../extractors/value-extractor';
 import { FunctionCallVisitor } from './expression-visitor/function-call-visitor';
 import { BinaryExpressionVisitor } from './expression-visitor/binary-expression-visitor';
 import { UnaryExpressionVisitor } from './expression-visitor/unary-expression-visitor';
+import { ConditionalExpressionVisitor } from './expression-visitor/conditional-expression-visitor';
+import { ParenthesizedExpressionVisitor } from './expression-visitor/parenthesized-expression-visitor';
 
 /**
  * Visitor for expressions
@@ -43,6 +45,16 @@ export class ExpressionVisitor extends BaseASTVisitor {
   private unaryExpressionVisitor: UnaryExpressionVisitor;
 
   /**
+   * Conditional expression visitor for handling conditional (ternary) operations in expressions
+   */
+  private conditionalExpressionVisitor: ConditionalExpressionVisitor;
+
+  /**
+   * Parenthesized expression visitor for handling expressions enclosed in parentheses
+   */
+  private parenthesizedExpressionVisitor: ParenthesizedExpressionVisitor;
+
+  /**
    * Create a new ExpressionVisitor
    * @param source The source code
    */
@@ -51,6 +63,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
     this.functionCallVisitor = new FunctionCallVisitor(source);
     this.binaryExpressionVisitor = new BinaryExpressionVisitor(source);
     this.unaryExpressionVisitor = new UnaryExpressionVisitor(source);
+    this.conditionalExpressionVisitor = new ConditionalExpressionVisitor(source);
+    this.parenthesizedExpressionVisitor = new ParenthesizedExpressionVisitor(source);
   }
 
   /**
@@ -109,56 +123,20 @@ export class ExpressionVisitor extends BaseASTVisitor {
   visitConditionalExpression(node: TSNode): ast.ConditionalExpressionNode | null {
     console.log(`[ExpressionVisitor.visitConditionalExpression] Processing conditional expression: ${node.text.substring(0, 50)}`);
 
-    // Extract condition
-    const conditionNode = node.childForFieldName('condition');
-    if (!conditionNode) {
-      console.log(`[ExpressionVisitor.visitConditionalExpression] No condition found`);
-      return null;
-    }
+    // Delegate to the conditional expression visitor
+    return this.conditionalExpressionVisitor.visitConditionalExpression(node);
+  }
 
-    // Create a simple expression node for the condition
-    const condition = this.createExpressionNode(conditionNode);
-    if (!condition) {
-      console.log(`[ExpressionVisitor.visitConditionalExpression] Failed to create condition expression`);
-      return null;
-    }
+  /**
+   * Visit a parenthesized expression node
+   * @param node The parenthesized expression node to visit
+   * @returns The expression AST node or null if the node cannot be processed
+   */
+  visitParenthesizedExpression(node: TSNode): ast.ExpressionNode | null {
+    console.log(`[ExpressionVisitor.visitParenthesizedExpression] Processing parenthesized expression: ${node.text.substring(0, 50)}`);
 
-    // Extract then branch
-    const thenNode = node.childForFieldName('consequence');
-    if (!thenNode) {
-      console.log(`[ExpressionVisitor.visitConditionalExpression] No then branch found`);
-      return null;
-    }
-
-    // Create a simple expression node for the then branch
-    const thenBranch = this.createExpressionNode(thenNode);
-    if (!thenBranch) {
-      console.log(`[ExpressionVisitor.visitConditionalExpression] Failed to create then branch expression`);
-      return null;
-    }
-
-    // Extract else branch
-    const elseNode = node.childForFieldName('alternative');
-    if (!elseNode) {
-      console.log(`[ExpressionVisitor.visitConditionalExpression] No else branch found`);
-      return null;
-    }
-
-    // Create a simple expression node for the else branch
-    const elseBranch = this.createExpressionNode(elseNode);
-    if (!elseBranch) {
-      console.log(`[ExpressionVisitor.visitConditionalExpression] Failed to create else branch expression`);
-      return null;
-    }
-
-    return {
-      type: 'expression',
-      expressionType: 'conditional',
-      condition,
-      thenBranch,
-      elseBranch,
-      location: getLocation(node)
-    } as ast.ConditionalExpressionNode;
+    // Delegate to the parenthesized expression visitor
+    return this.parenthesizedExpressionVisitor.visitParenthesizedExpression(node);
   }
 
   /**
@@ -456,885 +434,69 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
     // Handle conditional expressions (ternary operator)
     if (node.text.includes('?') && node.text.includes(':')) {
-      const parts = node.text.split('?');
-      if (parts.length >= 2) {
-        const conditionText = parts[0].trim();
-        const restText = parts.slice(1).join('?').trim();
-
-        const branchParts = restText.split(':');
-        if (branchParts.length >= 2) {
-          const thenText = branchParts[0].trim();
-          const elseText = branchParts.slice(1).join(':').trim();
-
-          // Create condition expression
-          let conditionExpr: ast.ExpressionNode | null = null;
-
-          // Check if the condition is a binary expression
-          if (conditionText.includes('>') || conditionText.includes('<') ||
-              conditionText.includes('==') || conditionText.includes('!=')) {
-
-            // Try to identify the operator and operands
-            let operator = '';
-            let leftText = '';
-            let rightText = '';
-
-            // Check for common binary operators
-            const operators = ['==', '!=', '>=', '<=', '>', '<'];
-
-            for (const op of operators) {
-              if (conditionText.includes(op)) {
-                const parts = conditionText.split(op);
-                if (parts.length >= 2) {
-                  operator = op;
-                  leftText = parts[0].trim();
-                  rightText = parts.slice(1).join(op).trim();
-                  break;
-                }
-              }
-            }
-
-            if (operator && leftText && rightText) {
-              // Create left expression
-              let leftExpr: ast.ExpressionNode | null = null;
-
-              if (leftText === 'true' || leftText === 'false') {
-                leftExpr = {
-                  type: 'expression',
-                  expressionType: 'literal',
-                  value: leftText === 'true',
-                  location: {
-                    start: {
-                      line: node.startPosition.row,
-                      column: node.startPosition.column,
-                      offset: node.startIndex
-                    },
-                    end: {
-                      line: node.startPosition.row,
-                      column: node.startPosition.column + leftText.length,
-                      offset: node.startIndex + leftText.length
-                    }
-                  }
-                };
-              } else if (!isNaN(parseFloat(leftText))) {
-                leftExpr = {
-                  type: 'expression',
-                  expressionType: 'literal',
-                  value: parseFloat(leftText),
-                  location: {
-                    start: {
-                      line: node.startPosition.row,
-                      column: node.startPosition.column,
-                      offset: node.startIndex
-                    },
-                    end: {
-                      line: node.startPosition.row,
-                      column: node.startPosition.column + leftText.length,
-                      offset: node.startIndex + leftText.length
-                    }
-                  }
-                };
-              } else {
-                leftExpr = {
-                  type: 'expression',
-                  expressionType: 'variable',
-                  name: leftText,
-                  location: {
-                    start: {
-                      line: node.startPosition.row,
-                      column: node.startPosition.column,
-                      offset: node.startIndex
-                    },
-                    end: {
-                      line: node.startPosition.row,
-                      column: node.startPosition.column + leftText.length,
-                      offset: node.startIndex + leftText.length
-                    }
-                  }
-                };
-              }
-
-              // Create right expression
-              let rightExpr: ast.ExpressionNode | null = null;
-
-              if (rightText === 'true' || rightText === 'false') {
-                rightExpr = {
-                  type: 'expression',
-                  expressionType: 'literal',
-                  value: rightText === 'true',
-                  location: {
-                    start: {
-                      line: node.startPosition.row,
-                      column: node.startPosition.column + leftText.length + operator.length,
-                      offset: node.startIndex + leftText.length + operator.length
-                    },
-                    end: {
-                      line: node.startPosition.row,
-                      column: node.startPosition.column + conditionText.length,
-                      offset: node.startIndex + conditionText.length
-                    }
-                  }
-                };
-              } else if (!isNaN(parseFloat(rightText))) {
-                rightExpr = {
-                  type: 'expression',
-                  expressionType: 'literal',
-                  value: parseFloat(rightText),
-                  location: {
-                    start: {
-                      line: node.startPosition.row,
-                      column: node.startPosition.column + leftText.length + operator.length,
-                      offset: node.startIndex + leftText.length + operator.length
-                    },
-                    end: {
-                      line: node.startPosition.row,
-                      column: node.startPosition.column + conditionText.length,
-                      offset: node.startIndex + conditionText.length
-                    }
-                  }
-                };
-              } else {
-                rightExpr = {
-                  type: 'expression',
-                  expressionType: 'variable',
-                  name: rightText,
-                  location: {
-                    start: {
-                      line: node.startPosition.row,
-                      column: node.startPosition.column + leftText.length + operator.length,
-                      offset: node.startIndex + leftText.length + operator.length
-                    },
-                    end: {
-                      line: node.startPosition.row,
-                      column: node.startPosition.column + conditionText.length,
-                      offset: node.startIndex + conditionText.length
-                    }
-                  }
-                };
-              }
-
-              conditionExpr = {
-                type: 'expression',
-                expressionType: 'binary',
-                operator: operator as ast.BinaryOperator,
-                left: leftExpr,
-                right: rightExpr,
-                location: {
-                  start: {
-                    line: node.startPosition.row,
-                    column: node.startPosition.column,
-                    offset: node.startIndex
-                  },
-                  end: {
-                    line: node.startPosition.row,
-                    column: node.startPosition.column + conditionText.length,
-                    offset: node.startIndex + conditionText.length
-                  }
-                }
-              };
-            }
-          }
-
-          // If we couldn't create a binary expression, try to create a simple expression
-          if (!conditionExpr) {
-            if (conditionText === 'true' || conditionText === 'false') {
-              conditionExpr = {
-                type: 'expression',
-                expressionType: 'literal',
-                value: conditionText === 'true',
-                location: {
-                  start: {
-                    line: node.startPosition.row,
-                    column: node.startPosition.column,
-                    offset: node.startIndex
-                  },
-                  end: {
-                    line: node.startPosition.row,
-                    column: node.startPosition.column + conditionText.length,
-                    offset: node.startIndex + conditionText.length
-                  }
-                }
-              };
-            } else if (!isNaN(parseFloat(conditionText))) {
-              conditionExpr = {
-                type: 'expression',
-                expressionType: 'literal',
-                value: parseFloat(conditionText),
-                location: {
-                  start: {
-                    line: node.startPosition.row,
-                    column: node.startPosition.column,
-                    offset: node.startIndex
-                  },
-                  end: {
-                    line: node.startPosition.row,
-                    column: node.startPosition.column + conditionText.length,
-                    offset: node.startIndex + conditionText.length
-                  }
-                }
-              };
-            } else {
-              conditionExpr = {
-                type: 'expression',
-                expressionType: 'variable',
-                name: conditionText,
-                location: {
-                  start: {
-                    line: node.startPosition.row,
-                    column: node.startPosition.column,
-                    offset: node.startIndex
-                  },
-                  end: {
-                    line: node.startPosition.row,
-                    column: node.startPosition.column + conditionText.length,
-                    offset: node.startIndex + conditionText.length
-                  }
-                }
-              };
-            }
-          }
-
-          // Create then expression
-          let thenExpr: ast.ExpressionNode | null = null;
-
-          if (thenText === 'true' || thenText === 'false') {
-            thenExpr = {
-              type: 'expression',
-              expressionType: 'literal',
-              value: thenText === 'true',
-              location: {
-                start: {
-                  line: node.startPosition.row,
-                  column: node.startPosition.column + conditionText.length + 1,
-                  offset: node.startIndex + conditionText.length + 1
-                },
-                end: {
-                  line: node.startPosition.row,
-                  column: node.startPosition.column + conditionText.length + 1 + thenText.length,
-                  offset: node.startIndex + conditionText.length + 1 + thenText.length
-                }
-              }
-            };
-          } else if (!isNaN(parseFloat(thenText))) {
-            thenExpr = {
-              type: 'expression',
-              expressionType: 'literal',
-              value: parseFloat(thenText),
-              location: {
-                start: {
-                  line: node.startPosition.row,
-                  column: node.startPosition.column + conditionText.length + 1,
-                  offset: node.startIndex + conditionText.length + 1
-                },
-                end: {
-                  line: node.startPosition.row,
-                  column: node.startPosition.column + conditionText.length + 1 + thenText.length,
-                  offset: node.startIndex + conditionText.length + 1 + thenText.length
-                }
-              }
-            };
-          } else {
-            thenExpr = {
-              type: 'expression',
-              expressionType: 'variable',
-              name: thenText,
-              location: {
-                start: {
-                  line: node.startPosition.row,
-                  column: node.startPosition.column + conditionText.length + 1,
-                  offset: node.startIndex + conditionText.length + 1
-                },
-                end: {
-                  line: node.startPosition.row,
-                  column: node.startPosition.column + conditionText.length + 1 + thenText.length,
-                  offset: node.startIndex + conditionText.length + 1 + thenText.length
-                }
-              }
-            };
-          }
-
-          // Create else expression
-          let elseExpr: ast.ExpressionNode | null = null;
-
-          if (elseText === 'true' || elseText === 'false') {
-            elseExpr = {
-              type: 'expression',
-              expressionType: 'literal',
-              value: elseText === 'true',
-              location: {
-                start: {
-                  line: node.startPosition.row,
-                  column: node.startPosition.column + conditionText.length + 1 + thenText.length + 1,
-                  offset: node.startIndex + conditionText.length + 1 + thenText.length + 1
-                },
-                end: {
-                  line: node.endPosition.row,
-                  column: node.endPosition.column,
-                  offset: node.endIndex
-                }
-              }
-            };
-          } else if (!isNaN(parseFloat(elseText))) {
-            elseExpr = {
-              type: 'expression',
-              expressionType: 'literal',
-              value: parseFloat(elseText),
-              location: {
-                start: {
-                  line: node.startPosition.row,
-                  column: node.startPosition.column + conditionText.length + 1 + thenText.length + 1,
-                  offset: node.startIndex + conditionText.length + 1 + thenText.length + 1
-                },
-                end: {
-                  line: node.endPosition.row,
-                  column: node.endPosition.column,
-                  offset: node.endIndex
-                }
-              }
-            };
-          } else {
-            elseExpr = {
-              type: 'expression',
-              expressionType: 'variable',
-              name: elseText,
-              location: {
-                start: {
-                  line: node.startPosition.row,
-                  column: node.startPosition.column + conditionText.length + 1 + thenText.length + 1,
-                  offset: node.startIndex + conditionText.length + 1 + thenText.length + 1
-                },
-                end: {
-                  line: node.endPosition.row,
-                  column: node.endPosition.column,
-                  offset: node.endIndex
-                }
-              }
-            };
-          }
-
-          return {
-            type: 'expression',
-            expressionType: 'conditional',
-            condition: conditionExpr,
-            thenBranch: thenExpr,
-            elseBranch: elseExpr,
-            location: getLocation(node)
-          };
-        }
+      // Try to find a conditional_expression node
+      const conditionalExpr = findDescendantOfType(node, 'conditional_expression');
+      if (conditionalExpr) {
+        return this.visitConditionalExpression(conditionalExpr);
       }
     }
 
     // Handle complex expressions with parentheses
     if (node.text.includes('(') && node.text.includes(')')) {
-      // Check for specific patterns like (1 + 2) * (3 - 4)
-      if (node.text.includes('*') &&
-          node.text.split('*').length === 2 &&
-          node.text.split('*')[0].trim().startsWith('(') &&
-          node.text.split('*')[0].trim().endsWith(')') &&
-          node.text.split('*')[1].trim().startsWith('(') &&
-          node.text.split('*')[1].trim().endsWith(')')) {
-
-        const leftExprText = node.text.split('*')[0].trim().substring(1, node.text.split('*')[0].trim().length - 1);
-        const rightExprText = node.text.split('*')[1].trim().substring(1, node.text.split('*')[1].trim().length - 1);
-
-        // Create left expression (binary)
-        let leftExpr: ast.ExpressionNode | null = null;
-
-        if (leftExprText.includes('+')) {
-          const leftParts = leftExprText.split('+');
-          if (leftParts.length >= 2) {
-            const leftLeftText = leftParts[0].trim();
-            const leftRightText = leftParts.slice(1).join('+').trim();
-
-            // Create left-left expression
-            let leftLeftExpr: ast.ExpressionNode | null = null;
-
-            if (leftLeftText === 'true' || leftLeftText === 'false') {
-              leftLeftExpr = {
-                type: 'expression',
-                expressionType: 'literal',
-                value: leftLeftText === 'true',
-                location: getLocation(node)
-              };
-            } else if (!isNaN(parseFloat(leftLeftText))) {
-              leftLeftExpr = {
-                type: 'expression',
-                expressionType: 'literal',
-                value: parseFloat(leftLeftText),
-                location: getLocation(node)
-              };
-            } else {
-              leftLeftExpr = {
-                type: 'expression',
-                expressionType: 'variable',
-                name: leftLeftText,
-                location: getLocation(node)
-              };
-            }
-
-            // Create left-right expression
-            let leftRightExpr: ast.ExpressionNode | null = null;
-
-            if (leftRightText === 'true' || leftRightText === 'false') {
-              leftRightExpr = {
-                type: 'expression',
-                expressionType: 'literal',
-                value: leftRightText === 'true',
-                location: getLocation(node)
-              };
-            } else if (!isNaN(parseFloat(leftRightText))) {
-              leftRightExpr = {
-                type: 'expression',
-                expressionType: 'literal',
-                value: parseFloat(leftRightText),
-                location: getLocation(node)
-              };
-            } else {
-              leftRightExpr = {
-                type: 'expression',
-                expressionType: 'variable',
-                name: leftRightText,
-                location: getLocation(node)
-              };
-            }
-
-            leftExpr = {
-              type: 'expression',
-              expressionType: 'binary',
-              operator: '+',
-              left: leftLeftExpr,
-              right: leftRightExpr,
-              location: getLocation(node)
-            };
-          }
-        }
-
-        // Create right expression (binary)
-        let rightExpr: ast.ExpressionNode | null = null;
-
-        if (rightExprText.includes('-')) {
-          const rightParts = rightExprText.split('-');
-          if (rightParts.length >= 2) {
-            const rightLeftText = rightParts[0].trim();
-            const rightRightText = rightParts.slice(1).join('-').trim();
-
-            // Create right-left expression
-            let rightLeftExpr: ast.ExpressionNode | null = null;
-
-            if (rightLeftText === 'true' || rightLeftText === 'false') {
-              rightLeftExpr = {
-                type: 'expression',
-                expressionType: 'literal',
-                value: rightLeftText === 'true',
-                location: getLocation(node)
-              };
-            } else if (!isNaN(parseFloat(rightLeftText))) {
-              rightLeftExpr = {
-                type: 'expression',
-                expressionType: 'literal',
-                value: parseFloat(rightLeftText),
-                location: getLocation(node)
-              };
-            } else {
-              rightLeftExpr = {
-                type: 'expression',
-                expressionType: 'variable',
-                name: rightLeftText,
-                location: getLocation(node)
-              };
-            }
-
-            // Create right-right expression
-            let rightRightExpr: ast.ExpressionNode | null = null;
-
-            if (rightRightText === 'true' || rightRightText === 'false') {
-              rightRightExpr = {
-                type: 'expression',
-                expressionType: 'literal',
-                value: rightRightText === 'true',
-                location: getLocation(node)
-              };
-            } else if (!isNaN(parseFloat(rightRightText))) {
-              rightRightExpr = {
-                type: 'expression',
-                expressionType: 'literal',
-                value: parseFloat(rightRightText),
-                location: getLocation(node)
-              };
-            } else {
-              rightRightExpr = {
-                type: 'expression',
-                expressionType: 'variable',
-                name: rightRightText,
-                location: getLocation(node)
-              };
-            }
-
-            rightExpr = {
-              type: 'expression',
-              expressionType: 'binary',
-              operator: '-',
-              left: rightLeftExpr,
-              right: rightRightExpr,
-              location: getLocation(node)
-            };
-          }
-        }
-
-        if (leftExpr && rightExpr) {
-          return {
-            type: 'expression',
-            expressionType: 'binary',
-            operator: '*',
-            left: leftExpr,
-            right: rightExpr,
-            location: getLocation(node)
-          };
-        }
+      // Try to find a parenthesized_expression node
+      const parenthesizedExpr = findDescendantOfType(node, 'parenthesized_expression');
+      if (parenthesizedExpr) {
+        return this.visitParenthesizedExpression(parenthesizedExpr);
       }
 
-      // Check for expressions with multiple operators like 1 + 2 * 3
-      if (node.text.includes('+') && node.text.includes('*')) {
-        const parts = node.text.split('+');
-        if (parts.length >= 2) {
-          const leftText = parts[0].trim();
-          const rightText = parts.slice(1).join('+').trim();
-
-          // Create left expression
-          let leftExpr: ast.ExpressionNode | null = null;
-
-          if (leftText === 'true' || leftText === 'false') {
-            leftExpr = {
-              type: 'expression',
-              expressionType: 'literal',
-              value: leftText === 'true',
-              location: getLocation(node)
-            };
-          } else if (!isNaN(parseFloat(leftText))) {
-            leftExpr = {
-              type: 'expression',
-              expressionType: 'literal',
-              value: parseFloat(leftText),
-              location: getLocation(node)
-            };
-          } else {
-            leftExpr = {
-              type: 'expression',
-              expressionType: 'variable',
-              name: leftText,
-              location: getLocation(node)
-            };
-          }
-
-          // Create right expression (binary)
-          let rightExpr: ast.ExpressionNode | null = null;
-
-          if (rightText.includes('*')) {
-            const rightParts = rightText.split('*');
-            if (rightParts.length >= 2) {
-              const rightLeftText = rightParts[0].trim();
-              const rightRightText = rightParts.slice(1).join('*').trim();
-
-              // Create right-left expression
-              let rightLeftExpr: ast.ExpressionNode | null = null;
-
-              if (rightLeftText === 'true' || rightLeftText === 'false') {
-                rightLeftExpr = {
-                  type: 'expression',
-                  expressionType: 'literal',
-                  value: rightLeftText === 'true',
-                  location: getLocation(node)
-                };
-              } else if (!isNaN(parseFloat(rightLeftText))) {
-                rightLeftExpr = {
-                  type: 'expression',
-                  expressionType: 'literal',
-                  value: parseFloat(rightLeftText),
-                  location: getLocation(node)
-                };
-              } else {
-                rightLeftExpr = {
-                  type: 'expression',
-                  expressionType: 'variable',
-                  name: rightLeftText,
-                  location: getLocation(node)
-                };
-              }
-
-              // Create right-right expression
-              let rightRightExpr: ast.ExpressionNode | null = null;
-
-              if (rightRightText === 'true' || rightRightText === 'false') {
-                rightRightExpr = {
-                  type: 'expression',
-                  expressionType: 'literal',
-                  value: rightRightText === 'true',
-                  location: getLocation(node)
-                };
-              } else if (!isNaN(parseFloat(rightRightText))) {
-                rightRightExpr = {
-                  type: 'expression',
-                  expressionType: 'literal',
-                  value: parseFloat(rightRightText),
-                  location: getLocation(node)
-                };
-              } else {
-                rightRightExpr = {
-                  type: 'expression',
-                  expressionType: 'variable',
-                  name: rightRightText,
-                  location: getLocation(node)
-                };
-              }
-
-              rightExpr = {
-                type: 'expression',
-                expressionType: 'binary',
-                operator: '*',
-                left: rightLeftExpr,
-                right: rightRightExpr,
-                location: getLocation(node)
-              };
-            }
-          }
-
-          if (leftExpr && rightExpr) {
-            return {
-              type: 'expression',
-              expressionType: 'binary',
-              operator: '+',
-              left: leftExpr,
-              right: rightExpr,
-              location: getLocation(node)
-            };
-          }
-        }
       }
+
+    // Check for specific expression types
+    const binaryExprNode = findDescendantOfType(node, 'binary_expression');
+    if (binaryExprNode) {
+      return this.binaryExpressionVisitor.visitBinaryExpression(binaryExprNode);
     }
 
-    // Handle direct binary expressions
-    if (node.text.includes('+') || node.text.includes('-') ||
-        node.text.includes('*') || node.text.includes('/') ||
-        node.text.includes('>') || node.text.includes('<') ||
-        node.text.includes('==') || node.text.includes('!=') ||
-        node.text.includes('&&') || node.text.includes('||')) {
-
-      // Try to identify the operator and operands
-      let operator = '';
-      let leftText = '';
-      let rightText = '';
-
-      // Check for common binary operators
-      const operators = ['&&', '||', '==', '!=', '>=', '<=', '>', '<', '+', '-', '*', '/', '%'];
-
-      for (const op of operators) {
-        if (node.text.includes(op)) {
-          const parts = node.text.split(op);
-          if (parts.length >= 2) {
-            operator = op;
-            leftText = parts[0].trim();
-            rightText = parts.slice(1).join(op).trim();
-            break;
-          }
-        }
-      }
-
-      if (operator && leftText && rightText) {
-        // Create left expression
-        let leftExpr: ast.ExpressionNode | null = null;
-
-        if (leftText === 'true' || leftText === 'false') {
-          leftExpr = {
-            type: 'expression',
-            expressionType: 'literal',
-            value: leftText === 'true',
-            location: {
-              start: {
-                line: node.startPosition.row,
-                column: node.startPosition.column,
-                offset: node.startIndex
-              },
-              end: {
-                line: node.startPosition.row,
-                column: node.startPosition.column + leftText.length,
-                offset: node.startIndex + leftText.length
-              }
-            }
-          };
-        } else if (!isNaN(parseFloat(leftText))) {
-          leftExpr = {
-            type: 'expression',
-            expressionType: 'literal',
-            value: parseFloat(leftText),
-            location: {
-              start: {
-                line: node.startPosition.row,
-                column: node.startPosition.column,
-                offset: node.startIndex
-              },
-              end: {
-                line: node.startPosition.row,
-                column: node.startPosition.column + leftText.length,
-                offset: node.startIndex + leftText.length
-              }
-            }
-          };
-        } else {
-          leftExpr = {
-            type: 'expression',
-            expressionType: 'variable',
-            name: leftText,
-            location: {
-              start: {
-                line: node.startPosition.row,
-                column: node.startPosition.column,
-                offset: node.startIndex
-              },
-              end: {
-                line: node.startPosition.row,
-                column: node.startPosition.column + leftText.length,
-                offset: node.startIndex + leftText.length
-              }
-            }
-          };
-        }
-
-        // Create right expression
-        let rightExpr: ast.ExpressionNode | null = null;
-
-        if (rightText === 'true' || rightText === 'false') {
-          rightExpr = {
-            type: 'expression',
-            expressionType: 'literal',
-            value: rightText === 'true',
-            location: {
-              start: {
-                line: node.startPosition.row,
-                column: node.startPosition.column + leftText.length + operator.length,
-                offset: node.startIndex + leftText.length + operator.length
-              },
-              end: {
-                line: node.endPosition.row,
-                column: node.endPosition.column,
-                offset: node.endIndex
-              }
-            }
-          };
-        } else if (!isNaN(parseFloat(rightText))) {
-          rightExpr = {
-            type: 'expression',
-            expressionType: 'literal',
-            value: parseFloat(rightText),
-            location: {
-              start: {
-                line: node.startPosition.row,
-                column: node.startPosition.column + leftText.length + operator.length,
-                offset: node.startIndex + leftText.length + operator.length
-              },
-              end: {
-                line: node.endPosition.row,
-                column: node.endPosition.column,
-                offset: node.endIndex
-              }
-            }
-          };
-        } else {
-          rightExpr = {
-            type: 'expression',
-            expressionType: 'variable',
-            name: rightText,
-            location: {
-              start: {
-                line: node.startPosition.row,
-                column: node.startPosition.column + leftText.length + operator.length,
-                offset: node.startIndex + leftText.length + operator.length
-              },
-              end: {
-                line: node.endPosition.row,
-                column: node.endPosition.column,
-                offset: node.endIndex
-              }
-            }
-          };
-        }
-
-        return {
-          type: 'expression',
-          expressionType: 'binary',
-          operator: operator as ast.BinaryOperator,
-          left: leftExpr,
-          right: rightExpr,
-          location: getLocation(node)
-        };
-      }
+    const unaryExprNode = findDescendantOfType(node, 'unary_expression');
+    if (unaryExprNode) {
+      return this.unaryExpressionVisitor.visitUnaryExpression(unaryExprNode);
     }
 
-    // Handle array expressions
-    if (node.text.startsWith('[') && node.text.endsWith(']')) {
-      const arrayContent = node.text.substring(1, node.text.length - 1).trim();
-      if (arrayContent) {
-        // Split by commas, but handle nested structures
-        const items: string[] = [];
-        let currentItem = '';
-        let bracketCount = 0;
+    const conditionalExprNode = findDescendantOfType(node, 'conditional_expression');
+    if (conditionalExprNode) {
+      return this.visitConditionalExpression(conditionalExprNode);
+    }
 
-        for (let i = 0; i < arrayContent.length; i++) {
-          const char = arrayContent[i];
+    const parenthesizedExprNode = findDescendantOfType(node, 'parenthesized_expression');
+    if (parenthesizedExprNode) {
+      return this.visitParenthesizedExpression(parenthesizedExprNode);
+    }
 
-          if (char === '[') {
-            bracketCount++;
-            currentItem += char;
-          } else if (char === ']') {
-            bracketCount--;
-            currentItem += char;
-          } else if (char === ',' && bracketCount === 0) {
-            items.push(currentItem.trim());
-            currentItem = '';
-          } else {
-            currentItem += char;
-          }
-        }
+    const arrayLiteralNode = findDescendantOfType(node, 'array_literal');
+    if (arrayLiteralNode) {
+      return this.visitArrayExpression(arrayLiteralNode);
+    }
 
-        if (currentItem.trim()) {
-          items.push(currentItem.trim());
-        }
+    const identifierNode = findDescendantOfType(node, 'identifier');
+    if (identifierNode) {
+      return this.visitVariableReference(identifierNode);
+    }
 
-        // Create expression nodes for each item
-        const itemNodes: ast.ExpressionNode[] = [];
+    const numberNode = findDescendantOfType(node, 'number');
+    if (numberNode) {
+      return this.visitLiteral(numberNode);
+    }
 
-        for (let i = 0; i < items.length; i++) {
-          const itemText = items[i];
+    const stringNode = findDescendantOfType(node, 'string');
+    if (stringNode) {
+      return this.visitLiteral(stringNode);
+    }
 
-          if (itemText === 'true' || itemText === 'false') {
-            itemNodes.push({
-              type: 'expression',
-              expressionType: 'literal',
-              value: itemText === 'true',
-              location: getLocation(node)
-            });
-          } else if (!isNaN(parseFloat(itemText))) {
-            itemNodes.push({
-              type: 'expression',
-              expressionType: 'literal',
-              value: parseFloat(itemText),
-              location: getLocation(node)
-            });
-          } else {
-            itemNodes.push({
-              type: 'expression',
-              expressionType: 'variable',
-              name: itemText,
-              location: getLocation(node)
-            });
-          }
-        }
-
-        return {
-          type: 'expression',
-          expressionType: 'array',
-          items: itemNodes,
-          location: getLocation(node)
-        };
-      }
+    const booleanNode = findDescendantOfType(node, 'boolean') ||
+                        findDescendantOfType(node, 'true') ||
+                        findDescendantOfType(node, 'false');
+    if (booleanNode) {
+      return this.visitLiteral(booleanNode);
     }
 
     // Handle the expression based on its type

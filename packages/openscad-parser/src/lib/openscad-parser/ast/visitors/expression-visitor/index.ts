@@ -9,3 +9,5 @@
 export * from './function-call-visitor';
 export * from './binary-expression-visitor';
 export * from './unary-expression-visitor';
+export * from './conditional-expression-visitor';
+export * from './parenthesized-expression-visitor';
