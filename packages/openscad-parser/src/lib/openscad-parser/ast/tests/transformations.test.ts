@@ -51,7 +51,7 @@ describe('Transformation AST Generation', () => {
       expect(ast[0].type).toBe('mirror');
 
       const mirrorNode = ast[0] as any;
-      expect(mirrorNode.vector).toEqual([1, 0, 0]); // Z should default to 0
+      expect(mirrorNode.v).toEqual([1, 0, 0]); // Z should default to 0
       expect(mirrorNode.children).toHaveLength(0);
       // Skip child node checks since children array is empty
       // expect(mirrorNode.children[0].type).toBe('cube');

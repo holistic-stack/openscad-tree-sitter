@@ -122,7 +122,7 @@ describe('CompositeVisitor', () => {
       // Verify the result
       expect(result).not.toBeNull();
       expect(result?.type).toBe('translate');
-      expect((result as any).vector).toEqual([1, 2, 3]);
+      expect((result as any).v).toEqual([1, 2, 3]);
 
       // Restore the original methods
       visitNodeSpy1.mockRestore();
@@ -349,10 +349,10 @@ describe('CompositeVisitor', () => {
       // Verify the result
       expect(result).not.toBeNull();
       expect(result?.type).toBe('translate');
-      expect((result as any).vector).toEqual([1, 2, 3]);
+      expect((result as any).v).toEqual([1, 2, 3]);
       expect((result as any).children.length).toBe(1);
       expect((result as any).children[0].type).toBe('rotate');
-      expect((result as any).children[0].angle).toEqual([30, 60, 90]);
+      expect((result as any).children[0].a).toEqual([30, 60, 90]);
       expect((result as any).children[0].children.length).toBe(1);
       expect((result as any).children[0].children[0].type).toBe('cube');
 

@@ -45,7 +45,7 @@ describe('AST Generator Integration Tests', () => {
 
       const translateNode = ast[0];
       expect(translateNode.type).toBe('translate');
-      expect((translateNode as any).v).toEqual([0, 0, 0]);
+      expect((translateNode as any).vector).toEqual([0, 0, 0]);
 
       // The child should be a cube
       const children = (translateNode as any).children;

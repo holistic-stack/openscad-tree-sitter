@@ -99,7 +99,7 @@ describe('VisitorASTGenerator', () => {
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0].type).toBe('rotate');
 
       // Instead of using the visitor directly, check the properties of the generated AST
       expect(ast[0]).toHaveProperty('type');
@@ -115,7 +115,7 @@ describe('VisitorASTGenerator', () => {
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0].type).toBe('scale');
 
       // Instead of using the visitor directly, check the properties of the generated AST
       expect(ast[0]).toHaveProperty('type');

@@ -2,47 +2,83 @@
 
 ## High Priority Tasks
 
-### 1. Enhance Expression Handling [IN PROGRESS]
-- **Goal**: Improve support for complex expressions
+### 1. Fix Expression Visitor Implementation Issues [IN PROGRESS]
+- **Goal**: Fix test failures in expression visitors
 - **Status**: In progress
-- **Description**: Refactor and enhance the ExpressionVisitor to properly handle all expression types
+- **Description**: Fix implementation issues in ParenthesizedExpressionVisitor and ConditionalExpressionVisitor
 - **Subtasks**:
   - [x] Create specialized visitors for different expression types
-  - [x] Implement FunctionCallVisitor to handle function calls in expressions
-  - [x] Update ExpressionVisitor to use FunctionCallVisitor
-  - [x] Implement BinaryExpressionVisitor to handle binary operations
-  - [x] Enhance visitBinaryExpression to handle all binary operators with proper precedence
-  - [x] Implement UnaryExpressionVisitor to handle unary operations
-  - [x] Improve visitUnaryExpression to handle all unary operators
-  - [x] Implement ConditionalExpressionVisitor to handle conditional expressions
-  - [x] Enhance visitConditionalExpression to use ConditionalExpressionVisitor
-  - [x] Implement ParenthesizedExpressionVisitor to handle parenthesized expressions
-  - [x] Enhance visitExpression to use ParenthesizedExpressionVisitor
-  - [ ] Add support for nested expressions with different operators
-  - [ ] Implement proper handling of parenthesized expressions
-  - [ ] Add comprehensive tests with real CST nodes
+  - [x] Fix query manager to handle different API formats for tree-sitter queries
+  - [x] Add support for both the new array-based API and the old object-based API
+  - [x] Fix circular dependency between ExpressionVisitor and specialized visitors
+  - [ ] Fix ParenthesizedExpressionVisitor implementation:
+    - [ ] Implement proper visitParenthesizedExpression method
+    - [ ] Fix the extraction of inner expressions
+    - [ ] Ensure proper handling of binary expressions inside parentheses
+  - [ ] Fix ConditionalExpressionVisitor implementation:
+    - [ ] Implement proper visitConditionalExpression method
+    - [ ] Fix the extraction of condition, consequence, and alternative
+    - [ ] Ensure proper handling of complex conditions and branches
+  - [ ] Fix complex expression tests:
+    - [ ] Fix handling of mixed operators and parentheses
+    - [ ] Ensure proper operator precedence handling
+    - [ ] Fix nested expression handling
+  - [ ] Fix query visitor tests:
+    - [ ] Fix query.matches function to find the expected nodes
+    - [ ] Ensure proper handling of different node types
+    - [ ] Add better error handling for query failures
 - **Dependencies**: None
 - **Priority**: High
 - **Assignee**: TBD
-- **Estimated Time**: 8 hours
+- **Estimated Time**: 6 hours
 - **Implementation Details**:
-  - ✅ Binary operations now handle: +, -, *, /, %, ==, !=, <, <=, >, >=, &&, ||
-  - ✅ Unary operations now handle: +, -, !
-  - ✅ Function calls now extract function name and arguments properly
-  - ✅ Conditional expressions now use a dedicated visitor with proper CST traversal
-  - ✅ Parenthesized expressions now use a dedicated visitor with proper CST traversal
-  - ✅ Created conditional-expression-visitor.ts in the expression-visitor directory
-  - ✅ Created parenthesized-expression-visitor.ts in the expression-visitor directory
-  - ✅ Added ConditionalExpressionVisitor to ExpressionVisitor constructor
-  - ✅ Added ParenthesizedExpressionVisitor to ExpressionVisitor constructor
-  - ✅ Updated visitConditionalExpression to delegate to ConditionalExpressionVisitor
-  - ✅ Updated visitExpression to delegate to ParenthesizedExpressionVisitor
-  - Implement proper handling of parenthesized expressions
-  - Tests should use real OpenscadParser instances and CST nodes
+  - ✅ Fixed query manager to handle different API formats for tree-sitter queries
+  - ✅ Added support for both the new array-based API and the old object-based API
+  - ✅ Fixed circular dependency between ExpressionVisitor and specialized visitors
+  - ✅ Made specialized visitors inherit from BaseASTVisitor instead of ExpressionVisitor
+  - ✅ Added try-catch blocks to handle errors in critical methods
+  - ✅ Added better error logging to help diagnose issues
+  - ParenthesizedExpressionVisitor is returning null instead of processing expressions
+  - ConditionalExpressionVisitor is returning null instead of processing conditional expressions
+  - Query visitor is not finding the expected nodes
   - Use `pnpm test:parser` to run tests for the parser package
-  - Use `nx test openscad-parser --testFile=src/lib/openscad-parser/ast/visitors/expression-visitor/conditional-expression-visitor.test.ts` to run specific test files
+  - Use `nx test openscad-parser --testFile=src/lib/openscad-parser/ast/visitors/expression-visitor/parenthesized-expression-visitor.test.ts` to run specific test files
 
-### 2. Improve Error Handling and Reporting
+### 2. Fix Transformation Visitor Issues
+- **Goal**: Fix test failures in transformation visitors
+- **Status**: Planned
+- **Description**: Fix implementation issues in transform visitors
+- **Subtasks**:
+  - [ ] Fix vector property extraction in transform visitors:
+    - [ ] Fix translate vector extraction
+    - [ ] Fix rotate vector extraction
+    - [ ] Fix scale vector extraction
+    - [ ] Fix mirror vector extraction
+  - [ ] Ensure proper handling of transform parameters:
+    - [ ] Handle both named and positional parameters
+    - [ ] Support different vector dimensions (1D, 2D, 3D)
+    - [ ] Apply proper defaults for missing parameters
+  - [ ] Fix the extraction of transformation parameters:
+    - [ ] Use proper type guards for parameter extraction
+    - [ ] Handle different parameter formats consistently
+    - [ ] Add validation for parameter values
+  - [ ] Update tests to match the actual behavior of the parser:
+    - [ ] Fix transformation test expectations
+    - [ ] Add tests for edge cases and special formats
+    - [ ] Ensure backward compatibility with existing tests
+- **Dependencies**: None
+- **Priority**: High
+- **Assignee**: TBD
+- **Estimated Time**: 4 hours
+- **Implementation Details**:
+  - Transform visitors are not properly extracting vector properties
+  - Vector properties are undefined in test assertions
+  - Need to fix the extraction of vector parameters from CST nodes
+  - Need to ensure proper handling of different parameter formats
+  - Use `pnpm test:parser` to run tests for the parser package
+  - Use `nx test openscad-parser --testFile=src/lib/openscad-parser/ast/tests/transformations.test.ts` to run specific test files
+
+### 3. Improve Error Handling and Reporting
 - **Goal**: Enhance error messages and recovery mechanisms
 - **Status**: Planned
 - **Description**: Add better error handling and recovery strategies throughout the parser
@@ -71,7 +107,7 @@
 
 ## Medium Priority Tasks
 
-### 3. Enhance AST with Semantic Information
+### 4. Enhance AST with Semantic Information
 - **Goal**: Add semantic information to AST nodes for better downstream processing
 - **Status**: Planned
 - **Description**: Augment AST nodes with additional semantic information
@@ -97,7 +133,7 @@
   - Provide warnings for potential type mismatches
   - Enhance AST nodes with type and scope information
 
-### 4. Optimize Parser Performance
+### 5. Optimize Parser Performance
 - **Goal**: Improve parsing speed and memory usage
 - **Status**: Planned
 - **Description**: Profile and optimize parser performance
@@ -111,7 +147,7 @@
 - **Assignee**: TBD
 - **Estimated Time**: 5 hours
 
-### 5. Add Support for Include and Use Statements
+### 6. Add Support for Include and Use Statements
 - **Goal**: Handle file inclusion and library usage
 - **Status**: Planned
 - **Description**: Implement handling for include and use statements
@@ -133,7 +169,7 @@
 
 ## Low Priority Tasks
 
-### 6. Implement Pretty Printer
+### 7. Implement Pretty Printer
 - **Goal**: Create a pretty printer for AST nodes
 - **Status**: Planned
 - **Description**: Implement a pretty printer to convert AST back to formatted OpenSCAD code
@@ -147,7 +183,7 @@
 - **Assignee**: TBD
 - **Estimated Time**: 5 hours
 
-### 7. Add Documentation Generator
+### 8. Add Documentation Generator
 - **Goal**: Generate documentation from OpenSCAD code
 - **Status**: Planned
 - **Description**: Create a documentation generator based on AST analysis

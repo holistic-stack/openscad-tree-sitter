@@ -19,7 +19,9 @@ We have successfully completed the implementation of control structure visitors 
    - The BinaryExpressionVisitor extracts operators and operands from CST nodes with proper precedence
    - Implemented a dedicated UnaryExpressionVisitor to handle unary operations in expressions
    - The UnaryExpressionVisitor extracts operators and operands from CST nodes with fallback mechanisms
-   - Updated the ExpressionVisitor to use the specialized visitors for function calls, binary operations, and unary operations
+   - Implemented a dedicated ConditionalExpressionVisitor to handle conditional expressions
+   - Implemented a dedicated ParenthesizedExpressionVisitor to handle parenthesized expressions
+   - Updated the ExpressionVisitor to use the specialized visitors for all expression types
    - Added comprehensive tests with real CST nodes (no mocks)
 
 2. **Expression Types to Support**:
@@ -30,117 +32,121 @@ We have successfully completed the implementation of control structure visitors 
    - Literal values: numbers, strings, booleans (✓ Implemented)
    - Array/vector expressions: [1, 2, 3] (✓ Implemented)
    - Function calls: len(v), sin(x), etc. (✓ Implemented)
+   - Parenthesized expressions: (expr) (✓ Implemented)
 
 3. **Next Priority Tasks**:
-   - Implement proper handling of array expressions
-   - Add support for nested expressions with different operators
-   - Add support for complex nested expressions with mixed operators
-   - Add comprehensive tests for conditional expressions and parenthesized expressions
+   - ✅ Add support for nested expressions with different operators
+   - ✅ Implement proper handling of parenthesized expressions
+   - Fix test failures in expression visitors:
+     - Fix ParenthesizedExpressionVisitor tests
+     - Fix ConditionalExpressionVisitor tests
+     - Fix complex expression tests
+     - Fix query visitor tests
+   - Fix tree-sitter API compatibility issues
+   - Fix transformation visitor tests
 
 ## Current Task Focus
 
-With the UnaryExpressionVisitor implementation complete, we are now shifting focus to implementing the ConditionalExpressionVisitor:
+We've made significant progress in fixing the expression visitor issues, but there are still several test failures that need to be addressed:
 
-1. **Expression Visitor Refactoring**:
-   - ✅ Refactor the ExpressionVisitor to properly use the visitor pattern
-   - ✅ Implement proper CST traversal instead of string manipulation
-   - ✅ Create specialized methods for different expression types
-   - ✅ Ensure proper handling of operator precedence
-   - ✅ Implement proper function call handling in expressions
+1. **Test Failures to Fix**:
+   - Fix ParenthesizedExpressionVisitor tests:
+     - The visitor is returning null instead of processing expressions
+     - Need to implement proper handling of expressions inside parentheses
+     - Need to fix the extraction of inner expressions
+   - Fix ConditionalExpressionVisitor tests:
+     - The visitor is returning null instead of processing conditional expressions
+     - Need to implement proper handling of condition, consequence, and alternative
+   - Fix complex expression tests:
+     - The expressions are not being parsed correctly
+     - Need to fix the handling of mixed operators and parentheses
+   - Fix query visitor tests:
+     - The query visitor is not finding the expected nodes
+     - Need to ensure the query manager is properly handling different API formats
 
-2. **Binary Operation Enhancement**:
-   - ✅ Implement dedicated visitors for different binary operation types:
-     - ✅ Arithmetic operations: +, -, *, /, %
-     - ✅ Logical operations: &&, ||
-     - ✅ Relational operations: ==, !=, <, <=, >, >=
-   - ✅ Ensure proper operator precedence handling
-   - ✅ Support nested binary expressions with different operators
-   - [ ] Handle parenthesized expressions correctly
+2. **Tree-sitter API Compatibility Issues**:
+   - ✅ Fixed query manager to handle different API formats for tree-sitter queries
+   - ✅ Added support for both the new array-based API and the old object-based API
+   - ✅ Improved error handling in query execution
+   - [ ] Fix remaining issues with query.matches function
+   - [ ] Ensure compatibility with different tree-sitter versions
 
-3. **Unary Operation Enhancement**:
-   - ✅ Implement dedicated visitors for unary operations:
-     - ✅ Arithmetic negation: -
-     - ✅ Logical negation: !
-     - ✅ Unary plus: +
-   - ✅ Support nested unary expressions
-   - ✅ Handle unary operations with complex operands
+3. **Expression Visitor Implementation Issues**:
+   - ✅ Implemented dedicated visitors for all expression types
+   - ✅ Fixed circular dependency between ExpressionVisitor and specialized visitors
+   - [ ] Fix inheritance structure for ParenthesizedExpressionVisitor
+   - [ ] Fix inheritance structure for ConditionalExpressionVisitor
+   - [ ] Implement proper visitExpression method in specialized visitors
+   - [ ] Fix method delegation in ExpressionVisitor
 
-4. **Function Call Support**:
-   - ✅ Implement proper function call handling in expressions
-   - ✅ Support built-in functions like len(), sin(), cos(), etc.
-   - ✅ Handle function calls with complex arguments
-   - ✅ Support nested function calls
+4. **Transformation Visitor Issues**:
+   - [ ] Fix vector property extraction in transform visitors
+   - [ ] Ensure proper handling of transform parameters
+   - [ ] Fix the extraction of transformation parameters
+   - [ ] Update tests to match the actual behavior of the parser
 
-5. **Conditional Expression Enhancement**:
-   - ✅ Implement ConditionalExpressionVisitor class
-   - ✅ Extract condition, then branch, and else branch from CST nodes
-   - ✅ Handle different node structures with fallback mechanisms
-   - ✅ Support nested conditional expressions
-   - ✅ Handle conditional expressions with complex conditions and branches
-   - ✅ Update ExpressionVisitor to use ConditionalExpressionVisitor
-
-6. **Parenthesized Expression Enhancement**:
-   - ✅ Implement ParenthesizedExpressionVisitor class
-   - ✅ Extract inner expressions from parenthesized expression nodes
-   - ✅ Handle different node structures with fallback mechanisms
-   - ✅ Support nested parenthesized expressions
-   - ✅ Handle binary expressions inside parentheses
-   - ✅ Update ExpressionVisitor to use ParenthesizedExpressionVisitor
+5. **Query Visitor Issues**:
+   - [ ] Fix query visitor to find the expected nodes
+   - [ ] Ensure proper handling of different node types in queries
+   - [ ] Update tests to use the correct query syntax
+   - [ ] Add better error handling for query failures
 
 ## Next Steps
 
 1. **Immediate Implementation Tasks**:
-   - ✅ Create a proper implementation of createASTNodeForFunction in ExpressionVisitor
-   - ✅ Refactor visitBinaryExpression to use proper CST traversal
-   - ✅ Implement specialized visitors for different binary operation types
-   - ✅ Implement UnaryExpressionVisitor for handling unary operations
-   - ✅ Enhance visitUnaryExpression to use the UnaryExpressionVisitor
-   - ✅ Create conditional-expression-visitor.ts file in the expression-visitor directory
-   - ✅ Implement ConditionalExpressionVisitor class with proper CST traversal
-   - ✅ Add ConditionalExpressionVisitor to ExpressionVisitor constructor
-   - ✅ Update visitConditionalExpression to delegate to ConditionalExpressionVisitor
-   - ✅ Create parenthesized-expression-visitor.ts file in the expression-visitor directory
-   - ✅ Implement ParenthesizedExpressionVisitor class with proper CST traversal
-   - ✅ Add ParenthesizedExpressionVisitor to ExpressionVisitor constructor
-   - ✅ Update visitExpression to delegate to ParenthesizedExpressionVisitor
-   - Implement proper handling of array expressions
-   - Add support for nested expressions with different operators
-   - [ ] Add support for complex nested expressions with mixed operators
+   - Fix ParenthesizedExpressionVisitor implementation:
+     - Implement proper visitParenthesizedExpression method
+     - Fix the extraction of inner expressions
+     - Ensure proper handling of binary expressions inside parentheses
+   - Fix ConditionalExpressionVisitor implementation:
+     - Implement proper visitConditionalExpression method
+     - Fix the extraction of condition, consequence, and alternative
+     - Ensure proper handling of complex conditions and branches
+   - Fix query manager implementation:
+     - Ensure proper handling of different tree-sitter API formats
+     - Fix query.matches function to find the expected nodes
+     - Add better error handling for query failures
+   - Fix transformation visitor implementation:
+     - Fix vector property extraction in transform visitors
+     - Ensure proper handling of transform parameters
+     - Update tests to match the actual behavior of the parser
 
 2. **Testing Strategy**:
-   - ✅ Create tests with real CST nodes instead of mocks
-   - ✅ Test binary expressions with different operators
-   - ✅ Test expressions with function calls
-   - ✅ Test expressions with unary operations
-   - ✅ Create conditional-expression-visitor.test.ts file
-   - ✅ Test conditional expressions with different condition types
-   - ✅ Test conditional expressions with complex then/else branches
-   - ✅ Test nested conditional expressions
-   - ✅ Create parenthesized-expression-visitor.test.ts file
-   - ✅ Test basic parenthesized expressions
-   - ✅ Test nested parenthesized expressions
-   - ✅ Test parenthesized binary expressions
-   - [ ] Test expressions with parentheses
-   - [ ] Test complex nested expressions with different operators
-   - [ ] Ensure proper operator precedence handling in complex expressions
+   - Fix existing test failures:
+     - Fix ParenthesizedExpressionVisitor tests
+     - Fix ConditionalExpressionVisitor tests
+     - Fix complex expression tests
+     - Fix query visitor tests
+     - Fix transformation visitor tests
+   - Add additional tests:
+     - Test expressions with parentheses
+     - Test complex nested expressions with different operators
+     - Test expressions with mixed operators and parentheses
+     - Ensure proper operator precedence handling in complex expressions
 
-3. **Implementation Details for ConditionalExpressionVisitor**:
-   - ✅ Followed the same pattern as BinaryExpressionVisitor and UnaryExpressionVisitor
-   - ✅ Used node.childForFieldName to extract condition, consequence, and alternative nodes
-   - ✅ Implemented fallback mechanisms for different node structures
-   - ✅ Added support for nested conditional expressions
-   - ✅ Handled complex conditions and branches
-   - ✅ Added comprehensive logging for better debugging
-   - ✅ Created tests with real CST nodes (no mocks)
+3. **Implementation Details for Expression Visitor Fixes**:
+   - Fix inheritance structure for specialized visitors:
+     - Ensure proper inheritance from BaseASTVisitor
+     - Fix circular dependencies between visitors
+     - Implement proper method delegation
+   - Fix method implementation in specialized visitors:
+     - Implement proper visitExpression methods
+     - Fix the extraction of inner expressions
+     - Ensure proper handling of complex expressions
+   - Add better error handling and logging:
+     - Add detailed error messages for parsing failures
+     - Implement graceful degradation for unparseable expressions
+     - Add comprehensive logging for better debugging
 
-4. **Implementation Details for ParenthesizedExpressionVisitor**:
-   - ✅ Followed the same pattern as other expression visitors
-   - ✅ Used node.namedChild to extract inner expression nodes
-   - ✅ Implemented fallback mechanisms for different node structures
-   - ✅ Added support for nested parenthesized expressions
-   - ✅ Handled binary expressions inside parentheses
-   - ✅ Added comprehensive logging for better debugging
-   - ✅ Created tests with real CST nodes (no mocks)
+4. **Implementation Details for Query Manager Fixes**:
+   - Fix API compatibility issues:
+     - Support both new and old tree-sitter query APIs
+     - Add proper type checking for API methods
+     - Implement fallback mechanisms for different API versions
+   - Fix query execution:
+     - Ensure proper handling of different node types
+     - Fix query.matches function to find the expected nodes
+     - Add better error handling for query failures
 
 ## Architecture
 

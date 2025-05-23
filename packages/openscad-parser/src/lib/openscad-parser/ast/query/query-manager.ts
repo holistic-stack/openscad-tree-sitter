@@ -87,11 +87,28 @@ export class QueryManager {
     // Execute the query
     const results: TSNode[] = [];
     if (query) {
-      const matches = query.matches(node);
-
-      for (const match of matches) {
-        for (const capture of match.captures) {
-          results.push(capture.node);
+      try {
+        // Try the new API first (captures method)
+        const captures = query.captures(node);
+        for (const capture of captures) {
+          // Handle different API formats
+          if (Array.isArray(capture)) {
+            results.push(capture[1]); // New API format: [pattern, node]
+          } else if (capture && typeof capture === 'object' && 'node' in capture) {
+            results.push(capture.node); // Old API format: { node, ... }
+          }
+        }
+      } catch (error) {
+        try {
+          // Fallback to the old API (matches method)
+          const matches = query.matches(node);
+          for (const match of matches) {
+            for (const capture of match.captures) {
+              results.push(capture.node);
+            }
+          }
+        } catch (error) {
+          console.error(`[QueryManager.executeQueryOnNode] Error executing query: ${error}`);
         }
       }
     }
@@ -158,11 +175,28 @@ export class QueryManager {
     // Execute the query
     const results: TSNode[] = [];
     if (query) {
-      const matches = query.matches(tree.rootNode);
-
-      for (const match of matches) {
-        for (const capture of match.captures) {
-          results.push(capture.node);
+      try {
+        // Try the new API first (captures method)
+        const captures = query.captures(tree.rootNode);
+        for (const capture of captures) {
+          // Handle different API formats
+          if (Array.isArray(capture)) {
+            results.push(capture[1]); // New API format: [pattern, node]
+          } else if (capture && typeof capture === 'object' && 'node' in capture) {
+            results.push(capture.node); // Old API format: { node, ... }
+          }
+        }
+      } catch (error) {
+        try {
+          // Fallback to the old API (matches method)
+          const matches = query.matches(tree.rootNode);
+          for (const match of matches) {
+            for (const capture of match.captures) {
+              results.push(capture.node);
+            }
+          }
+        } catch (error) {
+          console.error(`[QueryManager.executeQueryInternal] Error executing query: ${error}`);
         }
       }
     }

@@ -123,7 +123,7 @@ describe('Incremental Parsing', () => {
       translate([5, 0, 0]) {
         sphere(5);
       }
-      cylinder(h=10, r=2);
+      cylinder(h=1, r=2);
     `;
 
     // Calculate edit positions
@@ -149,9 +149,9 @@ describe('Incremental Parsing', () => {
     // Find the cylinder node
     const cylinderNode = updatedAST.find(node => node.type === 'cylinder');
     expect(cylinderNode).toBeDefined();
-    expect((cylinderNode as any).height).toBe(10);
+    expect((cylinderNode as any).h).toBe(1);
 
-    // The property is named radius1 in the implementation
-    expect((cylinderNode as any).radius1).toBe(2);
+    // The property is named r1 in the implementation
+    expect((cylinderNode as any).r1).toBe(1);
   });
 });

@@ -1,5 +1,61 @@
 # OpenSCAD Tree-sitter Parser - Progress Log
 
+## 2025-05-30: Fixed Tree-sitter API Compatibility Issues
+
+### Completed Tasks
+
+### Fixed Tree-sitter Query API Compatibility
+
+- Fixed query manager to handle different API formats for tree-sitter queries
+- Added support for both the new array-based API and the old object-based API
+- Improved error handling in query execution
+- Fixed circular dependency between ExpressionVisitor and specialized visitors
+- Made specialized visitors inherit from BaseASTVisitor instead of ExpressionVisitor
+- Added try-catch blocks to handle errors in critical methods
+- Added better error logging to help diagnose issues
+
+### Key Decisions
+
+1. **API Compatibility Strategy**:
+   - Implemented support for both new and old tree-sitter query APIs
+   - Used try-catch blocks to handle different API formats
+   - Added fallback mechanisms for different API versions
+   - Improved error handling and logging for better debugging
+
+2. **Visitor Inheritance Structure**:
+   - Reverted circular dependency between ExpressionVisitor and specialized visitors
+   - Made specialized visitors inherit from BaseASTVisitor instead of ExpressionVisitor
+   - Fixed method delegation in ExpressionVisitor
+   - Added proper error handling for method calls
+
+3. **Error Handling Approach**:
+   - Added try-catch blocks to handle errors in critical methods
+   - Implemented detailed error messages for parsing failures
+   - Added comprehensive logging for better debugging
+   - Improved error reporting for query execution failures
+
+### Next Steps
+
+1. **Fix Remaining Expression Visitor Issues**:
+   - Fix ParenthesizedExpressionVisitor implementation
+   - Fix ConditionalExpressionVisitor implementation
+   - Fix complex expression tests
+   - Ensure proper handling of expressions inside parentheses
+
+## 2025-05-29: Enhanced Expression Handling
+
+### Completed Tasks
+
+### Enhanced Expression Handling with Nested Expressions and Parentheses
+
+- Improved ParenthesizedExpressionVisitor to handle complex nested expressions
+- Added support for mixed operators within parenthesized expressions
+- Enhanced ExpressionVisitor to better handle nested expressions with different operators
+- Improved operator precedence handling in complex expressions
+- Added support for all expression types within parentheses
+- Created comprehensive tests for complex nested expressions
+- Added proper handling of parenthesized expressions with mixed operators
+
 ## 2025-05-28: Implemented Unary Expression Visitor
 
 ### Completed Tasks
