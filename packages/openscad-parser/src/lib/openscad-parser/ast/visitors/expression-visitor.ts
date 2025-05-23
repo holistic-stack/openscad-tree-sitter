@@ -20,6 +20,8 @@ import { findDescendantOfType } from '../utils/node-utils';
 // extractArguments is not used in this file
 import { extractValue } from '../extractors/value-extractor';
 import { FunctionCallVisitor } from './expression-visitor/function-call-visitor';
+import { BinaryExpressionVisitor } from './expression-visitor/binary-expression-visitor';
+import { UnaryExpressionVisitor } from './expression-visitor/unary-expression-visitor';
 
 /**
  * Visitor for expressions
@@ -31,12 +33,24 @@ export class ExpressionVisitor extends BaseASTVisitor {
   private functionCallVisitor: FunctionCallVisitor;
 
   /**
+   * Binary expression visitor for handling binary operations in expressions
+   */
+  private binaryExpressionVisitor: BinaryExpressionVisitor;
+
+  /**
+   * Unary expression visitor for handling unary operations in expressions
+   */
+  private unaryExpressionVisitor: UnaryExpressionVisitor;
+
+  /**
    * Create a new ExpressionVisitor
    * @param source The source code
    */
   constructor(source: string) {
     super(source);
     this.functionCallVisitor = new FunctionCallVisitor(source);
+    this.binaryExpressionVisitor = new BinaryExpressionVisitor(source);
+    this.unaryExpressionVisitor = new UnaryExpressionVisitor(source);
   }
 
   /**
@@ -71,51 +85,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
   visitBinaryExpression(node: TSNode): ast.BinaryExpressionNode | null {
     console.log(`[ExpressionVisitor.visitBinaryExpression] Processing binary expression: ${node.text.substring(0, 50)}`);
 
-    // Extract operator
-    const operatorNode = node.childForFieldName('operator');
-    if (!operatorNode) {
-      console.log(`[ExpressionVisitor.visitBinaryExpression] No operator found`);
-      return null;
-    }
-
-    const operator = operatorNode.text as ast.BinaryOperator;
-
-    // Extract left operand
-    const leftNode = node.childForFieldName('left');
-    if (!leftNode) {
-      console.log(`[ExpressionVisitor.visitBinaryExpression] No left operand found`);
-      return null;
-    }
-
-    // Create a simple expression node for the left operand
-    const left = this.createExpressionNode(leftNode);
-    if (!left) {
-      console.log(`[ExpressionVisitor.visitBinaryExpression] Failed to create left operand expression`);
-      return null;
-    }
-
-    // Extract right operand
-    const rightNode = node.childForFieldName('right');
-    if (!rightNode) {
-      console.log(`[ExpressionVisitor.visitBinaryExpression] No right operand found`);
-      return null;
-    }
-
-    // Create a simple expression node for the right operand
-    const right = this.createExpressionNode(rightNode);
-    if (!right) {
-      console.log(`[ExpressionVisitor.visitBinaryExpression] Failed to create right operand expression`);
-      return null;
-    }
-
-    return {
-      type: 'expression',
-      expressionType: 'binary',
-      operator,
-      left,
-      right,
-      location: getLocation(node)
-    };
+    // Delegate to the binary expression visitor
+    return this.binaryExpressionVisitor.visitBinaryExpression(node);
   }
 
   /**
@@ -126,168 +97,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
   visitUnaryExpression(node: TSNode): ast.UnaryExpressionNode | null {
     console.log(`[ExpressionVisitor.visitUnaryExpression] Processing unary expression: ${node.text.substring(0, 50)}`);
 
-    // Check if this is a unary expression with a single character operator
-    if (node.text.length >= 2 && (node.text[0] === '-' || node.text[0] === '!')) {
-      const operator = node.text[0] as ast.UnaryOperator;
-      const operandText = node.text.substring(1);
-
-      // Create a simple expression node for the operand
-      let operand: ast.ExpressionNode | null = null;
-
-      if (operator === '-' && !isNaN(parseFloat(operandText))) {
-        // Handle numeric literals
-        operand = {
-          type: 'expression',
-          expressionType: 'literal',
-          value: parseFloat(operandText),
-          location: {
-            start: {
-              line: node.startPosition.row,
-              column: node.startPosition.column + 1,
-              offset: node.startIndex
-            },
-            end: {
-              line: node.endPosition.row,
-              column: node.endPosition.column,
-              offset: node.endIndex
-            }
-          }
-        };
-      } else if (operator === '!' && (operandText === 'true' || operandText === 'false')) {
-        // Handle boolean literals
-        operand = {
-          type: 'expression',
-          expressionType: 'literal',
-          value: operandText === 'true',
-          location: {
-            start: {
-              line: node.startPosition.row,
-              column: node.startPosition.column + 1,
-              offset: node.startIndex
-            },
-            end: {
-              line: node.endPosition.row,
-              column: node.endPosition.column,
-              offset: node.endIndex
-            }
-          }
-        };
-      } else {
-        // Try to find the operand node
-        for (let i = 0; i < node.childCount; i++) {
-          const child = node.child(i);
-          if (!child) continue;
-
-          if (child.text === operandText) {
-            operand = this.createExpressionNode(child);
-            break;
-          }
-        }
-
-        // If we couldn't find the operand node, try to create one from the text
-        if (!operand) {
-          if (operandText === 'true' || operandText === 'false') {
-            operand = {
-              type: 'expression',
-              expressionType: 'literal',
-              value: operandText === 'true',
-              location: {
-                start: {
-                  line: node.startPosition.row,
-                  column: node.startPosition.column + 1,
-                  offset: node.startIndex
-                },
-                end: {
-                  line: node.endPosition.row,
-                  column: node.endPosition.column,
-                  offset: node.endIndex
-                }
-              }
-            };
-          } else if (!isNaN(parseFloat(operandText))) {
-            operand = {
-              type: 'expression',
-              expressionType: 'literal',
-              value: parseFloat(operandText),
-              location: {
-                start: {
-                  line: node.startPosition.row,
-                  column: node.startPosition.column + 1,
-                  offset: node.startIndex
-                },
-                end: {
-                  line: node.endPosition.row,
-                  column: node.endPosition.column,
-                  offset: node.endIndex
-                }
-              }
-            };
-          } else {
-            operand = {
-              type: 'expression',
-              expressionType: 'variable',
-              name: operandText,
-              location: {
-                start: {
-                  line: node.startPosition.row,
-                  column: node.startPosition.column + 1,
-                  offset: node.startIndex
-                },
-                end: {
-                  line: node.endPosition.row,
-                  column: node.endPosition.column,
-                  offset: node.endIndex
-                }
-              }
-            };
-          }
-        }
-      }
-
-      if (!operand) {
-        console.log(`[ExpressionVisitor.visitUnaryExpression] Failed to create operand expression`);
-        return null;
-      }
-
-      return {
-        type: 'expression',
-        expressionType: 'unary',
-        operator,
-        operand,
-        location: getLocation(node)
-      };
-    }
-
-    // Extract operator
-    const operatorNode = node.childForFieldName('operator');
-    if (!operatorNode) {
-      console.log(`[ExpressionVisitor.visitUnaryExpression] No operator found`);
-      return null;
-    }
-
-    const operator = operatorNode.text as ast.UnaryOperator;
-
-    // Extract operand
-    const operandNode = node.childForFieldName('operand');
-    if (!operandNode) {
-      console.log(`[ExpressionVisitor.visitUnaryExpression] No operand found`);
-      return null;
-    }
-
-    // Create a simple expression node for the operand
-    const operand = this.createExpressionNode(operandNode);
-    if (!operand) {
-      console.log(`[ExpressionVisitor.visitUnaryExpression] Failed to create operand expression`);
-      return null;
-    }
-
-    return {
-      type: 'expression',
-      expressionType: 'unary',
-      operator,
-      operand,
-      location: getLocation(node)
-    } as ast.UnaryExpressionNode;
+    // Delegate to the unary expression visitor
+    return this.unaryExpressionVisitor.visitUnaryExpression(node);
   }
 
   /**
@@ -440,7 +251,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
    */
   visitLogicalOrExpression(node: TSNode): ast.BinaryExpressionNode | null {
     console.log(`[ExpressionVisitor.visitLogicalOrExpression] Processing logical OR expression: ${node.text.substring(0, 50)}`);
-    return this.visitBinaryExpression(node);
+    return this.binaryExpressionVisitor.visitLogicalOrExpression(node);
   }
 
   /**
@@ -450,7 +261,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
    */
   visitLogicalAndExpression(node: TSNode): ast.BinaryExpressionNode | null {
     console.log(`[ExpressionVisitor.visitLogicalAndExpression] Processing logical AND expression: ${node.text.substring(0, 50)}`);
-    return this.visitBinaryExpression(node);
+    return this.binaryExpressionVisitor.visitLogicalAndExpression(node);
   }
 
   /**
@@ -460,7 +271,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
    */
   visitEqualityExpression(node: TSNode): ast.BinaryExpressionNode | null {
     console.log(`[ExpressionVisitor.visitEqualityExpression] Processing equality expression: ${node.text.substring(0, 50)}`);
-    return this.visitBinaryExpression(node);
+    return this.binaryExpressionVisitor.visitEqualityExpression(node);
   }
 
   /**
@@ -470,7 +281,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
    */
   visitRelationalExpression(node: TSNode): ast.BinaryExpressionNode | null {
     console.log(`[ExpressionVisitor.visitRelationalExpression] Processing relational expression: ${node.text.substring(0, 50)}`);
-    return this.visitBinaryExpression(node);
+    return this.binaryExpressionVisitor.visitRelationalExpression(node);
   }
 
   /**
@@ -480,7 +291,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
    */
   visitAdditiveExpression(node: TSNode): ast.BinaryExpressionNode | null {
     console.log(`[ExpressionVisitor.visitAdditiveExpression] Processing additive expression: ${node.text.substring(0, 50)}`);
-    return this.visitBinaryExpression(node);
+    return this.binaryExpressionVisitor.visitAdditiveExpression(node);
   }
 
   /**
@@ -490,7 +301,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
    */
   visitMultiplicativeExpression(node: TSNode): ast.BinaryExpressionNode | null {
     console.log(`[ExpressionVisitor.visitMultiplicativeExpression] Processing multiplicative expression: ${node.text.substring(0, 50)}`);
-    return this.visitBinaryExpression(node);
+    return this.binaryExpressionVisitor.visitMultiplicativeExpression(node);
   }
 
   /**
@@ -1588,12 +1399,12 @@ export class ExpressionVisitor extends BaseASTVisitor {
     // Check for specific expression types
     const binaryExpr = findDescendantOfType(node, 'binary_expression');
     if (binaryExpr) {
-      return this.visitBinaryExpression(binaryExpr);
+      return this.binaryExpressionVisitor.visitBinaryExpression(binaryExpr);
     }
 
     const unaryExpr = findDescendantOfType(node, 'unary_expression');
     if (unaryExpr) {
-      return this.visitUnaryExpression(unaryExpr);
+      return this.unaryExpressionVisitor.visitUnaryExpression(unaryExpr);
     }
 
     const conditionalExpr = findDescendantOfType(node, 'conditional_expression');

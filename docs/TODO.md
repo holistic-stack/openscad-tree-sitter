@@ -10,10 +10,12 @@
   - [x] Create specialized visitors for different expression types
   - [x] Implement FunctionCallVisitor to handle function calls in expressions
   - [x] Update ExpressionVisitor to use FunctionCallVisitor
-  - [ ] Implement BinaryExpressionVisitor to handle binary operations
-  - [ ] Enhance visitBinaryExpression to handle all binary operators with proper precedence
-  - [ ] Implement UnaryExpressionVisitor to handle unary operations
-  - [ ] Improve visitUnaryExpression to handle all unary operators
+  - [x] Implement BinaryExpressionVisitor to handle binary operations
+  - [x] Enhance visitBinaryExpression to handle all binary operators with proper precedence
+  - [x] Implement UnaryExpressionVisitor to handle unary operations
+  - [x] Improve visitUnaryExpression to handle all unary operators
+  - [ ] Implement ConditionalExpressionVisitor to handle conditional expressions
+  - [ ] Enhance visitConditionalExpression to use ConditionalExpressionVisitor
   - [ ] Add support for nested expressions with different operators
   - [ ] Implement proper handling of parenthesized expressions
   - [ ] Add comprehensive tests with real CST nodes
@@ -22,14 +24,18 @@
 - **Assignee**: TBD
 - **Estimated Time**: 8 hours
 - **Implementation Details**:
-  - The current ExpressionVisitor implementation relies heavily on string manipulation
-  - Need to refactor to use proper CST traversal with node.childForFieldName and node.child methods
-  - Binary operations should handle: +, -, *, /, %, ==, !=, <, <=, >, >=, &&, ||
-  - Unary operations should handle: +, -, !
-  - Function calls should extract function name and arguments properly
+  - ✅ Binary operations now handle: +, -, *, /, %, ==, !=, <, <=, >, >=, &&, ||
+  - ✅ Unary operations now handle: +, -, !
+  - ✅ Function calls now extract function name and arguments properly
+  - The current visitConditionalExpression implementation still relies on string manipulation
+  - Need to implement ConditionalExpressionVisitor following the same pattern as other expression visitors
+  - Create conditional-expression-visitor.ts in the expression-visitor directory
+  - Add ConditionalExpressionVisitor to ExpressionVisitor constructor
+  - Update visitConditionalExpression to delegate to ConditionalExpressionVisitor
+  - Implement proper handling of parenthesized expressions
   - Tests should use real OpenscadParser instances and CST nodes
   - Use `pnpm test:parser` to run tests for the parser package
-  - Use `nx test openscad-parser --testFile=src/lib/expression/expression-visitor.test.ts` to run specific test files
+  - Use `nx test openscad-parser --testFile=src/lib/openscad-parser/ast/visitors/expression-visitor/conditional-expression-visitor.test.ts` to run specific test files
 
 ### 2. Improve Error Handling and Reporting
 - **Goal**: Enhance error messages and recovery mechanisms

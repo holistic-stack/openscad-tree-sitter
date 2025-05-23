@@ -115,14 +115,25 @@ describe('ExpressionVisitor', () => {
         endPosition: { row: 0, column: 5 },
         childForFieldName: (name: string) => {
           if (name === 'operator') {
-            return { text: '>' };
+            return { text: '>', type: 'greater' };
           } else if (name === 'left') {
-            return { text: 'x' };
+            return { text: 'x', type: 'identifier' };
           } else if (name === 'right') {
-            return { text: '5' };
+            return { text: '5', type: 'number' };
           }
           return null;
-        }
+        },
+        child: (index: number) => {
+          if (index === 0) {
+            return { text: 'x', type: 'identifier' };
+          } else if (index === 1) {
+            return { text: '>', type: 'greater' };
+          } else if (index === 2) {
+            return { text: '5', type: 'number' };
+          }
+          return null;
+        },
+        childCount: 3
       } as unknown as TSNode;
 
       const result = visitor.visitBinaryExpression(mockBinaryExprNode);
@@ -174,14 +185,25 @@ describe('ExpressionVisitor', () => {
         endPosition: { row: 0, column: 14 },
         childForFieldName: (name: string) => {
           if (name === 'operator') {
-            return { text: '||' };
+            return { text: '||', type: 'pipe_pipe' };
           } else if (name === 'left') {
-            return { text: 'true' };
+            return { text: 'true', type: 'true' };
           } else if (name === 'right') {
-            return { text: 'false' };
+            return { text: 'false', type: 'false' };
           }
           return null;
-        }
+        },
+        child: (index: number) => {
+          if (index === 0) {
+            return { text: 'true', type: 'true' };
+          } else if (index === 1) {
+            return { text: '||', type: 'pipe_pipe' };
+          } else if (index === 2) {
+            return { text: 'false', type: 'false' };
+          }
+          return null;
+        },
+        childCount: 3
       } as unknown as TSNode;
 
       const result = visitor.visitBinaryExpression(mockBinaryExprNode);
@@ -223,11 +245,22 @@ describe('ExpressionVisitor', () => {
         text: '-5',
         startPosition: { row: 0, column: 0 },
         endPosition: { row: 0, column: 2 },
+        startIndex: 0,
+        endIndex: 2,
+        childCount: 2,
+        child: (index: number) => {
+          if (index === 0) {
+            return { text: '-', type: 'minus' } as unknown as TSNode;
+          } else if (index === 1) {
+            return { text: '5', type: 'number' } as unknown as TSNode;
+          }
+          return null;
+        },
         childForFieldName: (name: string) => {
           if (name === 'operator') {
-            return { text: '-' };
+            return { text: '-', type: 'minus' } as unknown as TSNode;
           } else if (name === 'operand') {
-            return { text: '5' };
+            return { text: '5', type: 'number' } as unknown as TSNode;
           }
           return null;
         }
@@ -268,11 +301,22 @@ describe('ExpressionVisitor', () => {
         text: '!true',
         startPosition: { row: 0, column: 0 },
         endPosition: { row: 0, column: 5 },
+        startIndex: 0,
+        endIndex: 5,
+        childCount: 2,
+        child: (index: number) => {
+          if (index === 0) {
+            return { text: '!', type: 'bang' } as unknown as TSNode;
+          } else if (index === 1) {
+            return { text: 'true', type: 'true' } as unknown as TSNode;
+          }
+          return null;
+        },
         childForFieldName: (name: string) => {
           if (name === 'operator') {
-            return { text: '!' };
+            return { text: '!', type: 'bang' } as unknown as TSNode;
           } else if (name === 'operand') {
-            return { text: 'true' };
+            return { text: 'true', type: 'true' } as unknown as TSNode;
           }
           return null;
         }

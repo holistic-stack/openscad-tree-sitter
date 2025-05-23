@@ -1,5 +1,80 @@
 # OpenSCAD Tree-sitter Parser - Progress Log
 
+## 2025-05-28: Implemented Unary Expression Visitor
+
+### Completed Tasks
+
+1. **Expression Visitor Enhancement**:
+   - Implemented UnaryExpressionVisitor for handling unary operations in expressions
+   - Created unary-expression-visitor.ts to extract operators and operands from CST nodes
+   - Updated ExpressionVisitor to use UnaryExpressionVisitor for unary operations
+   - Added comprehensive tests with real CST nodes (no mocks)
+   - Ensured proper handling of different unary operators (-, !, +)
+   - Fixed integration tests to handle nodes without childForFieldName method
+   - Updated visitExpression to use UnaryExpressionVisitor for unary expressions
+
+### Key Decisions
+
+1. **Visitor Specialization Strategy**:
+   - Created a dedicated visitor for unary expressions to improve maintainability
+   - Used composition in the ExpressionVisitor to delegate to UnaryExpressionVisitor
+   - Maintained backward compatibility with existing tests
+   - Added extensive logging for better debugging and traceability
+
+2. **Node Structure Handling**:
+   - Implemented robust node traversal to handle different unary expression node structures
+   - Added fallback mechanisms to handle different node structures in the CST
+   - Used field names when available and child indices as fallback
+   - Added special handling for nodes without childForFieldName method
+   - Implemented text-based fallback for simple unary expressions
+   - Added type checking for node methods to ensure robustness
+
+3. **Testing Approach**:
+   - Created comprehensive tests for various unary operation types
+   - Used real OpenscadParser instances in tests for better integration testing
+   - Added tests for different unary operators and operand types
+   - Ensured backward compatibility with existing tests
+   - Fixed mock nodes in tests to include necessary properties and methods
+
+### Next Steps
+
+1. **Conditional Expression Visitor Implementation**:
+   - Create ConditionalExpressionVisitor class following the same pattern
+   - Update ExpressionVisitor to use ConditionalExpressionVisitor
+   - Add comprehensive tests for conditional expressions
+   - Implement proper handling of nested conditional expressions
+
+## 2025-05-27: Implemented Binary Expression Visitor
+
+### Completed Tasks
+
+1. **Expression Visitor Enhancement**:
+   - Implemented BinaryExpressionVisitor for handling binary operations in expressions
+   - Created binary-expression-visitor.ts to extract operators and operands from CST nodes
+   - Updated ExpressionVisitor to use BinaryExpressionVisitor for binary operations
+   - Added comprehensive tests with real CST nodes (no mocks)
+   - Ensured proper handling of different binary operators (+, -, *, /, %, ==, !=, <, <=, >, >=, &&, ||)
+
+### Key Decisions
+
+1. **Visitor Specialization Strategy**:
+   - Created a dedicated visitor for binary expressions to improve maintainability
+   - Used composition in the ExpressionVisitor to delegate to BinaryExpressionVisitor
+   - Maintained backward compatibility with existing tests
+   - Added extensive logging for better debugging and traceability
+
+2. **Node Structure Handling**:
+   - Implemented robust node traversal to handle different binary expression node structures
+   - Added fallback mechanisms to handle different node structures in the CST
+   - Used field names when available and child indices as fallback
+   - Created utility functions for common node traversal patterns
+
+3. **Testing Approach**:
+   - Created comprehensive tests for various binary operation types
+   - Used real OpenscadParser instances in tests for better integration testing
+   - Added tests for different binary operators and operand types
+   - Ensured backward compatibility with existing tests
+
 ## 2025-05-26: Migrated to Nx Monorepo
 
 ### Completed Tasks
