@@ -8,7 +8,7 @@
   "scripts": {
     "build": "nx exec -- tree-sitter generate && nx exec -- tree-sitter build --wasm",
     "build:node": "node-gyp rebuild",
-    "install": "node-gyp-build",
+    "install": "tree-sitter init && tree-sitter generate && node-gyp-build",
     "prebuildify": "prebuildify --napi --strip",
     "generate": "tree-sitter generate",
     "test": "nx exec -- tree-sitter test",
