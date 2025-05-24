@@ -49,7 +49,7 @@ import {
   Logger,
   // Assuming ErrorHandlerOptions and LoggerOptions might be exported from here or defined inline
   // For now, let's assume they are part of the options object structure directly
-} from '../handler/index';
+} from '@/lib';
 import { ChangeTracker } from './ast/changes/change-tracker'; // Change is not used
 
 /**
