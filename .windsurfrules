@@ -1,6 +1,18 @@
 # GUIDELINES: OpenSCAD Tree-Sitter Parser Monorepo
 
 ## IMPORTANT AND NEVER SKIP:
+- ALWAYS use desktop commander mcp to:
+
+    - execute_command: Execute a terminal command with timeout. Command will continue running in background if it doesn't complete within timeout.
+        - IMPORTANT: `Set-Location 'c:\\Users\\luciano\\git\\openscad-tree-sitter'` before execute_command to change the current directory to the project root.
+    - read_output: Read new output from a running terminal session.
+    - force_terminate: Force terminate a running terminal session when timeout is reached or when command is not responding.
+    - search_code: Search for text/code patterns within file contents using ripgrep. Use this instead of 'execute_command' with grep/find for searching code content. Fast and powerful search similar to VS Code search functionality.
+    - search_files: Finds files by name using a case-insensitive substring matching. Use this instead of 'execute_command' with find/dir/ls for locating files. Searches through all subdirectories from the starting path. Has a default timeout of 30 seconds which can be customized using the timeoutMs parameter.
+    - list_directory: Get a detailed listing of all files and directories in a specified path. Use this instead of 'execute_command' with ls/dir commands. Results distinguish between files and directories with [FILE] and [DIR] prefixes.
+    - read_multiple_files: Read the contents of multiple files simultaneously. Each file's content is returned with its path as a reference. Handles text files normally and renders images as viewable content. Recognized image types: PNG, JPEG, GIF, WebP. Failed reads for individual files won't stop the entire operation.
+
+
 - ALWAYS START WITH Planning and Refining phases;
 - ALWAYS FOLLOW [Development Workflow](#development-workflow), [Documentation Best Practices](#documentation-best-practices) and [Mandatory Workflows](#mandatory-workflows);
 - ALWAYS FOLLOW Context Management documents docs/current-context.md, docs/TODO.md and docs/PROGRESS.md;
@@ -328,7 +340,7 @@ describe("OpenSCADParser", () => {
 
 ## Project Context
 
-This project aims to create a robust parser for OpenSCAD files using Tree-sitter, enabling rich analysis and manipulation of OpenSCAD code. 
+This project aims to create a robust parser for OpenSCAD files using Tree-sitter, enabling rich analysis and manipulation of OpenSCAD code.
 
 ### Current Focus
 

@@ -15,9 +15,12 @@ The OpenSCAD Tree-sitter Parser project is an Nx monorepo with PNPM workspaces t
 - Cleaned up test files to use real parser instances instead of mocks
 
 ### Current Focus
-- Enhancing VariableVisitor to handle complex variable assignments
-- Improving error handling for invalid variable declarations
-- Adding support for mathematical expressions in variable assignments
+- **Actively Implementing `BinaryExpressionVisitor` and `UnaryExpressionVisitor`**: This is critical for supporting mathematical and logical expressions in variable assignments and other parts of the language. This involves:
+    - Defining AST nodes for binary and unary expressions.
+    - Handling operator precedence for arithmetic, logical, and comparison operators.
+    - Integrating these visitors into the main parsing flow.
+- Enhancing `VariableVisitor` to utilize these expression visitors for complex variable assignments.
+- Improving error handling for invalid variable declarations and expressions.
 
 ### Test Coverage
 - Special variable assignments ($fn, $fa, $fs)

@@ -430,11 +430,11 @@
   - [x] Create a centralized error handling system
   - [x] Implement detailed error messages for parsing failures
   - [x] Add context information to error messages (line numbers, code snippets)
-  - [x] Implement error recovery strategies for common syntax errors
+  - [x] Implemented error recovery strategies for common syntax errors
   - [x] Add error logging and telemetry
-  - [x] Create error types for different kinds of parsing errors
-  - [x] Add error handling for expression parsing
-  - [x] Implement graceful degradation for unparseable expressions
+  - [x] Created error types for different kinds of parsing errors
+  - [x] Added error handling for expression parsing
+  - [x] Implemented graceful degradation for unparseable expressions
 - **Dependencies**: None
 - **Priority**: Medium
 - **Assignee**: TBD
@@ -556,7 +556,7 @@
   - [x] Implemented detailed error messages for parsing failures
   - [x] Added context information to error messages (line numbers, code snippets)
   - [x] Implemented error recovery strategies for common syntax errors
-  - [x] Added error logging and telemetry
+  - [x] Add error logging and telemetry
   - [x] Created error types for different kinds of parsing errors
   - [x] Added error handling for expression parsing
   - [x] Implemented graceful degradation for unparseable expressions

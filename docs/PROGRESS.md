@@ -526,9 +526,7 @@ The core error handling system is fully functional and production-ready.
    - Implemented robust node traversal to handle different unary expression node structures
    - Added fallback mechanisms to handle different node structures in the CST
    - Used field names when available and child indices as fallback
-   - Added special handling for nodes without childForFieldName method
-   - Implemented text-based fallback for simple unary expressions
-   - Added type checking for node methods to ensure robustness
+   - Created utility functions for common node traversal patterns
 
 3. **Testing Approach**:
    - Created comprehensive tests for various unary operation types
@@ -854,3 +852,19 @@ The core error handling system is fully functional and production-ready.
    - Adopted a Test-Driven Development approach
    - Created tests for both valid and invalid inputs
    - Focused on edge cases and parameter variations
+
+## 2025-05-24: Implement BinaryExpressionVisitor and UnaryExpressionVisitor
+
+### Implement `BinaryExpressionVisitor` and `UnaryExpressionVisitor` (P0)
+- **Status**: In Progress
+- **Priority**: P0 - CRITICAL
+- **Estimate**: 6-8 hours
+- **Description**: Create visitor implementations for binary and unary expressions. Ensure correct operator precedence and AST node generation. This is critical for parsing complex expressions in variable assignments, function arguments, and control structures.
+- **Subtasks**:
+  - [x] Define `BinaryExpressionNode` and `UnaryExpressionNode` in `ast-types.ts` (Done: 2025-05-24)
+  - [ ] Implement `BinaryExpressionVisitor` to handle arithmetic, logical, and comparison operators
+  - [ ] Implement `UnaryExpressionVisitor` to handle logical NOT and numeric negation
+  - [ ] Ensure correct operator precedence is maintained (AST must reflect CST's precedence handling)
+  - [ ] Write comprehensive unit tests for various expression types and precedences
+  - [ ] Integrate visitors into the main `OpenscadParser`
+- **Dependencies**: `grammar.js` (for CST node structure), `ast-types.ts`
