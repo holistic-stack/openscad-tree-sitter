@@ -78,35 +78,67 @@ This is a monorepo containing a Tree-sitter grammar and parser for the OpenSCAD 
 
 ## Build and Development
 
-### Common Commands
-```bash
-# Build everything
-pnpm build
+This project uses PNPM and Nx for managing builds, tests, and development workflows. Key scripts are defined in the root `package.json`.
 
-# Run tests
-pnpm test
+### Common Monorepo Commands
 
-# Development mode
-pnpm dev
+These commands operate on all packages:
 
-# Lint code
-pnpm lint
-
-# Type check
-pnpm check
-```
+- **`pnpm build`**: Build all packages.
+- **`pnpm test`**: Run tests for all packages.
+- **`pnpm lint`**: Lint all packages.
+- **`pnpm lint:fix`**: Attempt to automatically fix lint issues in all packages.
+- **`pnpm check`**: Perform type checking for all packages.
+- **`pnpm dev`**: Run all packages in development/watch mode.
+- **`pnpm test:watch`**: Run tests in watch mode for all packages.
+- **`pnpm test:coverage`**: Generate test coverage reports for all packages.
 
 ### Package-Specific Commands
-```bash
-# Build only grammar
-pnpm build:grammar
 
-# Build only parser
-pnpm build:parser
+These commands target individual packages.
 
-# Test only parser
-pnpm test:parser
-```
+**Build:**
+- **`pnpm build:grammar`**: Build `tree-sitter-openscad`.
+- **`pnpm build:parser`**: Build `openscad-parser`.
+- **`pnpm build:editor`**: Build `openscad-editor`.
+- **`pnpm build:demo`**: Build `openscad-demo`.
+
+**Test:**
+- **`pnpm test:grammar`**: Test `tree-sitter-openscad`.
+- **`pnpm test:parser`**: Test `openscad-parser`.
+- **`pnpm test:editor`**: Test `openscad-editor`.
+- **`pnpm test:demo`**: Test `openscad-demo`.
+
+**Test Specific File or Pattern (Vitest):**
+When needing to test a specific file or pattern in a Vitest-based package (`openscad-parser`, `openscad-editor`, `openscad-demo`), use the following pattern. The path should be relative to the package's root.
+- **`pnpm test:parser:file --testFile <path/to/your.test.ts>`**: Test a specific file/pattern in `openscad-parser`.
+  - *Example (single file)*: `pnpm test:parser:file --testFile src/lib/some-module.test.ts`
+  - *Example (directory)*: `pnpm test:parser:file --testFile src/lib/ast-nodes/`
+  - *Example (pattern)*: `pnpm test:parser:file --testFile "**/my-feature.*.test.ts"`
+- **`pnpm test:editor:file --testFile <path/to/your.test.ts>`**: Test a specific file/pattern in `openscad-editor`.
+- **`pnpm test:demo:file --testFile <path/to/your.test.ts>`**: Test a specific file/pattern in `openscad-demo`.
+
+**Lint:**
+- **`pnpm lint:grammar`**: Lint `tree-sitter-openscad`.
+- **`pnpm lint:parser`**: Lint `openscad-parser`.
+- **`pnpm lint:editor`**: Lint `openscad-editor`.
+- **`pnpm lint:demo`**: Lint `openscad-demo`.
+
+**Development/Watch Mode:**
+- **`pnpm dev:parser`**: Run `openscad-parser` in dev mode.
+- **`pnpm dev:editor`**: Run `openscad-editor` in dev mode.
+- **`pnpm dev:demo`**: Run `openscad-demo` in dev mode (starts the demo app).
+
+**Type Check:**
+- **`pnpm check:parser`**: Type check `openscad-parser`. (Note: `pnpm check` runs typecheck for all applicable packages).
+
+### Utility Commands
+- **`pnpm serve:demo`**: Serve the `openscad-demo` application.
+- **`pnpm graph`**: View project dependency graph using Nx.
+- **`pnpm clean`**: Clean build artifacts and `node_modules`.
+- **`pnpm reset`**: Clean and reinstall dependencies (`pnpm clean && pnpm install`).
+
+When suggesting commands, prefer the `pnpm` script aliases. If a specific file needs to be tested, use the appropriate `:file` suffixed script, e.g., `pnpm test:parser:file --testFile path/to/file.test.ts`. Remember that the `--testFile` path is relative to the specific package's root directory.
 
 ## OpenSCAD Language Features
 
@@ -236,6 +268,7 @@ pnpm test:parser
 
 ### Testing with Vitest
 do not use mocks for openscadParser, use real parser:
+
 ```
 
 describe("OpenSCADParser", () => {

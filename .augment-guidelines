@@ -201,141 +201,159 @@ packages/
 
 ### Test Commands
 
-```bash
-# Run all tests
-pnpm test
+The primary way to run tests is through the PNPM scripts defined in the root `package.json`:
 
-# Run tests for specific packages
-pnpm test:grammar
-pnpm test:parser
+- **`pnpm test`**: Runs all tests across all packages in the monorepo. This is the most comprehensive way to ensure everything is working.
+  ```bash
+  pnpm test
+  ```
 
-# Run tests with watch mode
-pnpm test:watch
+- **Package-Specific Tests**: To run tests for a single package:
+  ```bash
+  pnpm test:grammar   # For tree-sitter-openscad
+  pnpm test:parser    # For openscad-parser
+  pnpm test:editor    # For openscad-editor
+  pnpm test:demo      # For openscad-demo
+  ```
+  *Example*: `pnpm test:parser`
 
-# Run tests with coverage
-pnpm test:coverage
+- **Testing Specific Files or Patterns (for Vitest-based packages)**:
+  Use the `:file` suffixed scripts for `openscad-parser`, `openscad-editor`, and `openscad-demo`. The path provided to `--testFile` is relative to the package's root directory.
+  ```bash
+  # Test a single file in openscad-parser
+  pnpm test:parser:file --testFile src/lib/ast-utils.test.ts
 
-# Run specific test files
-nx test openscad-parser --testFile=docs/feature/feature.test.ts
-```
+  # Test all files in a specific directory within openscad-editor
+  pnpm test:editor:file --testFile src/components/specific-ui/
 
-#### Testing Phase
+  # Test files matching a pattern in openscad-demo
+  pnpm test:demo:file --testFile "**/integration.*.test.tsx"
+  ```
 
-1. **Unit Testing**: Test individual components in isolation (aim for >80% coverage)
-2. **Integration Testing**: Test component interactions and API contracts
-3. **System Testing**: Test end-to-end workflows and external integrations
-4. **Performance Testing**: Measure performance and identify bottlenecks
-5. **Bug Reporting**: Document issues with steps to reproduce
-6. **Bug Fixing**: Write failing test, fix bug, verify solution
-7. **Regression Testing**: Ensure fixes don't break existing functionality
-8. **Final Validation**: Verify implementation meets all requirements
+- **Watch Mode**: For continuous testing during development:
+  ```bash
+  pnpm test:watch # Runs tests for all packages in watch mode
+  ```
+  You can also run watch mode for specific packages if their `project.json` defines a `test:watch` target (e.g., `nx test:watch openscad-parser`).
+
+- **Coverage Reports**: To generate test coverage:
+  ```bash
+  pnpm test:coverage # Generates coverage for all packages
+  ```
+
+Refer to the "Script Commands" section for a more exhaustive list of available scripts and their usage.
 
 ## Script Commands
 
-This project uses Nx for task orchestration and PNPM for package management. The following scripts are available in the root `package.json`:
+This project uses PNPM and Nx for managing builds, tests, and development workflows. Key scripts are defined in the root `package.json`.
 
-### Build Commands
+### Common Monorepo Commands
 
-```bash
-# Build all packages
-pnpm build
+These commands operate on all packages within the monorepo:
 
-# Build specific packages
-pnpm build:grammar  # Build the tree-sitter grammar
-pnpm build:parser   # Build the TypeScript parser
+- **`pnpm build`**: Builds all packages.
+  - *When to use*: After pulling changes, before committing, or when you need a fresh build of the entire workspace.
+  - *Example*: `pnpm build`
 
-# Development mode (watch mode)
-pnpm dev
-pnpm dev:parser     # Development mode for parser only
-```
+- **`pnpm test`**: Runs tests for all packages.
+  - *When to use*: Before committing changes, during CI, or to ensure all packages are functioning correctly.
+  - *Example*: `pnpm test`
 
-### Test Commands
+- **`pnpm lint`**: Lints all packages.
+  - *When to use*: To check for code style and quality issues across the entire codebase.
+  - *Example*: `pnpm lint`
 
-```bash
-# Run all tests
-pnpm test
+- **`pnpm lint:fix`**: Attempts to automatically fix linting issues in all packages.
+  - *When to use*: After running `pnpm lint` to automatically correct any fixable issues.
+  - *Example*: `pnpm lint:fix`
 
-# Run tests for specific packages
-pnpm test:grammar   # Test the tree-sitter grammar
-pnpm test:parser    # Test the TypeScript parser
+- **`pnpm check`**: Performs type checking for all applicable packages (e.g., TypeScript packages).
+  - *When to use*: To ensure type safety across the TypeScript projects.
+  - *Example*: `pnpm check`
 
-# Run tests with watch mode
-pnpm test:watch
+- **`pnpm dev`**: Runs all packages in development/watch mode.
+  - *When to use*: When actively developing multiple packages simultaneously and you want them to rebuild on changes.
+  - *Example*: `pnpm dev`
 
-# Run tests with coverage
-pnpm test:coverage
-```
+- **`pnpm test:watch`**: Runs tests in watch mode for all packages, re-running tests when files change.
+  - *When to use*: During active development and TDD to get immediate feedback on test results.
+  - *Example*: `pnpm test:watch`
 
-### Lint Commands
+- **`pnpm test:coverage`**: Generates test coverage reports for all packages.
+  - *When to use*: To assess the extent of test coverage and identify untested code paths.
+  - *Example*: `pnpm test:coverage`
 
-```bash
-# Run linting
-pnpm lint
+### Package-Specific Commands
 
-# Fix linting issues
-pnpm lint:fix
+These commands target individual packages. Replace `<package-name>` with the actual package name (e.g., `tree-sitter-openscad`, `openscad-parser`, `openscad-editor`, `openscad-demo`).
 
-# Type checking
-pnpm typecheck
-```
+**Build:**
+- **`pnpm build:grammar`**: Builds the `tree-sitter-openscad` grammar package.
+- **`pnpm build:parser`**: Builds the `openscad-parser` TypeScript package.
+- **`pnpm build:editor`**: Builds the `openscad-editor` React component package.
+- **`pnpm build:demo`**: Builds the `openscad-demo` application.
+  - *When to use*: When you only need to build a specific package.
+  - *Example*: `pnpm build:parser`
+
+**Test:**
+- **`pnpm test:grammar`**: Tests `tree-sitter-openscad`.
+- **`pnpm test:parser`**: Tests `openscad-parser`.
+- **`pnpm test:editor`**: Tests `openscad-editor`.
+- **`pnpm test:demo`**: Tests `openscad-demo`.
+  - *When to use*: When you want to run tests for a single package.
+  - *Example*: `pnpm test:editor`
+
+**Test Specific File or Pattern:**
+For packages using Vitest (`openscad-parser`, `openscad-editor`, `openscad-demo`), you can test specific files or patterns.
+- **`pnpm test:parser:file --testFile <path/to/file.test.ts>`**: Tests a specific file in `openscad-parser`.
+- **`pnpm test:editor:file --testFile <path/to/file.test.ts>`**: Tests a specific file in `openscad-editor`.
+- **`pnpm test:demo:file --testFile <path/to/file.test.ts>`**: Tests a specific file in `openscad-demo`.
+  - *Important*: The `<path/to/file.test.ts>` should be relative to the root of the *specific package*.
+  - *When to use*: When focusing on a particular module or test suite within a package.
+  - *Example*: `pnpm test:parser:file --testFile src/lib/some-module.test.ts`
+  - *Example (testing all files in a directory)*: `pnpm test:parser:file --testFile src/lib/ast-nodes/`
+  - *Example (testing files matching a pattern)*: `pnpm test:parser:file --testFile "**/my-feature.*.test.ts"`
+
+**Lint:**
+- **`pnpm lint:grammar`**: Lints `tree-sitter-openscad`.
+- **`pnpm lint:parser`**: Lints `openscad-parser`.
+- **`pnpm lint:editor`**: Lints `openscad-editor`.
+- **`pnpm lint:demo`**: Lints `openscad-demo`.
+  - *When to use*: To check code style for a specific package.
+  - *Example*: `pnpm lint:parser`
+
+**Development/Watch Mode:**
+- **`pnpm dev:parser`**: Runs `openscad-parser` in development/watch mode.
+- **`pnpm dev:editor`**: Runs `openscad-editor` in development/watch mode.
+- **`pnpm dev:demo`**: Runs `openscad-demo` in development/watch mode (starts the demo app).
+  - *When to use*: When actively developing a specific package and want it to rebuild/rerun on changes.
+  - *Example*: `pnpm dev:demo`
+
+**Type Check:**
+- **`pnpm check:parser`**: Performs type checking for `openscad-parser`.
+  - *When to use*: To ensure type safety in a specific TypeScript package.
+  - *Example*: `pnpm check:parser`
 
 ### Utility Commands
 
-```bash
-# View the project dependency graph
-pnpm graph
+- **`pnpm serve:demo`**: Builds and serves the `openscad-demo` application.
+  - *When to use*: To view the live demo application in a browser.
+  - *Example*: `pnpm serve:demo`
 
-# Parse OpenSCAD files with tree-sitter
-pnpm parse <file.scad>
+- **`pnpm graph`**: Opens a web interface to view the project's dependency graph using Nx.
+  - *When to use*: To understand the relationships and dependencies between packages.
+  - *Example*: `pnpm graph`
 
-# Open the tree-sitter playground
-pnpm playground
+- **`pnpm clean`**: Removes all `node_modules` directories and build artifacts (`dist` folders) from the monorepo.
+  - *When to use*: To perform a clean build or resolve caching issues.
+  - *Example*: `pnpm clean`
 
-# Clean up build artifacts and node_modules
-pnpm clean
+- **`pnpm reset`**: Runs `pnpm clean` and then reinstalls all dependencies using `pnpm install`.
+  - *When to use*: For a complete reset of the development environment.
+  - *Example*: `pnpm reset`
 
-# Reset the project (clean and reinstall)
-pnpm reset
-```
-
-### Nx Commands
-
-```bash
-# Run a specific target for a project
-nx <target> <project>
-# Example: nx build openscad-parser
-
-# Run a target for all projects
-nx run-many --target=<target> --all
-# Example: nx run-many --target=build --all
-
-# Run a target for specific projects
-nx run-many --target=<target> --projects=<project1>,<project2>
-# Example: nx run-many --target=test --projects=tree-sitter-openscad,openscad-parser
-```
-
-#### Documentation Phase
-
-1. Maintain these context documents throughout development:
-
-- **docs/PROGRESS.md**: Contains previous completed task information, key decisions, and implementation details
-- **docs/current-context.md**: Contains current task information, key decisions, and implementation details
-- **docs/TODO.md**: Lists all tasks/subtasks with pending status or in progress, links to documentation, dependencies, code samples, and priorities
-
-#### Code Review Phase
-
-1. **Prepare for Review**: Ensure tests pass and documentation is complete
-2. **Submit for Review**: Have another developer review the code
-3. **Address Feedback**: Make necessary changes based on feedback
-4. **Verify Changes**: Run tests and get final approval
-5. **Update Context Documents**: Document review results
-
-#### Delivering Phase
-
-- ALWAYS KEEP THE docs/PROGRESS.md update with completed tasks;
-- ALWAYS MOVE COMPLETED TASKS FROM `docs/TODO.md` TO PROGRESS.md, when move information remove verbose context and code samples;
-- ALWAYS UPDATE docs/TODO.md with new tasks and subtasks, must add context and code samples;
-- ALWAYS REMOVE UNNECESSARY INFORMATION AND OLD CONTEXT NOT NECESSARY FOR docs/TODO.md tasks and subtasks FROM docs/current-context.md;
+- **`pnpm parse`**: (Specific to `tree-sitter-openscad`) Likely used for debugging the grammar by parsing a file.
+- **`pnpm playground`**: (Specific to `tree-sitter-openscad`) Likely used for launching a Tree-sitter playground for the grammar.
 
 ## Coding Best Practices
 

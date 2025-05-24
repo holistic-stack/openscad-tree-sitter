@@ -5,6 +5,50 @@
   "projectType": "library",
   "tags": ["editor", "ui"],
   "targets": {
+    "build": {
+      "executor": "@nx/vite:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/packages/openscad-editor",
+        "main": "packages/openscad-editor/src/index.ts",
+        "tsConfig": "packages/openscad-editor/tsconfig.lib.json",
+        "assets": ["packages/openscad-editor/*.md"]
+      },
+      "configurations": {
+        "development": {
+          "mode": "development"
+        },
+        "production": {
+          "mode": "production"
+        }
+      }
+    },
+    "dev": {
+      "executor": "@nx/vite:dev-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "openscad-editor:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "openscad-editor:build:development",
+          "hmr": true
+        },
+        "production": {
+          "buildTarget": "openscad-editor:build:production",
+          "hmr": false
+        }
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{options.reportsDirectory}"],
+      "options": {
+        "passWithNoTests": true,
+        "reportsDirectory": "../../coverage/packages/openscad-editor"
+      }
+    },
     "lint": {
       "executor": "@nx/eslint:lint"
     },

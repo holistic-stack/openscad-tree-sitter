@@ -8,7 +8,7 @@
   "scripts": {
     "build": "nx run tree-sitter-openscad:build",
     "build:node": "nx run tree-sitter-openscad:build:node",
-    "install": "node-gyp-build",
+    "install": "tree-sitter init && tree-sitter generate && node-gyp-build",
     "prebuildify": "nx run tree-sitter-openscad:prebuildify",
     "test": "nx run tree-sitter-openscad:test",
     "parse": "nx run tree-sitter-openscad:parse",

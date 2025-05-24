@@ -9,6 +9,12 @@
       "require": "./index.js"
     }
   },
+  "scripts": {
+    "build": "nx build openscad-editor",
+    "dev": "nx dev openscad-editor",
+    "test": "nx test openscad-editor",
+    "lint": "nx lint openscad-editor"
+  },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
     "monaco-editor": "^0.52.2",
