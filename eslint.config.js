@@ -3,8 +3,12 @@
 
 module.exports = [
   {
-    // Ignore node_modules and dist directories
-    ignores: ['node_modules/**', 'dist/**'],
+    ignores: [
+      'node_modules/**',
+      'dist/**',
+      '**/vite.config.*.timestamp*',
+      '**/vitest.config.*.timestamp*',
+    ],
   },
 
   // Base configuration for all files
@@ -23,7 +27,7 @@ module.exports = [
     // Configure plugins
     plugins: {
       '@typescript-eslint': require('@typescript-eslint/eslint-plugin'),
-      'vitest': require('eslint-plugin-vitest'),
+      vitest: require('eslint-plugin-vitest'),
     },
     // Rules for all files - disabled TypeScript strict rules
     rules: {
@@ -45,5 +49,5 @@ module.exports = [
       'vitest/no-focused-tests': 'error',
       'vitest/valid-expect': 'off',
     },
-  }
+  },
 ];

@@ -1,0 +1,15 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "sourceMap": true,
+    "declaration": true,
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
+    "module": "NodeNext",
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@openscad/editor": ["packages/openscad-editor/src/index.ts"]
+    }
+  }
+}

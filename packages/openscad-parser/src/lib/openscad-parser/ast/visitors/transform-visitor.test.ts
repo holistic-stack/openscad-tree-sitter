@@ -209,14 +209,10 @@ describe('TransformVisitor', () => {
       console.log('Test Debug - params:', JSON.stringify(params, null, 2));
 
       // Force the right vector for this test specifically
-      const mockParams = [
+      const mockParams: ast.Parameter[] = [
         {
-          type: 'vector',
-          value: [
-            { type: 'number', value: '1' },
-            { type: 'number', value: '2' },
-            { type: 'number', value: '3' },
-          ],
+          name: undefined,
+          value: [1, 2, 3] as ast.Vector3D,
         },
       ];
 
@@ -224,8 +220,7 @@ describe('TransformVisitor', () => {
       const result = visitor.createASTNodeForFunction(
         transformCstNode,
         'translate',
-        mockParams,
-        []
+        mockParams
       ) as ast.TranslateNode | null;
 
       expect(result).not.toBeNull();
@@ -281,7 +276,6 @@ describe('TransformVisitor', () => {
       const result = visitor.createASTNodeForFunction(
         mockSphereCstNode,
         'sphere',
-        [],
         []
       ) as ast.SphereNode | null;
       expect(result?.type).toBe('sphere');

@@ -1,0 +1,17 @@
+{
+  "name": "@openscad/editor",
+  "version": "0.0.1",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./index.mjs",
+      "require": "./index.js"
+    }
+  },
+  "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
+    "monaco-editor": "^0.52.2",
+    "vite-plugin-monaco-editor": "^1.1.0"
+  }
+}

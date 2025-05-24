@@ -233,4 +233,27 @@ pnpm test:parser
 3. Test error recovery
 4. Validate with edge cases
 
+
+### Testing with Vitest
+do not use mocks for openscadParser, use real parser:
+```
+
+describe("OpenSCADParser", () => {
+  let parser: OpenscadParser;
+
+  beforeEach(async () => {
+    // Create a new parser instance before each test
+    parser = new OpenscadParser();
+
+    // Initialize the parser
+    await parser.init();
+  });
+
+  afterEach(() => {
+    // Clean up after each test
+    parser.dispose();
+  });
+});
+```
+
 This document should help GitHub Copilot understand the project structure, coding conventions, and best practices for contributing to the OpenSCAD Tree-sitter project.
