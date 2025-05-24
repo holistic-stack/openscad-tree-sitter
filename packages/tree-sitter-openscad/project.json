@@ -11,39 +11,59 @@
           "tree-sitter generate",
           "tree-sitter build --wasm"
         ],
-        "cwd": "packages/tree-sitter-openscad",
+        "cwd": "{projectRoot}",
         "parallel": false
       },
-      "outputs": ["packages/tree-sitter-openscad/src/parser.c", "packages/tree-sitter-openscad/src/grammar.json"]
+      "outputs": [
+        "{projectRoot}/src/parser.c",
+        "{projectRoot}/src/grammar.json",
+        "{projectRoot}/src/node-types.json",
+        "{projectRoot}/tree-sitter-openscad.wasm"
+      ]
+    },
+    "build:node": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node-gyp rebuild",
+        "cwd": "{projectRoot}"
+      },
+      "outputs": ["{projectRoot}/build"]
+    },
+    "prebuildify": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prebuildify --napi --strip",
+        "cwd": "{projectRoot}"
+      },
+      "outputs": ["{projectRoot}/prebuilds"]
     },
     "test": {
       "executor": "nx:run-commands",
       "options": {
         "command": "tree-sitter test",
-        "cwd": "packages/tree-sitter-openscad"
+        "cwd": "{projectRoot}"
       }
     },
     "parse": {
       "executor": "nx:run-commands",
       "options": {
         "command": "tree-sitter parse",
-        "cwd": "packages/tree-sitter-openscad"
+        "cwd": "{projectRoot}"
       }
     },
     "playground": {
       "executor": "nx:run-commands",
       "options": {
         "command": "tree-sitter playground",
-        "cwd": "packages/tree-sitter-openscad"
+        "cwd": "{projectRoot}"
       }
     },
     "lint": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/eslint:lint",
       "options": {
-        "command": "eslint .",
-        "cwd": "packages/tree-sitter-openscad"
+        "lintFilePatterns": ["{projectRoot}"]
       }
     }
   },
-  "tags": ["grammar"]
+  "tags": ["grammar", "native", "wasm"]
 }

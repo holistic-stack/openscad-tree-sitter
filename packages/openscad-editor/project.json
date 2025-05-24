@@ -3,8 +3,11 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/openscad-editor/src",
   "projectType": "library",
-  "tags": [],
+  "tags": ["editor", "ui"],
   "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
     "nx-release-publish": {
       "options": {
         "packageRoot": "dist/{projectRoot}"

@@ -5,12 +5,21 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/vite:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
       "options": {
-        "command": "vite build",
-        "cwd": "packages/openscad-parser"
+        "outputPath": "dist/packages/openscad-parser",
+        "configFile": "packages/openscad-parser/vite.config.ts"
       },
-      "outputs": ["packages/openscad-parser/dist"],
+      "configurations": {
+        "development": {
+          "mode": "development"
+        },
+        "production": {
+          "mode": "production"
+        }
+      },
       "dependsOn": [
         {
           "target": "build",
@@ -19,17 +28,18 @@
       ]
     },
     "dev": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/vite:dev-server",
       "options": {
-        "command": "vite build --watch",
-        "cwd": "packages/openscad-parser"
+        "buildTarget": "openscad-parser:build:development",
+        "configFile": "packages/openscad-parser/vite.config.ts"
       }
     },
     "test": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/vite:test",
+      "outputs": ["{options.reportsDirectory}"],
       "options": {
-        "command": "vitest run",
-        "cwd": "packages/openscad-parser"
+        "reportsDirectory": "../../coverage/packages/openscad-parser",
+        "configFile": "packages/openscad-parser/vite.config.ts"
       },
       "dependsOn": [
         {
@@ -39,38 +49,39 @@
       ]
     },
     "test:watch": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/vite:test",
       "options": {
-        "command": "vitest",
-        "cwd": "packages/openscad-parser"
+        "watch": true,
+        "configFile": "packages/openscad-parser/vite.config.ts"
       }
     },
     "test:coverage": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/vite:test",
+      "outputs": ["{options.reportsDirectory}"],
       "options": {
-        "command": "vitest run --coverage",
-        "cwd": "packages/openscad-parser"
+        "coverage": true,
+        "reportsDirectory": "../../coverage/packages/openscad-parser",
+        "configFile": "packages/openscad-parser/vite.config.ts"
       }
     },
     "lint": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/eslint:lint",
       "options": {
-        "command": "eslint .",
-        "cwd": "packages/openscad-parser"
+        "lintFilePatterns": ["packages/openscad-parser/**/*.ts"]
       }
     },
     "lint:fix": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/eslint:lint",
       "options": {
-        "command": "eslint . --fix",
-        "cwd": "packages/openscad-parser"
+        "lintFilePatterns": ["packages/openscad-parser/**/*.ts"],
+        "fix": true
       }
     },
     "typecheck": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tsc --noEmit",
-        "cwd": "packages/openscad-parser"
+        "command": "tsc --noEmit --project packages/openscad-parser/tsconfig.json",
+        "cwd": "."
       }
     }
   },

@@ -6,15 +6,14 @@
   "types": "bindings/node/index.d.ts",
   "browser": "bindings/web/index.js",
   "scripts": {
-    "build": "nx exec -- tree-sitter generate && nx exec -- tree-sitter build --wasm",
-    "build:node": "node-gyp rebuild",
+    "build": "nx run tree-sitter-openscad:build",
+    "build:node": "nx run tree-sitter-openscad:build:node",
     "install": "node-gyp-build",
-    "prebuildify": "prebuildify --napi --strip",
-    "generate": "tree-sitter generate",
-    "test": "nx exec -- tree-sitter test",
-    "parse": "nx exec -- tree-sitter parse",
-    "playground": "nx exec -- tree-sitter playground",
-    "lint": "nx exec -- eslint ."
+    "prebuildify": "nx run tree-sitter-openscad:prebuildify",
+    "test": "nx run tree-sitter-openscad:test",
+    "parse": "nx run tree-sitter-openscad:parse",
+    "playground": "nx run tree-sitter-openscad:playground",
+    "lint": "nx run tree-sitter-openscad:lint"
   },
   "keywords": [
     "parser",
@@ -36,7 +35,8 @@
     "bindings/web/**",
     "bindings/wasm/**",
     "binding.gyp",
-    "prebuilds/**"
+    "prebuilds/**",
+    "tree-sitter-openscad.wasm"
   ],
   "author": "OpenSCAD Community",
   "license": "MIT",

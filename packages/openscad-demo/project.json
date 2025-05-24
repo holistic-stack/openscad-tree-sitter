@@ -3,7 +3,61 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/openscad-demo/src",
   "projectType": "library",
-  "tags": [],
+  "tags": ["demo", "ui"],
   "// targets": "to see all targets run: nx show project openscad-demo --web",
-  "targets": {}
+  "targets": {
+    "dev": {
+      "executor": "@nx/vite:dev-server",
+      "options": {
+        "buildTarget": "openscad-demo:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "openscad-demo:build:development",
+          "hmr": true
+        }
+      }
+    },
+    "build": {
+      "executor": "@nx/vite:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/packages/openscad-demo"
+      },
+      "configurations": {
+        "development": {
+          "mode": "development"
+        },
+        "production": {
+          "mode": "production"
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx/vite:preview-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "openscad-demo:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "openscad-demo:build:development"
+        },
+        "production": {
+          "buildTarget": "openscad-demo:build:production"
+        }
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{options.reportsDirectory}"],
+      "options": {
+        "reportsDirectory": "../../coverage/packages/openscad-demo"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
 }
