@@ -128,7 +128,7 @@ describe('OpenSCADParser', () => {
     // Configure the parser to not throw errors
     parser.getErrorHandler().options.throwErrors = false;
 
-    // Spy on the error handler's createSyntaxError method
+    // Spy on the error error-handling's createSyntaxError method
     const createSyntaxErrorSpy = vi.spyOn(
       parser.getErrorHandler(),
       'createSyntaxError'

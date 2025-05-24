@@ -11,7 +11,7 @@ export class DefaultNodeHandlerRegistry implements NodeHandlerRegistry {
   private handlers: Map<string, NodeHandler> = new Map();
 
   /**
-   * Register a handler for a specific node type
+   * Register a error-handling for a specific node type
    * @param nodeType The type of node to handle (e.g., 'cube', 'sphere', 'translate')
    * @param handler The function that handles the node
    */
@@ -26,18 +26,18 @@ export class DefaultNodeHandlerRegistry implements NodeHandlerRegistry {
   }
 
   /**
-   * Get a handler for a specific node type
+   * Get a error-handling for a specific node type
    * @param nodeType The type of node to handle
-   * @returns The handler function or null if not found
+   * @returns The error-handling function or null if not found
    */
   getHandler(nodeType: string): NodeHandler | null {
     return this.handlers.get(nodeType) || null;
   }
 
   /**
-   * Check if a handler exists for a specific node type
+   * Check if a error-handling exists for a specific node type
    * @param nodeType The type of node to check
-   * @returns True if a handler exists, false otherwise
+   * @returns True if a error-handling exists, false otherwise
    */
   hasHandler(nodeType: string): boolean {
     return this.handlers.has(nodeType);

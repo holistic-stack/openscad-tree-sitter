@@ -15,22 +15,22 @@ describe('NodeHandlerRegistry', () => {
       mockHandler = vi.fn().mockReturnValue(null);
     });
 
-    test('should register and retrieve a handler', () => {
-      // Register a handler
+    test('should register and retrieve a error-handling', () => {
+      // Register a error-handling
       registry.register('cube', mockHandler);
 
-      // Retrieve the handler
+      // Retrieve the error-handling
       const handler = registry.getHandler('cube');
 
-      // Verify the handler is the same
+      // Verify the error-handling is the same
       expect(handler).toBe(mockHandler);
     });
 
-    test('should check if a handler exists', () => {
-      // Register a handler
+    test('should check if a error-handling exists', () => {
+      // Register a error-handling
       registry.register('cube', mockHandler);
 
-      // Check if the handler exists
+      // Check if the error-handling exists
       expect(registry.hasHandler('cube')).toBe(true);
       expect(registry.hasHandler('sphere')).toBe(false);
     });
@@ -58,8 +58,8 @@ describe('NodeHandlerRegistry', () => {
       );
     });
 
-    test('should throw an error when registering with a null handler', () => {
-      // Attempt to register with a null handler
+    test('should throw an error when registering with a null error-handling', () => {
+      // Attempt to register with a null error-handling
       expect(() =>
         registry.register('cube', null as unknown as NodeHandler)
       ).toThrow('Handler cannot be null or undefined');

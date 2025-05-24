@@ -2,7 +2,7 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 
 /**
- * Type definition for a node handler function
+ * Type definition for a node error-handling function
  */
 export type NodeHandler = (
   node: TSNode,
@@ -15,23 +15,23 @@ export type NodeHandler = (
  */
 export interface NodeHandlerRegistry {
   /**
-   * Register a handler for a specific node type
+   * Register a error-handling for a specific node type
    * @param nodeType The type of node to handle (e.g., 'cube', 'sphere', 'translate')
    * @param handler The function that handles the node
    */
   register(nodeType: string, handler: NodeHandler): void;
 
   /**
-   * Get a handler for a specific node type
+   * Get a error-handling for a specific node type
    * @param nodeType The type of node to handle
-   * @returns The handler function or null if not found
+   * @returns The error-handling function or null if not found
    */
   getHandler(nodeType: string): NodeHandler | null;
 
   /**
-   * Check if a handler exists for a specific node type
+   * Check if a error-handling exists for a specific node type
    * @param nodeType The type of node to check
-   * @returns True if a handler exists, false otherwise
+   * @returns True if a error-handling exists, false otherwise
    */
   hasHandler(nodeType: string): boolean;
 

@@ -1,6 +1,19 @@
 # GUIDELINES: OpenSCAD Tree-Sitter Parser Monorepo
 
 ## IMPORTANT AND NEVER SKIP:
+- ALWAYS use desktop commander mcp to:
+
+    - mcp2_execute_command: Execute a terminal command with timeout. Command will continue running in background if it doesn't complete within timeout.
+        - IMPORTANT: Always use absolute paths (starting with 'c:\\' or '/')
+        - Example: `mcp2_execute_command { "command": "pnpm test", "cwd": "c:\\Users\\luciano\\git\\openscad-tree-sitter" }`
+    - mcp2_read_file: Read file contents. Always use absolute paths.
+    - mcp2_write_file: Write to files. Always use absolute paths.
+    - mcp2_search_code: Search for text/code patterns within file contents using ripgrep.
+    - mcp2_search_files: Find files by name using case-insensitive matching.
+    - mcp2_list_directory: Get detailed directory listings with [FILE] and [DIR] prefixes.
+    - mcp2_edit_block: Make precise file edits with context awareness.
+    - mcp2_read_multiple_files: Read multiple files simultaneously.
+
 - ALWAYS START WITH Planning and Refining phases;
 - ALWAYS FOLLOW [Development Workflow](#development-workflow), [Documentation Best Practices](#documentation-best-practices) and [Mandatory Workflows](#mandatory-workflows);
 - ALWAYS FOLLOW Context Management documents docs/current-context.md, docs/TODO.md and docs/PROGRESS.md;
@@ -25,6 +38,8 @@ You are the SuperCoder AI assistant for the blink-cad project. Always:
 7. [Documentation Best Practices](#documentation-best-practices)
 8. [Mandatory Workflows](#mandatory-workflows)
 9. [Project Context](#project-context)
+10. [Development Setup](#development-setup)
+11. [Debugging Guide](#debugging-guide)
 
 ## Brief Overview
 
@@ -61,6 +76,47 @@ new-srp-file/
     ├── ...
     └── new-srp-file-[siminalar-scenarioX].test.ts
 ```
+
+### Development Process
+
+#### Planning Phase
+
+1. **Project Documentation Review**: Review existing documentation and gather context
+2. **Requirements Gathering**: Document functional/non-functional requirements and constraints
+3. **Problem Analysis**: Break down the problem and identify dependencies
+4. **Solution Exploration**: Brainstorm multiple approaches (2-3 alternatives)
+5. **Approach Evaluation**: Create a decision matrix, conduct 50/50 analysis of top approaches
+6. **High-Level Design**: Create architecture diagram, define components, document decisions
+
+#### Refining Phase
+
+1. **Module Design**: Define module purpose, boundaries, interfaces, and dependencies
+2. **Test Strategy**: Plan test cases to cover normal behavior, edge cases, and error scenarios
+3. **Acceptance Criteria**: Define clear criteria for when the feature is complete
+4. **Task Breakdown**: Create small, manageable tasks (1-2 hours each)
+5. **Prioritization**: Sort tasks by dependencies and impact
+
+#### Development with TDD Phase
+
+1. **Write Test First**: Create failing test for a specific feature
+2. **Implement Feature**: Write minimal code to make the test pass
+3. **Refactor**: Improve code quality while keeping tests green
+4. **Repeat**: Continue with next feature
+
+#### Testing Phase
+
+1. **Unit Tests**: Verify individual components
+2. **Integration Tests**: Test component interactions
+3. **Performance Tests**: Check performance metrics (if applicable)
+4. **Edge Case Testing**: Validate behavior in extreme conditions
+5. **Error Handling**: Verify graceful handling of invalid inputs
+
+#### Documentation Phase
+
+1. **Code Comments**: Update JSDoc for public API
+2. **Update README**: Update usage examples and FAQs
+3. **Architecture Documentation**: Update design diagrams
+4. **Release Notes**: Document changes, additions, and deprecations
 
 ## Nx Monorepo Structure
 
@@ -115,309 +171,137 @@ graph TD
     F -- Approved --> G[Delivering]
 ```
 
-### Development Process
-
-#### Planning Phase
-
-1. **Project Documentation Review**: Review existing documentation and gather context
-2. **Requirements Gathering**: Document functional/non-functional requirements and constraints
-3. **Problem Analysis**: Break down the problem and identify dependencies
-4. **Solution Exploration**: Brainstorm multiple approaches (2-3 alternatives)
-5. **Approach Evaluation**: Create a decision matrix, conduct 50/50 analysis of top approaches
-6. **High-Level Design**: Create architecture diagram, define components, document decisions;
-
-#### Refining Phase
-
-1. **Module Design**: Define module purpose, boundaries, interfaces, and dependencies
-2. **Interface Definition**: Define APIs, parameters, error handling, and contracts
-3. **Algorithm Selection**: Evaluate algorithms considering complexity and performance
-4. **Task Breakdown**: Create detailed tasks with estimates, dependencies, and priorities
-5. **Document the refined tasks**:
-    - tasks/subtasks with pending status or in progress, links to documentation, dependencies, code samples, and priorities must be documented in docs/TODO.md;
-
-#### Development with TDD
-
-Follow this cycle for each task:
-
-1. **Understand Task**: Review requirements and context
-    - Read docs/TODO.md for context;
-    - Read docs/current-context.md for context and keep it updated each TDD cicle for future context;
-2. **Write Failing Test**: Create test that verifies expected behavior
-3. **Run Test to Verify Failure**: Confirm test fails for expected reason
-4. **Implement Minimal Code**: Write just enough code to make test pass
-5. **Run Tests**: Verify new test passes and existing tests still pass
-6. **Refactor Code**: Improve implementation while maintaining behavior
-7. **Run Tests Again**: Ensure refactoring didn't break anything
-8. **Document Code**: Add JSDoc comments with descriptions and examples
-9. **Next Task**: Update context documents and move to next task
-
 ## Testing Guidelines
 
-### Test Organization
+### Testing Philosophy
 
-Tests should be organized according to the Single Responsibility Principle (SRP):
+- **Test-Driven Development**: Write tests before implementation code
+- **Comprehensive Coverage**: Aim for high test coverage of all functionality
+- **Integration Testing**: Ensure components work together correctly
+- **Maintainable Tests**: Keep tests readable and maintainable
 
-- Each file should have its own test file(s) in the same directory
-- Test files should be named with the `.test.ts` extension
-- For complex components, multiple test files can be used to test different aspects
+### Testing Best Practices
 
-```
-packages/
-├── tree-sitter-openscad/
-│   ├── test/
-│   │   ├── corpus/            # Grammar test corpus
-│   │   └── nodejs/            # Node.js binding tests
-│
-└── openscad-parser/
-    └── src/
-        └── lib/
-            ├── feature/
-            │   ├── feature.ts
-            │   └── feature.test.ts
-            └── complex-feature/
-                ├── complex-feature.ts
-                ├── complex-feature-scenario1.test.ts
-                └── complex-feature-scenario2.test.ts
-```
+1. **Real Parser Instance**: Do not use mocks for OpenscadParser in tests
+```typescript
+describe("OpenSCADParser", () => {
+  let parser: OpenscadParser;
 
-### Test Types
+  beforeEach(async () => {
+    // Create a new parser instance before each test
+    parser = new OpenscadParser();
 
-1. **Unit Tests**: Test individual components in isolation (aim for >80% coverage)
-   - Use `pnpm test` to run all tests
-   - Use `pnpm test:grammar` or `pnpm test:parser` for specific packages
-   - Use `nx test openscad-parser --testFile=docs/feature/feature.test.ts` for specific files
+    // Initialize the parser
+    await parser.init();
+  });
 
-2. **Integration Tests**: Test component interactions and API contracts
-   - Focus on testing interactions between different modules
-   - Test the parser with real OpenSCAD code examples
-
-3. **Grammar Tests**: Test the tree-sitter grammar with corpus files
-   - Use the tree-sitter test corpus format
-   - Include examples of all OpenSCAD syntax variations
-
-4. **Performance Tests**: Measure parsing performance
-   - Test with large OpenSCAD files
-   - Benchmark parsing time and memory usage
-
-### Test Commands
-
-```bash
-# Run all tests
-pnpm test
-
-# Run tests for specific packages
-pnpm test:grammar
-pnpm test:parser
-
-# Run tests with watch mode
-pnpm test:watch
-
-# Run tests with coverage
-pnpm test:coverage
-
-# Run specific test files
-nx test openscad-parser --testFile=docs/feature/feature.test.ts
+  afterEach(() => {
+    // Clean up after each test
+    parser.dispose();
+  });
+});
 ```
 
-#### Testing Phase
-
-1. **Unit Testing**: Test individual components in isolation (aim for >80% coverage)
-2. **Integration Testing**: Test component interactions and API contracts
-3. **System Testing**: Test end-to-end workflows and external integrations
-4. **Performance Testing**: Measure performance and identify bottlenecks
-5. **Bug Reporting**: Document issues with steps to reproduce
-6. **Bug Fixing**: Write failing test, fix bug, verify solution
-7. **Regression Testing**: Ensure fixes don't break existing functionality
-8. **Final Validation**: Verify implementation meets all requirements
+2. **Test Organization**: Group tests logically by functionality
+3. **Descriptive Test Names**: Use clear and descriptive test names
+4. **Isolated Tests**: Each test should be independent and not rely on state from other tests
+5. **Test Error Cases**: Include tests for error handling and edge cases
 
 ## Script Commands
 
-This project uses Nx for task orchestration and PNPM for package management. The following scripts are available in the root `package.json`:
+### Root Package Scripts
 
-### Build Commands
+- **Build Commands**:
+  - `pnpm build`: Build all packages
+  - `pnpm build:grammar`: Build only the tree-sitter-openscad package
+  - `pnpm build:parser`: Build only the openscad-parser package
 
-```bash
-# Build all packages
-pnpm build
+- **Test Commands**:
+  - `pnpm test`: Run all tests
+  - `pnpm test:grammar`: Run tests for tree-sitter-openscad
+  - `pnpm test:parser`: Run tests for openscad-parser
+  - `pnpm test:watch`: Run tests in watch mode
+  - `pnpm test:coverage`: Run tests with coverage
 
-# Build specific packages
-pnpm build:grammar  # Build the tree-sitter grammar
-pnpm build:parser   # Build the TypeScript parser
+- **Development Commands**:
+  - `pnpm dev`: Run all packages in development mode
+  - `pnpm dev:parser`: Run openscad-parser in development mode
+  - `pnpm graph`: Visualize the dependency graph
+  - `pnpm parse`: Parse an OpenSCAD file
+  - `pnpm playground`: Open the Tree-sitter playground
 
-# Development mode (watch mode)
-pnpm dev
-pnpm dev:parser     # Development mode for parser only
-```
+- **Maintenance Commands**:
+  - `pnpm lint`: Run linting on all packages
+  - `pnpm lint:fix`: Fix linting issues
+  - `pnpm typecheck`: Run TypeScript type checking
+  - `pnpm clean`: Clean all dependencies
+  - `pnpm reset`: Reset and reinstall dependencies
 
-### Test Commands
+### Package-Specific Scripts
 
-```bash
-# Run all tests
-pnpm test
+#### tree-sitter-openscad
 
-# Run tests for specific packages
-pnpm test:grammar   # Test the tree-sitter grammar
-pnpm test:parser    # Test the TypeScript parser
+- `nx build tree-sitter-openscad`: Build the grammar and generate the parser
+- `nx test tree-sitter-openscad`: Run the grammar tests
+- `nx parse tree-sitter-openscad`: Parse an OpenSCAD file
+- `nx playground tree-sitter-openscad`: Open the Tree-sitter playground
 
-# Run tests with watch mode
-pnpm test:watch
+#### openscad-parser
 
-# Run tests with coverage
-pnpm test:coverage
-```
-
-### Lint Commands
-
-```bash
-# Run linting
-pnpm lint
-
-# Fix linting issues
-pnpm lint:fix
-
-# Type checking
-pnpm typecheck
-```
-
-### Utility Commands
-
-```bash
-# View the project dependency graph
-pnpm graph
-
-# Parse OpenSCAD files with tree-sitter
-pnpm parse <file.scad>
-
-# Open the tree-sitter playground
-pnpm playground
-
-# Clean up build artifacts and node_modules
-pnpm clean
-
-# Reset the project (clean and reinstall)
-pnpm reset
-```
-
-### Nx Commands
-
-```bash
-# Run a specific target for a project
-nx <target> <project>
-# Example: nx build openscad-parser
-
-# Run a target for all projects
-nx run-many --target=<target> --all
-# Example: nx run-many --target=build --all
-
-# Run a target for specific projects
-nx run-many --target=<target> --projects=<project1>,<project2>
-# Example: nx run-many --target=test --projects=tree-sitter-openscad,openscad-parser
-```
-
-#### Documentation Phase
-
-1. Maintain these context documents throughout development:
-
-- **docs/PROGRESS.md**: Contains previous completed task information, key decisions, and implementation details
-- **docs/current-context.md**: Contains current task information, key decisions, and implementation details
-- **docs/TODO.md**: Lists all tasks/subtasks with pending status or in progress, links to documentation, dependencies, code samples, and priorities
-
-#### Code Review Phase
-
-1. **Prepare for Review**: Ensure tests pass and documentation is complete
-2. **Submit for Review**: Have another developer review the code
-3. **Address Feedback**: Make necessary changes based on feedback
-4. **Verify Changes**: Run tests and get final approval
-5. **Update Context Documents**: Document review results
-
-#### Delivering Phase
-
-- ALWAYS KEEP THE docs/PROGRESS.md update with completed tasks;
-- ALWAYS MOVE COMPLETED TASKS FROM `docs/TODO.md` TO PROGRESS.md, when move information remove verbose context and code samples;
-- ALWAYS UPDATE docs/TODO.md with new tasks and subtasks, must add context and code samples;
-- ALWAYS REMOVE UNNECESSARY INFORMATION AND OLD CONTEXT NOT NECESSARY FOR docs/TODO.md tasks and subtasks FROM docs/current-context.md;
+- `nx build openscad-parser`: Build the parser package
+- `nx test openscad-parser`: Run the parser tests
+- `nx dev openscad-parser`: Run the parser in development mode
 
 ## Coding Best Practices
 
 ### General Principles
-- Implement changes incrementally with files under 500 lines
-- Follow TDD with small changes and avoid mocks in tests
-- No `any` types in TypeScript; use kebab-case for filenames
-- Apply Single Responsibility Principle (SRP)
-- Prioritize readability over clever code
+
+- **Single Responsibility Principle**: Each module should have a single responsibility
+- **DRY (Don't Repeat Yourself)**: Avoid code duplication
+- **KISS (Keep It Simple, Stupid)**: Prefer simple solutions over complex ones
+- **YAGNI (You Aren't Gonna Need It)**: Don't implement features until needed
 
 ### TypeScript Best Practices
-- Use strict mode and explicit type annotations
-- Leverage advanced types (unions, intersections, generics)
-- Prefer interfaces for APIs and readonly for immutable data
-- Use type guards instead of type assertions
-- Utilize utility types and discriminated unions
 
-### Functional Programming
-- Write pure functions without side effects
-- Enforce immutability and use higher-order functions
-- Compose functions and use declarative programming
-- Handle nullable values with option/maybe types
-- Use Either/Result types for error handling
+- **Type Safety**: Use strict type checking
+- **Interfaces**: Define clear interfaces for public APIs
+- **Immutability**: Prefer immutable data structures
+- **Error Handling**: Handle errors gracefully with specific error types
 
-### Error Handling
-- Use structured error handling with specific types
-- Provide meaningful error messages with context
-- Handle edge cases explicitly and validate input data
-- Use try/catch blocks only when necessary
+### Tree-sitter Grammar Best Practices
 
-### Performance
-- Optimize for readability first, then performance
-- Profile to identify actual bottlenecks
-- Use appropriate data structures and memoization
-- Minimize DOM manipulations and optimize 3D operations
+- **Rule Clarity**: Write clear and readable grammar rules
+- **Testing**: Test each rule with various syntax examples
+- **Documentation**: Document grammar rules with examples
+- **Conflict Resolution**: Resolve conflicts with precedence rules
 
 ## Documentation Best Practices
-- Add JSDoc comments to all code elements with descriptions and examples
-- Use `@example` tag and `@file` tag for module descriptions
-- Document why code works a certain way, not just what it does
-- Include architectural decisions, limitations, and edge cases
-- Use diagrams for complex relationships and "before/after" sections
-- Keep documentation close to code and provide thorough examples
 
-## Code Review Guidelines
-- Check adherence to standards, test coverage, and documentation
-- Look for security vulnerabilities and performance issues
-- Verify proper typing, error handling, and functional principles
-- Identify refactoring opportunities for better code quality
-- Provide constructive feedback focused on code, not developer
+### Code Documentation
 
-## Continuous Integration
-- Ensure all code passes tests, linting, and type checking
-- Use feature branches and maintain clean commit history
-- Tag releases with semantic versioning
-- Implement feature flags for gradual rollout
-- Have monitoring and rollback strategies
+- **JSDoc Comments**: Document all public APIs with JSDoc
+- **Examples**: Include usage examples in documentation
+- **Type Definitions**: Document complex types
+- **Error Documentation**: Document error cases and handling
 
+### Project Documentation
+
+- **README**: Clear project overview, installation instructions, and usage examples
+- **Architecture Documentation**: Document project structure and design decisions
+- **CONTRIBUTING**: Guidelines for contributors
+- **CHANGELOG**: Record of changes by version
 
 ## Mandatory Workflows
 
-These workflows must never be skipped:
-
-### TDD Workflow
-1. **Understand Requirements**: Define goals and identify edge cases
-2. **Write Failing Test**: Create test for expected behavior
-3. **Verify Failure**: Confirm test fails for expected reason
-4. **Write Minimal Code**: Just enough to make test pass
-5. **Verify Pass**: Confirm implementation works
-6. **Refactor**: Improve code while maintaining behavior
-7. **Test Again**: Ensure refactoring didn't break anything
-8. **Document**: Add JSDoc comments with examples
-9. **Commit**: Include implementation and tests together
-
-### Monorepo Workflow
-1. **Identify Package**: Determine which package your change affects
-2. **Build Dependencies**: Ensure dependencies are built first (handled by Nx)
-3. **Make Changes**: Make your changes to the appropriate package
-4. **Run Tests**: Use package-specific test commands
-5. **Check Dependencies**: Ensure your changes don't break dependent packages
-6. **Update Documentation**: Update relevant documentation
-7. **Commit**: Include all related changes in a single commit
+### Feature Development Workflow
+1. **Plan Feature**: Define requirements and scope
+2. **Write Tests**: Create comprehensive test suite
+3. **Implement Feature**: Follow TDD approach
+4. **Run Package Tests**: Test the specific package
+5. **Run Monorepo Tests**: Run package-specific test commands
+6. **Check Dependencies**: Ensure your changes don't break dependent packages
+7. **Update Documentation**: Update relevant documentation
+8. **Commit**: Include all related changes in a single commit
 
 ### Refactoring Workflow
 1. **Identify Need**: Code smells, performance issues, technical debt
@@ -432,7 +316,7 @@ These workflows must never be skipped:
 1. **Identify Need**: New code, unclear docs, missing examples
 2. **Update JSDoc**: Add/update comments with examples
 3. **Update Module Docs**: Document purpose and architecture
-6. **Commit**: Use "DOCS:" prefix in commit message
+4. **Commit**: Use "DOCS:" prefix in commit message
 
 ### Debugging Workflow
 1. **Reproduce Issue**: Create reliable reproduction steps
@@ -454,3 +338,73 @@ These workflows must never be skipped:
 7. **Test Changes**: Run `pnpm test:grammar` to verify fix
 8. **Visualize Parse Tree**: Use `pnpm parse examples/test-case.scad` to inspect
 9. **Document Changes**: Update grammar documentation
+
+## Project Context
+
+This project aims to create a robust parser for OpenSCAD files using Tree-sitter, enabling rich analysis and manipulation of OpenSCAD code.
+
+### Current Focus
+
+- **Recent Accomplishment**: Implemented FunctionCallVisitor for handling function calls in expressions.
+- **Next Steps**: Implement BinaryExpressionVisitor and UnaryExpressionVisitor to handle binary and unary operations with proper precedence.
+- **Current Enhancement**: Improving VariableVisitor to handle more complex variable assignments and mathematical expressions.
+
+## Development Setup
+
+### Prerequisites
+
+- Node.js (latest LTS version)
+- PNPM (v10.10.0 or later)
+- Git
+
+### Initial Setup
+
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/user/openscad-tree-sitter.git
+   cd openscad-tree-sitter
+   ```
+
+2. **Install Dependencies**:
+   ```bash
+   pnpm install
+   ```
+
+3. **Build the Project**:
+   ```bash
+   pnpm build
+   ```
+
+### Development Environment
+
+- Use VSCode or another IDE with good TypeScript support
+- Install recommended extensions for linting and formatting
+- Configure editor to use project's ESLint and Prettier settings
+
+## Debugging Guide
+
+### Common Issues and Solutions
+
+#### Tree-sitter Grammar Issues
+
+1. **Parsing Conflicts**: Check for conflicts in the grammar.js file with `tree-sitter generate --debug`
+2. **Node Types**: Ensure node types are correctly defined and used consistently
+3. **Rule Precedence**: Check precedence rules for operators and expressions
+
+#### Parser Issues
+
+1. **Type Errors**: Ensure proper typing for all functions and variables
+2. **AST Structure**: Validate AST structure matches expected output
+3. **Error Handling**: Check for proper error handling and messages
+
+### Debugging Tools
+
+1. **Tree-sitter Playground**: Visualize parse trees for debugging grammar issues
+2. **VSCode Debugger**: Use breakpoints and watch expressions for TypeScript debugging
+3. **Vitest UI**: Use the Vitest UI for interactive test debugging with `pnpm test:ui`
+
+### Performance Optimization
+
+1. **Profiling**: Use Node.js profiling tools to identify bottlenecks
+2. **Memoization**: Use memoization for expensive operations
+3. **Lazy Evaluation**: Implement lazy evaluation where appropriate

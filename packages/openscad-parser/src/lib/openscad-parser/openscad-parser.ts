@@ -47,8 +47,45 @@ import {
   RecoveryStrategyRegistry,
   Severity,
   Logger,
-} from './error-handling/index';
+  // Assuming ErrorHandlerOptions and LoggerOptions might be exported from here or defined inline
+  // For now, let's assume they are part of the options object structure directly
+} from '../handler/index';
 import { ChangeTracker } from './ast/changes/change-tracker'; // Change is not used
+
+/**
+ * Options for configuring the OpenscadParser.
+ */
+export interface OpenscadParserOptions {
+  /**
+   * If true, the parser will throw an error on the first critical issue.
+   * If false, errors will be collected in the ErrorHandler.
+   * @default true
+   */
+  throwOnError?: boolean;
+
+  /**
+   * The minimum severity level for errors to be considered critical or reported.
+   * @default Severity.ERROR
+   */
+  minSeverity?: Severity | string;
+
+  /**
+   * If true, attempts to apply recovery strategies for certain syntax errors.
+   * @default false
+   */
+  enableRecovery?: boolean;
+
+  /**
+   * Options to pass to the ErrorHandler constructor.
+   */
+  errorHandlerOptions?: object; // Replace with actual ErrorHandlerOptions if defined
+
+  /**
+   * Options to pass to the Logger constructor.
+   */
+  loggerOptions?: object; // Replace with actual LoggerOptions if defined
+}
+
 
 /**
  * A parser for OpenSCAD code using the Tree-sitter library.
@@ -630,7 +667,7 @@ export class OpenscadParser {
    * Sets the log level for the parser
    * @param level The log level to set
    */
-  setLogLevel(level: number): void {
+  setLogLevel(level: Severity): void {
     this.logger.setLevel(level);
   }
 }
