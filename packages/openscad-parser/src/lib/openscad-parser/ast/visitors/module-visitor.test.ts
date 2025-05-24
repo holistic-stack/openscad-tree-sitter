@@ -8,7 +8,7 @@ describe('ModuleVisitor', () => {
 
   beforeAll(async () => {
     parser = new OpenscadParser();
-    await parser.init("./tree-sitter-openscad.wasm");
+    await parser.init('./tree-sitter-openscad.wasm');
   });
 
   afterAll(() => {
@@ -34,22 +34,31 @@ describe('ModuleVisitor', () => {
       for (let i = 0; i < rootNode.namedChildCount; i++) {
         const child = rootNode.namedChild(i);
         if (child) {
-          console.log(`Child ${i}: type=${child.type}, text=${child.text.substring(0, 30)}`);
+          console.log(
+            `Child ${i}: type=${child.type}, text=${child.text.substring(
+              0,
+              30
+            )}`
+          );
         }
       }
 
       // Find the module definition node - use the correct node type
-      const moduleDefNode = rootNode.namedChildren.find(child =>
-        child && (
-          child.type === 'module_definition' ||
-          (child.type === 'statement' && child.text.includes('module'))
-        )
+      const moduleDefNode = rootNode.namedChildren.find(
+        child =>
+          child &&
+          (child.type === 'module_definition' ||
+            (child.type === 'statement' && child.text.includes('module')))
       );
 
       expect(moduleDefNode).toBeDefined();
 
       if (moduleDefNode) {
-        console.log(`Found module definition node: type=${moduleDefNode.type}, text=${moduleDefNode.text.substring(0, 30)}`);
+        console.log(
+          `Found module definition node: type=${
+            moduleDefNode.type
+          }, text=${moduleDefNode.text.substring(0, 30)}`
+        );
 
         const visitor = new ModuleVisitor(code);
         const result = visitor.visitModuleDefinition(moduleDefNode);
@@ -76,17 +85,21 @@ describe('ModuleVisitor', () => {
       const rootNode = tree.rootNode;
 
       // Find the module definition node - use the correct node type
-      const moduleDefNode = rootNode.namedChildren.find(child =>
-        child && (
-          child.type === 'module_definition' ||
-          (child.type === 'statement' && child.text.includes('module'))
-        )
+      const moduleDefNode = rootNode.namedChildren.find(
+        child =>
+          child &&
+          (child.type === 'module_definition' ||
+            (child.type === 'statement' && child.text.includes('module')))
       );
 
       expect(moduleDefNode).toBeDefined();
 
       if (moduleDefNode) {
-        console.log(`Found module definition node: type=${moduleDefNode.type}, text=${moduleDefNode.text.substring(0, 30)}`);
+        console.log(
+          `Found module definition node: type=${
+            moduleDefNode.type
+          }, text=${moduleDefNode.text.substring(0, 30)}`
+        );
 
         const visitor = new ModuleVisitor(code);
         const result = visitor.visitModuleDefinition(moduleDefNode);
@@ -113,17 +126,21 @@ describe('ModuleVisitor', () => {
       const rootNode = tree.rootNode;
 
       // Find the module definition node - use the correct node type
-      const moduleDefNode = rootNode.namedChildren.find(child =>
-        child && (
-          child.type === 'module_definition' ||
-          (child.type === 'statement' && child.text.includes('module'))
-        )
+      const moduleDefNode = rootNode.namedChildren.find(
+        child =>
+          child &&
+          (child.type === 'module_definition' ||
+            (child.type === 'statement' && child.text.includes('module')))
       );
 
       expect(moduleDefNode).toBeDefined();
 
       if (moduleDefNode) {
-        console.log(`Found module definition node: type=${moduleDefNode.type}, text=${moduleDefNode.text.substring(0, 30)}`);
+        console.log(
+          `Found module definition node: type=${
+            moduleDefNode.type
+          }, text=${moduleDefNode.text.substring(0, 30)}`
+        );
 
         const visitor = new ModuleVisitor(code);
         const result = visitor.visitModuleDefinition(moduleDefNode);
@@ -153,17 +170,21 @@ describe('ModuleVisitor', () => {
       const rootNode = tree.rootNode;
 
       // Find the module definition node - use the correct node type
-      const moduleDefNode = rootNode.namedChildren.find(child =>
-        child && (
-          child.type === 'module_definition' ||
-          (child.type === 'statement' && child.text.includes('module'))
-        )
+      const moduleDefNode = rootNode.namedChildren.find(
+        child =>
+          child &&
+          (child.type === 'module_definition' ||
+            (child.type === 'statement' && child.text.includes('module')))
       );
 
       expect(moduleDefNode).toBeDefined();
 
       if (moduleDefNode) {
-        console.log(`Found module definition node: type=${moduleDefNode.type}, text=${moduleDefNode.text.substring(0, 30)}`);
+        console.log(
+          `Found module definition node: type=${
+            moduleDefNode.type
+          }, text=${moduleDefNode.text.substring(0, 30)}`
+        );
 
         const visitor = new ModuleVisitor(code);
         const result = visitor.visitModuleDefinition(moduleDefNode);
@@ -196,23 +217,32 @@ describe('ModuleVisitor', () => {
       for (let i = 0; i < rootNode.namedChildCount; i++) {
         const child = rootNode.namedChild(i);
         if (child) {
-          console.log(`Child ${i}: type=${child.type}, text=${child.text.substring(0, 30)}`);
+          console.log(
+            `Child ${i}: type=${child.type}, text=${child.text.substring(
+              0,
+              30
+            )}`
+          );
         }
       }
 
       // Find the module instantiation node - use the correct node type
-      const moduleInstNode = rootNode.namedChildren.find(child =>
-        child && (
-          child.type === 'module_instantiation' ||
-          child.type === 'expression_statement' ||
-          (child.type === 'statement' && !child.text.includes('module'))
-        )
+      const moduleInstNode = rootNode.namedChildren.find(
+        child =>
+          child &&
+          (child.type === 'module_instantiation' ||
+            child.type === 'expression_statement' ||
+            (child.type === 'statement' && !child.text.includes('module')))
       );
 
       expect(moduleInstNode).toBeDefined();
 
       if (moduleInstNode) {
-        console.log(`Found module instantiation node: type=${moduleInstNode.type}, text=${moduleInstNode.text.substring(0, 30)}`);
+        console.log(
+          `Found module instantiation node: type=${
+            moduleInstNode.type
+          }, text=${moduleInstNode.text.substring(0, 30)}`
+        );
 
         const visitor = new ModuleVisitor(code);
         // Use visitStatement instead of visitModuleInstantiation for statement nodes
@@ -221,7 +251,9 @@ describe('ModuleVisitor', () => {
         expect(result).not.toBeNull();
         expect(result?.type).toBe('module_instantiation');
         expect((result as ast.ModuleInstantiationNode).name).toBe('mycube');
-        expect((result as ast.ModuleInstantiationNode).arguments).toHaveLength(1);
+        expect((result as ast.ModuleInstantiationNode).arguments).toHaveLength(
+          1
+        );
       }
     });
 
@@ -238,18 +270,22 @@ describe('ModuleVisitor', () => {
       const rootNode = tree.rootNode;
 
       // Find the module instantiation node - use the correct node type
-      const moduleInstNode = rootNode.namedChildren.find(child =>
-        child && (
-          child.type === 'module_instantiation' ||
-          child.type === 'expression_statement' ||
-          (child.type === 'statement' && !child.text.includes('module'))
-        )
+      const moduleInstNode = rootNode.namedChildren.find(
+        child =>
+          child &&
+          (child.type === 'module_instantiation' ||
+            child.type === 'expression_statement' ||
+            (child.type === 'statement' && !child.text.includes('module')))
       );
 
       expect(moduleInstNode).toBeDefined();
 
       if (moduleInstNode) {
-        console.log(`Found module instantiation node: type=${moduleInstNode.type}, text=${moduleInstNode.text.substring(0, 30)}`);
+        console.log(
+          `Found module instantiation node: type=${
+            moduleInstNode.type
+          }, text=${moduleInstNode.text.substring(0, 30)}`
+        );
 
         const visitor = new ModuleVisitor(code);
         // Use visitStatement instead of visitModuleInstantiation for statement nodes
@@ -263,7 +299,8 @@ describe('ModuleVisitor', () => {
         const childNode = (result as ast.TranslateNode).children[0];
         expect(
           childNode.type === 'cube' ||
-          (childNode.type === 'module_instantiation' && (childNode as ast.ModuleInstantiationNode).name === 'cube')
+            (childNode.type === 'module_instantiation' &&
+              (childNode as ast.ModuleInstantiationNode).name === 'cube')
         ).toBe(true);
       }
     });

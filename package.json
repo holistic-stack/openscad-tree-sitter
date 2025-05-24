@@ -6,7 +6,7 @@
   "scripts": {
     "build": "nx run-many --target=build --all",
     "build:grammar": "nx build tree-sitter-openscad",
-    "build:parser": "nx build openscad-parser",
+    "build:parser": "nx build openscad-parser --verbose",
     "test": "nx run-many --target=test --all",
     "test:grammar": "nx test tree-sitter-openscad",
     "test:parser": "nx test openscad-parser",

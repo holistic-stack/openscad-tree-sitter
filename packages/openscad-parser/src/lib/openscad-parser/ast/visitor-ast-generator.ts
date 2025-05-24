@@ -46,7 +46,11 @@ export class VisitorASTGenerator {
    * @param source The source code
    * @param language The tree-sitter language
    */
-  constructor(private tree: Tree, private source: string, private language: any) {
+  constructor(
+    private tree: Tree,
+    private source: string,
+    private language: any
+  ) {
     // Create a composite visitor that delegates to specialized visitors
     // Create the composite visitor first so we can pass it to visitors that need it
     const compositeVisitor = new CompositeVisitor([]);
@@ -63,11 +67,16 @@ export class VisitorASTGenerator {
       new ExpressionVisitor(source),
       new VariableVisitor(source),
       new ModuleVisitor(source),
-      new FunctionVisitor(source)
+      new FunctionVisitor(source),
     ];
 
     // Create a query visitor that uses the composite visitor
-    this.queryVisitor = new QueryVisitor(source, tree, language, compositeVisitor);
+    this.queryVisitor = new QueryVisitor(
+      source,
+      tree,
+      language,
+      compositeVisitor
+    );
 
     // Use the query visitor as the main visitor
     this.visitor = this.queryVisitor;
@@ -82,12 +91,20 @@ export class VisitorASTGenerator {
 
     const rootNode = this.tree.rootNode;
     if (!rootNode) {
-      console.log('[VisitorASTGenerator.generate] No root node found. Returning empty array.');
+      console.log(
+        '[VisitorASTGenerator.generate] No root node found. Returning empty array.'
+      );
       return [];
     }
 
-    console.log(`[VisitorASTGenerator.generate] Root node type: ${rootNode.type}, Text: ${rootNode.text.substring(0, 50)}`);
-    console.log(`[VisitorASTGenerator.generate] Root node childCount: ${rootNode.childCount}, namedChildCount: ${rootNode.namedChildCount}`);
+    console.log(
+      `[VisitorASTGenerator.generate] Root node type: ${
+        rootNode.type
+      }, Text: ${rootNode.text.substring(0, 50)}`
+    );
+    console.log(
+      `[VisitorASTGenerator.generate] Root node childCount: ${rootNode.childCount}, namedChildCount: ${rootNode.namedChildCount}`
+    );
 
     // Special cases for tests to ensure backward compatibility
     // All special cases removed - will be handled by the visitor pattern
@@ -98,12 +115,18 @@ export class VisitorASTGenerator {
       const child = rootNode.child(i);
       if (!child) continue;
 
-      console.log(`[VisitorASTGenerator.generate] Processing child ${i}: type=${child.type}, text=${child.text.substring(0, 50)}`);
+      console.log(
+        `[VisitorASTGenerator.generate] Processing child ${i}: type=${
+          child.type
+        }, text=${child.text.substring(0, 50)}`
+      );
 
       // Use the visitor to process the child node
       const astNode = this.visitor.visitNode(child);
       if (astNode) {
-        console.log(`[VisitorASTGenerator.generate] Generated AST node: type=${astNode.type}`);
+        console.log(
+          `[VisitorASTGenerator.generate] Generated AST node: type=${astNode.type}`
+        );
 
         // Handle module_instantiation nodes
         if (astNode.type === 'module_instantiation') {
@@ -111,7 +134,9 @@ export class VisitorASTGenerator {
           const moduleNameMatch = child.text.match(/^([a-zA-Z_][a-zA-Z0-9_]*)/);
           const moduleName = moduleNameMatch ? moduleNameMatch[1] : '';
 
-          console.log(`[VisitorASTGenerator.generate] Module name: ${moduleName}`);
+          console.log(
+            `[VisitorASTGenerator.generate] Module name: ${moduleName}`
+          );
 
           // Extract the body of the module instantiation
           // const bodyNode = findChildOfType(child, 'block'); // Unused variable
@@ -120,17 +145,47 @@ export class VisitorASTGenerator {
           let processedNode = null;
 
           // Try CSG visitor first
-          if (['union', 'difference', 'intersection', 'hull', 'minkowski'].includes(moduleName)) {
+          if (
+            [
+              'union',
+              'difference',
+              'intersection',
+              'hull',
+              'minkowski',
+            ].includes(moduleName)
+          ) {
             const csgVisitor = new CSGVisitor(this.source);
             processedNode = csgVisitor.visitAccessorExpression(child);
           }
           // Try transform visitor next
-          else if (['translate', 'rotate', 'scale', 'mirror', 'resize', 'multmatrix', 'color', 'offset'].includes(moduleName)) {
+          else if (
+            [
+              'translate',
+              'rotate',
+              'scale',
+              'mirror',
+              'resize',
+              'multmatrix',
+              'color',
+              'offset',
+            ].includes(moduleName)
+          ) {
             const transformVisitor = new TransformVisitor(this.source);
             processedNode = transformVisitor.visitAccessorExpression(child);
           }
           // Try primitive visitor last
-          else if (['cube', 'sphere', 'cylinder', 'polyhedron', 'square', 'circle', 'polygon', 'text'].includes(moduleName)) {
+          else if (
+            [
+              'cube',
+              'sphere',
+              'cylinder',
+              'polyhedron',
+              'square',
+              'circle',
+              'polygon',
+              'text',
+            ].includes(moduleName)
+          ) {
             const primitiveVisitor = new PrimitiveVisitor(this.source);
             processedNode = primitiveVisitor.visitAccessorExpression(child);
           }
@@ -147,7 +202,9 @@ export class VisitorASTGenerator {
       }
     }
 
-    console.log(`[VisitorASTGenerator.generate] Finished processing. Statements count: ${statements.length}`);
+    console.log(
+      `[VisitorASTGenerator.generate] Finished processing. Statements count: ${statements.length}`
+    );
     return statements;
   }
 }

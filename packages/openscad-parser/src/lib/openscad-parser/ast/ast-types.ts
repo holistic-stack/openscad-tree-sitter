@@ -122,7 +122,15 @@ export interface Parameter {
  */
 export interface ExpressionNode extends BaseNode {
   type: 'expression';
-  expressionType: 'variable' | 'binary' | 'unary' | 'conditional' | 'array' | 'literal' | 'each' | string;
+  expressionType:
+    | 'variable'
+    | 'binary'
+    | 'unary'
+    | 'conditional'
+    | 'array'
+    | 'literal'
+    | 'each'
+    | string;
 
   // Optional properties used in various expression types
   value?: number | string | boolean;
@@ -505,14 +513,14 @@ export interface LiteralExpressionNode extends ExpressionNode {
 /**
  * Special variables in OpenSCAD
  */
-export type SpecialVariable = 
-  | '$fn'       // Number of fragments
-  | '$fa'       // Minimum angle
-  | '$fs'       // Minimum size of fragment
-  | '$t'        // Animation time
-  | '$vpr'      // Viewport rotation
-  | '$vpt'      // Viewport translation
-  | '$vpd'      // Viewport distance
+export type SpecialVariable =
+  | '$fn' // Number of fragments
+  | '$fa' // Minimum angle
+  | '$fs' // Minimum size of fragment
+  | '$t' // Animation time
+  | '$vpr' // Viewport rotation
+  | '$vpt' // Viewport translation
+  | '$vpd' // Viewport distance
   | '$children' // Number of children in module
   | '$preview'; // True if in preview mode
 
@@ -528,7 +536,20 @@ export interface SpecialVariableAssignment extends BaseNode {
 /**
  * Binary operators in OpenSCAD
  */
-export type BinaryOperator = '+' | '-' | '*' | '/' | '%' | '==' | '!=' | '<' | '<=' | '>' | '>=' | '&&' | '||';
+export type BinaryOperator =
+  | '+'
+  | '-'
+  | '*'
+  | '/'
+  | '%'
+  | '=='
+  | '!='
+  | '<'
+  | '<='
+  | '>'
+  | '>='
+  | '&&'
+  | '||';
 
 /**
  * Unary operators in OpenSCAD

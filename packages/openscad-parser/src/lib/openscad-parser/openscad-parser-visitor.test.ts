@@ -5,7 +5,7 @@ describe('OpenscadParser with Visitor AST Generator', () => {
 
   beforeAll(async () => {
     parser = new OpenscadParser();
-    await parser.init("./tree-sitter-openscad.wasm");
+    await parser.init('./tree-sitter-openscad.wasm');
   });
 
   afterAll(() => {
@@ -77,7 +77,8 @@ describe('OpenscadParser with Visitor AST Generator', () => {
     });
 
     it('should parse complex nested operations', () => {
-      const code = 'difference() { cube(20, center=true); translate([0, 0, 5]) { rotate([0, 0, 45]) cube(10, center=true); } }';
+      const code =
+        'difference() { cube(20, center=true); translate([0, 0, 5]) { rotate([0, 0, 45]) cube(10, center=true); } }';
       const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);

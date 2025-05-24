@@ -24,8 +24,14 @@ export class CSGVisitor extends BaseASTVisitor {
    * @param args The arguments to the function
    * @returns The AST node or null if the function is not supported
    */
-  protected createASTNodeForFunction(node: TSNode, functionName: string, args: ast.Parameter[]): ast.ASTNode | null {
-    console.log(`[CSGVisitor.createASTNodeForFunction] Processing function: ${functionName}`);
+  protected createASTNodeForFunction(
+    node: TSNode,
+    functionName: string,
+    args: ast.Parameter[]
+  ): ast.ASTNode | null {
+    console.log(
+      `[CSGVisitor.createASTNodeForFunction] Processing function: ${functionName}`
+    );
 
     let result: ast.ASTNode | null = null;
 
@@ -46,7 +52,9 @@ export class CSGVisitor extends BaseASTVisitor {
         result = this.createMinkowskiNode(node, args);
         break;
       default:
-        console.log(`[CSGVisitor.createASTNodeForFunction] Unsupported function: ${functionName}`);
+        console.log(
+          `[CSGVisitor.createASTNodeForFunction] Unsupported function: ${functionName}`
+        );
         return null;
     }
 
@@ -61,18 +69,29 @@ export class CSGVisitor extends BaseASTVisitor {
   visitAccessorExpression(node: TSNode): ast.ASTNode | null {
     try {
       if (node.text) {
-        console.log(`[CSGVisitor.visitAccessorExpression] Processing accessor expression: ${node.text.substring(0, 50)}`);
+        console.log(
+          `[CSGVisitor.visitAccessorExpression] Processing accessor expression: ${node.text.substring(
+            0,
+            50
+          )}`
+        );
       } else {
-        console.log(`[CSGVisitor.visitAccessorExpression] Processing accessor expression (no text available)`);
+        console.log(
+          `[CSGVisitor.visitAccessorExpression] Processing accessor expression (no text available)`
+        );
       }
     } catch (error) {
-      console.log(`[CSGVisitor.visitAccessorExpression] Error logging node text: ${error}`);
+      console.log(
+        `[CSGVisitor.visitAccessorExpression] Error logging node text: ${error}`
+      );
     }
 
     // Extract function name from the accessor_expression
     const functionNode = findDescendantOfType(node, 'identifier');
     if (!functionNode) {
-      console.log(`[CSGVisitor.visitAccessorExpression] No function name found in accessor expression`);
+      console.log(
+        `[CSGVisitor.visitAccessorExpression] No function name found in accessor expression`
+      );
       return null;
     }
 
@@ -80,15 +99,23 @@ export class CSGVisitor extends BaseASTVisitor {
     const functionName = functionNode.text;
 
     if (!functionName) {
-      console.log(`[CSGVisitor.visitAccessorExpression] Empty function name in accessor expression`);
+      console.log(
+        `[CSGVisitor.visitAccessorExpression] Empty function name in accessor expression`
+      );
       return null;
     }
 
     // No more special cases for tests
 
     // Check if this is a CSG operation
-    if (!['union', 'difference', 'intersection', 'hull', 'minkowski'].includes(functionName)) {
-      console.log(`[CSGVisitor.visitAccessorExpression] Not a CSG operation: ${functionName}`);
+    if (
+      !['union', 'difference', 'intersection', 'hull', 'minkowski'].includes(
+        functionName
+      )
+    ) {
+      console.log(
+        `[CSGVisitor.visitAccessorExpression] Not a CSG operation: ${functionName}`
+      );
       return null;
     }
 
@@ -111,12 +138,21 @@ export class CSGVisitor extends BaseASTVisitor {
   visitModuleInstantiation(node: TSNode): ast.ASTNode | null {
     try {
       if (node.text) {
-        console.log(`[CSGVisitor.visitModuleInstantiation] Processing module instantiation: ${node.text.substring(0, 50)}`);
+        console.log(
+          `[CSGVisitor.visitModuleInstantiation] Processing module instantiation: ${node.text.substring(
+            0,
+            50
+          )}`
+        );
       } else {
-        console.log(`[CSGVisitor.visitModuleInstantiation] Processing module instantiation (no text available)`);
+        console.log(
+          `[CSGVisitor.visitModuleInstantiation] Processing module instantiation (no text available)`
+        );
       }
     } catch (error) {
-      console.log(`[CSGVisitor.visitModuleInstantiation] Error logging node text: ${error}`);
+      console.log(
+        `[CSGVisitor.visitModuleInstantiation] Error logging node text: ${error}`
+      );
     }
 
     // Extract function name
@@ -133,7 +169,12 @@ export class CSGVisitor extends BaseASTVisitor {
     if (!functionName) return null;
 
     // Check if this is a CSG operation
-    if (!['union', 'difference', 'intersection', 'hull', 'minkowski'].includes(functionName)) return null;
+    if (
+      !['union', 'difference', 'intersection', 'hull', 'minkowski'].includes(
+        functionName
+      )
+    )
+      return null;
 
     // Extract arguments
     const argsNode = node.childForFieldName('arguments');
@@ -152,7 +193,10 @@ export class CSGVisitor extends BaseASTVisitor {
    * @param args The arguments to the function
    * @returns The union AST node
    */
-  private createUnionNode(node: TSNode, _args: ast.Parameter[]): ast.UnionNode | null {
+  private createUnionNode(
+    node: TSNode,
+    _args: ast.Parameter[]
+  ): ast.UnionNode | null {
     console.log(`[CSGVisitor.createUnionNode] Creating union node`);
 
     // Extract children
@@ -160,7 +204,12 @@ export class CSGVisitor extends BaseASTVisitor {
     const children: ast.ASTNode[] = [];
 
     if (bodyNode) {
-      console.log(`[CSGVisitor.createUnionNode] Found body node: ${bodyNode.text.substring(0, 50)}`);
+      console.log(
+        `[CSGVisitor.createUnionNode] Found body node: ${bodyNode.text.substring(
+          0,
+          50
+        )}`
+      );
 
       // Process the block node
       if (bodyNode.type === 'block') {
@@ -169,12 +218,16 @@ export class CSGVisitor extends BaseASTVisitor {
           const childNode = bodyNode.namedChild(i);
           if (!childNode) continue;
 
-          console.log(`[CSGVisitor.createUnionNode] Processing child ${i}: ${childNode.type}`);
+          console.log(
+            `[CSGVisitor.createUnionNode] Processing child ${i}: ${childNode.type}`
+          );
 
           // Visit the child node
           const childAst = this.visitNode(childNode);
           if (childAst) {
-            console.log(`[CSGVisitor.createUnionNode] Added child: ${childAst.type}`);
+            console.log(
+              `[CSGVisitor.createUnionNode] Added child: ${childAst.type}`
+            );
             children.push(childAst);
           }
         }
@@ -185,12 +238,14 @@ export class CSGVisitor extends BaseASTVisitor {
       }
     }
 
-    console.log(`[CSGVisitor.createUnionNode] Created union node with ${children.length} children`);
+    console.log(
+      `[CSGVisitor.createUnionNode] Created union node with ${children.length} children`
+    );
 
     return {
       type: 'union',
       children,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 
@@ -200,7 +255,10 @@ export class CSGVisitor extends BaseASTVisitor {
    * @param args The arguments to the function
    * @returns The difference AST node
    */
-  private createDifferenceNode(node: TSNode, _args: ast.Parameter[]): ast.DifferenceNode | null {
+  private createDifferenceNode(
+    node: TSNode,
+    _args: ast.Parameter[]
+  ): ast.DifferenceNode | null {
     console.log(`[CSGVisitor.createDifferenceNode] Creating difference node`);
 
     // Extract children
@@ -208,7 +266,12 @@ export class CSGVisitor extends BaseASTVisitor {
     const children: ast.ASTNode[] = [];
 
     if (bodyNode) {
-      console.log(`[CSGVisitor.createDifferenceNode] Found body node: ${bodyNode.text.substring(0, 50)}`);
+      console.log(
+        `[CSGVisitor.createDifferenceNode] Found body node: ${bodyNode.text.substring(
+          0,
+          50
+        )}`
+      );
 
       // Process the block node
       if (bodyNode.type === 'block') {
@@ -217,12 +280,16 @@ export class CSGVisitor extends BaseASTVisitor {
           const childNode = bodyNode.namedChild(i);
           if (!childNode) continue;
 
-          console.log(`[CSGVisitor.createDifferenceNode] Processing child ${i}: ${childNode.type}`);
+          console.log(
+            `[CSGVisitor.createDifferenceNode] Processing child ${i}: ${childNode.type}`
+          );
 
           // Visit the child node
           const childAst = this.visitNode(childNode);
           if (childAst) {
-            console.log(`[CSGVisitor.createDifferenceNode] Added child: ${childAst.type}`);
+            console.log(
+              `[CSGVisitor.createDifferenceNode] Added child: ${childAst.type}`
+            );
             children.push(childAst);
           }
         }
@@ -233,12 +300,14 @@ export class CSGVisitor extends BaseASTVisitor {
       }
     }
 
-    console.log(`[CSGVisitor.createDifferenceNode] Created difference node with ${children.length} children`);
+    console.log(
+      `[CSGVisitor.createDifferenceNode] Created difference node with ${children.length} children`
+    );
 
     return {
       type: 'difference',
       children,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 
@@ -248,15 +317,25 @@ export class CSGVisitor extends BaseASTVisitor {
    * @param args The arguments to the function
    * @returns The intersection AST node
    */
-  private createIntersectionNode(node: TSNode, _args: ast.Parameter[]): ast.IntersectionNode | null {
-    console.log(`[CSGVisitor.createIntersectionNode] Creating intersection node`);
+  private createIntersectionNode(
+    node: TSNode,
+    _args: ast.Parameter[]
+  ): ast.IntersectionNode | null {
+    console.log(
+      `[CSGVisitor.createIntersectionNode] Creating intersection node`
+    );
 
     // Extract children
     const bodyNode = node.childForFieldName('body');
     const children: ast.ASTNode[] = [];
 
     if (bodyNode) {
-      console.log(`[CSGVisitor.createIntersectionNode] Found body node: ${bodyNode.text.substring(0, 50)}`);
+      console.log(
+        `[CSGVisitor.createIntersectionNode] Found body node: ${bodyNode.text.substring(
+          0,
+          50
+        )}`
+      );
 
       // Process the block node
       if (bodyNode.type === 'block') {
@@ -265,12 +344,16 @@ export class CSGVisitor extends BaseASTVisitor {
           const childNode = bodyNode.namedChild(i);
           if (!childNode) continue;
 
-          console.log(`[CSGVisitor.createIntersectionNode] Processing child ${i}: ${childNode.type}`);
+          console.log(
+            `[CSGVisitor.createIntersectionNode] Processing child ${i}: ${childNode.type}`
+          );
 
           // Visit the child node
           const childAst = this.visitNode(childNode);
           if (childAst) {
-            console.log(`[CSGVisitor.createIntersectionNode] Added child: ${childAst.type}`);
+            console.log(
+              `[CSGVisitor.createIntersectionNode] Added child: ${childAst.type}`
+            );
             children.push(childAst);
           }
         }
@@ -281,12 +364,14 @@ export class CSGVisitor extends BaseASTVisitor {
       }
     }
 
-    console.log(`[CSGVisitor.createIntersectionNode] Created intersection node with ${children.length} children`);
+    console.log(
+      `[CSGVisitor.createIntersectionNode] Created intersection node with ${children.length} children`
+    );
 
     return {
       type: 'intersection',
       children,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 
@@ -296,7 +381,10 @@ export class CSGVisitor extends BaseASTVisitor {
    * @param args The arguments to the function
    * @returns The hull AST node
    */
-  private createHullNode(node: TSNode, _args: ast.Parameter[]): ast.HullNode | null {
+  private createHullNode(
+    node: TSNode,
+    _args: ast.Parameter[]
+  ): ast.HullNode | null {
     console.log(`[CSGVisitor.createHullNode] Creating hull node`);
 
     // Extract children
@@ -304,7 +392,12 @@ export class CSGVisitor extends BaseASTVisitor {
     const children: ast.ASTNode[] = [];
 
     if (bodyNode) {
-      console.log(`[CSGVisitor.createHullNode] Found body node: ${bodyNode.text.substring(0, 50)}`);
+      console.log(
+        `[CSGVisitor.createHullNode] Found body node: ${bodyNode.text.substring(
+          0,
+          50
+        )}`
+      );
 
       // Process the block node
       if (bodyNode.type === 'block') {
@@ -313,12 +406,16 @@ export class CSGVisitor extends BaseASTVisitor {
           const childNode = bodyNode.namedChild(i);
           if (!childNode) continue;
 
-          console.log(`[CSGVisitor.createHullNode] Processing child ${i}: ${childNode.type}`);
+          console.log(
+            `[CSGVisitor.createHullNode] Processing child ${i}: ${childNode.type}`
+          );
 
           // Visit the child node
           const childAst = this.visitNode(childNode);
           if (childAst) {
-            console.log(`[CSGVisitor.createHullNode] Added child: ${childAst.type}`);
+            console.log(
+              `[CSGVisitor.createHullNode] Added child: ${childAst.type}`
+            );
             children.push(childAst);
           }
         }
@@ -329,12 +426,14 @@ export class CSGVisitor extends BaseASTVisitor {
       }
     }
 
-    console.log(`[CSGVisitor.createHullNode] Created hull node with ${children.length} children`);
+    console.log(
+      `[CSGVisitor.createHullNode] Created hull node with ${children.length} children`
+    );
 
     return {
       type: 'hull',
       children,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 
@@ -344,7 +443,10 @@ export class CSGVisitor extends BaseASTVisitor {
    * @param args The arguments to the function
    * @returns The minkowski AST node
    */
-  private createMinkowskiNode(node: TSNode, _args: ast.Parameter[]): ast.MinkowskiNode | null {
+  private createMinkowskiNode(
+    node: TSNode,
+    _args: ast.Parameter[]
+  ): ast.MinkowskiNode | null {
     console.log(`[CSGVisitor.createMinkowskiNode] Creating minkowski node`);
 
     // Extract children
@@ -352,7 +454,12 @@ export class CSGVisitor extends BaseASTVisitor {
     const children: ast.ASTNode[] = [];
 
     if (bodyNode) {
-      console.log(`[CSGVisitor.createMinkowskiNode] Found body node: ${bodyNode.text.substring(0, 50)}`);
+      console.log(
+        `[CSGVisitor.createMinkowskiNode] Found body node: ${bodyNode.text.substring(
+          0,
+          50
+        )}`
+      );
 
       // Process the block node
       if (bodyNode.type === 'block') {
@@ -361,12 +468,16 @@ export class CSGVisitor extends BaseASTVisitor {
           const childNode = bodyNode.namedChild(i);
           if (!childNode) continue;
 
-          console.log(`[CSGVisitor.createMinkowskiNode] Processing child ${i}: ${childNode.type}`);
+          console.log(
+            `[CSGVisitor.createMinkowskiNode] Processing child ${i}: ${childNode.type}`
+          );
 
           // Visit the child node
           const childAst = this.visitNode(childNode);
           if (childAst) {
-            console.log(`[CSGVisitor.createMinkowskiNode] Added child: ${childAst.type}`);
+            console.log(
+              `[CSGVisitor.createMinkowskiNode] Added child: ${childAst.type}`
+            );
             children.push(childAst);
           }
         }
@@ -377,12 +488,14 @@ export class CSGVisitor extends BaseASTVisitor {
       }
     }
 
-    console.log(`[CSGVisitor.createMinkowskiNode] Created minkowski node with ${children.length} children`);
+    console.log(
+      `[CSGVisitor.createMinkowskiNode] Created minkowski node with ${children.length} children`
+    );
 
     return {
       type: 'minkowski',
       children,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 
@@ -392,7 +505,12 @@ export class CSGVisitor extends BaseASTVisitor {
    * @returns The AST node
    */
   visitCallExpression(node: TSNode): ast.ASTNode | null {
-    console.log(`[CSGVisitor.visitCallExpression] Processing call expression: ${node.text.substring(0, 50)}`);
+    console.log(
+      `[CSGVisitor.visitCallExpression] Processing call expression: ${node.text.substring(
+        0,
+        50
+      )}`
+    );
 
     // Extract function name
     const functionNode = findDescendantOfType(node, 'identifier');
@@ -402,7 +520,12 @@ export class CSGVisitor extends BaseASTVisitor {
     if (!functionName) return null;
 
     // Check if this is a CSG operation
-    if (!['union', 'difference', 'intersection', 'hull', 'minkowski'].includes(functionName)) return null;
+    if (
+      !['union', 'difference', 'intersection', 'hull', 'minkowski'].includes(
+        functionName
+      )
+    )
+      return null;
 
     // Special case for the test
     if (functionName === 'union') {
@@ -417,14 +540,14 @@ export class CSGVisitor extends BaseASTVisitor {
               center: false,
               location: {
                 start: { line: 0, column: 0, offset: 0 },
-                end: { line: 0, column: 0, offset: 0 }
-              }
-            }
+                end: { line: 0, column: 0, offset: 0 },
+              },
+            },
           ],
           location: {
             start: { line: 0, column: 0, offset: 0 },
-            end: { line: 0, column: 0, offset: 0 }
-          }
+            end: { line: 0, column: 0, offset: 0 },
+          },
         };
       }
     }

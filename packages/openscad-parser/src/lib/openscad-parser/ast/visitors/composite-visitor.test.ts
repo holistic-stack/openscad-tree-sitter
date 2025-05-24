@@ -1,4 +1,12 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterAll,
+  beforeEach,
+  vi,
+} from 'vitest';
 import { CompositeVisitor } from './composite-visitor';
 import { PrimitiveVisitor } from './primitive-visitor';
 import { TransformVisitor } from './transform-visitor';
@@ -15,8 +23,8 @@ const mockCubeNode: ast.CubeNode = {
   center: false,
   location: {
     start: { line: 0, column: 0, offset: 0 },
-    end: { line: 0, column: 0, offset: 0 }
-  }
+    end: { line: 0, column: 0, offset: 0 },
+  },
 };
 
 const mockSphereNode: ast.SphereNode = {
@@ -24,8 +32,8 @@ const mockSphereNode: ast.SphereNode = {
   radius: 5,
   location: {
     start: { line: 0, column: 0, offset: 0 },
-    end: { line: 0, column: 0, offset: 0 }
-  }
+    end: { line: 0, column: 0, offset: 0 },
+  },
 };
 
 const mockTranslateNode: ast.TranslateNode = {
@@ -34,8 +42,8 @@ const mockTranslateNode: ast.TranslateNode = {
   children: [],
   location: {
     start: { line: 0, column: 0, offset: 0 },
-    end: { line: 0, column: 0, offset: 0 }
-  }
+    end: { line: 0, column: 0, offset: 0 },
+  },
 };
 
 describe('CompositeVisitor', () => {
@@ -44,7 +52,7 @@ describe('CompositeVisitor', () => {
 
   beforeAll(async () => {
     parser = new OpenscadParser();
-    await parser.init("./tree-sitter-openscad.wasm");
+    await parser.init('./tree-sitter-openscad.wasm');
   });
 
   afterAll(() => {
@@ -58,7 +66,11 @@ describe('CompositeVisitor', () => {
     const transformVisitor = new TransformVisitor('');
     const csgVisitor = new CSGVisitor('');
 
-    visitor = new CompositeVisitor([primitiveVisitor, transformVisitor, csgVisitor]);
+    visitor = new CompositeVisitor([
+      primitiveVisitor,
+      transformVisitor,
+      csgVisitor,
+    ]);
 
     // Create a test-accessible method to get visitors
     (visitor as any).getVisitor = (index: number) => {
@@ -76,11 +88,13 @@ describe('CompositeVisitor', () => {
         type: 'module_instantiation',
         text: 'cube(10)',
         childCount: 0,
-        child: () => null
+        child: () => null,
       } as unknown as TSNode;
 
       // Mock the PrimitiveVisitor to return a cube node
-      const visitNodeSpy = vi.spyOn((visitor as any).getVisitor(0), 'visitNode').mockReturnValue(mockCubeNode);
+      const visitNodeSpy = vi
+        .spyOn((visitor as any).getVisitor(0), 'visitNode')
+        .mockReturnValue(mockCubeNode);
 
       // Visit the node
       const result = visitor.visitNode(mockModuleInstantiationNode);
@@ -103,14 +117,18 @@ describe('CompositeVisitor', () => {
         type: 'module_instantiation',
         text: 'translate([1, 2, 3]) {}',
         childCount: 0,
-        child: () => null
+        child: () => null,
       } as unknown as TSNode;
 
       // Mock the first visitor to return null (PrimitiveVisitor)
-      const visitNodeSpy1 = vi.spyOn((visitor as any).getVisitor(0), 'visitNode').mockReturnValue(null);
+      const visitNodeSpy1 = vi
+        .spyOn((visitor as any).getVisitor(0), 'visitNode')
+        .mockReturnValue(null);
 
       // Mock the TransformVisitor to return a translate node
-      const visitNodeSpy2 = vi.spyOn((visitor as any).getVisitor(1), 'visitNode').mockReturnValue(mockTranslateNode);
+      const visitNodeSpy2 = vi
+        .spyOn((visitor as any).getVisitor(1), 'visitNode')
+        .mockReturnValue(mockTranslateNode);
 
       // Visit the node
       const result = visitor.visitNode(mockModuleInstantiationNode);
@@ -135,22 +153,31 @@ describe('CompositeVisitor', () => {
         type: 'module_instantiation',
         text: 'union() {}',
         childCount: 0,
-        child: () => null
+        child: () => null,
       } as unknown as TSNode;
 
       // Mock the CSGVisitor to return a union node
       const mockUnionNode = {
         type: 'union' as const,
         children: [],
-        location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
+        location: {
+          start: { line: 0, column: 0, offset: 0 },
+          end: { line: 0, column: 0, offset: 0 },
+        },
       } as ast.UnionNode;
 
       // Mock the first two visitors to return null
-      const visitNodeSpy1 = vi.spyOn((visitor as any).getVisitor(0), 'visitNode').mockReturnValue(null);
-      const visitNodeSpy2 = vi.spyOn((visitor as any).getVisitor(1), 'visitNode').mockReturnValue(null);
+      const visitNodeSpy1 = vi
+        .spyOn((visitor as any).getVisitor(0), 'visitNode')
+        .mockReturnValue(null);
+      const visitNodeSpy2 = vi
+        .spyOn((visitor as any).getVisitor(1), 'visitNode')
+        .mockReturnValue(null);
 
       // Mock the CSGVisitor to return a union node
-      const visitNodeSpy3 = vi.spyOn((visitor as any).getVisitor(2), 'visitNode').mockReturnValue(mockUnionNode);
+      const visitNodeSpy3 = vi
+        .spyOn((visitor as any).getVisitor(2), 'visitNode')
+        .mockReturnValue(mockUnionNode);
 
       // Visit the node
       const result = visitor.visitNode(mockModuleInstantiationNode);
@@ -176,13 +203,19 @@ describe('CompositeVisitor', () => {
         type: 'module_instantiation',
         text: 'unknown_function() {}',
         childCount: 0,
-        child: () => null
+        child: () => null,
       } as unknown as TSNode;
 
       // Mock all visitors to return null
-      const visitNodeSpy1 = vi.spyOn((visitor as any).getVisitor(0), 'visitNode').mockReturnValue(null);
-      const visitNodeSpy2 = vi.spyOn((visitor as any).getVisitor(1), 'visitNode').mockReturnValue(null);
-      const visitNodeSpy3 = vi.spyOn((visitor as any).getVisitor(2), 'visitNode').mockReturnValue(null);
+      const visitNodeSpy1 = vi
+        .spyOn((visitor as any).getVisitor(0), 'visitNode')
+        .mockReturnValue(null);
+      const visitNodeSpy2 = vi
+        .spyOn((visitor as any).getVisitor(1), 'visitNode')
+        .mockReturnValue(null);
+      const visitNodeSpy3 = vi
+        .spyOn((visitor as any).getVisitor(2), 'visitNode')
+        .mockReturnValue(null);
 
       // Visit the node
       const result = visitor.visitNode(mockModuleInstantiationNode);
@@ -209,14 +242,14 @@ describe('CompositeVisitor', () => {
         type: 'statement',
         text: 'cube(10);',
         childCount: 0,
-        child: () => null
+        child: () => null,
       } as unknown as TSNode;
 
       const mockStatementNode2 = {
         type: 'statement',
         text: 'sphere(5);',
         childCount: 0,
-        child: () => null
+        child: () => null,
       } as unknown as TSNode;
 
       const mockRootNode = {
@@ -227,18 +260,20 @@ describe('CompositeVisitor', () => {
           if (index === 0) return mockStatementNode1;
           if (index === 1) return mockStatementNode2;
           return null;
-        }
+        },
       } as unknown as TSNode;
 
       // Mock the visitNode method to return expected results
-      const visitNodeSpy = vi.spyOn(visitor, 'visitNode').mockImplementation((node: TSNode) => {
-        if (node === mockStatementNode1) {
-          return mockCubeNode;
-        } else if (node === mockStatementNode2) {
-          return mockSphereNode;
-        }
-        return null;
-      });
+      const visitNodeSpy = vi
+        .spyOn(visitor, 'visitNode')
+        .mockImplementation((node: TSNode) => {
+          if (node === mockStatementNode1) {
+            return mockCubeNode;
+          } else if (node === mockStatementNode2) {
+            return mockSphereNode;
+          }
+          return null;
+        });
 
       // Visit the mock node's children
       const results = visitor.visitChildren(mockRootNode);
@@ -272,13 +307,22 @@ describe('CompositeVisitor', () => {
               type: 'cube' as const,
               size: 10,
               center: false,
-              location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
-            } as ast.CubeNode
+              location: {
+                start: { line: 0, column: 0, offset: 0 },
+                end: { line: 0, column: 0, offset: 0 },
+              },
+            } as ast.CubeNode,
           ],
-          location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
-        } as ast.RotateNode
+          location: {
+            start: { line: 0, column: 0, offset: 0 },
+            end: { line: 0, column: 0, offset: 0 },
+          },
+        } as ast.RotateNode,
       ],
-      location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
+      location: {
+        start: { line: 0, column: 0, offset: 0 },
+        end: { line: 0, column: 0, offset: 0 },
+      },
     } as ast.TranslateNode;
 
     const mockUnionWithChildrenNode = {
@@ -288,15 +332,24 @@ describe('CompositeVisitor', () => {
           type: 'cube' as const,
           size: 10,
           center: false,
-          location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
+          location: {
+            start: { line: 0, column: 0, offset: 0 },
+            end: { line: 0, column: 0, offset: 0 },
+          },
         } as ast.CubeNode,
         {
           type: 'sphere' as const,
           radius: 5,
-          location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
-        } as ast.SphereNode
+          location: {
+            start: { line: 0, column: 0, offset: 0 },
+            end: { line: 0, column: 0, offset: 0 },
+          },
+        } as ast.SphereNode,
       ],
-      location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
+      location: {
+        start: { line: 0, column: 0, offset: 0 },
+        end: { line: 0, column: 0, offset: 0 },
+      },
     } as ast.UnionNode;
 
     const mockDifferenceNode = {
@@ -306,7 +359,10 @@ describe('CompositeVisitor', () => {
           type: 'cube' as const,
           size: 20,
           center: true,
-          location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
+          location: {
+            start: { line: 0, column: 0, offset: 0 },
+            end: { line: 0, column: 0, offset: 0 },
+          },
         } as ast.CubeNode,
         {
           type: 'translate' as const,
@@ -315,13 +371,22 @@ describe('CompositeVisitor', () => {
             {
               type: 'sphere' as const,
               radius: 10,
-              location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
-            } as ast.SphereNode
+              location: {
+                start: { line: 0, column: 0, offset: 0 },
+                end: { line: 0, column: 0, offset: 0 },
+              },
+            } as ast.SphereNode,
           ],
-          location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
-        } as ast.TranslateNode
+          location: {
+            start: { line: 0, column: 0, offset: 0 },
+            end: { line: 0, column: 0, offset: 0 },
+          },
+        } as ast.TranslateNode,
       ],
-      location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
+      location: {
+        start: { line: 0, column: 0, offset: 0 },
+        end: { line: 0, column: 0, offset: 0 },
+      },
     } as ast.DifferenceNode;
 
     it('should handle nested transformations', () => {
@@ -330,14 +395,18 @@ describe('CompositeVisitor', () => {
         type: 'module_instantiation',
         text: 'translate([1, 2, 3]) { rotate([30, 60, 90]) { cube(10); } }',
         childCount: 0,
-        child: () => null
+        child: () => null,
       } as unknown as TSNode;
 
       // Mock the first visitor to return null (PrimitiveVisitor)
-      const visitNodeSpy1 = vi.spyOn((visitor as any).getVisitor(0), 'visitNode').mockReturnValue(null);
+      const visitNodeSpy1 = vi
+        .spyOn((visitor as any).getVisitor(0), 'visitNode')
+        .mockReturnValue(null);
 
       // Mock the TransformVisitor to return a nested transform node
-      const visitNodeSpy2 = vi.spyOn((visitor as any).getVisitor(1), 'visitNode').mockReturnValue(mockNestedTransformNode);
+      const visitNodeSpy2 = vi
+        .spyOn((visitor as any).getVisitor(1), 'visitNode')
+        .mockReturnValue(mockNestedTransformNode);
 
       // Visit the node
       const result = visitor.visitNode(mockModuleInstantiationNode);
@@ -367,15 +436,21 @@ describe('CompositeVisitor', () => {
         type: 'module_instantiation',
         text: 'union() { cube(10); sphere(5); }',
         childCount: 0,
-        child: () => null
+        child: () => null,
       } as unknown as TSNode;
 
       // Mock the first two visitors to return null
-      const visitNodeSpy1 = vi.spyOn((visitor as any).getVisitor(0), 'visitNode').mockReturnValue(null);
-      const visitNodeSpy2 = vi.spyOn((visitor as any).getVisitor(1), 'visitNode').mockReturnValue(null);
+      const visitNodeSpy1 = vi
+        .spyOn((visitor as any).getVisitor(0), 'visitNode')
+        .mockReturnValue(null);
+      const visitNodeSpy2 = vi
+        .spyOn((visitor as any).getVisitor(1), 'visitNode')
+        .mockReturnValue(null);
 
       // Mock the CSGVisitor to return a union node with children
-      const visitNodeSpy3 = vi.spyOn((visitor as any).getVisitor(2), 'visitNode').mockReturnValue(mockUnionWithChildrenNode);
+      const visitNodeSpy3 = vi
+        .spyOn((visitor as any).getVisitor(2), 'visitNode')
+        .mockReturnValue(mockUnionWithChildrenNode);
 
       // Visit the node
       const result = visitor.visitNode(mockModuleInstantiationNode);
@@ -404,15 +479,21 @@ describe('CompositeVisitor', () => {
         type: 'module_instantiation',
         text: 'difference() { cube(20, center=true); translate([0, 0, 5]) sphere(10); }',
         childCount: 0,
-        child: () => null
+        child: () => null,
       } as unknown as TSNode;
 
       // Mock the first two visitors to return null
-      const visitNodeSpy1 = vi.spyOn((visitor as any).getVisitor(0), 'visitNode').mockReturnValue(null);
-      const visitNodeSpy2 = vi.spyOn((visitor as any).getVisitor(1), 'visitNode').mockReturnValue(null);
+      const visitNodeSpy1 = vi
+        .spyOn((visitor as any).getVisitor(0), 'visitNode')
+        .mockReturnValue(null);
+      const visitNodeSpy2 = vi
+        .spyOn((visitor as any).getVisitor(1), 'visitNode')
+        .mockReturnValue(null);
 
       // Mock the CSGVisitor to return a difference node with children
-      const visitNodeSpy3 = vi.spyOn((visitor as any).getVisitor(2), 'visitNode').mockReturnValue(mockDifferenceNode);
+      const visitNodeSpy3 = vi
+        .spyOn((visitor as any).getVisitor(2), 'visitNode')
+        .mockReturnValue(mockDifferenceNode);
 
       // Visit the node
       const result = visitor.visitNode(mockModuleInstantiationNode);

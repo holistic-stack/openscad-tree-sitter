@@ -1,20 +1,20 @@
-import {describe, it, expect, afterEach, beforeEach, vi} from 'vitest';
+import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
 import { OpenscadParser } from '../../openscad-parser';
 import * as cursorUtils from './cursor-utils';
-import {cstTreeCursorWalkLog} from "./cstTreeCursorWalkLog";
+import { cstTreeCursorWalkLog } from './cstTreeCursorWalkLog';
 
 describe('cursor-utils', () => {
   let parser: OpenscadParser;
 
   beforeEach(async () => {
-      parser = new OpenscadParser();
-      await parser.init('./tree-sitter-openscad.wasm');
-      console.log('Parser initialized successfully');
+    parser = new OpenscadParser();
+    await parser.init('./tree-sitter-openscad.wasm');
+    console.log('Parser initialized successfully');
   });
 
   afterEach(() => {
-      parser.dispose();
-      console.log('Parser disposed successfully');
+    parser.dispose();
+    console.log('Parser disposed successfully');
   });
 
   // Helper function to parse code and get cursor
@@ -34,12 +34,12 @@ describe('cursor-utils', () => {
       // Mock the cursor.nodeText property if it doesn't exist
       if (!Object.prototype.hasOwnProperty.call(cursor, 'nodeText')) {
         Object.defineProperty(cursor, 'nodeText', {
-          get: function() {
+          get: function () {
             return code.substring(
               this.startPosition.index,
               this.endPosition.index
             );
-          }
+          },
         });
       }
 
@@ -78,7 +78,9 @@ describe('cursor-utils', () => {
         };
 
         // Log the node
-        console.log(`${indent}Node: ${node.type} (${node.startPosition.row}:${node.startPosition.column}-${node.endPosition.row}:${node.endPosition.column})`);
+        console.log(
+          `${indent}Node: ${node.type} (${node.startPosition.row}:${node.startPosition.column}-${node.endPosition.row}:${node.endPosition.column})`
+        );
         console.log(`${indent}Text: "${node.text.replace(/\n/g, '\\n')}"`);
 
         // Log children recursively
@@ -119,7 +121,9 @@ describe('cursor-utils', () => {
         const isExpression = testNodeType('expression_statement');
         const isCall = testNodeType('call_expression');
 
-        console.log(`Node type is ${cursor.nodeType}, isStatement: ${isStatement}, isExpression: ${isExpression}, isCall: ${isCall}`);
+        console.log(
+          `Node type is ${cursor.nodeType}, isStatement: ${isStatement}, isExpression: ${isExpression}, isCall: ${isCall}`
+        );
 
         // Navigate to the function name if it's a call expression
         if (isCall && cursor.gotoFirstChild()) {
@@ -137,7 +141,9 @@ describe('cursor-utils', () => {
             console.log('Found cube function call');
           }
         } else {
-          console.log('Not a call expression or could not navigate to first child');
+          console.log(
+            'Not a call expression or could not navigate to first child'
+          );
         }
       } else {
         console.log('Could not navigate to first child');

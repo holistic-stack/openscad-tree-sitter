@@ -146,11 +146,14 @@ export class ParserError extends Error {
    * @param position - The tree-sitter position
    * @returns An ErrorPosition
    */
-  public static fromTreeSitterPosition(position: { row: number; column: number; }): ErrorPosition {
+  public static fromTreeSitterPosition(position: {
+    row: number;
+    column: number;
+  }): ErrorPosition {
     return {
       line: position.row,
       column: position.column,
-      offset: 0 // Tree-sitter doesn't provide offset directly
+      offset: 0, // Tree-sitter doesn't provide offset directly
     };
   }
 
@@ -168,7 +171,7 @@ export class ParserError extends Error {
     message: string,
     code: string,
     source: string,
-    node: { startPosition: { row: number; column: number; }; },
+    node: { startPosition: { row: number; column: number } },
     suggestions: ErrorSuggestion[] = []
   ): ParserError {
     const position = ParserError.fromTreeSitterPosition(node.startPosition);

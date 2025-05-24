@@ -7,7 +7,7 @@ describe('Intersection AST Generation', () => {
 
   beforeAll(async () => {
     parser = new OpenscadParser();
-    await parser.init("./tree-sitter-openscad.wasm");
+    await parser.init('./tree-sitter-openscad.wasm');
   });
 
   afterAll(() => {

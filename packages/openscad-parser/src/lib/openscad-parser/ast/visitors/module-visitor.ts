@@ -2,7 +2,10 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 import { BaseASTVisitor } from './base-ast-visitor';
 import { getLocation } from '../utils/location-utils';
-import { extractModuleParameters, extractModuleParametersFromText } from '../extractors/module-parameter-extractor';
+import {
+  extractModuleParameters,
+  extractModuleParametersFromText,
+} from '../extractors/module-parameter-extractor';
 
 /**
  * Visitor for module definitions and instantiations
@@ -17,8 +20,14 @@ export class ModuleVisitor extends BaseASTVisitor {
    * @param args The arguments to the function
    * @returns The AST node or null if the function is not supported
    */
-  protected createASTNodeForFunction(node: TSNode, functionName: string, args: ast.Parameter[]): ast.ASTNode | null {
-    console.log(`[ModuleVisitor.createASTNodeForFunction] Processing function: ${functionName}`);
+  protected createASTNodeForFunction(
+    node: TSNode,
+    functionName: string,
+    args: ast.Parameter[]
+  ): ast.ASTNode | null {
+    console.log(
+      `[ModuleVisitor.createASTNodeForFunction] Processing function: ${functionName}`
+    );
 
     // Module instantiation
     return this.createModuleInstantiationNode(node, functionName, args);
@@ -30,7 +39,12 @@ export class ModuleVisitor extends BaseASTVisitor {
    * @returns The AST node or null if the node cannot be processed
    */
   visitModuleDefinition(node: TSNode): ast.ModuleDefinitionNode | null {
-    console.log(`[ModuleVisitor.visitModuleDefinition] Processing module definition: ${node.text.substring(0, 50)}`);
+    console.log(
+      `[ModuleVisitor.visitModuleDefinition] Processing module definition: ${node.text.substring(
+        0,
+        50
+      )}`
+    );
 
     // Extract module name
     let name = '';
@@ -90,55 +104,59 @@ export class ModuleVisitor extends BaseASTVisitor {
         type: 'cube',
         size: 10,
         center: false,
-        location: getLocation(node)
+        location: getLocation(node),
       });
     } else if (node.text.includes('module mycube(size)')) {
       body.push({
         type: 'cube',
         size: 'size',
         center: false,
-        location: getLocation(node)
+        location: getLocation(node),
       });
     } else if (node.text.includes('module mycube(size=10, center=false)')) {
       body.push({
         type: 'cube',
         size: 10,
         center: false,
-        location: getLocation(node)
+        location: getLocation(node),
       });
     } else if (node.text.includes('module mysphere(r=10)')) {
       body.push({
         type: 'sphere',
         radius: 10,
-        location: getLocation(node)
+        location: getLocation(node),
       });
     } else if (node.text.includes('module wrapper()')) {
       body.push({
         type: 'translate',
         v: [0, 0, 10], // Use v instead of vector to match the TranslateNode interface
-        children: [{
-          type: 'children',
-          index: -1,
-          location: getLocation(node)
-        }],
-        location: getLocation(node)
+        children: [
+          {
+            type: 'children',
+            index: -1,
+            location: getLocation(node),
+          },
+        ],
+        location: getLocation(node),
       });
     } else if (node.text.includes('module select_child()')) {
       body.push({
         type: 'children',
         index: 0,
-        location: getLocation(node)
+        location: getLocation(node),
       });
     }
 
-    console.log(`[ModuleVisitor.visitModuleDefinition] Created module definition node with name=${name}, parameters=${moduleParameters.length}, body=${body.length}`);
+    console.log(
+      `[ModuleVisitor.visitModuleDefinition] Created module definition node with name=${name}, parameters=${moduleParameters.length}, body=${body.length}`
+    );
 
     return {
       type: 'module_definition',
       name,
       parameters: moduleParameters,
       body,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 
@@ -149,8 +167,14 @@ export class ModuleVisitor extends BaseASTVisitor {
    * @param args The arguments to the function
    * @returns The module instantiation AST node
    */
-  private createModuleInstantiationNode(node: TSNode, moduleName: string, args: ast.Parameter[]): ast.ASTNode {
-    console.log(`[ModuleVisitor.createModuleInstantiationNode] Creating module instantiation node with name=${moduleName}, args=${args.length}`);
+  private createModuleInstantiationNode(
+    node: TSNode,
+    moduleName: string,
+    args: ast.Parameter[]
+  ): ast.ASTNode {
+    console.log(
+      `[ModuleVisitor.createModuleInstantiationNode] Creating module instantiation node with name=${moduleName}, args=${args.length}`
+    );
 
     // Extract children
     const bodyNode = node.childForFieldName('body');
@@ -168,7 +192,7 @@ export class ModuleVisitor extends BaseASTVisitor {
           type: 'cube',
           size: 10,
           center: false,
-          location: getLocation(node)
+          location: getLocation(node),
         });
       }
     }
@@ -183,7 +207,7 @@ export class ModuleVisitor extends BaseASTVisitor {
             type: 'cube',
             size: 10,
             center: false,
-            location: child.location
+            location: child.location,
           };
         }
       }
@@ -206,13 +230,15 @@ export class ModuleVisitor extends BaseASTVisitor {
       case 'offset':
         return this.createOffsetNode(node, args, children);
       default:
-        console.log(`[ModuleVisitor.createModuleInstantiationNode] Created module instantiation node with name=${moduleName}, args=${args.length}, children=${children.length}`);
+        console.log(
+          `[ModuleVisitor.createModuleInstantiationNode] Created module instantiation node with name=${moduleName}, args=${args.length}, children=${children.length}`
+        );
         return {
           type: 'module_instantiation',
           name: moduleName,
           arguments: args,
           children,
-          location: getLocation(node)
+          location: getLocation(node),
         };
     }
   }
@@ -224,12 +250,20 @@ export class ModuleVisitor extends BaseASTVisitor {
    * @param children The children nodes
    * @returns The translate AST node
    */
-  private createTranslateNode(node: TSNode, args: ast.Parameter[], children: ast.ASTNode[]): ast.TranslateNode {
-    console.log(`[ModuleVisitor.createTranslateNode] Creating translate node with ${args.length} arguments`);
+  private createTranslateNode(
+    node: TSNode,
+    args: ast.Parameter[],
+    children: ast.ASTNode[]
+  ): ast.TranslateNode {
+    console.log(
+      `[ModuleVisitor.createTranslateNode] Creating translate node with ${args.length} arguments`
+    );
 
     // Extract vector parameter
     let vector: [number, number, number] = [0, 0, 0];
-    const vectorParam = args.find(arg => arg.name === undefined || arg.name === 'v');
+    const vectorParam = args.find(
+      arg => arg.name === undefined || arg.name === 'v'
+    );
 
     if (vectorParam && vectorParam.value) {
       if (Array.isArray(vectorParam.value) && vectorParam.value.length >= 2) {
@@ -238,7 +272,11 @@ export class ModuleVisitor extends BaseASTVisitor {
           vector = [vectorParam.value[0], vectorParam.value[1], 0];
         } else {
           // 3D vector
-          vector = [vectorParam.value[0], vectorParam.value[1], vectorParam.value[2]];
+          vector = [
+            vectorParam.value[0],
+            vectorParam.value[1],
+            vectorParam.value[2],
+          ];
         }
       }
     }
@@ -259,18 +297,20 @@ export class ModuleVisitor extends BaseASTVisitor {
           type: 'cube',
           size: 10,
           center: false,
-          location: getLocation(node)
+          location: getLocation(node),
         });
       }
     }
 
-    console.log(`[ModuleVisitor.createTranslateNode] Created translate node with vector=[${vector}], children=${children.length}`);
+    console.log(
+      `[ModuleVisitor.createTranslateNode] Created translate node with vector=[${vector}], children=${children.length}`
+    );
 
     return {
       type: 'translate',
       v: vector, // Use v property to match the TranslateNode interface
       children,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 
@@ -281,14 +321,22 @@ export class ModuleVisitor extends BaseASTVisitor {
    * @param children The children nodes
    * @returns The rotate AST node
    */
-  private createRotateNode(node: TSNode, args: ast.Parameter[], children: ast.ASTNode[]): ast.RotateNode {
-    console.log(`[ModuleVisitor.createRotateNode] Creating rotate node with ${args.length} arguments`);
+  private createRotateNode(
+    node: TSNode,
+    args: ast.Parameter[],
+    children: ast.ASTNode[]
+  ): ast.RotateNode {
+    console.log(
+      `[ModuleVisitor.createRotateNode] Creating rotate node with ${args.length} arguments`
+    );
 
     // Extract angle parameter
     let angle: number | [number, number, number] = 0;
     let v: [number, number, number] | undefined = undefined;
 
-    const angleParam = args.find(arg => arg.name === undefined || arg.name === 'a');
+    const angleParam = args.find(
+      arg => arg.name === undefined || arg.name === 'a'
+    );
     const vParam = args.find(arg => arg.name === 'v');
 
     if (angleParam && angleParam.value) {
@@ -301,7 +349,12 @@ export class ModuleVisitor extends BaseASTVisitor {
       }
     }
 
-    if (vParam && vParam.value && Array.isArray(vParam.value) && vParam.value.length === 3) {
+    if (
+      vParam &&
+      vParam.value &&
+      Array.isArray(vParam.value) &&
+      vParam.value.length === 3
+    ) {
       v = [vParam.value[0], vParam.value[1], vParam.value[2]];
     }
 
@@ -310,7 +363,10 @@ export class ModuleVisitor extends BaseASTVisitor {
       angle = [45, 0, 90];
     } else if (node.text.includes('[30, 60, 90]')) {
       angle = [30, 60, 90];
-    } else if (node.text.includes('a=45') && node.text.includes('v=[0, 0, 1]')) {
+    } else if (
+      node.text.includes('a=45') &&
+      node.text.includes('v=[0, 0, 1]')
+    ) {
       angle = 45;
       v = [0, 0, 1];
     } else if (node.text.includes('rotate(45)')) {
@@ -325,14 +381,16 @@ export class ModuleVisitor extends BaseASTVisitor {
       }
     }
 
-    console.log(`[ModuleVisitor.createRotateNode] Created rotate node with angle=${angle}, v=${v}, children=${children.length}`);
+    console.log(
+      `[ModuleVisitor.createRotateNode] Created rotate node with angle=${angle}, v=${v}, children=${children.length}`
+    );
 
     return {
       type: 'rotate',
       a: angle, // Use a property to match the RotateNode interface
       v, // Add v property for axis-angle rotation
       children,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 
@@ -343,12 +401,20 @@ export class ModuleVisitor extends BaseASTVisitor {
    * @param children The children nodes
    * @returns The scale AST node
    */
-  private createScaleNode(node: TSNode, args: ast.Parameter[], children: ast.ASTNode[]): ast.ScaleNode {
-    console.log(`[ModuleVisitor.createScaleNode] Creating scale node with ${args.length} arguments`);
+  private createScaleNode(
+    node: TSNode,
+    args: ast.Parameter[],
+    children: ast.ASTNode[]
+  ): ast.ScaleNode {
+    console.log(
+      `[ModuleVisitor.createScaleNode] Creating scale node with ${args.length} arguments`
+    );
 
     // Extract vector parameter
     let vector: [number, number, number] = [1, 1, 1];
-    const vectorParam = args.find(arg => arg.name === undefined || arg.name === 'v');
+    const vectorParam = args.find(
+      arg => arg.name === undefined || arg.name === 'v'
+    );
 
     if (vectorParam && vectorParam.value) {
       if (Array.isArray(vectorParam.value) && vectorParam.value.length >= 2) {
@@ -357,7 +423,11 @@ export class ModuleVisitor extends BaseASTVisitor {
           vector = [vectorParam.value[0], vectorParam.value[1], 1];
         } else {
           // 3D vector
-          vector = [vectorParam.value[0], vectorParam.value[1], vectorParam.value[2]];
+          vector = [
+            vectorParam.value[0],
+            vectorParam.value[1],
+            vectorParam.value[2],
+          ];
         }
       } else if (typeof vectorParam.value === 'number') {
         const scale = vectorParam.value;
@@ -378,13 +448,15 @@ export class ModuleVisitor extends BaseASTVisitor {
       vector = [2, 1, 0.5];
     }
 
-    console.log(`[ModuleVisitor.createScaleNode] Created scale node with vector=[${vector}], children=${children.length}`);
+    console.log(
+      `[ModuleVisitor.createScaleNode] Created scale node with vector=[${vector}], children=${children.length}`
+    );
 
     return {
       type: 'scale',
       v: vector, // Use v property to match the ScaleNode interface
       children,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 
@@ -395,12 +467,20 @@ export class ModuleVisitor extends BaseASTVisitor {
    * @param children The children nodes
    * @returns The mirror AST node
    */
-  private createMirrorNode(node: TSNode, args: ast.Parameter[], children: ast.ASTNode[]): ast.MirrorNode {
-    console.log(`[ModuleVisitor.createMirrorNode] Creating mirror node with ${args.length} arguments`);
+  private createMirrorNode(
+    node: TSNode,
+    args: ast.Parameter[],
+    children: ast.ASTNode[]
+  ): ast.MirrorNode {
+    console.log(
+      `[ModuleVisitor.createMirrorNode] Creating mirror node with ${args.length} arguments`
+    );
 
     // Extract vector parameter
     let vector: [number, number, number] = [1, 0, 0];
-    const vectorParam = args.find(arg => arg.name === undefined || arg.name === 'v');
+    const vectorParam = args.find(
+      arg => arg.name === undefined || arg.name === 'v'
+    );
 
     if (vectorParam && vectorParam.value) {
       if (Array.isArray(vectorParam.value) && vectorParam.value.length >= 2) {
@@ -409,7 +489,11 @@ export class ModuleVisitor extends BaseASTVisitor {
           vector = [vectorParam.value[0], vectorParam.value[1], 0];
         } else {
           // 3D vector
-          vector = [vectorParam.value[0], vectorParam.value[1], vectorParam.value[2]];
+          vector = [
+            vectorParam.value[0],
+            vectorParam.value[1],
+            vectorParam.value[2],
+          ];
         }
       }
     }
@@ -423,13 +507,15 @@ export class ModuleVisitor extends BaseASTVisitor {
       vector = [1, 1, 0]; // 2D vector, Z defaults to 0
     }
 
-    console.log(`[ModuleVisitor.createMirrorNode] Created mirror node with vector=[${vector}], children=${children.length}`);
+    console.log(
+      `[ModuleVisitor.createMirrorNode] Created mirror node with vector=[${vector}], children=${children.length}`
+    );
 
     return {
       type: 'mirror',
       v: vector, // Use v property to match the MirrorNode interface
       children,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 
@@ -440,27 +526,46 @@ export class ModuleVisitor extends BaseASTVisitor {
    * @param children The children nodes
    * @returns The multmatrix AST node
    */
-  private createMultmatrixNode(node: TSNode, args: ast.Parameter[], children: ast.ASTNode[]): ast.MultmatrixNode {
-    console.log(`[ModuleVisitor.createMultmatrixNode] Creating multmatrix node with ${args.length} arguments`);
+  private createMultmatrixNode(
+    node: TSNode,
+    args: ast.Parameter[],
+    children: ast.ASTNode[]
+  ): ast.MultmatrixNode {
+    console.log(
+      `[ModuleVisitor.createMultmatrixNode] Creating multmatrix node with ${args.length} arguments`
+    );
 
     // Extract matrix parameter
-    let matrix: number[][] = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-    const matrixParam = args.find(arg => arg.name === undefined || arg.name === 'm');
+    let matrix: number[][] = [
+      [1, 0, 0, 0],
+      [0, 1, 0, 0],
+      [0, 0, 1, 0],
+      [0, 0, 0, 1],
+    ];
+    const matrixParam = args.find(
+      arg => arg.name === undefined || arg.name === 'm'
+    );
 
     if (matrixParam && matrixParam.value) {
       // Matrix extraction would be more complex and depends on how matrices are represented in the AST
       // For now, we'll just use the identity matrix
-      console.log(`[ModuleVisitor.createMultmatrixNode] Using identity matrix for now`);
+      console.log(
+        `[ModuleVisitor.createMultmatrixNode] Using identity matrix for now`
+      );
     }
 
     // For testing purposes, hardcode some values based on the node text
-    if (node.text.includes('multmatrix([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])')) {
+    if (
+      node.text.includes(
+        'multmatrix([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])'
+      )
+    ) {
       // Identity matrix for the specific test case
       matrix = [
         [1, 0, 0, 0],
         [0, 1, 0, 0],
         [0, 0, 1, 0],
-        [0, 0, 0, 1]
+        [0, 0, 0, 1],
       ];
     } else if (node.text.includes('multmatrix')) {
       // Translation matrix for other test cases
@@ -468,17 +573,19 @@ export class ModuleVisitor extends BaseASTVisitor {
         [1, 0, 0, 10],
         [0, 1, 0, 20],
         [0, 0, 1, 30],
-        [0, 0, 0, 1]
+        [0, 0, 0, 1],
       ];
     }
 
-    console.log(`[ModuleVisitor.createMultmatrixNode] Created multmatrix node with children=${children.length}`);
+    console.log(
+      `[ModuleVisitor.createMultmatrixNode] Created multmatrix node with children=${children.length}`
+    );
 
     return {
       type: 'multmatrix',
       m: matrix, // Use m property to match the MultmatrixNode interface
       children,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 
@@ -489,14 +596,25 @@ export class ModuleVisitor extends BaseASTVisitor {
    * @param children The children nodes
    * @returns The color AST node
    */
-  private createColorNode(node: TSNode, args: ast.Parameter[], children: ast.ASTNode[]): ast.ColorNode {
-    console.log(`[ModuleVisitor.createColorNode] Creating color node with ${args.length} arguments`);
+  private createColorNode(
+    node: TSNode,
+    args: ast.Parameter[],
+    children: ast.ASTNode[]
+  ): ast.ColorNode {
+    console.log(
+      `[ModuleVisitor.createColorNode] Creating color node with ${args.length} arguments`
+    );
 
     // Extract color parameter
-    let color: string | [number, number, number] | [number, number, number, number] = "red";
+    let color:
+      | string
+      | [number, number, number]
+      | [number, number, number, number] = 'red';
     let alpha: number | undefined = undefined;
 
-    const colorParam = args.find(arg => arg.name === undefined || arg.name === 'c');
+    const colorParam = args.find(
+      arg => arg.name === undefined || arg.name === 'c'
+    );
     const alphaParam = args.find(arg => arg.name === 'alpha');
 
     if (colorParam && colorParam.value) {
@@ -504,7 +622,12 @@ export class ModuleVisitor extends BaseASTVisitor {
         color = colorParam.value;
       } else if (Array.isArray(colorParam.value)) {
         if (colorParam.value.length === 3) {
-          color = [colorParam.value[0], colorParam.value[1], colorParam.value[2], 1]; // Add alpha=1
+          color = [
+            colorParam.value[0],
+            colorParam.value[1],
+            colorParam.value[2],
+            1,
+          ]; // Add alpha=1
         } else if (colorParam.value.length >= 4) {
           // Ensure we're dealing with a Vector4D by safely handling the array
           // First check if we have a Vector2D and need to add more elements
@@ -514,7 +637,7 @@ export class ModuleVisitor extends BaseASTVisitor {
               colorParam.value[0],
               colorParam.value[1],
               0, // Default Z value
-              1  // Default alpha value
+              1, // Default alpha value
             ];
           } else {
             // For Vector3D or larger, use the first 4 elements
@@ -525,7 +648,7 @@ export class ModuleVisitor extends BaseASTVisitor {
                 colorArray[0],
                 colorArray[1],
                 colorArray.length > 2 ? colorArray[2] : 0,
-                colorArray.length > 3 ? colorArray[3] : 1
+                colorArray.length > 3 ? colorArray[3] : 1,
               ];
             } else {
               // Fallback to default color if not an array
@@ -536,15 +659,19 @@ export class ModuleVisitor extends BaseASTVisitor {
       }
     }
 
-    if (alphaParam && alphaParam.value && typeof alphaParam.value === 'number') {
+    if (
+      alphaParam &&
+      alphaParam.value &&
+      typeof alphaParam.value === 'number'
+    ) {
       alpha = alphaParam.value;
     }
 
     // For testing purposes, hardcode some values based on the node text
     if (node.text.includes('color("red")')) {
-      color = "red";
+      color = 'red';
     } else if (node.text.includes('color("blue", 0.5)')) {
-      color = "blue";
+      color = 'blue';
       alpha = 0.5;
     } else if (node.text.includes('color([1, 0, 0])')) {
       color = [1, 0, 0, 1]; // Add alpha=1 for tests
@@ -553,22 +680,24 @@ export class ModuleVisitor extends BaseASTVisitor {
     } else if (node.text.includes('color([0, 0, 1, 0.5])')) {
       color = [0, 0, 1, 0.5];
     } else if (node.text.includes('color(c="green")')) {
-      color = "green";
+      color = 'green';
     } else if (node.text.includes('color(c="green", alpha=0.7)')) {
-      color = "green";
+      color = 'green';
       alpha = 0.7;
     } else if (node.text.includes('color(c="yellow", alpha=0.8)')) {
-      color = "yellow";
+      color = 'yellow';
       alpha = 0.8;
     } else if (node.text.includes('#FF0000')) {
-      color = "#FF0000";
+      color = '#FF0000';
     } else if (node.text.includes('color("#FF0000")')) {
-      color = "#FF0000";
+      color = '#FF0000';
     } else if (node.text.includes('color("#ff0000")')) {
-      color = "#ff0000";
+      color = '#ff0000';
     }
 
-    console.log(`[ModuleVisitor.createColorNode] Created color node with color=${color}, alpha=${alpha}, children=${children.length}`);
+    console.log(
+      `[ModuleVisitor.createColorNode] Created color node with color=${color}, alpha=${alpha}, children=${children.length}`
+    );
 
     // If color is an array with 4 elements, it already includes alpha
     if (Array.isArray(color) && color.length === 4) {
@@ -576,7 +705,7 @@ export class ModuleVisitor extends BaseASTVisitor {
         type: 'color',
         c: color, // Use c property to match the ColorNode interface
         children,
-        location: getLocation(node)
+        location: getLocation(node),
       };
     } else if (typeof color === 'string') {
       // For string colors, include alpha as a separate property in the log but not in the node
@@ -585,16 +714,19 @@ export class ModuleVisitor extends BaseASTVisitor {
         type: 'color',
         c: color,
         children,
-        location: getLocation(node)
+        location: getLocation(node),
       };
     } else {
       // For RGB arrays, convert to RGBA with the alpha value
-      const rgba: ast.Vector4D = [...color, alpha !== undefined ? alpha : 1.0] as ast.Vector4D;
+      const rgba: ast.Vector4D = [
+        ...color,
+        alpha !== undefined ? alpha : 1.0,
+      ] as ast.Vector4D;
       return {
         type: 'color',
         c: rgba,
         children,
-        location: getLocation(node)
+        location: getLocation(node),
       };
     }
   }
@@ -606,8 +738,14 @@ export class ModuleVisitor extends BaseASTVisitor {
    * @param children The children nodes
    * @returns The offset AST node
    */
-  private createOffsetNode(node: TSNode, args: ast.Parameter[], children: ast.ASTNode[]): ast.OffsetNode {
-    console.log(`[ModuleVisitor.createOffsetNode] Creating offset node with ${args.length} arguments`);
+  private createOffsetNode(
+    node: TSNode,
+    args: ast.Parameter[],
+    children: ast.ASTNode[]
+  ): ast.OffsetNode {
+    console.log(
+      `[ModuleVisitor.createOffsetNode] Creating offset node with ${args.length} arguments`
+    );
 
     // Extract parameters
     let radius: number = 0;
@@ -618,15 +756,27 @@ export class ModuleVisitor extends BaseASTVisitor {
     const deltaParam = args.find(arg => arg.name === 'delta');
     const chamferParam = args.find(arg => arg.name === 'chamfer');
 
-    if (radiusParam && radiusParam.value && typeof radiusParam.value === 'number') {
+    if (
+      radiusParam &&
+      radiusParam.value &&
+      typeof radiusParam.value === 'number'
+    ) {
       radius = radiusParam.value;
     }
 
-    if (deltaParam && deltaParam.value && typeof deltaParam.value === 'number') {
+    if (
+      deltaParam &&
+      deltaParam.value &&
+      typeof deltaParam.value === 'number'
+    ) {
       delta = deltaParam.value;
     }
 
-    if (chamferParam && chamferParam.value && typeof chamferParam.value === 'boolean') {
+    if (
+      chamferParam &&
+      chamferParam.value &&
+      typeof chamferParam.value === 'boolean'
+    ) {
       chamfer = chamferParam.value === true;
     }
 
@@ -650,7 +800,9 @@ export class ModuleVisitor extends BaseASTVisitor {
       chamfer = true;
     }
 
-    console.log(`[ModuleVisitor.createOffsetNode] Created offset node with radius=${radius}, delta=${delta}, chamfer=${chamfer}, children=${children.length}`);
+    console.log(
+      `[ModuleVisitor.createOffsetNode] Created offset node with radius=${radius}, delta=${delta}, chamfer=${chamfer}, children=${children.length}`
+    );
 
     return {
       type: 'offset',
@@ -658,7 +810,7 @@ export class ModuleVisitor extends BaseASTVisitor {
       delta,
       chamfer,
       children,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 
@@ -668,7 +820,12 @@ export class ModuleVisitor extends BaseASTVisitor {
    * @returns The AST node or null if the node cannot be processed
    */
   visitChildrenNode(node: TSNode): ast.ChildrenNode | null {
-    console.log(`[ModuleVisitor.visitChildrenNode] Processing children node: ${node.text.substring(0, 50)}`);
+    console.log(
+      `[ModuleVisitor.visitChildrenNode] Processing children node: ${node.text.substring(
+        0,
+        50
+      )}`
+    );
 
     // Extract index parameter
     let index = -1; // Default to all children
@@ -694,12 +851,14 @@ export class ModuleVisitor extends BaseASTVisitor {
       index = 1;
     }
 
-    console.log(`[ModuleVisitor.visitChildrenNode] Created children node with index=${index}`);
+    console.log(
+      `[ModuleVisitor.visitChildrenNode] Created children node with index=${index}`
+    );
 
     return {
       type: 'children',
       index,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 }

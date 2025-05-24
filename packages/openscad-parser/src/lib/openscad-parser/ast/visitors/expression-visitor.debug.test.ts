@@ -10,7 +10,7 @@ describe('ExpressionVisitor Debug', () => {
 
   beforeEach(async () => {
     parser = new OpenscadParser();
-    await parser.init("./tree-sitter-openscad.wasm");
+    await parser.init('./tree-sitter-openscad.wasm');
     visitor = new ExpressionVisitor('');
   });
 
@@ -32,16 +32,16 @@ describe('ExpressionVisitor Debug', () => {
     for (let i = 0; i < tree!.rootNode.childCount; i++) {
       const child = tree!.rootNode.child(i);
       if (!child) continue;
-      
+
       console.log(`Child ${i} type:`, child.type);
       console.log(`Child ${i} text:`, child.text);
       console.log(`Child ${i} child count:`, child.childCount);
-      
+
       // Log the structure of each grandchild
       for (let j = 0; j < child.childCount; j++) {
         const grandchild = child.child(j);
         if (!grandchild) continue;
-        
+
         console.log(`Grandchild ${i}.${j} type:`, grandchild.type);
         console.log(`Grandchild ${i}.${j} text:`, grandchild.text);
         console.log(`Grandchild ${i}.${j} child count:`, grandchild.childCount);
@@ -63,16 +63,16 @@ describe('ExpressionVisitor Debug', () => {
     for (let i = 0; i < tree!.rootNode.childCount; i++) {
       const child = tree!.rootNode.child(i);
       if (!child) continue;
-      
+
       console.log(`Child ${i} type:`, child.type);
       console.log(`Child ${i} text:`, child.text);
       console.log(`Child ${i} child count:`, child.childCount);
-      
+
       // Log the structure of each grandchild
       for (let j = 0; j < child.childCount; j++) {
         const grandchild = child.child(j);
         if (!grandchild) continue;
-        
+
         console.log(`Grandchild ${i}.${j} type:`, grandchild.type);
         console.log(`Grandchild ${i}.${j} text:`, grandchild.text);
         console.log(`Grandchild ${i}.${j} child count:`, grandchild.childCount);
@@ -81,10 +81,19 @@ describe('ExpressionVisitor Debug', () => {
         for (let k = 0; k < grandchild.childCount; k++) {
           const greatGrandchild = grandchild.child(k);
           if (!greatGrandchild) continue;
-          
-          console.log(`Great-grandchild ${i}.${j}.${k} type:`, greatGrandchild.type);
-          console.log(`Great-grandchild ${i}.${j}.${k} text:`, greatGrandchild.text);
-          console.log(`Great-grandchild ${i}.${j}.${k} child count:`, greatGrandchild.childCount);
+
+          console.log(
+            `Great-grandchild ${i}.${j}.${k} type:`,
+            greatGrandchild.type
+          );
+          console.log(
+            `Great-grandchild ${i}.${j}.${k} text:`,
+            greatGrandchild.text
+          );
+          console.log(
+            `Great-grandchild ${i}.${j}.${k} child count:`,
+            greatGrandchild.childCount
+          );
         }
       }
     }

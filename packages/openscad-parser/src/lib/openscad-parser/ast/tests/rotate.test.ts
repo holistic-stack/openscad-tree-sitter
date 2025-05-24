@@ -7,7 +7,7 @@ describe('Rotate AST Generation', () => {
 
   beforeAll(async () => {
     parser = new OpenscadParser();
-    await parser.init("./tree-sitter-openscad.wasm");
+    await parser.init('./tree-sitter-openscad.wasm');
 
     // Mock the parseAST method to return hardcoded values for tests
     vi.spyOn(parser, 'parseAST').mockImplementation((code: string) => {
@@ -22,11 +22,17 @@ describe('Rotate AST Generation', () => {
                 type: 'cube',
                 size: 10,
                 center: false,
-                location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 10, offset: 10 } }
-              }
+                location: {
+                  start: { line: 0, column: 0, offset: 0 },
+                  end: { line: 0, column: 10, offset: 10 },
+                },
+              },
             ],
-            location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 20, offset: 20 } }
-          }
+            location: {
+              start: { line: 0, column: 0, offset: 0 },
+              end: { line: 0, column: 20, offset: 20 },
+            },
+          },
         ];
       } else if (code === 'rotate([45, 0, 90]) cube(10);') {
         return [
@@ -38,11 +44,17 @@ describe('Rotate AST Generation', () => {
                 type: 'cube',
                 size: 10,
                 center: false,
-                location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 10, offset: 10 } }
-              }
+                location: {
+                  start: { line: 0, column: 0, offset: 0 },
+                  end: { line: 0, column: 10, offset: 10 },
+                },
+              },
             ],
-            location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 28, offset: 28 } }
-          }
+            location: {
+              start: { line: 0, column: 0, offset: 0 },
+              end: { line: 0, column: 28, offset: 28 },
+            },
+          },
         ];
       } else if (code === 'rotate(a=45, v=[0, 0, 1]) cube(10);') {
         return [
@@ -55,16 +67,25 @@ describe('Rotate AST Generation', () => {
                 type: 'cube',
                 size: 10,
                 center: false,
-                location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 10, offset: 10 } }
-              }
+                location: {
+                  start: { line: 0, column: 0, offset: 0 },
+                  end: { line: 0, column: 10, offset: 10 },
+                },
+              },
             ],
-            location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 35, offset: 35 } }
-          }
+            location: {
+              start: { line: 0, column: 0, offset: 0 },
+              end: { line: 0, column: 35, offset: 35 },
+            },
+          },
         ];
-      } else if (code === `rotate([45, 0, 90]) {
+      } else if (
+        code ===
+        `rotate([45, 0, 90]) {
         cube(10);
         sphere(5);
-      }`) {
+      }`
+      ) {
         return [
           {
             type: 'rotate',
@@ -74,16 +95,25 @@ describe('Rotate AST Generation', () => {
                 type: 'cube',
                 size: 10,
                 center: false,
-                location: { start: { line: 1, column: 8, offset: 28 }, end: { line: 1, column: 16, offset: 36 } }
+                location: {
+                  start: { line: 1, column: 8, offset: 28 },
+                  end: { line: 1, column: 16, offset: 36 },
+                },
               },
               {
                 type: 'sphere',
                 r: 5,
-                location: { start: { line: 2, column: 8, offset: 45 }, end: { line: 2, column: 16, offset: 53 } }
-              }
+                location: {
+                  start: { line: 2, column: 8, offset: 45 },
+                  end: { line: 2, column: 16, offset: 53 },
+                },
+              },
             ],
-            location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 3, column: 7, offset: 61 } }
-          }
+            location: {
+              start: { line: 0, column: 0, offset: 0 },
+              end: { line: 3, column: 7, offset: 61 },
+            },
+          },
         ];
       } else {
         return [];

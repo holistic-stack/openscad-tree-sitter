@@ -9,7 +9,7 @@ describe('FunctionVisitor', () => {
 
   beforeAll(async () => {
     parser = new OpenscadParser();
-    await parser.init("./tree-sitter-openscad.wasm");
+    await parser.init('./tree-sitter-openscad.wasm');
   });
 
   afterAll(() => {
@@ -36,7 +36,7 @@ describe('FunctionVisitor', () => {
             return { text: '42' } as TSNode;
           }
           return null;
-        }
+        },
       } as TSNode;
 
       const visitor = new FunctionVisitor(code);
@@ -68,7 +68,7 @@ describe('FunctionVisitor', () => {
             return { text: 'a + b' } as TSNode;
           }
           return null;
-        }
+        },
       } as TSNode;
 
       const visitor = new FunctionVisitor(code);
@@ -102,7 +102,7 @@ describe('FunctionVisitor', () => {
             return { text: 'a + b' } as TSNode;
           }
           return null;
-        }
+        },
       } as TSNode;
 
       const visitor = new FunctionVisitor(code);
@@ -138,7 +138,7 @@ describe('FunctionVisitor', () => {
             return { text: '[x, y, z]' } as TSNode;
           }
           return null;
-        }
+        },
       } as TSNode;
 
       const visitor = new FunctionVisitor(code);
@@ -181,9 +181,9 @@ describe('FunctionVisitor', () => {
             value: 1,
             location: {
               start: { line: 0, column: 0, offset: 0 },
-              end: { line: 0, column: 0, offset: 0 }
-            }
-          }
+              end: { line: 0, column: 0, offset: 0 },
+            },
+          },
         },
         {
           name: undefined,
@@ -193,10 +193,10 @@ describe('FunctionVisitor', () => {
             value: 2,
             location: {
               start: { line: 0, column: 0, offset: 0 },
-              end: { line: 0, column: 0, offset: 0 }
-            }
-          }
-        }
+              end: { line: 0, column: 0, offset: 0 },
+            },
+          },
+        },
       ]);
 
       expect(result).not.toBeNull();

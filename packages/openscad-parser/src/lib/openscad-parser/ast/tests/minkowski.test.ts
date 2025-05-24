@@ -5,15 +5,14 @@ import * as ast from '../ast-types';
 describe('Minkowski Operation AST Generation', () => {
   let parser: OpenscadParser;
 
-    beforeAll(async () => {
-        parser = new OpenscadParser();
-        await parser.init("./tree-sitter-openscad.wasm");
-    });
+  beforeAll(async () => {
+    parser = new OpenscadParser();
+    await parser.init('./tree-sitter-openscad.wasm');
+  });
 
-    afterAll(() => {
-        parser.dispose();
-    });
-
+  afterAll(() => {
+    parser.dispose();
+  });
 
   it('should parse a basic minkowski sum of multiple children', async () => {
     const code = `
@@ -33,8 +32,12 @@ describe('Minkowski Operation AST Generation', () => {
 
     // If there are children, check for cube and cylinder nodes
     if (minkowskiNode.children && minkowskiNode.children.length > 0) {
-      const cubeNode = minkowskiNode.children.find((child: any) => child.type === 'cube');
-      const cylinderNode = minkowskiNode.children.find((child: any) => child.type === 'cylinder');
+      const cubeNode = minkowskiNode.children.find(
+        (child: any) => child.type === 'cube'
+      );
+      const cylinderNode = minkowskiNode.children.find(
+        (child: any) => child.type === 'cylinder'
+      );
 
       // At least one of these should be defined
       expect(cubeNode !== undefined || cylinderNode !== undefined).toBe(true);
@@ -59,8 +62,12 @@ describe('Minkowski Operation AST Generation', () => {
 
     // If there are children, check for cube and sphere nodes
     if (minkowskiNode.children && minkowskiNode.children.length > 0) {
-      const cubeNode = minkowskiNode.children.find((child: any) => child.type === 'cube');
-      const sphereNode = minkowskiNode.children.find((child: any) => child.type === 'sphere');
+      const cubeNode = minkowskiNode.children.find(
+        (child: any) => child.type === 'cube'
+      );
+      const sphereNode = minkowskiNode.children.find(
+        (child: any) => child.type === 'sphere'
+      );
 
       // At least one of these should be defined
       expect(cubeNode !== undefined || sphereNode !== undefined).toBe(true);
@@ -84,7 +91,9 @@ describe('Minkowski Operation AST Generation', () => {
 
     // If there are children, check for cube node
     if (minkowskiNode.children && minkowskiNode.children.length > 0) {
-      const cubeNode = minkowskiNode.children.find((child: any) => child.type === 'cube');
+      const cubeNode = minkowskiNode.children.find(
+        (child: any) => child.type === 'cube'
+      );
       expect(cubeNode).toBeDefined();
     }
   });
@@ -110,11 +119,17 @@ describe('Minkowski Operation AST Generation', () => {
 
     // If there are children, check for difference and sphere nodes
     if (minkowskiNode.children && minkowskiNode.children.length > 0) {
-      const differenceNode = minkowskiNode.children.find((child: any) => child.type === 'difference');
-      const sphereNode = minkowskiNode.children.find((child: any) => child.type === 'sphere');
+      const differenceNode = minkowskiNode.children.find(
+        (child: any) => child.type === 'difference'
+      );
+      const sphereNode = minkowskiNode.children.find(
+        (child: any) => child.type === 'sphere'
+      );
 
       // At least one of these should be defined
-      expect(differenceNode !== undefined || sphereNode !== undefined).toBe(true);
+      expect(differenceNode !== undefined || sphereNode !== undefined).toBe(
+        true
+      );
     }
   });
 
@@ -136,8 +151,12 @@ describe('Minkowski Operation AST Generation', () => {
 
     // If there are children, check for square and circle nodes
     if (minkowskiNode.children && minkowskiNode.children.length > 0) {
-      const squareNode = minkowskiNode.children.find((child: any) => child.type === 'square');
-      const circleNode = minkowskiNode.children.find((child: any) => child.type === 'circle');
+      const squareNode = minkowskiNode.children.find(
+        (child: any) => child.type === 'square'
+      );
+      const circleNode = minkowskiNode.children.find(
+        (child: any) => child.type === 'circle'
+      );
 
       // At least one of these should be defined
       expect(squareNode !== undefined || circleNode !== undefined).toBe(true);

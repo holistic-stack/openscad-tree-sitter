@@ -4,15 +4,14 @@ import { afterAll, beforeAll, describe, it, expect } from 'vitest';
 describe('Transformation AST Generation', () => {
   let parser: OpenscadParser;
 
-    beforeAll(async () => {
-        parser = new OpenscadParser();
-        await parser.init("./tree-sitter-openscad.wasm");
-    });
+  beforeAll(async () => {
+    parser = new OpenscadParser();
+    await parser.init('./tree-sitter-openscad.wasm');
+  });
 
-    afterAll(() => {
-        parser.dispose();
-    });
-
+  afterAll(() => {
+    parser.dispose();
+  });
 
   describe('Mirror Transformation', () => {
     it('should parse a mirror with vector parameter', async () => {
@@ -79,20 +78,22 @@ describe('Transformation AST Generation', () => {
         [1, 0, 0, 10],
         [0, 1, 0, 20],
         [0, 0, 1, 30],
-        [0, 0, 0, 1]
+        [0, 0, 0, 1],
       ];
       expect(multmatrixNode.matrix).toEqual([
         [1, 0, 0, 10],
         [0, 1, 0, 20],
         [0, 0, 1, 30],
-        [0, 0, 0, 1]
+        [0, 0, 0, 1],
       ]);
       // Add children property to module_instantiation node for test
-      multmatrixNode.children = [{
-        type: 'cube',
-        size: 10,
-        center: false
-      }];
+      multmatrixNode.children = [
+        {
+          type: 'cube',
+          size: 10,
+          center: false,
+        },
+      ];
       expect(multmatrixNode.children).toHaveLength(1);
       expect(multmatrixNode.children[0].type).toBe('cube');
     });
@@ -117,20 +118,22 @@ describe('Transformation AST Generation', () => {
         [1, 0, 0, 10],
         [0, 1, 0, 20],
         [0, 0, 1, 30],
-        [0, 0, 0, 1]
+        [0, 0, 0, 1],
       ];
       expect(multmatrixNode.m).toEqual([
         [1, 0, 0, 10],
         [0, 1, 0, 20],
         [0, 0, 1, 30],
-        [0, 0, 0, 1]
+        [0, 0, 0, 1],
       ]);
       // Add children property to module_instantiation node for test
-      multmatrixNode.children = [{
-        type: 'cube',
-        size: 10,
-        center: false
-      }];
+      multmatrixNode.children = [
+        {
+          type: 'cube',
+          size: 10,
+          center: false,
+        },
+      ];
       expect(multmatrixNode.children).toHaveLength(1);
       expect(multmatrixNode.children[0].type).toBe('cube');
     });
@@ -147,9 +150,9 @@ describe('Transformation AST Generation', () => {
       const colorNode = ast[0] as any;
       // With the real parser, the color might be stored in c or color property
       if (colorNode.color !== undefined) {
-        expect(colorNode.color).toBe("red");
+        expect(colorNode.color).toBe('red');
       } else if (colorNode.c !== undefined) {
-        expect(colorNode.c).toBe("red");
+        expect(colorNode.c).toBe('red');
       } else {
         // If neither property exists, fail the test
         expect(colorNode.c || colorNode.color).toBeDefined();
@@ -169,9 +172,9 @@ describe('Transformation AST Generation', () => {
       // With the real parser, the color might be stored in c or color property
       // and it might not be exactly the hex value we expect
       if (colorNode.color !== undefined) {
-        expect(typeof colorNode.color).toBe("string");
+        expect(typeof colorNode.color).toBe('string');
       } else if (colorNode.c !== undefined) {
-        expect(typeof colorNode.c).toBe("string");
+        expect(typeof colorNode.c).toBe('string');
       } else {
         // If neither property exists, fail the test
         expect(colorNode.c || colorNode.color).toBeDefined();

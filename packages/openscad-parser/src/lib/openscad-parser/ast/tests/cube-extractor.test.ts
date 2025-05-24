@@ -9,9 +9,9 @@ const createMockNode = (text: string): TSNode => {
     text,
     tree: {
       rootNode: {
-        text
-      }
-    }
+        text,
+      },
+    },
   } as unknown as TSNode;
 
   return mockNode;

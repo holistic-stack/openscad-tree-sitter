@@ -8,7 +8,10 @@ const copyWasmFile = () => {
   return {
     name: 'copy-wasm-file',
     closeBundle() {
-      const srcWasmPath = resolve(__dirname, './node_modules/@openscad/tree-sitter-openscad/tree-sitter-openscad.wasm');
+      const srcWasmPath = resolve(
+        __dirname,
+        './node_modules/@openscad/tree-sitter-openscad/tree-sitter-openscad.wasm'
+      );
       const destDir = resolve(__dirname, 'dist');
       const destWasmPath = resolve(destDir, 'tree-sitter-openscad.wasm');
 
@@ -22,7 +25,7 @@ const copyWasmFile = () => {
       } else {
         console.error(`WASM file not found at ${srcWasmPath}`);
       }
-    }
+    },
   };
 };
 
@@ -30,7 +33,7 @@ export default defineConfig({
   plugins: [
     dts({
       entryRoot: 'src',
-      tsConfigFilePath: join(__dirname, 'tsconfig.json'),
+      tsconfigPath: join(__dirname, 'tsconfig.json'),
     }),
     copyWasmFile(),
   ],
@@ -45,15 +48,14 @@ export default defineConfig({
       external: ['@openscad/tree-sitter-openscad', 'web-tree-sitter'],
     },
   },
-    test: {
+  test: {
     globals: true,
     environment: 'jsdom',
-        environmentOptions: {
-            jsdom: {
-                resources: "usable",
-            },
-        },
-    setupFiles: './src/test-utils/setupTest.ts',
-
+    environmentOptions: {
+      jsdom: {
+        resources: 'usable',
+      },
     },
+    setupFiles: './src/test-utils/setupTest.ts',
+  },
 });

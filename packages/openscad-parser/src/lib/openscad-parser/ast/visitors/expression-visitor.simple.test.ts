@@ -10,7 +10,7 @@ describe('ExpressionVisitor Simple Tests', () => {
 
   beforeEach(async () => {
     parser = new OpenscadParser();
-    await parser.init("./tree-sitter-openscad.wasm");
+    await parser.init('./tree-sitter-openscad.wasm');
     visitor = new ExpressionVisitor('');
   });
 
@@ -49,7 +49,10 @@ describe('ExpressionVisitor Simple Tests', () => {
     }
 
     // Find the assignment statement node
-    const assignmentNode = findNodeOfType(tree!.rootNode, 'assignment_statement');
+    const assignmentNode = findNodeOfType(
+      tree!.rootNode,
+      'assignment_statement'
+    );
     expect(assignmentNode).not.toBeNull();
 
     if (assignmentNode) {

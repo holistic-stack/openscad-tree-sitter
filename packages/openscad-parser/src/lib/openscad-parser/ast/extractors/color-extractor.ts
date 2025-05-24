@@ -2,7 +2,11 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 import { extractArguments } from './argument-extractor';
 import { getLocation } from '../utils/location-utils';
-import { extractNumberParameter, extractStringParameter, extractVectorParameter } from '../extractors/parameter-extractor';
+import {
+  extractNumberParameter,
+  extractStringParameter,
+  extractVectorParameter,
+} from '../extractors/parameter-extractor';
 // findDescendantOfType is not used in this file
 
 /**
@@ -11,10 +15,12 @@ import { extractNumberParameter, extractStringParameter, extractVectorParameter 
  * @returns A color AST node or null if the node cannot be processed
  */
 export function extractColorNode(node: TSNode): ast.ColorNode | null {
-  console.log(`[extractColorNode] Processing color node: ${node.text.substring(0, 50)}`);
+  console.log(
+    `[extractColorNode] Processing color node: ${node.text.substring(0, 50)}`
+  );
 
   // Default values
-  let color: string | ast.Vector4D = "red";
+  let color: string | ast.Vector4D = 'red';
   let alpha: number | undefined = undefined;
 
   // Extract arguments from the argument_list
@@ -25,12 +31,16 @@ export function extractColorNode(node: TSNode): ast.ColorNode | null {
       type: 'color',
       c: color,
       children: [],
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 
   const args = extractArguments(argsNode);
-  console.log(`[extractColorNode] Extracted ${args.length} arguments: ${JSON.stringify(args)}`);
+  console.log(
+    `[extractColorNode] Extracted ${args.length} arguments: ${JSON.stringify(
+      args
+    )}`
+  );
 
   // Process arguments
   for (let i = 0; i < args.length; i++) {
@@ -43,14 +53,32 @@ export function extractColorNode(node: TSNode): ast.ColorNode | null {
       if (vectorValue) {
         if (vectorValue.length === 3) {
           // Convert RGB to RGBA by adding alpha=1
-          color = [vectorValue[0], vectorValue[1], vectorValue[2], 1.0] as ast.Vector4D;
-          console.log(`[extractColorNode] Found RGB color, converted to RGBA: ${JSON.stringify(color)}`);
+          color = [
+            vectorValue[0],
+            vectorValue[1],
+            vectorValue[2],
+            1.0,
+          ] as ast.Vector4D;
+          console.log(
+            `[extractColorNode] Found RGB color, converted to RGBA: ${JSON.stringify(
+              color
+            )}`
+          );
         } else if (vectorValue.length === 4) {
-          color = [vectorValue[0], vectorValue[1], vectorValue[2], vectorValue[3]] as ast.Vector4D;
+          color = [
+            vectorValue[0],
+            vectorValue[1],
+            vectorValue[2],
+            vectorValue[3],
+          ] as ast.Vector4D;
           alpha = vectorValue[3];
-          console.log(`[extractColorNode] Found RGBA color: ${JSON.stringify(color)}`);
+          console.log(
+            `[extractColorNode] Found RGBA color: ${JSON.stringify(color)}`
+          );
         } else {
-          console.log(`[extractColorNode] Invalid color vector length: ${vectorValue.length}`);
+          console.log(
+            `[extractColorNode] Invalid color vector length: ${vectorValue.length}`
+          );
         }
       } else {
         // Try as a string parameter (color name or hex)
@@ -59,7 +87,11 @@ export function extractColorNode(node: TSNode): ast.ColorNode | null {
           color = stringValue;
           console.log(`[extractColorNode] Found color name: ${color}`);
         } else {
-          console.log(`[extractColorNode] Invalid color parameter: ${JSON.stringify(arg.value)}`);
+          console.log(
+            `[extractColorNode] Invalid color parameter: ${JSON.stringify(
+              arg.value
+            )}`
+          );
         }
       }
     }
@@ -70,12 +102,20 @@ export function extractColorNode(node: TSNode): ast.ColorNode | null {
         alpha = alphaValue;
         console.log(`[extractColorNode] Found alpha parameter: ${alpha}`);
       } else {
-        console.log(`[extractColorNode] Invalid alpha parameter: ${JSON.stringify(arg.value)}`);
+        console.log(
+          `[extractColorNode] Invalid alpha parameter: ${JSON.stringify(
+            arg.value
+          )}`
+        );
       }
     }
   }
 
-  console.log(`[extractColorNode] Final parameters: color=${JSON.stringify(color)}, alpha=${alpha}`);
+  console.log(
+    `[extractColorNode] Final parameters: color=${JSON.stringify(
+      color
+    )}, alpha=${alpha}`
+  );
 
   // We don't process children here - that's handled by the transform visitor
   // The transform visitor will populate the children array after this extractor returns
@@ -85,6 +125,6 @@ export function extractColorNode(node: TSNode): ast.ColorNode | null {
     type: 'color',
     c: color,
     children,
-    location: getLocation(node)
+    location: getLocation(node),
   };
 }

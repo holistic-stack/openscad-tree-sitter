@@ -6,7 +6,10 @@ import { getLocation } from '../utils/location-utils';
 
 // Create a test class that extends PrimitiveVisitor to expose the private methods
 class TestPrimitiveVisitor extends PrimitiveVisitor {
-  public testCreateCubeNode(node: TSNode, args: ast.Parameter[]): ast.CubeNode | null {
+  public testCreateCubeNode(
+    node: TSNode,
+    args: ast.Parameter[]
+  ): ast.CubeNode | null {
     // @ts-expect-error - Accessing private method for testing
     return this.createCubeNode(node, args);
   }
@@ -18,9 +21,9 @@ const createMockNode = (text: string): TSNode => {
     text,
     tree: {
       rootNode: {
-        text
-      }
-    }
+        text,
+      },
+    },
   } as unknown as TSNode;
 
   return mockNode;
@@ -44,10 +47,10 @@ describe('PrimitiveVisitor', () => {
             value: 10,
             location: {
               start: { line: 1, column: 5, offset: 5 },
-              end: { line: 1, column: 7, offset: 7 }
-            }
-          }
-        }
+              end: { line: 1, column: 7, offset: 7 },
+            },
+          },
+        },
       ];
 
       // Call the method
@@ -76,9 +79,9 @@ describe('PrimitiveVisitor', () => {
             value: 10,
             location: {
               start: { line: 1, column: 5, offset: 5 },
-              end: { line: 1, column: 7, offset: 7 }
-            }
-          }
+              end: { line: 1, column: 7, offset: 7 },
+            },
+          },
         },
         {
           name: 'center',
@@ -88,10 +91,10 @@ describe('PrimitiveVisitor', () => {
             value: true,
             location: {
               start: { line: 1, column: 15, offset: 15 },
-              end: { line: 1, column: 19, offset: 19 }
-            }
-          }
-        }
+              end: { line: 1, column: 19, offset: 19 },
+            },
+          },
+        },
       ];
 
       // Call the method
@@ -121,10 +124,10 @@ describe('PrimitiveVisitor', () => {
             value: 10,
             location: {
               start: { line: 1, column: 10, offset: 10 },
-              end: { line: 1, column: 12, offset: 12 }
-            }
-          }
-        }
+              end: { line: 1, column: 12, offset: 12 },
+            },
+          },
+        },
       ];
 
       // Call the method
@@ -157,8 +160,8 @@ describe('PrimitiveVisitor', () => {
                 value: 10,
                 location: {
                   start: { line: 1, column: 6, offset: 6 },
-                  end: { line: 1, column: 8, offset: 8 }
-                }
+                  end: { line: 1, column: 8, offset: 8 },
+                },
               },
               {
                 type: 'expression',
@@ -166,8 +169,8 @@ describe('PrimitiveVisitor', () => {
                 value: 20,
                 location: {
                   start: { line: 1, column: 10, offset: 10 },
-                  end: { line: 1, column: 12, offset: 12 }
-                }
+                  end: { line: 1, column: 12, offset: 12 },
+                },
               },
               {
                 type: 'expression',
@@ -175,16 +178,16 @@ describe('PrimitiveVisitor', () => {
                 value: 30,
                 location: {
                   start: { line: 1, column: 14, offset: 14 },
-                  end: { line: 1, column: 16, offset: 16 }
-                }
-              }
+                  end: { line: 1, column: 16, offset: 16 },
+                },
+              },
             ],
             location: {
               start: { line: 1, column: 5, offset: 5 },
-              end: { line: 1, column: 17, offset: 17 }
-            }
-          }
-        }
+              end: { line: 1, column: 17, offset: 17 },
+            },
+          },
+        },
       ];
 
       // Call the method

@@ -7,7 +7,11 @@ import { getLocation } from '../utils/location-utils';
 
 // Mock implementation of BaseASTVisitor for testing
 class TestVisitor extends BaseASTVisitor {
-  protected createASTNodeForFunction(node: TSNode, functionName: string, args: ast.Parameter[]): ast.ASTNode | null {
+  protected createASTNodeForFunction(
+    node: TSNode,
+    functionName: string,
+    args: ast.Parameter[]
+  ): ast.ASTNode | null {
     // Simple implementation for testing
     if (functionName === 'cube') {
       return {
@@ -16,8 +20,8 @@ class TestVisitor extends BaseASTVisitor {
         center: false,
         location: {
           start: { line: 0, column: 0, offset: 0 },
-          end: { line: 0, column: 0, offset: 0 }
-        }
+          end: { line: 0, column: 0, offset: 0 },
+        },
       };
     }
     return null;
@@ -30,7 +34,7 @@ describe('BaseASTVisitor', () => {
 
   beforeAll(async () => {
     parser = new OpenscadParser();
-    await parser.init("./tree-sitter-openscad.wasm");
+    await parser.init('./tree-sitter-openscad.wasm');
   });
 
   afterAll(() => {
@@ -61,7 +65,6 @@ describe('BaseASTVisitor', () => {
     consoleSpy.mockRestore();
   });
 
-
   describe('visitNode', () => {
     it('should handle expression nodes', () => {
       // Create a mock expression node
@@ -69,26 +72,30 @@ describe('BaseASTVisitor', () => {
         type: 'expression',
         text: 'cube(10)',
         childCount: 0,
-        child: () => null
+        child: () => null,
       } as unknown as TSNode;
 
       // Create a test visitor that handles cube nodes
-      const testVisitor = new class extends BaseASTVisitor {
+      const testVisitor = new (class extends BaseASTVisitor {
         visitExpression(node: TSNode): ast.ASTNode | null {
           if (node.text.startsWith('cube(')) {
             return {
               type: 'cube',
               size: 10,
-              location: getLocation(node)
+              location: getLocation(node),
             };
           }
           return null;
         }
 
-        protected createASTNodeForFunction(node: TSNode, functionName: string, args: ast.Parameter[]): ast.ASTNode | null {
+        protected createASTNodeForFunction(
+          node: TSNode,
+          functionName: string,
+          args: ast.Parameter[]
+        ): ast.ASTNode | null {
           return null;
         }
-      }('');
+      })('');
 
       // Create a mock result that matches CubeNode
       const mockResult: ast.CubeNode = {
@@ -97,12 +104,14 @@ describe('BaseASTVisitor', () => {
         center: false,
         location: {
           start: { line: 0, column: 0, offset: 0 },
-          end: { line: 0, column: 0, offset: 0 }
-        }
+          end: { line: 0, column: 0, offset: 0 },
+        },
       };
 
       // Mock the visitExpression method to return our mock result
-      const visitExpressionSpy = vi.spyOn(testVisitor, 'visitExpression').mockReturnValue(mockResult);
+      const visitExpressionSpy = vi
+        .spyOn(testVisitor, 'visitExpression')
+        .mockReturnValue(mockResult);
 
       // Visit the node
       const result = testVisitor.visitNode(mockExpressionNode);
@@ -124,25 +133,25 @@ describe('BaseASTVisitor', () => {
         type: 'expression',
         text: 'cube(10)',
         childCount: 0,
-        child: () => null
+        child: () => null,
       } as unknown as TSNode;
 
       const mockExpressionStatementNode = {
         type: 'expression_statement',
         text: 'cube(10)',
         childCount: 1,
-        child: () => mockExpressionNode
+        child: () => mockExpressionNode,
       } as unknown as TSNode;
 
       const mockStatementNode = {
         type: 'statement',
         text: 'cube(10);',
         childCount: 1,
-        child: () => mockExpressionStatementNode
+        child: () => mockExpressionStatementNode,
       } as unknown as TSNode;
 
       // Create a test visitor that handles cube nodes
-      const testVisitor = new class extends BaseASTVisitor {
+      const testVisitor = new (class extends BaseASTVisitor {
         visitStatement(node: TSNode): ast.ASTNode | null {
           // Override the visitStatement method to handle our test case
           for (let i = 0; i < node.childCount; i++) {
@@ -155,12 +164,15 @@ describe('BaseASTVisitor', () => {
                 const grandchild = child.child(j);
                 if (!grandchild) continue;
 
-                if (grandchild.type === 'expression' && grandchild.text.startsWith('cube(')) {
+                if (
+                  grandchild.type === 'expression' &&
+                  grandchild.text.startsWith('cube(')
+                ) {
                   return {
                     type: 'cube',
                     size: 10,
                     center: false,
-                    location: getLocation(node)
+                    location: getLocation(node),
                   } as ast.CubeNode;
                 }
               }
@@ -169,10 +181,14 @@ describe('BaseASTVisitor', () => {
           return null;
         }
 
-        protected createASTNodeForFunction(node: TSNode, functionName: string, args: ast.Parameter[]): ast.ASTNode | null {
+        protected createASTNodeForFunction(
+          node: TSNode,
+          functionName: string,
+          args: ast.Parameter[]
+        ): ast.ASTNode | null {
           return null;
         }
-      }('');
+      })('');
 
       // Create a mock result that matches CubeNode
       const mockResult: ast.CubeNode = {
@@ -181,12 +197,14 @@ describe('BaseASTVisitor', () => {
         center: false,
         location: {
           start: { line: 0, column: 0, offset: 0 },
-          end: { line: 0, column: 0, offset: 0 }
-        }
+          end: { line: 0, column: 0, offset: 0 },
+        },
       };
 
       // Mock the visitStatement method to return our mock result
-      const visitStatementSpy = vi.spyOn(testVisitor, 'visitStatement').mockReturnValue(mockResult);
+      const visitStatementSpy = vi
+        .spyOn(testVisitor, 'visitStatement')
+        .mockReturnValue(mockResult);
 
       // Visit the node
       const result = testVisitor.visitNode(mockStatementNode);
@@ -227,20 +245,31 @@ describe('BaseASTVisitor', () => {
         hasError: false,
         isMissing: false,
         toString: () => 'unknown_type',
-        walk: () => ({ gotoFirstChild: () => false, gotoNextSibling: () => false, gotoParent: () => false, currentNode: () => mockNode, currentFieldName: () => null, reset: () => {} }),
+        walk: () => ({
+          gotoFirstChild: () => false,
+          gotoNextSibling: () => false,
+          gotoParent: () => false,
+          currentNode: () => mockNode,
+          currentFieldName: () => null,
+          reset: () => {},
+        }),
         descendantForPosition: () => null,
         descendantsOfType: () => [],
         equals: () => false,
         id: 0,
-        isNamed: true
+        isNamed: true,
       } as unknown as TSNode;
 
       // Create a test visitor
-      const testVisitor = new class extends BaseASTVisitor {
-        protected createASTNodeForFunction(node: TSNode, functionName: string, args: ast.Parameter[]): ast.ASTNode | null {
+      const testVisitor = new (class extends BaseASTVisitor {
+        protected createASTNodeForFunction(
+          node: TSNode,
+          functionName: string,
+          args: ast.Parameter[]
+        ): ast.ASTNode | null {
           return null;
         }
-      }('');
+      })('');
 
       // Visit the node
       const result = testVisitor.visitNode(mockNode);
@@ -257,42 +286,42 @@ describe('BaseASTVisitor', () => {
         type: 'expression',
         text: 'cube(10)',
         childCount: 0,
-        child: () => null
+        child: () => null,
       } as unknown as TSNode;
 
       const mockExpressionStatementNode1 = {
         type: 'expression_statement',
         text: 'cube(10)',
         childCount: 1,
-        child: () => mockExpressionNode1
+        child: () => mockExpressionNode1,
       } as unknown as TSNode;
 
       const mockStatementNode1 = {
         type: 'statement',
         text: 'cube(10);',
         childCount: 1,
-        child: () => mockExpressionStatementNode1
+        child: () => mockExpressionStatementNode1,
       } as unknown as TSNode;
 
       const mockExpressionNode2 = {
         type: 'expression',
         text: 'sphere(5)',
         childCount: 0,
-        child: () => null
+        child: () => null,
       } as unknown as TSNode;
 
       const mockExpressionStatementNode2 = {
         type: 'expression_statement',
         text: 'sphere(5)',
         childCount: 1,
-        child: () => mockExpressionNode2
+        child: () => mockExpressionNode2,
       } as unknown as TSNode;
 
       const mockStatementNode2 = {
         type: 'statement',
         text: 'sphere(5);',
         childCount: 1,
-        child: () => mockExpressionStatementNode2
+        child: () => mockExpressionStatementNode2,
       } as unknown as TSNode;
 
       const mockRootNode = {
@@ -303,11 +332,11 @@ describe('BaseASTVisitor', () => {
           if (index === 0) return mockStatementNode1;
           if (index === 1) return mockStatementNode2;
           return null;
-        }
+        },
       } as unknown as TSNode;
 
       // Create a test visitor that handles cube nodes
-      const testVisitor = new class extends BaseASTVisitor {
+      const testVisitor = new (class extends BaseASTVisitor {
         visitStatement(node: TSNode): ast.ASTNode | null {
           // In the real tree, the expression_statement is a direct child, not a field
           for (let i = 0; i < node.childCount; i++) {
@@ -320,12 +349,15 @@ describe('BaseASTVisitor', () => {
                 const grandchild = child.child(j);
                 if (!grandchild) continue;
 
-                if (grandchild.type === 'expression' && grandchild.text.startsWith('cube(')) {
+                if (
+                  grandchild.type === 'expression' &&
+                  grandchild.text.startsWith('cube(')
+                ) {
                   return {
                     type: 'cube',
                     size: 10,
                     center: false,
-                    location: getLocation(node)
+                    location: getLocation(node),
                   } as ast.CubeNode;
                 }
               }
@@ -334,10 +366,14 @@ describe('BaseASTVisitor', () => {
           return null;
         }
 
-        protected createASTNodeForFunction(node: TSNode, functionName: string, args: ast.Parameter[]): ast.ASTNode | null {
+        protected createASTNodeForFunction(
+          node: TSNode,
+          functionName: string,
+          args: ast.Parameter[]
+        ): ast.ASTNode | null {
           return null;
         }
-      }('');
+      })('');
 
       // Create a mock result for the first statement
       const mockResult: ast.CubeNode = {
@@ -346,17 +382,19 @@ describe('BaseASTVisitor', () => {
         center: false,
         location: {
           start: { line: 0, column: 0, offset: 0 },
-          end: { line: 0, column: 0, offset: 0 }
-        }
+          end: { line: 0, column: 0, offset: 0 },
+        },
       };
 
       // Mock the visitNode method to return our mock result for the first statement
-      const visitNodeSpy = vi.spyOn(testVisitor, 'visitNode').mockImplementation((node: TSNode) => {
-        if (node === mockStatementNode1) {
-          return mockResult;
-        }
-        return null;
-      });
+      const visitNodeSpy = vi
+        .spyOn(testVisitor, 'visitNode')
+        .mockImplementation((node: TSNode) => {
+          if (node === mockStatementNode1) {
+            return mockResult;
+          }
+          return null;
+        });
 
       // Visit the children of the root node
       const results = testVisitor.visitChildren(mockRootNode);
@@ -382,11 +420,11 @@ describe('BaseASTVisitor', () => {
         type: 'expression',
         text: 'cube(10)',
         childCount: 0,
-        child: () => null
+        child: () => null,
       } as unknown as TSNode;
 
       // Create a test visitor that handles cube nodes
-      const testVisitor = new class extends BaseASTVisitor {
+      const testVisitor = new (class extends BaseASTVisitor {
         visitModuleInstantiation(node: TSNode): ast.ASTNode | null {
           // For testing purposes, treat expression nodes as module instantiations
           if (node.type === 'expression' && node.text.startsWith('cube(')) {
@@ -394,16 +432,20 @@ describe('BaseASTVisitor', () => {
               type: 'cube',
               size: 10,
               center: false,
-              location: getLocation(node)
+              location: getLocation(node),
             } as ast.CubeNode;
           }
           return null;
         }
 
-        protected createASTNodeForFunction(node: TSNode, functionName: string, args: ast.Parameter[]): ast.ASTNode | null {
+        protected createASTNodeForFunction(
+          node: TSNode,
+          functionName: string,
+          args: ast.Parameter[]
+        ): ast.ASTNode | null {
           return null;
         }
-      }('');
+      })('');
 
       // Create a mock result that matches CubeNode
       const mockResult: ast.CubeNode = {
@@ -412,18 +454,22 @@ describe('BaseASTVisitor', () => {
         center: false,
         location: {
           start: { line: 0, column: 0, offset: 0 },
-          end: { line: 0, column: 0, offset: 0 }
-        }
+          end: { line: 0, column: 0, offset: 0 },
+        },
       };
 
       // Mock the visitModuleInstantiation method to return our mock result
-      const visitModuleInstantiationSpy = vi.spyOn(testVisitor, 'visitModuleInstantiation').mockReturnValue(mockResult);
+      const visitModuleInstantiationSpy = vi
+        .spyOn(testVisitor, 'visitModuleInstantiation')
+        .mockReturnValue(mockResult);
 
       // Visit the node
       const result = testVisitor.visitModuleInstantiation(mockExpressionNode);
 
       // Verify the method was called
-      expect(visitModuleInstantiationSpy).toHaveBeenCalledWith(mockExpressionNode);
+      expect(visitModuleInstantiationSpy).toHaveBeenCalledWith(
+        mockExpressionNode
+      );
 
       // Verify the result
       expect(result).not.toBeNull();
@@ -449,13 +495,20 @@ function findNodeOfType(node: TSNode, type: string): TSNode | null {
   }
 
   // Special case for expression_statement which might contain an expression
-  if (node.type === 'expression_statement' && (type === 'call_expression' || type === 'expression')) {
+  if (
+    node.type === 'expression_statement' &&
+    (type === 'call_expression' || type === 'expression')
+  ) {
     for (let i = 0; i < node.childCount; i++) {
       const child = node.child(i);
       if (child && child.type === 'expression') {
         if (type === 'expression') {
           return child;
-        } else if (type === 'call_expression' && child.text.includes('(') && child.text.includes(')')) {
+        } else if (
+          type === 'call_expression' &&
+          child.text.includes('(') &&
+          child.text.includes(')')
+        ) {
           return child;
         }
       }

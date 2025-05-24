@@ -1,4 +1,12 @@
-import { describe, it, expect, vi, beforeAll, afterAll, beforeEach } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeAll,
+  afterAll,
+  beforeEach,
+} from 'vitest';
 import { PrimitiveVisitor } from './primitive-visitor';
 import { OpenscadParser } from '../../openscad-parser';
 import { Node as TSNode } from 'web-tree-sitter';
@@ -10,14 +18,13 @@ describe('PrimitiveVisitor', () => {
 
   beforeAll(async () => {
     parser = new OpenscadParser();
-    await parser.init("./tree-sitter-openscad.wasm");
+    await parser.init('./tree-sitter-openscad.wasm');
   });
 
   afterAll(() => {
     parser.dispose();
     vi.clearAllMocks();
   });
-
 
   beforeEach(() => {
     visitor = new PrimitiveVisitor('');
@@ -32,7 +39,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 0,
         child: () => null,
         childForFieldName: () => null,
-        namedChildren: []
+        namedChildren: [],
       };
 
       // Create a mock accessor_expression node
@@ -46,7 +53,7 @@ describe('PrimitiveVisitor', () => {
               type: 'identifier',
               text: 'cube',
               childCount: 0,
-              child: () => null
+              child: () => null,
             };
           } else if (index === 1) {
             return mockArgumentListNode;
@@ -59,7 +66,7 @@ describe('PrimitiveVisitor', () => {
               type: 'identifier',
               text: 'cube',
               childCount: 0,
-              child: () => null
+              child: () => null,
             };
           } else if (name === 'arguments' || name === 'argument_list') {
             return mockArgumentListNode;
@@ -71,22 +78,29 @@ describe('PrimitiveVisitor', () => {
             type: 'identifier',
             text: 'cube',
             childCount: 0,
-            child: () => null
+            child: () => null,
           },
-          mockArgumentListNode
-        ]
+          mockArgumentListNode,
+        ],
       } as unknown as TSNode;
 
       // Mock the createASTNodeForFunction method
-      const createASTNodeForFunctionSpy = vi.spyOn(visitor as any, 'createASTNodeForFunction').mockReturnValue({
-        type: 'cube',
-        size: 1,
-        center: false,
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      });
+      const createASTNodeForFunctionSpy = vi
+        .spyOn(visitor as any, 'createASTNodeForFunction')
+        .mockReturnValue({
+          type: 'cube',
+          size: 1,
+          center: false,
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
+        });
 
       // Visit the node
-      const result = visitor.visitAccessorExpression(mockAccessorExpressionNode);
+      const result = visitor.visitAccessorExpression(
+        mockAccessorExpressionNode
+      );
 
       // Verify the method was called
       expect(createASTNodeForFunctionSpy).toHaveBeenCalled();
@@ -109,7 +123,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 0,
         child: () => null,
         childForFieldName: () => null,
-        namedChildren: []
+        namedChildren: [],
       };
 
       // Create a mock argument_list node
@@ -119,7 +133,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 1,
         child: () => mockNumberNode,
         childForFieldName: () => null,
-        namedChildren: [mockNumberNode]
+        namedChildren: [mockNumberNode],
       };
 
       // Create a mock accessor_expression node
@@ -135,7 +149,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (index === 1) {
             return mockArgumentListNode;
@@ -150,7 +164,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'arguments' || name === 'argument_list') {
             return mockArgumentListNode;
@@ -164,22 +178,29 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockArgumentListNode
-        ]
+          mockArgumentListNode,
+        ],
       } as unknown as TSNode;
 
       // Mock the createASTNodeForFunction method
-      const createASTNodeForFunctionSpy = vi.spyOn(visitor as any, 'createASTNodeForFunction').mockReturnValue({
-        type: 'cube',
-        size: 10,
-        center: false,
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      });
+      const createASTNodeForFunctionSpy = vi
+        .spyOn(visitor as any, 'createASTNodeForFunction')
+        .mockReturnValue({
+          type: 'cube',
+          size: 10,
+          center: false,
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
+        });
 
       // Visit the node
-      const result = visitor.visitAccessorExpression(mockAccessorExpressionNode);
+      const result = visitor.visitAccessorExpression(
+        mockAccessorExpressionNode
+      );
 
       // Verify the method was called
       expect(createASTNodeForFunctionSpy).toHaveBeenCalled();
@@ -202,7 +223,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 0,
         child: () => null,
         childForFieldName: () => null,
-        namedChildren: []
+        namedChildren: [],
       };
 
       // Create a mock true node
@@ -212,7 +233,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 0,
         child: () => null,
         childForFieldName: () => null,
-        namedChildren: []
+        namedChildren: [],
       };
 
       // Create a mock named_argument node
@@ -228,7 +249,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 1) {
             return {
@@ -237,7 +258,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 2) {
             return mockTrueNode;
@@ -252,7 +273,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'value') {
             return mockTrueNode;
@@ -266,7 +287,7 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
           {
             type: 'equals',
@@ -274,10 +295,10 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockTrueNode
-        ]
+          mockTrueNode,
+        ],
       };
 
       // Create a mock argument_list node
@@ -295,7 +316,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (i === 2) {
             return mockNamedArgumentNode;
@@ -311,10 +332,10 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockNamedArgumentNode
-        ]
+          mockNamedArgumentNode,
+        ],
       };
 
       // Create a mock accessor_expression node
@@ -330,7 +351,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (index === 1) {
             return mockArgumentListNode;
@@ -345,7 +366,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'arguments' || name === 'argument_list') {
             return mockArgumentListNode;
@@ -359,22 +380,29 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockArgumentListNode
-        ]
+          mockArgumentListNode,
+        ],
       } as unknown as TSNode;
 
       // Mock the createASTNodeForFunction method
-      const createASTNodeForFunctionSpy = vi.spyOn(visitor as any, 'createASTNodeForFunction').mockReturnValue({
-        type: 'cube',
-        size: 10,
-        center: true,
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      });
+      const createASTNodeForFunctionSpy = vi
+        .spyOn(visitor as any, 'createASTNodeForFunction')
+        .mockReturnValue({
+          type: 'cube',
+          size: 10,
+          center: true,
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
+        });
 
       // Visit the node
-      const result = visitor.visitAccessorExpression(mockAccessorExpressionNode);
+      const result = visitor.visitAccessorExpression(
+        mockAccessorExpressionNode
+      );
 
       // Verify the method was called
       expect(createASTNodeForFunctionSpy).toHaveBeenCalled();
@@ -397,32 +425,130 @@ describe('PrimitiveVisitor', () => {
         childCount: 7,
         child: (i: number) => {
           if (i === 0) {
-            return { type: 'left_bracket', text: '[', childCount: 0, child: () => null, childForFieldName: () => null, namedChildren: [] };
+            return {
+              type: 'left_bracket',
+              text: '[',
+              childCount: 0,
+              child: () => null,
+              childForFieldName: () => null,
+              namedChildren: [],
+            };
           } else if (i === 1) {
-            return { type: 'number', text: '10', childCount: 0, child: () => null, childForFieldName: () => null, namedChildren: [] };
+            return {
+              type: 'number',
+              text: '10',
+              childCount: 0,
+              child: () => null,
+              childForFieldName: () => null,
+              namedChildren: [],
+            };
           } else if (i === 2) {
-            return { type: 'comma', text: ',', childCount: 0, child: () => null, childForFieldName: () => null, namedChildren: [] };
+            return {
+              type: 'comma',
+              text: ',',
+              childCount: 0,
+              child: () => null,
+              childForFieldName: () => null,
+              namedChildren: [],
+            };
           } else if (i === 3) {
-            return { type: 'number', text: '20', childCount: 0, child: () => null, childForFieldName: () => null, namedChildren: [] };
+            return {
+              type: 'number',
+              text: '20',
+              childCount: 0,
+              child: () => null,
+              childForFieldName: () => null,
+              namedChildren: [],
+            };
           } else if (i === 4) {
-            return { type: 'comma', text: ',', childCount: 0, child: () => null, childForFieldName: () => null, namedChildren: [] };
+            return {
+              type: 'comma',
+              text: ',',
+              childCount: 0,
+              child: () => null,
+              childForFieldName: () => null,
+              namedChildren: [],
+            };
           } else if (i === 5) {
-            return { type: 'number', text: '30', childCount: 0, child: () => null, childForFieldName: () => null, namedChildren: [] };
+            return {
+              type: 'number',
+              text: '30',
+              childCount: 0,
+              child: () => null,
+              childForFieldName: () => null,
+              namedChildren: [],
+            };
           } else if (i === 6) {
-            return { type: 'right_bracket', text: ']', childCount: 0, child: () => null, childForFieldName: () => null, namedChildren: [] };
+            return {
+              type: 'right_bracket',
+              text: ']',
+              childCount: 0,
+              child: () => null,
+              childForFieldName: () => null,
+              namedChildren: [],
+            };
           }
           return null;
         },
         childForFieldName: () => null,
         namedChildren: [
-          { type: 'left_bracket', text: '[', childCount: 0, child: () => null, childForFieldName: () => null, namedChildren: [] },
-          { type: 'number', text: '10', childCount: 0, child: () => null, childForFieldName: () => null, namedChildren: [] },
-          { type: 'comma', text: ',', childCount: 0, child: () => null, childForFieldName: () => null, namedChildren: [] },
-          { type: 'number', text: '20', childCount: 0, child: () => null, childForFieldName: () => null, namedChildren: [] },
-          { type: 'comma', text: ',', childCount: 0, child: () => null, childForFieldName: () => null, namedChildren: [] },
-          { type: 'number', text: '30', childCount: 0, child: () => null, childForFieldName: () => null, namedChildren: [] },
-          { type: 'right_bracket', text: ']', childCount: 0, child: () => null, childForFieldName: () => null, namedChildren: [] }
-        ]
+          {
+            type: 'left_bracket',
+            text: '[',
+            childCount: 0,
+            child: () => null,
+            childForFieldName: () => null,
+            namedChildren: [],
+          },
+          {
+            type: 'number',
+            text: '10',
+            childCount: 0,
+            child: () => null,
+            childForFieldName: () => null,
+            namedChildren: [],
+          },
+          {
+            type: 'comma',
+            text: ',',
+            childCount: 0,
+            child: () => null,
+            childForFieldName: () => null,
+            namedChildren: [],
+          },
+          {
+            type: 'number',
+            text: '20',
+            childCount: 0,
+            child: () => null,
+            childForFieldName: () => null,
+            namedChildren: [],
+          },
+          {
+            type: 'comma',
+            text: ',',
+            childCount: 0,
+            child: () => null,
+            childForFieldName: () => null,
+            namedChildren: [],
+          },
+          {
+            type: 'number',
+            text: '30',
+            childCount: 0,
+            child: () => null,
+            childForFieldName: () => null,
+            namedChildren: [],
+          },
+          {
+            type: 'right_bracket',
+            text: ']',
+            childCount: 0,
+            child: () => null,
+            childForFieldName: () => null,
+            namedChildren: [],
+          },
+        ],
       };
 
       // Create a mock argument_list node
@@ -432,7 +558,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 1,
         child: () => mockArrayExpressionNode,
         childForFieldName: () => null,
-        namedChildren: [mockArrayExpressionNode]
+        namedChildren: [mockArrayExpressionNode],
       };
 
       // Create a mock accessor_expression node
@@ -448,7 +574,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (index === 1) {
             return mockArgumentListNode;
@@ -463,7 +589,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'arguments' || name === 'argument_list') {
             return mockArgumentListNode;
@@ -477,22 +603,29 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockArgumentListNode
-        ]
+          mockArgumentListNode,
+        ],
       } as unknown as TSNode;
 
       // Mock the createASTNodeForFunction method
-      const createASTNodeForFunctionSpy = vi.spyOn(visitor as any, 'createASTNodeForFunction').mockReturnValue({
-        type: 'cube',
-        size: [10, 20, 30],
-        center: false,
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      });
+      const createASTNodeForFunctionSpy = vi
+        .spyOn(visitor as any, 'createASTNodeForFunction')
+        .mockReturnValue({
+          type: 'cube',
+          size: [10, 20, 30],
+          center: false,
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
+        });
 
       // Visit the node
-      const result = visitor.visitAccessorExpression(mockAccessorExpressionNode);
+      const result = visitor.visitAccessorExpression(
+        mockAccessorExpressionNode
+      );
 
       // Verify the method was called
       expect(createASTNodeForFunctionSpy).toHaveBeenCalled();
@@ -515,7 +648,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 0,
         child: () => null,
         childForFieldName: () => null,
-        namedChildren: []
+        namedChildren: [],
       };
 
       // Create a mock accessor_expression node
@@ -531,7 +664,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (index === 1) {
             return mockArgumentListNode;
@@ -546,7 +679,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'arguments' || name === 'argument_list') {
             return mockArgumentListNode;
@@ -560,21 +693,28 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockArgumentListNode
-        ]
+          mockArgumentListNode,
+        ],
       } as unknown as TSNode;
 
       // Mock the createASTNodeForFunction method
-      const createASTNodeForFunctionSpy = vi.spyOn(visitor as any, 'createASTNodeForFunction').mockReturnValue({
-        type: 'sphere',
-        radius: 1,
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      });
+      const createASTNodeForFunctionSpy = vi
+        .spyOn(visitor as any, 'createASTNodeForFunction')
+        .mockReturnValue({
+          type: 'sphere',
+          radius: 1,
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
+        });
 
       // Visit the node
-      const result = visitor.visitAccessorExpression(mockAccessorExpressionNode);
+      const result = visitor.visitAccessorExpression(
+        mockAccessorExpressionNode
+      );
 
       // Verify the method was called
       expect(createASTNodeForFunctionSpy).toHaveBeenCalled();
@@ -596,7 +736,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 0,
         child: () => null,
         childForFieldName: () => null,
-        namedChildren: []
+        namedChildren: [],
       };
 
       // Create a mock argument_list node
@@ -606,7 +746,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 1,
         child: () => mockNumberNode,
         childForFieldName: () => null,
-        namedChildren: [mockNumberNode]
+        namedChildren: [mockNumberNode],
       };
 
       // Create a mock accessor_expression node
@@ -622,7 +762,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (index === 1) {
             return mockArgumentListNode;
@@ -637,7 +777,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'arguments' || name === 'argument_list') {
             return mockArgumentListNode;
@@ -651,21 +791,28 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockArgumentListNode
-        ]
+          mockArgumentListNode,
+        ],
       } as unknown as TSNode;
 
       // Mock the createASTNodeForFunction method
-      const createASTNodeForFunctionSpy = vi.spyOn(visitor as any, 'createASTNodeForFunction').mockReturnValue({
-        type: 'sphere',
-        radius: 5,
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      });
+      const createASTNodeForFunctionSpy = vi
+        .spyOn(visitor as any, 'createASTNodeForFunction')
+        .mockReturnValue({
+          type: 'sphere',
+          radius: 5,
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
+        });
 
       // Visit the node
-      const result = visitor.visitAccessorExpression(mockAccessorExpressionNode);
+      const result = visitor.visitAccessorExpression(
+        mockAccessorExpressionNode
+      );
 
       // Verify the method was called
       expect(createASTNodeForFunctionSpy).toHaveBeenCalled();
@@ -687,7 +834,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 0,
         child: () => null,
         childForFieldName: () => null,
-        namedChildren: []
+        namedChildren: [],
       };
 
       // Create a mock named_argument node
@@ -703,7 +850,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 1) {
             return {
@@ -712,7 +859,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 2) {
             return mockNumberNode;
@@ -727,7 +874,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'value') {
             return mockNumberNode;
@@ -741,7 +888,7 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
           {
             type: 'equals',
@@ -749,10 +896,10 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockNumberNode
-        ]
+          mockNumberNode,
+        ],
       };
 
       // Create a mock argument_list node
@@ -762,7 +909,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 1,
         child: () => mockNamedArgumentNode,
         childForFieldName: () => null,
-        namedChildren: [mockNamedArgumentNode]
+        namedChildren: [mockNamedArgumentNode],
       };
 
       // Create a mock accessor_expression node
@@ -778,7 +925,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (index === 1) {
             return mockArgumentListNode;
@@ -793,7 +940,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'arguments' || name === 'argument_list') {
             return mockArgumentListNode;
@@ -807,21 +954,28 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockArgumentListNode
-        ]
+          mockArgumentListNode,
+        ],
       } as unknown as TSNode;
 
       // Mock the createASTNodeForFunction method
-      const createASTNodeForFunctionSpy = vi.spyOn(visitor as any, 'createASTNodeForFunction').mockReturnValue({
-        type: 'sphere',
-        r: 5,
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      });
+      const createASTNodeForFunctionSpy = vi
+        .spyOn(visitor as any, 'createASTNodeForFunction')
+        .mockReturnValue({
+          type: 'sphere',
+          r: 5,
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
+        });
 
       // Visit the node
-      const result = visitor.visitAccessorExpression(mockAccessorExpressionNode);
+      const result = visitor.visitAccessorExpression(
+        mockAccessorExpressionNode
+      );
 
       // Verify the method was called
       expect(createASTNodeForFunctionSpy).toHaveBeenCalled();
@@ -843,7 +997,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 0,
         child: () => null,
         childForFieldName: () => null,
-        namedChildren: []
+        namedChildren: [],
       };
 
       // Create a mock accessor_expression node
@@ -859,7 +1013,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (index === 1) {
             return mockArgumentListNode;
@@ -874,7 +1028,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'arguments' || name === 'argument_list') {
             return mockArgumentListNode;
@@ -888,24 +1042,31 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockArgumentListNode
-        ]
+          mockArgumentListNode,
+        ],
       } as unknown as TSNode;
 
       // Mock the createASTNodeForFunction method
-      const createASTNodeForFunctionSpy = vi.spyOn(visitor as any, 'createASTNodeForFunction').mockReturnValue({
-        type: 'cylinder',
-        height: 1,
-        radius1: 1,
-        radius2: 1,
-        center: false,
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      });
+      const createASTNodeForFunctionSpy = vi
+        .spyOn(visitor as any, 'createASTNodeForFunction')
+        .mockReturnValue({
+          type: 'cylinder',
+          height: 1,
+          radius1: 1,
+          radius2: 1,
+          center: false,
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
+        });
 
       // Visit the node
-      const result = visitor.visitAccessorExpression(mockAccessorExpressionNode);
+      const result = visitor.visitAccessorExpression(
+        mockAccessorExpressionNode
+      );
 
       // Verify the method was called
       expect(createASTNodeForFunctionSpy).toHaveBeenCalled();
@@ -930,7 +1091,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 0,
         child: () => null,
         childForFieldName: () => null,
-        namedChildren: []
+        namedChildren: [],
       };
 
       const mockRadiusNumberNode = {
@@ -939,7 +1100,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 0,
         child: () => null,
         childForFieldName: () => null,
-        namedChildren: []
+        namedChildren: [],
       };
 
       // Create mock named_argument nodes
@@ -955,7 +1116,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 1) {
             return {
@@ -964,7 +1125,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 2) {
             return mockHeightNumberNode;
@@ -979,7 +1140,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'value') {
             return mockHeightNumberNode;
@@ -993,7 +1154,7 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
           {
             type: 'equals',
@@ -1001,10 +1162,10 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockHeightNumberNode
-        ]
+          mockHeightNumberNode,
+        ],
       };
 
       const mockRadiusNamedArgumentNode = {
@@ -1019,7 +1180,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 1) {
             return {
@@ -1028,7 +1189,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 2) {
             return mockRadiusNumberNode;
@@ -1043,7 +1204,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'value') {
             return mockRadiusNumberNode;
@@ -1057,7 +1218,7 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
           {
             type: 'equals',
@@ -1065,10 +1226,10 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockRadiusNumberNode
-        ]
+          mockRadiusNumberNode,
+        ],
       };
 
       // Create a mock argument_list node
@@ -1086,7 +1247,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (i === 2) {
             return mockRadiusNamedArgumentNode;
@@ -1102,10 +1263,10 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockRadiusNamedArgumentNode
-        ]
+          mockRadiusNamedArgumentNode,
+        ],
       };
 
       // Create a mock accessor_expression node
@@ -1121,7 +1282,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (index === 1) {
             return mockArgumentListNode;
@@ -1136,7 +1297,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'arguments' || name === 'argument_list') {
             return mockArgumentListNode;
@@ -1150,24 +1311,31 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockArgumentListNode
-        ]
+          mockArgumentListNode,
+        ],
       } as unknown as TSNode;
 
       // Mock the createASTNodeForFunction method
-      const createASTNodeForFunctionSpy = vi.spyOn(visitor as any, 'createASTNodeForFunction').mockReturnValue({
-        type: 'cylinder',
-        height: 10,
-        radius1: 5,
-        radius2: 5,
-        center: false,
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      });
+      const createASTNodeForFunctionSpy = vi
+        .spyOn(visitor as any, 'createASTNodeForFunction')
+        .mockReturnValue({
+          type: 'cylinder',
+          height: 10,
+          radius1: 5,
+          radius2: 5,
+          center: false,
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
+        });
 
       // Visit the node
-      const result = visitor.visitAccessorExpression(mockAccessorExpressionNode);
+      const result = visitor.visitAccessorExpression(
+        mockAccessorExpressionNode
+      );
 
       // Verify the method was called
       expect(createASTNodeForFunctionSpy).toHaveBeenCalled();
@@ -1192,7 +1360,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 0,
         child: () => null,
         childForFieldName: () => null,
-        namedChildren: []
+        namedChildren: [],
       };
 
       const mockRadius1NumberNode = {
@@ -1201,7 +1369,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 0,
         child: () => null,
         childForFieldName: () => null,
-        namedChildren: []
+        namedChildren: [],
       };
 
       const mockRadius2NumberNode = {
@@ -1210,7 +1378,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 0,
         child: () => null,
         childForFieldName: () => null,
-        namedChildren: []
+        namedChildren: [],
       };
 
       // Create mock named_argument nodes
@@ -1226,7 +1394,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 1) {
             return {
@@ -1235,7 +1403,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 2) {
             return mockHeightNumberNode;
@@ -1250,7 +1418,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'value') {
             return mockHeightNumberNode;
@@ -1264,7 +1432,7 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
           {
             type: 'equals',
@@ -1272,10 +1440,10 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockHeightNumberNode
-        ]
+          mockHeightNumberNode,
+        ],
       };
 
       const mockRadius1NamedArgumentNode = {
@@ -1290,7 +1458,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 1) {
             return {
@@ -1299,7 +1467,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 2) {
             return mockRadius1NumberNode;
@@ -1314,7 +1482,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'value') {
             return mockRadius1NumberNode;
@@ -1328,7 +1496,7 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
           {
             type: 'equals',
@@ -1336,10 +1504,10 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockRadius1NumberNode
-        ]
+          mockRadius1NumberNode,
+        ],
       };
 
       const mockRadius2NamedArgumentNode = {
@@ -1354,7 +1522,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 1) {
             return {
@@ -1363,7 +1531,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 2) {
             return mockRadius2NumberNode;
@@ -1378,7 +1546,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'value') {
             return mockRadius2NumberNode;
@@ -1392,7 +1560,7 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
           {
             type: 'equals',
@@ -1400,10 +1568,10 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockRadius2NumberNode
-        ]
+          mockRadius2NumberNode,
+        ],
       };
 
       // Create a mock argument_list node
@@ -1421,7 +1589,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (i === 2) {
             return mockRadius1NamedArgumentNode;
@@ -1432,7 +1600,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (i === 4) {
             return mockRadius2NamedArgumentNode;
@@ -1448,7 +1616,7 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
           mockRadius1NamedArgumentNode,
           {
@@ -1457,10 +1625,10 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockRadius2NamedArgumentNode
-        ]
+          mockRadius2NamedArgumentNode,
+        ],
       };
 
       // Create a mock accessor_expression node
@@ -1476,7 +1644,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (index === 1) {
             return mockArgumentListNode;
@@ -1491,7 +1659,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'arguments' || name === 'argument_list') {
             return mockArgumentListNode;
@@ -1505,24 +1673,31 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockArgumentListNode
-        ]
+          mockArgumentListNode,
+        ],
       } as unknown as TSNode;
 
       // Mock the createASTNodeForFunction method
-      const createASTNodeForFunctionSpy = vi.spyOn(visitor as any, 'createASTNodeForFunction').mockReturnValue({
-        type: 'cylinder',
-        height: 10,
-        radius1: 5,
-        radius2: 3,
-        center: false,
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      });
+      const createASTNodeForFunctionSpy = vi
+        .spyOn(visitor as any, 'createASTNodeForFunction')
+        .mockReturnValue({
+          type: 'cylinder',
+          height: 10,
+          radius1: 5,
+          radius2: 3,
+          center: false,
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
+        });
 
       // Visit the node
-      const result = visitor.visitAccessorExpression(mockAccessorExpressionNode);
+      const result = visitor.visitAccessorExpression(
+        mockAccessorExpressionNode
+      );
 
       // Verify the method was called
       expect(createASTNodeForFunctionSpy).toHaveBeenCalled();
@@ -1547,7 +1722,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 0,
         child: () => null,
         childForFieldName: () => null,
-        namedChildren: []
+        namedChildren: [],
       };
 
       const mockDiameterNumberNode = {
@@ -1556,7 +1731,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 0,
         child: () => null,
         childForFieldName: () => null,
-        namedChildren: []
+        namedChildren: [],
       };
 
       // Create mock named_argument nodes
@@ -1572,7 +1747,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 1) {
             return {
@@ -1581,7 +1756,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 2) {
             return mockHeightNumberNode;
@@ -1596,7 +1771,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'value') {
             return mockHeightNumberNode;
@@ -1610,7 +1785,7 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
           {
             type: 'equals',
@@ -1618,10 +1793,10 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockHeightNumberNode
-        ]
+          mockHeightNumberNode,
+        ],
       };
 
       const mockDiameterNamedArgumentNode = {
@@ -1636,7 +1811,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 1) {
             return {
@@ -1645,7 +1820,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 2) {
             return mockDiameterNumberNode;
@@ -1660,7 +1835,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'value') {
             return mockDiameterNumberNode;
@@ -1674,7 +1849,7 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
           {
             type: 'equals',
@@ -1682,10 +1857,10 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockDiameterNumberNode
-        ]
+          mockDiameterNumberNode,
+        ],
       };
 
       // Create a mock argument_list node
@@ -1703,7 +1878,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (i === 2) {
             return mockDiameterNamedArgumentNode;
@@ -1719,10 +1894,10 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockDiameterNamedArgumentNode
-        ]
+          mockDiameterNamedArgumentNode,
+        ],
       };
 
       // Create a mock accessor_expression node
@@ -1738,7 +1913,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (index === 1) {
             return mockArgumentListNode;
@@ -1753,7 +1928,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'arguments' || name === 'argument_list') {
             return mockArgumentListNode;
@@ -1767,24 +1942,31 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockArgumentListNode
-        ]
+          mockArgumentListNode,
+        ],
       } as unknown as TSNode;
 
       // Mock the createASTNodeForFunction method
-      const createASTNodeForFunctionSpy = vi.spyOn(visitor as any, 'createASTNodeForFunction').mockReturnValue({
-        type: 'cylinder',
-        height: 10,
-        radius1: 5,
-        radius2: 5,
-        center: false,
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      });
+      const createASTNodeForFunctionSpy = vi
+        .spyOn(visitor as any, 'createASTNodeForFunction')
+        .mockReturnValue({
+          type: 'cylinder',
+          height: 10,
+          radius1: 5,
+          radius2: 5,
+          center: false,
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
+        });
 
       // Visit the node
-      const result = visitor.visitAccessorExpression(mockAccessorExpressionNode);
+      const result = visitor.visitAccessorExpression(
+        mockAccessorExpressionNode
+      );
 
       // Verify the method was called
       expect(createASTNodeForFunctionSpy).toHaveBeenCalled();
@@ -1809,7 +1991,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 0,
         child: () => null,
         childForFieldName: () => null,
-        namedChildren: []
+        namedChildren: [],
       };
 
       const mockDiameter1NumberNode = {
@@ -1818,7 +2000,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 0,
         child: () => null,
         childForFieldName: () => null,
-        namedChildren: []
+        namedChildren: [],
       };
 
       const mockDiameter2NumberNode = {
@@ -1827,7 +2009,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 0,
         child: () => null,
         childForFieldName: () => null,
-        namedChildren: []
+        namedChildren: [],
       };
 
       // Create mock named_argument nodes
@@ -1843,7 +2025,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 1) {
             return {
@@ -1852,7 +2034,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 2) {
             return mockHeightNumberNode;
@@ -1867,7 +2049,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'value') {
             return mockHeightNumberNode;
@@ -1881,7 +2063,7 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
           {
             type: 'equals',
@@ -1889,10 +2071,10 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockHeightNumberNode
-        ]
+          mockHeightNumberNode,
+        ],
       };
 
       const mockDiameter1NamedArgumentNode = {
@@ -1907,7 +2089,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 1) {
             return {
@@ -1916,7 +2098,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 2) {
             return mockDiameter1NumberNode;
@@ -1931,7 +2113,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'value') {
             return mockDiameter1NumberNode;
@@ -1945,7 +2127,7 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
           {
             type: 'equals',
@@ -1953,10 +2135,10 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockDiameter1NumberNode
-        ]
+          mockDiameter1NumberNode,
+        ],
       };
 
       const mockDiameter2NamedArgumentNode = {
@@ -1971,7 +2153,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 1) {
             return {
@@ -1980,7 +2162,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (j === 2) {
             return mockDiameter2NumberNode;
@@ -1995,7 +2177,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'value') {
             return mockDiameter2NumberNode;
@@ -2009,7 +2191,7 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
           {
             type: 'equals',
@@ -2017,10 +2199,10 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockDiameter2NumberNode
-        ]
+          mockDiameter2NumberNode,
+        ],
       };
 
       // Create a mock argument_list node
@@ -2038,7 +2220,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (i === 2) {
             return mockDiameter1NamedArgumentNode;
@@ -2049,7 +2231,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (i === 4) {
             return mockDiameter2NamedArgumentNode;
@@ -2065,7 +2247,7 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
           mockDiameter1NamedArgumentNode,
           {
@@ -2074,10 +2256,10 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockDiameter2NamedArgumentNode
-        ]
+          mockDiameter2NamedArgumentNode,
+        ],
       };
 
       // Create a mock accessor_expression node
@@ -2093,7 +2275,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (index === 1) {
             return mockArgumentListNode;
@@ -2108,7 +2290,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'arguments' || name === 'argument_list') {
             return mockArgumentListNode;
@@ -2122,24 +2304,31 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockArgumentListNode
-        ]
+          mockArgumentListNode,
+        ],
       } as unknown as TSNode;
 
       // Mock the createASTNodeForFunction method
-      const createASTNodeForFunctionSpy = vi.spyOn(visitor as any, 'createASTNodeForFunction').mockReturnValue({
-        type: 'cylinder',
-        height: 10,
-        radius1: 5,
-        radius2: 3,
-        center: false,
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-      });
+      const createASTNodeForFunctionSpy = vi
+        .spyOn(visitor as any, 'createASTNodeForFunction')
+        .mockReturnValue({
+          type: 'cylinder',
+          height: 10,
+          radius1: 5,
+          radius2: 3,
+          center: false,
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
+        });
 
       // Visit the node
-      const result = visitor.visitAccessorExpression(mockAccessorExpressionNode);
+      const result = visitor.visitAccessorExpression(
+        mockAccessorExpressionNode
+      );
 
       // Verify the method was called
       expect(createASTNodeForFunctionSpy).toHaveBeenCalled();
@@ -2164,7 +2353,7 @@ describe('PrimitiveVisitor', () => {
         childCount: 0,
         child: () => null,
         childForFieldName: () => null,
-        namedChildren: []
+        namedChildren: [],
       };
 
       // Create a mock accessor_expression node
@@ -2180,7 +2369,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (index === 1) {
             return mockArgumentListNode;
@@ -2195,7 +2384,7 @@ describe('PrimitiveVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'arguments' || name === 'argument_list') {
             return mockArgumentListNode;
@@ -2209,14 +2398,16 @@ describe('PrimitiveVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
-          mockArgumentListNode
-        ]
+          mockArgumentListNode,
+        ],
       } as unknown as TSNode;
 
       // Visit the node
-      const result = visitor.visitAccessorExpression(mockAccessorExpressionNode);
+      const result = visitor.visitAccessorExpression(
+        mockAccessorExpressionNode
+      );
 
       // Verify the result
       expect(result).toBeNull();
@@ -2239,7 +2430,10 @@ function findNodeOfType(node: TSNode, type: string): TSNode | null {
   if (node.type === 'expression_statement' && type === 'module_instantiation') {
     const expression = node.firstChild;
     if (expression) {
-      const accessorExpression = findDescendantOfType(expression, 'accessor_expression');
+      const accessorExpression = findDescendantOfType(
+        expression,
+        'accessor_expression'
+      );
       if (accessorExpression) {
         return accessorExpression;
       }

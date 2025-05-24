@@ -2,7 +2,11 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 import { extractArguments } from './argument-extractor';
 import { getLocation } from '../utils/location-utils';
-import { extractNumberParameter, extractBooleanParameter, extractVectorParameter } from '../extractors/parameter-extractor';
+import {
+  extractNumberParameter,
+  extractBooleanParameter,
+  extractVectorParameter,
+} from '../extractors/parameter-extractor';
 // findDescendantOfType is not used in this file
 
 /**
@@ -11,8 +15,12 @@ import { extractNumberParameter, extractBooleanParameter, extractVectorParameter
  * @returns A cube AST node or null if the node cannot be processed
  */
 export function extractCubeNode(node: TSNode): ast.CubeNode | null {
-  console.log(`[extractCubeNode] Processing cube node: ${node.text.substring(0, 50)}`);
-  console.log(`[extractCubeNode] Node type: ${node.type}, childCount: ${node.childCount}`);
+  console.log(
+    `[extractCubeNode] Processing cube node: ${node.text.substring(0, 50)}`
+  );
+  console.log(
+    `[extractCubeNode] Node type: ${node.type}, childCount: ${node.childCount}`
+  );
 
   // Default values
   let size: number | ast.Vector3D = 1;
@@ -42,14 +50,20 @@ export function extractCubeNode(node: TSNode): ast.CubeNode | null {
       type: 'cube',
       size,
       center,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 
-  console.log(`[extractCubeNode] Found arguments node: type=${argsNode.type}, text='${argsNode.text}'`);
+  console.log(
+    `[extractCubeNode] Found arguments node: type=${argsNode.type}, text='${argsNode.text}'`
+  );
 
   const args = extractArguments(argsNode);
-  console.log(`[extractCubeNode] Extracted ${args.length} arguments: ${JSON.stringify(args)}`);
+  console.log(
+    `[extractCubeNode] Extracted ${args.length} arguments: ${JSON.stringify(
+      args
+    )}`
+  );
 
   // Process arguments
   for (let i = 0; i < args.length; i++) {
@@ -69,7 +83,9 @@ export function extractCubeNode(node: TSNode): ast.CubeNode | null {
           // If only 1 value provided, use it as a scalar
           size = vectorValue[0];
         }
-        console.log(`[extractCubeNode] Found vector size: ${JSON.stringify(size)}`);
+        console.log(
+          `[extractCubeNode] Found vector size: ${JSON.stringify(size)}`
+        );
       } else {
         // Try as a number parameter
         const numberValue = extractNumberParameter(arg);
@@ -77,7 +93,11 @@ export function extractCubeNode(node: TSNode): ast.CubeNode | null {
           size = numberValue;
           console.log(`[extractCubeNode] Found number size: ${size}`);
         } else {
-          console.log(`[extractCubeNode] Invalid size parameter: ${JSON.stringify(arg.value)}`);
+          console.log(
+            `[extractCubeNode] Invalid size parameter: ${JSON.stringify(
+              arg.value
+            )}`
+          );
         }
       }
     }
@@ -88,17 +108,25 @@ export function extractCubeNode(node: TSNode): ast.CubeNode | null {
         center = centerValue;
         console.log(`[extractCubeNode] Found center parameter: ${center}`);
       } else {
-        console.log(`[extractCubeNode] Invalid center parameter: ${JSON.stringify(arg.value)}`);
+        console.log(
+          `[extractCubeNode] Invalid center parameter: ${JSON.stringify(
+            arg.value
+          )}`
+        );
       }
     }
   }
 
-  console.log(`[extractCubeNode] Final parameters: size=${JSON.stringify(size)}, center=${center}`);
+  console.log(
+    `[extractCubeNode] Final parameters: size=${JSON.stringify(
+      size
+    )}, center=${center}`
+  );
 
   return {
     type: 'cube',
     size,
     center,
-    location: getLocation(node)
+    location: getLocation(node),
   };
 }

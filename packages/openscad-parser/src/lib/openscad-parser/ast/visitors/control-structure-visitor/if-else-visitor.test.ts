@@ -16,7 +16,7 @@ describe('IfElseVisitor', () => {
 
   beforeEach(async () => {
     parser = new OpenscadParser();
-    await parser.init("./tree-sitter-openscad.wasm");
+    await parser.init('./tree-sitter-openscad.wasm');
     visitor = new ControlStructureVisitor();
   });
 

@@ -17,21 +17,30 @@ const mockLanguage = {
       // Return mock captures for testing
       if (queryString.includes('accessor_expression')) {
         return [
-          { node: { type: 'accessor_expression', text: 'cube(10)' }, name: 'node' },
-          { node: { type: 'accessor_expression', text: 'sphere(5)' }, name: 'node' },
-          { node: { type: 'accessor_expression', text: 'cylinder(h=10, r=5)' }, name: 'node' }
+          {
+            node: { type: 'accessor_expression', text: 'cube(10)' },
+            name: 'node',
+          },
+          {
+            node: { type: 'accessor_expression', text: 'sphere(5)' },
+            name: 'node',
+          },
+          {
+            node: { type: 'accessor_expression', text: 'cylinder(h=10, r=5)' },
+            name: 'node',
+          },
         ];
       } else if (queryString.includes('arguments')) {
         return [
           { node: { type: 'arguments', text: '(10)' }, name: 'node' },
           { node: { type: 'arguments', text: '(5)' }, name: 'node' },
-          { node: { type: 'arguments', text: '(h=10, r=5)' }, name: 'node' }
+          { node: { type: 'arguments', text: '(h=10, r=5)' }, name: 'node' },
         ];
       } else {
         return [];
       }
-    }
-  })
+    },
+  }),
 };
 
 describe('QueryVisitor', () => {
@@ -56,14 +65,16 @@ describe('QueryVisitor', () => {
     const compositeVisitor = new CompositeVisitor([
       new PrimitiveVisitor(code),
       new TransformVisitor(code),
-      new CSGVisitor(code)
+      new CSGVisitor(code),
     ]);
 
     // Create a query visitor
     queryVisitor = new QueryVisitor(code, tree, mockLanguage, compositeVisitor);
 
     // Find all accessor_expression nodes
-    const accessorExpressions = queryVisitor.findNodesByType('accessor_expression');
+    const accessorExpressions = queryVisitor.findNodesByType(
+      'accessor_expression'
+    );
 
     // There should be at least 3 accessor expressions (cube, sphere, cylinder)
     expect(accessorExpressions.length).toBeGreaterThanOrEqual(3);
@@ -84,20 +95,25 @@ describe('QueryVisitor', () => {
     const compositeVisitor = new CompositeVisitor([
       new PrimitiveVisitor(code),
       new TransformVisitor(code),
-      new CSGVisitor(code)
+      new CSGVisitor(code),
     ]);
 
     // Create a query visitor
     queryVisitor = new QueryVisitor(code, tree, mockLanguage, compositeVisitor);
 
     // Find all accessor_expression and arguments nodes
-    const nodes = queryVisitor.findNodesByTypes(['accessor_expression', 'arguments']);
+    const nodes = queryVisitor.findNodesByTypes([
+      'accessor_expression',
+      'arguments',
+    ]);
 
     // There should be at least 3 nodes total
     expect(nodes.length).toBeGreaterThanOrEqual(3);
 
     // Check that we have both accessor_expression and arguments nodes
-    const accessorExpressions = nodes.filter(node => node.type === 'accessor_expression');
+    const accessorExpressions = nodes.filter(
+      node => node.type === 'accessor_expression'
+    );
     const arguments_ = nodes.filter(node => node.type === 'arguments');
 
     // We should have at least one accessor_expression
@@ -115,7 +131,7 @@ describe('QueryVisitor', () => {
     const compositeVisitor = new CompositeVisitor([
       new PrimitiveVisitor(code),
       new TransformVisitor(code),
-      new CSGVisitor(code)
+      new CSGVisitor(code),
     ]);
 
     // Create a query visitor
@@ -150,7 +166,7 @@ describe('QueryVisitor', () => {
     const compositeVisitor = new CompositeVisitor([
       new PrimitiveVisitor(code),
       new TransformVisitor(code),
-      new CSGVisitor(code)
+      new CSGVisitor(code),
     ]);
 
     // Create a query visitor

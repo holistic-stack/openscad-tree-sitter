@@ -4,7 +4,10 @@ import * as ast from '../ast-types';
 /**
  * Type definition for a node handler function
  */
-export type NodeHandler = (node: TSNode, args: ast.Parameter[]) => ast.ASTNode | null;
+export type NodeHandler = (
+  node: TSNode,
+  args: ast.Parameter[]
+) => ast.ASTNode | null;
 
 /**
  * Interface for a registry of node handlers

@@ -15,7 +15,10 @@ describe('OpenSCAD Parser - AST Generation', () => {
     osParser.dispose();
   });
 
-  function findDescendantNode(node: any | null, predicate: (n: any) => boolean): any | undefined {
+  function findDescendantNode(
+    node: any | null,
+    predicate: (n: any) => boolean
+  ): any | undefined {
     if (!node) return undefined;
     if (predicate(node)) return node;
 
@@ -53,16 +56,22 @@ describe('OpenSCAD Parser - AST Generation', () => {
         expect(rootNode).not.toBeNull();
 
         // Debug: Print the tree structure
-        console.log("Tree structure:");
+        console.log('Tree structure:');
         printTree(rootNode);
 
         // Find the cube node using the updated grammar structure
-        const cubeNode = findDescendantNode(rootNode,
-          (n) => n.type === 'expression_statement' &&
-                 n.firstNamedChild?.type === 'expression' &&
-                 n.firstNamedChild.firstNamedChild?.type === 'conditional_expression' &&
-                 n.firstNamedChild.firstNamedChild.firstNamedChild?.type === 'logical_or_expression' &&
-                 n.firstNamedChild.firstNamedChild.firstNamedChild.text.includes('cube')
+        const cubeNode = findDescendantNode(
+          rootNode,
+          n =>
+            n.type === 'expression_statement' &&
+            n.firstNamedChild?.type === 'expression' &&
+            n.firstNamedChild.firstNamedChild?.type ===
+              'conditional_expression' &&
+            n.firstNamedChild.firstNamedChild.firstNamedChild?.type ===
+              'logical_or_expression' &&
+            n.firstNamedChild.firstNamedChild.firstNamedChild.text.includes(
+              'cube'
+            )
         );
 
         expect(cubeNode).toBeDefined();
@@ -77,12 +86,18 @@ describe('OpenSCAD Parser - AST Generation', () => {
         expect(rootNode).not.toBeNull();
 
         // Find the cube node using the updated grammar structure
-        const cubeNode = findDescendantNode(rootNode,
-          (n) => n.type === 'expression_statement' &&
-                 n.firstNamedChild?.type === 'expression' &&
-                 n.firstNamedChild.firstNamedChild?.type === 'conditional_expression' &&
-                 n.firstNamedChild.firstNamedChild.firstNamedChild?.type === 'logical_or_expression' &&
-                 n.firstNamedChild.firstNamedChild.firstNamedChild.text.includes('cube')
+        const cubeNode = findDescendantNode(
+          rootNode,
+          n =>
+            n.type === 'expression_statement' &&
+            n.firstNamedChild?.type === 'expression' &&
+            n.firstNamedChild.firstNamedChild?.type ===
+              'conditional_expression' &&
+            n.firstNamedChild.firstNamedChild.firstNamedChild?.type ===
+              'logical_or_expression' &&
+            n.firstNamedChild.firstNamedChild.firstNamedChild.text.includes(
+              'cube'
+            )
         );
         expect(cubeNode).toBeDefined();
 
@@ -98,12 +113,18 @@ describe('OpenSCAD Parser - AST Generation', () => {
         expect(rootNode).not.toBeNull();
 
         // Find the cube node using the updated grammar structure
-        const cubeNode = findDescendantNode(rootNode,
-          (n) => n.type === 'expression_statement' &&
-                 n.firstNamedChild?.type === 'expression' &&
-                 n.firstNamedChild.firstNamedChild?.type === 'conditional_expression' &&
-                 n.firstNamedChild.firstNamedChild.firstNamedChild?.type === 'logical_or_expression' &&
-                 n.firstNamedChild.firstNamedChild.firstNamedChild.text.includes('cube')
+        const cubeNode = findDescendantNode(
+          rootNode,
+          n =>
+            n.type === 'expression_statement' &&
+            n.firstNamedChild?.type === 'expression' &&
+            n.firstNamedChild.firstNamedChild?.type ===
+              'conditional_expression' &&
+            n.firstNamedChild.firstNamedChild.firstNamedChild?.type ===
+              'logical_or_expression' &&
+            n.firstNamedChild.firstNamedChild.firstNamedChild.text.includes(
+              'cube'
+            )
         );
         expect(cubeNode).toBeDefined();
 

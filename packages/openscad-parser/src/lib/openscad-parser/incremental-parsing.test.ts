@@ -40,7 +40,12 @@ describe('Incremental Parsing', () => {
     const newEndIndex = startIndex + 2; // '20' is also 2 characters
 
     // Update the tree incrementally
-    const updatedTree = parser.update(modifiedCode, startIndex, oldEndIndex, newEndIndex);
+    const updatedTree = parser.update(
+      modifiedCode,
+      startIndex,
+      oldEndIndex,
+      newEndIndex
+    );
 
     // Verify the update was successful
     expect(updatedTree).not.toBeNull();
@@ -65,7 +70,12 @@ describe('Incremental Parsing', () => {
     const newEndIndex = startIndex + 2; // '20' is also 2 characters
 
     // Update the AST incrementally
-    const updatedAST = parser.updateAST(modifiedCode, startIndex, oldEndIndex, newEndIndex);
+    const updatedAST = parser.updateAST(
+      modifiedCode,
+      startIndex,
+      oldEndIndex,
+      newEndIndex
+    );
 
     // Verify the update was successful
     expect(updatedAST.length).toBe(1);
@@ -85,7 +95,12 @@ describe('Incremental Parsing', () => {
     const firstOldEndIndex = firstStartIndex + 2;
     const firstNewEndIndex = firstStartIndex + 2;
 
-    const firstUpdatedTree = parser.update(firstModifiedCode, firstStartIndex, firstOldEndIndex, firstNewEndIndex);
+    const firstUpdatedTree = parser.update(
+      firstModifiedCode,
+      firstStartIndex,
+      firstOldEndIndex,
+      firstNewEndIndex
+    );
     expect(firstUpdatedTree?.rootNode.text).toBe(firstModifiedCode);
 
     // Second update: add center parameter
@@ -94,7 +109,12 @@ describe('Incremental Parsing', () => {
     const secondOldEndIndex = secondStartIndex;
     const secondNewEndIndex = secondStartIndex + ', center=true'.length;
 
-    const secondUpdatedTree = parser.update(secondModifiedCode, secondStartIndex, secondOldEndIndex, secondNewEndIndex);
+    const secondUpdatedTree = parser.update(
+      secondModifiedCode,
+      secondStartIndex,
+      secondOldEndIndex,
+      secondNewEndIndex
+    );
     expect(secondUpdatedTree?.rootNode.text).toBe(secondModifiedCode);
 
     // Verify the AST after multiple updates
@@ -132,13 +152,20 @@ describe('Incremental Parsing', () => {
     const newEndIndex = modifiedCode.length;
 
     // Update the tree incrementally
-    const updatedTree = parser.update(modifiedCode, startIndex, oldEndIndex, newEndIndex);
+    const updatedTree = parser.update(
+      modifiedCode,
+      startIndex,
+      oldEndIndex,
+      newEndIndex
+    );
 
     // Verify the update was successful
     expect(updatedTree).not.toBeNull();
 
     // Normalize whitespace for comparison
-    const normalizedTreeText = updatedTree?.rootNode.text.replace(/\s+/g, ' ').trim();
+    const normalizedTreeText = updatedTree?.rootNode.text
+      .replace(/\s+/g, ' ')
+      .trim();
     const normalizedModifiedCode = modifiedCode.replace(/\s+/g, ' ').trim();
     expect(normalizedTreeText).toBe(normalizedModifiedCode);
 

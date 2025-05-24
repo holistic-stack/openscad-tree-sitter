@@ -64,7 +64,11 @@ export class QueryManager {
    * @param sourceText The source text (for caching)
    * @returns The query results
    */
-  executeQueryOnNode(queryString: string, node: TSNode, sourceText: string): TSNode[] {
+  executeQueryOnNode(
+    queryString: string,
+    node: TSNode,
+    sourceText: string
+  ): TSNode[] {
     // Create a cache key for the node
     const nodeText = node.text;
     const nodeCacheKey = `${queryString}:${nodeText}`;
@@ -94,7 +98,11 @@ export class QueryManager {
           // Handle different API formats
           if (Array.isArray(capture)) {
             results.push(capture[1]); // New API format: [pattern, node]
-          } else if (capture && typeof capture === 'object' && 'node' in capture) {
+          } else if (
+            capture &&
+            typeof capture === 'object' &&
+            'node' in capture
+          ) {
             results.push(capture.node); // Old API format: { node, ... }
           }
         }
@@ -108,7 +116,9 @@ export class QueryManager {
             }
           }
         } catch (error) {
-          console.error(`[QueryManager.executeQueryOnNode] Error executing query: ${error}`);
+          console.error(
+            `[QueryManager.executeQueryOnNode] Error executing query: ${error}`
+          );
         }
       }
     }
@@ -182,7 +192,11 @@ export class QueryManager {
           // Handle different API formats
           if (Array.isArray(capture)) {
             results.push(capture[1]); // New API format: [pattern, node]
-          } else if (capture && typeof capture === 'object' && 'node' in capture) {
+          } else if (
+            capture &&
+            typeof capture === 'object' &&
+            'node' in capture
+          ) {
             results.push(capture.node); // Old API format: { node, ... }
           }
         }
@@ -196,7 +210,9 @@ export class QueryManager {
             }
           }
         } catch (error) {
-          console.error(`[QueryManager.executeQueryInternal] Error executing query: ${error}`);
+          console.error(
+            `[QueryManager.executeQueryInternal] Error executing query: ${error}`
+          );
         }
       }
     }

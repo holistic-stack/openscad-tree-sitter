@@ -16,9 +16,9 @@ describe('OpenscadParser Error Handling', () => {
   beforeEach(async () => {
     // Configure parser for graceful error handling
     parser = new OpenscadParser({
-      throwErrors: false,  // Don't throw errors, handle them gracefully
+      throwErrors: false, // Don't throw errors, handle them gracefully
       attemptRecovery: true,
-      includeSource: true
+      includeSource: true,
     });
     await parser.init('./tree-sitter-openscad.wasm');
   });

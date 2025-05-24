@@ -1,9 +1,9 @@
 /**
  * SyntaxError class for syntax errors in the parser
- * 
+ *
  * This class represents syntax errors in the OpenSCAD code, such as
  * missing semicolons, unmatched parentheses, etc.
- * 
+ *
  * @module lib/openscad-parser/ast/errors/syntax-error
  */
 
@@ -15,7 +15,7 @@ import { ParserError, ErrorPosition, ErrorSuggestion } from './parser-error';
 export class SyntaxError extends ParserError {
   /**
    * Create a new SyntaxError
-   * 
+   *
    * @param message - The error message
    * @param source - The source code that caused the error
    * @param position - The position in the source code where the error occurred
@@ -33,7 +33,7 @@ export class SyntaxError extends ParserError {
 
   /**
    * Create a missing token error
-   * 
+   *
    * @param tokenName - The name of the missing token
    * @param source - The source code
    * @param position - The position in the source code
@@ -48,15 +48,15 @@ export class SyntaxError extends ParserError {
     const suggestions: ErrorSuggestion[] = [
       {
         message: `Add the missing ${tokenName}`,
-        replacement: tokenName
-      }
+        replacement: tokenName,
+      },
     ];
     return new SyntaxError(message, source, position, suggestions);
   }
 
   /**
    * Create an unexpected token error
-   * 
+   *
    * @param foundToken - The token that was found
    * @param expectedToken - The token that was expected
    * @param source - The source code
@@ -73,15 +73,15 @@ export class SyntaxError extends ParserError {
     const suggestions: ErrorSuggestion[] = [
       {
         message: `Replace '${foundToken}' with '${expectedToken}'`,
-        replacement: expectedToken
-      }
+        replacement: expectedToken,
+      },
     ];
     return new SyntaxError(message, source, position, suggestions);
   }
 
   /**
    * Create an unmatched token error
-   * 
+   *
    * @param openToken - The opening token
    * @param closeToken - The closing token
    * @param source - The source code
@@ -98,15 +98,15 @@ export class SyntaxError extends ParserError {
     const suggestions: ErrorSuggestion[] = [
       {
         message: `Add the missing '${closeToken}'`,
-        replacement: closeToken
-      }
+        replacement: closeToken,
+      },
     ];
     return new SyntaxError(message, source, position, suggestions);
   }
 
   /**
    * Create a missing semicolon error
-   * 
+   *
    * @param source - The source code
    * @param position - The position in the source code
    * @returns A SyntaxError for a missing semicolon
@@ -119,8 +119,8 @@ export class SyntaxError extends ParserError {
     const suggestions: ErrorSuggestion[] = [
       {
         message: `Add a semicolon at the end of the statement`,
-        replacement: ';'
-      }
+        replacement: ';',
+      },
     ];
     return new SyntaxError(message, source, position, suggestions);
   }

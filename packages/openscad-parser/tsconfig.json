@@ -16,10 +16,16 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "types": ["vitest/globals", "node"],
+    "types": [   
+       "node",
+      // Include type definitions for:
+      "vite/client", // - Vite client types
+      "vitest/globals", // - Vitest globals for testing
+      "vitest" // - Vitest types for testing
+    ],
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+  "include": ["src/**/*", "vite.config.ts", "**/*.test.ts", "**/*.spec.ts"],
+  "exclude": ["node_modules", "dist"]
 }

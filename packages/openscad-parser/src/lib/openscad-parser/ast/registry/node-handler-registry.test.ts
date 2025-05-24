@@ -53,12 +53,16 @@ describe('NodeHandlerRegistry', () => {
 
     test('should throw an error when registering with an empty node type', () => {
       // Attempt to register with an empty node type
-      expect(() => registry.register('', mockHandler)).toThrow('Node type cannot be empty');
+      expect(() => registry.register('', mockHandler)).toThrow(
+        'Node type cannot be empty'
+      );
     });
 
     test('should throw an error when registering with a null handler', () => {
       // Attempt to register with a null handler
-      expect(() => registry.register('cube', null as unknown as NodeHandler)).toThrow('Handler cannot be null or undefined');
+      expect(() =>
+        registry.register('cube', null as unknown as NodeHandler)
+      ).toThrow('Handler cannot be null or undefined');
     });
   });
 

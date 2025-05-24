@@ -24,7 +24,10 @@ export function cstTreeCursorWalkLog(
   let cursor: TreeCursor;
 
   // Check if initialTreeOrCursor is a Tree or a TreeCursor
-  if ('walk' in initialTreeOrCursor && typeof initialTreeOrCursor.walk === 'function') {
+  if (
+    'walk' in initialTreeOrCursor &&
+    typeof initialTreeOrCursor.walk === 'function'
+  ) {
     // It's a Tree
     cursor = initialTreeOrCursor.walk();
   } else if ('nodeType' in initialTreeOrCursor) {
@@ -41,11 +44,18 @@ export function cstTreeCursorWalkLog(
       return;
     }
 
-    const { nodeType, startPosition: start, endPosition: end, nodeIsNamed } = currentCursor;
+    const {
+      nodeType,
+      startPosition: start,
+      endPosition: end,
+      nodeIsNamed,
+    } = currentCursor;
     const fieldName = currentCursor.currentFieldName || 'child';
 
     // Get the node text and truncate it if it's too long
-    let nodeText = code.substring(currentCursor.startIndex, currentCursor.endIndex).replace(/\n/g, '\\n');
+    let nodeText = code
+      .substring(currentCursor.startIndex, currentCursor.endIndex)
+      .replace(/\n/g, '\\n');
     if (nodeText.length > 50) {
       nodeText = nodeText.substring(0, 47) + '...'; // Truncate and add ellipsis
     }

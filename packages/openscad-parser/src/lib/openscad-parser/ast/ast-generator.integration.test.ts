@@ -4,16 +4,15 @@ import { afterAll, beforeAll, describe, it, expect, beforeEach } from 'vitest';
 describe('AST Generator Integration Tests', () => {
   let parser: OpenscadParser;
 
+  beforeAll(async () => {
+    parser = new OpenscadParser();
+    // Assuming the WASM file is in the public directory when served
+    await parser.init('./tree-sitter-openscad.wasm');
+  });
 
-    beforeAll(async () => {
-        parser = new OpenscadParser();
-        // Assuming the WASM file is in the public directory when served
-        await parser.init('./tree-sitter-openscad.wasm');
-    });
-
-    afterAll(() => {
-        parser.dispose();
-    });
+  afterAll(() => {
+    parser.dispose();
+  });
 
   describe('translate and cube operations', () => {
     it('should parse translate with cube without curly braces', () => {
@@ -27,7 +26,15 @@ describe('AST Generator Integration Tests', () => {
       function printNode(node: any, depth = 0) {
         if (!node) return;
         const indent = '  '.repeat(depth);
-        console.log(`${indent}${node.type} [${node.startPosition.row},${node.startPosition.column} → ${node.endPosition.row},${node.endPosition.column}]: '${node.text.substring(0, 30)}${node.text.length > 30 ? '...' : ''}'`);
+        console.log(
+          `${indent}${node.type} [${node.startPosition.row},${
+            node.startPosition.column
+          } → ${node.endPosition.row},${
+            node.endPosition.column
+          }]: '${node.text.substring(0, 30)}${
+            node.text.length > 30 ? '...' : ''
+          }'`
+        );
         for (let i = 0; i < node.childCount; i++) {
           printNode(node.child(i), depth + 1);
         }

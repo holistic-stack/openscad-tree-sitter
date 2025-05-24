@@ -5,7 +5,7 @@ describe('Debug CST Structure', () => {
 
   beforeEach(async () => {
     parser = new OpenscadParser();
-    await parser.init("./tree-sitter-openscad.wasm");
+    await parser.init('./tree-sitter-openscad.wasm');
   });
 
   afterEach(() => {
@@ -53,33 +53,33 @@ function formatNode(node: any) {
     text: node.text,
     startPosition: node.startPosition,
     endPosition: node.endPosition,
-    children: []
+    children: [],
   };
-  
+
   for (let i = 0; i < node.childCount; i++) {
     const child = node.child(i);
     if (child) {
       result.children.push(formatNode(child));
     }
   }
-  
+
   return result;
 }
 
 function walkTree(node: any, targetType: string, depth = 0) {
   const indent = '  '.repeat(depth);
-  
+
   if (node.type === targetType) {
     console.log(`${indent}Found ${targetType}: ${node.text}`);
     console.log(`${indent}Children:`);
-    
+
     for (let i = 0; i < node.childCount; i++) {
       const child = node.child(i);
       if (child) {
         console.log(`${indent}  Child ${i}: ${child.type} - ${child.text}`);
       }
     }
-    
+
     // Try to get field names
     console.log(`${indent}Fields:`);
     const nameField = node.childForFieldName('name');
@@ -88,15 +88,17 @@ function walkTree(node: any, targetType: string, depth = 0) {
     } else {
       console.log(`${indent}  name: not found`);
     }
-    
+
     const argsField = node.childForFieldName('arguments');
     if (argsField) {
-      console.log(`${indent}  arguments: ${argsField.type} - ${argsField.text}`);
+      console.log(
+        `${indent}  arguments: ${argsField.type} - ${argsField.text}`
+      );
     } else {
       console.log(`${indent}  arguments: not found`);
     }
   }
-  
+
   for (let i = 0; i < node.childCount; i++) {
     const child = node.child(i);
     if (child) {

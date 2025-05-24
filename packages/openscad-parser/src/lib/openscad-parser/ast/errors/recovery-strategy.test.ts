@@ -2,7 +2,13 @@
  * Tests for the recovery strategies
  */
 
-import { RecoveryStrategy, SkipToNextStatementStrategy, InsertMissingTokenStrategy, DeleteExtraTokenStrategy, RecoveryStrategyFactory } from './recovery-strategy';
+import {
+  RecoveryStrategy,
+  SkipToNextStatementStrategy,
+  InsertMissingTokenStrategy,
+  DeleteExtraTokenStrategy,
+  RecoveryStrategyFactory,
+} from './recovery-strategy';
 import { ParserError, ErrorPosition } from './parser-error';
 import { SyntaxError } from './syntax-error';
 import { SemanticError } from './semantic-error';
@@ -52,29 +58,29 @@ describe('RecoveryStrategies', () => {
       const errorNode = new MockNode('ERROR');
       const statementNode = new MockNode('statement');
       const nextStatementNode = new MockNode('statement');
-      
+
       statementNode.setNextSibling(nextStatementNode);
       errorNode.setParent(statementNode);
-      
+
       const error = new SyntaxError('Test error', source, position);
       const strategy = new SkipToNextStatementStrategy();
-      
+
       const result = strategy.recover(errorNode as any, error);
-      
+
       expect(result).toBe(nextStatementNode);
     });
 
     it('should return null if no next statement is found', () => {
       const errorNode = new MockNode('ERROR');
       const statementNode = new MockNode('statement');
-      
+
       errorNode.setParent(statementNode);
-      
+
       const error = new SyntaxError('Test error', source, position);
       const strategy = new SkipToNextStatementStrategy();
-      
+
       const result = strategy.recover(errorNode as any, error);
-      
+
       expect(result).toBeNull();
     });
   });
@@ -84,20 +90,25 @@ describe('RecoveryStrategies', () => {
       const errorNode = new MockNode('ERROR');
       const error = SyntaxError.missingToken(']', source, position);
       const strategy = new InsertMissingTokenStrategy();
-      
+
       const result = strategy.recover(errorNode as any, error);
-      
+
       // In our implementation, we just return the node for now
       expect(result).toBe(errorNode);
     });
 
     it('should return null for non-syntax errors', () => {
       const errorNode = new MockNode('ERROR');
-      const error = new ParserError('Test error', 'TEST_ERROR', source, position);
+      const error = new ParserError(
+        'Test error',
+        'TEST_ERROR',
+        source,
+        position
+      );
       const strategy = new InsertMissingTokenStrategy();
-      
+
       const result = strategy.recover(errorNode as any, error);
-      
+
       expect(result).toBeNull();
     });
   });
@@ -106,25 +117,30 @@ describe('RecoveryStrategies', () => {
     it('should handle unexpected token errors', () => {
       const errorNode = new MockNode('ERROR');
       const nextNode = new MockNode('token');
-      
+
       errorNode.setNextSibling(nextNode);
-      
+
       const error = SyntaxError.unexpectedToken(')', ']', source, position);
       const strategy = new DeleteExtraTokenStrategy();
-      
+
       const result = strategy.recover(errorNode as any, error);
-      
+
       // Should return the next sibling
       expect(result).toBe(nextNode);
     });
 
     it('should return null for non-syntax errors', () => {
       const errorNode = new MockNode('ERROR');
-      const error = new ParserError('Test error', 'TEST_ERROR', source, position);
+      const error = new ParserError(
+        'Test error',
+        'TEST_ERROR',
+        source,
+        position
+      );
       const strategy = new DeleteExtraTokenStrategy();
-      
+
       const result = strategy.recover(errorNode as any, error);
-      
+
       expect(result).toBeNull();
     });
   });
@@ -133,28 +149,28 @@ describe('RecoveryStrategies', () => {
     it('should create InsertMissingTokenStrategy for missing token errors', () => {
       const error = SyntaxError.missingToken(']', source, position);
       const strategy = RecoveryStrategyFactory.createStrategy(error);
-      
+
       expect(strategy).toBeInstanceOf(InsertMissingTokenStrategy);
     });
 
     it('should create DeleteExtraTokenStrategy for unexpected token errors', () => {
       const error = SyntaxError.unexpectedToken(')', ']', source, position);
       const strategy = RecoveryStrategyFactory.createStrategy(error);
-      
+
       expect(strategy).toBeInstanceOf(DeleteExtraTokenStrategy);
     });
 
     it('should create SkipToNextStatementStrategy for other syntax errors', () => {
       const error = new SyntaxError('Test error', source, position);
       const strategy = RecoveryStrategyFactory.createStrategy(error);
-      
+
       expect(strategy).toBeInstanceOf(SkipToNextStatementStrategy);
     });
 
     it('should return null for non-syntax errors', () => {
       const error = new SemanticError('Test error', source, position);
       const strategy = RecoveryStrategyFactory.createStrategy(error);
-      
+
       expect(strategy).toBeNull();
     });
   });

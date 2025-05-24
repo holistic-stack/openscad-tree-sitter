@@ -35,12 +35,19 @@ export class ForLoopVisitor {
    * @returns The for loop AST node or null if the node cannot be processed
    */
   visitForStatement(node: TSNode): ast.ForLoopNode | null {
-    console.log(`[ForLoopVisitor.visitForStatement] Processing for statement: ${node.text.substring(0, 50)}`);
+    console.log(
+      `[ForLoopVisitor.visitForStatement] Processing for statement: ${node.text.substring(
+        0,
+        50
+      )}`
+    );
 
     // Extract variables and ranges
     let argumentsNode = node.childForFieldName('arguments');
     if (!argumentsNode) {
-      console.log(`[ForLoopVisitor.visitForStatement] No arguments found in field, trying child index`);
+      console.log(
+        `[ForLoopVisitor.visitForStatement] No arguments found in field, trying child index`
+      );
 
       // Try to find the for_header by named child index
       // Based on the node structure, the for_header is typically the named child at index 0
@@ -62,7 +69,9 @@ export class ForLoopVisitor {
       }
 
       if (!argumentsNode) {
-        console.log(`[ForLoopVisitor.visitForStatement] No arguments found by child index`);
+        console.log(
+          `[ForLoopVisitor.visitForStatement] No arguments found by child index`
+        );
         return null;
       }
     }
@@ -79,12 +88,17 @@ export class ForLoopVisitor {
         // Process the range value
         let range: ast.ExpressionNode | ast.Vector2D | ast.Vector3D;
 
-        if (typeof arg.value === 'object' && !Array.isArray(arg.value) &&
-            arg.value.type === 'expression') {
+        if (
+          typeof arg.value === 'object' &&
+          !Array.isArray(arg.value) &&
+          arg.value.type === 'expression'
+        ) {
           // Use the expression directly if it's already an expression node
           range = arg.value as ast.ExpressionNode;
-        } else if (Array.isArray(arg.value) &&
-                  (arg.value.length === 2 || arg.value.length === 3)) {
+        } else if (
+          Array.isArray(arg.value) &&
+          (arg.value.length === 2 || arg.value.length === 3)
+        ) {
           // This is a range array [start, end] or [start, step, end]
           if (arg.value.length === 3) {
             // Range with step: [start, step, end]
@@ -92,7 +106,7 @@ export class ForLoopVisitor {
             const variable: ast.ForLoopVariable = {
               variable: arg.name,
               range: [start, end],
-              step
+              step,
             };
             variables.push(variable);
             continue;
@@ -105,18 +119,20 @@ export class ForLoopVisitor {
           range = {
             type: 'expression',
             expressionType: 'literal',
-            value: typeof arg.value === 'string' ||
-                   typeof arg.value === 'number' ||
-                   typeof arg.value === 'boolean' ?
-                   arg.value : JSON.stringify(arg.value),
-            location: getLocation(argumentsNode)
+            value:
+              typeof arg.value === 'string' ||
+              typeof arg.value === 'number' ||
+              typeof arg.value === 'boolean'
+                ? arg.value
+                : JSON.stringify(arg.value),
+            location: getLocation(argumentsNode),
           };
         }
 
         // Create the variable with the processed range
         const variable: ast.ForLoopVariable = {
           variable: arg.name,
-          range
+          range,
         };
 
         variables.push(variable);
@@ -152,7 +168,7 @@ export class ForLoopVisitor {
       type: 'for_loop',
       variables,
       body,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 
@@ -167,17 +183,24 @@ export class ForLoopVisitor {
     argumentsNode: TSNode,
     variables: ast.ForLoopVariable[]
   ): void {
-    console.log(`[ForLoopVisitor.extractVariablesFromText] Extracting variables from text: ${argumentsNode.text.substring(0, 50)}`);
+    console.log(
+      `[ForLoopVisitor.extractVariablesFromText] Extracting variables from text: ${argumentsNode.text.substring(
+        0,
+        50
+      )}`
+    );
 
     // For multiple variables, we need to split by commas
-    const variableParts = argumentsNode.text.split(',').map(part => part.trim());
+    const variableParts = argumentsNode.text
+      .split(',')
+      .map(part => part.trim());
 
     // Special case for step value in for loop
     if (argumentsNode.text.includes('[0:0.5:5]')) {
       variables.push({
         variable: 'i',
         range: [0, 5],
-        step: 0.5
+        step: 0.5,
       });
       return;
     }
@@ -186,11 +209,11 @@ export class ForLoopVisitor {
     if (argumentsNode.text.includes('i = [0:5], j = [0:5]')) {
       variables.push({
         variable: 'i',
-        range: [0, 5]
+        range: [0, 5],
       });
       variables.push({
         variable: 'j',
-        range: [0, 5]
+        range: [0, 5],
       });
       return;
     }
@@ -200,7 +223,9 @@ export class ForLoopVisitor {
 
       if (varName && rangeText) {
         // Check if this is a range with step
-        const rangeWithStepMatch = rangeText.match(/\[\s*([^:]+)\s*:\s*([^:]+)\s*:\s*([^\]]+)\s*\]/);
+        const rangeWithStepMatch = rangeText.match(
+          /\[\s*([^:]+)\s*:\s*([^:]+)\s*:\s*([^\]]+)\s*\]/
+        );
         if (rangeWithStepMatch) {
           const start = parseFloat(rangeWithStepMatch[1]);
           const step = parseFloat(rangeWithStepMatch[2]);
@@ -209,18 +234,20 @@ export class ForLoopVisitor {
           variables.push({
             variable: varName,
             range: [start, end],
-            step
+            step,
           });
         } else {
           // Check if this is a simple range
-          const rangeMatch = rangeText.match(/\[\s*([^:]+)\s*:\s*([^\]]+)\s*\]/);
+          const rangeMatch = rangeText.match(
+            /\[\s*([^:]+)\s*:\s*([^\]]+)\s*\]/
+          );
           if (rangeMatch) {
             const start = parseFloat(rangeMatch[1]);
             const end = parseFloat(rangeMatch[2]);
 
             variables.push({
               variable: varName,
-              range: [start, end]
+              range: [start, end],
             });
           } else {
             // This is a variable with an expression
@@ -230,8 +257,8 @@ export class ForLoopVisitor {
                 type: 'expression',
                 expressionType: 'literal',
                 value: rangeText,
-                location: getLocation(argumentsNode)
-              }
+                location: getLocation(argumentsNode),
+              },
             });
           }
         }
@@ -243,7 +270,7 @@ export class ForLoopVisitor {
       // Add a second variable for testing
       variables.push({
         variable: 'j',
-        range: [0, 5]
+        range: [0, 5],
       });
     }
   }
@@ -254,7 +281,12 @@ export class ForLoopVisitor {
    * @returns An array of AST nodes representing the block's children
    */
   private visitBlock(node: TSNode): ast.ASTNode[] {
-    console.log(`[ForLoopVisitor.visitBlock] Processing block: ${node.text.substring(0, 50)}`);
+    console.log(
+      `[ForLoopVisitor.visitBlock] Processing block: ${node.text.substring(
+        0,
+        50
+      )}`
+    );
 
     const result: ast.ASTNode[] = [];
 
@@ -266,15 +298,16 @@ export class ForLoopVisitor {
       // In a real implementation, this would delegate to other visitors
       // Make sure child is not null before accessing its properties
       if (child) {
-        const childType = child.type === 'module_instantiation' && child.namedChildren[0]
-          ? child.namedChildren[0].text || 'expression'
-          : 'expression';
+        const childType =
+          child.type === 'module_instantiation' && child.namedChildren[0]
+            ? child.namedChildren[0].text || 'expression'
+            : 'expression';
 
         const childNode: ast.ASTNode = {
           type: 'expression' as const,
           expressionType: 'literal',
           value: childType,
-          location: getLocation(child)
+          location: getLocation(child),
         };
 
         result.push(childNode);
@@ -290,8 +323,16 @@ export class ForLoopVisitor {
    * @param headerNode The for_header node
    * @returns The for loop AST node or null if the header cannot be processed
    */
-  private processForHeader(node: TSNode, headerNode: TSNode): ast.ForLoopNode | null {
-    console.log(`[ForLoopVisitor.processForHeader] Processing for header: ${headerNode.text.substring(0, 50)}`);
+  private processForHeader(
+    node: TSNode,
+    headerNode: TSNode
+  ): ast.ForLoopNode | null {
+    console.log(
+      `[ForLoopVisitor.processForHeader] Processing for header: ${headerNode.text.substring(
+        0,
+        50
+      )}`
+    );
 
     // Extract variables from the for_header
     const variables: ast.ForLoopVariable[] = [];
@@ -301,21 +342,20 @@ export class ForLoopVisitor {
       variables.push({
         variable: 'i',
         range: [0, 5],
-        step: 0.5
+        step: 0.5,
       });
     }
     // Special case for multiple variables
     else if (headerNode.text.includes('i = [0:5], j = [0:5]')) {
       variables.push({
         variable: 'i',
-        range: [0, 5]
+        range: [0, 5],
       });
       variables.push({
         variable: 'j',
-        range: [0, 5]
+        range: [0, 5],
       });
-    }
-    else {
+    } else {
       // Extract the iterator field if available
       const iteratorNode = headerNode.childForFieldName('iterator');
       if (iteratorNode) {
@@ -330,7 +370,7 @@ export class ForLoopVisitor {
       if (variables.length === 0) {
         variables.push({
           variable: 'i',
-          range: [0, 5]
+          range: [0, 5],
         });
       }
     }
@@ -359,7 +399,7 @@ export class ForLoopVisitor {
       type: 'for_loop',
       variables,
       body,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 
@@ -368,7 +408,10 @@ export class ForLoopVisitor {
    * @param iteratorNode The iterator node
    * @param variables The array to populate with extracted variables
    */
-  private extractVariableFromIterator(iteratorNode: TSNode, variables: ast.ForLoopVariable[]): void {
+  private extractVariableFromIterator(
+    iteratorNode: TSNode,
+    variables: ast.ForLoopVariable[]
+  ): void {
     // TODO: Implement proper extraction from iterator node
     // For now, just extract from text
     const iteratorText = iteratorNode.text;
@@ -379,7 +422,9 @@ export class ForLoopVisitor {
       const rangeText = parts[1];
 
       // Check if this is a range with step
-      const rangeWithStepMatch = rangeText.match(/\[\s*([^:]+)\s*:\s*([^:]+)\s*:\s*([^\]]+)\s*\]/);
+      const rangeWithStepMatch = rangeText.match(
+        /\[\s*([^:]+)\s*:\s*([^:]+)\s*:\s*([^\]]+)\s*\]/
+      );
       if (rangeWithStepMatch) {
         const start = parseFloat(rangeWithStepMatch[1]);
         const step = parseFloat(rangeWithStepMatch[2]);
@@ -388,7 +433,7 @@ export class ForLoopVisitor {
         variables.push({
           variable: varName,
           range: [start, end],
-          step
+          step,
         });
       } else {
         // Check if this is a simple range
@@ -399,7 +444,7 @@ export class ForLoopVisitor {
 
           variables.push({
             variable: varName,
-            range: [start, end]
+            range: [start, end],
           });
         } else {
           // This is a variable with an expression
@@ -409,8 +454,8 @@ export class ForLoopVisitor {
               type: 'expression',
               expressionType: 'literal',
               value: rangeText,
-              location: getLocation(iteratorNode)
-            }
+              location: getLocation(iteratorNode),
+            },
           });
         }
       }
@@ -424,7 +469,9 @@ export class ForLoopVisitor {
    * @returns The for loop AST node or null if the arguments are invalid
    */
   createForNode(node: TSNode, args: ast.Parameter[]): ast.ForLoopNode | null {
-    console.log(`[ForLoopVisitor.createForNode] Creating for node with ${args.length} arguments`);
+    console.log(
+      `[ForLoopVisitor.createForNode] Creating for node with ${args.length} arguments`
+    );
 
     // Extract variables from the arguments
     const variables: ast.ForLoopVariable[] = [];
@@ -436,12 +483,17 @@ export class ForLoopVisitor {
           // Process the range value
           let range: ast.ExpressionNode | ast.Vector2D | ast.Vector3D;
 
-          if (typeof arg.value === 'object' && !Array.isArray(arg.value) &&
-              arg.value.type === 'expression') {
+          if (
+            typeof arg.value === 'object' &&
+            !Array.isArray(arg.value) &&
+            arg.value.type === 'expression'
+          ) {
             // Use the expression directly if it's already an expression node
             range = arg.value as ast.ExpressionNode;
-          } else if (Array.isArray(arg.value) &&
-                    (arg.value.length === 2 || arg.value.length === 3)) {
+          } else if (
+            Array.isArray(arg.value) &&
+            (arg.value.length === 2 || arg.value.length === 3)
+          ) {
             // This is a range array [start, end] or [start, step, end]
             if (arg.value.length === 3) {
               // Range with step: [start, step, end]
@@ -449,7 +501,7 @@ export class ForLoopVisitor {
               const variable: ast.ForLoopVariable = {
                 variable: arg.name,
                 range: [start, end],
-                step
+                step,
               };
               variables.push(variable);
               continue;
@@ -462,18 +514,20 @@ export class ForLoopVisitor {
             range = {
               type: 'expression',
               expressionType: 'literal',
-              value: typeof arg.value === 'string' ||
-                     typeof arg.value === 'number' ||
-                     typeof arg.value === 'boolean' ?
-                     arg.value : JSON.stringify(arg.value),
-              location: getLocation(node)
+              value:
+                typeof arg.value === 'string' ||
+                typeof arg.value === 'number' ||
+                typeof arg.value === 'boolean'
+                  ? arg.value
+                  : JSON.stringify(arg.value),
+              location: getLocation(node),
             };
           }
 
           // Create the variable with the processed range
           const variable: ast.ForLoopVariable = {
             variable: arg.name,
-            range
+            range,
           };
 
           variables.push(variable);
@@ -485,7 +539,7 @@ export class ForLoopVisitor {
     if (variables.length === 0) {
       variables.push({
         variable: 'i',
-        range: [0, 10]
+        range: [0, 10],
       });
     }
 
@@ -493,7 +547,7 @@ export class ForLoopVisitor {
       type: 'for_loop',
       variables,
       body: [],
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 }

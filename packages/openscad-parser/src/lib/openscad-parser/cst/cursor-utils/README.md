@@ -12,18 +12,23 @@ This module provides utility functions for working with Tree-sitter cursors in a
 ### Functions
 
 #### `isNodeType(cursor: TreeCursor, type: string): boolean`
+
 Checks if the cursor's current node is of the specified type.
 
 #### `getNodeRange(cursor: TreeCursor): SourceRange`
+
 Gets the source range of the current node.
 
 #### `getNodeText(cursor: TreeCursor, source: string): string`
+
 Gets the text content of the current node from the source code.
 
 #### `findFirstChildOfType(cursor: TreeCursor, type: string): boolean`
+
 Finds the first child node of the specified type.
 
 #### `getChildren(cursor: TreeCursor): SyntaxNode[]`
+
 Gets all direct children of the current node.
 
 ## Usage Example
@@ -41,7 +46,9 @@ const cursor = tree.walk();
 if (cursorUtils.isNodeType(cursor, 'call_expression')) {
   const range = cursorUtils.getNodeRange(cursor);
   const text = cursorUtils.getNodeText(cursor, 'cube(10);');
-  console.log(`Found call expression at ${range.start.row}:${range.start.column}: ${text}`);
+  console.log(
+    `Found call expression at ${range.start.row}:${range.start.column}: ${text}`
+  );
 }
 ```
 

@@ -125,14 +125,24 @@ describe('ChangeTracker', () => {
     expect(change2.startPosition.row).toBe(0);
     expect(change2.startPosition.column).toBe(0);
 
-    const change3 = tracker.trackChange(sourceText.length, sourceText.length, sourceText.length, sourceText);
+    const change3 = tracker.trackChange(
+      sourceText.length,
+      sourceText.length,
+      sourceText.length,
+      sourceText
+    );
     expect(change3.startPosition.row).toBe(2);
     expect(change3.startPosition.column).toBe(1);
   });
 
   it('should throw an error for out of bounds index', () => {
     expect(() => {
-      tracker.trackChange(sourceText.length + 1, sourceText.length + 2, sourceText.length + 3, sourceText);
+      tracker.trackChange(
+        sourceText.length + 1,
+        sourceText.length + 2,
+        sourceText.length + 3,
+        sourceText
+      );
     }).toThrow();
   });
 });

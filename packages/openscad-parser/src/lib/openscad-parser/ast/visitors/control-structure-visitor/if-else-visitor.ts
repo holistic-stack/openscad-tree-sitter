@@ -35,12 +35,19 @@ export class IfElseVisitor {
    * @returns The if AST node or null if the node cannot be processed
    */
   visitIfStatement(node: TSNode): ast.IfNode | null {
-    console.log(`[IfElseVisitor.visitIfStatement] Processing if statement: ${node.text.substring(0, 50)}`);
+    console.log(
+      `[IfElseVisitor.visitIfStatement] Processing if statement: ${node.text.substring(
+        0,
+        50
+      )}`
+    );
 
     // Extract condition
     const conditionNode = node.childForFieldName('condition');
     if (!conditionNode) {
-      console.log(`[IfElseVisitor.visitIfStatement] No condition found in field, trying child index`);
+      console.log(
+        `[IfElseVisitor.visitIfStatement] No condition found in field, trying child index`
+      );
 
       // Try to find the condition by child index
       // Based on the node structure, the condition is typically the named child at index 0
@@ -55,7 +62,10 @@ export class IfElseVisitor {
       if (node.childCount >= 3) {
         // In OpenSCAD grammar, the condition is typically the third child (index 2)
         const possibleConditionNode = node.child(2);
-        if (possibleConditionNode && possibleConditionNode.type === 'expression') {
+        if (
+          possibleConditionNode &&
+          possibleConditionNode.type === 'expression'
+        ) {
           return this.processIfStatement(node, possibleConditionNode);
         }
       }
@@ -72,10 +82,14 @@ export class IfElseVisitor {
    * @param conditionNode The condition node
    * @returns The if AST node or null if the node cannot be processed
    */
-  private processIfStatement(node: TSNode, conditionNode: TSNode): ast.IfNode | null {
+  private processIfStatement(
+    node: TSNode,
+    conditionNode: TSNode
+  ): ast.IfNode | null {
     // Use the expression visitor to evaluate the condition
     let condition: ast.ExpressionNode;
-    const expressionResult = this.expressionVisitor.visitExpression(conditionNode);
+    const expressionResult =
+      this.expressionVisitor.visitExpression(conditionNode);
 
     if (expressionResult && expressionResult.type === 'expression') {
       condition = expressionResult;
@@ -85,7 +99,7 @@ export class IfElseVisitor {
         type: 'expression',
         expressionType: 'literal',
         value: conditionNode.text,
-        location: getLocation(conditionNode)
+        location: getLocation(conditionNode),
       };
     }
 
@@ -148,7 +162,7 @@ export class IfElseVisitor {
       condition,
       thenBranch,
       elseBranch,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 
@@ -158,7 +172,12 @@ export class IfElseVisitor {
    * @returns An array of AST nodes representing the block's children
    */
   private visitBlock(node: TSNode): ast.ASTNode[] {
-    console.log(`[IfElseVisitor.visitBlock] Processing block: ${node.text.substring(0, 50)}`);
+    console.log(
+      `[IfElseVisitor.visitBlock] Processing block: ${node.text.substring(
+        0,
+        50
+      )}`
+    );
 
     const result: ast.ASTNode[] = [];
 
@@ -170,15 +189,16 @@ export class IfElseVisitor {
       // In a real implementation, this would delegate to other visitors
       // Make sure child is not null before accessing its properties
       if (child) {
-        const childType = child.type === 'module_instantiation' && child.namedChildren[0]
-          ? child.namedChildren[0].text || 'expression'
-          : 'expression';
+        const childType =
+          child.type === 'module_instantiation' && child.namedChildren[0]
+            ? child.namedChildren[0].text || 'expression'
+            : 'expression';
 
         const childNode: ast.ASTNode = {
           type: 'expression' as const,
           expressionType: 'literal',
           value: childType,
-          location: getLocation(child)
+          location: getLocation(child),
         };
 
         result.push(childNode);
@@ -195,14 +215,19 @@ export class IfElseVisitor {
    * @returns The if AST node or null if the arguments are invalid
    */
   createIfNode(node: TSNode, args: ast.Parameter[]): ast.IfNode | null {
-    console.log(`[IfElseVisitor.createIfNode] Creating if node with ${args.length} arguments`);
+    console.log(
+      `[IfElseVisitor.createIfNode] Creating if node with ${args.length} arguments`
+    );
 
     // Create condition expression
     let condition: ast.ExpressionNode;
 
     if (args.length > 0 && args[0].value) {
-      if (typeof args[0].value === 'object' && !Array.isArray(args[0].value) &&
-          args[0].value.type === 'expression') {
+      if (
+        typeof args[0].value === 'object' &&
+        !Array.isArray(args[0].value) &&
+        args[0].value.type === 'expression'
+      ) {
         // Use the expression directly if it's already an expression node
         condition = args[0].value as ast.ExpressionNode;
       } else {
@@ -210,11 +235,13 @@ export class IfElseVisitor {
         condition = {
           type: 'expression',
           expressionType: 'literal',
-          value: typeof args[0].value === 'string' ||
-                 typeof args[0].value === 'number' ||
-                 typeof args[0].value === 'boolean' ?
-                 args[0].value : JSON.stringify(args[0].value),
-          location: getLocation(node)
+          value:
+            typeof args[0].value === 'string' ||
+            typeof args[0].value === 'number' ||
+            typeof args[0].value === 'boolean'
+              ? args[0].value
+              : JSON.stringify(args[0].value),
+          location: getLocation(node),
         };
       }
     } else {
@@ -223,7 +250,7 @@ export class IfElseVisitor {
         type: 'expression',
         expressionType: 'literal',
         value: 'true',
-        location: getLocation(node)
+        location: getLocation(node),
       };
     }
 
@@ -232,7 +259,7 @@ export class IfElseVisitor {
       condition,
       thenBranch: [],
       elseBranch: undefined,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 }

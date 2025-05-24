@@ -73,7 +73,7 @@ class MockQueryCache implements QueryCache {
     return {
       hits: this._hits,
       misses: this._misses,
-      size: this.cache.size
+      size: this.cache.size,
     };
   }
 }
@@ -82,15 +82,15 @@ describe('QueryManager', () => {
   it('should execute a query and cache the results', () => {
     // Create a mock language
     const mockLanguage = {
-      query: vi.fn().mockImplementation((queryString) => {
+      query: vi.fn().mockImplementation(queryString => {
         const mockQuery = new MockQuery([
           new MockMatch([
             new MockCapture(new MockNode('node1', 'type1')),
-            new MockCapture(new MockNode('node2', 'type2'))
-          ])
+            new MockCapture(new MockNode('node2', 'type2')),
+          ]),
         ]);
         return mockQuery;
-      })
+      }),
     };
 
     // Create a mock cache
@@ -121,14 +121,14 @@ describe('QueryManager', () => {
   it('should find nodes by type', () => {
     // Create a mock language
     const mockLanguage = {
-      query: vi.fn().mockImplementation((queryString) => {
+      query: vi.fn().mockImplementation(queryString => {
         return new MockQuery([
           new MockMatch([
             new MockCapture(new MockNode('node1', 'type1')),
-            new MockCapture(new MockNode('node2', 'type1'))
-          ])
+            new MockCapture(new MockNode('node2', 'type1')),
+          ]),
         ]);
-      })
+      }),
     };
 
     // Create a query manager
@@ -148,13 +148,11 @@ describe('QueryManager', () => {
   it('should clear the cache', () => {
     // Create a mock language
     const mockLanguage = {
-      query: vi.fn().mockImplementation((queryString) => {
+      query: vi.fn().mockImplementation(queryString => {
         return new MockQuery([
-          new MockMatch([
-            new MockCapture(new MockNode('node1', 'type1'))
-          ])
+          new MockMatch([new MockCapture(new MockNode('node1', 'type1'))]),
         ]);
-      })
+      }),
     };
 
     // Create a mock cache
@@ -182,13 +180,11 @@ describe('QueryManager', () => {
   it('should get cache statistics', () => {
     // Create a mock language
     const mockLanguage = {
-      query: vi.fn().mockImplementation((queryString) => {
+      query: vi.fn().mockImplementation(queryString => {
         return new MockQuery([
-          new MockMatch([
-            new MockCapture(new MockNode('node1', 'type1'))
-          ])
+          new MockMatch([new MockCapture(new MockNode('node1', 'type1'))]),
         ]);
-      })
+      }),
     };
 
     // Create a mock cache

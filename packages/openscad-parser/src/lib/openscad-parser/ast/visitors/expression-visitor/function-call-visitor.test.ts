@@ -32,7 +32,10 @@ describe('FunctionCallVisitor', () => {
       expect(tree).not.toBeNull();
 
       // Find the accessor_expression node (function call)
-      const accessorExprNode = findDescendantOfType(tree!.rootNode, 'accessor_expression');
+      const accessorExprNode = findDescendantOfType(
+        tree!.rootNode,
+        'accessor_expression'
+      );
       expect(accessorExprNode).not.toBeNull();
 
       // Create visitor and process the node
@@ -56,7 +59,10 @@ describe('FunctionCallVisitor', () => {
       expect(tree).not.toBeNull();
 
       // Find the accessor_expression node (function call)
-      const accessorExprNode = findDescendantOfType(tree!.rootNode, 'accessor_expression');
+      const accessorExprNode = findDescendantOfType(
+        tree!.rootNode,
+        'accessor_expression'
+      );
       expect(accessorExprNode).not.toBeNull();
 
       // Create visitor and process the node
@@ -93,7 +99,10 @@ describe('FunctionCallVisitor', () => {
       expect(tree).not.toBeNull();
 
       // Find the accessor_expression node (function call)
-      const accessorExprNode = findDescendantOfType(tree!.rootNode, 'accessor_expression');
+      const accessorExprNode = findDescendantOfType(
+        tree!.rootNode,
+        'accessor_expression'
+      );
       expect(accessorExprNode).not.toBeNull();
 
       // Create visitor and process the node
@@ -126,7 +135,10 @@ describe('FunctionCallVisitor', () => {
       expect(tree).not.toBeNull();
 
       // Find the accessor_expression node (function call)
-      const accessorExprNode = findDescendantOfType(tree!.rootNode, 'accessor_expression');
+      const accessorExprNode = findDescendantOfType(
+        tree!.rootNode,
+        'accessor_expression'
+      );
       expect(accessorExprNode).not.toBeNull();
 
       // Create visitor and process the node
@@ -150,7 +162,9 @@ describe('FunctionCallVisitor', () => {
 
       expect(result?.arguments[2].name).toBeUndefined();
       expect(result?.arguments[2].value.type).toBe('expression');
-      expect((result?.arguments[2].value as ast.LiteralNode).value).toBe("hello");
+      expect((result?.arguments[2].value as ast.LiteralNode).value).toBe(
+        'hello'
+      );
     });
 
     it('should handle nested function calls', async () => {
@@ -163,31 +177,38 @@ describe('FunctionCallVisitor', () => {
       expect(tree).not.toBeNull();
 
       // Find the accessor_expression node (function call)
-      const accessorExprNode = findDescendantOfType(tree!.rootNode, 'accessor_expression');
+      const accessorExprNode = findDescendantOfType(
+        tree!.rootNode,
+        'accessor_expression'
+      );
       expect(accessorExprNode).not.toBeNull();
 
       // Create visitor and process the node
       const visitor = new FunctionCallVisitor(code);
 
       // Mock the createExpressionNode method to handle the nested function call
-      vi.spyOn(visitor as any, 'createExpressionNode').mockImplementation((node: TSNode) => {
-        if (node.text.includes('inner')) {
-          return {
-            type: 'expression',
-            expressionType: 'function_call',
-            name: 'inner',
-            arguments: [{
-              name: undefined,
-              value: {
-                type: 'expression',
-                expressionType: 'literal',
-                value: 10
-              }
-            }]
-          };
+      vi.spyOn(visitor as any, 'createExpressionNode').mockImplementation(
+        (node: TSNode) => {
+          if (node.text.includes('inner')) {
+            return {
+              type: 'expression',
+              expressionType: 'function_call',
+              name: 'inner',
+              arguments: [
+                {
+                  name: undefined,
+                  value: {
+                    type: 'expression',
+                    expressionType: 'literal',
+                    value: 10,
+                  },
+                },
+              ],
+            };
+          }
+          return null;
         }
-        return null;
-      });
+      );
 
       const result = visitor.visitFunctionCall(accessorExprNode!);
 

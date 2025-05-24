@@ -7,11 +7,14 @@ import * as ast from '../ast-types';
  * @param offset Optional character offset
  * @returns The Position
  */
-export function pointToPosition(point: Point, offset: number = 0): ast.Position {
+export function pointToPosition(
+  point: Point,
+  offset: number = 0
+): ast.Position {
   return {
     line: point.row,
     column: point.column,
-    offset: offset
+    offset: offset,
   };
 }
 
@@ -34,13 +37,13 @@ export function getLocation(node: TSNode): ast.SourceLocation {
       start: {
         line: node.startPosition.row,
         column: node.startPosition.column,
-        offset: startOffset
+        offset: startOffset,
       },
       end: {
         line: node.endPosition.row,
         column: node.endPosition.column,
-        offset: endOffset
-      }
+        offset: endOffset,
+      },
     };
   }
 
@@ -49,12 +52,12 @@ export function getLocation(node: TSNode): ast.SourceLocation {
     start: {
       line: 0,
       column: 0,
-      offset: 0
+      offset: 0,
     },
     end: {
       line: 0,
       column: 0,
-      offset: 0
-    }
+      offset: 0,
+    },
   };
 }

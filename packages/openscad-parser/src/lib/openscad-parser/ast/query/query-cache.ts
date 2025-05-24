@@ -1,8 +1,8 @@
 /**
  * Interface for a cache of query results
- * 
+ *
  * This module defines the interface for caching tree-sitter query results.
- * 
+ *
  * @module lib/openscad-parser/ast/query/query-cache
  */
 

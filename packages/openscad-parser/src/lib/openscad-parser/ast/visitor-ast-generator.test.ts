@@ -7,23 +7,21 @@ import { CSGVisitor } from './visitors/csg-visitor';
 // Create a mock language object for testing
 const mockLanguage = {
   query: () => ({
-    captures: () => []
-  })
+    captures: () => [],
+  }),
 };
 
 describe('VisitorASTGenerator', () => {
   let parser: OpenscadParser;
 
-    beforeAll(async () => {
-        parser = new OpenscadParser();
-        await parser.init("./tree-sitter-openscad.wasm");
-    });
+  beforeAll(async () => {
+    parser = new OpenscadParser();
+    await parser.init('./tree-sitter-openscad.wasm');
+  });
 
-    afterAll(() => {
-        parser.dispose();
-    });
-
-
+  afterAll(() => {
+    parser.dispose();
+  });
 
   describe('generate', () => {
     it('should generate an AST for a simple cube', () => {
@@ -186,7 +184,8 @@ describe('VisitorASTGenerator', () => {
     });
 
     it('should generate an AST for complex nested operations', () => {
-      const code = 'difference() { cube(20, center=true); translate([0, 0, 5]) { rotate([0, 0, 45]) cube(10, center=true); } }';
+      const code =
+        'difference() { cube(20, center=true); translate([0, 0, 5]) { rotate([0, 0, 45]) cube(10, center=true); } }';
       const tree = parser.parseCST(code);
       if (!tree) throw new Error('Failed to parse CST');
 

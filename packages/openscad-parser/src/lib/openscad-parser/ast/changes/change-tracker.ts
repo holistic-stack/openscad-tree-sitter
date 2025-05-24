@@ -54,7 +54,12 @@ export class ChangeTracker {
    * @param text The source text after the change
    * @returns The change that was tracked
    */
-  trackChange(startIndex: number, oldEndIndex: number, newEndIndex: number, text: string): Change {
+  trackChange(
+    startIndex: number,
+    oldEndIndex: number,
+    newEndIndex: number,
+    text: string
+  ): Change {
     const change: Change = {
       startIndex,
       oldEndIndex,
@@ -62,7 +67,7 @@ export class ChangeTracker {
       startPosition: this.indexToPosition(text, startIndex),
       oldEndPosition: this.indexToPosition(text, oldEndIndex),
       newEndPosition: this.indexToPosition(text, newEndIndex),
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     this.changes.push(change);
@@ -96,20 +101,28 @@ export class ChangeTracker {
    * @param since Optional timestamp to only check changes since that time
    * @returns True if the node is affected by any changes, false otherwise
    */
-  isNodeAffected(nodeStartIndex: number, nodeEndIndex: number, since?: number): boolean {
+  isNodeAffected(
+    nodeStartIndex: number,
+    nodeEndIndex: number,
+    since?: number
+  ): boolean {
     const changesToCheck = since ? this.getChangesSince(since) : this.changes;
 
     return changesToCheck.some(change => {
       // Check if the change overlaps with the node
       return (
         // Change starts within the node
-        (change.startIndex >= nodeStartIndex && change.startIndex <= nodeEndIndex) ||
+        (change.startIndex >= nodeStartIndex &&
+          change.startIndex <= nodeEndIndex) ||
         // Change ends within the node
-        (change.newEndIndex >= nodeStartIndex && change.newEndIndex <= nodeEndIndex) ||
+        (change.newEndIndex >= nodeStartIndex &&
+          change.newEndIndex <= nodeEndIndex) ||
         // Change completely contains the node
-        (change.startIndex <= nodeStartIndex && change.newEndIndex >= nodeEndIndex) ||
+        (change.startIndex <= nodeStartIndex &&
+          change.newEndIndex >= nodeEndIndex) ||
         // Node completely contains the change
-        (nodeStartIndex <= change.startIndex && nodeEndIndex >= change.newEndIndex)
+        (nodeStartIndex <= change.startIndex &&
+          nodeEndIndex >= change.newEndIndex)
       );
     });
   }
@@ -130,7 +143,9 @@ export class ChangeTracker {
    */
   private indexToPosition(text: string, index: number): Point {
     if (index > text.length) {
-      throw new Error(`Index ${index} is out of bounds for text of length ${text.length}`);
+      throw new Error(
+        `Index ${index} is out of bounds for text of length ${text.length}`
+      );
     }
 
     let line = 0;

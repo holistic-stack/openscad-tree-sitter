@@ -11,34 +11,40 @@ describe('ControlStructureVisitor', () => {
 
   beforeEach(async () => {
     // Mock the extractArguments function
-    vi.spyOn(extractorModule, 'extractArguments').mockImplementation((node: TSNode) => {
-      if (node.text.includes('true')) {
-        return [{
-          name: undefined,
-          value: {
-            type: 'expression',
-            expressionType: 'literal',
-            value: 'true',
-            location: getLocation(node)
-          }
-        }];
-      } else if (node.text.includes('i = [0:10]')) {
-        return [{
-          name: 'i',
-          value: {
-            type: 'expression',
-            expressionType: 'literal',
-            value: '[0:10]',
-            location: getLocation(node)
-          }
-        }];
+    vi.spyOn(extractorModule, 'extractArguments').mockImplementation(
+      (node: TSNode) => {
+        if (node.text.includes('true')) {
+          return [
+            {
+              name: undefined,
+              value: {
+                type: 'expression',
+                expressionType: 'literal',
+                value: 'true',
+                location: getLocation(node),
+              },
+            },
+          ];
+        } else if (node.text.includes('i = [0:10]')) {
+          return [
+            {
+              name: 'i',
+              value: {
+                type: 'expression',
+                expressionType: 'literal',
+                value: '[0:10]',
+                location: getLocation(node),
+              },
+            },
+          ];
+        }
+        return [];
       }
-      return [];
-    });
+    );
 
     visitor = new ControlStructureVisitor();
     parser = new OpenscadParser();
-    await parser.init("./tree-sitter-openscad.wasm");
+    await parser.init('./tree-sitter-openscad.wasm');
   });
 
   afterEach(() => {
@@ -61,7 +67,7 @@ describe('ControlStructureVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (index === 1) {
             return {
@@ -74,7 +80,7 @@ describe('ControlStructureVisitor', () => {
                 childCount: 0,
                 child: () => null,
                 childForFieldName: () => null,
-                namedChildren: []
+                namedChildren: [],
               }),
               childForFieldName: () => null,
               namedChildren: [
@@ -84,9 +90,9 @@ describe('ControlStructureVisitor', () => {
                   childCount: 0,
                   child: () => null,
                   childForFieldName: () => null,
-                  namedChildren: []
-                }
-              ]
+                  namedChildren: [],
+                },
+              ],
             };
           } else if (index === 2) {
             return {
@@ -95,7 +101,7 @@ describe('ControlStructureVisitor', () => {
               childCount: 3,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           }
           return null;
@@ -108,7 +114,7 @@ describe('ControlStructureVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'arguments') {
             return {
@@ -121,7 +127,7 @@ describe('ControlStructureVisitor', () => {
                 childCount: 0,
                 child: () => null,
                 childForFieldName: () => null,
-                namedChildren: []
+                namedChildren: [],
               }),
               childForFieldName: () => null,
               namedChildren: [
@@ -131,9 +137,9 @@ describe('ControlStructureVisitor', () => {
                   childCount: 0,
                   child: () => null,
                   childForFieldName: () => null,
-                  namedChildren: []
-                }
-              ]
+                  namedChildren: [],
+                },
+              ],
             };
           } else if (name === 'block') {
             return {
@@ -142,7 +148,7 @@ describe('ControlStructureVisitor', () => {
               childCount: 3,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           }
           return null;
@@ -154,7 +160,7 @@ describe('ControlStructureVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
           {
             type: 'argument_list',
@@ -166,7 +172,7 @@ describe('ControlStructureVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             }),
             childForFieldName: () => null,
             namedChildren: [
@@ -176,9 +182,9 @@ describe('ControlStructureVisitor', () => {
                 childCount: 0,
                 child: () => null,
                 childForFieldName: () => null,
-                namedChildren: []
-              }
-            ]
+                namedChildren: [],
+              },
+            ],
           },
           {
             type: 'block',
@@ -186,9 +192,9 @@ describe('ControlStructureVisitor', () => {
             childCount: 3,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
-          }
-        ]
+            namedChildren: [],
+          },
+        ],
       } as unknown as TSNode;
 
       // Visit the node
@@ -218,7 +224,7 @@ describe('ControlStructureVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (index === 1) {
             return {
@@ -237,7 +243,7 @@ describe('ControlStructureVisitor', () => {
                       childCount: 0,
                       child: () => null,
                       childForFieldName: () => null,
-                      namedChildren: []
+                      namedChildren: [],
                     };
                   } else if (j === 1) {
                     return {
@@ -246,7 +252,7 @@ describe('ControlStructureVisitor', () => {
                       childCount: 0,
                       child: () => null,
                       childForFieldName: () => null,
-                      namedChildren: []
+                      namedChildren: [],
                     };
                   } else if (j === 2) {
                     return {
@@ -255,7 +261,7 @@ describe('ControlStructureVisitor', () => {
                       childCount: 0,
                       child: () => null,
                       childForFieldName: () => null,
-                      namedChildren: []
+                      namedChildren: [],
                     };
                   }
                   return null;
@@ -268,7 +274,7 @@ describe('ControlStructureVisitor', () => {
                       childCount: 0,
                       child: () => null,
                       childForFieldName: () => null,
-                      namedChildren: []
+                      namedChildren: [],
                     };
                   } else if (name === 'value') {
                     return {
@@ -277,7 +283,7 @@ describe('ControlStructureVisitor', () => {
                       childCount: 0,
                       child: () => null,
                       childForFieldName: () => null,
-                      namedChildren: []
+                      namedChildren: [],
                     };
                   }
                   return null;
@@ -289,7 +295,7 @@ describe('ControlStructureVisitor', () => {
                     childCount: 0,
                     child: () => null,
                     childForFieldName: () => null,
-                    namedChildren: []
+                    namedChildren: [],
                   },
                   {
                     type: 'equals',
@@ -297,7 +303,7 @@ describe('ControlStructureVisitor', () => {
                     childCount: 0,
                     child: () => null,
                     childForFieldName: () => null,
-                    namedChildren: []
+                    namedChildren: [],
                   },
                   {
                     type: 'range_expression',
@@ -305,9 +311,9 @@ describe('ControlStructureVisitor', () => {
                     childCount: 0,
                     child: () => null,
                     childForFieldName: () => null,
-                    namedChildren: []
-                  }
-                ]
+                    namedChildren: [],
+                  },
+                ],
               }),
               childForFieldName: () => null,
               namedChildren: [
@@ -317,9 +323,9 @@ describe('ControlStructureVisitor', () => {
                   childCount: 3,
                   child: () => null,
                   childForFieldName: () => null,
-                  namedChildren: []
-                }
-              ]
+                  namedChildren: [],
+                },
+              ],
             };
           } else if (index === 2) {
             return {
@@ -328,7 +334,7 @@ describe('ControlStructureVisitor', () => {
               childCount: 3,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           }
           return null;
@@ -341,7 +347,7 @@ describe('ControlStructureVisitor', () => {
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'arguments') {
             return {
@@ -350,7 +356,7 @@ describe('ControlStructureVisitor', () => {
               childCount: 1,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           } else if (name === 'block') {
             return {
@@ -359,7 +365,7 @@ describe('ControlStructureVisitor', () => {
               childCount: 3,
               child: () => null,
               childForFieldName: () => null,
-              namedChildren: []
+              namedChildren: [],
             };
           }
           return null;
@@ -371,7 +377,7 @@ describe('ControlStructureVisitor', () => {
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
           {
             type: 'argument_list',
@@ -379,7 +385,7 @@ describe('ControlStructureVisitor', () => {
             childCount: 1,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
+            namedChildren: [],
           },
           {
             type: 'block',
@@ -387,9 +393,9 @@ describe('ControlStructureVisitor', () => {
             childCount: 3,
             child: () => null,
             childForFieldName: () => null,
-            namedChildren: []
-          }
-        ]
+            namedChildren: [],
+          },
+        ],
       } as unknown as TSNode;
 
       // Visit the node

@@ -64,7 +64,11 @@ export class QueryManager {
       this.queryCache.set(name, query);
       return query;
     } catch (error) {
-      throw new Error(`Failed to load query '${name}': ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Failed to load query '${name}': ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
   }
 
@@ -84,7 +88,9 @@ export class QueryManager {
   public queryNode(queryName: string, node: Node): QueryResult[] {
     const query = this.queryCache.get(queryName);
     if (!query) {
-      throw new Error(`Query '${queryName}' not loaded. Call loadQuery() first.`);
+      throw new Error(
+        `Query '${queryName}' not loaded. Call loadQuery() first.`
+      );
     }
 
     const matches = query.matches(node);
@@ -101,9 +107,7 @@ export class QueryManager {
       .filter(result =>
         result.captures.some(c => c.name === 'module_definition')
       )
-      .map(result =>
-        result.captures.find(c => c.name === 'module_name')?.node
-      )
+      .map(result => result.captures.find(c => c.name === 'module_name')?.node)
       .filter((node): node is OpenSCADNode => node !== undefined);
   }
 
@@ -117,8 +121,8 @@ export class QueryManager {
       .filter(result =>
         result.captures.some(c => c.name === 'function_definition')
       )
-      .map(result =>
-        result.captures.find(c => c.name === 'function_name')?.node
+      .map(
+        result => result.captures.find(c => c.name === 'function_name')?.node
       )
       .filter((node): node is OpenSCADNode => node !== undefined);
   }
@@ -126,11 +130,13 @@ export class QueryManager {
   /**
    * Find all include and use statements in the current tree
    */
-  public async findDependencies(): Promise<{file: string, type: 'include' | 'use'}[]> {
+  public async findDependencies(): Promise<
+    { file: string; type: 'include' | 'use' }[]
+  > {
     await this.loadQuery('dependencies');
     const results = this.queryTree('dependencies');
 
-    const dependencies: {file: string, type: 'include' | 'use'}[] = [];
+    const dependencies: { file: string; type: 'include' | 'use' }[] = [];
 
     for (const result of results) {
       const includeMatch = result.captures.find(c => c.name === 'include');
@@ -140,12 +146,12 @@ export class QueryManager {
       if (includeMatch && fileMatch?.node.text) {
         dependencies.push({
           file: fileMatch.node.text.replace(/^["']|["']$/g, ''),
-          type: 'include'
+          type: 'include',
         });
       } else if (useMatch && fileMatch?.node.text) {
         dependencies.push({
           file: fileMatch.node.text.replace(/^["']|["']$/g, ''),
-          type: 'use'
+          type: 'use',
         });
       }
     }
@@ -213,7 +219,10 @@ export class QueryManager {
   /**
    * Check if a node has an ancestor of a specific type
    */
-  public hasAncestorOfType(node: Node, ancestorType: string | string[]): boolean {
+  public hasAncestorOfType(
+    node: Node,
+    ancestorType: string | string[]
+  ): boolean {
     const types = Array.isArray(ancestorType) ? ancestorType : [ancestorType];
     let current = node.parent;
 
@@ -251,7 +260,10 @@ export class QueryManager {
   /**
    * Get the location of a node in the source code
    */
-  public getNodeLocation(node: Node): { start: { line: number; column: number; index: number }; end: { line: number; column: number; index: number } } {
+  public getNodeLocation(node: Node): {
+    start: { line: number; column: number; index: number };
+    end: { line: number; column: number; index: number };
+  } {
     return {
       start: {
         line: node.startPosition.row + 1,
@@ -278,13 +290,13 @@ export class QueryManager {
         node: capture.node,
         text: capture.node.text,
         start: capture.node.startPosition,
-        end: capture.node.endPosition
+        end: capture.node.endPosition,
       };
     });
 
     return {
       patternIndex: match.patternIndex,
-      captures
+      captures,
     };
   }
 
@@ -294,9 +306,19 @@ export class QueryManager {
   public static getCapturesByName(
     results: QueryResult[],
     name: string | string[]
-  ): Array<{ node: Node; text: string; start: { row: number; column: number }; end: { row: number; column: number } }> {
+  ): Array<{
+    node: Node;
+    text: string;
+    start: { row: number; column: number };
+    end: { row: number; column: number };
+  }> {
     const names = Array.isArray(name) ? name : [name];
-    const captures: Array<{ node: Node; text: string; start: { row: number; column: number }; end: { row: number; column: number } }> = [];
+    const captures: Array<{
+      node: Node;
+      text: string;
+      start: { row: number; column: number };
+      end: { row: number; column: number };
+    }> = [];
 
     for (const result of results) {
       for (const capture of result.captures) {
@@ -305,7 +327,7 @@ export class QueryManager {
             node: capture.node,
             text: capture.text,
             start: capture.node.startPosition,
-            end: capture.node.endPosition
+            end: capture.node.endPosition,
           });
         }
       }

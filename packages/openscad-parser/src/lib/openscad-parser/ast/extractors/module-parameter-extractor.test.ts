@@ -8,7 +8,7 @@ describe('Module Parameter Extractor', () => {
 
   beforeAll(async () => {
     parser = new OpenscadParser();
-    await parser.init("./tree-sitter-openscad.wasm");
+    await parser.init('./tree-sitter-openscad.wasm');
   });
 
   afterAll(() => {
@@ -20,7 +20,7 @@ describe('Module Parameter Extractor', () => {
     it('should extract parameters without default values', () => {
       const paramsText = 'a, b, c';
       const result = extractModuleParametersFromText(paramsText);
-      
+
       expect(result).toHaveLength(3);
       expect(result[0].name).toBe('a');
       expect(result[0].defaultValue).toBeUndefined();
@@ -33,7 +33,7 @@ describe('Module Parameter Extractor', () => {
     it('should extract parameters with default values', () => {
       const paramsText = 'a=10, b="test", c=true';
       const result = extractModuleParametersFromText(paramsText);
-      
+
       expect(result).toHaveLength(3);
       expect(result[0].name).toBe('a');
       expect(result[0].defaultValue).toBe(10);
@@ -46,7 +46,7 @@ describe('Module Parameter Extractor', () => {
     it('should extract parameters with mixed default values', () => {
       const paramsText = 'a, b=20, c';
       const result = extractModuleParametersFromText(paramsText);
-      
+
       expect(result).toHaveLength(3);
       expect(result[0].name).toBe('a');
       expect(result[0].defaultValue).toBeUndefined();
@@ -59,7 +59,7 @@ describe('Module Parameter Extractor', () => {
     it('should extract parameters with vector default values', () => {
       const paramsText = 'size=[10, 20, 30], center=false';
       const result = extractModuleParametersFromText(paramsText);
-      
+
       expect(result).toHaveLength(2);
       expect(result[0].name).toBe('size');
       expect(result[0].defaultValue).toEqual([10, 20, 30]);
@@ -70,7 +70,7 @@ describe('Module Parameter Extractor', () => {
     it('should extract parameters with 2D vector default values', () => {
       const paramsText = 'size=[10, 20], center=false';
       const result = extractModuleParametersFromText(paramsText);
-      
+
       expect(result).toHaveLength(2);
       expect(result[0].name).toBe('size');
       expect(result[0].defaultValue).toEqual([10, 20]);
@@ -81,14 +81,14 @@ describe('Module Parameter Extractor', () => {
     it('should handle empty parameter list', () => {
       const paramsText = '';
       const result = extractModuleParametersFromText(paramsText);
-      
+
       expect(result).toHaveLength(0);
     });
 
     it('should handle whitespace in parameter list', () => {
       const paramsText = '  a = 10,   b = 20  ';
       const result = extractModuleParametersFromText(paramsText);
-      
+
       expect(result).toHaveLength(2);
       expect(result[0].name).toBe('a');
       expect(result[0].defaultValue).toBe(10);
@@ -99,7 +99,7 @@ describe('Module Parameter Extractor', () => {
     it('should handle negative numbers as default values', () => {
       const paramsText = 'x=-10, y=-20.5';
       const result = extractModuleParametersFromText(paramsText);
-      
+
       expect(result).toHaveLength(2);
       expect(result[0].name).toBe('x');
       expect(result[0].defaultValue).toBe(-10);
@@ -110,7 +110,7 @@ describe('Module Parameter Extractor', () => {
     it('should handle vectors with negative numbers', () => {
       const paramsText = 'v=[-10, 20, -30]';
       const result = extractModuleParametersFromText(paramsText);
-      
+
       expect(result).toHaveLength(1);
       expect(result[0].name).toBe('v');
       expect(result[0].defaultValue).toEqual([-10, 20, -30]);

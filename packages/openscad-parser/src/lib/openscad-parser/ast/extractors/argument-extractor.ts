@@ -26,7 +26,11 @@ function convertValueToParameterValue(value: ast.Value): ast.ParameterValue {
     if (vectorValues.length === 2) {
       return vectorValues as ast.Vector2D;
     } else if (vectorValues.length >= 3) {
-      return [vectorValues[0], vectorValues[1], vectorValues[2]] as ast.Vector3D;
+      return [
+        vectorValues[0],
+        vectorValues[1],
+        vectorValues[2],
+      ] as ast.Vector3D;
     }
     return 0; // Default fallback
   } else if (value.type === 'range') {
@@ -34,7 +38,7 @@ function convertValueToParameterValue(value: ast.Value): ast.ParameterValue {
     return {
       type: 'expression',
       expressionType: 'range',
-      location: undefined
+      location: undefined,
     };
   }
 
@@ -43,7 +47,7 @@ function convertValueToParameterValue(value: ast.Value): ast.ParameterValue {
     type: 'expression',
     expressionType: 'literal',
     value: typeof value.value === 'string' ? value.value : '',
-    location: undefined
+    location: undefined,
   } as ast.LiteralNode;
 }
 
@@ -52,7 +56,9 @@ function convertValueToParameterValue(value: ast.Value): ast.ParameterValue {
  * @param node The node to convert
  * @returns A ParameterValue object or undefined if the conversion fails
  */
-function convertNodeToParameterValue(node: TSNode): ast.ParameterValue | undefined {
+function convertNodeToParameterValue(
+  node: TSNode
+): ast.ParameterValue | undefined {
   const value = extractValue(node);
   if (!value) return undefined;
   return convertValueToParameterValue(value);
@@ -64,7 +70,9 @@ function convertNodeToParameterValue(node: TSNode): ast.ParameterValue | undefin
  * @returns An array of parameters
  */
 export function extractArguments(argsNode: TSNode): ast.Parameter[] {
-  console.log(`[extractArguments] Processing arguments node: type=${argsNode.type}, text=${argsNode.text}`);
+  console.log(
+    `[extractArguments] Processing arguments node: type=${argsNode.type}, text=${argsNode.text}`
+  );
   const args: ast.Parameter[] = [];
 
   // Process each argument based on named children (structured parsing)
@@ -72,23 +80,33 @@ export function extractArguments(argsNode: TSNode): ast.Parameter[] {
     const argNode = argsNode.namedChild(i);
     if (!argNode) continue;
 
-    console.log(`[extractArguments] Processing structured child ${i}: type=${argNode.type}, text=${argNode.text}`);
+    console.log(
+      `[extractArguments] Processing structured child ${i}: type=${argNode.type}, text=${argNode.text}`
+    );
 
     // Handle 'arguments' node that contains 'argument' nodes
     if (argNode.type === 'arguments') {
-      console.log(`[extractArguments] Found 'arguments' node, processing its children`);
+      console.log(
+        `[extractArguments] Found 'arguments' node, processing its children`
+      );
 
       // Process each child of the 'arguments' node
       for (let j = 0; j < argNode.namedChildCount; j++) {
         const innerArgNode = argNode.namedChild(j);
         if (!innerArgNode) continue;
 
-        console.log(`[extractArguments] Processing inner argument ${j}: type=${innerArgNode.type}, text=${innerArgNode.text}`);
+        console.log(
+          `[extractArguments] Processing inner argument ${j}: type=${innerArgNode.type}, text=${innerArgNode.text}`
+        );
 
         if (innerArgNode.type === 'argument') {
           const param = extractArgument(innerArgNode);
           if (param) {
-            console.log(`[extractArguments] Extracted parameter from inner argument: ${JSON.stringify(param)}`);
+            console.log(
+              `[extractArguments] Extracted parameter from inner argument: ${JSON.stringify(
+                param
+              )}`
+            );
             args.push(param);
           }
         }
@@ -98,17 +116,27 @@ export function extractArguments(argsNode: TSNode): ast.Parameter[] {
     else if (argNode.type === 'argument') {
       const param = extractArgument(argNode); // extractArgument should handle named vs positional within 'argument'
       if (param) {
-        console.log(`[extractArguments] Extracted parameter from structured child: ${JSON.stringify(param)}`);
+        console.log(
+          `[extractArguments] Extracted parameter from structured child: ${JSON.stringify(
+            param
+          )}`
+        );
         args.push(param);
       }
     } else {
       // Handle cases where the child of argument_list is directly an expression (e.g. a single array_literal)
       // This might be needed if 'argument' nodes are not always present for single, unnamed arguments.
-      console.log(`[extractArguments] Child is not of type 'argument', attempting to process as direct value: type=${argNode.type}`);
+      console.log(
+        `[extractArguments] Child is not of type 'argument', attempting to process as direct value: type=${argNode.type}`
+      );
       const value = convertNodeToParameterValue(argNode);
       if (value !== undefined) {
         args.push({ value }); // Positional argument
-        console.log(`[extractArguments] Extracted direct value as positional argument: ${JSON.stringify({value})}`);
+        console.log(
+          `[extractArguments] Extracted direct value as positional argument: ${JSON.stringify(
+            { value }
+          )}`
+        );
       }
     }
   }
@@ -127,11 +155,17 @@ export function extractArguments(argsNode: TSNode): ast.Parameter[] {
 
   // If after all attempts, args is empty and argsNode.text is also empty or whitespace (e.g. for `translate()`), ensure we return empty.
   if (args.length === 0 && (!argsNode.text || argsNode.text.trim() === '')) {
-    console.log('[extractArguments] No arguments found and text is empty, returning empty array.');
+    console.log(
+      '[extractArguments] No arguments found and text is empty, returning empty array.'
+    );
     return [];
   }
 
-  console.log(`[extractArguments] Extracted ${args.length} arguments: ${JSON.stringify(args)}`);
+  console.log(
+    `[extractArguments] Extracted ${args.length} arguments: ${JSON.stringify(
+      args
+    )}`
+  );
   return args;
 }
 
@@ -146,7 +180,9 @@ function extractArgument(argNode: TSNode): ast.Parameter | null {
   // Check if this is a named argument by looking for '=' in the text
   // Named arguments have the pattern: identifier = expression
   if (argNode.text.includes('=')) {
-    console.log(`[extractArgument] Detected named argument pattern with '=' in text`);
+    console.log(
+      `[extractArgument] Detected named argument pattern with '=' in text`
+    );
 
     // Find the identifier and expression parts
     let identifierNode: TSNode | null = null;
@@ -157,58 +193,83 @@ function extractArgument(argNode: TSNode): ast.Parameter | null {
       const child = argNode.child(i);
       if (!child) continue;
 
-      console.log(`[extractArgument] Examining child ${i}: type=${child.type}, text='${child.text}'`);
+      console.log(
+        `[extractArgument] Examining child ${i}: type=${child.type}, text='${child.text}'`
+      );
 
       if (child.type === 'identifier' && !identifierNode) {
         identifierNode = child;
         console.log(`[extractArgument] Found identifier: ${child.text}`);
-      } else if (child.type !== '=' && child.type !== 'identifier' && child.isNamed && !expressionNode) {
+      } else if (
+        child.type !== '=' &&
+        child.type !== 'identifier' &&
+        child.isNamed &&
+        !expressionNode
+      ) {
         // This should be the expression part (not the '=' operator or identifier)
         expressionNode = child;
-        console.log(`[extractArgument] Found expression: type=${child.type}, text='${child.text}'`);
+        console.log(
+          `[extractArgument] Found expression: type=${child.type}, text='${child.text}'`
+        );
       }
     }
 
     if (identifierNode && expressionNode) {
       const name = identifierNode.text;
-      console.log(`[extractArgument] Processing named argument: ${name} = ${expressionNode.text}`);
+      console.log(
+        `[extractArgument] Processing named argument: ${name} = ${expressionNode.text}`
+      );
 
       // Extract the value from the expression
       const value = extractValue(expressionNode);
       if (!value) {
-        console.log(`[extractArgument] Failed to extract value from expression: ${expressionNode.text}`);
+        console.log(
+          `[extractArgument] Failed to extract value from expression: ${expressionNode.text}`
+        );
         return null;
       }
 
-      console.log(`[extractArgument] Extracted value: ${JSON.stringify(value)}`);
+      console.log(
+        `[extractArgument] Extracted value: ${JSON.stringify(value)}`
+      );
       // Convert Value to ParameterValue
       const paramValue = convertValueToParameterValue(value);
       return { name, value: paramValue };
     } else {
-      console.log(`[extractArgument] Failed to find identifier and expression in named argument`);
+      console.log(
+        `[extractArgument] Failed to find identifier and expression in named argument`
+      );
       return null;
     }
   } else if (argNode.namedChildCount === 1 && argNode.namedChild(0)) {
     // This is a positional argument
     const valueNode = argNode.namedChild(0);
     if (valueNode) {
-      console.log(`[extractArgument] Found positional argument: ${valueNode.text}`);
+      console.log(
+        `[extractArgument] Found positional argument: ${valueNode.text}`
+      );
 
       // Extract the value
       const value = extractValue(valueNode);
       if (!value) {
-        console.log(`[extractArgument] Failed to extract value from node: ${valueNode.text}`);
+        console.log(
+          `[extractArgument] Failed to extract value from node: ${valueNode.text}`
+        );
         return null;
       }
 
-      console.log(`[extractArgument] Extracted value: ${JSON.stringify(value)}`);
+      console.log(
+        `[extractArgument] Extracted value: ${JSON.stringify(value)}`
+      );
       // Convert Value to ParameterValue
       const paramValue = convertValueToParameterValue(value);
       return { value: paramValue };
     }
   }
 
-  console.log(`[extractArgument] Failed to extract argument from node: ${argNode.text}`);
+  console.log(
+    `[extractArgument] Failed to extract argument from node: ${argNode.text}`
+  );
   return null;
 }
 
@@ -222,55 +283,70 @@ export function extractValue(valueNode: TSNode): ast.Value | null {
   // console.log(`[extractValue ENTRY] Node Type: '${valueNode.type}', Text: '${valueNode.text.replace(/\n/g, '\\n')}', isNamed: ${valueNode.isNamed}`);
   // --- END DIAGNOSTIC LOGGING ---
 
-  console.log(`[extractValue] Processing value node: type=${valueNode.type}, text='${valueNode.text}'`);
+  console.log(
+    `[extractValue] Processing value node: type=${valueNode.type}, text='${valueNode.text}'`
+  );
   switch (valueNode.type) {
     case 'expression': {
       const expressionChild = valueNode.namedChild(0); // Or child(0) if expressions can be anonymous
       if (expressionChild) {
-        console.log(`[extractValue] Expression child: type=${expressionChild.type}, text='${expressionChild.text}'`);
+        console.log(
+          `[extractValue] Expression child: type=${expressionChild.type}, text='${expressionChild.text}'`
+        );
         return extractValue(expressionChild);
       }
       console.log('[extractValue] Expression node has no processable child.');
       return null;
     }
-    case 'arguments': { // Added case for 'arguments'
+    case 'arguments': {
+      // Added case for 'arguments'
       // This case handles when a single, unnamed argument is passed,
       // and it's wrapped in an 'arguments' node by the parser.
       // e.g., translate([1,2,3]) -> argument_list has child 'arguments' (text: [1,2,3])
       // We expect the actual value (e.g., array_literal) to be the first child of this 'arguments' node.
       const firstChild = valueNode.child(0); // Or namedChild(0) if it's always named
       if (firstChild) {
-        console.log(`[extractValue] 'arguments' node found. Processing its first child: type=${firstChild.type}, text='${firstChild.text}'`);
+        console.log(
+          `[extractValue] 'arguments' node found. Processing its first child: type=${firstChild.type}, text='${firstChild.text}'`
+        );
         return extractValue(firstChild);
       }
-      console.log('[extractValue] \'arguments\' node has no processable child.');
+      console.log("[extractValue] 'arguments' node has no processable child.");
       return null;
     }
-    case 'argument': { // Added case for 'argument'
+    case 'argument': {
+      // Added case for 'argument'
       // This handles the case where an 'arguments' node contains an 'argument' node,
       // which in turn contains the actual value node (e.g., array_literal).
       const firstChild = valueNode.child(0); // Or namedChild(0)
       if (firstChild) {
-        console.log(`[extractValue] 'argument' node found. Processing its first child: type=${firstChild.type}, text='${firstChild.text}'`);
+        console.log(
+          `[extractValue] 'argument' node found. Processing its first child: type=${firstChild.type}, text='${firstChild.text}'`
+        );
         return extractValue(firstChild);
       }
-      console.log('[extractValue] \'argument\' node has no processable child.');
+      console.log("[extractValue] 'argument' node has no processable child.");
       return null;
     }
     case 'number': // Changed from 'number_literal'
       console.log(`[extractValue] Matched number. Value: ${valueNode.text}`);
       return { type: 'number', value: valueNode.text };
 
-    case 'string_literal': { // Reverted to previous correct logic
+    case 'string_literal': {
+      // Reverted to previous correct logic
       // Remove quotes from string
-      const stringValue = valueNode.text.substring(1, valueNode.text.length - 1);
+      const stringValue = valueNode.text.substring(
+        1,
+        valueNode.text.length - 1
+      );
       console.log(`[extractValue] Extracted string: ${stringValue}`);
       return { type: 'string', value: stringValue };
     }
 
     case 'boolean_literal': // Reverted to previous correct logic
-    case 'true':            // Reverted to previous correct logic
-    case 'false': {         // Reverted to previous correct logic
+    case 'true': // Reverted to previous correct logic
+    case 'false': {
+      // Reverted to previous correct logic
       // const boolValue = valueNode.text === 'true'; // Not strictly needed as value is string 'true'/'false'
       console.log(`[extractValue] Extracted boolean: ${valueNode.text}`);
       return { type: 'boolean', value: valueNode.text };
@@ -302,16 +378,22 @@ export function extractValue(valueNode: TSNode): ast.Value | null {
     case 'primary_expression': {
       // These expression types typically have a single child that contains the actual value
       // Traverse down the expression hierarchy to find the leaf value
-      console.log(`[extractValue] Processing expression hierarchy node: ${valueNode.type}`);
+      console.log(
+        `[extractValue] Processing expression hierarchy node: ${valueNode.type}`
+      );
 
       // Try to find the first named child that contains a value
       for (let i = 0; i < valueNode.namedChildCount; i++) {
         const child = valueNode.namedChild(i);
         if (child) {
-          console.log(`[extractValue] Trying child ${i}: type=${child.type}, text='${child.text}'`);
+          console.log(
+            `[extractValue] Trying child ${i}: type=${child.type}, text='${child.text}'`
+          );
           const result = extractValue(child);
           if (result) {
-            console.log(`[extractValue] Successfully extracted from ${valueNode.type} via child ${i}`);
+            console.log(
+              `[extractValue] Successfully extracted from ${valueNode.type} via child ${i}`
+            );
             return result;
           }
         }
@@ -321,16 +403,22 @@ export function extractValue(valueNode: TSNode): ast.Value | null {
       for (let i = 0; i < valueNode.childCount; i++) {
         const child = valueNode.child(i);
         if (child && child.isNamed) {
-          console.log(`[extractValue] Trying unnamed child ${i}: type=${child.type}, text='${child.text}'`);
+          console.log(
+            `[extractValue] Trying unnamed child ${i}: type=${child.type}, text='${child.text}'`
+          );
           const result = extractValue(child);
           if (result) {
-            console.log(`[extractValue] Successfully extracted from ${valueNode.type} via unnamed child ${i}`);
+            console.log(
+              `[extractValue] Successfully extracted from ${valueNode.type} via unnamed child ${i}`
+            );
             return result;
           }
         }
       }
 
-      console.log(`[extractValue] Could not extract value from expression hierarchy node: ${valueNode.type}`);
+      console.log(
+        `[extractValue] Could not extract value from expression hierarchy node: ${valueNode.type}`
+      );
       return null;
     }
 
@@ -346,20 +434,32 @@ export function extractValue(valueNode: TSNode): ast.Value | null {
  * @returns A vector value object or null if the vector is invalid
  */
 function extractVectorLiteral(vectorNode: TSNode): ast.VectorValue | null {
-  console.log(`[extractVectorLiteral] Processing vector/array node: type=${vectorNode.type}, text='${vectorNode.text}'`);
+  console.log(
+    `[extractVectorLiteral] Processing vector/array node: type=${vectorNode.type}, text='${vectorNode.text}'`
+  );
   const values: ast.Value[] = [];
 
   // Iterate over all children, including syntax tokens like ',', '[', ']'
   // extractValue should filter out non-value tokens by returning null.
   for (let i = 0; i < vectorNode.childCount; i++) {
     const elementNode = vectorNode.child(i);
-    if (elementNode) { // Ensure child exists
+    if (elementNode) {
+      // Ensure child exists
       // --- BEGIN DIAGNOSTIC LOGGING ---
-      console.log(`[extractVectorLiteral BEFORE extractValue] Child node: Type='${elementNode.type}', Text='${elementNode.text.replace(/\n/g, '\\n')}', isNamed=${elementNode.isNamed}`);
+      console.log(
+        `[extractVectorLiteral BEFORE extractValue] Child node: Type='${
+          elementNode.type
+        }', Text='${elementNode.text.replace(/\n/g, '\\n')}', isNamed=${
+          elementNode.isNamed
+        }`
+      );
       // --- END DIAGNOSTIC LOGGING ---
       const value = extractValue(elementNode);
       if (value) {
-        console.log('[extractVectorLiteral] Successfully extracted value for child:', JSON.stringify(value));
+        console.log(
+          '[extractVectorLiteral] Successfully extracted value for child:',
+          JSON.stringify(value)
+        );
         values.push(value);
       }
     }
@@ -368,8 +468,14 @@ function extractVectorLiteral(vectorNode: TSNode): ast.VectorValue | null {
   // It's possible for an array like `[,,]` to parse with no actual values.
   // Or if extractValue fails for all children. Default OpenSCAD behavior might be relevant here.
   // For now, if values is empty but the text wasn't just '[]', it might indicate a parsing problem for its elements.
-  if (values.length === 0 && vectorNode.text.trim() !== '[]' && vectorNode.text.trim() !== '') {
-    console.warn(`[extractVectorLiteral] Parsed an empty vector from non-empty text: '${vectorNode.text}'. This might indicate issues extracting its elements.`);
+  if (
+    values.length === 0 &&
+    vectorNode.text.trim() !== '[]' &&
+    vectorNode.text.trim() !== ''
+  ) {
+    console.warn(
+      `[extractVectorLiteral] Parsed an empty vector from non-empty text: '${vectorNode.text}'. This might indicate issues extracting its elements.`
+    );
   }
   return { type: 'vector', value: values };
 }
@@ -393,7 +499,7 @@ function extractRangeLiteral(rangeNode: TSNode): ast.RangeValue | null {
     start,
     end,
     step,
-    value: rangeNode.text // Add the required value property
+    value: rangeNode.text, // Add the required value property
   };
 }
 

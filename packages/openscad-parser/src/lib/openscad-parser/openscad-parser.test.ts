@@ -14,8 +14,8 @@
  * - tree-sitter-openscad.wasm: WebAssembly module containing the OpenSCAD grammar
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { OpenscadParser } from "./openscad-parser";
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { OpenscadParser } from './openscad-parser';
 
 // Sample OpenSCAD code for testing
 const SAMPLE_OPENSCAD_CODE = `
@@ -58,7 +58,7 @@ const INVALID_OPENSCAD_CODE = `
   test();
 `;
 
-describe("OpenSCADParser", () => {
+describe('OpenSCADParser', () => {
   let parser: OpenscadParser;
 
   beforeEach(async () => {
@@ -74,7 +74,7 @@ describe("OpenSCADParser", () => {
     parser.dispose();
   });
 
-  it("should initialize automatically in the constructor", async () => {
+  it('should initialize automatically in the constructor', async () => {
     // Wait for initialization to complete
     await parser.init();
 
@@ -82,46 +82,46 @@ describe("OpenSCADParser", () => {
     expect(parser.isInitialized).toBe(true);
   });
 
-  it("should parse simple OpenSCAD code correctly", async () => {
+  it('should parse simple OpenSCAD code correctly', async () => {
     // Parse the sample code
     const result = parser.parse(SAMPLE_OPENSCAD_CODE);
-    console.log("result", JSON.stringify(result));
+    console.log('result', JSON.stringify(result));
 
     // Check that the result is valid
     expect(result).toBeDefined();
     expect(result?.rootNode).toBeDefined();
-    expect(result?.rootNode.type).toBe("source_file");
+    expect(result?.rootNode.type).toBe('source_file');
 
     // Check that the text content contains the expected code
     const text = result?.rootNode.text;
-    expect(text).toContain("module test()");
-    expect(text).toContain("cube([10, 10, 10])");
-    expect(text).toContain("test();");
+    expect(text).toContain('module test()');
+    expect(text).toContain('cube([10, 10, 10])');
+    expect(text).toContain('test();');
   });
 
-  it("should parse complex OpenSCAD code correctly", async () => {
+  it('should parse complex OpenSCAD code correctly', async () => {
     // Wait for initialization to complete
     await parser.init();
 
     // Parse the complex code
     const result = parser.parse(COMPLEX_OPENSCAD_CODE);
-    console.log("result", JSON.stringify(result));
+    console.log('result', JSON.stringify(result));
 
     // Check that the result is valid
     expect(result).toBeDefined();
     expect(result?.rootNode).toBeDefined();
-    expect(result?.rootNode.type).toBe("source_file");
+    expect(result?.rootNode.type).toBe('source_file');
 
     // Check that the text content contains the expected code
     const text = result?.rootNode.text;
-    expect(text).toContain("module rounded_cylinder");
-    expect(text).toContain("union()");
-    expect(text).toContain("cylinder(h=h-2*fillet, r=r)");
-    expect(text).toContain("rotate_extrude()");
-    expect(text).toContain("translate([0, 0, fillet])");
+    expect(text).toContain('module rounded_cylinder');
+    expect(text).toContain('union()');
+    expect(text).toContain('cylinder(h=h-2*fillet, r=r)');
+    expect(text).toContain('rotate_extrude()');
+    expect(text).toContain('translate([0, 0, fillet])');
   });
 
-  it("should handle invalid OpenSCAD code gracefully", async () => {
+  it('should handle invalid OpenSCAD code gracefully', async () => {
     // Wait for initialization to complete
     await parser.init();
 
@@ -129,7 +129,10 @@ describe("OpenSCADParser", () => {
     parser.getErrorHandler().options.throwErrors = false;
 
     // Spy on the error handler's createSyntaxError method
-    const createSyntaxErrorSpy = vi.spyOn(parser.getErrorHandler(), 'createSyntaxError');
+    const createSyntaxErrorSpy = vi.spyOn(
+      parser.getErrorHandler(),
+      'createSyntaxError'
+    );
 
     // Parse the invalid code
     const result = parser.parse(INVALID_OPENSCAD_CODE);
@@ -143,6 +146,6 @@ describe("OpenSCADParser", () => {
 
     // The tree should contain ERROR nodes
     const rootNodeString = result?.rootNode.toString();
-    expect(rootNodeString).toContain("ERROR");
+    expect(rootNodeString).toContain('ERROR');
   });
 });

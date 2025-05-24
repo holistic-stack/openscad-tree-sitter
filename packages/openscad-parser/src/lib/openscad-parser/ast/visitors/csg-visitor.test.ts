@@ -9,7 +9,7 @@ describe('CSGVisitor', () => {
 
   beforeAll(async () => {
     parser = new OpenscadParser();
-    await parser.init("./tree-sitter-openscad.wasm");
+    await parser.init('./tree-sitter-openscad.wasm');
   });
 
   afterAll(() => {
@@ -21,26 +21,122 @@ describe('CSGVisitor', () => {
 
     // Add mock children to the visitor for testing
     visitor.mockChildren = {
-      'union': [
-        { type: 'cube', size: 10, center: false, location: { start: { row: 0, column: 0 }, end: { row: 0, column: 0 } } },
-        { type: 'sphere', radius: 5, location: { start: { row: 0, column: 0 }, end: { row: 0, column: 0 } } }
+      union: [
+        {
+          type: 'cube',
+          size: 10,
+          center: false,
+          location: {
+            start: { row: 0, column: 0 },
+            end: { row: 0, column: 0 },
+          },
+        },
+        {
+          type: 'sphere',
+          radius: 5,
+          location: {
+            start: { row: 0, column: 0 },
+            end: { row: 0, column: 0 },
+          },
+        },
       ],
-      'difference': [
-        { type: 'cube', size: 20, center: true, location: { start: { row: 0, column: 0 }, end: { row: 0, column: 0 } } },
-        { type: 'sphere', radius: 10, location: { start: { row: 0, column: 0 }, end: { row: 0, column: 0 } } }
+      difference: [
+        {
+          type: 'cube',
+          size: 20,
+          center: true,
+          location: {
+            start: { row: 0, column: 0 },
+            end: { row: 0, column: 0 },
+          },
+        },
+        {
+          type: 'sphere',
+          radius: 10,
+          location: {
+            start: { row: 0, column: 0 },
+            end: { row: 0, column: 0 },
+          },
+        },
       ],
-      'intersection': [
-        { type: 'cube', size: 20, center: true, location: { start: { row: 0, column: 0 }, end: { row: 0, column: 0 } } },
-        { type: 'sphere', radius: 15, location: { start: { row: 0, column: 0 }, end: { row: 0, column: 0 } } }
+      intersection: [
+        {
+          type: 'cube',
+          size: 20,
+          center: true,
+          location: {
+            start: { row: 0, column: 0 },
+            end: { row: 0, column: 0 },
+          },
+        },
+        {
+          type: 'sphere',
+          radius: 15,
+          location: {
+            start: { row: 0, column: 0 },
+            end: { row: 0, column: 0 },
+          },
+        },
       ],
-      'hull': [
-        { type: 'translate', vector: [0, 0, 0], children: [{ type: 'sphere', radius: 5, location: { start: { row: 0, column: 0 }, end: { row: 0, column: 0 } } }], location: { start: { row: 0, column: 0 }, end: { row: 0, column: 0 } } },
-        { type: 'translate', vector: [20, 0, 0], children: [{ type: 'sphere', radius: 5, location: { start: { row: 0, column: 0 }, end: { row: 0, column: 0 } } }], location: { start: { row: 0, column: 0 }, end: { row: 0, column: 0 } } }
+      hull: [
+        {
+          type: 'translate',
+          vector: [0, 0, 0],
+          children: [
+            {
+              type: 'sphere',
+              radius: 5,
+              location: {
+                start: { row: 0, column: 0 },
+                end: { row: 0, column: 0 },
+              },
+            },
+          ],
+          location: {
+            start: { row: 0, column: 0 },
+            end: { row: 0, column: 0 },
+          },
+        },
+        {
+          type: 'translate',
+          vector: [20, 0, 0],
+          children: [
+            {
+              type: 'sphere',
+              radius: 5,
+              location: {
+                start: { row: 0, column: 0 },
+                end: { row: 0, column: 0 },
+              },
+            },
+          ],
+          location: {
+            start: { row: 0, column: 0 },
+            end: { row: 0, column: 0 },
+          },
+        },
       ],
-      'minkowski': [
-        { type: 'cube', size: [10, 10, 1], center: false, location: { start: { row: 0, column: 0 }, end: { row: 0, column: 0 } } },
-        { type: 'cylinder', radius: 2, height: 1, center: false, location: { start: { row: 0, column: 0 }, end: { row: 0, column: 0 } } }
-      ]
+      minkowski: [
+        {
+          type: 'cube',
+          size: [10, 10, 1],
+          center: false,
+          location: {
+            start: { row: 0, column: 0 },
+            end: { row: 0, column: 0 },
+          },
+        },
+        {
+          type: 'cylinder',
+          radius: 2,
+          height: 1,
+          center: false,
+          location: {
+            start: { row: 0, column: 0 },
+            end: { row: 0, column: 0 },
+          },
+        },
+      ],
     };
   });
 
@@ -70,8 +166,12 @@ describe('CSGVisitor', () => {
       if (!tree) throw new Error('Failed to parse CST');
 
       // Find the module_instantiation node
-      const moduleInstantiation = findNodeOfType(tree.rootNode, 'module_instantiation');
-      if (!moduleInstantiation) throw new Error('Failed to find module_instantiation node');
+      const moduleInstantiation = findNodeOfType(
+        tree.rootNode,
+        'module_instantiation'
+      );
+      if (!moduleInstantiation)
+        throw new Error('Failed to find module_instantiation node');
 
       // Override the mock children for this test
       visitor.mockChildren = {};
@@ -92,11 +192,20 @@ describe('CSGVisitor', () => {
       if (!tree) throw new Error('Failed to parse CST');
 
       // Find the call_expression node
-      const callExpression = findDescendantOfType(tree.rootNode, 'call_expression');
+      const callExpression = findDescendantOfType(
+        tree.rootNode,
+        'call_expression'
+      );
       if (!callExpression) {
         // If call_expression is not found, try to find accessor_expression as a fallback
-        const accessorExpression = findDescendantOfType(tree.rootNode, 'accessor_expression');
-        if (!accessorExpression) throw new Error('Failed to find call_expression or accessor_expression node');
+        const accessorExpression = findDescendantOfType(
+          tree.rootNode,
+          'accessor_expression'
+        );
+        if (!accessorExpression)
+          throw new Error(
+            'Failed to find call_expression or accessor_expression node'
+          );
 
         // Visit the node
         const result = visitor.visitAccessorExpression(accessorExpression);
@@ -130,11 +239,11 @@ describe('CSGVisitor', () => {
           if (name === 'name') {
             return {
               type: 'identifier',
-              text: 'difference'
+              text: 'difference',
             };
           }
           return null;
-        }
+        },
       } as any;
 
       // Visit the node
@@ -158,11 +267,11 @@ describe('CSGVisitor', () => {
           if (name === 'name') {
             return {
               type: 'identifier',
-              text: 'intersection'
+              text: 'intersection',
             };
           }
           return null;
-        }
+        },
       } as any;
 
       // Visit the node
@@ -186,11 +295,11 @@ describe('CSGVisitor', () => {
           if (name === 'name') {
             return {
               type: 'identifier',
-              text: 'hull'
+              text: 'hull',
             };
           }
           return null;
-        }
+        },
       } as any;
 
       // Visit the node
@@ -214,11 +323,11 @@ describe('CSGVisitor', () => {
           if (name === 'name') {
             return {
               type: 'identifier',
-              text: 'minkowski'
+              text: 'minkowski',
             };
           }
           return null;
-        }
+        },
       } as any;
 
       // Visit the node
@@ -237,8 +346,12 @@ describe('CSGVisitor', () => {
       if (!tree) throw new Error('Failed to parse CST');
 
       // Find the module_instantiation node
-      const moduleInstantiation = findNodeOfType(tree.rootNode, 'module_instantiation');
-      if (!moduleInstantiation) throw new Error('Failed to find module_instantiation node');
+      const moduleInstantiation = findNodeOfType(
+        tree.rootNode,
+        'module_instantiation'
+      );
+      if (!moduleInstantiation)
+        throw new Error('Failed to find module_instantiation node');
 
       // Visit the node
       const result = visitor.visitModuleInstantiation(moduleInstantiation);
@@ -262,11 +375,11 @@ describe('CSGVisitor', () => {
           if (name === 'name') {
             return {
               type: 'identifier',
-              text: 'difference'
+              text: 'difference',
             };
           }
           return null;
-        }
+        },
       } as any;
 
       // Override the mock children for this test
@@ -293,11 +406,11 @@ describe('CSGVisitor', () => {
           if (name === 'name') {
             return {
               type: 'identifier',
-              text: 'intersection'
+              text: 'intersection',
             };
           }
           return null;
-        }
+        },
       } as any;
 
       // Override the mock children for this test
@@ -324,11 +437,11 @@ describe('CSGVisitor', () => {
           if (name === 'name') {
             return {
               type: 'identifier',
-              text: 'hull'
+              text: 'hull',
             };
           }
           return null;
-        }
+        },
       } as any;
 
       // Override the mock children for this test
@@ -354,11 +467,11 @@ describe('CSGVisitor', () => {
           if (name === 'name') {
             return {
               type: 'identifier',
-              text: 'minkowski'
+              text: 'minkowski',
             };
           }
           return null;
-        }
+        },
       } as any;
 
       // Override the mock children for this test
@@ -379,8 +492,12 @@ describe('CSGVisitor', () => {
       if (!tree) throw new Error('Failed to parse CST');
 
       // Find the module_instantiation node
-      const moduleInstantiation = findNodeOfType(tree.rootNode, 'module_instantiation');
-      if (!moduleInstantiation) throw new Error('Failed to find module_instantiation node');
+      const moduleInstantiation = findNodeOfType(
+        tree.rootNode,
+        'module_instantiation'
+      );
+      if (!moduleInstantiation)
+        throw new Error('Failed to find module_instantiation node');
 
       // Visit the node
       const result = visitor.visitModuleInstantiation(moduleInstantiation);
@@ -402,11 +519,11 @@ function findNodeOfType(node: TSNode, type: string): TSNode | null {
         if (name === 'name') {
           return {
             type: 'identifier',
-            text: 'difference'
+            text: 'difference',
           };
         }
         return null;
-      }
+      },
     } as any;
   }
 
@@ -418,11 +535,11 @@ function findNodeOfType(node: TSNode, type: string): TSNode | null {
         if (name === 'name') {
           return {
             type: 'identifier',
-            text: 'intersection'
+            text: 'intersection',
           };
         }
         return null;
-      }
+      },
     } as any;
   }
 
@@ -434,11 +551,11 @@ function findNodeOfType(node: TSNode, type: string): TSNode | null {
         if (name === 'name') {
           return {
             type: 'identifier',
-            text: 'hull'
+            text: 'hull',
           };
         }
         return null;
-      }
+      },
     } as any;
   }
 
@@ -450,11 +567,11 @@ function findNodeOfType(node: TSNode, type: string): TSNode | null {
         if (name === 'name') {
           return {
             type: 'identifier',
-            text: 'minkowski'
+            text: 'minkowski',
           };
         }
         return null;
-      }
+      },
     } as any;
   }
 
@@ -471,7 +588,10 @@ function findNodeOfType(node: TSNode, type: string): TSNode | null {
   if (node.type === 'expression_statement' && type === 'module_instantiation') {
     const expression = node.firstChild;
     if (expression) {
-      const accessorExpression = findDescendantOfType(expression, 'accessor_expression');
+      const accessorExpression = findDescendantOfType(
+        expression,
+        'accessor_expression'
+      );
       if (accessorExpression) {
         return accessorExpression;
       }

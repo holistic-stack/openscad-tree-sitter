@@ -5,8 +5,15 @@ import * as ast from '../ast-types';
  * @param value The value to check
  * @returns True if the value is an expression node
  */
-function isExpressionNode(value: ast.ParameterValue): value is ast.ExpressionNode {
-  return typeof value === 'object' && value !== null && 'type' in value && value.type === 'expression';
+function isExpressionNode(
+  value: ast.ParameterValue
+): value is ast.ExpressionNode {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'type' in value &&
+    value.type === 'expression'
+  );
 }
 
 /**
@@ -24,15 +31,20 @@ export function extractNumberParameter(param: ast.Parameter): number | null {
 
   // Handle expression node
   if (isExpressionNode(param.value)) {
-    if (param.value.expressionType === 'literal' && typeof (param.value as ast.LiteralNode).value === 'number') {
+    if (
+      param.value.expressionType === 'literal' &&
+      typeof (param.value as ast.LiteralNode).value === 'number'
+    ) {
       return (param.value as ast.LiteralNode).value as number;
     }
 
     if (param.value.expressionType === 'unary') {
       const unaryExpr = param.value as ast.UnaryExpressionNode;
-      if (unaryExpr.operator === '-' &&
-          unaryExpr.operand.expressionType === 'literal' &&
-          typeof (unaryExpr.operand as ast.LiteralNode).value === 'number') {
+      if (
+        unaryExpr.operator === '-' &&
+        unaryExpr.operand.expressionType === 'literal' &&
+        typeof (unaryExpr.operand as ast.LiteralNode).value === 'number'
+      ) {
         return -(unaryExpr.operand as ast.LiteralNode).value as number;
       }
     }
@@ -70,7 +82,10 @@ export function extractBooleanParameter(param: ast.Parameter): boolean | null {
 
   // Handle expression node
   if (isExpressionNode(param.value)) {
-    if (param.value.expressionType === 'literal' && typeof (param.value as ast.LiteralNode).value === 'boolean') {
+    if (
+      param.value.expressionType === 'literal' &&
+      typeof (param.value as ast.LiteralNode).value === 'boolean'
+    ) {
       return (param.value as ast.LiteralNode).value as boolean;
     }
   }
@@ -93,7 +108,10 @@ export function extractStringParameter(param: ast.Parameter): string | null {
 
   // Handle expression node
   if (isExpressionNode(param.value)) {
-    if (param.value.expressionType === 'literal' && typeof (param.value as ast.LiteralNode).value === 'string') {
+    if (
+      param.value.expressionType === 'literal' &&
+      typeof (param.value as ast.LiteralNode).value === 'string'
+    ) {
       return (param.value as ast.LiteralNode).value as string;
     }
   }
@@ -110,7 +128,10 @@ export function extractVectorParameter(param: ast.Parameter): number[] | null {
   if (!param || !param.value) return null;
 
   // Handle Vector2D or Vector3D as raw value
-  if (Array.isArray(param.value) && param.value.every(v => typeof v === 'number')) {
+  if (
+    Array.isArray(param.value) &&
+    param.value.every(v => typeof v === 'number')
+  ) {
     return param.value as number[];
   }
 
@@ -121,7 +142,10 @@ export function extractVectorParameter(param: ast.Parameter): number[] | null {
       const values: number[] = [];
 
       for (const item of arrayExpr.items) {
-        if (item.expressionType === 'literal' && typeof (item as ast.LiteralNode).value === 'number') {
+        if (
+          item.expressionType === 'literal' &&
+          typeof (item as ast.LiteralNode).value === 'number'
+        ) {
           values.push((item as ast.LiteralNode).value as number);
         }
       }
@@ -134,12 +158,20 @@ export function extractVectorParameter(param: ast.Parameter): number[] | null {
 
   // Try to parse the value as a vector if it's a string
   if (typeof param.value === 'string') {
-    const matches = param.value.match(/\[\s*([\d.+-]+)\s*,\s*([\d.+-]+)\s*,\s*([\d.+-]+)\s*\]/);
+    const matches = param.value.match(
+      /\[\s*([\d.+-]+)\s*,\s*([\d.+-]+)\s*,\s*([\d.+-]+)\s*\]/
+    );
     if (matches && matches.length === 4) {
-      return [parseFloat(matches[1]), parseFloat(matches[2]), parseFloat(matches[3])];
+      return [
+        parseFloat(matches[1]),
+        parseFloat(matches[2]),
+        parseFloat(matches[3]),
+      ];
     }
 
-    const matches2D = param.value.match(/\[\s*([\d.+-]+)\s*,\s*([\d.+-]+)\s*\]/);
+    const matches2D = param.value.match(
+      /\[\s*([\d.+-]+)\s*,\s*([\d.+-]+)\s*\]/
+    );
     if (matches2D && matches2D.length === 3) {
       return [parseFloat(matches2D[1]), parseFloat(matches2D[2])];
     }
@@ -153,11 +185,17 @@ export function extractVectorParameter(param: ast.Parameter): number[] | null {
  * @param param The parameter object
  * @returns The range values as an array of numbers or null if the parameter is not a range
  */
-export function extractRangeParameter(param: ast.Parameter): [number, number, number] | null {
+export function extractRangeParameter(
+  param: ast.Parameter
+): [number, number, number] | null {
   if (!param || !param.value) return null;
 
   // Handle array as raw value with 2 or 3 elements
-  if (Array.isArray(param.value) && param.value.length >= 2 && param.value.every(v => typeof v === 'number')) {
+  if (
+    Array.isArray(param.value) &&
+    param.value.length >= 2 &&
+    param.value.every(v => typeof v === 'number')
+  ) {
     if (param.value.length === 2) {
       return [param.value[0], param.value[1], 1];
     } else if (param.value.length >= 3) {
@@ -174,9 +212,15 @@ export function extractRangeParameter(param: ast.Parameter): [number, number, nu
 
   // Try to parse the value as a range if it's a string
   if (typeof param.value === 'string') {
-    const matches = param.value.match(/\[\s*([\d.+-]+)\s*:\s*([\d.+-]+)\s*:\s*([\d.+-]+)\s*\]/);
+    const matches = param.value.match(
+      /\[\s*([\d.+-]+)\s*:\s*([\d.+-]+)\s*:\s*([\d.+-]+)\s*\]/
+    );
     if (matches && matches.length === 4) {
-      return [parseFloat(matches[1]), parseFloat(matches[3]), parseFloat(matches[2])];
+      return [
+        parseFloat(matches[1]),
+        parseFloat(matches[3]),
+        parseFloat(matches[2]),
+      ];
     }
 
     const matches2 = param.value.match(/\[\s*([\d.+-]+)\s*:\s*([\d.+-]+)\s*\]/);
@@ -193,16 +237,24 @@ export function extractRangeParameter(param: ast.Parameter): [number, number, nu
  * @param param The parameter object
  * @returns The identifier value or null if the parameter is not an identifier
  */
-export function extractIdentifierParameter(param: ast.Parameter): string | null {
+export function extractIdentifierParameter(
+  param: ast.Parameter
+): string | null {
   if (!param || !param.value) return null;
 
   // Handle string as identifier
-  if (typeof param.value === 'string' && /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(param.value)) {
+  if (
+    typeof param.value === 'string' &&
+    /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(param.value)
+  ) {
     return param.value;
   }
 
   // Handle expression node
-  if (isExpressionNode(param.value) && param.value.expressionType === 'variable') {
+  if (
+    isExpressionNode(param.value) &&
+    param.value.expressionType === 'variable'
+  ) {
     return (param.value as ast.VariableNode).name;
   }
 

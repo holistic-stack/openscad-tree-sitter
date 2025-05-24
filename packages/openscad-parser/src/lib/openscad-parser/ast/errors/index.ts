@@ -1,9 +1,9 @@
 /**
  * Error handling module for the OpenSCAD parser
- * 
+ *
  * This module provides error handling classes and recovery strategies
  * for the OpenSCAD parser.
- * 
+ *
  * @module lib/openscad-parser/ast/errors
  */
 

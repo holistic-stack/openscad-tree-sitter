@@ -50,19 +50,20 @@ describe('QueryManager', () => {
       `;
 
       // Mock the parser.parse method
-      parser.parse = (source: string) => ({
-        rootNode: {
-          // Mock node structure for testing
-          type: 'program',
-          text: source,
-          startPosition: { row: 0, column: 0 },
-          endPosition: { row: 0, column: source.length },
-          startIndex: 0,
-          endIndex: source.length,
+      parser.parse = (source: string) =>
+        ({
+          rootNode: {
+            // Mock node structure for testing
+            type: 'program',
+            text: source,
+            startPosition: { row: 0, column: 0 },
+            endPosition: { row: 0, column: source.length },
+            startIndex: 0,
+            endIndex: source.length,
+            // Add other required properties
+          },
           // Add other required properties
-        },
-        // Add other required properties
-      } as any);
+        } as any);
 
       // Set the tree property directly
       const tree = parser.parse(source);
@@ -89,16 +90,17 @@ describe('QueryManager', () => {
 
       // Set the tree property directly
       const source = 'cube(10);';
-      parser.parse = (source: string) => ({
-        rootNode: {
-          type: 'program',
-          text: source,
-          startPosition: { row: 0, column: 0 },
-          endPosition: { row: 0, column: source.length },
-          startIndex: 0,
-          endIndex: source.length,
-        },
-      } as any);
+      parser.parse = (source: string) =>
+        ({
+          rootNode: {
+            type: 'program',
+            text: source,
+            startPosition: { row: 0, column: 0 },
+            endPosition: { row: 0, column: source.length },
+            startIndex: 0,
+            endIndex: source.length,
+          },
+        } as any);
 
       const tree = parser.parse(source);
       if (tree) {
@@ -119,16 +121,20 @@ describe('QueryManager', () => {
           type: 'call_expression',
           parent: {
             type: 'expression_statement',
-            parent: null
-          }
-        }
+            parent: null,
+          },
+        },
       } as any;
 
       // Test with an existing ancestor type
-      expect(queryManager.hasAncestorOfType(childNode, 'call_expression')).toBe(true);
+      expect(queryManager.hasAncestorOfType(childNode, 'call_expression')).toBe(
+        true
+      );
 
       // Test with a non-existing ancestor type
-      expect(queryManager.hasAncestorOfType(childNode, 'nonexistent_type')).toBe(false);
+      expect(
+        queryManager.hasAncestorOfType(childNode, 'nonexistent_type')
+      ).toBe(false);
     });
   });
 
@@ -145,7 +151,7 @@ describe('QueryManager', () => {
       const node = {
         startIndex: 0,
         endIndex: 7, // Points to 'cube(10)'
-        text: 'cube(10)'
+        text: 'cube(10)',
       } as any;
 
       const result = queryManager.getNodeTextWithSemicolon(node, source);
@@ -160,7 +166,7 @@ describe('QueryManager', () => {
       const node = {
         startIndex: 0,
         endIndex: 7,
-        text: 'cube(10)'
+        text: 'cube(10)',
       } as any;
 
       const result = queryManager.getNodeTextWithSemicolon(node, source);

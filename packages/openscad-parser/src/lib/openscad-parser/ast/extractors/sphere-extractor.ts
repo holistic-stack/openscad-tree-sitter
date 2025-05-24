@@ -10,7 +10,9 @@ import { extractNumberParameter } from '../extractors/parameter-extractor';
  * @returns A sphere AST node or null if the node cannot be processed
  */
 export function extractSphereNode(node: TSNode): ast.SphereNode | null {
-  console.log(`[extractSphereNode] Processing sphere node: ${node.text.substring(0, 50)}`);
+  console.log(
+    `[extractSphereNode] Processing sphere node: ${node.text.substring(0, 50)}`
+  );
 
   // Default values
   let radius: number = 1;
@@ -26,12 +28,16 @@ export function extractSphereNode(node: TSNode): ast.SphereNode | null {
     return {
       type: 'sphere',
       radius,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 
   const args = extractArguments(argsNode);
-  console.log(`[extractSphereNode] Extracted ${args.length} arguments: ${JSON.stringify(args)}`);
+  console.log(
+    `[extractSphereNode] Extracted ${args.length} arguments: ${JSON.stringify(
+      args
+    )}`
+  );
 
   // First, check for positional parameters
   if (args.length > 0 && !args[0].name) {
@@ -39,7 +45,9 @@ export function extractSphereNode(node: TSNode): ast.SphereNode | null {
     const radiusValue = extractNumberParameter(args[0]);
     if (radiusValue !== null) {
       radius = radiusValue;
-      console.log(`[extractSphereNode] Found positional radius parameter: ${radius}`);
+      console.log(
+        `[extractSphereNode] Found positional radius parameter: ${radius}`
+      );
     }
   }
 
@@ -54,7 +62,11 @@ export function extractSphereNode(node: TSNode): ast.SphereNode | null {
         radius = radiusValue;
         console.log(`[extractSphereNode] Found radius parameter: ${radius}`);
       } else {
-        console.log(`[extractSphereNode] Invalid radius parameter: ${JSON.stringify(arg.value)}`);
+        console.log(
+          `[extractSphereNode] Invalid radius parameter: ${JSON.stringify(
+            arg.value
+          )}`
+        );
       }
     }
     // Handle diameter parameter (named 'd')
@@ -63,9 +75,15 @@ export function extractSphereNode(node: TSNode): ast.SphereNode | null {
       if (diameterValue !== null) {
         diameter = diameterValue;
         radius = diameterValue / 2; // Set radius based on diameter
-        console.log(`[extractSphereNode] Found diameter parameter: ${diameter}, calculated radius: ${radius}`);
+        console.log(
+          `[extractSphereNode] Found diameter parameter: ${diameter}, calculated radius: ${radius}`
+        );
       } else {
-        console.log(`[extractSphereNode] Invalid diameter parameter: ${JSON.stringify(arg.value)}`);
+        console.log(
+          `[extractSphereNode] Invalid diameter parameter: ${JSON.stringify(
+            arg.value
+          )}`
+        );
       }
     }
     // Handle $fn parameter
@@ -75,7 +93,11 @@ export function extractSphereNode(node: TSNode): ast.SphereNode | null {
         fn = fnValue;
         console.log(`[extractSphereNode] Found $fn parameter: ${fn}`);
       } else {
-        console.log(`[extractSphereNode] Invalid $fn parameter: ${JSON.stringify(arg.value)}`);
+        console.log(
+          `[extractSphereNode] Invalid $fn parameter: ${JSON.stringify(
+            arg.value
+          )}`
+        );
       }
     }
     // Handle $fa parameter
@@ -85,7 +107,11 @@ export function extractSphereNode(node: TSNode): ast.SphereNode | null {
         fa = faValue;
         console.log(`[extractSphereNode] Found $fa parameter: ${fa}`);
       } else {
-        console.log(`[extractSphereNode] Invalid $fa parameter: ${JSON.stringify(arg.value)}`);
+        console.log(
+          `[extractSphereNode] Invalid $fa parameter: ${JSON.stringify(
+            arg.value
+          )}`
+        );
       }
     }
     // Handle $fs parameter
@@ -95,12 +121,18 @@ export function extractSphereNode(node: TSNode): ast.SphereNode | null {
         fs = fsValue;
         console.log(`[extractSphereNode] Found $fs parameter: ${fs}`);
       } else {
-        console.log(`[extractSphereNode] Invalid $fs parameter: ${JSON.stringify(arg.value)}`);
+        console.log(
+          `[extractSphereNode] Invalid $fs parameter: ${JSON.stringify(
+            arg.value
+          )}`
+        );
       }
     }
   }
 
-  console.log(`[extractSphereNode] Final parameters: radius=${radius}, diameter=${diameter}, fn=${fn}, fa=${fa}, fs=${fs}`);
+  console.log(
+    `[extractSphereNode] Final parameters: radius=${radius}, diameter=${diameter}, fn=${fn}, fa=${fa}, fs=${fs}`
+  );
 
   // Create the sphere node with the appropriate parameters
   if (diameter !== undefined) {
@@ -111,7 +143,7 @@ export function extractSphereNode(node: TSNode): ast.SphereNode | null {
       fn,
       fa,
       fs,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   } else {
     return {
@@ -120,7 +152,7 @@ export function extractSphereNode(node: TSNode): ast.SphereNode | null {
       fn,
       fa,
       fs,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 }

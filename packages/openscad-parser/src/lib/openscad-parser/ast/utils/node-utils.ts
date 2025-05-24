@@ -6,21 +6,24 @@ import { Node as TSNode } from 'web-tree-sitter';
  * @param type The type of node to find
  * @returns The first descendant node of the specified type or null if not found
  */
-export function findDescendantOfType(node: TSNode, type: string): TSNode | null {
+export function findDescendantOfType(
+  node: TSNode,
+  type: string
+): TSNode | null {
   if (node.type === type) {
     return node;
   }
-  
+
   for (let i = 0; i < node.childCount; i++) {
     const child = node.child(i);
     if (!child) continue;
-    
+
     const result = findDescendantOfType(child, type);
     if (result) {
       return result;
     }
   }
-  
+
   return null;
 }
 
@@ -32,19 +35,19 @@ export function findDescendantOfType(node: TSNode, type: string): TSNode | null 
  */
 export function findAllDescendantsOfType(node: TSNode, type: string): TSNode[] {
   const results: TSNode[] = [];
-  
+
   if (node.type === type) {
     results.push(node);
   }
-  
+
   for (let i = 0; i < node.childCount; i++) {
     const child = node.child(i);
     if (!child) continue;
-    
+
     const childResults = findAllDescendantsOfType(child, type);
     results.push(...childResults);
   }
-  
+
   return results;
 }
 
@@ -56,14 +59,14 @@ export function findAllDescendantsOfType(node: TSNode, type: string): TSNode[] {
  */
 export function findAncestorOfType(node: TSNode, type: string): TSNode | null {
   let current = node.parent;
-  
+
   while (current) {
     if (current.type === type) {
       return current;
     }
     current = current.parent;
   }
-  
+
   return null;
 }
 
@@ -74,9 +77,9 @@ export function findAncestorOfType(node: TSNode, type: string): TSNode | null {
  */
 export function getFunctionName(node: TSNode): string | null {
   if (node.type !== 'module_instantiation') return null;
-  
+
   const nameNode = node.childForFieldName('name');
   if (!nameNode) return null;
-  
+
   return nameNode.text;
 }

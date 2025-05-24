@@ -10,7 +10,7 @@ describe('ExpressionVisitor Integration', () => {
 
   beforeEach(async () => {
     parser = new OpenscadParser();
-    await parser.init("./tree-sitter-openscad.wasm");
+    await parser.init('./tree-sitter-openscad.wasm');
     visitor = new ExpressionVisitor('');
   });
 
@@ -36,26 +36,26 @@ describe('ExpressionVisitor Integration', () => {
                 type: 'number',
                 text: '1',
                 childCount: 0,
-                child: () => null
+                child: () => null,
               };
             } else if (index === 1) {
               return {
                 type: 'plus',
                 text: '+',
                 childCount: 0,
-                child: () => null
+                child: () => null,
               };
             } else if (index === 2) {
               return {
                 type: 'number',
                 text: '2',
                 childCount: 0,
-                child: () => null
+                child: () => null,
               };
             }
             return null;
-          }
-        })
+          },
+        }),
       } as unknown as TSNode;
 
       // Mock the visitor methods
@@ -67,15 +67,24 @@ describe('ExpressionVisitor Integration', () => {
           type: 'expression',
           expressionType: 'literal',
           value: 1,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
         },
         right: {
           type: 'expression',
           expressionType: 'literal',
           value: 2,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
         },
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+        location: {
+          start: { line: 0, column: 0 },
+          end: { line: 0, column: 0 },
+        },
       };
 
       // Mock the visitExpression method
@@ -117,26 +126,26 @@ describe('ExpressionVisitor Integration', () => {
                 type: 'identifier',
                 text: 'x',
                 childCount: 0,
-                child: () => null
+                child: () => null,
               };
             } else if (index === 1) {
               return {
                 type: 'greater_than',
                 text: '>',
                 childCount: 0,
-                child: () => null
+                child: () => null,
               };
             } else if (index === 2) {
               return {
                 type: 'number',
                 text: '5',
                 childCount: 0,
-                child: () => null
+                child: () => null,
               };
             }
             return null;
-          }
-        })
+          },
+        }),
       } as unknown as TSNode;
 
       // Mock the visitor methods
@@ -148,15 +157,24 @@ describe('ExpressionVisitor Integration', () => {
           type: 'expression',
           expressionType: 'variable',
           name: 'x',
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
         },
         right: {
           type: 'expression',
           expressionType: 'literal',
           value: 5,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
         },
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+        location: {
+          start: { line: 0, column: 0 },
+          end: { line: 0, column: 0 },
+        },
       };
 
       // Mock the visitExpression method
@@ -198,26 +216,26 @@ describe('ExpressionVisitor Integration', () => {
                 type: 'true',
                 text: 'true',
                 childCount: 0,
-                child: () => null
+                child: () => null,
               };
             } else if (index === 1) {
               return {
                 type: 'logical_or',
                 text: '||',
                 childCount: 0,
-                child: () => null
+                child: () => null,
               };
             } else if (index === 2) {
               return {
                 type: 'false',
                 text: 'false',
                 childCount: 0,
-                child: () => null
+                child: () => null,
               };
             }
             return null;
-          }
-        })
+          },
+        }),
       } as unknown as TSNode;
 
       // Mock the visitor methods
@@ -229,15 +247,24 @@ describe('ExpressionVisitor Integration', () => {
           type: 'expression',
           expressionType: 'literal',
           value: true,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
         },
         right: {
           type: 'expression',
           expressionType: 'literal',
           value: false,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
         },
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+        location: {
+          start: { line: 0, column: 0 },
+          end: { line: 0, column: 0 },
+        },
       };
 
       // Mock the visitExpression method
@@ -281,19 +308,19 @@ describe('ExpressionVisitor Integration', () => {
                 type: 'minus',
                 text: '-',
                 childCount: 0,
-                child: () => null
+                child: () => null,
               };
             } else if (index === 1) {
               return {
                 type: 'number',
                 text: '5',
                 childCount: 0,
-                child: () => null
+                child: () => null,
               };
             }
             return null;
-          }
-        })
+          },
+        }),
       } as unknown as TSNode;
 
       // Mock the visitor methods
@@ -306,9 +333,15 @@ describe('ExpressionVisitor Integration', () => {
           type: 'expression',
           expressionType: 'literal',
           value: 5,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
         },
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+        location: {
+          start: { line: 0, column: 0 },
+          end: { line: 0, column: 0 },
+        },
       });
 
       // Process the expression
@@ -344,19 +377,19 @@ describe('ExpressionVisitor Integration', () => {
                 type: 'bang',
                 text: '!',
                 childCount: 0,
-                child: () => null
+                child: () => null,
               };
             } else if (index === 1) {
               return {
                 type: 'true',
                 text: 'true',
                 childCount: 0,
-                child: () => null
+                child: () => null,
               };
             }
             return null;
-          }
-        })
+          },
+        }),
       } as unknown as TSNode;
 
       // Mock the visitor methods
@@ -369,9 +402,15 @@ describe('ExpressionVisitor Integration', () => {
           type: 'expression',
           expressionType: 'literal',
           value: true,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
         },
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+        location: {
+          start: { line: 0, column: 0 },
+          end: { line: 0, column: 0 },
+        },
       });
 
       // Process the expression
@@ -411,27 +450,62 @@ describe('ExpressionVisitor Integration', () => {
                 childCount: 3,
                 child: (i: number) => {
                   if (i === 0) {
-                    return { type: 'identifier', text: 'x', childCount: 0, child: () => null };
+                    return {
+                      type: 'identifier',
+                      text: 'x',
+                      childCount: 0,
+                      child: () => null,
+                    };
                   } else if (i === 1) {
-                    return { type: 'greater_than', text: '>', childCount: 0, child: () => null };
+                    return {
+                      type: 'greater_than',
+                      text: '>',
+                      childCount: 0,
+                      child: () => null,
+                    };
                   } else if (i === 2) {
-                    return { type: 'number', text: '5', childCount: 0, child: () => null };
+                    return {
+                      type: 'number',
+                      text: '5',
+                      childCount: 0,
+                      child: () => null,
+                    };
                   }
                   return null;
-                }
+                },
               };
             } else if (index === 1) {
-              return { type: 'question_mark', text: '?', childCount: 0, child: () => null };
+              return {
+                type: 'question_mark',
+                text: '?',
+                childCount: 0,
+                child: () => null,
+              };
             } else if (index === 2) {
-              return { type: 'number', text: '10', childCount: 0, child: () => null };
+              return {
+                type: 'number',
+                text: '10',
+                childCount: 0,
+                child: () => null,
+              };
             } else if (index === 3) {
-              return { type: 'colon', text: ':', childCount: 0, child: () => null };
+              return {
+                type: 'colon',
+                text: ':',
+                childCount: 0,
+                child: () => null,
+              };
             } else if (index === 4) {
-              return { type: 'number', text: '20', childCount: 0, child: () => null };
+              return {
+                type: 'number',
+                text: '20',
+                childCount: 0,
+                child: () => null,
+              };
             }
             return null;
-          }
-        })
+          },
+        }),
       } as unknown as TSNode;
 
       // Mock the visitor methods
@@ -446,29 +520,47 @@ describe('ExpressionVisitor Integration', () => {
             type: 'expression',
             expressionType: 'variable',
             name: 'x',
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+            location: {
+              start: { line: 0, column: 0 },
+              end: { line: 0, column: 0 },
+            },
           },
           right: {
             type: 'expression',
             expressionType: 'literal',
             value: 5,
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+            location: {
+              start: { line: 0, column: 0 },
+              end: { line: 0, column: 0 },
+            },
           },
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
         },
         thenBranch: {
           type: 'expression',
           expressionType: 'literal',
           value: 10,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
         },
         elseBranch: {
           type: 'expression',
           expressionType: 'literal',
           value: 20,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
         },
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+        location: {
+          start: { line: 0, column: 0 },
+          end: { line: 0, column: 0 },
+        },
       };
 
       // Mock the visitExpression method
@@ -508,23 +600,58 @@ describe('ExpressionVisitor Integration', () => {
           childCount: 5,
           child: (index: number) => {
             if (index === 0) {
-              return { type: 'left_bracket', text: '[', childCount: 0, child: () => null };
+              return {
+                type: 'left_bracket',
+                text: '[',
+                childCount: 0,
+                child: () => null,
+              };
             } else if (index === 1) {
-              return { type: 'number', text: '1', childCount: 0, child: () => null };
+              return {
+                type: 'number',
+                text: '1',
+                childCount: 0,
+                child: () => null,
+              };
             } else if (index === 2) {
-              return { type: 'comma', text: ',', childCount: 0, child: () => null };
+              return {
+                type: 'comma',
+                text: ',',
+                childCount: 0,
+                child: () => null,
+              };
             } else if (index === 3) {
-              return { type: 'number', text: '2', childCount: 0, child: () => null };
+              return {
+                type: 'number',
+                text: '2',
+                childCount: 0,
+                child: () => null,
+              };
             } else if (index === 4) {
-              return { type: 'comma', text: ',', childCount: 0, child: () => null };
+              return {
+                type: 'comma',
+                text: ',',
+                childCount: 0,
+                child: () => null,
+              };
             } else if (index === 5) {
-              return { type: 'number', text: '3', childCount: 0, child: () => null };
+              return {
+                type: 'number',
+                text: '3',
+                childCount: 0,
+                child: () => null,
+              };
             } else if (index === 6) {
-              return { type: 'right_bracket', text: ']', childCount: 0, child: () => null };
+              return {
+                type: 'right_bracket',
+                text: ']',
+                childCount: 0,
+                child: () => null,
+              };
             }
             return null;
-          }
-        })
+          },
+        }),
       } as unknown as TSNode;
 
       // Mock the visitor methods
@@ -536,22 +663,34 @@ describe('ExpressionVisitor Integration', () => {
             type: 'expression',
             expressionType: 'literal',
             value: 1,
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+            location: {
+              start: { line: 0, column: 0 },
+              end: { line: 0, column: 0 },
+            },
           },
           {
             type: 'expression',
             expressionType: 'literal',
             value: 2,
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+            location: {
+              start: { line: 0, column: 0 },
+              end: { line: 0, column: 0 },
+            },
           },
           {
             type: 'expression',
             expressionType: 'literal',
             value: 3,
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
-          }
+            location: {
+              start: { line: 0, column: 0 },
+              end: { line: 0, column: 0 },
+            },
+          },
         ],
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+        location: {
+          start: { line: 0, column: 0 },
+          end: { line: 0, column: 0 },
+        },
       };
 
       // Mock the visitExpression method
@@ -599,7 +738,12 @@ describe('ExpressionVisitor Integration', () => {
                 childCount: 3,
                 child: (i: number) => {
                   if (i === 0) {
-                    return { type: 'left_paren', text: '(', childCount: 0, child: () => null };
+                    return {
+                      type: 'left_paren',
+                      text: '(',
+                      childCount: 0,
+                      child: () => null,
+                    };
                   } else if (i === 1) {
                     return {
                       type: 'binary_expression',
@@ -607,23 +751,48 @@ describe('ExpressionVisitor Integration', () => {
                       childCount: 3,
                       child: (j: number) => {
                         if (j === 0) {
-                          return { type: 'number', text: '1', childCount: 0, child: () => null };
+                          return {
+                            type: 'number',
+                            text: '1',
+                            childCount: 0,
+                            child: () => null,
+                          };
                         } else if (j === 1) {
-                          return { type: 'plus', text: '+', childCount: 0, child: () => null };
+                          return {
+                            type: 'plus',
+                            text: '+',
+                            childCount: 0,
+                            child: () => null,
+                          };
                         } else if (j === 2) {
-                          return { type: 'number', text: '2', childCount: 0, child: () => null };
+                          return {
+                            type: 'number',
+                            text: '2',
+                            childCount: 0,
+                            child: () => null,
+                          };
                         }
                         return null;
-                      }
+                      },
                     };
                   } else if (i === 2) {
-                    return { type: 'right_paren', text: ')', childCount: 0, child: () => null };
+                    return {
+                      type: 'right_paren',
+                      text: ')',
+                      childCount: 0,
+                      child: () => null,
+                    };
                   }
                   return null;
-                }
+                },
               };
             } else if (index === 1) {
-              return { type: 'star', text: '*', childCount: 0, child: () => null };
+              return {
+                type: 'star',
+                text: '*',
+                childCount: 0,
+                child: () => null,
+              };
             } else if (index === 2) {
               return {
                 type: 'parenthesized_expression',
@@ -631,7 +800,12 @@ describe('ExpressionVisitor Integration', () => {
                 childCount: 3,
                 child: (i: number) => {
                   if (i === 0) {
-                    return { type: 'left_paren', text: '(', childCount: 0, child: () => null };
+                    return {
+                      type: 'left_paren',
+                      text: '(',
+                      childCount: 0,
+                      child: () => null,
+                    };
                   } else if (i === 1) {
                     return {
                       type: 'binary_expression',
@@ -639,25 +813,45 @@ describe('ExpressionVisitor Integration', () => {
                       childCount: 3,
                       child: (j: number) => {
                         if (j === 0) {
-                          return { type: 'number', text: '3', childCount: 0, child: () => null };
+                          return {
+                            type: 'number',
+                            text: '3',
+                            childCount: 0,
+                            child: () => null,
+                          };
                         } else if (j === 1) {
-                          return { type: 'minus', text: '-', childCount: 0, child: () => null };
+                          return {
+                            type: 'minus',
+                            text: '-',
+                            childCount: 0,
+                            child: () => null,
+                          };
                         } else if (j === 2) {
-                          return { type: 'number', text: '4', childCount: 0, child: () => null };
+                          return {
+                            type: 'number',
+                            text: '4',
+                            childCount: 0,
+                            child: () => null,
+                          };
                         }
                         return null;
-                      }
+                      },
                     };
                   } else if (i === 2) {
-                    return { type: 'right_paren', text: ')', childCount: 0, child: () => null };
+                    return {
+                      type: 'right_paren',
+                      text: ')',
+                      childCount: 0,
+                      child: () => null,
+                    };
                   }
                   return null;
-                }
+                },
               };
             }
             return null;
-          }
-        })
+          },
+        }),
       } as unknown as TSNode;
 
       // Mock the visitor methods
@@ -673,15 +867,24 @@ describe('ExpressionVisitor Integration', () => {
             type: 'expression',
             expressionType: 'literal',
             value: 1,
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+            location: {
+              start: { line: 0, column: 0 },
+              end: { line: 0, column: 0 },
+            },
           },
           right: {
             type: 'expression',
             expressionType: 'literal',
             value: 2,
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+            location: {
+              start: { line: 0, column: 0 },
+              end: { line: 0, column: 0 },
+            },
           },
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
         },
         right: {
           type: 'expression',
@@ -691,17 +894,29 @@ describe('ExpressionVisitor Integration', () => {
             type: 'expression',
             expressionType: 'literal',
             value: 3,
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+            location: {
+              start: { line: 0, column: 0 },
+              end: { line: 0, column: 0 },
+            },
           },
           right: {
             type: 'expression',
             expressionType: 'literal',
             value: 4,
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+            location: {
+              start: { line: 0, column: 0 },
+              end: { line: 0, column: 0 },
+            },
           },
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
         },
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+        location: {
+          start: { line: 0, column: 0 },
+          end: { line: 0, column: 0 },
+        },
       };
 
       // Mock the visitExpression method
@@ -737,9 +952,19 @@ describe('ExpressionVisitor Integration', () => {
           childCount: 3,
           child: (index: number) => {
             if (index === 0) {
-              return { type: 'number', text: '1', childCount: 0, child: () => null };
+              return {
+                type: 'number',
+                text: '1',
+                childCount: 0,
+                child: () => null,
+              };
             } else if (index === 1) {
-              return { type: 'plus', text: '+', childCount: 0, child: () => null };
+              return {
+                type: 'plus',
+                text: '+',
+                childCount: 0,
+                child: () => null,
+              };
             } else if (index === 2) {
               return {
                 type: 'binary_expression',
@@ -747,19 +972,34 @@ describe('ExpressionVisitor Integration', () => {
                 childCount: 3,
                 child: (i: number) => {
                   if (i === 0) {
-                    return { type: 'number', text: '2', childCount: 0, child: () => null };
+                    return {
+                      type: 'number',
+                      text: '2',
+                      childCount: 0,
+                      child: () => null,
+                    };
                   } else if (i === 1) {
-                    return { type: 'star', text: '*', childCount: 0, child: () => null };
+                    return {
+                      type: 'star',
+                      text: '*',
+                      childCount: 0,
+                      child: () => null,
+                    };
                   } else if (i === 2) {
-                    return { type: 'number', text: '3', childCount: 0, child: () => null };
+                    return {
+                      type: 'number',
+                      text: '3',
+                      childCount: 0,
+                      child: () => null,
+                    };
                   }
                   return null;
-                }
+                },
               };
             }
             return null;
-          }
-        })
+          },
+        }),
       } as unknown as TSNode;
 
       // Mock the visitor methods
@@ -771,7 +1011,10 @@ describe('ExpressionVisitor Integration', () => {
           type: 'expression',
           expressionType: 'literal',
           value: 1,
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
         },
         right: {
           type: 'expression',
@@ -781,17 +1024,29 @@ describe('ExpressionVisitor Integration', () => {
             type: 'expression',
             expressionType: 'literal',
             value: 2,
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+            location: {
+              start: { line: 0, column: 0 },
+              end: { line: 0, column: 0 },
+            },
           },
           right: {
             type: 'expression',
             expressionType: 'literal',
             value: 3,
-            location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+            location: {
+              start: { line: 0, column: 0 },
+              end: { line: 0, column: 0 },
+            },
           },
-          location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+          location: {
+            start: { line: 0, column: 0 },
+            end: { line: 0, column: 0 },
+          },
         },
-        location: { start: { line: 0, column: 0 }, end: { line: 0, column: 0 } }
+        location: {
+          start: { line: 0, column: 0 },
+          end: { line: 0, column: 0 },
+        },
       };
 
       // Mock the visitExpression method

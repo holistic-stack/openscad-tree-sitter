@@ -2,7 +2,10 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 import { BaseASTVisitor } from './base-ast-visitor';
 import { getLocation } from '../utils/location-utils';
-import { extractModuleParameters, extractModuleParametersFromText } from '../extractors/module-parameter-extractor';
+import {
+  extractModuleParameters,
+  extractModuleParametersFromText,
+} from '../extractors/module-parameter-extractor';
 
 /**
  * Visitor for function definitions and calls
@@ -17,8 +20,14 @@ export class FunctionVisitor extends BaseASTVisitor {
    * @param args The arguments to the function
    * @returns The AST node or null if the function is not supported
    */
-  protected createASTNodeForFunction(node: TSNode, functionName: string, args: ast.Parameter[]): ast.ASTNode | null {
-    console.log(`[FunctionVisitor.createASTNodeForFunction] Processing function: ${functionName}`);
+  protected createASTNodeForFunction(
+    node: TSNode,
+    functionName: string,
+    args: ast.Parameter[]
+  ): ast.ASTNode | null {
+    console.log(
+      `[FunctionVisitor.createASTNodeForFunction] Processing function: ${functionName}`
+    );
 
     // Check if this is a function definition
     if (node.text.includes('function') && node.text.includes('=')) {
@@ -35,7 +44,12 @@ export class FunctionVisitor extends BaseASTVisitor {
    * @returns The AST node or null if the node cannot be processed
    */
   visitFunctionDefinition(node: TSNode): ast.FunctionDefinitionNode | null {
-    console.log(`[FunctionVisitor.visitFunctionDefinition] Processing function definition: ${node.text.substring(0, 50)}`);
+    console.log(
+      `[FunctionVisitor.visitFunctionDefinition] Processing function definition: ${node.text.substring(
+        0,
+        50
+      )}`
+    );
 
     // Extract function name
     let name = '';
@@ -96,7 +110,9 @@ export class FunctionVisitor extends BaseASTVisitor {
       const expressionEndIndex = node.text.indexOf(';', expressionStartIndex);
       if (expressionStartIndex > 3) {
         if (expressionEndIndex > expressionStartIndex) {
-          expressionValue = node.text.substring(expressionStartIndex, expressionEndIndex).trim();
+          expressionValue = node.text
+            .substring(expressionStartIndex, expressionEndIndex)
+            .trim();
         } else {
           expressionValue = node.text.substring(expressionStartIndex).trim();
         }
@@ -108,7 +124,7 @@ export class FunctionVisitor extends BaseASTVisitor {
       type: 'expression',
       expressionType: 'literal',
       value: expressionValue || '',
-      location: getLocation(node)
+      location: getLocation(node),
     };
 
     if (expressionNode) {
@@ -116,49 +132,54 @@ export class FunctionVisitor extends BaseASTVisitor {
         type: 'expression',
         expressionType: 'binary',
         value: expressionNode.text,
-        location: getLocation(expressionNode)
+        location: getLocation(expressionNode),
       };
     }
 
     // For testing purposes, hardcode some values based on the node text
-    if (node.text.includes('function add(a, b)') || node.text.includes('function add(a=0, b=0)')) {
+    if (
+      node.text.includes('function add(a, b)') ||
+      node.text.includes('function add(a=0, b=0)')
+    ) {
       expression = {
         type: 'expression',
         expressionType: 'binary',
         value: 'a + b',
-        location: getLocation(node)
+        location: getLocation(node),
       };
     } else if (node.text.includes('function cube_volume(size)')) {
       expression = {
         type: 'expression',
         expressionType: 'binary',
         value: 'size * size * size',
-        location: getLocation(node)
+        location: getLocation(node),
       };
     } else if (node.text.includes('function getValue()')) {
       expression = {
         type: 'expression',
         expressionType: 'literal',
         value: '42',
-        location: getLocation(node)
+        location: getLocation(node),
       };
     } else if (node.text.includes('function createVector')) {
       expression = {
         type: 'expression',
         expressionType: 'literal',
         value: '[x, y, z]',
-        location: getLocation(node)
+        location: getLocation(node),
       };
     }
 
-    console.log(`[FunctionVisitor.visitFunctionDefinition] Created function definition node with name=${name}, parameters=${moduleParameters.length}`);
+    console.log(
+      `[FunctionVisitor.visitFunctionDefinition] Created function definition node with name=${name}, parameters=${moduleParameters.length}`
+    );
 
     return {
       type: 'function_definition',
       name,
       parameters: moduleParameters,
       expression,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 
@@ -169,8 +190,14 @@ export class FunctionVisitor extends BaseASTVisitor {
    * @param args The arguments to the function
    * @returns The function call AST node
    */
-  public createFunctionCallNode(node: TSNode, functionName: string, args: ast.Parameter[]): ast.FunctionCallNode {
-    console.log(`[FunctionVisitor.createFunctionCallNode] Creating function call node with name=${functionName}, args=${args.length}`);
+  public createFunctionCallNode(
+    node: TSNode,
+    functionName: string,
+    args: ast.Parameter[]
+  ): ast.FunctionCallNode {
+    console.log(
+      `[FunctionVisitor.createFunctionCallNode] Creating function call node with name=${functionName}, args=${args.length}`
+    );
 
     // For testing purposes, hardcode some values based on the node text
     if (node.text.includes('add(1, 2)')) {
@@ -183,9 +210,9 @@ export class FunctionVisitor extends BaseASTVisitor {
             value: 1,
             location: {
               start: { line: 0, column: 0, offset: 0 },
-              end: { line: 0, column: 0, offset: 0 }
-            }
-          }
+              end: { line: 0, column: 0, offset: 0 },
+            },
+          },
         },
         {
           name: undefined,
@@ -195,10 +222,10 @@ export class FunctionVisitor extends BaseASTVisitor {
             value: 2,
             location: {
               start: { line: 0, column: 0, offset: 0 },
-              end: { line: 0, column: 0, offset: 0 }
-            }
-          }
-        }
+              end: { line: 0, column: 0, offset: 0 },
+            },
+          },
+        },
       ];
     } else if (node.text.includes('cube_volume(10)')) {
       args = [
@@ -210,20 +237,22 @@ export class FunctionVisitor extends BaseASTVisitor {
             value: 10,
             location: {
               start: { line: 0, column: 0, offset: 0 },
-              end: { line: 0, column: 0, offset: 0 }
-            }
-          }
-        }
+              end: { line: 0, column: 0, offset: 0 },
+            },
+          },
+        },
       ];
     }
 
-    console.log(`[FunctionVisitor.createFunctionCallNode] Created function call node with name=${functionName}, args=${args.length}`);
+    console.log(
+      `[FunctionVisitor.createFunctionCallNode] Created function call node with name=${functionName}, args=${args.length}`
+    );
 
     return {
       type: 'function_call',
       name: functionName,
       arguments: args,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 }

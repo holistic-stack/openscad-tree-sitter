@@ -14,7 +14,10 @@ describe('Cylinder Extractor', () => {
     try {
       await parser.init(defaultWasmPath);
     } catch (error) {
-      console.error('Failed to initialize parser in cylinder-extractor.test.ts:', error);
+      console.error(
+        'Failed to initialize parser in cylinder-extractor.test.ts:',
+        error
+      );
       // This will cause tests to be skipped if the parser fails to initialize
       throw error;
     }
@@ -48,10 +51,16 @@ describe('Cylinder Extractor', () => {
       if (statementNode?.childCount && statementNode.childCount > 0) {
         const expressionStatementNode = statementNode.child(0);
         // console.log('ExpressionStatement node:', expressionStatementNode?.type, expressionStatementNode?.text);
-        if (expressionStatementNode?.childCount && expressionStatementNode.childCount > 0) {
+        if (
+          expressionStatementNode?.childCount &&
+          expressionStatementNode.childCount > 0
+        ) {
           const callExpressionNode = expressionStatementNode.child(0);
           // console.log('CallExpression node:', callExpressionNode?.type, callExpressionNode?.text);
-          if (callExpressionNode?.type === 'call_expression' || callExpressionNode?.type === 'module_call') {
+          if (
+            callExpressionNode?.type === 'call_expression' ||
+            callExpressionNode?.type === 'module_call'
+          ) {
             return callExpressionNode;
           }
         }
@@ -268,7 +277,7 @@ describe('Cylinder Extractor', () => {
       // In this case, r should probably be undefined as r1 and r2 define the radii
       // Or, if r is meant to be a single radius, it should only be set if r1 and r2 are equal and r isn't set.
       // Let's assume for now that if r1/r2 are set, r is not automatically derived from just one of them.
-      expect(result?.r).toBeUndefined(); 
+      expect(result?.r).toBeUndefined();
     });
 
     it('should default r to d/2 if d is provided', () => {
@@ -314,18 +323,18 @@ describe('Cylinder Extractor', () => {
     });
 
     it('should handle no parameters by using defaults (if any are defined by OpenSCAD)', () => {
-        const code = 'cylinder();';
-        const node = parseToSyntaxNode(code);
-        expect(node).toBeDefined();
-        if (!node) return;
-  
-        const result = extractCylinderNode(node);
-        // OpenSCAD documentation states cylinder() is not valid without parameters.
-        // cylinder(h,r) is the minimal form.
-        // So, this should likely result in an error or an incomplete node.
-        // Similar to the missing 'h' case.
-        expect(result?.h).toBeUndefined();
-        expect(result?.r).toBeUndefined(); 
-      });
+      const code = 'cylinder();';
+      const node = parseToSyntaxNode(code);
+      expect(node).toBeDefined();
+      if (!node) return;
+
+      const result = extractCylinderNode(node);
+      // OpenSCAD documentation states cylinder() is not valid without parameters.
+      // cylinder(h,r) is the minimal form.
+      // So, this should likely result in an error or an incomplete node.
+      // Similar to the missing 'h' case.
+      expect(result?.h).toBeUndefined();
+      expect(result?.r).toBeUndefined();
+    });
   });
 });

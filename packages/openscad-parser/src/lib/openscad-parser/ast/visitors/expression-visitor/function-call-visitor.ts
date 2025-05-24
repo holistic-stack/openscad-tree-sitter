@@ -39,22 +39,33 @@ export class FunctionCallVisitor extends BaseASTVisitor {
    * @returns The function call AST node or null if the node cannot be processed
    */
   visitFunctionCall(node: TSNode): ast.FunctionCallNode | null {
-    console.log(`[FunctionCallVisitor.visitFunctionCall] Processing function call: ${node.text.substring(0, 50)}`);
+    console.log(
+      `[FunctionCallVisitor.visitFunctionCall] Processing function call: ${node.text.substring(
+        0,
+        50
+      )}`
+    );
 
     // Extract function name
     const functionNameNode = this.extractFunctionNameNode(node);
     if (!functionNameNode) {
-      console.log(`[FunctionCallVisitor.visitFunctionCall] No function name found`);
+      console.log(
+        `[FunctionCallVisitor.visitFunctionCall] No function name found`
+      );
       return null;
     }
 
     const functionName = functionNameNode.text;
-    console.log(`[FunctionCallVisitor.visitFunctionCall] Function name: ${functionName}`);
+    console.log(
+      `[FunctionCallVisitor.visitFunctionCall] Function name: ${functionName}`
+    );
 
     // Extract arguments
     const args = this.extractFunctionArguments(node);
     if (!args) {
-      console.log(`[FunctionCallVisitor.visitFunctionCall] Failed to extract arguments`);
+      console.log(
+        `[FunctionCallVisitor.visitFunctionCall] Failed to extract arguments`
+      );
       return null;
     }
 
@@ -92,7 +103,9 @@ export class FunctionCallVisitor extends BaseASTVisitor {
    * @param node The function call node
    * @returns Array of extracted parameters or null if extraction fails
    */
-  private extractFunctionArguments(node: TSNode): FunctionCallParameter[] | null {
+  private extractFunctionArguments(
+    node: TSNode
+  ): FunctionCallParameter[] | null {
     // For testing purposes, let's create mock arguments based on the node text
     // In a real implementation, we would properly extract the arguments from the CST
 
@@ -110,8 +123,8 @@ export class FunctionCallVisitor extends BaseASTVisitor {
             type: 'expression',
             expressionType: 'literal',
             value: 1,
-            location: getLocation(node)
-          }
+            location: getLocation(node),
+          },
         },
         {
           name: undefined,
@@ -119,8 +132,8 @@ export class FunctionCallVisitor extends BaseASTVisitor {
             type: 'expression',
             expressionType: 'literal',
             value: 2,
-            location: getLocation(node)
-          }
+            location: getLocation(node),
+          },
         },
         {
           name: undefined,
@@ -128,9 +141,9 @@ export class FunctionCallVisitor extends BaseASTVisitor {
             type: 'expression',
             expressionType: 'literal',
             value: 3,
-            location: getLocation(node)
-          }
-        }
+            location: getLocation(node),
+          },
+        },
       ];
     }
 
@@ -143,8 +156,8 @@ export class FunctionCallVisitor extends BaseASTVisitor {
             type: 'expression',
             expressionType: 'literal',
             value: 10,
-            location: getLocation(node)
-          }
+            location: getLocation(node),
+          },
         },
         {
           name: 'y',
@@ -152,9 +165,9 @@ export class FunctionCallVisitor extends BaseASTVisitor {
             type: 'expression',
             expressionType: 'literal',
             value: 20,
-            location: getLocation(node)
-          }
-        }
+            location: getLocation(node),
+          },
+        },
       ];
     }
 
@@ -167,8 +180,8 @@ export class FunctionCallVisitor extends BaseASTVisitor {
             type: 'expression',
             expressionType: 'literal',
             value: 1,
-            location: getLocation(node)
-          }
+            location: getLocation(node),
+          },
         },
         {
           name: 'y',
@@ -176,18 +189,18 @@ export class FunctionCallVisitor extends BaseASTVisitor {
             type: 'expression',
             expressionType: 'literal',
             value: 20,
-            location: getLocation(node)
-          }
+            location: getLocation(node),
+          },
         },
         {
           name: undefined,
           value: {
             type: 'expression',
             expressionType: 'literal',
-            value: "hello",
-            location: getLocation(node)
-          }
-        }
+            value: 'hello',
+            location: getLocation(node),
+          },
+        },
       ];
     }
 
@@ -197,32 +210,38 @@ export class FunctionCallVisitor extends BaseASTVisitor {
         type: 'expression',
         expressionType: 'function_call',
         name: 'inner',
-        arguments: [{
-          name: undefined,
-          value: 10
-        }],
-        location: getLocation(node)
+        arguments: [
+          {
+            name: undefined,
+            value: 10,
+          },
+        ],
+        location: getLocation(node),
       };
 
       return [
         {
           name: undefined,
-          value: innerFunctionCall
-        }
+          value: innerFunctionCall,
+        },
       ];
     }
 
     // Find the argument_list node (for real implementation)
     const argumentListNode = findDescendantOfType(node, 'argument_list');
     if (!argumentListNode) {
-      console.log(`[FunctionCallVisitor.extractFunctionArguments] No argument_list found`);
+      console.log(
+        `[FunctionCallVisitor.extractFunctionArguments] No argument_list found`
+      );
       return [];
     }
 
     // Find the arguments node within the argument_list
     const argumentsNode = argumentListNode.childForFieldName('arguments');
     if (!argumentsNode) {
-      console.log(`[FunctionCallVisitor.extractFunctionArguments] No arguments found, returning empty array`);
+      console.log(
+        `[FunctionCallVisitor.extractFunctionArguments] No arguments found, returning empty array`
+      );
       return [];
     }
 
@@ -242,11 +261,16 @@ export class FunctionCallVisitor extends BaseASTVisitor {
           // This is a named argument
           const name = nameNode.text;
           // Create a literal expression node
-          const value = valueNode.type === 'number' ? parseFloat(valueNode.text) :
-                        valueNode.type === 'string' ? valueNode.text.slice(1, -1) :
-                        valueNode.type === 'true' ? true :
-                        valueNode.type === 'false' ? false :
-                        valueNode.text;
+          const value =
+            valueNode.type === 'number'
+              ? parseFloat(valueNode.text)
+              : valueNode.type === 'string'
+              ? valueNode.text.slice(1, -1)
+              : valueNode.type === 'true'
+              ? true
+              : valueNode.type === 'false'
+              ? false
+              : valueNode.text;
 
           args.push({
             name,
@@ -254,18 +278,23 @@ export class FunctionCallVisitor extends BaseASTVisitor {
               type: 'expression',
               expressionType: 'literal',
               value,
-              location: getLocation(valueNode)
-            }
+              location: getLocation(valueNode),
+            },
           });
         }
       } else {
         // This is a positional argument
         // Create a literal expression node
-        const value = argNode.type === 'number' ? parseFloat(argNode.text) :
-                      argNode.type === 'string' ? argNode.text.slice(1, -1) :
-                      argNode.type === 'true' ? true :
-                      argNode.type === 'false' ? false :
-                      argNode.text;
+        const value =
+          argNode.type === 'number'
+            ? parseFloat(argNode.text)
+            : argNode.type === 'string'
+            ? argNode.text.slice(1, -1)
+            : argNode.type === 'true'
+            ? true
+            : argNode.type === 'false'
+            ? false
+            : argNode.text;
 
         args.push({
           name: undefined,
@@ -273,8 +302,8 @@ export class FunctionCallVisitor extends BaseASTVisitor {
             type: 'expression',
             expressionType: 'literal',
             value,
-            location: getLocation(argNode)
-          }
+            location: getLocation(argNode),
+          },
         });
       }
     }
@@ -289,21 +318,30 @@ export class FunctionCallVisitor extends BaseASTVisitor {
    * @param args The function arguments
    * @returns The function call AST node
    */
-  private createFunctionCallNode(node: TSNode, functionName: string, args: FunctionCallParameter[]): ast.FunctionCallNode {
+  private createFunctionCallNode(
+    node: TSNode,
+    functionName: string,
+    args: FunctionCallParameter[]
+  ): ast.FunctionCallNode {
     // Convert FunctionCallParameter[] to Parameter[]
     const parameters: ast.Parameter[] = args.map(arg => {
       // If the value is an ExpressionNode, use it directly
-      if (typeof arg.value === 'object' && arg.value !== null && 'type' in arg.value && arg.value.type === 'expression') {
+      if (
+        typeof arg.value === 'object' &&
+        arg.value !== null &&
+        'type' in arg.value &&
+        arg.value.type === 'expression'
+      ) {
         return {
           name: arg.name,
-          value: arg.value as ast.ExpressionNode
+          value: arg.value as ast.ExpressionNode,
         };
       }
 
       // Otherwise, use the primitive value directly
       return {
         name: arg.name,
-        value: arg.value
+        value: arg.value,
       };
     });
 
@@ -311,7 +349,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
       type: 'function_call',
       name: functionName,
       arguments: parameters,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 
@@ -330,7 +368,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
           type: 'expression',
           expressionType: 'literal',
           value,
-          location: getLocation(node)
+          location: getLocation(node),
         };
       }
     }
@@ -344,7 +382,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
         type: 'expression',
         expressionType: 'literal',
         value,
-        location: getLocation(node)
+        location: getLocation(node),
       };
     }
 
@@ -354,7 +392,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
         type: 'expression',
         expressionType: 'literal',
         value: true,
-        location: getLocation(node)
+        location: getLocation(node),
       };
     }
 
@@ -363,7 +401,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
         type: 'expression',
         expressionType: 'literal',
         value: false,
-        location: getLocation(node)
+        location: getLocation(node),
       };
     }
 
@@ -372,7 +410,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
       type: 'expression',
       expressionType: 'literal',
       value: node.text,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 
@@ -413,7 +451,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
       walk: () => ({ gotoFirstChild: () => false } as any),
       descendantForIndex: () => null,
       descendantsOfType: () => [],
-      fieldNameForChild: () => null
+      fieldNameForChild: () => null,
     } as any;
   }
 
@@ -435,15 +473,21 @@ export class FunctionCallVisitor extends BaseASTVisitor {
    * @param args The arguments to the function
    * @returns The AST node or null if the function is not supported
    */
-  protected createASTNodeForFunction(node: TSNode, functionName: string, args: ast.Parameter[]): ast.ASTNode | null {
-    console.log(`[FunctionCallVisitor.createASTNodeForFunction] Processing function: ${functionName}`);
+  protected createASTNodeForFunction(
+    node: TSNode,
+    functionName: string,
+    args: ast.Parameter[]
+  ): ast.ASTNode | null {
+    console.log(
+      `[FunctionCallVisitor.createASTNodeForFunction] Processing function: ${functionName}`
+    );
 
     // Create a function call node
     return {
       type: 'function_call',
       name: functionName,
       arguments: args,
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 }

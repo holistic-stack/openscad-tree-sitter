@@ -10,7 +10,7 @@ describe('ExpressionVisitor', () => {
 
   beforeEach(async () => {
     parser = new OpenscadParser();
-    await parser.init("./tree-sitter-openscad.wasm");
+    await parser.init('./tree-sitter-openscad.wasm');
     visitor = new ExpressionVisitor('');
   });
 
@@ -21,30 +21,32 @@ describe('ExpressionVisitor', () => {
   describe('visitBinaryExpression', () => {
     it('should handle arithmetic binary expressions', async () => {
       // Mock the necessary methods
-      vi.spyOn(visitor as any, 'createExpressionNode').mockImplementation((node: any) => {
-        if (node.text === '1') {
-          return {
-            type: 'expression',
-            expressionType: 'literal',
-            value: 1,
-            location: {
-              start: { line: 0, column: 0, offset: 0 },
-              end: { line: 0, column: 1, offset: 1 }
-            }
-          } as ast.LiteralNode;
-        } else if (node.text === '2') {
-          return {
-            type: 'expression',
-            expressionType: 'literal',
-            value: 2,
-            location: {
-              start: { line: 0, column: 4, offset: 4 },
-              end: { line: 0, column: 5, offset: 5 }
-            }
-          } as ast.LiteralNode;
+      vi.spyOn(visitor as any, 'createExpressionNode').mockImplementation(
+        (node: any) => {
+          if (node.text === '1') {
+            return {
+              type: 'expression',
+              expressionType: 'literal',
+              value: 1,
+              location: {
+                start: { line: 0, column: 0, offset: 0 },
+                end: { line: 0, column: 1, offset: 1 },
+              },
+            } as ast.LiteralNode;
+          } else if (node.text === '2') {
+            return {
+              type: 'expression',
+              expressionType: 'literal',
+              value: 2,
+              location: {
+                start: { line: 0, column: 4, offset: 4 },
+                end: { line: 0, column: 5, offset: 5 },
+              },
+            } as ast.LiteralNode;
+          }
+          return null;
         }
-        return null;
-      });
+      );
 
       // Mock the childForFieldName method
       const mockBinaryExprNode = {
@@ -63,7 +65,7 @@ describe('ExpressionVisitor', () => {
             return { text: '2', type: 'number' };
           }
           return null;
-        }
+        },
       } as unknown as TSNode;
 
       const result = visitor.visitBinaryExpression(mockBinaryExprNode);
@@ -72,9 +74,13 @@ describe('ExpressionVisitor', () => {
       expect(result?.type).toBe('expression');
       expect(result?.expressionType).toBe('binary');
       expect((result as ast.BinaryExpressionNode).operator).toBe('+');
-      expect((result as ast.BinaryExpressionNode).left.expressionType).toBe('literal');
+      expect((result as ast.BinaryExpressionNode).left.expressionType).toBe(
+        'literal'
+      );
       expect((result as ast.BinaryExpressionNode).left.value).toBe(1);
-      expect((result as ast.BinaryExpressionNode).right.expressionType).toBe('literal');
+      expect((result as ast.BinaryExpressionNode).right.expressionType).toBe(
+        'literal'
+      );
       expect((result as ast.BinaryExpressionNode).right.value).toBe(2);
     });
 
@@ -82,30 +88,32 @@ describe('ExpressionVisitor', () => {
       const code = 'x > 5;';
 
       // Mock the necessary methods
-      vi.spyOn(visitor as any, 'createExpressionNode').mockImplementation((node: any) => {
-        if (node.text === 'x') {
-          return {
-            type: 'expression',
-            expressionType: 'variable',
-            name: 'x',
-            location: {
-              start: { line: 0, column: 0, offset: 0 },
-              end: { line: 0, column: 1, offset: 1 }
-            }
-          } as ast.VariableNode;
-        } else if (node.text === '5') {
-          return {
-            type: 'expression',
-            expressionType: 'literal',
-            value: 5,
-            location: {
-              start: { line: 0, column: 4, offset: 4 },
-              end: { line: 0, column: 5, offset: 5 }
-            }
-          } as ast.LiteralNode;
+      vi.spyOn(visitor as any, 'createExpressionNode').mockImplementation(
+        (node: any) => {
+          if (node.text === 'x') {
+            return {
+              type: 'expression',
+              expressionType: 'variable',
+              name: 'x',
+              location: {
+                start: { line: 0, column: 0, offset: 0 },
+                end: { line: 0, column: 1, offset: 1 },
+              },
+            } as ast.VariableNode;
+          } else if (node.text === '5') {
+            return {
+              type: 'expression',
+              expressionType: 'literal',
+              value: 5,
+              location: {
+                start: { line: 0, column: 4, offset: 4 },
+                end: { line: 0, column: 5, offset: 5 },
+              },
+            } as ast.LiteralNode;
+          }
+          return null;
         }
-        return null;
-      });
+      );
 
       // Mock the childForFieldName method
       const mockBinaryExprNode = {
@@ -133,7 +141,7 @@ describe('ExpressionVisitor', () => {
           }
           return null;
         },
-        childCount: 3
+        childCount: 3,
       } as unknown as TSNode;
 
       const result = visitor.visitBinaryExpression(mockBinaryExprNode);
@@ -142,9 +150,13 @@ describe('ExpressionVisitor', () => {
       expect(result?.type).toBe('expression');
       expect(result?.expressionType).toBe('binary');
       expect((result as ast.BinaryExpressionNode).operator).toBe('>');
-      expect((result as ast.BinaryExpressionNode).left.expressionType).toBe('variable');
+      expect((result as ast.BinaryExpressionNode).left.expressionType).toBe(
+        'variable'
+      );
       expect((result as ast.BinaryExpressionNode).left.name).toBe('x');
-      expect((result as ast.BinaryExpressionNode).right.expressionType).toBe('literal');
+      expect((result as ast.BinaryExpressionNode).right.expressionType).toBe(
+        'literal'
+      );
       expect((result as ast.BinaryExpressionNode).right.value).toBe(5);
     });
 
@@ -152,30 +164,32 @@ describe('ExpressionVisitor', () => {
       const code = 'true || false;';
 
       // Mock the necessary methods
-      vi.spyOn(visitor as any, 'createExpressionNode').mockImplementation((node: any) => {
-        if (node.text === 'true') {
-          return {
-            type: 'expression',
-            expressionType: 'literal',
-            value: true,
-            location: {
-              start: { line: 0, column: 0, offset: 0 },
-              end: { line: 0, column: 4, offset: 4 }
-            }
-          } as ast.LiteralNode;
-        } else if (node.text === 'false') {
-          return {
-            type: 'expression',
-            expressionType: 'literal',
-            value: false,
-            location: {
-              start: { line: 0, column: 9, offset: 9 },
-              end: { line: 0, column: 14, offset: 14 }
-            }
-          } as ast.LiteralNode;
+      vi.spyOn(visitor as any, 'createExpressionNode').mockImplementation(
+        (node: any) => {
+          if (node.text === 'true') {
+            return {
+              type: 'expression',
+              expressionType: 'literal',
+              value: true,
+              location: {
+                start: { line: 0, column: 0, offset: 0 },
+                end: { line: 0, column: 4, offset: 4 },
+              },
+            } as ast.LiteralNode;
+          } else if (node.text === 'false') {
+            return {
+              type: 'expression',
+              expressionType: 'literal',
+              value: false,
+              location: {
+                start: { line: 0, column: 9, offset: 9 },
+                end: { line: 0, column: 14, offset: 14 },
+              },
+            } as ast.LiteralNode;
+          }
+          return null;
         }
-        return null;
-      });
+      );
 
       // Mock the childForFieldName method
       const mockBinaryExprNode = {
@@ -203,7 +217,7 @@ describe('ExpressionVisitor', () => {
           }
           return null;
         },
-        childCount: 3
+        childCount: 3,
       } as unknown as TSNode;
 
       const result = visitor.visitBinaryExpression(mockBinaryExprNode);
@@ -212,9 +226,13 @@ describe('ExpressionVisitor', () => {
       expect(result?.type).toBe('expression');
       expect(result?.expressionType).toBe('binary');
       expect((result as ast.BinaryExpressionNode).operator).toBe('||');
-      expect((result as ast.BinaryExpressionNode).left.expressionType).toBe('literal');
+      expect((result as ast.BinaryExpressionNode).left.expressionType).toBe(
+        'literal'
+      );
       expect((result as ast.BinaryExpressionNode).left.value).toBe(true);
-      expect((result as ast.BinaryExpressionNode).right.expressionType).toBe('literal');
+      expect((result as ast.BinaryExpressionNode).right.expressionType).toBe(
+        'literal'
+      );
       expect((result as ast.BinaryExpressionNode).right.value).toBe(false);
     });
   });
@@ -224,20 +242,22 @@ describe('ExpressionVisitor', () => {
       const code = '-5;';
 
       // Mock the necessary methods
-      vi.spyOn(visitor as any, 'createExpressionNode').mockImplementation((node: any) => {
-        if (node.text === '5') {
-          return {
-            type: 'expression',
-            expressionType: 'literal',
-            value: 5,
-            location: {
-              start: { line: 0, column: 1, offset: 1 },
-              end: { line: 0, column: 2, offset: 2 }
-            }
-          } as ast.LiteralNode;
+      vi.spyOn(visitor as any, 'createExpressionNode').mockImplementation(
+        (node: any) => {
+          if (node.text === '5') {
+            return {
+              type: 'expression',
+              expressionType: 'literal',
+              value: 5,
+              location: {
+                start: { line: 0, column: 1, offset: 1 },
+                end: { line: 0, column: 2, offset: 2 },
+              },
+            } as ast.LiteralNode;
+          }
+          return null;
         }
-        return null;
-      });
+      );
 
       // Mock the childForFieldName method
       const mockUnaryExprNode = {
@@ -263,7 +283,7 @@ describe('ExpressionVisitor', () => {
             return { text: '5', type: 'number' } as unknown as TSNode;
           }
           return null;
-        }
+        },
       } as unknown as TSNode;
 
       const result = visitor.visitUnaryExpression(mockUnaryExprNode);
@@ -272,7 +292,9 @@ describe('ExpressionVisitor', () => {
       expect(result?.type).toBe('expression');
       expect(result?.expressionType).toBe('unary');
       expect((result as ast.UnaryExpressionNode).operator).toBe('-');
-      expect((result as ast.UnaryExpressionNode).operand.expressionType).toBe('literal');
+      expect((result as ast.UnaryExpressionNode).operand.expressionType).toBe(
+        'literal'
+      );
       expect((result as ast.UnaryExpressionNode).operand.value).toBe(5);
     });
 
@@ -280,20 +302,22 @@ describe('ExpressionVisitor', () => {
       const code = '!true;';
 
       // Mock the necessary methods
-      vi.spyOn(visitor as any, 'createExpressionNode').mockImplementation((node: any) => {
-        if (node.text === 'true') {
-          return {
-            type: 'expression',
-            expressionType: 'literal',
-            value: true,
-            location: {
-              start: { line: 0, column: 1, offset: 1 },
-              end: { line: 0, column: 5, offset: 5 }
-            }
-          } as ast.LiteralNode;
+      vi.spyOn(visitor as any, 'createExpressionNode').mockImplementation(
+        (node: any) => {
+          if (node.text === 'true') {
+            return {
+              type: 'expression',
+              expressionType: 'literal',
+              value: true,
+              location: {
+                start: { line: 0, column: 1, offset: 1 },
+                end: { line: 0, column: 5, offset: 5 },
+              },
+            } as ast.LiteralNode;
+          }
+          return null;
         }
-        return null;
-      });
+      );
 
       // Mock the childForFieldName method
       const mockUnaryExprNode = {
@@ -319,7 +343,7 @@ describe('ExpressionVisitor', () => {
             return { text: 'true', type: 'true' } as unknown as TSNode;
           }
           return null;
-        }
+        },
       } as unknown as TSNode;
 
       const result = visitor.visitUnaryExpression(mockUnaryExprNode);
@@ -328,7 +352,9 @@ describe('ExpressionVisitor', () => {
       expect(result?.type).toBe('expression');
       expect(result?.expressionType).toBe('unary');
       expect((result as ast.UnaryExpressionNode).operator).toBe('!');
-      expect((result as ast.UnaryExpressionNode).operand.expressionType).toBe('literal');
+      expect((result as ast.UnaryExpressionNode).operand.expressionType).toBe(
+        'literal'
+      );
       expect((result as ast.UnaryExpressionNode).operand.value).toBe(true);
     });
   });
@@ -338,58 +364,60 @@ describe('ExpressionVisitor', () => {
       const code = 'x > 5 ? 10 : 20;';
 
       // Mock the necessary methods
-      vi.spyOn(visitor as any, 'createExpressionNode').mockImplementation((node: any) => {
-        if (node.text === 'x > 5') {
-          return {
-            type: 'expression',
-            expressionType: 'binary',
-            operator: '>',
-            left: {
+      vi.spyOn(visitor as any, 'createExpressionNode').mockImplementation(
+        (node: any) => {
+          if (node.text === 'x > 5') {
+            return {
               type: 'expression',
-              expressionType: 'variable',
-              name: 'x',
+              expressionType: 'binary',
+              operator: '>',
+              left: {
+                type: 'expression',
+                expressionType: 'variable',
+                name: 'x',
+                location: {
+                  start: { line: 0, column: 0, offset: 0 },
+                  end: { line: 0, column: 1, offset: 1 },
+                },
+              } as ast.VariableNode,
+              right: {
+                type: 'expression',
+                expressionType: 'literal',
+                value: 5,
+                location: {
+                  start: { line: 0, column: 4, offset: 4 },
+                  end: { line: 0, column: 5, offset: 5 },
+                },
+              } as ast.LiteralNode,
               location: {
                 start: { line: 0, column: 0, offset: 0 },
-                end: { line: 0, column: 1, offset: 1 }
-              }
-            } as ast.VariableNode,
-            right: {
+                end: { line: 0, column: 5, offset: 5 },
+              },
+            } as ast.BinaryExpressionNode;
+          } else if (node.text === '10') {
+            return {
               type: 'expression',
               expressionType: 'literal',
-              value: 5,
+              value: 10,
               location: {
-                start: { line: 0, column: 4, offset: 4 },
-                end: { line: 0, column: 5, offset: 5 }
-              }
-            } as ast.LiteralNode,
-            location: {
-              start: { line: 0, column: 0, offset: 0 },
-              end: { line: 0, column: 5, offset: 5 }
-            }
-          } as ast.BinaryExpressionNode;
-        } else if (node.text === '10') {
-          return {
-            type: 'expression',
-            expressionType: 'literal',
-            value: 10,
-            location: {
-              start: { line: 0, column: 8, offset: 8 },
-              end: { line: 0, column: 10, offset: 10 }
-            }
-          } as ast.LiteralNode;
-        } else if (node.text === '20') {
-          return {
-            type: 'expression',
-            expressionType: 'literal',
-            value: 20,
-            location: {
-              start: { line: 0, column: 13, offset: 13 },
-              end: { line: 0, column: 15, offset: 15 }
-            }
-          } as ast.LiteralNode;
+                start: { line: 0, column: 8, offset: 8 },
+                end: { line: 0, column: 10, offset: 10 },
+              },
+            } as ast.LiteralNode;
+          } else if (node.text === '20') {
+            return {
+              type: 'expression',
+              expressionType: 'literal',
+              value: 20,
+              location: {
+                start: { line: 0, column: 13, offset: 13 },
+                end: { line: 0, column: 15, offset: 15 },
+              },
+            } as ast.LiteralNode;
+          }
+          return null;
         }
-        return null;
-      });
+      );
 
       // Mock the childForFieldName method
       const mockConditionalExprNode = {
@@ -406,19 +434,31 @@ describe('ExpressionVisitor', () => {
             return { text: '20' };
           }
           return null;
-        }
+        },
       } as unknown as TSNode;
 
-      const result = visitor.visitConditionalExpression(mockConditionalExprNode);
+      const result = visitor.visitConditionalExpression(
+        mockConditionalExprNode
+      );
 
       expect(result).not.toBeNull();
       expect(result?.type).toBe('expression');
       expect(result?.expressionType).toBe('conditional');
-      expect((result as ast.ConditionalExpressionNode).condition.expressionType).toBe('binary');
-      expect((result as ast.ConditionalExpressionNode).thenBranch.expressionType).toBe('literal');
-      expect((result as ast.ConditionalExpressionNode).thenBranch.value).toBe(10);
-      expect((result as ast.ConditionalExpressionNode).elseBranch.expressionType).toBe('literal');
-      expect((result as ast.ConditionalExpressionNode).elseBranch.value).toBe(20);
+      expect(
+        (result as ast.ConditionalExpressionNode).condition.expressionType
+      ).toBe('binary');
+      expect(
+        (result as ast.ConditionalExpressionNode).thenBranch.expressionType
+      ).toBe('literal');
+      expect((result as ast.ConditionalExpressionNode).thenBranch.value).toBe(
+        10
+      );
+      expect(
+        (result as ast.ConditionalExpressionNode).elseBranch.expressionType
+      ).toBe('literal');
+      expect((result as ast.ConditionalExpressionNode).elseBranch.value).toBe(
+        20
+      );
     });
   });
 
@@ -493,40 +533,42 @@ describe('ExpressionVisitor', () => {
   describe('visitArrayExpression', () => {
     it('should handle array expressions', async () => {
       // Mock the necessary methods
-      vi.spyOn(visitor as any, 'createExpressionNode').mockImplementation((node: any) => {
-        if (node.text === '1') {
-          return {
-            type: 'expression',
-            expressionType: 'literal',
-            value: 1,
-            location: {
-              start: { line: 0, column: 1, offset: 1 },
-              end: { line: 0, column: 2, offset: 2 }
-            }
-          } as ast.LiteralNode;
-        } else if (node.text === '2') {
-          return {
-            type: 'expression',
-            expressionType: 'literal',
-            value: 2,
-            location: {
-              start: { line: 0, column: 4, offset: 4 },
-              end: { line: 0, column: 5, offset: 5 }
-            }
-          } as ast.LiteralNode;
-        } else if (node.text === '3') {
-          return {
-            type: 'expression',
-            expressionType: 'literal',
-            value: 3,
-            location: {
-              start: { line: 0, column: 7, offset: 7 },
-              end: { line: 0, column: 8, offset: 8 }
-            }
-          } as ast.LiteralNode;
+      vi.spyOn(visitor as any, 'createExpressionNode').mockImplementation(
+        (node: any) => {
+          if (node.text === '1') {
+            return {
+              type: 'expression',
+              expressionType: 'literal',
+              value: 1,
+              location: {
+                start: { line: 0, column: 1, offset: 1 },
+                end: { line: 0, column: 2, offset: 2 },
+              },
+            } as ast.LiteralNode;
+          } else if (node.text === '2') {
+            return {
+              type: 'expression',
+              expressionType: 'literal',
+              value: 2,
+              location: {
+                start: { line: 0, column: 4, offset: 4 },
+                end: { line: 0, column: 5, offset: 5 },
+              },
+            } as ast.LiteralNode;
+          } else if (node.text === '3') {
+            return {
+              type: 'expression',
+              expressionType: 'literal',
+              value: 3,
+              location: {
+                start: { line: 0, column: 7, offset: 7 },
+                end: { line: 0, column: 8, offset: 8 },
+              },
+            } as ast.LiteralNode;
+          }
+          return null;
         }
-        return null;
-      });
+      );
 
       // Mock the array node
       const mockArrayNode = {
@@ -544,7 +586,7 @@ describe('ExpressionVisitor', () => {
             return { text: '3' };
           }
           return null;
-        }
+        },
       } as unknown as TSNode;
 
       const result = visitor.visitArrayExpression(mockArrayNode);
@@ -553,11 +595,17 @@ describe('ExpressionVisitor', () => {
       expect(result?.type).toBe('expression');
       expect(result?.expressionType).toBe('array');
       expect((result as ast.ArrayExpressionNode).items.length).toBe(3);
-      expect((result as ast.ArrayExpressionNode).items[0].expressionType).toBe('literal');
+      expect((result as ast.ArrayExpressionNode).items[0].expressionType).toBe(
+        'literal'
+      );
       expect((result as ast.ArrayExpressionNode).items[0].value).toBe(1);
-      expect((result as ast.ArrayExpressionNode).items[1].expressionType).toBe('literal');
+      expect((result as ast.ArrayExpressionNode).items[1].expressionType).toBe(
+        'literal'
+      );
       expect((result as ast.ArrayExpressionNode).items[1].value).toBe(2);
-      expect((result as ast.ArrayExpressionNode).items[2].expressionType).toBe('literal');
+      expect((result as ast.ArrayExpressionNode).items[2].expressionType).toBe(
+        'literal'
+      );
       expect((result as ast.ArrayExpressionNode).items[2].value).toBe(3);
     });
   });

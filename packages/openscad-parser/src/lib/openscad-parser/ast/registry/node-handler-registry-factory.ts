@@ -34,7 +34,9 @@ export class NodeHandlerRegistryFactory {
    * Registers handlers for primitive shapes.
    * @param registry The registry to register handlers with.
    */
-  private static registerPrimitiveHandlers(registry: NodeHandlerRegistry): void {
+  private static registerPrimitiveHandlers(
+    registry: NodeHandlerRegistry
+  ): void {
     // 3D primitives
     registry.register('cube', (_node: TSNode) => {
       return { type: 'cube', size: 1, center: false };
@@ -83,7 +85,9 @@ export class NodeHandlerRegistryFactory {
    * Registers handlers for transformations.
    * @param registry The registry to register handlers with.
    */
-  private static registerTransformationHandlers(registry: NodeHandlerRegistry): void {
+  private static registerTransformationHandlers(
+    registry: NodeHandlerRegistry
+  ): void {
     registry.register('translate', (_node: TSNode) => {
       return { type: 'translate', v: [0, 0, 0], children: [] };
     });
@@ -107,9 +111,9 @@ export class NodeHandlerRegistryFactory {
           [1, 0, 0, 0],
           [0, 1, 0, 0],
           [0, 0, 1, 0],
-          [0, 0, 0, 1]
+          [0, 0, 0, 1],
         ],
-        children: []
+        children: [],
       };
     });
 
@@ -126,7 +130,9 @@ export class NodeHandlerRegistryFactory {
    * Registers handlers for CSG operations.
    * @param registry The registry to register handlers with.
    */
-  private static registerCSGOperationHandlers(registry: NodeHandlerRegistry): void {
+  private static registerCSGOperationHandlers(
+    registry: NodeHandlerRegistry
+  ): void {
     registry.register('union', (_node: TSNode) => {
       return { type: 'union', children: [] };
     });
@@ -152,7 +158,9 @@ export class NodeHandlerRegistryFactory {
    * Registers handlers for modules and functions.
    * @param registry The registry to register handlers with.
    */
-  private static registerModuleAndFunctionHandlers(registry: NodeHandlerRegistry): void {
+  private static registerModuleAndFunctionHandlers(
+    registry: NodeHandlerRegistry
+  ): void {
     registry.register('module', (_node: TSNode) => {
       return { type: 'module_definition', name: '', parameters: [], body: [] };
     });
@@ -162,9 +170,14 @@ export class NodeHandlerRegistryFactory {
       const dummyExpression: ExpressionNode = {
         type: 'expression',
         expressionType: 'literal',
-        location: undefined
+        location: undefined,
       };
-      return { type: 'function_definition', name: '', parameters: [], expression: dummyExpression };
+      return {
+        type: 'function_definition',
+        name: '',
+        parameters: [],
+        expression: dummyExpression,
+      };
     });
 
     registry.register('children', (_node: TSNode) => {

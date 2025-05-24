@@ -86,7 +86,7 @@ export function extractCylinderNode(node: SyntaxNode): ast.CylinderNode | null {
       }
     }
   }
-  
+
   // Implement positional argument handling
   const positionalArgs = params.filter(p => !p.name);
   let currentPositionalIndex = 0;
@@ -102,8 +102,12 @@ export function extractCylinderNode(node: SyntaxNode): ast.CylinderNode | null {
 
   // 2. Positional 'r1' & 'r2' OR 'r'
   // Check for r1, r2 pattern first (two consecutive numbers)
-  if (r1 === undefined && r2 === undefined && r === undefined && // Only if no radius-like param already set by name
-      positionalArgs.length > currentPositionalIndex + 1) {
+  if (
+    r1 === undefined &&
+    r2 === undefined &&
+    r === undefined && // Only if no radius-like param already set by name
+    positionalArgs.length > currentPositionalIndex + 1
+  ) {
     const potential_r1_param = positionalArgs[currentPositionalIndex];
     const potential_r2_param = positionalArgs[currentPositionalIndex + 1];
     const val_r1 = extractNumberParameter(potential_r1_param);
@@ -117,8 +121,11 @@ export function extractCylinderNode(node: SyntaxNode): ast.CylinderNode | null {
   }
 
   // If r1,r2 pattern didn't match or apply, check for single 'r'
-  if (r === undefined && r1 === undefined && // only if r is not set and r1 is not set (r2 might be set if r1 was named)
-      positionalArgs.length > currentPositionalIndex) {
+  if (
+    r === undefined &&
+    r1 === undefined && // only if r is not set and r1 is not set (r2 might be set if r1 was named)
+    positionalArgs.length > currentPositionalIndex
+  ) {
     // If r1 was set (either by name or above), this positional arg is not r.
     // If r1 is undefined, then this could be r.
     const val = extractNumberParameter(positionalArgs[currentPositionalIndex]);
@@ -184,7 +191,7 @@ export function extractCylinderNode(node: SyntaxNode): ast.CylinderNode | null {
     if (r1 === undefined) cylinderNode.r1 = r;
     if (r2 === undefined) cylinderNode.r2 = r;
   }
-  
+
   // If only one of r1 or r2 is defined, the other defaults to it (OpenSCAD behavior for cylinder(r,h))
   // This is implicitly handled if r is defined, as r1 and r2 take r's value.
   // If r is not defined, but one of r1/r2 is, this needs specific handling.
