@@ -474,6 +474,7 @@ export interface UnaryExpressionNode extends ExpressionNode {
   expressionType: 'unary';
   operator: UnaryOperator;
   operand: ExpressionNode;
+  prefix: boolean; // Indicates if the operator is a prefix operator (always true for OpenSCAD unary ops)
 }
 
 /**
@@ -554,7 +555,7 @@ export type BinaryOperator =
 /**
  * Unary operators in OpenSCAD
  */
-export type UnaryOperator = '+' | '-' | '!';
+export type UnaryOperator = '-' | '!';
 
 /**
  * Represents a module definition
