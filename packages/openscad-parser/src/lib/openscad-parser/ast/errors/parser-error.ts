@@ -38,7 +38,7 @@ export class ParserError extends Error {
   /**
    * The position in the source code where the error occurred
    */
-  public position: ErrorPosition;
+  public position: ErrorPosition | undefined;
 
   /**
    * The source code that caused the error
@@ -51,6 +51,16 @@ export class ParserError extends Error {
   public suggestions: ErrorSuggestion[];
 
   /**
+   * Additional context about the error
+   */
+  public context: Record<string, unknown> | undefined;
+
+  /**
+   * The original error that caused this error (if any)
+   */
+  public originalError: Error | undefined;
+
+  /**
    * Create a new ParserError
    *
    * @param message - The error message
@@ -61,27 +71,27 @@ export class ParserError extends Error {
    */
   constructor(
     message: string,
-    code: string,
-    source: string,
-    position: ErrorPosition,
-    suggestions: ErrorSuggestion[] = []
+    code: string = 'PARSER_ERROR',
+    position?: ErrorPosition,
+    source: string = '',
+    suggestions: ErrorSuggestion[] = [],
+    context?: Record<string, unknown>,
+    originalError?: Error
   ) {
-    // Create a detailed error message with position information
-    const detailedMessage = `${message} at line ${position.line + 1}, column ${position.column + 1}`;
-    super(detailedMessage);
-
-    // Set the name of the error for better debugging
-    this.name = 'ParserError';
-
-    // Store the error details
+    super(message);
+    this.name = this.constructor.name;
     this.code = code;
-    this.source = source;
     this.position = position;
+    this.source = source;
     this.suggestions = suggestions;
+    this.context = context;
+    this.originalError = originalError;
 
-    // Ensure the error stack trace is captured correctly
+    // Maintain proper stack trace in V8 (Node.js and Chrome)
     if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, ParserError);
+      Error.captureStackTrace(this, this.constructor);
+    } else {
+      this.stack = new Error(message).stack;
     }
   }
 
@@ -92,7 +102,16 @@ export class ParserError extends Error {
    */
   public getSourceLine(): string {
     const lines = this.source.split('\n');
-    return lines[this.position.line] || '';
+    return lines[this.position?.line || 0] || '';
+  }
+
+  /**
+   * Get the error position as a string
+   */
+  public getPositionString(): string {
+    return this.position
+      ? `line ${this.position.line + 1}, column ${this.position.column + 1}`
+      : 'unknown position';
   }
 
   /**

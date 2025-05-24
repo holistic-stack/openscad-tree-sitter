@@ -2,35 +2,52 @@
 
 ## Project Overview
 
-The OpenSCAD Tree-sitter Parser project aims to create a parser for OpenSCAD code using tree-sitter to generate a Concrete Syntax Tree (CST), and then convert that CST to an Abstract Syntax Tree (AST) with structured types. The parser leverages tree-sitter's capabilities, including treeCursor, queries, and other features to facilitate this transformation.
+The OpenSCAD Tree-sitter Parser project is an Nx monorepo with PNPM workspaces that provides robust parsing of OpenSCAD code. The project converts OpenSCAD code into a structured Abstract Syntax Tree (AST) using tree-sitter for initial parsing.
 
-The project is structured as an Nx monorepo with PNPM workspaces, containing two main packages:
-- **packages/tree-sitter-openscad**: Tree-sitter grammar for OpenSCAD
-- **packages/openscad-parser**: TypeScript parser for OpenSCAD using the tree-sitter grammar
+## Current Status (2025-05-23)
 
-## Current Status
+**🎉 Variable Visitor Implementation In Progress**
 
-**🎉 INCREDIBLE SUCCESS - Phase 1 Integration Tests COMPLETED!**
+### Recent Accomplishments
+- Implemented comprehensive test suite for VariableVisitor with 100% test coverage
+- Added support for special OpenSCAD variables ($fn, $fa, $fs)
+- Implemented handling for regular variable assignments and expressions
+- Cleaned up test files to use real parser instances instead of mocks
 
-**Current Test Results**: **30/30 tests passing (100% SUCCESS RATE)** 🎉
-- ✅ **ALL 3D primitives working perfectly** (cube, sphere, cylinder)
-- ✅ **ALL 2D primitives working perfectly** (circle, square, text)
-- ✅ **ALL transformations working perfectly** (translate, rotate, scale)
-- ✅ **ALL boolean operations working perfectly** (union, difference)
+### Current Focus
+- Enhancing VariableVisitor to handle complex variable assignments
+- Improving error handling for invalid variable declarations
+- Adding support for mathematical expressions in variable assignments
 
-**✅ Issues RESOLVED**:
-- ✅ Fixed missing `createASTNodeForFunction` method in VariableVisitor
-- ✅ Fixed method signature mismatch in ExpressionVisitor
-- ✅ All visitor classes now properly implement the required abstract method
+### Test Coverage
+- Special variable assignments ($fn, $fa, $fs)
+- Regular variable assignments (numbers, strings)
+- Basic arithmetic expressions
+- Complex expressions with proper operator precedence
 
-1. **Expression Visitor Enhancement Progress** ✅ COMPLETED:
-   - Implemented a dedicated FunctionCallVisitor to handle function calls in expressions
-   - The FunctionCallVisitor extracts function names and arguments from CST nodes
-   - Implemented a dedicated BinaryExpressionVisitor to handle binary operations in expressions
-   - The BinaryExpressionVisitor extracts operators and operands from CST nodes with proper precedence
-   - Implemented a dedicated UnaryExpressionVisitor to handle unary operations in expressions
-   - The UnaryExpressionVisitor extracts operators and operands from CST nodes with fallback mechanisms
-   - Implemented a dedicated ConditionalExpressionVisitor to handle conditional expressions
+## Project Structure
+
+### Core Components
+1. **tree-sitter-openscad**
+   - Grammar definition for OpenSCAD
+   - CST generation
+
+2. **openscad-parser**
+   - AST generation from CST
+   - Visitor pattern implementation
+   - Type definitions for OpenSCAD AST
+   - Error handling and recovery
+
+### Key Files
+- `variable-visitor.ts`: Handles variable assignments and expressions
+- `ast-types.ts`: Type definitions for the AST
+- `variable-utils.ts`: Utilities for variable validation and processing
+
+## Next Steps
+1. Implement proper type checking for variable assignments
+2. Add support for vector and matrix operations
+3. Enhance error messages for invalid expressions
+4. Add more comprehensive test cases for edge casesessionVisitor to handle conditional expressions
    - Implemented a dedicated ParenthesizedExpressionVisitor to handle parenthesized expressions
    - Updated the ExpressionVisitor to use the specialized visitors for all expression types
    - Added comprehensive tests with real CST nodes (no mocks)

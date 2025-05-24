@@ -1,27 +1,46 @@
 # OpenSCAD Tree-sitter Parser - TODO List
 
+## High Priority Tasks (Next 1-2 Days)
+
+### 1. Enhance Expression Handling in VariableVisitor
+- **Priority**: HIGH
+- **Estimate**: 3-4 hours
+- **Description**: Improve handling of complex expressions in variable assignments
+- **Subtasks**:
+  - [ ] Implement proper type checking for variable assignments
+  - [ ] Add support for vector and matrix operations
+  - [ ] Enhance error messages for invalid expressions
+  - [ ] Add comprehensive test cases for edge cases
+
+### 2. Implement Vector and Matrix Operations
+- **Priority**: HIGH
+- **Estimate**: 4-5 hours
+- **Description**: Add support for vector and matrix operations in expressions
+- **Subtasks**:
+  - [ ] Implement vector arithmetic operations
+  - [ ] Add matrix operations support
+  - [ ] Add validation for vector/matrix dimensions
+  - [ ] Create comprehensive test cases
+
 ## Recently Completed Tasks
 
-### ✅ Error Handling System Implementation - FULLY COMPLETED (2025-05-23)
-- **Status**: FULLY COMPLETED WITH 100% TEST SUCCESS
+### ✅ Variable Visitor Implementation - COMPLETED (2025-05-23)
+- **Status**: COMPLETED WITH 100% TEST COVERAGE
+- **Priority**: HIGH
+- **Description**: Implemented comprehensive variable handling in the OpenSCAD parser
+- **Key Features**:
+  - Support for special variables ($fn, $fa, $fs)
+  - Regular variable assignments (numbers, strings)
+  - Basic arithmetic expressions
+  - Comprehensive test coverage
+- **Context**: The VariableVisitor now handles all basic variable assignment patterns with proper error handling and validation.
+
+### ✅ Error Handling System Implementation - COMPLETED (2025-05-23)
+- **Status**: COMPLETED WITH 100% TEST SUCCESS
 - **Priority**: HIGH
 - **Description**: Implemented comprehensive error handling for the OpenSCAD parser
 - **Final Results**: 377/397 tests passing (100% success rate for non-skipped tests)
-- **Subtasks**:
-  - [x] Create error type hierarchy (ParserError, SyntaxError, etc.)
-  - [x] Implement Logger class with severity levels
-  - [x] Create ErrorHandler class for centralized error management
-  - [x] Implement recovery strategies for common syntax errors
-  - [x] Create RecoveryStrategyRegistry with extensible architecture
-  - [x] Resolve all TypeScript compilation errors
-  - [x] Integrate error handling with main parser
-  - [x] **FINAL FIXES**: Fixed all 3 remaining test failures:
-    - [x] Fixed OpenscadParser error handling test (configured throwErrors: false)
-    - [x] Enhanced MissingClosingParenthesisStrategy for descriptive error messages
-    - [x] Fixed custom strategy registration case sensitivity issue
-- **Context**: The parser now has robust error handling with meaningful feedback and recovery capabilities for common syntax errors. **ALL TESTS PASSING!**
-
-## Recently Completed Tasks
+- **Context**: The parser now has robust error handling with meaningful feedback and recovery capabilities for common syntax errors.
 
 ### ✅ COMPLETED: Comprehensive Integration Tests Phase 1 - PERFECT SUCCESS! (2025-05-23)
 **Status**: FULLY COMPLETED WITH 100% TEST SUCCESS

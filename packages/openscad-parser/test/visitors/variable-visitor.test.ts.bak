@@ -1,0 +1,651 @@
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { OpenscadParser } from '../../src/lib/openscad-parser/openscad-parser';
+import { VariableVisitor } from '../../src/lib/openscad-parser/ast/visitors/variable-visitor';
+
+// Test cases for VariableVisitor
+describe('VariableVisitor', () => {
+  let parser: OpenscadParser;
+  let visitor: VariableVisitor;
+
+  beforeEach(async () => {
+    // Create a new parser instance before each test
+    parser = new OpenscadParser();
+    // Initialize the parser
+    await parser.init();
+    visitor = new VariableVisitor('');
+  });
+
+  afterEach(() => {
+    // Clean up after each test
+    parser.dispose();
+  });
+
+  // Helper function to parse code and get the AST
+  const parseCode = async (code: string) => {
+    const tree = await parser.parse(code);
+    if (!tree?.rootNode) {
+      throw new Error('Failed to parse code');
+    }
+    return tree.rootNode;
+  };
+
+  describe('Special Variables', () => {
+    it('should handle $fn special variable assignment', async () => {
+      const code = '$fn = 32;';
+      const node = await parseCode(code);
+      const result = visitor.visitAssignmentStatement(node);
+      
+      expect(result).toEqual({
+        type: 'assignment',
+        variable: '$fn',
+        value: 32,
+        location: expect.any(Object)
+      });
+    });
+
+    it('should handle $fa special variable assignment', async () => {
+      const code = '$fa = 6;';
+      const node = await parseCode(code);
+      const result = visitor.visitAssignmentStatement(node);
+      
+      expect(result).toEqual({
+        type: 'assignment',
+        variable: '$fa',
+        value: 6,
+        location: expect.any(Object)
+      });
+    });
+
+    it('should handle $fs special variable assignment', async () => {
+      const code = '$fs = 1;';
+      const node = await parseCode(code);
+      const result = visitor.visitAssignmentStatement(node);
+      
+      expect(result).toEqual({
+        type: 'assignment',
+        variable: '$fs',
+        value: 1,
+        location: expect.any(Object)
+      });
+    });
+  });
+
+  describe('Regular Variables', () => {
+    it('should handle simple number assignment', async () => {
+      const code = 'x = 10;';
+      const node = await parseCode(code);
+      const result = visitor.visitAssignmentStatement(node);
+      
+      expect(result).toEqual({
+        type: 'assignment',
+        variable: 'x',
+        value: 10,
+        location: expect.any(Object)
+      });
+    });
+
+    it('should handle string assignment', async () => {
+      const code = 'name = "test";';
+      const node = await parseCode(code);
+      const result = visitor.visitAssignmentStatement(node);
+      
+      expect(result).toEqual({
+        type: 'assignment',
+        variable: 'name',
+        value: 'test',
+        location: expect.any(Object)
+      });
+    });
+  });
+
+  describe('Expressions', () => {
+    it('should handle arithmetic expressions', async () => {
+      const code = 'result = (10 + 5) * 2;';
+      const node = await parseCode(code);
+      const result = visitor.visitAssignmentStatement(node);
+      
+      // We're just checking the structure here, not evaluating the expression
+      expect(result).toEqual({
+        type: 'assignment',
+        variable: 'result',
+        value: expect.any(Object),
+        location: expect.any(Object)
+      });
+    });
+  });
+});(Object)
+      });
+    });
+  });
+
+  describe('Regular Variables', () => {
+    it('should handle simple number assignment', async () => {
+      const code = 'x = 10;';
+      const node = await parseCode(code);
+      const result = visitor.visitAssignmentStatement(node);
+      
+      expect(result).toEqual({
+        type: 'assignment',
+        variable: 'x',
+        value: 10,
+        location: expect.any(Object)
+      });
+    });
+
+    it('should handle string assignment', async () => {
+      const code = 'name = "test";';
+      const node = await parseCode(code);
+      const result = visitor.visitAssignmentStatement(node);
+      
+      expect(result).toEqual({
+        type: 'assignment',
+        variable: 'name',
+        value: 'test',
+        location: expect.any(Object)
+      });
+    });
+  });
+
+  describe('Expressions', () => {
+    it('should handle arithmetic expressions', async () => {
+      const code = 'result = (10 + 5) * 2;';
+      const node = await parseCode(code);
+      const result = visitor.visitAssignmentStatement(node);
+      
+      // We're just checking the structure here, not evaluating the expression
+      expect(result).toEqual({
+        type: 'assignment',
+        variable: 'result',
+        value: expect.any(Object),
+        location: expect.any(Object)
+      });
+    });
+  });
+      expect(result).toMatchObject({
+        type: 'specialVariableAssignment',
+        variable: '$fs',
+        value: 0.5
+      });
+    });
+
+    it('should handle viewport special variables', () => {
+      // Test $vpr (viewport rotation)
+      vi.spyOn(visitor as any, 'extractValue').mockReturnValue([60, 0, 30]);
+      const vprNode = createMockSpecialVariableNode('$vpr', '[60, 0, 30]');
+      const vprResult = visitor.visitAssignmentStatement(vprNode);
+      
+      expect(vprResult).toMatchObject({
+        type: 'specialVariableAssignment',
+        variable: '$vpr',
+        value: [60, 0, 30]
+      });
+      
+      // Test $vpt (viewport translation)
+      vi.spyOn(visitor as any, 'extractValue').mockReturnValue([0, 0, 10]);
+      const vptNode = createMockSpecialVariableNode('$vpt', '[0, 0, 10]');
+      const vptResult = visitor.visitAssignmentStatement(vptNode);
+      
+      expect(vptResult).toMatchObject({
+        type: 'specialVariableAssignment',
+        variable: '$vpt',
+        value: [0, 0, 10]
+      });
+      
+      // Test $vpd (viewport distance)
+      vi.spyOn(visitor as any, 'extractValue').mockReturnValue(500);
+      const vpdNode = createMockSpecialVariableNode('$vpd', '500');
+      const vpdResult = visitor.visitAssignmentStatement(vpdNode);
+      
+      expect(vpdResult).toMatchObject({
+        type: 'specialVariableAssignment',
+        variable: '$vpd',
+        value: 500
+      });
+    });
+  });
+
+  describe('Complex Expressions', () => {
+    it('should handle mathematical expressions in assignments', () => {
+      // Create a mock binary expression node for (10 + 5) * 2 / 5
+      const binaryExprNode = createMockNode('binary_expression', '(10 + 5) * 2 / 5', [
+        createMockNode('binary_expression', '(10 + 5) * 2', [
+          createMockNode('binary_expression', '10 + 5', [
+            createMockNode('number', '10', []),
+            createMockNode('number', '5', [])
+          ]),
+          createMockNode('number', '2', [])
+        ]),
+        createMockNode('number', '5', [])
+      ]);
+      
+      // Mock the extractValue function to return a complex expression
+      vi.spyOn(visitor as any, 'extractValue').mockImplementation((node: any) => {
+        if (node.text === '10') return { expressionType: 'literal', value: 10 };
+        if (node.text === '5') return { expressionType: 'literal', value: 5 };
+        if (node.text === '2') return { expressionType: 'literal', value: 2 };
+        if (node.text === '10 + 5') {
+          return {
+            expressionType: 'binary',
+            operator: '+',
+            left: { expressionType: 'literal', value: 10 },
+            right: { expressionType: 'literal', value: 5 }
+          };
+        }
+        if (node.text === '(10 + 5) * 2') {
+          return {
+            expressionType: 'binary',
+            operator: '*',
+            left: {
+              expressionType: 'binary',
+              operator: '+',
+              left: { expressionType: 'literal', value: 10 },
+              right: { expressionType: 'literal', value: 5 }
+            },
+            right: { expressionType: 'literal', value: 2 }
+          };
+        }
+        if (node.text === '(10 + 5) * 2 / 5') {
+          return {
+            expressionType: 'binary',
+            operator: '/',
+            left: {
+              expressionType: 'binary',
+              operator: '*',
+              left: {
+                expressionType: 'binary',
+                operator: '+',
+                left: { expressionType: 'literal', value: 10 },
+                right: { expressionType: 'literal', value: 5 }
+              },
+              right: { expressionType: 'literal', value: 2 }
+            },
+            right: { expressionType: 'literal', value: 5 }
+          };
+        }
+        return null;
+      });
+      
+      const node = createMockAssignmentNode('x', '(10 + 5) * 2 / 5');
+      const result = visitor.visitAssignmentStatement(node as any);
+      
+      expect(result).toMatchObject({
+        type: 'assignment',
+        variable: 'x',
+        value: {
+          expressionType: 'binary',
+          operator: '/',
+          left: {
+            expressionType: 'binary',
+            operator: '*',
+            left: {
+              expressionType: 'binary',
+              operator: '+',
+              left: { expressionType: 'literal', value: 10 },
+              right: { expressionType: 'literal', value: 5 }
+            },
+            right: { expressionType: 'literal', value: 2 }
+          },
+          right: { expressionType: 'literal', value: 5 }
+        }
+      });
+    });
+
+    it('should handle function calls in expressions', () => {
+      // Create a mock function call node for sin(45)
+      const sinCallNode = createMockNode('function_call', 'sin(45)', [
+        createMockNode('number', '45', [])
+      ]);
+      
+      // Create a mock function call node for cos(30)
+      const cosCallNode = createMockNode('function_call', 'cos(30)', [
+        createMockNode('number', '30', [])
+      ]);
+      
+      // Mock the extractValue function to return a function call expression
+      vi.spyOn(visitor as any, 'extractValue').mockImplementation((node) => {
+        if (node.text === 'sin(45)') {
+          return {
+            expressionType: 'function_call',
+            name: 'sin',
+            arguments: [{ name: undefined, value: 45 }]
+          };
+        } else if (node.text === 'cos(30)') {
+          return {
+            expressionType: 'function_call',
+            name: 'cos',
+            arguments: [{ name: undefined, value: 30 }]
+          };
+        }
+        return null;
+      });
+      
+      const node = createMockAssignmentNode('x', 'sin(45) + cos(30)');
+      const result = visitor.visitAssignmentStatement(node);
+      
+      expect(result).toMatchObject({
+        type: 'assignment',
+        variable: 'x',
+        value: {
+          expressionType: 'binary',
+          operator: '+',
+          left: {
+            expressionType: 'function_call',
+            name: 'sin',
+            arguments: [{ name: undefined, value: 45 }]
+          },
+          right: {
+            expressionType: 'function_call',
+            name: 'cos',
+            arguments: [{ name: undefined, value: 30 }]
+          }
+        }
+      });
+    });
+
+    it('should handle vector expressions', () => {
+      // Create a mock array node for [1, 2, 3]
+      const arrayNode1 = createMockNode('array', '[1, 2, 3]', [
+        createMockNode('number', '1', []),
+        createMockNode('number', '2', []),
+        createMockNode('number', '3', [])
+      ]);
+      
+      // Create a mock array node for [4, 5, 6]
+      const arrayNode2 = createMockNode('array', '[4, 5, 6]', [
+        createMockNode('number', '4', []),
+        createMockNode('number', '5', []),
+        createMockNode('number', '6', [])
+      ]);
+      
+      // Mock the extractValue function to return an array expression
+      vi.spyOn(visitor as any, 'extractValue').mockImplementation((node) => {
+        if (node.text === '[1, 2, 3]') {
+          return {
+            expressionType: 'array',
+            items: [
+              { expressionType: 'literal', value: 1 },
+              { expressionType: 'literal', value: 2 },
+              { expressionType: 'literal', value: 3 }
+            ]
+          };
+        } else if (node.text === '[4, 5, 6]') {
+          return {
+            expressionType: 'array',
+            items: [
+              { expressionType: 'literal', value: 4 },
+              { expressionType: 'literal', value: 5 },
+              { expressionType: 'literal', value: 6 }
+            ]
+          };
+        }
+        return null;
+      });
+      
+      const node = createMockAssignmentNode('v', '[1, 2, 3] + [4, 5, 6]');
+      const result = visitor.visitAssignmentStatement(node);
+      
+      expect(result).toMatchObject({
+        type: 'assignment',
+        variable: 'v',
+        value: {
+          expressionType: 'binary',
+          operator: '+',
+          left: {
+            expressionType: 'array',
+            items: [
+              { expressionType: 'literal', value: 1 },
+              { expressionType: 'literal', value: 2 },
+              { expressionType: 'literal', value: 3 }
+            ]
+          },
+          right: {
+            expressionType: 'array',
+            items: [
+              { expressionType: 'literal', value: 4 },
+              { expressionType: 'literal', value: 5 },
+              { expressionType: 'literal', value: 6 }
+            ]
+          }
+        }
+  });
+
+  it('should handle function calls in expressions', () => {
+    // Create a mock function call node for sin(45)
+    const sinCallNode = createMockNode('function_call', 'sin(45)', [
+      createMockNode('number', '45', [])
+    ]);
+    
+    // Create a mock function call node for cos(30)
+    const cosCallNode = createMockNode('function_call', 'cos(30)', [
+      createMockNode('number', '30', [])
+    ]);
+    
+    // Mock the extractValue function to return a function call expression
+    vi.spyOn(visitor as any, 'extractValue').mockImplementation((node) => {
+      if (node.text === 'sin(45)') {
+        return {
+          expressionType: 'function_call',
+          name: 'sin',
+          arguments: [{ name: undefined, value: 45 }]
+        };
+      } else if (node.text === 'cos(30)') {
+        return {
+          expressionType: 'function_call',
+          name: 'cos',
+          arguments: [{ name: undefined, value: 30 }]
+        };
+      }
+      return null;
+    });
+    
+    const node = createMockAssignmentNode('x', 'sin(45) + cos(30)');
+    const result = visitor.visitAssignmentStatement(node);
+    
+    expect(result).toMatchObject({
+      type: 'assignment',
+      variable: 'x',
+      value: {
+        expressionType: 'binary',
+        operator: '+',
+        left: {
+          expressionType: 'function_call',
+          name: 'sin',
+          arguments: [{ name: undefined, value: 45 }]
+        },
+        right: {
+          expressionType: 'function_call',
+          name: 'cos',
+          arguments: [{ name: undefined, value: 30 }]
+        }
+      }
+    });
+  });
+
+  it('should handle vector expressions', () => {
+    // Create a mock array node for [1, 2, 3]
+    const arrayNode1 = createMockNode('array', '[1, 2, 3]', [
+      createMockNode('number', '1', []),
+      createMockNode('number', '2', []),
+      createMockNode('number', '3', [])
+    ]);
+    
+    // Create a mock array node for [4, 5, 6]
+    const arrayNode2 = createMockNode('array', '[4, 5, 6]', [
+      createMockNode('number', '4', []),
+      createMockNode('number', '5', []),
+      createMockNode('number', '6', [])
+    ]);
+    
+    // Mock the extractValue function to return an array expression
+    vi.spyOn(visitor as any, 'extractValue').mockImplementation((node) => {
+      if (node.text === '[1, 2, 3]') {
+        return {
+          expressionType: 'array',
+          items: [
+            { expressionType: 'literal', value: 1 },
+            { expressionType: 'literal', value: 2 },
+            { expressionType: 'literal', value: 3 }
+          ]
+        };
+      } else if (node.text === '[4, 5, 6]') {
+        return {
+          expressionType: 'array',
+          items: [
+            { expressionType: 'literal', value: 4 },
+            { expressionType: 'literal', value: 5 },
+            { expressionType: 'literal', value: 6 }
+          ]
+        };
+      }
+      return null;
+    });
+    
+    const node = createMockAssignmentNode('v', '[1, 2, 3] + [4, 5, 6]');
+    const result = visitor.visitAssignmentStatement(node);
+    
+    expect(result).toMatchObject({
+      type: 'assignment',
+      variable: 'v',
+      value: {
+        expressionType: 'binary',
+        operator: '+',
+        left: {
+          expressionType: 'array',
+          items: [
+            { expressionType: 'literal', value: 1 },
+            { expressionType: 'literal', value: 2 },
+            { expressionType: 'literal', value: 3 }
+          ]
+        },
+        right: {
+          expressionType: 'array',
+          items: [
+            { expressionType: 'literal', value: 4 },
+            { expressionType: 'literal', value: 5 },
+            { expressionType: 'literal', value: 6 }
+          ]
+        }
+      }
+    });
+  });
+});
+
+describe('Edge Cases', () => {
+  it('should handle multiple assignments', () => {
+    const code = `
+      a = 1;
+      b = 2;
+      c = a + b;
+    `;
+    const ast = parseCode(code);
+
+    expect(ast).toHaveLength(3);
+    expect(ast[0]).toMatchObject({ variable: 'a', value: 1 });
+    expect(ast[1]).toMatchObject({ variable: 'b', value: 2 });
+    expect(ast[2]).toMatchObject({
+      variable: 'c',
+      value: {
+        expressionType: 'binary',
+        operator: '+',
+        left: { expressionType: 'variable', name: 'a' },
+        right: { expressionType: 'variable', name: 'b' }
+      }
+    });
+  });
+
+  it('should handle reassignment of variables', () => {
+    const code = `
+      x = 5;
+      x = x * 2;
+    `;
+    const ast = parseCode(code);
+
+    expect(ast).toHaveLength(2);
+    expect(ast[0]).toMatchObject({ variable: 'x', value: 5 });
+    expect(ast[1]).toMatchObject({
+      variable: 'x',
+      value: {
+        expressionType: 'binary',
+        operator: '*',
+        left: { expressionType: 'variable', name: 'x' },
+        right: { expressionType: 'literal', value: 2 }
+      }
+    });
+  });
+
+  it('should handle undefined or null values', () => {
+    // Test undef value
+    vi.spyOn(visitor as any, 'extractValue').mockReturnValue({
+      expressionType: 'literal',
+      value: undefined
+    });
+    
+    const undefNode = createMockAssignmentNode('x', 'undef');
+    const undefResult = visitor.visitAssignmentStatement(undefNode);
+    
+    expect(undefResult).toMatchObject({
+      type: 'assignment',
+      variable: 'x',
+      value: {
+        expressionType: 'literal',
+        value: undefined
+      }
+    });
+    
+    // Test null value
+    vi.spyOn(visitor as any, 'extractValue').mockReturnValue({
+      expressionType: 'literal',
+      value: null
+    });
+    
+    const nullNode = createMockAssignmentNode('y', 'null');
+    const nullResult = visitor.visitAssignmentStatement(nullNode);
+    
+    expect(nullResult).toMatchObject({
+      type: 'assignment',
+      variable: 'y',
+      value: {
+        expressionType: 'literal',
+        value: null
+      }
+    });
+  });
+
+  it('should handle boolean literals', () => {
+    // Test true value
+    vi.spyOn(visitor as any, 'extractValue').mockReturnValue({
+      expressionType: 'literal',
+      value: true
+    });
+    
+    const trueNode = createMockAssignmentNode('a', 'true');
+    const trueResult = visitor.visitAssignmentStatement(trueNode);
+    
+    expect(trueResult).toMatchObject({
+      type: 'assignment',
+      variable: 'a',
+      value: {
+        expressionType: 'literal',
+        value: true
+      }
+    });
+    
+    // Test false value
+    vi.spyOn(visitor as any, 'extractValue').mockReturnValue({
+      expressionType: 'literal',
+      value: false
+    });
+    
+    const falseNode = createMockAssignmentNode('b', 'false');
+    const falseResult = visitor.visitAssignmentStatement(falseNode);
+    
+    expect(falseResult).toMatchObject({
+      type: 'assignment',
+      variable: 'b',
+      value: {
+        expressionType: 'literal',
+        value: false
+      }
+    });
+  });
+});

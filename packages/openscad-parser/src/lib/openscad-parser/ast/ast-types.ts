@@ -503,6 +503,29 @@ export interface LiteralExpressionNode extends ExpressionNode {
 }
 
 /**
+ * Special variables in OpenSCAD
+ */
+export type SpecialVariable = 
+  | '$fn'       // Number of fragments
+  | '$fa'       // Minimum angle
+  | '$fs'       // Minimum size of fragment
+  | '$t'        // Animation time
+  | '$vpr'      // Viewport rotation
+  | '$vpt'      // Viewport translation
+  | '$vpd'      // Viewport distance
+  | '$children' // Number of children in module
+  | '$preview'; // True if in preview mode
+
+/**
+ * Represents a special variable assignment
+ */
+export interface SpecialVariableAssignment extends BaseNode {
+  type: 'specialVariableAssignment';
+  variable: SpecialVariable;
+  value: number | boolean | Vector3D;
+}
+
+/**
  * Binary operators in OpenSCAD
  */
 export type BinaryOperator = '+' | '-' | '*' | '/' | '%' | '==' | '!=' | '<' | '<=' | '>' | '>=' | '&&' | '||';
@@ -571,6 +594,11 @@ export interface ChildrenNode extends BaseNode {
  * Union type of all possible AST nodes
  */
 export type ASTNode =
+  | ExpressionNode
+  | LiteralNode
+  | VariableNode
+  | FunctionCallNode
+  | TranslateNode
   | CubeNode
   | SphereNode
   | CylinderNode
@@ -579,7 +607,14 @@ export type ASTNode =
   | CircleNode
   | SquareNode
   | TextNode
-  | TranslateNode
+  | LinearExtrudeNode
+  | RotateExtrudeNode
+  | OffsetNode
+  | ResizeNode
+  | IfNode
+  | ForLoopNode
+  | LetNode
+  | EachNode
   | RotateNode
   | ScaleNode
   | MirrorNode
@@ -590,20 +625,9 @@ export type ASTNode =
   | IntersectionNode
   | HullNode
   | MinkowskiNode
-  | FunctionCallNode
-  | LiteralNode
-  | VariableNode
-  | ExpressionNode
-  | IfNode
-  | ForLoopNode
-  | LetNode
-  | EachNode
-  | AssignmentNode
   | ModuleDefinitionNode
   | ModuleInstantiationNode
   | FunctionDefinitionNode
-  | ChildrenNode
-  | LinearExtrudeNode
-  | RotateExtrudeNode
-  | OffsetNode
-  | ResizeNode;
+  | AssignmentNode
+  | SpecialVariableAssignment
+  | ChildrenNode;
