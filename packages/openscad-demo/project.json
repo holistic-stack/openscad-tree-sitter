@@ -1,0 +1,9 @@
+{
+  "name": "openscad-demo",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/openscad-demo/src",
+  "projectType": "library",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project openscad-demo --web",
+  "targets": {}
+}

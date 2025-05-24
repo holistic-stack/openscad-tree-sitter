@@ -5,6 +5,7 @@ import dts from 'vite-plugin-dts';
 import * as path from 'path';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
+import monacoEditorPlugin from 'vite-plugin-monaco-editor';
 
 export default defineConfig(() => ({
   root: __dirname,
@@ -13,6 +14,9 @@ export default defineConfig(() => ({
     react(),
     nxViteTsPaths(),
     nxCopyAssetsPlugin(['*.md']),
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    monacoEditorPlugin({}), // Add this line
     dts({
       entryRoot: 'src',
       tsconfigPath: path.join(__dirname, 'tsconfig.lib.json'),
@@ -42,7 +46,7 @@ export default defineConfig(() => ({
     },
     rollupOptions: {
       // External packages that should not be bundled into your library.
-      external: ['react', 'react-dom', 'react/jsx-runtime'],
+      external: ['react', 'react-dom', 'react/jsx-runtime', 'monaco-editor'], // Add 'monaco-editor' here
     },
   },
   test: {

@@ -9,7 +9,8 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@openscad/editor": ["packages/openscad-editor/src/index.ts"]
+      "@openscad/editor": ["packages/openscad-editor/src/index.ts"],
+      "openscad-demo": ["packages/openscad-demo/src/index.ts"]
     }
   }
 }
