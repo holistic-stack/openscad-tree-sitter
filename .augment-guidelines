@@ -41,6 +41,14 @@ This project follows an incremental development workflow with a strong emphasis 
 - Use `pnpm test` to run all tests across the monorepo.
 - Use `pnpm test:grammar` or `pnpm test:parser` to run tests for specific packages.
 - Use `nx test tree-sitter-openscad` or `nx test openscad-parser` for more granular control.
+- To run a specific test file, use:
+  ```bash
+  pnpm test:parser:file "path/to/test/file.test.ts"
+  ```
+- To run a specific test within a file, use the `-t` flag:
+  ```bash
+  pnpm test:parser:file "path/to/test/file.test.ts" -t "test name pattern"
+  ```
 - ALWAYS USE TDD, DRY and SRP files principles approach:
 
 ALWAYS USE DRY and KISS rules and algoritm improvements, split the code in smaller and manageable code, reason multiple options of improvements;

@@ -76,6 +76,39 @@ This is a monorepo containing a Tree-sitter grammar and parser for the OpenSCAD 
 - Performance tests for large files
 - Error scenario tests
 
+### Running Tests
+
+#### Running All Tests
+```bash
+# Run all tests across all packages
+pnpm test
+
+# Run tests for a specific package
+pnpm test:parser
+```
+
+#### Running Specific Test Files
+```bash
+# Run a specific test file from the root directory
+pnpm test:parser:file "path/from/package/root/file.test.ts"
+
+# Example:
+pnpm test:parser:file "src/lib/openscad-parser/openscad-parser-visitor.test.ts"
+
+# Run specific tests within a file using the -t flag
+pnpm test:parser:file "path/to/test/file.test.ts" -t "test name pattern"
+```
+
+#### Test Development
+- Run tests in watch mode while developing:
+  ```bash
+  pnpm test:watch:parser
+  ```
+- Generate coverage reports:
+  ```bash
+  pnpm test:coverage:parser
+  ```
+
 ## Build and Development
 
 This project uses PNPM and Nx for managing builds, tests, and development workflows. Key scripts are defined in the root `package.json`.
