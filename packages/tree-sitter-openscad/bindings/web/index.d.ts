@@ -15,5 +15,5 @@ declare module '@openscad/tree-sitter-openscad/bindings/web' {
   /**
    * Node types information for the OpenSCAD grammar
    */
-  export const nodeTypeInfo?: Record<string, any>;
+  export const nodeTypeInfo: Record<string, any> | undefined;
 }

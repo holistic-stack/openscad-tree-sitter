@@ -76,17 +76,17 @@ describe('FunctionCallVisitor', () => {
       expect(result?.arguments).toHaveLength(3);
 
       // Check the arguments
-      expect(result?.arguments[0].name).toBeUndefined();
-      expect(result?.arguments[0].value.type).toBe('expression');
-      expect((result?.arguments[0].value as ast.LiteralNode).value).toBe(1);
+      expect(result?.arguments[0]?.name).toBeUndefined();
+      expect((result?.arguments[0]?.value as ast.ExpressionNode)?.type).toBe('expression');
+      expect((result?.arguments[0]?.value as ast.LiteralNode)?.value).toBe(1);
 
-      expect(result?.arguments[1].name).toBeUndefined();
-      expect(result?.arguments[1].value.type).toBe('expression');
-      expect((result?.arguments[1].value as ast.LiteralNode).value).toBe(2);
+      expect(result?.arguments[1]?.name).toBeUndefined();
+      expect((result?.arguments[1]?.value as ast.ExpressionNode)?.type).toBe('expression');
+      expect((result?.arguments[1]?.value as ast.LiteralNode)?.value).toBe(2);
 
-      expect(result?.arguments[2].name).toBeUndefined();
-      expect(result?.arguments[2].value.type).toBe('expression');
-      expect((result?.arguments[2].value as ast.LiteralNode).value).toBe(3);
+      expect(result?.arguments[2]?.name).toBeUndefined();
+      expect((result?.arguments[2]?.value as ast.ExpressionNode)?.type).toBe('expression');
+      expect((result?.arguments[2]?.value as ast.LiteralNode)?.value).toBe(3);
     });
 
     it('should handle function calls with named arguments', async () => {
@@ -116,13 +116,13 @@ describe('FunctionCallVisitor', () => {
       expect(result?.arguments).toHaveLength(2);
 
       // Check the arguments
-      expect(result?.arguments[0].name).toBe('x');
-      expect(result?.arguments[0].value.type).toBe('expression');
-      expect((result?.arguments[0].value as ast.LiteralNode).value).toBe(10);
+      expect(result?.arguments[0]?.name).toBe('x');
+      expect((result?.arguments[0]?.value as ast.ExpressionNode)?.type).toBe('expression');
+      expect((result?.arguments[0]?.value as ast.LiteralNode)?.value).toBe(10);
 
-      expect(result?.arguments[1].name).toBe('y');
-      expect(result?.arguments[1].value.type).toBe('expression');
-      expect((result?.arguments[1].value as ast.LiteralNode).value).toBe(20);
+      expect(result?.arguments[1]?.name).toBe('y');
+      expect((result?.arguments[1]?.value as ast.ExpressionNode)?.type).toBe('expression');
+      expect((result?.arguments[1]?.value as ast.LiteralNode)?.value).toBe(20);
     });
 
     it('should handle function calls with mixed arguments', async () => {
@@ -152,17 +152,17 @@ describe('FunctionCallVisitor', () => {
       expect(result?.arguments).toHaveLength(3);
 
       // Check the arguments
-      expect(result?.arguments[0].name).toBeUndefined();
-      expect(result?.arguments[0].value.type).toBe('expression');
-      expect((result?.arguments[0].value as ast.LiteralNode).value).toBe(1);
+      expect(result?.arguments[0]?.name).toBeUndefined();
+      expect((result?.arguments[0]?.value as ast.ExpressionNode)?.type).toBe('expression');
+      expect((result?.arguments[0]?.value as ast.LiteralNode)?.value).toBe(1);
 
-      expect(result?.arguments[1].name).toBe('y');
-      expect(result?.arguments[1].value.type).toBe('expression');
-      expect((result?.arguments[1].value as ast.LiteralNode).value).toBe(20);
+      expect(result?.arguments[1]?.name).toBe('y');
+      expect((result?.arguments[1]?.value as ast.ExpressionNode)?.type).toBe('expression');
+      expect((result?.arguments[1]?.value as ast.LiteralNode)?.value).toBe(20);
 
-      expect(result?.arguments[2].name).toBeUndefined();
-      expect(result?.arguments[2].value.type).toBe('expression');
-      expect((result?.arguments[2].value as ast.LiteralNode).value).toBe(
+      expect(result?.arguments[2]?.name).toBeUndefined();
+      expect((result?.arguments[2]?.value as ast.ExpressionNode)?.type).toBe('expression');
+      expect((result?.arguments[2]?.value as ast.LiteralNode)?.value).toBe(
         'hello'
       );
     });
@@ -187,8 +187,9 @@ describe('FunctionCallVisitor', () => {
       const visitor = new FunctionCallVisitor(code);
 
       // Mock the createExpressionNode method to handle the nested function call
-      vi.spyOn(visitor as any, 'createExpressionNode').mockImplementation(
-        (node: TSNode) => {
+      const originalMethod = (visitor as any).createExpressionNode;
+      (visitor as any).createExpressionNode = vi.fn().mockImplementation(
+        (node: TSNode): ast.ExpressionNode | null => {
           if (node.text.includes('inner')) {
             return {
               type: 'expression',
@@ -201,12 +202,12 @@ describe('FunctionCallVisitor', () => {
                     type: 'expression',
                     expressionType: 'literal',
                     value: 10,
-                  },
+                  } as ast.LiteralNode,
                 },
               ],
-            };
+            } as ast.ExpressionNode;
           }
-          return null;
+          return originalMethod?.call(visitor, node) || null;
         }
       );
 

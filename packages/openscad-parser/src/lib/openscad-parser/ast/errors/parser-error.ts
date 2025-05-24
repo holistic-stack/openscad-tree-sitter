@@ -72,8 +72,8 @@ export class ParserError extends Error {
   constructor(
     message: string,
     code: string = 'PARSER_ERROR',
-    position?: ErrorPosition,
     source: string = '',
+    position?: ErrorPosition,
     suggestions: ErrorSuggestion[] = [],
     context?: Record<string, unknown>,
     originalError?: Error
@@ -121,7 +121,7 @@ export class ParserError extends Error {
    */
   public getFormattedMessage(): string {
     const sourceLine = this.getSourceLine();
-    const pointer = ' '.repeat(this.position.column) + '^';
+    const pointer = ' '.repeat(this.position?.column || 0) + '^';
 
     let message = `${this.message}\n\n`;
     message += `${sourceLine}\n`;

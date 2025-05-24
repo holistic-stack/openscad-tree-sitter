@@ -14,7 +14,7 @@
     "test:coverage": "nx run-many --target=test:coverage --all",
     "lint": "nx run-many --target=lint --all",
     "lint:fix": "nx run-many --target=lint:fix --all",
-    "typecheck": "nx run-many --target=typecheck --all",
+    "check": "nx run-many --target=typecheck --all",
     "dev": "nx run-many --target=dev --all",
     "dev:parser": "nx dev openscad-parser",
     "graph": "nx graph",

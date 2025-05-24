@@ -62,7 +62,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
     super(source);
     this.functionCallVisitor = new FunctionCallVisitor(source);
     this.binaryExpressionVisitor = new BinaryExpressionVisitor(source);
-    this.unaryExpressionVisitor = new UnaryExpressionVisitor(source);
+    this.unaryExpressionVisitor = new UnaryExpressionVisitor(this, source);
     this.conditionalExpressionVisitor = new ConditionalExpressionVisitor(
       source
     );
@@ -140,7 +140,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
     );
 
     // Delegate to the unary expression visitor
-    return this.unaryExpressionVisitor.visitUnaryExpression(node);
+    return this.unaryExpressionVisitor.visit(node);
   }
 
   /**
@@ -564,7 +564,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
       case 'binary_expression':
         return this.binaryExpressionVisitor.visitBinaryExpression(node);
       case 'unary_expression':
-        return this.unaryExpressionVisitor.visitUnaryExpression(node);
+        return this.unaryExpressionVisitor.visit(node);
       case 'conditional_expression':
         return this.conditionalExpressionVisitor.visitConditionalExpression(
           node
@@ -906,7 +906,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
     // Check for unary_expression
     const unaryExprNode = findDescendantOfType(node, 'unary_expression');
     if (unaryExprNode) {
-      return this.unaryExpressionVisitor.visitUnaryExpression(unaryExprNode);
+      return this.unaryExpressionVisitor.visit(unaryExprNode);
     }
 
     // Check for conditional_expression
@@ -1039,7 +1039,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
     const unaryExpr = findDescendantOfType(node, 'unary_expression');
     if (unaryExpr) {
-      return this.unaryExpressionVisitor.visitUnaryExpression(unaryExpr);
+      return this.unaryExpressionVisitor.visit(unaryExpr);
     }
 
     const conditionalExpr = findDescendantOfType(
@@ -1330,7 +1330,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
       case 'exponentiation_expression':
         return this.visitExponentiationExpression(node);
       case 'unary_expression':
-        return this.unaryExpressionVisitor.visitUnaryExpression(node);
+        return this.unaryExpressionVisitor.visit(node);
       case 'conditional_expression':
         return this.conditionalExpressionVisitor.visitConditionalExpression(
           node
