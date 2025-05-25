@@ -14,16 +14,16 @@
     }
   },
   "scripts": {
-    "build": "vite build",
+    "build": "env-cmd -e plain vite build",
     "dev": "vite build --watch",
-    "test": "vitest run",
+    "test": "env-cmd -e plain vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "test:coverage": "env-cmd -e plain vitest run --coverage",
+    "lint": "env-cmd -e plain eslint .",
+    "lint:fix": "env-cmd -e plain eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "env-cmd -e plain tsc --noEmit",
     "check": "pnpm typecheck && pnpm lint && pnpm format:check"
   },
   "keywords": [

@@ -65,5 +65,5 @@
       }
     }
   },
-  "tags": ["grammar", "native", "wasm"]
+  "tags": ["type:library", "scope:grammar", "platform:native", "platform:wasm"]
 }

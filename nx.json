@@ -3,16 +3,45 @@
   "defaultBase": "main",
   "targetDefaults": {
     "build": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "cache": true,
+      "inputs": ["production", "^production"],
+      "outputs": ["{projectRoot}/dist", "{projectRoot}/build"]
     },
     "test": {
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "cache": true,
+      "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"]
+    },
+    "test:watch": {
+      "cache": false
     },
     "dev": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "cache": false
+    },
+    "serve": {
+      "dependsOn": ["^build"],
+      "cache": false
     },
     "lint": {
-      "dependsOn": []
+      "cache": true,
+      "inputs": ["default", "{workspaceRoot}/.eslintrc.json", "{workspaceRoot}/eslint.config.js"],
+      "outputs": ["{options.outputFile}"]
+    },
+    "lint:fix": {
+      "cache": false
+    },
+    "typecheck": {
+      "cache": true,
+      "inputs": ["default", "^production"],
+      "outputs": []
+    },
+    "e2e": {
+      "dependsOn": ["build"],
+      "cache": true,
+      "inputs": ["default", "^production"]
     }
   },
   "plugins": [
@@ -62,6 +91,25 @@
       }
     }
   ],
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "production": [
+      "default",
+      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
+      "!{projectRoot}/tsconfig.spec.json",
+      "!{projectRoot}/jest.config.[jt]s",
+      "!{projectRoot}/src/test-setup.[jt]s",
+      "!{projectRoot}/test-setup.[jt]s",
+      "!{projectRoot}/.eslintrc.json",
+      "!{projectRoot}/eslint.config.js",
+      "!{projectRoot}/**/*.stories.@(js|jsx|ts|tsx|mdx)"
+    ],
+    "sharedGlobals": [
+      "{workspaceRoot}/babel.config.json",
+      "{workspaceRoot}/.eslintrc.json",
+      "{workspaceRoot}/eslint.config.js"
+    ]
+  },
   "release": {
     "version": {
       "preVersionCommand": "pnpm dlx nx run-many -t build"
@@ -71,6 +119,14 @@
     "@nx/react": {
       "library": {
         "unitTestRunner": "vitest"
+      }
+    }
+  },
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx/tasks-runners/default",
+      "options": {
+        "cacheableOperations": ["build", "lint", "test", "e2e", "typecheck"]
       }
     }
   }

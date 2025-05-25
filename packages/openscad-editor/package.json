@@ -32,10 +32,14 @@
   ],
   "license": "MIT",
   "scripts": {
-    "build": "nx build openscad-editor",
-    "dev": "nx dev openscad-editor",
-    "test": "vitest run",
-    "lint": "nx lint openscad-editor",
+    "build": "env-cmd -e plain vite build",
+    "dev": "vite build --watch",
+    "test": "env-cmd -e plain vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "env-cmd -e plain vitest run --coverage",
+    "lint": "env-cmd -e plain eslint .",
+    "lint:fix": "env-cmd -e plain eslint . --fix",
+    "typecheck": "env-cmd -e plain tsc --noEmit",
     "postinstall": "shx mkdir -p ./public && shx cp ./node_modules/@openscad/tree-sitter-openscad/tree-sitter-openscad.wasm ./public/tree-sitter-openscad.wasm && shx cp ./node_modules/web-tree-sitter/tree-sitter.wasm ./public/tree-sitter.wasm"
   },
   "dependencies": {

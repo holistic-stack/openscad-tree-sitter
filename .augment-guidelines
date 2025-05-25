@@ -38,16 +38,17 @@ This project is an Nx monorepo with PNPM workspaces containing packages for pars
 This project follows an incremental development workflow with a strong emphasis on Test-Driven Development (TDD) and automated documentation. The process is broken down into distinct stages to ensure short, incremental changes, thorough testing, and up-to-date documentation.
 
 - Include concrete examples of each OpenSCAD syntax variation in test coverage documentation.
-- Use `pnpm test` to run all tests across the monorepo.
-- Use `pnpm test:grammar` or `pnpm test:parser` to run tests for specific packages.
+- **All commands use plain text output by default** - no need for `:plain` suffixes.
+- Use `pnpm test` to run all tests across the monorepo (plain text output).
+- Use `pnpm test:grammar` or `pnpm test:parser` to run tests for specific packages (plain text output).
 - Use `nx test tree-sitter-openscad` or `nx test openscad-parser` for more granular control.
 - To run a specific test file, use:
   ```bash
-  pnpm test:parser:file "path/to/test/file.test.ts"
+  pnpm test:parser:file --testFile "path/to/test/file.test.ts"
   ```
 - To run a specific test within a file, use the `-t` flag:
   ```bash
-  pnpm test:parser:file "path/to/test/file.test.ts" -t "test name pattern"
+  pnpm test:parser:file --testFile "path/to/test/file.test.ts" -t "test name pattern"
   ```
 - ALWAYS USE TDD, DRY and SRP files principles approach:
 
@@ -191,9 +192,9 @@ packages/
 ### Test Types
 
 1. **Unit Tests**: Test individual components in isolation (aim for >80% coverage)
-   - Use `pnpm test` to run all tests
-   - Use `pnpm test:grammar` or `pnpm test:parser` for specific packages
-   - Use `nx test openscad-parser --testFile=docs/feature/feature.test.ts` for specific files
+   - Use `pnpm test` to run all tests (plain text output)
+   - Use `pnpm test:grammar` or `pnpm test:parser` for specific packages (plain text output)
+   - Use `pnpm test:parser:file --testFile=src/lib/feature/feature.test.ts` for specific files (plain text output)
 
 2. **Integration Tests**: Test component interactions and API contracts
    - Focus on testing interactions between different modules
@@ -209,14 +210,14 @@ packages/
 
 ### Test Commands
 
-The primary way to run tests is through the PNPM scripts defined in the root `package.json`:
+The primary way to run tests is through the PNPM scripts defined in the root `package.json`. **All test commands use plain text output by default**:
 
-- **`pnpm test`**: Runs all tests across all packages in the monorepo. This is the most comprehensive way to ensure everything is working.
+- **`pnpm test`**: Runs all tests across all packages in the monorepo (plain text output). This is the most comprehensive way to ensure everything is working.
   ```bash
   pnpm test
   ```
 
-- **Package-Specific Tests**: To run tests for a single package:
+- **Package-Specific Tests**: To run tests for a single package (plain text output):
   ```bash
   pnpm test:grammar   # For tree-sitter-openscad
   pnpm test:parser    # For openscad-parser
@@ -226,7 +227,7 @@ The primary way to run tests is through the PNPM scripts defined in the root `pa
   *Example*: `pnpm test:parser`
 
 - **Testing Specific Files or Patterns (for Vitest-based packages)**:
-  Use the `:file` suffixed scripts for `openscad-parser`, `openscad-editor`, and `openscad-demo`. The path provided to `--testFile` is relative to the package's root directory.
+  Use the `:file` suffixed scripts for `openscad-parser`, `openscad-editor`, and `openscad-demo`. The path provided to `--testFile` is relative to the package's root directory. All use plain text output.
   ```bash
   # Test a single file in openscad-parser
   pnpm test:parser:file --testFile src/lib/ast-utils.test.ts
@@ -238,13 +239,13 @@ The primary way to run tests is through the PNPM scripts defined in the root `pa
   pnpm test:demo:file --testFile "**/integration.*.test.tsx"
   ```
 
-- **Watch Mode**: For continuous testing during development:
+- **Watch Mode**: For continuous testing during development (interactive mode):
   ```bash
   pnpm test:watch # Runs tests for all packages in watch mode
   ```
   You can also run watch mode for specific packages if their `project.json` defines a `test:watch` target (e.g., `nx test:watch openscad-parser`).
 
-- **Coverage Reports**: To generate test coverage:
+- **Coverage Reports**: To generate test coverage (plain text output):
   ```bash
   pnpm test:coverage # Generates coverage for all packages
   ```
@@ -257,37 +258,37 @@ This project uses PNPM and Nx for managing builds, tests, and development workfl
 
 ### Common Monorepo Commands
 
-These commands operate on all packages within the monorepo:
+These commands operate on all packages within the monorepo and **use plain text output by default**:
 
-- **`pnpm build`**: Builds all packages.
+- **`pnpm build`**: Builds all packages (plain text output).
   - *When to use*: After pulling changes, before committing, or when you need a fresh build of the entire workspace.
   - *Example*: `pnpm build`
 
-- **`pnpm test`**: Runs tests for all packages.
+- **`pnpm test`**: Runs tests for all packages (plain text output).
   - *When to use*: Before committing changes, during CI, or to ensure all packages are functioning correctly.
   - *Example*: `pnpm test`
 
-- **`pnpm lint`**: Lints all packages.
+- **`pnpm lint`**: Lints all packages (plain text output).
   - *When to use*: To check for code style and quality issues across the entire codebase.
   - *Example*: `pnpm lint`
 
-- **`pnpm lint:fix`**: Attempts to automatically fix linting issues in all packages.
+- **`pnpm lint:fix`**: Attempts to automatically fix linting issues in all packages (plain text output).
   - *When to use*: After running `pnpm lint` to automatically correct any fixable issues.
   - *Example*: `pnpm lint:fix`
 
-- **`pnpm check`**: Performs type checking for all applicable packages (e.g., TypeScript packages).
+- **`pnpm typecheck`**: Performs type checking for all applicable packages (plain text output).
   - *When to use*: To ensure type safety across the TypeScript projects.
-  - *Example*: `pnpm check`
+  - *Example*: `pnpm typecheck`
 
-- **`pnpm dev`**: Runs all packages in development/watch mode.
+- **`pnpm dev`**: Runs all packages in development/watch mode (interactive mode).
   - *When to use*: When actively developing multiple packages simultaneously and you want them to rebuild on changes.
   - *Example*: `pnpm dev`
 
-- **`pnpm test:watch`**: Runs tests in watch mode for all packages, re-running tests when files change.
+- **`pnpm test:watch`**: Runs tests in watch mode for all packages (interactive mode).
   - *When to use*: During active development and TDD to get immediate feedback on test results.
   - *Example*: `pnpm test:watch`
 
-- **`pnpm test:coverage`**: Generates test coverage reports for all packages.
+- **`pnpm test:coverage`**: Generates test coverage reports for all packages (plain text output).
   - *When to use*: To assess the extent of test coverage and identify untested code paths.
   - *Example*: `pnpm test:coverage`
 
@@ -360,8 +361,51 @@ For packages using Vitest (`openscad-parser`, `openscad-editor`, `openscad-demo`
   - *When to use*: For a complete reset of the development environment.
   - *Example*: `pnpm reset`
 
-- **`pnpm parse`**: (Specific to `tree-sitter-openscad`) Likely used for debugging the grammar by parsing a file.
-- **`pnpm playground`**: (Specific to `tree-sitter-openscad`) Likely used for launching a Tree-sitter playground for the grammar.
+- **`pnpm parse`**: Parse an OpenSCAD file using tree-sitter (plain text output).
+- **`pnpm playground`**: Launch tree-sitter playground for the grammar (plain text output).
+
+### Script Output Configuration
+
+**Important**: All nx scripts and build/test/lint commands now use `env-cmd -e plain` by default for consistent plain text output.
+
+#### Plain Text Output (Default)
+All build, test, lint, and typecheck commands use plain text output by default:
+- ✅ Clean, linear output without loading animations
+- ✅ Perfect for CI/CD environments and IDE integration
+- ✅ Consistent across all packages and commands
+- ✅ No need to remember `:plain` suffixes
+
+#### Interactive Mode
+Development and watch commands remain interactive for better development experience:
+- `dev`, `test:watch`, `serve` commands
+- Provides real-time feedback and user interaction
+- Better for active development workflows
+
+#### Usage Examples
+
+**Development Workflow:**
+```bash
+# Build with plain text output (default)
+pnpm build:parser
+
+# Test with plain text output (default)
+pnpm test:parser
+
+# Lint with plain text output (default)
+pnpm lint:parser
+
+# Development with interactive mode
+pnpm dev:parser
+```
+
+**CI/CD Workflow:**
+```bash
+# All commands use plain text output by default
+pnpm build
+pnpm test
+pnpm lint
+pnpm typecheck
+```
 
 ## Coding Best Practices
 

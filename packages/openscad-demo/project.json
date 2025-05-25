@@ -2,8 +2,8 @@
   "name": "openscad-demo",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/openscad-demo/src",
-  "projectType": "library",
-  "tags": ["demo", "ui"],
+  "projectType": "application",
+  "tags": ["type:application", "scope:demo", "platform:web", "framework:react"],
   "implicitDependencies": ["tree-sitter-openscad"],
   "// targets": "to see all targets run: nx show project openscad-demo --web",
   "targets": {

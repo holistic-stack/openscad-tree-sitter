@@ -6,15 +6,15 @@
   "types": "bindings/node/index.d.ts",
   "browser": "bindings/web/index.js",
   "scripts": {
-    "build": "nx run tree-sitter-openscad:build",
-    "build:node": "nx run tree-sitter-openscad:build:node",
-    "build:wasm": "tree-sitter build --wasm",
+    "build": "env-cmd -e plain tree-sitter generate && env-cmd -e plain tree-sitter build --wasm && env-cmd -e plain node-gyp rebuild",
+    "build:node": "env-cmd -e plain node-gyp rebuild",
+    "build:wasm": "env-cmd -e plain tree-sitter build --wasm",
     "install": "tree-sitter init && tree-sitter generate && npm run build:wasm && node-gyp-build",
-    "prebuildify": "nx run tree-sitter-openscad:prebuildify",
-    "test": "nx run tree-sitter-openscad:test",
-    "parse": "nx run tree-sitter-openscad:parse",
-    "playground": "nx run tree-sitter-openscad:playground",
-    "lint": "nx run tree-sitter-openscad:lint"
+    "prebuildify": "env-cmd -e plain prebuildify --napi --strip",
+    "test": "env-cmd -e plain tree-sitter test",
+    "parse": "env-cmd -e plain tree-sitter parse",
+    "playground": "env-cmd -e plain tree-sitter playground",
+    "lint": "echo 'No linting configured for grammar package'"
   },
   "keywords": [
     "parser",

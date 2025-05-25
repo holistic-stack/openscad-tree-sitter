@@ -41,27 +41,13 @@
         "reportsDirectory": "../../coverage/packages/openscad-parser",
         "configFile": "packages/openscad-parser/vite.config.ts"
       },
-      "dependsOn": [
-        {
-          "target": "build",
-          "projects": "self"
+      "configurations": {
+        "watch": {
+          "watch": true
+        },
+        "coverage": {
+          "coverage": true
         }
-      ]
-    },
-    "test:watch": {
-      "executor": "@nx/vite:test",
-      "options": {
-        "watch": true,
-        "configFile": "packages/openscad-parser/vite.config.ts"
-      }
-    },
-    "test:coverage": {
-      "executor": "@nx/vite:test",
-      "outputs": ["{options.reportsDirectory}"],
-      "options": {
-        "coverage": true,
-        "reportsDirectory": "../../coverage/packages/openscad-parser",
-        "configFile": "packages/openscad-parser/vite.config.ts"
       }
     },
     "lint": {
@@ -85,5 +71,5 @@
       }
     }
   },
-  "tags": ["parser"]
+  "tags": ["type:library", "scope:parser", "platform:node"]
 }

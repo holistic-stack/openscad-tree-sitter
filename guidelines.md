@@ -53,8 +53,9 @@ This project is an Nx monorepo with PNPM workspaces containing packages for pars
 This project follows an incremental development workflow with a strong emphasis on Test-Driven Development (TDD) and automated documentation. The process is broken down into distinct stages to ensure short, incremental changes, thorough testing, and up-to-date documentation.
 
 - Include concrete examples of each OpenSCAD syntax variation in test coverage documentation.
-- Use `pnpm test` to run all tests across the monorepo.
-- Use `pnpm test:grammar` or `pnpm test:parser` to run tests for specific packages.
+- **All commands use plain text output by default** - no need for `:plain` suffixes.
+- Use `pnpm test` to run all tests across the monorepo (plain text output).
+- Use `pnpm test:grammar` or `pnpm test:parser` to run tests for specific packages (plain text output).
 - Use `nx test tree-sitter-openscad` or `nx test openscad-parser` for more granular control.
 - ALWAYS USE TDD, DRY and SRP files principles approach:
 
@@ -211,26 +212,38 @@ describe("OpenSCADParser", () => {
 
 ### Root Package Scripts
 
-- **Build Commands**:
+**All commands use plain text output by default** - no need for `:plain` suffixes.
+
+- **Build Commands (Plain Text Output)**:
   - `pnpm build`: Build all packages
   - `pnpm build:grammar`: Build only the tree-sitter-openscad package
   - `pnpm build:parser`: Build only the openscad-parser package
+  - `pnpm build:editor`: Build only the openscad-editor package
+  - `pnpm build:demo`: Build only the openscad-demo package
 
-- **Test Commands**:
+- **Test Commands (Plain Text Output)**:
   - `pnpm test`: Run all tests
   - `pnpm test:grammar`: Run tests for tree-sitter-openscad
   - `pnpm test:parser`: Run tests for openscad-parser
-  - `pnpm test:watch`: Run tests in watch mode
+  - `pnpm test:editor`: Run tests for openscad-editor
+  - `pnpm test:demo`: Run tests for openscad-demo
   - `pnpm test:coverage`: Run tests with coverage
+  - `pnpm test:parser:file --testFile <path>`: Test specific files
 
 - **Development Commands**:
-  - `pnpm dev`: Run all packages in development mode
-  - `pnpm dev:parser`: Run openscad-parser in development mode
-  - `pnpm graph`: Visualize the dependency graph
-  - `pnpm parse`: Parse an OpenSCAD file
-  - `pnpm playground`: Open the Tree-sitter playground
+  - `pnpm dev`: Run all packages in development mode (interactive)
+  - `pnpm dev:parser`: Run openscad-parser in development mode (interactive)
+  - `pnpm dev:editor`: Run openscad-editor in development mode (interactive)
+  - `pnpm dev:demo`: Run openscad-demo in development mode (interactive)
+  - `pnpm test:watch`: Run tests in watch mode (interactive)
 
-- **Maintenance Commands**:
+- **Utility Commands**:
+  - `pnpm graph`: Visualize the dependency graph (interactive web interface)
+  - `pnpm parse`: Parse an OpenSCAD file (plain text output)
+  - `pnpm playground`: Open the Tree-sitter playground (plain text output)
+  - `pnpm serve:demo`: Serve the demo application (plain text output)
+
+- **Maintenance Commands (Plain Text Output)**:
   - `pnpm lint`: Run linting on all packages
   - `pnpm lint:fix`: Fix linting issues
   - `pnpm typecheck`: Run TypeScript type checking
@@ -239,18 +252,40 @@ describe("OpenSCADParser", () => {
 
 ### Package-Specific Scripts
 
-#### tree-sitter-openscad
+#### tree-sitter-openscad (Plain Text Output)
 
-- `nx build tree-sitter-openscad`: Build the grammar and generate the parser
-- `nx test tree-sitter-openscad`: Run the grammar tests
-- `nx parse tree-sitter-openscad`: Parse an OpenSCAD file
-- `nx playground tree-sitter-openscad`: Open the Tree-sitter playground
+- `pnpm build:grammar`: Build the grammar and generate the parser
+- `pnpm test:grammar`: Run the grammar tests
+- `pnpm parse`: Parse an OpenSCAD file
+- `pnpm playground`: Open the Tree-sitter playground
 
-#### openscad-parser
+#### openscad-parser (Plain Text Output)
 
-- `nx build openscad-parser`: Build the parser package
-- `nx test openscad-parser`: Run the parser tests
-- `nx dev openscad-parser`: Run the parser in development mode
+- `pnpm build:parser`: Build the parser package
+- `pnpm test:parser`: Run the parser tests
+- `pnpm test:parser:file --testFile <path>`: Test specific files
+- `pnpm lint:parser`: Lint the parser package
+- `pnpm typecheck:parser`: Type check the parser package
+- `pnpm dev:parser`: Run the parser in development mode (interactive)
+
+#### openscad-editor (Plain Text Output)
+
+- `pnpm build:editor`: Build the editor package
+- `pnpm test:editor`: Run the editor tests
+- `pnpm test:editor:file --testFile <path>`: Test specific files
+- `pnpm lint:editor`: Lint the editor package
+- `pnpm typecheck:editor`: Type check the editor package
+- `pnpm dev:editor`: Run the editor in development mode (interactive)
+
+#### openscad-demo (Plain Text Output)
+
+- `pnpm build:demo`: Build the demo application
+- `pnpm test:demo`: Run the demo tests
+- `pnpm test:demo:file --testFile <path>`: Test specific files
+- `pnpm lint:demo`: Lint the demo package
+- `pnpm typecheck:demo`: Type check the demo package
+- `pnpm dev:demo`: Run the demo in development mode (interactive)
+- `pnpm serve:demo`: Serve the demo application
 
 ## Coding Best Practices
 

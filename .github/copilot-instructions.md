@@ -80,33 +80,33 @@ This is a monorepo containing a Tree-sitter grammar and parser for the OpenSCAD 
 
 #### Running All Tests
 ```bash
-# Run all tests across all packages
+# Run all tests across all packages (uses plain text output by default)
 pnpm test
 
-# Run tests for a specific package
+# Run tests for a specific package (uses plain text output by default)
 pnpm test:parser
 ```
 
 #### Running Specific Test Files
 ```bash
-# Run a specific test file from the root directory
-pnpm test:parser:file "path/from/package/root/file.test.ts"
+# Run a specific test file from the root directory (uses plain text output by default)
+pnpm test:parser:file --testFile "path/from/package/root/file.test.ts"
 
 # Example:
-pnpm test:parser:file "src/lib/openscad-parser/openscad-parser-visitor.test.ts"
+pnpm test:parser:file --testFile "src/lib/openscad-parser/openscad-parser-visitor.test.ts"
 
 # Run specific tests within a file using the -t flag
-pnpm test:parser:file "path/to/test/file.test.ts" -t "test name pattern"
+pnpm test:parser:file --testFile "path/to/test/file.test.ts" -t "test name pattern"
 ```
 
 #### Test Development
-- Run tests in watch mode while developing:
+- Run tests in watch mode while developing (interactive mode, no plain text):
   ```bash
-  pnpm test:watch:parser
+  pnpm test:watch
   ```
-- Generate coverage reports:
+- Generate coverage reports (uses plain text output by default):
   ```bash
-  pnpm test:coverage:parser
+  pnpm test:coverage
   ```
 
 ## Build and Development
@@ -115,63 +115,72 @@ This project uses PNPM and Nx for managing builds, tests, and development workfl
 
 ### Common Monorepo Commands
 
-These commands operate on all packages:
+These commands operate on all packages and **use plain text output by default**:
 
-- **`pnpm build`**: Build all packages.
-- **`pnpm test`**: Run tests for all packages.
-- **`pnpm lint`**: Lint all packages.
-- **`pnpm lint:fix`**: Attempt to automatically fix lint issues in all packages.
-- **`pnpm check`**: Perform type checking for all packages.
-- **`pnpm dev`**: Run all packages in development/watch mode.
-- **`pnpm test:watch`**: Run tests in watch mode for all packages.
-- **`pnpm test:coverage`**: Generate test coverage reports for all packages.
+- **`pnpm build`**: Build all packages (plain text output).
+- **`pnpm test`**: Run tests for all packages (plain text output).
+- **`pnpm lint`**: Lint all packages (plain text output).
+- **`pnpm lint:fix`**: Attempt to automatically fix lint issues in all packages (plain text output).
+- **`pnpm typecheck`**: Perform type checking for all packages (plain text output).
+- **`pnpm dev`**: Run all packages in development/watch mode (interactive mode).
+- **`pnpm test:watch`**: Run tests in watch mode for all packages (interactive mode).
+- **`pnpm test:coverage`**: Generate test coverage reports for all packages (plain text output).
 
 ### Package-Specific Commands
 
 These commands target individual packages.
 
-**Build:**
-- **`pnpm build:grammar`**: Build `tree-sitter-openscad`.
-- **`pnpm build:parser`**: Build `openscad-parser`.
-- **`pnpm build:editor`**: Build `openscad-editor`.
-- **`pnpm build:demo`**: Build `openscad-demo`.
+**Build (Plain Text Output):**
+- **`pnpm build:grammar`**: Build `tree-sitter-openscad` (plain text output).
+- **`pnpm build:parser`**: Build `openscad-parser` (plain text output).
+- **`pnpm build:editor`**: Build `openscad-editor` (plain text output).
+- **`pnpm build:demo`**: Build `openscad-demo` (plain text output).
 
-**Test:**
-- **`pnpm test:grammar`**: Test `tree-sitter-openscad`.
-- **`pnpm test:parser`**: Test `openscad-parser`.
-- **`pnpm test:editor`**: Test `openscad-editor`.
-- **`pnpm test:demo`**: Test `openscad-demo`.
+**Test (Plain Text Output):**
+- **`pnpm test:grammar`**: Test `tree-sitter-openscad` (plain text output).
+- **`pnpm test:parser`**: Test `openscad-parser` (plain text output).
+- **`pnpm test:editor`**: Test `openscad-editor` (plain text output).
+- **`pnpm test:demo`**: Test `openscad-demo` (plain text output).
 
-**Test Specific File or Pattern (Vitest):**
+**Test Specific File or Pattern (Plain Text Output):**
 When needing to test a specific file or pattern in a Vitest-based package (`openscad-parser`, `openscad-editor`, `openscad-demo`), use the following pattern. The path should be relative to the package's root.
-- **`pnpm test:parser:file --testFile <path/to/your.test.ts>`**: Test a specific file/pattern in `openscad-parser`.
+- **`pnpm test:parser:file --testFile <path/to/your.test.ts>`**: Test a specific file/pattern in `openscad-parser` (plain text output).
   - *Example (single file)*: `pnpm test:parser:file --testFile src/lib/some-module.test.ts`
   - *Example (directory)*: `pnpm test:parser:file --testFile src/lib/ast-nodes/`
   - *Example (pattern)*: `pnpm test:parser:file --testFile "**/my-feature.*.test.ts"`
-- **`pnpm test:editor:file --testFile <path/to/your.test.ts>`**: Test a specific file/pattern in `openscad-editor`.
-- **`pnpm test:demo:file --testFile <path/to/your.test.ts>`**: Test a specific file/pattern in `openscad-demo`.
+- **`pnpm test:editor:file --testFile <path/to/your.test.ts>`**: Test a specific file/pattern in `openscad-editor` (plain text output).
+- **`pnpm test:demo:file --testFile <path/to/your.test.ts>`**: Test a specific file/pattern in `openscad-demo` (plain text output).
 
-**Lint:**
-- **`pnpm lint:grammar`**: Lint `tree-sitter-openscad`.
-- **`pnpm lint:parser`**: Lint `openscad-parser`.
-- **`pnpm lint:editor`**: Lint `openscad-editor`.
-- **`pnpm lint:demo`**: Lint `openscad-demo`.
+**Lint (Plain Text Output):**
+- **`pnpm lint:grammar`**: Lint `tree-sitter-openscad` (plain text output).
+- **`pnpm lint:parser`**: Lint `openscad-parser` (plain text output).
+- **`pnpm lint:editor`**: Lint `openscad-editor` (plain text output).
+- **`pnpm lint:demo`**: Lint `openscad-demo` (plain text output).
 
-**Development/Watch Mode:**
-- **`pnpm dev:parser`**: Run `openscad-parser` in dev mode.
-- **`pnpm dev:editor`**: Run `openscad-editor` in dev mode.
-- **`pnpm dev:demo`**: Run `openscad-demo` in dev mode (starts the demo app).
+**Development/Watch Mode (Interactive):**
+- **`pnpm dev:parser`**: Run `openscad-parser` in dev mode (interactive).
+- **`pnpm dev:editor`**: Run `openscad-editor` in dev mode (interactive).
+- **`pnpm dev:demo`**: Run `openscad-demo` in dev mode (interactive, starts the demo app).
 
-**Type Check:**
-- **`pnpm check:parser`**: Type check `openscad-parser`. (Note: `pnpm check` runs typecheck for all applicable packages).
+**Type Check (Plain Text Output):**
+- **`pnpm typecheck:parser`**: Type check `openscad-parser` (plain text output).
+- **`pnpm typecheck`**: Type check all applicable packages (plain text output).
 
 ### Utility Commands
-- **`pnpm serve:demo`**: Serve the `openscad-demo` application.
-- **`pnpm graph`**: View project dependency graph using Nx.
-- **`pnpm clean`**: Clean build artifacts and `node_modules`.
-- **`pnpm reset`**: Clean and reinstall dependencies (`pnpm clean && pnpm install`).
+- **`pnpm serve:demo`**: Serve the `openscad-demo` application (plain text output).
+- **`pnpm graph`**: View project dependency graph using Nx (interactive web interface).
+- **`pnpm clean`**: Clean build artifacts and `node_modules` (simple operation).
+- **`pnpm reset`**: Clean and reinstall dependencies (simple operation).
+- **`pnpm parse`**: Parse an OpenSCAD file using tree-sitter (plain text output).
+- **`pnpm playground`**: Open tree-sitter playground (plain text output).
 
-When suggesting commands, prefer the `pnpm` script aliases. If a specific file needs to be tested, use the appropriate `:file` suffixed script, e.g., `pnpm test:parser:file --testFile path/to/file.test.ts`. Remember that the `--testFile` path is relative to the specific package's root directory.
+### Script Output Modes
+
+**Plain Text Output (Default)**: All build, test, lint, and typecheck commands use `env-cmd -e plain` by default for clean, linear output without animations. Perfect for CI/CD and IDE integration.
+
+**Interactive Mode**: Development and watch commands (`dev`, `test:watch`, `serve`) remain interactive for better development experience.
+
+When suggesting commands, prefer the `pnpm` script aliases. All commands now use plain text output by default - no need for `:plain` suffixes. If a specific file needs to be tested, use the appropriate `:file` suffixed script, e.g., `pnpm test:parser:file --testFile path/to/file.test.ts`. Remember that the `--testFile` path is relative to the specific package's root directory.
 
 ## OpenSCAD Language Features
 
