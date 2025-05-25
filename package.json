@@ -45,7 +45,8 @@
     "graph": "nx graph",
     "parse": "nx parse tree-sitter-openscad",
     "playground": "nx playground tree-sitter-openscad",
-    "clean:pwsh": "Remove-Item -Recurse -Force node_modules -ErrorAction SilentlyContinue; Remove-Item -Recurse -Force packages/*/node_modules -ErrorAction SilentlyContinue; Remove-Item -Recurse -Force packages/*/dist -ErrorAction SilentlyContinue"
+    "clean": "shx rm -rf node_modules && shx rm -rf packages/*/node_modules && shx rm -rf packages/*/dist && shx rm -rf dist",
+    "reset": "pnpm clean && pnpm install"
   },
   "keywords": [
     "openscad",
@@ -58,6 +59,7 @@
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",
   "devDependencies": {
+    "shx": "^0.3.4",
     "@babel/core": "^7.14.5",
     "@babel/preset-react": "^7.14.5",
     "@eslint/eslintrc": "^3.0.2",
