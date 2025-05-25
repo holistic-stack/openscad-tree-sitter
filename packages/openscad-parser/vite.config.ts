@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
+import tsconfigPaths from 'vite-tsconfig-paths';
 import { join, resolve } from 'path';
 import { copyFileSync, existsSync, mkdirSync } from 'fs';
 
@@ -36,6 +37,7 @@ export default defineConfig({
       tsconfigPath: join(__dirname, 'tsconfig.json'),
     }),
     copyWasmFile(),
+    tsconfigPaths(),
   ],
   build: {
     lib: {
