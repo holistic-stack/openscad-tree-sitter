@@ -148,7 +148,30 @@ export function extractArguments(argsNode: TSNode): ast.Parameter[] {
     console.log(`[extractArguments] No structured args found, trying to parse text directly: ${argsNode.text}`);
 
     // Split the text by commas
-{{ ... }}
+    const argTexts = argsNode.text.split(',');
+    for (const argText of argTexts) {
+      const trimmedArgText = argText.trim();
+      if (trimmedArgText) {
+        // This is a very naive way to parse, ideally we'd re-invoke a mini-parser or expression parser here.
+        // For now, let's assume it's a literal or identifier if it gets to this fallback.
+        // This part would need significant improvement if relied upon.
+        let value: ast.ParameterValue | undefined;
+        if (!isNaN(parseFloat(trimmedArgText))) {
+          value = parseFloat(trimmedArgText);
+        } else if (trimmedArgText.toLowerCase() === 'true') {
+          value = true;
+        } else if (trimmedArgText.toLowerCase() === 'false') {
+          value = false;
+        } else if (trimmedArgText.startsWith('"') && trimmedArgText.endsWith('"')) {
+          value = trimmedArgText.slice(1, -1);
+        } else {
+          // Assuming identifier or some other complex expression not handled here
+          console.warn(`[extractArguments] Fallback text parsing cannot handle complex argument: ${trimmedArgText}`);
+        }
+        if (value !== undefined) {
+          args.push({ value });
+        }
+      }
     }
   }
   */

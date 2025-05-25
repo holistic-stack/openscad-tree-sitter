@@ -9,6 +9,7 @@ import {
 } from '../extractors/parameter-extractor';
 import { getLocation } from '../utils/location-utils';
 import { findDescendantOfType } from '../utils/node-utils';
+import { ErrorHandler } from '../../error-handling'; // Added ErrorHandler import
 
 /**
  * Visitor for transform operations (translate, rotate, scale, mirror)
@@ -20,8 +21,13 @@ export class TransformVisitor extends BaseASTVisitor {
    * Create a new TransformVisitor
    * @param source The source code
    * @param compositeVisitor Optional composite visitor for delegating child processing
+   * @param errorHandler The error handler instance
    */
-  constructor(source: string, private compositeVisitor?: ASTVisitor) {
+  constructor(
+    source: string,
+    private compositeVisitor: ASTVisitor | undefined, // Made explicit undefined for clarity with optional errorHandler
+    protected errorHandler: ErrorHandler
+  ) {
     super(source);
   }
 

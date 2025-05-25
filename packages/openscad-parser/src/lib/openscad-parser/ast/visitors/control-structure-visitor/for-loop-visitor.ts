@@ -14,6 +14,7 @@ import * as ast from '../../ast-types';
 import { getLocation } from '../../utils/location-utils';
 import { extractArguments } from '../../extractors/argument-extractor';
 import { ExpressionVisitor } from '../expression-visitor';
+import { ErrorHandler } from '../../../error-handling'; // Added ErrorHandler import
 
 /**
  * Visitor for for loop statements
@@ -24,9 +25,10 @@ export class ForLoopVisitor {
   /**
    * Create a new ForLoopVisitor
    * @param source The source code (optional, defaults to empty string)
+   * @param errorHandler The error handler instance
    */
-  constructor(source: string = '') {
-    this.expressionVisitor = new ExpressionVisitor(source);
+  constructor(source: string = '', protected errorHandler: ErrorHandler) {
+    this.expressionVisitor = new ExpressionVisitor(source, errorHandler);
   }
 
   /**

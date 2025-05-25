@@ -4,6 +4,7 @@ import { BaseASTVisitor } from './base-ast-visitor';
 import { getLocation } from '../utils/location-utils';
 import { findDescendantOfType } from '../utils/node-utils';
 import { extractArguments } from '../extractors/argument-extractor';
+import { ErrorHandler } from '../../error-handling'; // Added ErrorHandler import
 
 /**
  * Visitor for CSG operations (union, difference, intersection, etc.)
@@ -11,6 +12,10 @@ import { extractArguments } from '../extractors/argument-extractor';
  * @file Defines the CSGVisitor class for processing CSG operation nodes
  */
 export class CSGVisitor extends BaseASTVisitor {
+  constructor(source: string, protected errorHandler: ErrorHandler) {
+    super(source); // BaseASTVisitor constructor takes source
+  }
+
   /**
    * Mock children for testing purposes
    * This property is only used in tests and should not be used in production code

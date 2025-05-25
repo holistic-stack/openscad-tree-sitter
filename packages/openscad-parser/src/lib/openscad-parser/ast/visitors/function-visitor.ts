@@ -6,6 +6,7 @@ import {
   extractModuleParameters,
   extractModuleParametersFromText,
 } from '../extractors/module-parameter-extractor';
+import { ErrorHandler } from '../../error-handling'; // Added ErrorHandler import
 
 /**
  * Visitor for function definitions and calls
@@ -13,6 +14,10 @@ import {
  * @file Defines the FunctionVisitor class for processing function nodes
  */
 export class FunctionVisitor extends BaseASTVisitor {
+  constructor(source: string, protected errorHandler: ErrorHandler) {
+    super(source);
+  }
+
   /**
    * Create an AST node for a specific function
    * @param node The node to process

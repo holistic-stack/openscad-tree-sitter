@@ -11,6 +11,7 @@ import { findDescendantOfType } from '../utils/node-utils';
 import { extractArguments } from '../extractors/argument-extractor';
 import { extractCubeNode } from '../extractors/cube-extractor';
 import { extractSphereNode } from '../extractors/sphere-extractor';
+import { ErrorHandler } from '../../error-handling'; // Added ErrorHandler import
 
 /**
  * Visitor for primitive shapes (cube, sphere, cylinder, etc.)
@@ -18,6 +19,10 @@ import { extractSphereNode } from '../extractors/sphere-extractor';
  * @file Defines the PrimitiveVisitor class for processing primitive shape nodes
  */
 export class PrimitiveVisitor extends BaseASTVisitor {
+  constructor(source: string, protected errorHandler: ErrorHandler) {
+    super(source); // Assuming BaseASTVisitor constructor takes source
+  }
+
   /**
    * Create an AST node for a specific function
    * @param node The node to process
