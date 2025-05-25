@@ -3,15 +3,18 @@ import { OpenscadParser } from '../../openscad-parser';
 import { ExpressionVisitor } from './expression-visitor';
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
+import { ErrorHandler } from '../../error-handling';
 
 describe('ExpressionVisitor Integration', () => {
   let parser: OpenscadParser;
+  let errorHandler: ErrorHandler;
   let visitor: ExpressionVisitor;
 
   beforeEach(async () => {
     parser = new OpenscadParser();
     await parser.init('./tree-sitter-openscad.wasm');
-    visitor = new ExpressionVisitor('');
+    errorHandler = new ErrorHandler();
+    visitor = new ExpressionVisitor('', errorHandler);
   });
 
   afterEach(() => {

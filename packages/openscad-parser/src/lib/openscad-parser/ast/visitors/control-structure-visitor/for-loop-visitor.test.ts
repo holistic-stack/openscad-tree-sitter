@@ -9,15 +9,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as ast from '../../ast-types';
 import { ControlStructureVisitor } from '../control-structure-visitor';
 import { printNodeStructure } from '../../utils/debug-utils';
+import { ErrorHandler } from '../../../error-handling';
 
 describe('ForLoopVisitor', () => {
   let parser: OpenscadParser;
+  let errorHandler: ErrorHandler;
   let visitor: ControlStructureVisitor;
 
   beforeEach(async () => {
     parser = new OpenscadParser();
     await parser.init('./tree-sitter-openscad.wasm');
-    visitor = new ControlStructureVisitor();
+    errorHandler = new ErrorHandler();
+    visitor = new ControlStructureVisitor('', errorHandler);
   });
 
   afterEach(() => {

@@ -348,7 +348,8 @@ export class FunctionCallVisitor extends BaseASTVisitor {
     });
 
     return {
-      type: 'function_call',
+      type: 'expression',
+      expressionType: 'function_call',
       name: functionName,
       arguments: parameters,
       location: getLocation(node),
@@ -484,9 +485,10 @@ export class FunctionCallVisitor extends BaseASTVisitor {
       `[FunctionCallVisitor.createASTNodeForFunction] Processing function: ${functionName}`
     );
 
-    // Create a function call node
+    // Create a function call expression node
     return {
-      type: 'function_call',
+      type: 'expression',
+      expressionType: 'function_call',
       name: functionName,
       arguments: args,
       location: getLocation(node),

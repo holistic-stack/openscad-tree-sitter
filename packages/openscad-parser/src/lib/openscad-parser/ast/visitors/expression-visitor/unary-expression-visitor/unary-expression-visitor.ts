@@ -2,25 +2,38 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../../../ast-types';
 import { BaseASTVisitor } from '../../base-ast-visitor';
 import { ErrorHandler } from '../../../../error-handling';
-import { ExpressionVisitor } from '../expression-visitor';
+import { ExpressionVisitor } from '../../expression-visitor';
+import { getLocation } from '../../../utils/location-utils';
 
 export class UnaryExpressionVisitor extends BaseASTVisitor {
   constructor(
     protected parentVisitor: ExpressionVisitor,
     protected errorHandler: ErrorHandler
   ) {
-    super(parentVisitor.source, errorHandler);
+    super('', errorHandler); // Use empty string for source since we get it from parent
+  }
+
+  // Implement the abstract method required by BaseASTVisitor
+  protected createASTNodeForFunction(
+    node: TSNode,
+    functionName: string,
+    args: ast.Parameter[]
+  ): ast.ASTNode | null {
+    // Unary expressions don't handle function calls
+    return null;
   }
 
   visit(node: TSNode): ast.UnaryExpressionNode | null {
     if (node.type !== 'unary_expression') {
-      this.errorHandler.handleError(
-        new ast.ParserError(
-          `Expected 'unary_expression' but got '${node.type}'`,
-          this.getLocation(node),
-          'UnaryExpressionVisitorError'
-        )
+      const error = this.errorHandler.createParserError(
+        `Expected 'unary_expression' but got '${node.type}'`,
+        {
+          line: getLocation(node).start.line,
+          column: getLocation(node).start.column,
+          nodeType: node.type
+        }
       );
+      this.errorHandler.report(error);
       return null;
     }
     // Tree-sitter grammar might use 'argument' or 'operand' for the operand node
@@ -29,13 +42,15 @@ export class UnaryExpressionVisitor extends BaseASTVisitor {
     const operandNode = node.childForFieldName('argument'); // Or 'operand'
 
     if (!operatorNode || !operandNode) {
-      this.errorHandler.handleError(
-        new ast.ParserError(
-          `Malformed unary_expression: missing operator or operand. Operator: ${operatorNode}, Operand: ${operandNode}`,
-          this.getLocation(node),
-          'UnaryExpressionVisitorError'
-        )
+      const error = this.errorHandler.createParserError(
+        `Malformed unary_expression: missing operator or operand. Operator: ${operatorNode}, Operand: ${operandNode}`,
+        {
+          line: getLocation(node).start.line,
+          column: getLocation(node).start.column,
+          nodeType: node.type
+        }
       );
+      this.errorHandler.report(error);
       return null;
     }
 
@@ -45,22 +60,25 @@ export class UnaryExpressionVisitor extends BaseASTVisitor {
     const operandAST = this.parentVisitor.visitExpression(operandNode);
 
     if (!operandAST) {
-      this.errorHandler.handleError(
-        new ast.ParserError(
-          `Failed to parse operand in unary expression.`,
-          this.getLocation(operandNode), // Location of the problematic operand
-          'UnaryExpressionVisitorError'
-        )
+      const error = this.errorHandler.createParserError(
+        `Failed to parse operand in unary expression.`,
+        {
+          line: getLocation(operandNode).start.line,
+          column: getLocation(operandNode).start.column,
+          nodeType: operandNode.type
+        }
       );
+      this.errorHandler.report(error);
       return null;
     }
 
     return {
       type: 'expression',
-      expressionType: 'unary_expression',
+      expressionType: 'unary',
       operator: operator as ast.UnaryOperator, // Cast, assuming grammar aligns
       operand: operandAST,
-      location: this.getLocation(node),
+      prefix: true, // OpenSCAD unary operators are always prefix
+      location: getLocation(node),
     };
   }
 }

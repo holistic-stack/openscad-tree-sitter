@@ -5,15 +5,18 @@ import * as ast from '../ast-types';
 import { TransformVisitor } from './transform-visitor';
 import { extractArguments } from '../../ast/extractors/argument-extractor';
 import { getLocation } from '../utils/location-utils';
+import { ErrorHandler } from '../../error-handling';
 
 describe('TransformVisitor', () => {
   let parser: OpenscadParser;
   let visitor: TransformVisitor;
+  let errorHandler: ErrorHandler;
 
   beforeEach(async () => {
     parser = new OpenscadParser();
     await parser.init('/tree-sitter-openscad.wasm');
-    visitor = new TransformVisitor('');
+    errorHandler = new ErrorHandler();
+    visitor = new TransformVisitor('', undefined, errorHandler);
   });
 
   afterEach(() => {
@@ -53,7 +56,7 @@ describe('TransformVisitor', () => {
     it('should parse translate([10, 20, 30]) sphere(5);', () => {
       const code = 'translate([10, 20, 30]) sphere(5);';
       // Update the visitor with the current code being tested
-      visitor = new TransformVisitor(code);
+      visitor = new TransformVisitor(code, undefined, errorHandler);
       const transformCstNode = getTransformCstNode(code, 'translate');
       expect(
         transformCstNode,
@@ -73,7 +76,7 @@ describe('TransformVisitor', () => {
     it('should parse translate(v = [1, 2, 3]) cube(1);', () => {
       const code = 'translate(v = [1, 2, 3]) cube(1);';
       // Update the visitor with the current code being tested
-      visitor = new TransformVisitor(code);
+      visitor = new TransformVisitor(code, undefined, errorHandler);
       const transformCstNode = getTransformCstNode(code, 'translate');
       expect(
         transformCstNode,
@@ -93,7 +96,7 @@ describe('TransformVisitor', () => {
     it('should parse translate([10, 20]) /* 2D vector */ circle(5);', () => {
       const code = 'translate([10, 20]) circle(5);';
       // Update the visitor with the current code being tested
-      visitor = new TransformVisitor(code);
+      visitor = new TransformVisitor(code, undefined, errorHandler);
       const transformCstNode = getTransformCstNode(code, 'translate');
       expect(
         transformCstNode,
@@ -113,7 +116,7 @@ describe('TransformVisitor', () => {
     it('should parse translate(5) /* single number */ cylinder(h=10, r=1);', () => {
       const code = 'translate(5) cylinder(h=10, r=1);';
       // Update the visitor with the current code being tested
-      visitor = new TransformVisitor(code);
+      visitor = new TransformVisitor(code, undefined, errorHandler);
       const transformCstNode = getTransformCstNode(code, 'translate');
       expect(
         transformCstNode,
@@ -134,7 +137,7 @@ describe('TransformVisitor', () => {
     it('should parse translate([-5, 10.5, 0]) text("hello");', () => {
       const code = 'translate([-5, 10.5, 0]) text("hello");';
       // Update the visitor with the current code being tested
-      visitor = new TransformVisitor(code);
+      visitor = new TransformVisitor(code, undefined, errorHandler);
       const transformCstNode = getTransformCstNode(code, 'translate');
       expect(
         transformCstNode,
@@ -155,7 +158,7 @@ describe('TransformVisitor', () => {
     it('should parse translate([-5, 10.5]) polygon();', () => {
       const code = 'translate([-5, 10.5]) polygon();';
       // Update the visitor with the current code being tested
-      visitor = new TransformVisitor(code);
+      visitor = new TransformVisitor(code, undefined, errorHandler);
       const transformCstNode = getTransformCstNode(code, 'translate');
       expect(
         transformCstNode,

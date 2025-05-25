@@ -2,13 +2,16 @@ import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import { ModuleVisitor } from './module-visitor';
 import { OpenscadParser } from '../../openscad-parser';
 import * as ast from '../ast-types';
+import { ErrorHandler } from '../../error-handling';
 
 describe('ModuleVisitor', () => {
   let parser: OpenscadParser;
+  let errorHandler: ErrorHandler;
 
   beforeAll(async () => {
     parser = new OpenscadParser();
     await parser.init('./tree-sitter-openscad.wasm');
+    errorHandler = new ErrorHandler();
   });
 
   afterAll(() => {
@@ -60,7 +63,7 @@ describe('ModuleVisitor', () => {
           }, text=${moduleDefNode.text.substring(0, 30)}`
         );
 
-        const visitor = new ModuleVisitor(code);
+        const visitor = new ModuleVisitor(code, errorHandler);
         const result = visitor.visitModuleDefinition(moduleDefNode);
 
         expect(result).not.toBeNull();
@@ -101,7 +104,7 @@ describe('ModuleVisitor', () => {
           }, text=${moduleDefNode.text.substring(0, 30)}`
         );
 
-        const visitor = new ModuleVisitor(code);
+        const visitor = new ModuleVisitor(code, errorHandler);
         const result = visitor.visitModuleDefinition(moduleDefNode);
 
         expect(result).not.toBeNull();
@@ -142,7 +145,7 @@ describe('ModuleVisitor', () => {
           }, text=${moduleDefNode.text.substring(0, 30)}`
         );
 
-        const visitor = new ModuleVisitor(code);
+        const visitor = new ModuleVisitor(code, errorHandler);
         const result = visitor.visitModuleDefinition(moduleDefNode);
 
         expect(result).not.toBeNull();
@@ -186,7 +189,7 @@ describe('ModuleVisitor', () => {
           }, text=${moduleDefNode.text.substring(0, 30)}`
         );
 
-        const visitor = new ModuleVisitor(code);
+        const visitor = new ModuleVisitor(code, errorHandler);
         const result = visitor.visitModuleDefinition(moduleDefNode);
 
         expect(result).not.toBeNull();
@@ -244,7 +247,7 @@ describe('ModuleVisitor', () => {
           }, text=${moduleInstNode.text.substring(0, 30)}`
         );
 
-        const visitor = new ModuleVisitor(code);
+        const visitor = new ModuleVisitor(code, errorHandler);
         // Use visitStatement instead of visitModuleInstantiation for statement nodes
         const result = visitor.visitStatement(moduleInstNode);
 
@@ -287,7 +290,7 @@ describe('ModuleVisitor', () => {
           }, text=${moduleInstNode.text.substring(0, 30)}`
         );
 
-        const visitor = new ModuleVisitor(code);
+        const visitor = new ModuleVisitor(code, errorHandler);
         // Use visitStatement instead of visitModuleInstantiation for statement nodes
         const result = visitor.visitStatement(moduleInstNode);
 

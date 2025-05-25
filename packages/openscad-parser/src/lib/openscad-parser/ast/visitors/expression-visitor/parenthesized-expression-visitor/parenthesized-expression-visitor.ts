@@ -2,25 +2,38 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../../../ast-types';
 import { BaseASTVisitor } from '../../base-ast-visitor';
 import { ErrorHandler } from '../../../../error-handling';
-import { ExpressionVisitor } from '../expression-visitor';
+import { ExpressionVisitor } from '../../expression-visitor';
+import { getLocation } from '../../../utils/location-utils';
 
 export class ParenthesizedExpressionVisitor extends BaseASTVisitor {
   constructor(
     protected parentVisitor: ExpressionVisitor,
     protected errorHandler: ErrorHandler
   ) {
-    super(parentVisitor.source, errorHandler);
+    super('', errorHandler); // Use empty string for source since we get it from parent
+  }
+
+  // Implement the abstract method required by BaseASTVisitor
+  protected createASTNodeForFunction(
+    node: TSNode,
+    functionName: string,
+    args: ast.Parameter[]
+  ): ast.ASTNode | null {
+    // Parenthesized expressions don't handle function calls
+    return null;
   }
 
   visit(node: TSNode): ast.ExpressionNode | null { // Returns the inner expression's AST node
     if (node.type !== 'parenthesized_expression') {
-      this.errorHandler.handleError(
-        new ast.ParserError(
-          `Expected 'parenthesized_expression' but got '${node.type}'`,
-          this.getLocation(node),
-          'ParenthesizedExpressionVisitorError'
-        )
+      const error = this.errorHandler.createParserError(
+        `Expected 'parenthesized_expression' but got '${node.type}'`,
+        {
+          line: getLocation(node).start.line,
+          column: getLocation(node).start.column,
+          nodeType: node.type
+        }
       );
+      this.errorHandler.report(error);
       return null;
     }
     // The Tree-sitter grammar for parenthesized_expression should have a child
@@ -29,13 +42,15 @@ export class ParenthesizedExpressionVisitor extends BaseASTVisitor {
     const innerExpressionNode = node.childForFieldName('expression') || node.namedChild(0);
 
     if (!innerExpressionNode) {
-      this.errorHandler.handleError(
-        new ast.ParserError(
-          `Malformed parenthesized_expression: missing inner expression.`,
-          this.getLocation(node),
-          'ParenthesizedExpressionVisitorError'
-        )
+      const error = this.errorHandler.createParserError(
+        `Malformed parenthesized_expression: missing inner expression.`,
+        {
+          line: getLocation(node).start.line,
+          column: getLocation(node).start.column,
+          nodeType: node.type
+        }
       );
+      this.errorHandler.report(error);
       return null;
     }
 

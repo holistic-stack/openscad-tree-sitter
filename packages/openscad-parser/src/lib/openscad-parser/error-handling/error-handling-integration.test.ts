@@ -7,7 +7,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { ErrorHandler } from './error-handler.ts';
 import { Logger } from './logger.ts';
 import { RecoveryStrategyRegistry } from './recovery-strategy-registry.ts';
-import { Severity, ErrorCode } from './types/error-types.ts';
+import { Severity, ErrorCode, ParserError } from './types/error-types.ts';
 
 describe('Error Handling Integration', () => {
   let errorHandler: ErrorHandler;
@@ -54,12 +54,9 @@ describe('Error Handling Integration', () => {
     });
 
     it('should filter errors by severity', () => {
-      const debugError = errorHandler.createParserError('Debug message', {});
-      debugError.severity = Severity.DEBUG;
-
-      const warningError = errorHandler.createValidationError('Warning message', {});
-      warningError.severity = Severity.WARNING;
-
+      // Create errors with specific severities using the ParserError constructor directly
+      const debugError = new ParserError('Debug message', ErrorCode.INTERNAL_ERROR, Severity.DEBUG, {});
+      const warningError = new ParserError('Warning message', ErrorCode.VALIDATION_ERROR, Severity.WARNING, {});
       const errorError = errorHandler.createSyntaxError('Error message', {});
 
       errorHandler.report(debugError);

@@ -67,14 +67,14 @@ describe('CompositeVisitor', () => {
 
     // Create a composite visitor with primitive, transform, and CSG visitors
     const primitiveVisitor = new PrimitiveVisitor('', mockErrorHandler);
-    const transformVisitor = new TransformVisitor('', mockErrorHandler);
+    const transformVisitor = new TransformVisitor('', undefined, mockErrorHandler);
     const csgVisitor = new CSGVisitor('', mockErrorHandler);
 
     visitor = new CompositeVisitor([
       primitiveVisitor,
       transformVisitor,
       csgVisitor,
-    ]);
+    ], mockErrorHandler);
 
     // Create a test-accessible method to get visitors
     (visitor as any).getVisitor = (index: number) => {

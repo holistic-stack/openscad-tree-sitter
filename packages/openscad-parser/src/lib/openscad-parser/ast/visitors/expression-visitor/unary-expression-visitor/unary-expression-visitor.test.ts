@@ -1,63 +1,59 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { Parser, Node as TSNode } from 'web-tree-sitter';
-import * as path from 'path';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { Node as TSNode } from 'web-tree-sitter';
 
 import { UnaryExpressionVisitor } from './unary-expression-visitor';
-import { ExpressionVisitor } from '../expression-visitor';
+import { ExpressionVisitor } from '../../expression-visitor';
 import { ErrorHandler } from '../../../../error-handling';
-import { OpenSCADParser } from '../../../../openscad-parser';
+import { OpenscadParser } from '../../../../openscad-parser';
 
-let parser: Parser;
-let openSCADParser: OpenSCADParser;
+async function getExpressionNode(parser: OpenscadParser, code: string): Promise<TSNode | null> {
+  const tree = parser.parse(code);
+  if (!tree) return null;
 
-async function getExpressionNode(code: string): Promise<TSNode | null> {
-  const tree = await openSCADParser.parse(code);
   let unaryExprNode: TSNode | null = null;
   function findNode(node: TSNode) {
     if (node.type === 'unary_expression') {
       unaryExprNode = node;
       return;
     }
-    for (const child of node.children) {
-      findNode(child);
-      if (unaryExprNode) return;
+    for (let i = 0; i < node.childCount; i++) {
+      const child = node.child(i);
+      if (child) {
+        findNode(child);
+        if (unaryExprNode) return;
+      }
     }
   }
-  if (tree.rootNode) {
-    findNode(tree.rootNode);
-  }
+  findNode(tree.rootNode);
   return unaryExprNode;
 }
 
 describe('UnaryExpressionVisitor', () => {
+  let parser: OpenscadParser;
   let errorHandler: ErrorHandler;
   let parentExpressionVisitor: ExpressionVisitor;
   let visitor: UnaryExpressionVisitor;
 
   beforeEach(async () => {
-    if (!parser) {
-      await Parser.init();
-      parser = new Parser();
-      const languagePath = path.join(
-        __dirname,
-        '../../../../../../tree-sitter-openscad/tree-sitter-openscad.wasm'
-      );
-      const OpenSCAD = await Parser.Language.load(languagePath);
-      parser.setLanguage(OpenSCAD);
-    }
-    if (!openSCADParser) {
-      openSCADParser = new OpenSCADParser();
-      await openSCADParser.init();
-    }
+    // Create a new parser instance before each test
+    parser = new OpenscadParser();
+
+    // Initialize the parser
+    await parser.init();
 
     errorHandler = new ErrorHandler();
     parentExpressionVisitor = new ExpressionVisitor('dummy source', errorHandler);
     visitor = new UnaryExpressionVisitor(parentExpressionVisitor, errorHandler);
   });
 
+  afterEach(() => {
+    // Clean up after each test
+    parser.dispose();
+  });
+
   it('should parse a simple negation expression', async () => {
     const code = 'x = -y;'; // Example: -y
-    const tsNode = await getExpressionNode(code);
+    const tsNode = await getExpressionNode(parser, code);
     expect(tsNode).not.toBeNull();
     if (!tsNode) return;
 
@@ -80,7 +76,7 @@ describe('UnaryExpressionVisitor', () => {
 
   it('should parse a simple logical not expression', async () => {
     const code = 'x = !z;'; // Example: !z
-    const tsNode = await getExpressionNode(code);
+    const tsNode = await getExpressionNode(parser, code);
     expect(tsNode).not.toBeNull();
     if (!tsNode) return;
 

@@ -3,9 +3,30 @@
 ## 2025-01-08: Test Infrastructure Modernization with Real Parser Pattern - IN PROGRESS
 
 ### Current Status
-- **Phase**: Test Infrastructure Modernization (In Progress)
-- **Compilation Errors**: Reduced from 173 to 121 (52 errors fixed - 30% improvement)
-- **Focus**: Systematic application of real parser pattern to eliminate mocks
+- **Phase**: Test Infrastructure Modernization (90% Complete)
+- **Compilation Errors**: Reduced from 173 to ~25-30 (145+ errors fixed - 90% improvement)
+- **Focus**: Complete remaining constructor parameter issues and complex test refactoring
+
+### 🎉 Major Breakthrough: Expression Sub-Visitor Infrastructure COMPLETED
+
+#### Expression Sub-Visitor Infrastructure (100% Complete)
+- ✅ **Fixed Import Path Issues**: Corrected all `'../expression-visitor'` to `'../../expression-visitor'` in sub-visitors
+- ✅ **Added Missing Abstract Methods**: Implemented `createASTNodeForFunction` in all expression sub-visitors
+- ✅ **Fixed Error Handling Format**: Updated from object literals to proper `ParserError` instances using `errorHandler.createParserError()` and `errorHandler.report()`
+- ✅ **Fixed SourceLocation Access**: Updated from `getLocation(node).line` to `getLocation(node).start.line`
+- ✅ **Fixed AST Type Issues**:
+  - Updated `consequence`/`alternative` to `thenBranch`/`elseBranch` in conditional expressions
+  - Added missing `prefix: true` property to unary expressions
+  - Fixed `expressionType` values to match AST type definitions
+- ✅ **Enabled Sub-Visitors**: Updated main `ExpressionVisitor` to actually use sub-visitors instead of returning null
+- ✅ **Fixed Constructor Issues**: Updated sub-visitor constructors to pass `this` (ExpressionVisitor instance) instead of `source` string
+
+#### Files Successfully Completed
+1. **binary-expression-visitor.ts**: Complete infrastructure overhaul
+2. **conditional-expression-visitor.ts**: Complete infrastructure overhaul
+3. **parenthesized-expression-visitor.ts**: Complete infrastructure overhaul
+4. **unary-expression-visitor.ts**: Complete infrastructure overhaul
+5. **expression-visitor.ts**: Enabled all sub-visitors and fixed delegation
 
 ### Major Accomplishments
 
@@ -64,17 +85,27 @@
 
 ### Remaining Work
 
-#### Critical Issues to Address (121 errors)
-1. **Constructor Parameter Issues**: ~70+ test files need ErrorHandler parameters
-2. **Import Path Issues**: Several test files have incorrect import paths
-3. **Type Mismatch Issues**: Some error context properties have type conflicts
-4. **Missing Abstract Method Implementations**: Some visitor classes missing required methods
+#### ✅ COMPLETED Major Fixes This Session
+1. **✅ Function Call Visitor AST Type Issues**: Fixed all `Type '"function_call"' is not assignable to type '"expression"'` errors
+2. **✅ Error Handling Strategy Type Issues**: Fixed all string vs string[] conflicts in type-mismatch-strategy.test.ts
+3. **✅ Major Constructor Parameter Issues**: Applied real parser pattern to 8 critical test files:
+   - function-call-visitor.test.ts, function-visitor.test.ts, module-visitor.test.ts
+   - primitive-visitor.test.ts, query-visitor.test.ts, composite-visitor.test.ts
+   - transform-visitor.test.ts, csg-visitor.test.ts
+
+#### Remaining Critical Issues (~25-30 errors)
+1. **Remaining Constructor Parameter Issues**: ~8-10 test files still need ErrorHandler parameters
+   - Control structure visitors: for-loop-visitor.test.ts, if-else-visitor.test.ts
+   - Expression visitors: expression-visitor.*.test.ts, expression sub-visitor tests
+2. **Complex Test Refactoring**: binary-expression-visitor.test.ts needs major refactoring (uses old AST approach)
+3. **Language Import Issues**: Fix `Property 'Language' does not exist on type 'typeof Parser'` errors
+4. **Integration Issues**: error-handling-integration.test.ts, parser-setup.ts type issues
 
 #### Next Phase Priorities
-1. **Complete Real Parser Pattern Application**: Apply to remaining ~70+ test files
-2. **Fix Import Path Issues**: Correct relative import paths in test files
-3. **Resolve Type Mismatches**: Fix remaining type compatibility issues
-4. **Implement Missing Abstract Methods**: Complete visitor class implementations
+1. **Complete Constructor Parameter Fixes**: Apply real parser pattern to remaining ~8-10 test files
+2. **Refactor Complex Tests**: Major refactoring of binary-expression-visitor.test.ts
+3. **Fix Language Import Issues**: Resolve Parser.Language import problems
+4. **Complete Integration Fixes**: Fix readonly property and type compatibility issues
 
 ### Performance Impact
 - Real parser instances add minimal overhead to test execution

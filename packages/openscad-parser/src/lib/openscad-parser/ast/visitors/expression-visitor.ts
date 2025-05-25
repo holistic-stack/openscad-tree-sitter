@@ -59,19 +59,19 @@ export class ExpressionVisitor extends BaseASTVisitor {
     super(source, errorHandler);
     this.functionCallVisitor = new FunctionCallVisitor(source, errorHandler);
     this.binaryExpressionVisitor = new BinaryExpressionVisitor(
-      source,
+      this,
       errorHandler
     );
     this.unaryExpressionVisitor = new UnaryExpressionVisitor(
-      source,
+      this,
       errorHandler
     );
     this.conditionalExpressionVisitor = new ConditionalExpressionVisitor(
-      source,
+      this,
       errorHandler
     );
     this.parenthesizedExpressionVisitor = new ParenthesizedExpressionVisitor(
-      source,
+      this,
       errorHandler
     );
   }
@@ -233,8 +233,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
     );
 
     // Delegate to the binary expression visitor
-    // return this.binaryExpressionVisitor.visitBinaryExpression(node); // TODO: Enable when TS visitor is ready
-    return null;
+    return this.binaryExpressionVisitor.visit(node);
   }
 
   /**
@@ -253,8 +252,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
     );
 
     // Delegate to the unary expression visitor
-    // return this.unaryExpressionVisitor.visit(node); // TODO: Enable when TS visitor is ready
-    return null;
+    return this.unaryExpressionVisitor.visit(node);
   }
 
   /**
@@ -275,8 +273,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
     );
 
     // Delegate to the conditional expression visitor
-    // return this.conditionalExpressionVisitor.visitConditionalExpression(node); // TODO: Enable when TS visitor is ready
-    return null;
+    return this.conditionalExpressionVisitor.visit(node);
   }
 
   /**
@@ -294,8 +291,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
       node
     );
     // Delegate to the parenthesized expression visitor
-    // return this.parenthesizedExpressionVisitor.visitParenthesizedExpression(node); // TODO: Enable when TS visitor is ready
-    return null;
+    return this.parenthesizedExpressionVisitor.visit(node);
   }
 
   // --- Start of new stub methods ---

@@ -7,13 +7,6 @@
     "types": ["node", "vite/client", "vitest/globals", "vitest"]
   },
   "files": [],
-  "references": [
-    {
-      "path": "./packages/tree-sitter-openscad/tsconfig.json"
-    },
-    {
-      "path": "./packages/openscad-parser/tsconfig.json"
-    }
-  ],
+  "references": [],
   "extends": "./tsconfig.base.json"
 }

@@ -1,11 +1,14 @@
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { CSGVisitor } from './csg-visitor';
 import { OpenscadParser } from '../../openscad-parser';
 import { Node as TSNode } from 'web-tree-sitter';
 import { findDescendantOfType } from '../utils/node-utils';
+import { ErrorHandler } from '../../error-handling';
 
 describe('CSGVisitor', () => {
   let parser: OpenscadParser;
   let visitor: CSGVisitor;
+  let errorHandler: ErrorHandler;
 
   beforeAll(async () => {
     parser = new OpenscadParser();
@@ -17,7 +20,8 @@ describe('CSGVisitor', () => {
   });
 
   beforeEach(() => {
-    visitor = new CSGVisitor('');
+    errorHandler = new ErrorHandler();
+    visitor = new CSGVisitor('', errorHandler);
 
     // Add mock children to the visitor for testing
     visitor.mockChildren = {

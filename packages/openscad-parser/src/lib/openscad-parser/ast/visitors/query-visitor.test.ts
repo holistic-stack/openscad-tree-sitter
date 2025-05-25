@@ -9,6 +9,7 @@ import { PrimitiveVisitor } from './primitive-visitor';
 import { TransformVisitor } from './transform-visitor';
 import { CSGVisitor } from './csg-visitor';
 import { OpenscadParser } from '../../openscad-parser';
+import { ErrorHandler } from '../../error-handling';
 
 // Create a mock language object for testing
 const mockLanguage = {
@@ -46,10 +47,12 @@ const mockLanguage = {
 describe('QueryVisitor', () => {
   let parser: OpenscadParser;
   let queryVisitor: QueryVisitor;
+  let errorHandler: ErrorHandler;
 
   beforeEach(async () => {
     parser = new OpenscadParser();
     await parser.init('./tree-sitter-openscad.wasm');
+    errorHandler = new ErrorHandler();
   });
 
   afterEach(() => {
@@ -63,13 +66,13 @@ describe('QueryVisitor', () => {
 
     // Create a composite visitor
     const compositeVisitor = new CompositeVisitor([
-      new PrimitiveVisitor(code),
-      new TransformVisitor(code),
-      new CSGVisitor(code),
-    ]);
+      new PrimitiveVisitor(code, errorHandler),
+      new TransformVisitor(code, undefined, errorHandler),
+      new CSGVisitor(code, errorHandler),
+    ], errorHandler);
 
     // Create a query visitor
-    queryVisitor = new QueryVisitor(code, tree, mockLanguage, compositeVisitor);
+    queryVisitor = new QueryVisitor(code, tree, mockLanguage, compositeVisitor, errorHandler);
 
     // Find all accessor_expression nodes
     const accessorExpressions = queryVisitor.findNodesByType(
@@ -93,13 +96,13 @@ describe('QueryVisitor', () => {
 
     // Create a composite visitor
     const compositeVisitor = new CompositeVisitor([
-      new PrimitiveVisitor(code),
-      new TransformVisitor(code),
-      new CSGVisitor(code),
-    ]);
+      new PrimitiveVisitor(code, errorHandler),
+      new TransformVisitor(code, undefined, errorHandler),
+      new CSGVisitor(code, errorHandler),
+    ], errorHandler);
 
     // Create a query visitor
-    queryVisitor = new QueryVisitor(code, tree, mockLanguage, compositeVisitor);
+    queryVisitor = new QueryVisitor(code, tree, mockLanguage, compositeVisitor, errorHandler);
 
     // Find all accessor_expression and arguments nodes
     const nodes = queryVisitor.findNodesByTypes([
@@ -129,13 +132,13 @@ describe('QueryVisitor', () => {
 
     // Create a composite visitor
     const compositeVisitor = new CompositeVisitor([
-      new PrimitiveVisitor(code),
-      new TransformVisitor(code),
-      new CSGVisitor(code),
-    ]);
+      new PrimitiveVisitor(code, errorHandler),
+      new TransformVisitor(code, undefined, errorHandler),
+      new CSGVisitor(code, errorHandler),
+    ], errorHandler);
 
     // Create a query visitor
-    queryVisitor = new QueryVisitor(code, tree, mockLanguage, compositeVisitor);
+    queryVisitor = new QueryVisitor(code, tree, mockLanguage, compositeVisitor, errorHandler);
 
     // Execute a query to find all accessor expressions
     const query = '(accessor_expression) @node';
@@ -164,13 +167,13 @@ describe('QueryVisitor', () => {
 
     // Create a composite visitor
     const compositeVisitor = new CompositeVisitor([
-      new PrimitiveVisitor(code),
-      new TransformVisitor(code),
-      new CSGVisitor(code),
-    ]);
+      new PrimitiveVisitor(code, errorHandler),
+      new TransformVisitor(code, undefined, errorHandler),
+      new CSGVisitor(code, errorHandler),
+    ], errorHandler);
 
     // Create a query visitor
-    queryVisitor = new QueryVisitor(code, tree, mockLanguage, compositeVisitor);
+    queryVisitor = new QueryVisitor(code, tree, mockLanguage, compositeVisitor, errorHandler);
 
     // Execute a query to find all accessor expressions
     const query = '(accessor_expression) @node';

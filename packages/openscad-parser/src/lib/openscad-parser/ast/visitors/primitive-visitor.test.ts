@@ -11,10 +11,12 @@ import { PrimitiveVisitor } from './primitive-visitor';
 import { OpenscadParser } from '../../openscad-parser';
 import { Node as TSNode } from 'web-tree-sitter';
 import { findDescendantOfType } from '../utils/node-utils';
+import { ErrorHandler } from '../../error-handling';
 
 describe('PrimitiveVisitor', () => {
   let parser: OpenscadParser;
   let visitor: PrimitiveVisitor;
+  let errorHandler: ErrorHandler;
 
   beforeAll(async () => {
     parser = new OpenscadParser();
@@ -27,7 +29,8 @@ describe('PrimitiveVisitor', () => {
   });
 
   beforeEach(() => {
-    visitor = new PrimitiveVisitor('');
+    errorHandler = new ErrorHandler();
+    visitor = new PrimitiveVisitor('', errorHandler);
   });
 
   describe('createASTNodeForFunction', () => {

@@ -1,63 +1,59 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { Parser, Node as TSNode } from 'web-tree-sitter';
-import * as path from 'path';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { Node as TSNode } from 'web-tree-sitter';
 
 import { ParenthesizedExpressionVisitor } from './parenthesized-expression-visitor';
-import { ExpressionVisitor } from '../expression-visitor';
+import { ExpressionVisitor } from '../../expression-visitor';
 import { ErrorHandler } from '../../../../error-handling';
-import { OpenSCADParser } from '../../../../openscad-parser';
+import { OpenscadParser } from '../../../../openscad-parser';
 
-let parser: Parser;
-let openSCADParser: OpenSCADParser;
+async function getExpressionNode(parser: OpenscadParser, code: string): Promise<TSNode | null> {
+  const tree = parser.parse(code);
+  if (!tree) return null;
 
-async function getExpressionNode(code: string): Promise<TSNode | null> {
-  const tree = await openSCADParser.parse(code);
   let parenExprNode: TSNode | null = null;
   function findNode(node: TSNode) {
     if (node.type === 'parenthesized_expression') {
       parenExprNode = node;
       return;
     }
-    for (const child of node.children) {
-      findNode(child);
-      if (parenExprNode) return;
+    for (let i = 0; i < node.childCount; i++) {
+      const child = node.child(i);
+      if (child) {
+        findNode(child);
+        if (parenExprNode) return;
+      }
     }
   }
-  if (tree.rootNode) {
-    findNode(tree.rootNode);
-  }
+  findNode(tree.rootNode);
   return parenExprNode;
 }
 
 describe('ParenthesizedExpressionVisitor', () => {
+  let parser: OpenscadParser;
   let errorHandler: ErrorHandler;
   let parentExpressionVisitor: ExpressionVisitor;
   let visitor: ParenthesizedExpressionVisitor;
 
   beforeEach(async () => {
-    if (!parser) {
-      await Parser.init();
-      parser = new Parser();
-      const languagePath = path.join(
-        __dirname,
-        '../../../../../../tree-sitter-openscad/tree-sitter-openscad.wasm'
-      );
-      const OpenSCAD = await Parser.Language.load(languagePath);
-      parser.setLanguage(OpenSCAD);
-    }
-    if (!openSCADParser) {
-      openSCADParser = new OpenSCADParser();
-      await openSCADParser.init();
-    }
+    // Create a new parser instance before each test
+    parser = new OpenscadParser();
+
+    // Initialize the parser
+    await parser.init();
 
     errorHandler = new ErrorHandler();
     parentExpressionVisitor = new ExpressionVisitor('dummy source', errorHandler);
     visitor = new ParenthesizedExpressionVisitor(parentExpressionVisitor, errorHandler);
   });
 
+  afterEach(() => {
+    // Clean up after each test
+    parser.dispose();
+  });
+
   it('should parse a simple parenthesized expression (number literal)', async () => {
     const code = 'x = (123);';
-    const tsNode = await getExpressionNode(code);
+    const tsNode = await getExpressionNode(parser, code);
     expect(tsNode).not.toBeNull();
     if (!tsNode) return;
 
@@ -76,7 +72,7 @@ describe('ParenthesizedExpressionVisitor', () => {
 
   it('should parse a parenthesized binary expression', async () => {
     const code = 'x = (a + b);';
-    const tsNode = await getExpressionNode(code);
+    const tsNode = await getExpressionNode(parser, code);
     expect(tsNode).not.toBeNull();
     if (!tsNode) return;
 

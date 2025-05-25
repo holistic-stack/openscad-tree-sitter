@@ -1,63 +1,59 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { Parser, Node as TSNode } from 'web-tree-sitter';
-import * as path from 'path';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { Node as TSNode } from 'web-tree-sitter';
 
 import { ConditionalExpressionVisitor } from './conditional-expression-visitor';
-import { ExpressionVisitor } from '../expression-visitor';
+import { ExpressionVisitor } from '../../expression-visitor';
 import { ErrorHandler } from '../../../../error-handling';
-import { OpenSCADParser } from '../../../../openscad-parser';
+import { OpenscadParser } from '../../../../openscad-parser';
 
-let parser: Parser;
-let openSCADParser: OpenSCADParser;
+async function getExpressionNode(parser: OpenscadParser, code: string): Promise<TSNode | null> {
+  const tree = parser.parse(code);
+  if (!tree) return null;
 
-async function getExpressionNode(code: string): Promise<TSNode | null> {
-  const tree = await openSCADParser.parse(code);
   let conditionalExprNode: TSNode | null = null;
   function findNode(node: TSNode) {
     if (node.type === 'conditional_expression') {
       conditionalExprNode = node;
       return;
     }
-    for (const child of node.children) {
-      findNode(child);
-      if (conditionalExprNode) return;
+    for (let i = 0; i < node.childCount; i++) {
+      const child = node.child(i);
+      if (child) {
+        findNode(child);
+        if (conditionalExprNode) return;
+      }
     }
   }
-  if (tree.rootNode) {
-    findNode(tree.rootNode);
-  }
+  findNode(tree.rootNode);
   return conditionalExprNode;
 }
 
 describe('ConditionalExpressionVisitor', () => {
+  let parser: OpenscadParser;
   let errorHandler: ErrorHandler;
   let parentExpressionVisitor: ExpressionVisitor;
   let visitor: ConditionalExpressionVisitor;
 
   beforeEach(async () => {
-    if (!parser) {
-      await Parser.init();
-      parser = new Parser();
-      const languagePath = path.join(
-        __dirname,
-        '../../../../../../tree-sitter-openscad/tree-sitter-openscad.wasm'
-      );
-      const OpenSCAD = await Parser.Language.load(languagePath);
-      parser.setLanguage(OpenSCAD);
-    }
-    if (!openSCADParser) {
-      openSCADParser = new OpenSCADParser();
-      await openSCADParser.init();
-    }
+    // Create a new parser instance before each test
+    parser = new OpenscadParser();
+
+    // Initialize the parser
+    await parser.init();
 
     errorHandler = new ErrorHandler();
     parentExpressionVisitor = new ExpressionVisitor('dummy source', errorHandler);
     visitor = new ConditionalExpressionVisitor(parentExpressionVisitor, errorHandler);
   });
 
+  afterEach(() => {
+    // Clean up after each test
+    parser.dispose();
+  });
+
   it('should parse a simple conditional expression', async () => {
     const code = 'x = a > b ? 10 : 20;'; // Example: a > b ? 10 : 20
-    const tsNode = await getExpressionNode(code);
+    const tsNode = await getExpressionNode(parser, code);
     expect(tsNode).not.toBeNull();
     if (!tsNode) return;
 
@@ -84,14 +80,14 @@ describe('ConditionalExpressionVisitor', () => {
         },
         location: expect.anything(),
       },
-      consequence: {
+      thenBranch: {
         type: 'expression',
         expressionType: 'literal',
         literalType: 'number',
         value: 10,
         location: expect.anything(),
       },
-      alternative: {
+      elseBranch: {
         type: 'expression',
         expressionType: 'literal',
         literalType: 'number',

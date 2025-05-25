@@ -8,13 +8,16 @@ import { OpenscadParser } from '../../../openscad-parser';
 import * as ast from '../../ast-types';
 import { Node as TSNode } from 'web-tree-sitter';
 import { findDescendantOfType } from '../../utils/node-utils';
+import { ErrorHandler } from '../../../error-handling';
 
 describe('FunctionCallVisitor', () => {
   let parser: OpenscadParser;
+  let errorHandler: ErrorHandler;
 
   beforeEach(async () => {
     parser = new OpenscadParser();
     await parser.init();
+    errorHandler = new ErrorHandler();
   });
 
   afterEach(() => {
@@ -39,7 +42,7 @@ describe('FunctionCallVisitor', () => {
       expect(accessorExprNode).not.toBeNull();
 
       // Create visitor and process the node
-      const visitor = new FunctionCallVisitor(code);
+      const visitor = new FunctionCallVisitor(code, errorHandler);
       const result = visitor.visitFunctionCall(accessorExprNode!);
 
       // Verify the result
@@ -66,7 +69,7 @@ describe('FunctionCallVisitor', () => {
       expect(accessorExprNode).not.toBeNull();
 
       // Create visitor and process the node
-      const visitor = new FunctionCallVisitor(code);
+      const visitor = new FunctionCallVisitor(code, errorHandler);
       const result = visitor.visitFunctionCall(accessorExprNode!);
 
       // Verify the result
@@ -106,7 +109,7 @@ describe('FunctionCallVisitor', () => {
       expect(accessorExprNode).not.toBeNull();
 
       // Create visitor and process the node
-      const visitor = new FunctionCallVisitor(code);
+      const visitor = new FunctionCallVisitor(code, errorHandler);
       const result = visitor.visitFunctionCall(accessorExprNode!);
 
       // Verify the result
@@ -142,7 +145,7 @@ describe('FunctionCallVisitor', () => {
       expect(accessorExprNode).not.toBeNull();
 
       // Create visitor and process the node
-      const visitor = new FunctionCallVisitor(code);
+      const visitor = new FunctionCallVisitor(code, errorHandler);
       const result = visitor.visitFunctionCall(accessorExprNode!);
 
       // Verify the result
@@ -184,7 +187,7 @@ describe('FunctionCallVisitor', () => {
       expect(accessorExprNode).not.toBeNull();
 
       // Create visitor and process the node
-      const visitor = new FunctionCallVisitor(code);
+      const visitor = new FunctionCallVisitor(code, errorHandler);
 
       // Mock the createExpressionNode method to handle the nested function call
       const originalMethod = (visitor as any).createExpressionNode;

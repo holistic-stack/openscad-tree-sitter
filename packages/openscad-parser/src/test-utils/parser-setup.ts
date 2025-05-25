@@ -20,7 +20,7 @@ export async function setupParser(): Promise<Parser> {
         __dirname,
         '../../../node_modules/@openscad/tree-sitter-openscad/tree-sitter-openscad.wasm'
       );
-      
+
       try {
         // Check if the wasm file exists
         readFileSync(wasmPath);
@@ -35,11 +35,13 @@ export async function setupParser(): Promise<Parser> {
   });
 
   const parser = new Parser();
-  
+
   try {
     // Try to load the OpenSCAD language
-    // @ts-ignore - web-tree-sitter types are incorrect
-    const language = await import('@openscad/tree-sitter-openscad');
+    const languageModule = await import('@openscad/tree-sitter-openscad');
+    // Access the default export which should be the Language object
+    const language = languageModule.default || languageModule;
+    // @ts-ignore - web-tree-sitter types are incorrect for dynamic language loading
     parser.setLanguage(language);
   } catch (e) {
     console.error('Failed to load @openscad/tree-sitter-openscad:', e);

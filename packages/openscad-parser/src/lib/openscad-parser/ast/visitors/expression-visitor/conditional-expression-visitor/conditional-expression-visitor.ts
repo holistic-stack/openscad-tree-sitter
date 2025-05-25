@@ -2,25 +2,38 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../../../ast-types';
 import { BaseASTVisitor } from '../../base-ast-visitor';
 import { ErrorHandler } from '../../../../error-handling';
-import { ExpressionVisitor } from '../expression-visitor';
+import { ExpressionVisitor } from '../../expression-visitor';
+import { getLocation } from '../../../utils/location-utils';
 
 export class ConditionalExpressionVisitor extends BaseASTVisitor {
   constructor(
     protected parentVisitor: ExpressionVisitor,
     protected errorHandler: ErrorHandler
   ) {
-    super(parentVisitor.source, errorHandler);
+    super('', errorHandler); // Use empty string for source since we get it from parent
+  }
+
+  // Implement the abstract method required by BaseASTVisitor
+  protected createASTNodeForFunction(
+    node: TSNode,
+    functionName: string,
+    args: ast.Parameter[]
+  ): ast.ASTNode | null {
+    // Conditional expressions don't handle function calls
+    return null;
   }
 
   visit(node: TSNode): ast.ConditionalExpressionNode | null {
     if (node.type !== 'conditional_expression') {
-      this.errorHandler.handleError(
-        new ast.ParserError(
-          `Expected 'conditional_expression' but got '${node.type}'`,
-          this.getLocation(node),
-          'ConditionalExpressionVisitorError'
-        )
+      const error = this.errorHandler.createParserError(
+        `Expected 'conditional_expression' but got '${node.type}'`,
+        {
+          line: getLocation(node).start.line,
+          column: getLocation(node).start.column,
+          nodeType: node.type
+        }
       );
+      this.errorHandler.report(error);
       return null;
     }
     const conditionNode = node.childForFieldName('condition');
@@ -28,59 +41,67 @@ export class ConditionalExpressionVisitor extends BaseASTVisitor {
     const alternativeNode = node.childForFieldName('alternative');
 
     if (!conditionNode || !consequenceNode || !alternativeNode) {
-      this.errorHandler.handleError(
-        new ast.ParserError(
-          `Malformed conditional_expression: missing condition, consequence, or alternative.`,
-          this.getLocation(node),
-          'ConditionalExpressionVisitorError'
-        )
+      const error = this.errorHandler.createParserError(
+        `Malformed conditional_expression: missing condition, consequence, or alternative.`,
+        {
+          line: getLocation(node).start.line,
+          column: getLocation(node).start.column,
+          nodeType: node.type
+        }
       );
+      this.errorHandler.report(error);
       return null;
     }
 
     const conditionAST = this.parentVisitor.visitExpression(conditionNode);
     if (!conditionAST) {
-      this.errorHandler.handleError(
-        new ast.ParserError(
-          `Failed to parse condition in conditional expression.`,
-          this.getLocation(conditionNode),
-          'ConditionalExpressionVisitorError'
-        )
+      const error = this.errorHandler.createParserError(
+        `Failed to parse condition in conditional expression.`,
+        {
+          line: getLocation(conditionNode).start.line,
+          column: getLocation(conditionNode).start.column,
+          nodeType: conditionNode.type
+        }
       );
+      this.errorHandler.report(error);
       return null;
     }
 
     const consequenceAST = this.parentVisitor.visitExpression(consequenceNode);
     if (!consequenceAST) {
-      this.errorHandler.handleError(
-        new ast.ParserError(
-          `Failed to parse consequence in conditional expression.`,
-          this.getLocation(consequenceNode),
-          'ConditionalExpressionVisitorError'
-        )
+      const error = this.errorHandler.createParserError(
+        `Failed to parse consequence in conditional expression.`,
+        {
+          line: getLocation(consequenceNode).start.line,
+          column: getLocation(consequenceNode).start.column,
+          nodeType: consequenceNode.type
+        }
       );
+      this.errorHandler.report(error);
       return null;
     }
 
     const alternativeAST = this.parentVisitor.visitExpression(alternativeNode);
     if (!alternativeAST) {
-      this.errorHandler.handleError(
-        new ast.ParserError(
-          `Failed to parse alternative in conditional expression.`,
-          this.getLocation(alternativeNode),
-          'ConditionalExpressionVisitorError'
-        )
+      const error = this.errorHandler.createParserError(
+        `Failed to parse alternative in conditional expression.`,
+        {
+          line: getLocation(alternativeNode).start.line,
+          column: getLocation(alternativeNode).start.column,
+          nodeType: alternativeNode.type
+        }
       );
+      this.errorHandler.report(error);
       return null;
     }
 
     return {
       type: 'expression',
-      expressionType: 'conditional_expression',
+      expressionType: 'conditional',
       condition: conditionAST,
-      consequence: consequenceAST,
-      alternative: alternativeAST,
-      location: this.getLocation(node),
+      thenBranch: consequenceAST,
+      elseBranch: alternativeAST,
+      location: getLocation(node),
     };
   }
 }

@@ -3,13 +3,16 @@ import { FunctionVisitor } from './function-visitor';
 import { OpenscadParser } from '../../openscad-parser';
 import * as ast from '../ast-types';
 import { Node as TSNode } from 'web-tree-sitter';
+import { ErrorHandler } from '../../error-handling';
 
 describe('FunctionVisitor', () => {
   let parser: OpenscadParser;
+  let errorHandler: ErrorHandler;
 
   beforeAll(async () => {
     parser = new OpenscadParser();
     await parser.init('./tree-sitter-openscad.wasm');
+    errorHandler = new ErrorHandler();
   });
 
   afterAll(() => {
@@ -39,7 +42,7 @@ describe('FunctionVisitor', () => {
         },
       } as TSNode;
 
-      const visitor = new FunctionVisitor(code);
+      const visitor = new FunctionVisitor(code, errorHandler);
       const result = visitor.visitFunctionDefinition(mockNode);
 
       expect(result).not.toBeNull();
@@ -71,7 +74,7 @@ describe('FunctionVisitor', () => {
         },
       } as TSNode;
 
-      const visitor = new FunctionVisitor(code);
+      const visitor = new FunctionVisitor(code, errorHandler);
       const result = visitor.visitFunctionDefinition(mockNode);
 
       expect(result).not.toBeNull();
@@ -105,7 +108,7 @@ describe('FunctionVisitor', () => {
         },
       } as TSNode;
 
-      const visitor = new FunctionVisitor(code);
+      const visitor = new FunctionVisitor(code, errorHandler);
       const result = visitor.visitFunctionDefinition(mockNode);
 
       expect(result).not.toBeNull();
@@ -141,7 +144,7 @@ describe('FunctionVisitor', () => {
         },
       } as TSNode;
 
-      const visitor = new FunctionVisitor(code);
+      const visitor = new FunctionVisitor(code, errorHandler);
       const result = visitor.visitFunctionDefinition(mockNode);
 
       expect(result).not.toBeNull();
@@ -171,7 +174,7 @@ describe('FunctionVisitor', () => {
         text: 'add(1, 2);',
       } as TSNode;
 
-      const visitor = new FunctionVisitor(code);
+      const visitor = new FunctionVisitor(code, errorHandler);
       const result = visitor.createFunctionCallNode(mockNode, 'add', [
         {
           name: undefined,

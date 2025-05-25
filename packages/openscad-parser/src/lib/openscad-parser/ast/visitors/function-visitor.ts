@@ -254,7 +254,8 @@ export class FunctionVisitor extends BaseASTVisitor {
     );
 
     return {
-      type: 'function_call',
+      type: 'expression',
+      expressionType: 'function_call',
       name: functionName,
       arguments: args,
       location: getLocation(node),

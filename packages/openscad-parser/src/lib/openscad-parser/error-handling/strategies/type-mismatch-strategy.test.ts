@@ -28,7 +28,7 @@ describe('TypeMismatchStrategy', () => {
         ErrorCode.TYPE_MISMATCH,
         Severity.ERROR,
         {
-          expected: 'number',
+          expected: ['number'],
           found: 'string',
           location: { line: 1, column: 10 }
         }
@@ -68,7 +68,7 @@ describe('TypeMismatchStrategy', () => {
         ErrorCode.TYPE_MISMATCH,
         Severity.ERROR,
         {
-          expected: 'number',
+          expected: ['number'],
           found: 'string',
           value: '42',
           location: { line: 1, column: 10 }
@@ -88,7 +88,7 @@ describe('TypeMismatchStrategy', () => {
         ErrorCode.TYPE_MISMATCH,
         Severity.ERROR,
         {
-          expected: 'string',
+          expected: ['string'],
           found: 'number',
           value: 42,
           location: { line: 1, column: 10 }
@@ -165,7 +165,7 @@ describe('TypeMismatchStrategy', () => {
         {
           functionName: 'sqrt',
           paramIndex: 0,
-          expected: 'number',
+          expected: ['number'],
           found: 'string',
           value: '"16"',
           location: { line: 1, column: 10 }
@@ -190,7 +190,7 @@ describe('TypeMismatchStrategy', () => {
         ErrorCode.TYPE_MISMATCH,
         Severity.ERROR,
         {
-          expected: 'number',
+          expected: ['number'],
           found: 'string',
           value: '"42"',
           location: { line: 1, column: 10 }
