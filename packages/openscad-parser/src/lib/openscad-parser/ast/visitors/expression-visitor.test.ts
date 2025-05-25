@@ -3,20 +3,24 @@ import { ExpressionVisitor } from './expression-visitor';
 import { OpenscadParser } from '../../openscad-parser';
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
+import { ErrorHandler } from '../../error-handling';
 
 describe('ExpressionVisitor', () => {
   let parser: OpenscadParser;
   let visitor: ExpressionVisitor;
+  let errorHandler: ErrorHandler;
 
   beforeEach(async () => {
     parser = new OpenscadParser();
     await parser.init('./tree-sitter-openscad.wasm');
-    visitor = new ExpressionVisitor('');
+    errorHandler = new ErrorHandler();
+    visitor = new ExpressionVisitor('', errorHandler);
   });
 
   afterEach(() => {
     parser.dispose();
   });
+
 
   describe('visitBinaryExpression', () => {
     it('should handle arithmetic binary expressions', async () => {
@@ -471,7 +475,7 @@ describe('ExpressionVisitor', () => {
         endPosition: { row: 0, column: 10 },
       } as unknown as TSNode;
 
-      const result = visitor.visitVariableReference(mockVariableNode);
+      const result = visitor.visitExpression(mockVariableNode);
 
       expect(result).not.toBeNull();
       expect(result?.type).toBe('expression');
@@ -483,13 +487,13 @@ describe('ExpressionVisitor', () => {
   describe('visitLiteral', () => {
     it('should handle number literals', async () => {
       const mockNumberNode = {
-        type: 'number',
+        type: 'number_literal',
         text: '42',
         startPosition: { row: 0, column: 0 },
         endPosition: { row: 0, column: 2 },
       } as unknown as TSNode;
 
-      const result = visitor.visitLiteral(mockNumberNode);
+      const result = visitor.visitExpression(mockNumberNode);
 
       expect(result).not.toBeNull();
       expect(result?.type).toBe('expression');
@@ -499,13 +503,13 @@ describe('ExpressionVisitor', () => {
 
     it('should handle string literals', async () => {
       const mockStringNode = {
-        type: 'string',
+        type: 'string_literal',
         text: '"hello"',
         startPosition: { row: 0, column: 0 },
         endPosition: { row: 0, column: 7 },
       } as unknown as TSNode;
 
-      const result = visitor.visitLiteral(mockStringNode);
+      const result = visitor.visitExpression(mockStringNode);
 
       expect(result).not.toBeNull();
       expect(result?.type).toBe('expression');
@@ -515,13 +519,13 @@ describe('ExpressionVisitor', () => {
 
     it('should handle boolean literals', async () => {
       const mockBooleanNode = {
-        type: 'boolean',
+        type: 'boolean_literal',
         text: 'true',
         startPosition: { row: 0, column: 0 },
         endPosition: { row: 0, column: 4 },
       } as unknown as TSNode;
 
-      const result = visitor.visitLiteral(mockBooleanNode);
+      const result = visitor.visitExpression(mockBooleanNode);
 
       expect(result).not.toBeNull();
       expect(result?.type).toBe('expression');
@@ -589,7 +593,7 @@ describe('ExpressionVisitor', () => {
         },
       } as unknown as TSNode;
 
-      const result = visitor.visitArrayExpression(mockArrayNode);
+      const result = visitor.visitExpression(mockArrayNode);
 
       expect(result).not.toBeNull();
       expect(result?.type).toBe('expression');

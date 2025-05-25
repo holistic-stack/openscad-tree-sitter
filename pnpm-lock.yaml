@@ -281,6 +281,9 @@ importers:
       vite-plugin-monaco-editor:
         specifier: ^1.1.0
         version: 1.1.0(monaco-editor@0.52.2)
+      vitest:
+        specifier: ^3.1.4
+        version: 3.1.4(@types/node@22.15.18)(@vitest/ui@3.1.4)(jiti@2.4.2)(jsdom@26.1.0)(terser@5.39.2)(yaml@2.8.0)
 
   packages/openscad-parser:
     dependencies:

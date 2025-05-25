@@ -242,6 +242,57 @@ export class ErrorHandler {
   }
 
   /**
+   * Logs an info message
+   * @param message - The message to log
+   * @param context - Optional context information
+   * @param node - Optional tree-sitter node for additional context
+   */
+  logInfo(message: string, context?: string, node?: any): void {
+    this.logger.info(message);
+  }
+
+  /**
+   * Logs a debug message
+   * @param message - The message to log
+   * @param context - Optional context information
+   * @param node - Optional tree-sitter node for additional context
+   */
+  logDebug(message: string, context?: string, node?: any): void {
+    this.logger.debug(message);
+  }
+
+  /**
+   * Logs a warning message
+   * @param message - The message to log
+   * @param context - Optional context information
+   * @param node - Optional tree-sitter node for additional context
+   */
+  logWarning(message: string, context?: string, node?: any): void {
+    this.logger.warn(message);
+  }
+
+  /**
+   * Logs an error message
+   * @param message - The message to log
+   * @param context - Optional context information
+   * @param node - Optional tree-sitter node for additional context
+   */
+  logError(message: string, context?: string, node?: any): void {
+    this.logger.error(message);
+  }
+
+  /**
+   * Handles an error by logging it and optionally reporting it
+   * @param error - The error to handle
+   * @param context - Optional context information
+   * @param node - Optional tree-sitter node for additional context
+   */
+  handleError(error: Error, context?: string, node?: any): void {
+    const message = context ? `${context}: ${error.message}` : error.message;
+    this.logger.error(message);
+  }
+
+  /**
    * Determines if an error should be collected based on severity
    * @param error - The error to check
    * @returns True if the error should be collected

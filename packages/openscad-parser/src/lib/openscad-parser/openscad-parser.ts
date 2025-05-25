@@ -507,7 +507,7 @@ export class OpenscadParser {
         return [];
       }
 
-      const generator = new VisitorASTGenerator(cst, code, this.language);
+      const generator = new VisitorASTGenerator(cst, code, this.language, this.errorHandler);
       const ast = generator.generate();
 
       this.logger.debug(`Generated AST with ${ast.length} top-level nodes`);
@@ -571,7 +571,8 @@ export class OpenscadParser {
       const generator = new VisitorASTGenerator(
         updatedCST,
         newCode,
-        this.language
+        this.language,
+        this.errorHandler
       );
 
       // TODO: Implement incremental AST generation in VisitorASTGenerator

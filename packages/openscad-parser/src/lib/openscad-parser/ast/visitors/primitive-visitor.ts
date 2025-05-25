@@ -135,11 +135,9 @@ export class PrimitiveVisitor extends BaseASTVisitor {
 
         // The function name should be in the first child (field: function)
         const functionChild = node.child(0);
-        if (functionChild && functionChild.type === 'accessor_expression') {
-          const identifierNode = findDescendantOfType(
-            functionChild,
-            'identifier'
-          );
+        if (functionChild) {
+          // Try to find the identifier directly in the function child
+          const identifierNode = findDescendantOfType(functionChild, 'identifier');
           if (identifierNode) {
             functionName = identifierNode.text;
             console.log(
@@ -148,6 +146,18 @@ export class PrimitiveVisitor extends BaseASTVisitor {
           }
         }
         break;
+      }
+    }
+
+    // If we didn't find the function name through the argument_list approach,
+    // try to extract it directly from the node
+    if (!functionName) {
+      const identifierNode = findDescendantOfType(node, 'identifier');
+      if (identifierNode) {
+        functionName = identifierNode.text;
+        console.log(
+          `[PrimitiveVisitor.visitAccessorExpression] Found function name (fallback): ${functionName}`
+        );
       }
     }
 

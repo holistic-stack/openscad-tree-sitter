@@ -32,7 +32,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
    * @param errorHandler The error handler instance
    */
   constructor(source: string, protected errorHandler: ErrorHandler) {
-    super(source);
+    super(source, errorHandler);
   }
 
   /**

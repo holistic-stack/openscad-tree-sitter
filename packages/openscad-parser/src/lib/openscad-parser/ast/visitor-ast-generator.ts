@@ -157,7 +157,7 @@ export class VisitorASTGenerator {
               'minkowski',
             ].includes(moduleName)
           ) {
-            const csgVisitor = new CSGVisitor(this.source);
+            const csgVisitor = new CSGVisitor(this.source, this.errorHandler);
             processedNode = csgVisitor.visitAccessorExpression(child);
           }
           // Try transform visitor next
@@ -173,7 +173,7 @@ export class VisitorASTGenerator {
               'offset',
             ].includes(moduleName)
           ) {
-            const transformVisitor = new TransformVisitor(this.source);
+            const transformVisitor = new TransformVisitor(this.source, undefined, this.errorHandler);
             processedNode = transformVisitor.visitAccessorExpression(child);
           }
           // Try primitive visitor last
@@ -189,7 +189,7 @@ export class VisitorASTGenerator {
               'text',
             ].includes(moduleName)
           ) {
-            const primitiveVisitor = new PrimitiveVisitor(this.source);
+            const primitiveVisitor = new PrimitiveVisitor(this.source, this.errorHandler);
             processedNode = primitiveVisitor.visitAccessorExpression(child);
           }
 

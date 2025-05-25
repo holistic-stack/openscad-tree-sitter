@@ -106,8 +106,9 @@ export abstract class BaseASTVisitor implements ASTVisitor {
   /**
    * Create a new BaseASTVisitor
    * @param source The source code
+   * @param errorHandler The error handler instance (optional for backward compatibility)
    */
-  constructor(protected source: string) {}
+  constructor(protected source: string, protected errorHandler?: any) {}
 
   /**
    * Visit a node and return the corresponding AST node
