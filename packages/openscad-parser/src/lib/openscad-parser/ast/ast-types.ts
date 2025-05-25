@@ -165,8 +165,8 @@ export interface VariableNode extends ExpressionNode {
 /**
  * Represents a function call
  */
-export interface FunctionCallNode extends ExpressionNode {
-  expressionType: 'function_call';
+export interface FunctionCallNode extends BaseNode {
+  type: 'function_call';
   name: string;
   arguments: Parameter[];
 }

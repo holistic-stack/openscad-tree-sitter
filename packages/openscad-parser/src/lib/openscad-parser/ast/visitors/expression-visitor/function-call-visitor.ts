@@ -36,6 +36,26 @@ export class FunctionCallVisitor extends BaseASTVisitor {
   }
 
   /**
+   * Visit a node that could be a function call or accessor expression
+   * @param node The node to visit
+   * @returns The AST node or null if the node cannot be processed
+   */
+  visit(node: TSNode): ast.ASTNode | null {
+    if (node.type === 'function_call') {
+      return this.visitFunctionCall(node);
+    } else if (node.type === 'accessor_expression') {
+      return this.visitAccessorExpression(node);
+    } else {
+      this.errorHandler.logWarning(
+        `[FunctionCallVisitor.visit] Unsupported node type: ${node.type}`,
+        'FunctionCallVisitor.visit',
+        node
+      );
+      return null;
+    }
+  }
+
+  /**
    * Visit a function call node
    * @param node The function call node to visit
    * @returns The function call AST node or null if the node cannot be processed
@@ -73,6 +93,92 @@ export class FunctionCallVisitor extends BaseASTVisitor {
 
     // Create function call node
     return this.createFunctionCallNode(node, functionName, args);
+  }
+
+  /**
+   * Visit an accessor expression node
+   * @param node The accessor expression node to visit
+   * @returns The AST node or null if the node cannot be processed
+   */
+  visitAccessorExpression(node: TSNode): ast.ASTNode | null {
+    console.log(
+      `[FunctionCallVisitor.visitAccessorExpression] Processing accessor expression: ${node.text.substring(
+        0,
+        50
+      )}`
+    );
+
+    // Check if this accessor expression has an argument list (making it a function call)
+    const argumentListNode = findDescendantOfType(node, 'argument_list');
+    if (argumentListNode) {
+      // This is a function call, delegate to visitFunctionCall
+      return this.visitFunctionCall(node);
+    }
+
+    // Check if this is a boolean literal first (before looking for identifiers)
+    if (node.text === 'true' || node.text === 'false') {
+      this.errorHandler.logInfo(
+        `[FunctionCallVisitor.visitAccessorExpression] Detected boolean literal: "${node.text}"`,
+        'FunctionCallVisitor.visitAccessorExpression',
+        node
+      );
+
+      return {
+        type: 'expression',
+        expressionType: 'literal',
+        value: node.text === 'true',
+        location: getLocation(node),
+      } as ast.LiteralNode;
+    }
+
+    // This is a simple identifier access, try to find the identifier
+    let identifierNode = findDescendantOfType(node, 'identifier');
+
+    // If no identifier found, check if the child node itself is the identifier
+    if (!identifierNode && node.namedChildCount === 1) {
+      const child = node.namedChild(0);
+      if (child && (child.type === 'identifier' || child.text === node.text)) {
+        identifierNode = child;
+      }
+    }
+
+    // If still no identifier, use the node text directly (for simple literals like numbers)
+    if (!identifierNode) {
+      this.errorHandler.logInfo(
+        `[FunctionCallVisitor.visitAccessorExpression] No identifier found, using node text as literal: "${node.text}"`,
+        'FunctionCallVisitor.visitAccessorExpression',
+        node
+      );
+
+      // Create a literal expression node for simple values like 'true', 'false', numbers, etc.
+      let value: any = node.text;
+
+      // Try to parse as specific types
+      if (node.text === 'true') {
+        value = true;
+      } else if (node.text === 'false') {
+        value = false;
+      } else if (node.text === 'undef') {
+        value = null;
+      } else if (!isNaN(parseFloat(node.text))) {
+        value = parseFloat(node.text);
+      }
+
+      return {
+        type: 'expression',
+        expressionType: 'literal',
+        value,
+        location: getLocation(node),
+      } as ast.LiteralNode;
+    }
+
+    // Create an identifier expression node
+    return {
+      type: 'expression',
+      expressionType: 'identifier',
+      name: identifierNode.text,
+      location: getLocation(node),
+    } as ast.IdentifierNode;
   }
 
   /**
@@ -348,8 +454,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
     });
 
     return {
-      type: 'expression',
-      expressionType: 'function_call',
+      type: 'function_call',
       name: functionName,
       arguments: parameters,
       location: getLocation(node),
@@ -485,13 +590,12 @@ export class FunctionCallVisitor extends BaseASTVisitor {
       `[FunctionCallVisitor.createASTNodeForFunction] Processing function: ${functionName}`
     );
 
-    // Create a function call expression node
+    // Create a function call node
     return {
-      type: 'expression',
-      expressionType: 'function_call',
+      type: 'function_call',
       name: functionName,
       arguments: args,
       location: getLocation(node),
-    };
+    } as ast.FunctionCallNode;
   }
 }

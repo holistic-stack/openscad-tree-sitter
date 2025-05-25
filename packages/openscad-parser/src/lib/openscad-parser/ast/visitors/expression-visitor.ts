@@ -144,6 +144,23 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @returns The expression AST node or null if the node cannot be processed
    */
   visitExpression(node: TSNode): ast.ExpressionNode | null {
+    // Debug: Log the node structure
+    this.errorHandler.logInfo(
+      `[ExpressionVisitor.visitExpression] Input node type: "${node.type}", text: "${node.text.substring(0, 50)}", childCount: ${node.childCount}, namedChildCount: ${node.namedChildCount}`,
+      'ExpressionVisitor.visitExpression',
+      node
+    );
+
+    // If the node itself is a specific expression type, use it directly
+    if (node.type !== 'expression') {
+      this.errorHandler.logInfo(
+        `[ExpressionVisitor.visitExpression] Using node directly as it's not a generic expression wrapper: "${node.type}"`,
+        'ExpressionVisitor.visitExpression',
+        node
+      );
+      return this.dispatchSpecificExpression(node);
+    }
+
     // An "expression" node in the grammar might be a wrapper.
     // We often need to look at its first named child to find the actual specific expression type.
     const specificExpressionNode = node.namedChild(0) || node.child(0);
@@ -157,61 +174,90 @@ export class ExpressionVisitor extends BaseASTVisitor {
       return null;
     }
 
+    // Debug: Log detailed child node information
+    this.errorHandler.logInfo(
+      `[ExpressionVisitor.visitExpression] Child node details: type="${specificExpressionNode.type}", text="${specificExpressionNode.text}", isNamed=${specificExpressionNode.isNamed}, childCount=${specificExpressionNode.childCount}`,
+      'ExpressionVisitor.visitExpression',
+      specificExpressionNode
+    );
+
     this.errorHandler.logInfo(
       `[ExpressionVisitor.visitExpression] Dispatching based on specific expression type: \"${specificExpressionNode.type}\", text: \"${specificExpressionNode.text.substring(0, 50)}\"`,
       'ExpressionVisitor.visitExpression',
       specificExpressionNode
     );
 
-    switch (specificExpressionNode.type) {
+    return this.dispatchSpecificExpression(specificExpressionNode);
+  }
+
+  /**
+   * Dispatch to the appropriate visitor based on the specific expression type
+   * @param node The specific expression node
+   * @returns The expression AST node or null if the node cannot be processed
+   */
+  private dispatchSpecificExpression(node: TSNode): ast.ExpressionNode | null {
+    switch (node.type) {
       case 'number_literal':
       case 'string_literal':
       case 'boolean_literal':
       case 'undef_literal':
-        return this.visitLiteral(specificExpressionNode);
+      case 'true':
+      case 'false':
+      case 'undef':
+      case 'number':
+      case 'string':
+        return this.visitLiteral(node);
 
       case 'identifier':
-        return this.visitIdentifier(specificExpressionNode);
+        return this.visitIdentifier(node);
 
       case 'function_call':
-        return this.functionCallVisitor.visitFunctionCall(specificExpressionNode);
+      case 'accessor_expression':
+        return this.functionCallVisitor.visit(node);
 
       case 'vector_expression':
-        return this.visitVectorExpression(specificExpressionNode);
+        return this.visitVectorExpression(node);
 
       case 'index_expression':
-        return this.visitIndexExpression(specificExpressionNode);
+        return this.visitIndexExpression(node);
 
       case 'range_expression':
-        return this.visitRangeExpression(specificExpressionNode);
+        return this.visitRangeExpression(node);
 
       case 'let_expression':
-        return this.visitLetExpression(specificExpressionNode);
+        return this.visitLetExpression(node);
 
       case 'list_comprehension_expression': // Also covers 'list_comprehension_if_expression', 'list_comprehension_for_expression'
       case 'list_comprehension_if_expression':
       case 'list_comprehension_for_expression':
-        return this.visitListComprehensionExpression(specificExpressionNode);
+        return this.visitListComprehensionExpression(node);
 
       case 'binary_expression':
-        return this.visitBinaryExpression(specificExpressionNode);
+      case 'logical_or_expression':
+      case 'logical_and_expression':
+      case 'equality_expression':
+      case 'relational_expression':
+      case 'additive_expression':
+      case 'multiplicative_expression':
+      case 'exponentiation_expression':
+        return this.visitBinaryExpression(node);
 
       case 'unary_expression':
-        return this.visitUnaryExpression(specificExpressionNode);
+        return this.visitUnaryExpression(node);
 
       case 'conditional_expression':
-        return this.visitConditionalExpression(specificExpressionNode);
+        return this.visitConditionalExpression(node);
 
       case 'parenthesized_expression':
-        return this.visitParenthesizedExpression(specificExpressionNode);
+        return this.visitParenthesizedExpression(node);
 
       default:
         this.errorHandler.handleError(
           new Error(
-            `Unsupported specific expression type \"${specificExpressionNode.type}\" in visitExpression. Text: ${specificExpressionNode.text.substring(0,100)}`
+            `Unsupported specific expression type \"${node.type}\" in dispatchSpecificExpression. Text: ${node.text.substring(0,100)}`
           ),
-          'ExpressionVisitor.visitExpression',
-          specificExpressionNode
+          'ExpressionVisitor.dispatchSpecificExpression',
+          node
         );
         return null;
     }
@@ -302,13 +348,70 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @private
    */
   private visitLiteral(node: TSNode): ast.LiteralNode | null {
-    this.errorHandler.logWarning(
-      `[ExpressionVisitor.visitLiteral] Stub: Processing literal: ${node.text.substring(0,50)}. Implementation pending.`,
+    this.errorHandler.logInfo(
+      `[ExpressionVisitor.visitLiteral] Processing literal: ${node.text.substring(0,50)}`,
       'ExpressionVisitor.visitLiteral',
       node
     );
-    // TODO: Implement using extractValue or similar
-    return null;
+
+    // Extract the literal value based on the node type
+    let value: ast.ParameterValue;
+
+    switch (node.type) {
+      case 'number_literal':
+      case 'number':
+        const numValue = parseFloat(node.text);
+        if (isNaN(numValue)) {
+          this.errorHandler.handleError(
+            new Error(`Invalid number literal: ${node.text}`),
+            'ExpressionVisitor.visitLiteral',
+            node
+          );
+          return null;
+        }
+        value = numValue;
+        break;
+
+      case 'string_literal':
+      case 'string':
+        // Remove quotes from string literals
+        const stringText = node.text;
+        if (stringText.startsWith('"') && stringText.endsWith('"')) {
+          value = stringText.slice(1, -1);
+        } else {
+          value = stringText;
+        }
+        break;
+
+      case 'boolean_literal':
+      case 'true':
+        value = true;
+        break;
+
+      case 'false':
+        value = false;
+        break;
+
+      case 'undef_literal':
+      case 'undef':
+        value = null; // OpenSCAD undef maps to null
+        break;
+
+      default:
+        this.errorHandler.handleError(
+          new Error(`Unsupported literal type: ${node.type}`),
+          'ExpressionVisitor.visitLiteral',
+          node
+        );
+        return null;
+    }
+
+    return {
+      type: 'expression',
+      expressionType: 'literal',
+      value,
+      location: getLocation(node),
+    } as ast.LiteralNode;
   }
 
   /**
@@ -318,13 +421,28 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @private
    */
   private visitIdentifier(node: TSNode): ast.IdentifierNode | null {
-    this.errorHandler.logWarning(
-      `[ExpressionVisitor.visitIdentifier] Stub: Processing identifier: ${node.text.substring(0,50)}. Implementation pending.`,
+    this.errorHandler.logInfo(
+      `[ExpressionVisitor.visitIdentifier] Processing identifier: ${node.text.substring(0,50)}`,
       'ExpressionVisitor.visitIdentifier',
       node
     );
-    // TODO: Implement using extractValue or similar
-    return null;
+
+    const name = node.text;
+    if (!name || name.trim() === '') {
+      this.errorHandler.handleError(
+        new Error(`Empty identifier name`),
+        'ExpressionVisitor.visitIdentifier',
+        node
+      );
+      return null;
+    }
+
+    return {
+      type: 'expression',
+      expressionType: 'identifier',
+      name,
+      location: getLocation(node),
+    } as ast.IdentifierNode;
   }
 
   /**

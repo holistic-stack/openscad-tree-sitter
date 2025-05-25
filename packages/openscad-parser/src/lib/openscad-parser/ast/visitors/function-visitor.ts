@@ -254,11 +254,10 @@ export class FunctionVisitor extends BaseASTVisitor {
     );
 
     return {
-      type: 'expression',
-      expressionType: 'function_call',
+      type: 'function_call',
       name: functionName,
       arguments: args,
       location: getLocation(node),
-    };
+    } as ast.FunctionCallNode;
   }
 }

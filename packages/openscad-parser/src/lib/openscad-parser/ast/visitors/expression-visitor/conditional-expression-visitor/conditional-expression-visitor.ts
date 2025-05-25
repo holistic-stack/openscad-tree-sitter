@@ -41,6 +41,22 @@ export class ConditionalExpressionVisitor extends BaseASTVisitor {
     const alternativeNode = node.childForFieldName('alternative');
 
     if (!conditionNode || !consequenceNode || !alternativeNode) {
+      // WORKAROUND: Check if this is actually a simple literal that was misclassified as conditional_expression
+      // This can happen due to grammar issues where simple expressions are incorrectly parsed
+      if (node.childCount === 1 && node.namedChildCount === 1) {
+        const child = node.namedChild(0);
+        if (child) {
+          this.errorHandler.logWarning(
+            `[ConditionalExpressionVisitor] Detected misclassified literal as conditional_expression. Delegating to parent visitor. Node: "${node.text}", Child: "${child.type}"`,
+            'ConditionalExpressionVisitor.visit',
+            node
+          );
+          // Delegate back to the parent visitor to handle this as a regular expression
+          return this.parentVisitor.visitExpression(child);
+        }
+      }
+
+      // If it's not a simple misclassified literal, it's a real error
       const error = this.errorHandler.createParserError(
         `Malformed conditional_expression: missing condition, consequence, or alternative.`,
         {

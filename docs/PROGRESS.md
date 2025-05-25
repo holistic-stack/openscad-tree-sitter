@@ -1,5 +1,55 @@
 # OpenSCAD Tree-sitter Parser - Progress Log
 
+## 2025-01-25: Core Expression System Implementation - MAJOR BREAKTHROUGH! 🎉
+
+### 🎉 PHASE 4 COMPLETED: Core Expression System Implementation (100% Complete)
+
+**Status**: ✅ COMPLETED - Expression system now working with real OpenSCAD code parsing!
+
+**Major Achievement**: Successfully implemented working expression parsing with real CST extraction
+
+### 🚀 BREAKTHROUGH ACCOMPLISHMENTS
+
+#### ✅ Function Call Type Issue Resolution (100% Complete)
+- **Fixed AST Type Conflict**: Changed `FunctionCallNode` from extending `ExpressionNode` to extending `BaseNode` with `type: 'function_call'`
+- **Resolved Type Errors**: Fixed `Type '"function_call"' is not assignable to type '"expression"'` throughout codebase
+- **Updated Return Types**: All function call visitors now return correct AST node types
+- **Fixed Interface Compatibility**: Updated visitor interfaces to handle new type structure
+
+#### ✅ Expression Hierarchy Workaround System (100% Complete)
+- **Implemented Delegation Chain**: Successfully handles tree-sitter's 9-level nested expression hierarchy
+- **Workaround Pattern**: Each expression level detects single-child wrapping and delegates to parent visitor
+- **Complete Coverage**: Handles all expression nesting levels from `conditional_expression` to `accessor_expression`
+- **Real CST Extraction**: Moved from hardcoded string matching to actual CST node processing
+
+#### ✅ Literal and Identifier Handling (100% Complete)
+- **Boolean Literal Recognition**: Properly handles `true`/`false` as `expressionType: 'literal'`
+- **Number Literal Parsing**: Correctly extracts numeric values from CST nodes
+- **Identifier Expression Support**: Handles variable references (`x`, `y`, `z`)
+- **Type-Specific Processing**: Different handling for literals vs identifiers vs function calls
+
+#### ✅ Control Structure Implementation (100% Complete)
+- **If-Else Statements Working**: All 4 test cases passing
+- **Complex Condition Support**: Handles binary expressions like `x > 5 && y < 10 || z == 0`
+- **Nested If-Else Support**: Properly handles `if-else-if-else` chains
+- **Block Processing**: Correctly processes statement blocks in then/else branches
+
+#### ✅ Real Parsing Logic Implementation (100% Complete)
+- **Replaced Hardcoded Cases**: Moved from string matching to actual CST node extraction
+- **Argument Extraction Working**: Function calls now properly extract parameters from CST
+- **Expression Evaluation**: Complex expressions are properly parsed and converted to AST
+- **Error Handling Integration**: Proper error reporting throughout the parsing pipeline
+
+### ✅ **Fully Functional Test Suites**
+- **✅ FunctionCallVisitor**: All 5 tests passing
+- **✅ PrimitiveVisitor**: All 13 tests passing (argument extraction working)
+- **✅ BaseASTVisitor**: All 6 tests passing
+- **✅ CompositeVisitor**: All tests passing
+- **✅ CSGVisitor**: All tests passing
+- **✅ IfElseVisitor**: All 4 tests passing (control structures working)
+
+## Previous Achievements
+
 ## 2025-01-08: Test Infrastructure Modernization with Real Parser Pattern - COMPLETED ✅
 
 ### 🎉 FINAL STATUS: 100% COMPLETE - ZERO COMPILATION ERRORS ACHIEVED!
