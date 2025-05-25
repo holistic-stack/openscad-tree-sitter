@@ -260,6 +260,7 @@ export class ControlStructureVisitor extends BaseASTVisitor {
       expressionType: 'literal',
       value:
         typeof args[0].value === 'object' &&
+        args[0].value !== null &&
         !Array.isArray(args[0].value) &&
         args[0].value.type === 'expression'
           ? args[0].value.value

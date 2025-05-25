@@ -41,7 +41,7 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: 'src/lib/index.ts',
+      entry: resolve(__dirname, 'src/lib/index.ts'),
       name: 'openscadParser',
       fileName: 'index',
       formats: ['es', 'cjs'],

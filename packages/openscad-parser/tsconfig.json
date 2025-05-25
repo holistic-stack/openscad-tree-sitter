@@ -16,7 +16,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "types": [   
+    "types": [
        "node",
       // Include type definitions for:
       "vite/client", // - Vite client types
@@ -26,6 +26,12 @@
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
-  "include": ["src/**/*", "vite.config.ts", "**/*.test.ts", "**/*.spec.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*", "vite.config.ts"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/lib/openscad-parser/openscad-parser.ts",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
 }

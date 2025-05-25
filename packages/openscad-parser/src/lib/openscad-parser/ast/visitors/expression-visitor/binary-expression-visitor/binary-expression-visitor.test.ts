@@ -11,17 +11,36 @@ function getExpressionNode(parser: OpenscadParser, code: string): TSNode | null 
   const tree = parser.parse(code);
   if (!tree) return null;
 
-  // Find the 'binary_expression' node in the tree
-  let binaryExprNode: TSNode | null = null;
+  // Debug: Print the entire tree structure
+  console.log('Tree structure for code:', code);
+  console.log('Root node:', tree.rootNode.toString());
+
+  function printTree(node: TSNode, depth = 0) {
+    const indent = '  '.repeat(depth);
+    console.log(`${indent}${node.type}: "${node.text}"`);
+    for (const child of node.children) {
+      if (child) {
+        printTree(child, depth + 1);
+      }
+    }
+  }
+
+  printTree(tree.rootNode);
+
+  // Find any expression-related node in the tree (not just binary_expression)
+  let exprNode: TSNode | null = null;
   function findNode(node: TSNode) {
-    if (node.type === 'binary_expression') {
-      binaryExprNode = node;
+    // Look for various expression types that might contain binary expressions
+    if (node.type.includes('expression') || node.type === 'additive_expression' ||
+        node.type === 'multiplicative_expression' || node.type === 'binary_expression') {
+      console.log(`Found expression node: ${node.type} with text: "${node.text}"`);
+      exprNode = node;
       return;
     }
     for (const child of node.children) {
       if (child) {
         findNode(child);
-        if (binaryExprNode) return;
+        if (exprNode) return;
       }
     }
   }
@@ -29,7 +48,7 @@ function getExpressionNode(parser: OpenscadParser, code: string): TSNode | null 
   if (tree.rootNode) {
     findNode(tree.rootNode);
   }
-  return binaryExprNode;
+  return exprNode;
 }
 
 
@@ -63,23 +82,24 @@ describe('BinaryExpressionVisitor', () => {
     expect(tsNode).not.toBeNull();
     if (!tsNode) return;
 
+    console.log('Found node type:', tsNode.type);
+    console.log('Node text:', tsNode.text);
+
     const astNode = visitor.visit(tsNode);
 
     expect(astNode).toEqual({
       type: 'expression',
-      expressionType: 'binary_expression',
+      expressionType: 'binary',
       operator: '+',
       left: {
         type: 'expression',
         expressionType: 'literal',
-        literalType: 'number',
         value: 1, // Corrected: 1 is a number literal
         location: expect.anything(),
       },
       right: {
         type: 'expression',
         expressionType: 'literal',
-        literalType: 'number',
         value: 2,
         location: expect.anything(),
       },

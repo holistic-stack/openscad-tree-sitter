@@ -107,6 +107,7 @@ export type ParameterValue =
   | Vector2D
   | Vector3D
   | ExpressionNode
+  | null
   | undefined;
 
 /**
@@ -130,6 +131,12 @@ export interface ExpressionNode extends BaseNode {
     | 'array'
     | 'literal'
     | 'each'
+    | 'function_call'
+    | 'identifier'
+    | 'vector_expression'
+    | 'index_expression'
+    | 'range_expression'
+    | 'let_expression'
     | string;
 
   // Optional properties used in various expression types

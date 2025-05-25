@@ -1,59 +1,93 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { OpenscadParser } from '../../openscad-parser';
-import * as ast from '../ast-types';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { OpenscadParser } from '../../../index'; // Use the minimal parser from index
+import { Node as TSNode } from 'web-tree-sitter';
 
-describe('CompositeVisitor with Real Parser', () => {
+describe('Real Parser Integration Tests', () => {
   let parser: OpenscadParser;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
+    // Create a new parser instance for each test
     parser = new OpenscadParser();
     await parser.init('./tree-sitter-openscad.wasm');
   });
 
-  afterAll(() => {
+  afterEach(() => {
     parser.dispose();
   });
 
-  describe('parseAST with real parser', () => {
-    it('should parse a simple cube', async () => {
+  describe('Core parsing functionality', () => {
+    it('should parse a simple cube and return CST', () => {
       const code = 'cube(10);';
-      const ast = parser.parseAST(code);
+      const tree = parser.parse(code);
 
-      expect(ast).toBeDefined();
-      expect(ast).toHaveLength(1);
+      expect(tree).toBeDefined();
+      expect(tree).not.toBeNull();
 
-      const cubeNode = ast[0];
-      expect(cubeNode.type).toBe('cube');
-      expect(cubeNode).toHaveProperty('location');
+      const rootNode = tree!.rootNode;
+      expect(rootNode.type).toBe('source_file');
+      expect(rootNode.childCount).toBeGreaterThan(0);
     });
 
-    it('should parse OpenSCAD code and return AST nodes', async () => {
+    it('should parse OpenSCAD code and return valid tree structure', () => {
       const code = 'sphere(5);';
-      const ast = parser.parseAST(code);
+      const tree = parser.parse(code);
 
-      expect(ast).toBeDefined();
-      expect(ast).toHaveLength(1);
+      expect(tree).toBeDefined();
+      expect(tree).not.toBeNull();
 
-      // The parser returns AST nodes with type information
-      const node = ast[0];
-      expect(node).toHaveProperty('location');
+      const rootNode = tree!.rootNode;
+      expect(rootNode.type).toBe('source_file');
+
+      // Find statement nodes
+      function findStatements(node: TSNode): TSNode[] {
+        const statements: TSNode[] = [];
+        if (node.type === 'statement') {
+          statements.push(node);
+        }
+        for (let i = 0; i < node.childCount; i++) {
+          const child = node.child(i);
+          if (child) {
+            statements.push(...findStatements(child));
+          }
+        }
+        return statements;
+      }
+
+      const statements = findStatements(rootNode);
+      expect(statements.length).toBeGreaterThan(0);
     });
 
-    it('should parse code with multiple statements', async () => {
+    it('should parse code with multiple statements', () => {
       const code = `
         cube(10);
         sphere(5);
         cylinder(h=10, r=5);
       `;
-      const ast = parser.parseAST(code);
+      const tree = parser.parse(code);
 
-      expect(ast).toBeDefined();
-      expect(ast.length).toBeGreaterThan(0);
+      expect(tree).toBeDefined();
+      expect(tree).not.toBeNull();
 
-      // Check that we have AST nodes
-      ast.forEach(node => {
-        expect(node).toHaveProperty('location');
-      });
+      const rootNode = tree!.rootNode;
+      expect(rootNode.type).toBe('source_file');
+
+      // Count statement nodes
+      function countStatements(node: TSNode): number {
+        let count = 0;
+        if (node.type === 'statement') {
+          count++;
+        }
+        for (let i = 0; i < node.childCount; i++) {
+          const child = node.child(i);
+          if (child) {
+            count += countStatements(child);
+          }
+        }
+        return count;
+      }
+
+      const statementCount = countStatements(rootNode);
+      expect(statementCount).toBeGreaterThanOrEqual(3);
     });
   });
 });

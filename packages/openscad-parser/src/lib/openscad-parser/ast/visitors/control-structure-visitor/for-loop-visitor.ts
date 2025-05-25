@@ -92,6 +92,7 @@ export class ForLoopVisitor {
 
         if (
           typeof arg.value === 'object' &&
+          arg.value !== null &&
           !Array.isArray(arg.value) &&
           arg.value.type === 'expression'
         ) {
@@ -487,6 +488,7 @@ export class ForLoopVisitor {
 
           if (
             typeof arg.value === 'object' &&
+            arg.value !== null &&
             !Array.isArray(arg.value) &&
             arg.value.type === 'expression'
           ) {

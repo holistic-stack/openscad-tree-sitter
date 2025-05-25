@@ -124,7 +124,19 @@ export class ExpressionVisitor extends BaseASTVisitor {
         // return this.parenthesizedExpressionVisitor.visit(node); // ANTLR visitor, not compatible
         return null;
       case 'function_call':
-        return this.functionCallVisitor.visitFunctionCall(node);
+        // Convert function call to expression node for expression contexts
+        const functionCall = this.functionCallVisitor.visitFunctionCall(node);
+        if (functionCall) {
+          // Create an expression wrapper for the function call
+          return {
+            type: 'expression',
+            expressionType: 'function_call',
+            name: functionCall.name,
+            arguments: functionCall.arguments,
+            location: functionCall.location,
+          } as ast.ExpressionNode;
+        }
+        return null;
       // TODO: Add cases for other expression types (literals, identifiers, etc.)
       // For now, we attempt to use the generic visitExpression for other types
       default:
@@ -213,7 +225,20 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
       case 'function_call':
       case 'accessor_expression':
-        return this.functionCallVisitor.visit(node);
+        // Convert function call to expression node for expression contexts
+        const functionCallResult = this.functionCallVisitor.visit(node);
+        if (functionCallResult && functionCallResult.type === 'function_call') {
+          const functionCall = functionCallResult as ast.FunctionCallNode;
+          // Create an expression wrapper for the function call
+          return {
+            type: 'expression',
+            expressionType: 'function_call',
+            name: functionCall.name,
+            arguments: functionCall.arguments,
+            location: functionCall.location,
+          } as ast.ExpressionNode;
+        }
+        return null;
 
       case 'vector_expression':
         return this.visitVectorExpression(node);
@@ -394,7 +419,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
       case 'undef_literal':
       case 'undef':
-        value = null; // OpenSCAD undef maps to null
+        value = null; // OpenSCAD undef maps to null (now allowed in ParameterValue)
         break;
 
       default:

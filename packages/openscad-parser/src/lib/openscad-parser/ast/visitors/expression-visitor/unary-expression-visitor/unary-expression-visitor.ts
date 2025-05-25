@@ -53,7 +53,12 @@ export class UnaryExpressionVisitor extends BaseASTVisitor {
             node
           );
           // Delegate back to the parent visitor to handle this as a regular expression
-          return this.parentVisitor.visitExpression(child);
+          const result = this.parentVisitor.visitExpression(child);
+          // If the result is a unary expression, return it; otherwise return null
+          if (result && result.expressionType === 'unary') {
+            return result as ast.UnaryExpressionNode;
+          }
+          return null;
         }
       }
 

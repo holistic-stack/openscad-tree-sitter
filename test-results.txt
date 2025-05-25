@@ -1,0 +1,31 @@
+
+ NX   Running target test for project openscad-parser and 2 tasks it depends on:
+
+
+
+> nx run tree-sitter-openscad:build  [existing outputs match the cache, left as is]
+
+
+> nx run openscad-parser:build:production
+
+[36mvite v6.3.5 [32mbuilding for production...[36m[39m
+
+(!) outDir C:\Users\luciano\dist\packages\openscad-parser is not inside project root and will not be emptied.
+Use --emptyOutDir to override.
+
+[32mÔ£ô[39m 0 modules transformed.
+Copying WASM file from C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\node_modules\@openscad\tree-sitter-openscad\tree-sitter-openscad.wasm to C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\dist\tree-sitter-openscad.wasm
+Ô£ù Build failed in 2.14s
+[0m[7m[1m[31m NX [39m[22m[27m[0m  [31m[31mCould not resolve entry module "src/lib/index.ts".[39m[31m[39m
+Pass --verbose to see the stacktrace.
+
+
+
+ NX   Running target test for project openscad-parser and 2 tasks it depends on failed
+
+Failed tasks:
+
+- openscad-parser:build:production
+
+Hint: run the command with --verbose for more details.
+

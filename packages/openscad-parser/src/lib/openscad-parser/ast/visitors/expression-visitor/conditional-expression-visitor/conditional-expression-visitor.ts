@@ -52,7 +52,12 @@ export class ConditionalExpressionVisitor extends BaseASTVisitor {
             node
           );
           // Delegate back to the parent visitor to handle this as a regular expression
-          return this.parentVisitor.visitExpression(child);
+          const result = this.parentVisitor.visitExpression(child);
+          // If the result is a conditional expression, return it; otherwise return null
+          if (result && result.expressionType === 'conditional') {
+            return result as ast.ConditionalExpressionNode;
+          }
+          return null;
         }
       }
 

@@ -64,7 +64,12 @@ export class BinaryExpressionVisitor extends BaseASTVisitor {
             node
           );
           // Delegate back to the parent visitor to handle this as a regular expression
-          return this.parentVisitor.visitExpression(child);
+          const result = this.parentVisitor.visitExpression(child);
+          // If the result is a binary expression, return it; otherwise return null
+          if (result && result.expressionType === 'binary') {
+            return result as ast.BinaryExpressionNode;
+          }
+          return null;
         }
       }
 
