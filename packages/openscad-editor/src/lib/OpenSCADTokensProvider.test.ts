@@ -21,16 +21,6 @@ const highlightQueryFilePath = path.join(publicDir, 'highlights.scm');
 let ActualOpenSCADLanguage: TreeSitterLanguage;
 let actualHighlightQueryText: string;
 
-// Minimal mock for monaco.editor.ITextModel - this can remain as it's helpful for simulating Monaco's model
-const createMockTextModel = (lines: string[], versionId = 1): monaco.editor.ITextModel => ({
-  getLineContent: vi.fn((lineNumber: number) => lines[lineNumber - 1] || ''),
-  getLineCount: vi.fn(() => lines.length),
-  getVersionId: vi.fn(() => versionId),
-  uri: { fsPath: '/test/file.scad' } as monaco.Uri, // Add a mock URI
-  // Add other methods if OpenSCADTokensProvider starts using them
-} as any);
-
-
 beforeAll(async () => {
   try {
     await TreeSitterParser.init({

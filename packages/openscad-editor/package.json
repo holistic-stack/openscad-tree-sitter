@@ -34,7 +34,7 @@
   "scripts": {
     "build": "nx build openscad-editor",
     "dev": "nx dev openscad-editor",
-    "test": "nx test openscad-editor",
+    "test": "vitest run",
     "lint": "nx lint openscad-editor",
     "postinstall": "shx mkdir -p ./public && shx cp ./node_modules/@openscad/tree-sitter-openscad/tree-sitter-openscad.wasm ./public/tree-sitter-openscad.wasm && shx cp ./node_modules/web-tree-sitter/tree-sitter.wasm ./public/tree-sitter.wasm"
   },
@@ -53,7 +53,8 @@
     "shx": "^0.3.4",
     "@monaco-editor/react": "^4.7.0",
     "monaco-editor": "^0.52.2",
-    "vite-plugin-monaco-editor": "^1.1.0",
+     "vite-plugin-dts": "^3.9.1",
+    "vitest-fetch-mock": "^0.4.5",
         "vitest": "^3.1.4"
   }
 }
