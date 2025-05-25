@@ -52,6 +52,14 @@ export function extractValue(node: TSNode): ast.ParameterValue {
         )}`
       ); // DEBUG
       return extractVector(node);
+    case 'array_expression':
+      console.log(
+        `[extractValue] Calling extractVector for array_expression: ${node.text.substring(
+          0,
+          20
+        )}`
+      ); // DEBUG
+      return extractVector(node);
     case 'unary_expression': {
       console.log(
         `[extractValue] Processing unary_expression with ${node.childCount} children: '${node.text}'`

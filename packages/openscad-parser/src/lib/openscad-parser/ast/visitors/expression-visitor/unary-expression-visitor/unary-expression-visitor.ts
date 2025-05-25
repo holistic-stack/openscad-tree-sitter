@@ -42,6 +42,22 @@ export class UnaryExpressionVisitor extends BaseASTVisitor {
     const operandNode = node.childForFieldName('argument'); // Or 'operand'
 
     if (!operatorNode || !operandNode) {
+      // WORKAROUND: Check if this is actually a single expression wrapped in a unary expression node
+      // This can happen when the grammar creates nested expression hierarchies for precedence
+      if (node.namedChildCount === 1) {
+        const child = node.namedChild(0);
+        if (child) {
+          this.errorHandler.logWarning(
+            `[UnaryExpressionVisitor] Detected single expression wrapped as unary expression. Delegating to parent visitor. Node: "${node.text}", Child: "${child.type}"`,
+            'UnaryExpressionVisitor.visit',
+            node
+          );
+          // Delegate back to the parent visitor to handle this as a regular expression
+          return this.parentVisitor.visitExpression(child);
+        }
+      }
+
+      // If it's not a simple wrapped expression, it's a real error
       const error = this.errorHandler.createParserError(
         `Malformed unary_expression: missing operator or operand. Operator: ${operatorNode}, Operand: ${operandNode}`,
         {

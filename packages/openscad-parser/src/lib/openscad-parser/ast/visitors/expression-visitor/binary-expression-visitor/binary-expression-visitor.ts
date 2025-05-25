@@ -24,9 +24,21 @@ export class BinaryExpressionVisitor extends BaseASTVisitor {
   }
 
   visit(node: TSNode): ast.BinaryExpressionNode | null {
-    if (node.type !== 'binary_expression') {
+    // Accept all binary expression types from the grammar
+    const validBinaryTypes = [
+      'binary_expression',
+      'logical_or_expression',
+      'logical_and_expression',
+      'equality_expression',
+      'relational_expression',
+      'additive_expression',
+      'multiplicative_expression',
+      'exponentiation_expression'
+    ];
+
+    if (!validBinaryTypes.includes(node.type)) {
       const error = this.errorHandler.createParserError(
-        `Expected 'binary_expression' but got '${node.type}'`,
+        `Expected binary expression type but got '${node.type}'`,
         {
           line: getLocation(node).start.line,
           column: getLocation(node).start.column,
@@ -41,6 +53,22 @@ export class BinaryExpressionVisitor extends BaseASTVisitor {
     const rightNode = node.childForFieldName('right');
 
     if (!leftNode || !operatorNode || !rightNode) {
+      // WORKAROUND: Check if this is actually a single expression wrapped in a binary expression node
+      // This can happen when the grammar creates nested expression hierarchies for precedence
+      if (node.namedChildCount === 1) {
+        const child = node.namedChild(0);
+        if (child) {
+          this.errorHandler.logWarning(
+            `[BinaryExpressionVisitor] Detected single expression wrapped as binary expression. Delegating to parent visitor. Node: "${node.text}", Child: "${child.type}"`,
+            'BinaryExpressionVisitor.visit',
+            node
+          );
+          // Delegate back to the parent visitor to handle this as a regular expression
+          return this.parentVisitor.visitExpression(child);
+        }
+      }
+
+      // If it's not a simple wrapped expression, it's a real error
       const error = this.errorHandler.createParserError(
         `Malformed binary_expression: missing left, operator, or right child. Left: ${leftNode}, Op: ${operatorNode}, Right: ${rightNode}`,
         {

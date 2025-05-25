@@ -1,5 +1,6 @@
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
+import { extractValue as extractParameterValue } from './value-extractor';
 
 /**
  * Convert a Value to a ParameterValue
@@ -59,14 +60,13 @@ function convertValueToParameterValue(value: ast.Value): ast.ParameterValue {
 function convertNodeToParameterValue(
   node: TSNode
 ): ast.ParameterValue | undefined {
-  const value = extractValue(node);
-  if (!value) return undefined;
-  return convertValueToParameterValue(value);
+  // Use the value-extractor function which directly returns ParameterValue
+  return extractParameterValue(node);
 }
 
 /**
- * Extract arguments from an arguments node
- * @param argsNode The arguments node
+ * Extract arguments from an arguments node or argument_list node
+ * @param argsNode The arguments node or argument_list node
  * @returns An array of parameters
  */
 export function extractArguments(argsNode: TSNode): ast.Parameter[] {
@@ -75,7 +75,68 @@ export function extractArguments(argsNode: TSNode): ast.Parameter[] {
   );
   const args: ast.Parameter[] = [];
 
-  // Process each argument based on named children (structured parsing)
+  // Handle argument_list nodes specially
+  if (argsNode.type === 'argument_list') {
+    console.log(`[extractArguments] Processing argument_list node`);
+
+    // For argument_list, we need to look at all children, not just named children
+    // The structure is typically: '(' argument1 ',' argument2 ')'
+    for (let i = 0; i < argsNode.childCount; i++) {
+      const child = argsNode.child(i);
+      if (!child) continue;
+
+      console.log(
+        `[extractArguments] Processing argument_list child ${i}: type=${child.type}, text=${child.text}`
+      );
+
+      // Skip punctuation tokens like '(', ')', ','
+      if (child.type === '(' || child.type === ')' || child.type === ',') {
+        continue;
+      }
+
+      // Process actual argument nodes or expressions
+      if (child.type === 'argument') {
+        const param = extractArgument(child);
+        if (param) {
+          console.log(
+            `[extractArguments] Extracted parameter from argument: ${JSON.stringify(param)}`
+          );
+          args.push(param);
+        }
+      } else if (child.type === 'named_argument') {
+        // Handle named arguments directly
+        console.log(
+          `[extractArguments] Processing named_argument: type=${child.type}, text=${child.text}`
+        );
+        const param = extractArgument(child);
+        if (param) {
+          console.log(
+            `[extractArguments] Extracted parameter from named_argument: ${JSON.stringify(param)}`
+          );
+          args.push(param);
+        }
+      } else if (child.type === 'number' || child.type === 'string_literal' || child.type === 'array_expression' || child.type === 'identifier') {
+        // Handle direct value nodes (positional arguments)
+        console.log(
+          `[extractArguments] Processing direct value: type=${child.type}, text=${child.text}`
+        );
+        const value = convertNodeToParameterValue(child);
+        if (value !== undefined) {
+          args.push({ value }); // Positional argument
+          console.log(
+            `[extractArguments] Extracted direct value as positional argument: ${JSON.stringify({ value })}`
+          );
+        }
+      }
+    }
+
+    console.log(
+      `[extractArguments] Extracted ${args.length} arguments from argument_list: ${JSON.stringify(args)}`
+    );
+    return args;
+  }
+
+  // Process each argument based on named children (structured parsing for 'arguments' nodes)
   for (let i = 0; i < argsNode.namedChildCount; i++) {
     const argNode = argsNode.namedChild(i);
     if (!argNode) continue;
@@ -198,7 +259,41 @@ export function extractArguments(argsNode: TSNode): ast.Parameter[] {
  * @returns A parameter object or null if the argument is invalid
  */
 function extractArgument(argNode: TSNode): ast.Parameter | null {
-  console.log(`[extractArgument] Processing argument node: ${argNode.text}`);
+  console.log(`[extractArgument] Processing argument node: type=${argNode.type}, text=${argNode.text}`);
+
+  // Handle named_argument nodes directly
+  if (argNode.type === 'named_argument') {
+    console.log(`[extractArgument] Processing named_argument node`);
+
+    // For named_argument nodes, look for identifier and value children
+    let identifierNode: TSNode | null = null;
+    let valueNode: TSNode | null = null;
+
+    for (let i = 0; i < argNode.childCount; i++) {
+      const child = argNode.child(i);
+      if (!child) continue;
+
+      console.log(`[extractArgument] named_argument child ${i}: type=${child.type}, text=${child.text}`);
+
+      if (child.type === 'identifier' && !identifierNode) {
+        identifierNode = child;
+      } else if (child.type !== '=' && child.type !== 'equals' && child.type !== 'identifier' && !valueNode) {
+        valueNode = child;
+      }
+    }
+
+    if (identifierNode && valueNode) {
+      const name = identifierNode.text;
+      const value = convertNodeToParameterValue(valueNode);
+      if (value !== undefined) {
+        console.log(`[extractArgument] Extracted named parameter: ${name} = ${JSON.stringify(value)}`);
+        return { name, value };
+      }
+    }
+
+    console.log(`[extractArgument] Failed to extract named_argument`);
+    return null;
+  }
 
   // Check if this is a named argument by looking for '=' in the text
   // Named arguments have the pattern: identifier = expression
