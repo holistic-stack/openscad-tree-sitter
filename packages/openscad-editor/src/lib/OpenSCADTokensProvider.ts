@@ -52,7 +52,6 @@ export class OpenSCADTokensProvider implements monaco.languages.TokensProvider {
   getInitialState(): monaco.languages.IState {
     return new TokenizerState(null, 0); 
   }
-
   tokenize(
     line: string, // This is the content of the line to tokenize
     state: monaco.languages.IState, // The state returned by the previous tokenize call (or getInitialState)
@@ -63,23 +62,57 @@ export class OpenSCADTokensProvider implements monaco.languages.TokensProvider {
       return { tokens: [{ startIndex: 0, scopes: 'source.openscad' }], endState: freshState };
     }
 
-    // The `tokenize` method in Monaco is called line by line. Tree-sitter parses the whole document.
-    // A robust solution requires careful management of the tree and mapping line numbers.
-    // The TokenizerState could carry the line number and a reference to the model.
-    const model = state.model; // Assuming TokenizerState is enhanced
-    const lineNumber = state.lineNumber; // Assuming TokenizerState is enhanced
-
-    if (model && lineNumber && this.tree) {
-      return {
-        tokens: this.getTokensForLine(lineNumber, model),
-        endState: new TokenizerState(this.tree, lineNumber + 1, model),
-      };
+    // For now, we'll implement a simpler approach since Monaco's tokenize method
+    // is called line by line, but Tree-sitter parses the whole document.
+    // We'll provide basic fallback tokens and rely on the main highlighting
+    // to be updated through updateDocument.
+    
+    const tokens: monaco.languages.IToken[] = [];
+    let lastIndex = 0;
+    
+    // Basic regex-based tokenization for common patterns as fallback
+    const patterns = [
+      { regex: /\/\/.*$/g, scope: 'comment.openscad' },
+      { regex: /\/\*[\s\S]*?\*\//g, scope: 'comment.openscad' },
+      { regex: /\b(?:module|function|if|else|for|while|true|false|undef)\b/g, scope: 'keyword.openscad' },
+      { regex: /\b\d+(?:\.\d+)?\b/g, scope: 'number.openscad' },
+      { regex: /"(?:[^"\\]|\\.)*"/g, scope: 'string.openscad' },
+      { regex: /[+\-*\/=<>!&|]+/g, scope: 'operator.openscad' },
+    ];
+    
+    for (const pattern of patterns) {
+      let match;
+      pattern.regex.lastIndex = 0; // Reset regex state
+      while ((match = pattern.regex.exec(line)) !== null) {
+        const startIndex = match.index;
+        const endIndex = startIndex + match[0].length;
+        
+        // Add default token before this match if needed
+        if (startIndex > lastIndex) {
+          tokens.push({ startIndex: lastIndex, scopes: 'source.openscad' });
+        }
+        
+        tokens.push({ startIndex, scopes: pattern.scope });
+        lastIndex = endIndex;
+      }
     }
-
-    // Fallback if we don't have enough info or tree is not ready
+    
+    // Add final default token if needed
+    if (lastIndex < line.length) {
+      tokens.push({ startIndex: lastIndex, scopes: 'source.openscad' });
+    }
+    
+    // If no tokens were found, provide a default one
+    if (tokens.length === 0) {
+      tokens.push({ startIndex: 0, scopes: 'source.openscad' });
+    }
+    
+    // Sort tokens by start index
+    tokens.sort((a, b) => a.startIndex - b.startIndex);
+    
     return {
-      tokens: [{ startIndex: 0, scopes: 'source.openscad' }],
-      endState: state, // Preserve state or return a new initial state
+      tokens,
+      endState: new TokenizerState(state.treeSnapshot, state.lineNumber + 1, state.model),
     };
   }
 

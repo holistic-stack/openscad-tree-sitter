@@ -23,7 +23,7 @@ interface OpenscadEditorProps {
 const OpenscadEditor: React.FC<OpenscadEditorProps> = ({
   initialCode = '',
   onCodeChange,
-  theme = 'vs-dark',
+  theme = 'openscad-dark',
   wasmPath = TREE_SITTER_WASM_PATH,
   highlightQueryPath = HIGHLIGHT_QUERY_PATH,
 }) => {
@@ -81,30 +81,47 @@ const OpenscadEditor: React.FC<OpenscadEditorProps> = ({
     });
 
   }, [wasmPath, highlightQueryPath]);
-
   // Register OpenSCAD language and tokens provider with Monaco once both are ready
   useEffect(() => {
-    if (isMonacoReady && isTreeSitterReady && monacoRef.current && tokensProviderRef.current) {
+    if (isMonacoReady && monacoRef.current) {
       const monaco = monacoRef.current;
+      
       // Register the language
       monaco.languages.register({ id: LANGUAGE_ID });
-
-      // Register the tokens provider
-      const disposable = monaco.languages.setTokensProvider(LANGUAGE_ID, tokensProviderRef.current);
       
-      // Initial parse of the document
-      if (editorRef.current) {
-        const model = editorRef.current.getModel();
-        if (model) {
-          tokensProviderRef.current.updateDocument(model.getValue(), model.getVersionId());
-          // Trigger re-tokenization if necessary. Monaco might do this automatically
-          // when a new tokens provider is set, or on next render/change.
+      // Define basic theme colors for OpenSCAD
+      monaco.editor.defineTheme('openscad-dark', {
+        base: 'vs-dark',
+        inherit: true,
+        rules: [
+          { token: 'keyword.openscad', foreground: '569cd6' },
+          { token: 'number.openscad', foreground: 'b5cea8' },
+          { token: 'string.openscad', foreground: 'ce9178' },
+          { token: 'comment.openscad', foreground: '6a9955' },
+          { token: 'operator.openscad', foreground: 'd4d4d4' },
+        ],
+        colors: {}
+      });
+
+      let disposable: monacoEditor.IDisposable | null = null;
+      
+      if (isTreeSitterReady && tokensProviderRef.current) {
+        // Register the tokens provider if Tree-sitter is ready
+        disposable = monaco.languages.setTokensProvider(LANGUAGE_ID, tokensProviderRef.current);
+        
+        // Initial parse of the document
+        if (editorRef.current) {
+          const model = editorRef.current.getModel();
+          if (model) {
+            tokensProviderRef.current.updateDocument(model.getValue(), model.getVersionId());
+          }
         }
       }
 
       return () => {
-        disposable.dispose();
-        // Potentially dispose of language features if re-registering
+        if (disposable) {
+          disposable.dispose();
+        }
       };
     }
   }, [isMonacoReady, isTreeSitterReady]);

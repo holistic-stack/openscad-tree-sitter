@@ -1,5 +1,20 @@
 # GitHub Copilot Instructions for OpenSCAD Tree-Sitter Project
 
+
+## IMPORTANT AND NEVER SKIP:
+- ALWAYS use desktop commander mcp to:
+
+    - mcp2_execute_command: Execute a terminal command with timeout. Command will continue running in background if it doesn't complete within timeout.
+        - IMPORTANT: Always use absolute paths (starting with 'c:\\' or '/')
+        - Example: `mcp2_execute_command { "command": "pnpm test", "cwd": "c:\\Users\\luciano\\git\\openscad-tree-sitter" }`
+    - mcp2_read_file: Read file contents. Always use absolute paths.
+    - mcp2_write_file: Write to files. Always use absolute paths.
+    - mcp2_search_code: Search for text/code patterns within file contents using ripgrep.
+    - mcp2_search_files: Find files by name using case-insensitive matching.
+    - mcp2_list_directory: Get detailed directory listings with [FILE] and [DIR] prefixes.
+    - mcp2_edit_block: Make precise file edits with context awareness.
+    - mcp2_read_multiple_files: Read multiple files simultaneously.
+
 ## Project Overview
 
 This is a monorepo containing a Tree-sitter grammar and parser for the OpenSCAD language. The project uses Nx for monorepo management, PNPM for package management, TypeScript, and Vitest for testing.
