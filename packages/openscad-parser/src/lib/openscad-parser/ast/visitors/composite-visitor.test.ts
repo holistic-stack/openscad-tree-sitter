@@ -15,6 +15,7 @@ import { OpenscadParser } from '../../openscad-parser';
 import { Node as TSNode } from 'web-tree-sitter';
 import { findDescendantOfType } from '../utils/node-utils';
 import * as ast from '../ast-types';
+import { ErrorHandler } from '../../error-handling';
 
 // Define mock nodes for testing
 const mockCubeNode: ast.CubeNode = {
@@ -61,10 +62,13 @@ describe('CompositeVisitor', () => {
   });
 
   beforeEach(() => {
+    // Create a mock ErrorHandler for testing
+    const mockErrorHandler = new ErrorHandler();
+
     // Create a composite visitor with primitive, transform, and CSG visitors
-    const primitiveVisitor = new PrimitiveVisitor('');
-    const transformVisitor = new TransformVisitor('');
-    const csgVisitor = new CSGVisitor('');
+    const primitiveVisitor = new PrimitiveVisitor('', mockErrorHandler);
+    const transformVisitor = new TransformVisitor('', mockErrorHandler);
+    const csgVisitor = new CSGVisitor('', mockErrorHandler);
 
     visitor = new CompositeVisitor([
       primitiveVisitor,

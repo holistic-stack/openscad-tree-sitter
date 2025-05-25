@@ -95,8 +95,9 @@ export class TypeMismatchStrategy extends BaseRecoveryStrategy {
     if (!expected || !found || !location) return null;
 
     // Check if we can convert from found type to expected type
-    if (this.canConvert(found, expected)) {
-      const convertedValue = this.convertValue(value || '', found, expected);
+    const expectedType = Array.isArray(expected) ? expected[0] : expected;
+    if (this.canConvert(found, expectedType)) {
+      const convertedValue = this.convertValue(value || '', found, expectedType);
       if (convertedValue !== null) {
         return this.replaceAtPosition(
           code,
@@ -178,8 +179,9 @@ export class TypeMismatchStrategy extends BaseRecoveryStrategy {
     }
 
     // Check if we can convert the argument to the expected type
-    if (this.canConvert(found, expected)) {
-      const convertedValue = this.convertValue(value, found, expected);
+    const expectedType = Array.isArray(expected) ? expected[0] : expected;
+    if (this.canConvert(found, expectedType)) {
+      const convertedValue = this.convertValue(value, found, expectedType);
       if (convertedValue !== null) {
         return this.replaceAtPosition(
           code,
@@ -237,7 +239,8 @@ export class TypeMismatchStrategy extends BaseRecoveryStrategy {
   getRecoverySuggestion(error: ParserError): string {
     if (error.code === ErrorCode.TYPE_MISMATCH) {
       const { expected, found } = error.context;
-      return `Convert ${found} to ${expected}`;
+      const expectedType = Array.isArray(expected) ? expected[0] : expected;
+      return `Convert ${found} to ${expectedType}`;
     }
 
     if (error.code === ErrorCode.INVALID_OPERATION) {
@@ -247,9 +250,50 @@ export class TypeMismatchStrategy extends BaseRecoveryStrategy {
 
     if (error.code === ErrorCode.INVALID_ARGUMENTS) {
       const { functionName, paramIndex, expected, found } = error.context;
-      return `Convert argument ${paramIndex + 1} of ${functionName}() from ${found} to ${expected}`;
+      const expectedType = Array.isArray(expected) ? expected[0] : expected;
+      return `Convert argument ${(paramIndex ?? 0) + 1} of ${functionName}() from ${found} to ${expectedType}`;
     }
 
     return 'Fix type mismatch';
+  }
+
+  /**
+   * Replace text at a specific position in the code
+   * @param code The source code
+   * @param line The line number (1-based)
+   * @param column The column number (1-based)
+   * @param oldText The text to replace
+   * @param newText The replacement text
+   * @returns The modified code
+   */
+  private replaceAtPosition(
+    code: string,
+    line: number,
+    column: number,
+    oldText: string,
+    newText: string
+  ): string {
+    const lines = code.split('\n');
+    if (line < 1 || line > lines.length) {
+      return code; // Invalid line number
+    }
+
+    const targetLine = lines[line - 1];
+    if (column < 1 || column > targetLine.length + 1) {
+      return code; // Invalid column number
+    }
+
+    // Find the old text starting at the specified position
+    const startIndex = column - 1;
+    const endIndex = startIndex + oldText.length;
+
+    if (targetLine.substring(startIndex, endIndex) === oldText) {
+      // Replace the text
+      const newLine = targetLine.substring(0, startIndex) + newText + targetLine.substring(endIndex);
+      lines[line - 1] = newLine;
+      return lines.join('\n');
+    }
+
+    return code; // Text not found at the specified position
   }
 }

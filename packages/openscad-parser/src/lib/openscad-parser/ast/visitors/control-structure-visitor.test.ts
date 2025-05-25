@@ -4,6 +4,7 @@ import { OpenscadParser } from '../../openscad-parser';
 import { Node as TSNode } from 'web-tree-sitter';
 import * as extractorModule from '../extractors';
 import { getLocation } from '../utils/location-utils';
+import { ErrorHandler } from '../../error-handling';
 
 describe('ControlStructureVisitor', () => {
   let visitor: ControlStructureVisitor;
@@ -42,7 +43,8 @@ describe('ControlStructureVisitor', () => {
       }
     );
 
-    visitor = new ControlStructureVisitor();
+    const errorHandler = new ErrorHandler();
+    visitor = new ControlStructureVisitor('', errorHandler);
     parser = new OpenscadParser();
     await parser.init('./tree-sitter-openscad.wasm');
   });

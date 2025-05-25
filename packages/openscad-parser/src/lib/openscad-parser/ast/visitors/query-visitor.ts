@@ -12,6 +12,7 @@ import * as ast from '../ast-types';
 import { ASTVisitor } from './ast-visitor';
 import { BaseASTVisitor } from './base-ast-visitor';
 import { QueryManager } from '../query/query-manager';
+import { ErrorHandler } from '../../error-handling';
 
 /**
  * Visitor that uses the query manager to find nodes in the CST
@@ -33,14 +34,16 @@ export class QueryVisitor extends BaseASTVisitor {
    * @param tree The tree-sitter tree
    * @param language The tree-sitter language
    * @param delegate The visitor to delegate to
+   * @param errorHandler The error handler
    */
   constructor(
     source: string,
     tree: Tree,
     language: any,
-    private delegate: ASTVisitor
+    private delegate: ASTVisitor,
+    errorHandler: ErrorHandler
   ) {
-    super(source);
+    super(source, errorHandler);
     this.tree = tree;
     this.queryManager = new QueryManager(language);
   }

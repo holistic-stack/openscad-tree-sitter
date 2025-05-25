@@ -13,3 +13,4 @@ export * from './module-visitor';
 export * from './primitive-visitor';
 export * from './query-visitor';
 export * from './transform-visitor';
+export * from './variable-visitor';

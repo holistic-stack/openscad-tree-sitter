@@ -67,7 +67,7 @@ export class VisitorASTGenerator {
       new CSGVisitor(this.source, this.errorHandler), // Added errorHandler, used this.source
       new ControlStructureVisitor(this.source, this.errorHandler), // Added errorHandler, used this.source
       new ExpressionVisitor(this.source, this.errorHandler), // Added errorHandler, used this.source
-      // new VariableVisitor(this.source, this.errorHandler), // TODO: Implement and uncomment VariableVisitor
+      new VariableVisitor(this.source, this.errorHandler), // Added errorHandler, used this.source
       new ModuleVisitor(this.source, this.errorHandler), // Added errorHandler, used this.source
       new FunctionVisitor(this.source, this.errorHandler), // Added errorHandler, used this.source
     ];

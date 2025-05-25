@@ -4,32 +4,116 @@
 
 The OpenSCAD Tree-sitter Parser project is an Nx monorepo with PNPM workspaces that provides robust parsing of OpenSCAD code. The project converts OpenSCAD code into a structured Abstract Syntax Tree (AST) using tree-sitter for initial parsing.
 
-## Current Status (2025-05-24)
+## Current Status (2025-01-08)
 
+**🔄 CRITICAL PRIORITY: Test Infrastructure Modernization**
 **✅ Error Handling Implementation COMPLETED**
 **✅ Tree-sitter Expression Sub-Visitor Implementation COMPLETED**
 
-### Recent Accomplishments
-- ✅ **COMPLETED**: Implemented comprehensive error handling system with recovery strategies
-- ✅ **COMPLETED**: Added support for various error types (SyntaxError, TypeError, ValidationError, ReferenceError)
-- ✅ **COMPLETED**: Created recovery strategies for common syntax errors (missing semicolons, unclosed brackets)
-- ✅ **COMPLETED**: Enhanced error reporting with detailed context information
-- ✅ **COMPLETED**: Implemented core error handling classes (ErrorHandler, Logger, RecoveryStrategyRegistry)
-- ✅ **COMPLETED**: All error handling integration tests passing (13/13 tests)
-- ✅ **COMPLETED**: Implemented and integrated Tree-sitter based expression sub-visitors (`BinaryExpressionVisitor`, `UnaryExpressionVisitor`, `ConditionalExpressionVisitor`, `ParenthesizedExpressionVisitor`).
+### Current Task: Test Infrastructure Modernization with Real Parser Pattern
 
-### Current Focus (as of 2025-05-24)
-- **Refining Tree-sitter Based Expression Parsing**:
-  - **Goal**: Ensure robust and correct parsing of all OpenSCAD expressions using the newly integrated Tree-sitter visitors.
-  - **Priorities**:
-    1.  **✅ COMPLETED (2025-05-24)**: **Review and Refine `ExpressionVisitor.visitExpression`**: Critically reviewed and restored the main dispatch method in `ExpressionVisitor.ts`. It now correctly handles all expression types, delegates appropriately to existing or new stub methods, and uses the `ErrorHandler` for logging. Concerns about previously lost logic have been addressed.
-    2.  **✅ COMPLETED (2025-05-24)**: **Cleanup `ExpressionVisitor.ts` and Sub-Visitors**: Reviewed `ExpressionVisitor.ts` and its sub-visitors (`BinaryExpressionVisitor`, `UnaryExpressionVisitor`, `ConditionalExpressionVisitor`, `ParenthesizedExpressionVisitor`). `ExpressionVisitor.ts` was updated via overwrite, ensuring no temporary logs and that obsolete methods were handled. Sub-visitors were found to be already clean, using `this.errorHandler` correctly and containing no temporary logs or obsolete methods. Intentional stubs for future work remain. Ensured consistent use of `this.errorHandler` for logging.
-    3.  **Comprehensive Testing**: Execute all parser tests (`pnpm nx test openscad-parser`) to validate the new expression handling logic and fix any identified issues.
+**Status**: Phase 3 - Test Infrastructure Fixes (In Progress)
 
-### Next Steps
-- Complete the review and cleanup of `ExpressionVisitor.ts` and its sub-visitors.
-- Achieve a stable and fully tested Tree-sitter based expression parsing module.
-- Proceed with remaining items in `TODO.md` once expression parsing is solidified.
+**Objective**: Complete the error handling integration by systematically applying the real parser pattern to all test files, eliminating mocks and ensuring proper test infrastructure as outlined in TODO.md.
+
+### Progress Summary
+
+**Errors Reduced**: From 173 to 121 compilation errors (52 errors fixed - 30% improvement)
+
+**✅ Completed (Phases 1-3)**:
+1. **AST Node Type Inheritance**: Updated node types to properly extend ExpressionNode
+2. **Return Type Compatibility**: Fixed `visitLetExpression` method signatures across interfaces and implementations
+3. **Variable Visitor Issues**: Fixed null assignment and return type issues
+4. **QueryVisitor Constructor**: Added ErrorHandler parameter support
+5. **Error Context Interface**: Added missing properties for error handling strategies
+6. **Type Mismatch Strategy**: Added missing `replaceAtPosition` method and fixed type handling
+7. **Real Parser Pattern Implementation**: Successfully applied to multiple test files following best practices
+
+**🔄 In Progress (Phase 3)**:
+**Current Focus**: Systematic application of real parser pattern to all test files
+
+**Real Parser Pattern Applied To**:
+- ✅ `binary-expression-visitor.test.ts` - Updated with real OpenscadParser instances
+- ✅ `primitive-visitor.test.ts` - Added proper beforeEach/afterEach setup
+- ✅ `control-structure-visitor.test.ts` - Added ErrorHandler parameter
+- ✅ `composite-visitor.test.ts` - Added ErrorHandler imports and setup
+
+**Remaining Critical Issues (121 errors)**:
+1. **Constructor Parameter Issues**: ~70+ test files still need ErrorHandler parameters added
+2. **Import Path Issues**: Several test files have incorrect import paths
+3. **Type Mismatch Issues**: Some error context properties have type conflicts
+4. **Missing Abstract Method Implementations**: Some visitor classes missing required abstract methods
+
+## Key Decisions Made
+
+### Real Parser Pattern Implementation
+- **Decision**: Eliminate all mocks for OpenscadParser and use real parser instances in tests
+- **Impact**: Provides better integration testing and aligns with TDD best practices
+- **Pattern**: Use beforeEach/afterEach for proper parser lifecycle management
+- **Rationale**: Ensures tests reflect real-world usage and catch integration issues
+
+### Error Handling Integration Strategy
+- **Decision**: All visitor constructors require ErrorHandler parameter for consistent error handling
+- **Impact**: Requires updating all test files to provide ErrorHandler instances
+- **Rationale**: Enables comprehensive error reporting and recovery strategies
+
+### Test Infrastructure Modernization
+- **Decision**: Systematically apply real parser pattern to all test files
+- **Impact**: Improves test reliability and eliminates mock-related issues
+- **Rationale**: Aligns with project coding best practices and TDD principles
+
+## Next Steps
+
+### Phase 3: Complete Test Infrastructure Modernization (Current)
+1. **Apply Real Parser Pattern**: Continue systematic application to remaining ~70+ test files
+2. **Fix Constructor Issues**: Add ErrorHandler parameters to all visitor constructors in tests
+3. **Fix Import Paths**: Correct import paths in test files
+4. **Fix Type Mismatches**: Resolve remaining type compatibility issues
+
+### Phase 4: Comprehensive Testing (Next)
+1. **Run Full Test Suite**: Execute `pnpm nx test openscad-parser`
+2. **Validate Expression Handling**: Ensure all expression types parse correctly
+3. **Test Error Recovery**: Verify error handling strategies work as expected
+
+## Implementation Guidelines
+
+### Real Parser Pattern Template
+```typescript
+describe("VisitorName", () => {
+  let parser: OpenscadParser;
+  let errorHandler: ErrorHandler;
+  let visitor: VisitorName;
+
+  beforeEach(async () => {
+    // Create a new parser instance before each test
+    parser = new OpenscadParser();
+
+    // Initialize the parser
+    await parser.init();
+
+    errorHandler = new ErrorHandler();
+    visitor = new VisitorName('source code', errorHandler);
+  });
+
+  afterEach(() => {
+    // Clean up after each test
+    parser.dispose();
+  });
+});
+```
+
+### Constructor Pattern for Visitors
+```typescript
+// All visitor constructors should follow this pattern
+constructor(
+  sourceCode: string,
+  errorHandler: ErrorHandler,
+  // additional parameters as needed
+) {
+  super(sourceCode);
+  this.errorHandler = errorHandler;
+}
+```
 
 ## Key Components and Architecture
 

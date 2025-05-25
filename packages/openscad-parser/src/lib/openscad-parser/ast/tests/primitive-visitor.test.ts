@@ -1,8 +1,10 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { PrimitiveVisitor } from '../visitors/primitive-visitor';
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 import { getLocation } from '../utils/location-utils';
+import { ErrorHandler } from '../../error-handling';
+import { OpenscadParser } from '../../openscad-parser';
 
 // Create a test class that extends PrimitiveVisitor to expose the private methods
 class TestPrimitiveVisitor extends PrimitiveVisitor {
@@ -29,14 +31,32 @@ const createMockNode = (text: string): TSNode => {
   return mockNode;
 };
 
+// Create a mock ErrorHandler for testing
+const mockErrorHandler = new ErrorHandler();
+
 describe('PrimitiveVisitor', () => {
+  let parser: OpenscadParser;
+
+  beforeEach(async () => {
+    // Create a new parser instance before each test
+    parser = new OpenscadParser();
+
+    // Initialize the parser
+    await parser.init();
+  });
+
+  afterEach(() => {
+    // Clean up after each test
+    parser.dispose();
+  });
+
   describe('createCubeNode', () => {
     it('should create a cube node with size parameter', () => {
       // Create a mock node
       const mockNode = createMockNode('cube(10);');
 
       // Create a mock visitor with source code
-      const visitor = new TestPrimitiveVisitor('cube(10);');
+      const visitor = new TestPrimitiveVisitor('cube(10);', mockErrorHandler);
 
       // Create mock arguments
       const args: ast.Parameter[] = [
@@ -68,7 +88,7 @@ describe('PrimitiveVisitor', () => {
       const mockNode = createMockNode('cube(10, center=true);');
 
       // Create a mock visitor with source code
-      const visitor = new TestPrimitiveVisitor('cube(10, center=true);');
+      const visitor = new TestPrimitiveVisitor('cube(10, center=true);', mockErrorHandler);
 
       // Create mock arguments
       const args: ast.Parameter[] = [
@@ -112,7 +132,7 @@ describe('PrimitiveVisitor', () => {
       const mockNode = createMockNode('cube(size=10);');
 
       // Create a mock visitor with source code
-      const visitor = new TestPrimitiveVisitor('cube(size=10);');
+      const visitor = new TestPrimitiveVisitor('cube(size=10);', mockErrorHandler);
 
       // Create mock arguments
       const args: ast.Parameter[] = [
@@ -145,7 +165,7 @@ describe('PrimitiveVisitor', () => {
       const mockNode = createMockNode('cube([10, 20, 30]);');
 
       // Create a mock visitor with source code
-      const visitor = new TestPrimitiveVisitor('cube([10, 20, 30]);');
+      const visitor = new TestPrimitiveVisitor('cube([10, 20, 30]);', mockErrorHandler);
 
       // Create mock arguments
       const args: ast.Parameter[] = [
@@ -205,7 +225,7 @@ describe('PrimitiveVisitor', () => {
       const mockNode = createMockNode('cube();');
 
       // Create a mock visitor with source code
-      const visitor = new TestPrimitiveVisitor('cube();');
+      const visitor = new TestPrimitiveVisitor('cube();', mockErrorHandler);
 
       // Create mock arguments
       const args: ast.Parameter[] = [];

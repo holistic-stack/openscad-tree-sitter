@@ -1,7 +1,7 @@
 import { Expression } from '../expression';
-import { NodeLocation } from '../../node-location';
+import { NodeLocation } from '../../../../node-location';
 
-type BinaryOperator = 
+type BinaryOperator =
   | '+' | '-' | '*' | '/' | '%'     // Arithmetic
   | '==' | '!=' | '<' | '<=' | '>' | '>='  // Comparison
   | '&&' | '||';                           // Logical

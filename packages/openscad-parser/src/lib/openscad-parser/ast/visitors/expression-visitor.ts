@@ -383,9 +383,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * Visit a let expression node (e.g., let(a=1, b=2) a+b)
    * @param node The let expression node to visit
    * @returns The let expression AST node or null if the node cannot be processed
-   * @private
    */
-  private visitLetExpression(node: TSNode): ast.LetExpressionNode | null {
+  visitLetExpression(node: TSNode): ast.LetExpressionNode | null {
     this.errorHandler.logWarning(
       `[ExpressionVisitor.visitLetExpression] Stub: Processing let expression: ${node.text.substring(0,50)}. Implementation pending.`,
       'ExpressionVisitor.visitLetExpression',
@@ -411,4 +410,20 @@ export class ExpressionVisitor extends BaseASTVisitor {
     return null;
   }
   // --- End of new stub methods ---
+
+  /**
+   * Create an AST node for a function (required by BaseASTVisitor)
+   * @param node The function node
+   * @param functionName The function name
+   * @param args The function arguments
+   * @returns The function call AST node or null if not handled
+   */
+  createASTNodeForFunction(node: TSNode, functionName?: string, args?: ast.Parameter[]): ast.ASTNode | null {
+    // Expression visitor doesn't handle function definitions, only function calls
+    // Function calls are handled by the FunctionCallVisitor
+    if (node.type === 'function_call') {
+      return this.functionCallVisitor.visitFunctionCall(node);
+    }
+    return null;
+  }
 }

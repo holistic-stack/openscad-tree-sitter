@@ -22,24 +22,24 @@ export enum ErrorCode {
   UNCLOSED_BRACE = 'E104',
   UNCLOSED_PAREN = 'E105',
   UNEXPECTED_EOF = 'E106',
-  
+
   // Type errors (200-299)
   TYPE_ERROR = 'E200',
   TYPE_MISMATCH = 'E201',
   INVALID_OPERATION = 'E202',
   INVALID_TYPE = 'E203',
-  
+
   // Reference errors (300-399)
   REFERENCE_ERROR = 'E300',
   UNDEFINED_VARIABLE = 'E301',
   UNDEFINED_FUNCTION = 'E302',
   UNDEFINED_MODULE = 'E303',
-  
+
   // Validation errors (400-499)
   VALIDATION_ERROR = 'E400',
   INVALID_ARGUMENTS = 'E401',
   INVALID_MODIFIER = 'E402',
-  
+
   // Internal errors (900-999)
   INTERNAL_ERROR = 'E900',
   NOT_IMPLEMENTED = 'E901',
@@ -65,6 +65,28 @@ export interface ErrorContext {
   suggestion?: string;
   /** Link to documentation */
   helpUrl?: string;
+
+  // Additional properties for type mismatch errors
+  /** The value that caused the error */
+  value?: any;
+  /** Location information for the error */
+  location?: { line: number; column: number };
+  /** Operation that caused the error (for binary operations) */
+  operation?: string;
+  /** Type of the left operand (for binary operations) */
+  leftType?: string;
+  /** Type of the right operand (for binary operations) */
+  rightType?: string;
+  /** Value of the left operand (for binary operations) */
+  leftValue?: any;
+  /** Value of the right operand (for binary operations) */
+  rightValue?: any;
+  /** Function name (for function call errors) */
+  functionName?: string;
+  /** Parameter index (for function call errors) */
+  paramIndex?: number;
+  /** List of suggestions for unknown identifiers */
+  suggestions?: string[];
 }
 
 /** Base class for all parser errors */
@@ -84,7 +106,7 @@ export class ParserError extends Error {
   ) {
     super(message);
     this.name = this.constructor.name;
-    
+
     // Maintains proper stack trace for where the error was thrown
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, this.constructor);
@@ -97,10 +119,10 @@ export class ParserError extends Error {
    */
   getFormattedMessage(): string {
     const { line, column, source } = this.context;
-    const location = line !== undefined && column !== undefined 
-      ? `[${line}:${column}]` 
+    const location = line !== undefined && column !== undefined
+      ? `[${line}:${column}]`
       : '';
-    
+
     return `${this.severity} ${location} [${this.code}]: ${this.message}`;
   }
 
@@ -156,8 +178,8 @@ export class InternalError extends ParserError {
 
 /** Type guard to check if an error is a ParserError */
 export function isParserError(error: unknown): error is ParserError {
-  return error instanceof Error && 
-         'code' in error && 
+  return error instanceof Error &&
+         'code' in error &&
          'severity' in error &&
          'context' in error;
 }

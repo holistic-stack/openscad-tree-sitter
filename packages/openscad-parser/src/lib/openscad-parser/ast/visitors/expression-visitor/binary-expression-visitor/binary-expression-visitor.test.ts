@@ -1,25 +1,17 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { Parser, Node as TSNode } from 'web-tree-sitter';
-import * as path from 'path';
-import { promises as fs } from 'fs';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { Node as TSNode } from 'web-tree-sitter';
 
 import { BinaryExpressionVisitor } from './binary-expression-visitor';
-import { ExpressionVisitor } from '../expression-visitor'; // Adjust path as needed
-import { ErrorHandler } from '../../../../error-handling'; // Adjust path as needed
-import { OpenSCADParser } from '../../../../openscad-parser'; // For getting a Tree-sitter node
-
-let parser: Parser;
-let openSCADParser: OpenSCADParser;
+import { ExpressionVisitor } from '../expression-visitor';
+import { ErrorHandler } from '../../../../error-handling';
+import { OpenscadParser } from '../../../../openscad-parser';
 
 // Helper function to get a Tree-sitter node for an expression
-async function getExpressionNode(code: string): Promise<TSNode | null> {
-  const tree = await openSCADParser.parse(code);
-  // Assuming the expression is the first statement's child,
-  // or a more robust way to find the specific expression node.
-  // For "a + b;", it might be tree.rootNode.child(0)?.child(0)?.child(0)
-  // This needs to be adapted based on actual grammar structure for expressions.
-  // For now, let's assume a simple top-level expression for testing.
-  // A robust approach would be to find the 'binary_expression' node.
+function getExpressionNode(parser: OpenscadParser, code: string): TSNode | null {
+  const tree = parser.parse(code);
+  if (!tree) return null;
+
+  // Find the 'binary_expression' node in the tree
   let binaryExprNode: TSNode | null = null;
   function findNode(node: TSNode) {
     if (node.type === 'binary_expression') {
@@ -27,10 +19,13 @@ async function getExpressionNode(code: string): Promise<TSNode | null> {
       return;
     }
     for (const child of node.children) {
-      findNode(child);
-      if (binaryExprNode) return;
+      if (child) {
+        findNode(child);
+        if (binaryExprNode) return;
+      }
     }
   }
+
   if (tree.rootNode) {
     findNode(tree.rootNode);
   }
@@ -39,35 +34,32 @@ async function getExpressionNode(code: string): Promise<TSNode | null> {
 
 
 describe('BinaryExpressionVisitor', () => {
+  let parser: OpenscadParser;
   let errorHandler: ErrorHandler;
   let parentExpressionVisitor: ExpressionVisitor;
   let visitor: BinaryExpressionVisitor;
 
   beforeEach(async () => {
-    if (!parser) {
-      await Parser.init();
-      parser = new Parser();
-      const languagePath = path.join(
-        __dirname,
-        '../../../../../../tree-sitter-openscad/tree-sitter-openscad.wasm'
-      );
-      const OpenSCAD = await Parser.Language.load(languagePath);
-      parser.setLanguage(OpenSCAD);
-    }
-    if (!openSCADParser) {
-      openSCADParser = new OpenSCADParser(); // Initialize your main parser
-      await openSCADParser.init();
-    }
+    // Create a new parser instance before each test
+    parser = new OpenscadParser();
+
+    // Initialize the parser
+    await parser.init();
 
     errorHandler = new ErrorHandler();
-    // Mock parentVisitor or use a real one if simple enough
+    // Use a real ExpressionVisitor instance
     parentExpressionVisitor = new ExpressionVisitor('dummy source', errorHandler);
     visitor = new BinaryExpressionVisitor(parentExpressionVisitor, errorHandler);
   });
 
-  it('should parse a simple addition expression', async () => {
+  afterEach(() => {
+    // Clean up after each test
+    parser.dispose();
+  });
+
+  it('should parse a simple addition expression', () => {
     const code = 'x = 1 + 2;';
-    const tsNode = await getExpressionNode(code);
+    const tsNode = getExpressionNode(parser, code);
     expect(tsNode).not.toBeNull();
     if (!tsNode) return;
 

@@ -165,8 +165,8 @@ export interface VariableNode extends ExpressionNode {
 /**
  * Represents a function call
  */
-export interface FunctionCallNode extends BaseNode {
-  type: 'function_call';
+export interface FunctionCallNode extends ExpressionNode {
+  expressionType: 'function_call';
   name: string;
   arguments: Parameter[];
 }
@@ -457,35 +457,7 @@ export interface EachNode extends BaseNode {
   expression: ExpressionNode;
 }
 
-/**
- * Represents a binary expression
- */
-export interface BinaryExpressionNode extends ExpressionNode {
-  expressionType: 'binary';
-  operator: BinaryOperator;
-  left: ExpressionNode;
-  right: ExpressionNode;
-}
 
-/**
- * Represents a unary expression
- */
-export interface UnaryExpressionNode extends ExpressionNode {
-  expressionType: 'unary';
-  operator: UnaryOperator;
-  operand: ExpressionNode;
-  prefix: boolean; // Indicates if the operator is a prefix operator (always true for OpenSCAD unary ops)
-}
-
-/**
- * Represents a conditional expression (ternary operator)
- */
-export interface ConditionalExpressionNode extends ExpressionNode {
-  expressionType: 'conditional';
-  condition: ExpressionNode;
-  thenBranch: ExpressionNode;
-  elseBranch: ExpressionNode;
-}
 
 /**
  * Represents an array expression
@@ -613,6 +585,91 @@ export interface ChildrenNode extends BaseNode {
 }
 
 /**
+ * Represents an identifier (variable reference)
+ */
+export interface IdentifierNode extends ExpressionNode {
+  expressionType: 'identifier';
+  name: string;
+}
+
+/**
+ * Represents a vector expression [x, y, z]
+ */
+export interface VectorExpressionNode extends ExpressionNode {
+  expressionType: 'vector_expression';
+  elements: ExpressionNode[];
+}
+
+/**
+ * Represents an index expression (e.g., array[index])
+ */
+export interface IndexExpressionNode extends ExpressionNode {
+  expressionType: 'index_expression';
+  object: ExpressionNode;
+  index: ExpressionNode;
+}
+
+/**
+ * Represents a range expression [start:end] or [start:step:end]
+ */
+export interface RangeExpressionNode extends ExpressionNode {
+  expressionType: 'range_expression';
+  start: ExpressionNode;
+  end: ExpressionNode;
+  step?: ExpressionNode;
+}
+
+/**
+ * Represents a let expression let(assignments) expression
+ */
+export interface LetExpressionNode extends ExpressionNode {
+  expressionType: 'let_expression';
+  assignments: AssignmentNode[];
+  expression: ExpressionNode;
+}
+
+/**
+ * Represents a list comprehension expression [for (var = range) expression]
+ */
+export interface ListComprehensionExpressionNode extends ExpressionNode {
+  expressionType: 'list_comprehension_expression';
+  variable: string;
+  range: ExpressionNode;
+  expression: ExpressionNode;
+  condition?: ExpressionNode;
+}
+
+/**
+ * Represents a binary expression (e.g., a + b)
+ */
+export interface BinaryExpressionNode extends ExpressionNode {
+  expressionType: 'binary';
+  operator: BinaryOperator;
+  left: ExpressionNode;
+  right: ExpressionNode;
+}
+
+/**
+ * Represents a unary expression (e.g., -a, !b)
+ */
+export interface UnaryExpressionNode extends ExpressionNode {
+  expressionType: 'unary';
+  operator: UnaryOperator;
+  operand: ExpressionNode;
+  prefix: boolean; // Indicates if the operator is a prefix operator (always true for OpenSCAD unary ops)
+}
+
+/**
+ * Represents a conditional expression (ternary operator: condition ? then : else)
+ */
+export interface ConditionalExpressionNode extends ExpressionNode {
+  expressionType: 'conditional';
+  condition: ExpressionNode;
+  thenBranch: ExpressionNode;
+  elseBranch: ExpressionNode;
+}
+
+/**
  * Union type of all possible AST nodes
  */
 export type ASTNode =
@@ -652,4 +709,13 @@ export type ASTNode =
   | FunctionDefinitionNode
   | AssignmentNode
   | SpecialVariableAssignment
-  | ChildrenNode;
+  | ChildrenNode
+  | IdentifierNode
+  | VectorExpressionNode
+  | IndexExpressionNode
+  | RangeExpressionNode
+  | LetExpressionNode
+  | ListComprehensionExpressionNode
+  | BinaryExpressionNode
+  | UnaryExpressionNode
+  | ConditionalExpressionNode;

@@ -449,7 +449,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
    * @param node The let expression node to visit
    * @returns The let AST node or null if the node cannot be processed
    */
-  visitLetExpression(node: TSNode): ast.LetNode | null {
+  visitLetExpression(node: TSNode): ast.LetNode | ast.LetExpressionNode | null {
     console.log(
       `[BaseASTVisitor.visitLetExpression] Processing let expression: ${node.text.substring(
         0,
