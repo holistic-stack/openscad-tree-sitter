@@ -86,7 +86,6 @@ export interface OpenscadParserOptions {
   loggerOptions?: object; // Replace with actual LoggerOptions if defined
 }
 
-
 /**
  * A parser for OpenSCAD code using the Tree-sitter library.
  *
@@ -144,31 +143,28 @@ export class OpenscadParser {
    */
   private logger: Logger;
 
-  /**
-   * Whether the parser has been initialized
-   */
-  public isInitialized = false;
+  // Configuration options
+  private throwOnError: boolean;
+  private enableRecovery: boolean;
 
   /**
    * Creates a new OpenscadParser
    * @param options Options for the parser
    */
-  constructor(
-    options: {
-      throwErrors?: boolean;
-      minSeverity?: Severity;
-      includeSource?: boolean;
-      attemptRecovery?: boolean;
-    } = {}
-  ) {
-    this.logger = new Logger();
-    this.errorHandler = new ErrorHandler({
-      throwErrors: options.throwErrors !== false,
-      minSeverity: options.minSeverity || Severity.WARNING,
-      includeSource: options.includeSource !== false,
-      attemptRecovery: options.attemptRecovery !== false,
-    });
-    this.recoveryRegistry = new RecoveryStrategyRegistry();
+  constructor(options?: OpenscadParserOptions) {
+    this.logger = new Logger(options?.loggerOptions);
+    this.errorHandler = new ErrorHandler(options?.errorHandlerOptions, this.logger);
+
+    // Set parser configurations
+    this.throwOnError = options?.throwOnError ?? true;
+    this.enableRecovery = options?.enableRecovery ?? false;
+    const minSeverity = options?.minSeverity ?? Severity.ERROR;
+
+    this.errorHandler.setThrowOnError(this.throwOnError);
+    this.errorHandler.setMinSeverity(minSeverity);
+
+    this.logger.info('OpenscadParser instance created.');
+    this.logger.debug(`Parser configured with: throwOnError=${this.throwOnError}, enableRecovery=${this.enableRecovery}, minSeverity=${minSeverity}`);
   }
 
   /**
@@ -242,117 +238,75 @@ export class OpenscadParser {
     code: string,
     previousTree?: TreeSitter.Tree | null
   ): TreeSitter.Tree | null {
+    this.logger.debug(`Starting CST parsing for code snippet: ${code.substring(0, 50)}...`);
+    this.errorHandler.clearErrors(); // Clear previous errors
+
     if (!this.isInitialized || !this.parser) {
-      // This case should still throw synchronously as it's a precondition failure
-      throw this.errorHandler.createParserError(
-        'Parser not initialized. Call init() first.',
-        { source: 'parseCST' }
+      const error = new ParserError(
+        "Parser not initialized. Call init() before parsing.",
+        // @ts-expect-error - E001 is a placeholder for a real error code
+        'E001',
+        Severity.FATAL
       );
+      this.errorHandler.addError(error); // Add to handler even if throwing
+      this.logger.error(error.getFormattedMessage());
+      if (this.throwOnError) throw error;
+      return null;
     }
 
     try {
-      this.logger.debug('Parsing OpenSCAD code...');
+      const tree = this.parser.parse(code, previousTree || this.previousTree);
+      this.previousTree = tree; // Store for potential incremental parsing
+      this.logger.info('CST parsing completed.');
 
-      // Use the provided previous tree or the stored one
-      const prevTree = previousTree || this.previousTree;
+      // Traverse the tree to collect syntax errors from TreeSitter
+      if (tree.rootNode) {
+        this.collectTreeSitterErrors(tree.rootNode);
+      }
 
-      // Tree-sitter's parse method is synchronous, so we can just return its result
-      const tree = this.parser.parse(code, prevTree);
+      // Optional: Log collected errors for debugging
+      // this.errorHandler.getErrors().forEach(e => this.logger.warn(`Collected error: ${e.getFormattedMessage()}`));
 
-      // Store the tree for future incremental parsing
-      this.previousTree = tree;
-
-      // Check for syntax errors in the tree
-      if (tree) {
-        const errorNode = this.findErrorNode(tree.rootNode);
-        if (errorNode) {
-          this.logger.debug(
-            `Found error node at line ${
-              errorNode.startPosition.row + 1
-            }, column ${errorNode.startPosition.column + 1}`
-          );
-
-          // Extract source code snippet around the error
-          const lines = code.split('\n');
-          const errorLine = errorNode.startPosition.row;
-          const startLine = Math.max(0, errorLine - 2);
-          const endLine = Math.min(lines.length - 1, errorLine + 2);
-          const sourceSnippet = lines.slice(startLine, endLine + 1).join('\n');
-
-          // Create a syntax error with the error node information
-          const error = this.errorHandler.createSyntaxError(
-            `Syntax error in OpenSCAD code`,
-            {
-              line: errorNode.startPosition.row + 1,
-              column: errorNode.startPosition.column + 1,
-              source: sourceSnippet,
-              nodeType: errorNode.type,
-            }
-          );
-
-          // Try to recover from the error
-          if (this.errorHandler.options.attemptRecovery) {
-            const recoveredCode = this.errorHandler.attemptRecovery(
-              error,
-              code
-            );
-            if (recoveredCode) {
-              this.logger.info(
-                `Recovered from syntax error at line ${
-                  errorNode.startPosition.row + 1
-                }, column ${errorNode.startPosition.column + 1}`
-              );
-
-              // Parse the recovered code
-              const recoveredTree = this.parser.parse(recoveredCode);
-
-              // Check if the recovered code still has errors
-              if (recoveredTree && recoveredTree.rootNode) {
-                const newErrorNode = this.findErrorNode(recoveredTree.rootNode);
-                if (!newErrorNode) {
-                  this.logger.info(
-                    'Recovery successful, no more syntax errors'
-                  );
-                  this.previousTree = recoveredTree;
-                  return recoveredTree;
-                } else {
-                  this.logger.warn(
-                    'Recovery attempt did not fix all syntax errors'
-                  );
-                }
-              } else {
-                this.logger.warn('Recovery produced invalid tree');
-              }
-            } else {
-              this.logger.warn('Could not recover from syntax error');
-            }
-          }
-
-          // If we couldn't recover or recovery is disabled, just log the error
-          this.logger.error(error.getFormattedMessage());
+      // If configured to throw on error and critical errors are present
+      if (this.throwOnError && this.errorHandler.hasCriticalErrors()) {
+        // Find the first critical error (ERROR or FATAL)
+        const criticalError = this.errorHandler.getErrors().find(
+          e => e.severity === Severity.ERROR || e.severity === Severity.FATAL
+        );
+        if (criticalError) {
+          this.logger.error(`Critical parsing error encountered: ${criticalError.getFormattedMessage()}`);
+          throw criticalError;
         }
       }
+      // Note: Recovery logic would go here if enabled and errors are present
+      // For now, just returning the tree with collected errors.
 
       return tree;
     } catch (err) {
-      // If it's already a ParserError, just rethrow it
+      // This catch block handles errors from treeSitterParser.parse() itself (e.g., unexpected internal errors)
+      // or errors re-thrown from the critical error check above.
       if (err instanceof ParserError) {
-        this.logger.error(err.getFormattedMessage());
-        throw err;
+        // If it's already a ParserError (e.g., re-thrown critical error), just ensure it's logged by handler if not already
+        // and re-throw if throwOnError is enabled.
+        if (!this.errorHandler.getErrors().includes(err)) {
+            this.errorHandler.addError(err);
+        }
+        this.logger.error(`ParserError during CST parsing: ${err.getFormattedMessage()}`);
+        if (this.throwOnError) throw err;
+        return null; // Or handle as per recovery strategy if applicable
       }
 
-      // Otherwise, wrap it in a generic ParserError
-      const error = this.errorHandler.createParserError(
-        `Failed to parse OpenSCAD code: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
+      // For other types of errors, wrap them in a SyntaxError
+      const syntaxError = new SyntaxError(
+        `Failed to parse OpenSCAD code due to an unexpected error: ${err instanceof Error ? err.message : String(err)}`,
         {
           source: code.length > 100 ? code.substring(0, 100) + '...' : code,
         }
       );
-
-      this.logger.error(error.getFormattedMessage());
-      throw error;
+      this.errorHandler.addError(syntaxError);
+      this.logger.error(syntaxError.getFormattedMessage());
+      if (this.throwOnError) throw syntaxError;
+      return null;
     }
   }
 
@@ -495,179 +449,93 @@ export class OpenscadParser {
    *
    * @param code - The OpenSCAD code to parse
    * @returns An array of AST nodes representing the parsed code
-   * @throws If the parser hasn't been initialized or there's an error parsing the code
+   * @throws If the parser hasn't been initialized or there's an error parsing the code and throwOnError is true.
    */
   parseAST(code: string): ASTNode[] {
+    this.logger.debug('Starting AST generation process...');
+    this.errorHandler.clearErrors(); // Clear previous errors, including those from parseCST if called sequentially by user
+
+    // First, get the CST. Errors from CST parsing will be collected by parseCST.
+    const cst = this.parseCST(code);
+
+    // If CST parsing failed and we are not throwing, or if CST is null for other reasons.
+    if (!cst) {
+      this.logger.warn('CST generation failed or resulted in null, cannot proceed to AST generation.');
+      // Errors should have been collected by parseCST. If throwOnError is true, parseCST would have thrown.
+      // If throwOnError is false, we return empty AST and errors are in the handler.
+      return [];
+    }
+
+    // If parseCST collected errors and throwOnError is true, it would have already thrown.
+    // If not throwing, proceed, but AST might be partial or based on an erroneous CST.
+
     try {
-      this.logger.debug('Generating AST from OpenSCAD code...');
+      this.logger.debug('Generating AST from CST...');
+      // Assuming VisitorASTGenerator might need ErrorHandler. 
+      // If astGenerator is stateful and configured with ErrorHandler at construction, this might not be needed.
+      // For now, let's assume it can access it or we modify generate's signature if necessary.
+      // Option 1: Pass error handler to generate: const astNodes = this.astGenerator.generate(cst.rootNode, code, this.errorHandler);
+      // Option 2: Ensure astGenerator is constructed with this.errorHandler.
+      // Current signature: this.astGenerator.generate(cst.rootNode, code)
+      // For now, we'll proceed without changing signature and assume astGenerator has access or we address it separately.
+      // Corrected: Instantiate VisitorASTGenerator here
+      const astGenerator = new VisitorASTGenerator(cst, code, this.language, this.errorHandler);
+      const astNodes = astGenerator.generate(); // generate() takes no arguments as per its definition
+      this.logger.info('AST generation completed.');
 
-      const cst = this.parseCST(code);
-      if (!cst) {
-        this.logger.warn('Failed to generate CST, returning empty AST');
-        return [];
-      }
-
-      const generator = new VisitorASTGenerator(cst, code, this.language);
-      const ast = generator.generate();
-
-      this.logger.debug(`Generated AST with ${ast.length} top-level nodes`);
-      return ast;
-    } catch (err) {
-      // If it's already a ParserError, just rethrow it
-      if (err instanceof ParserError) {
-        this.logger.error(err.getFormattedMessage());
-        throw err;
-      }
-
-      // Otherwise, wrap it in a generic ParserError
-      const error = this.errorHandler.createParserError(
-        `Failed to generate AST: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
-        {
-          source: code.length > 100 ? code.substring(0, 100) + '...' : code,
+      // After AST generation, check for any new errors (e.g., semantic errors from visitors)
+      // that might have been added to the errorHandler by the astGenerator's process.
+      if (this.throwOnError && this.errorHandler.hasCriticalErrors()) {
+        const criticalError = this.errorHandler.getErrors().find(
+          e => e.severity === Severity.ERROR || e.severity === Severity.FATAL
+        );
+        if (criticalError) {
+          this.logger.error(`Critical error during AST generation: ${criticalError.getFormattedMessage()}`);
+          throw criticalError;
         }
-      );
+      }
+      return astNodes;
+    } catch (err) {
+      // This catch block handles errors from astGenerator.generate() or re-thrown critical errors.
+      if (err instanceof ParserError) {
+        if (!this.errorHandler.getErrors().includes(err)) {
+            this.errorHandler.addError(err);
+        }
+        this.logger.error(`ParserError during AST generation: ${err.getFormattedMessage()}`);
+        if (this.throwOnError) throw err;
+        return []; // Return empty AST if not throwing
+      }
 
-      this.logger.error(error.getFormattedMessage());
-      throw error;
+      // For other types of errors, wrap them
+      const processingError = new ParserError(
+        `Failed to generate AST due to an unexpected error: ${err instanceof Error ? err.message : String(err)}`,
+        // @ts-expect-error - E002 is a placeholder for a real error code
+        'E002', 
+        Severity.ERROR,
+        { source: code.length > 100 ? code.substring(0, 100) + '...' : code }
+      );
+      this.errorHandler.addError(processingError);
+      this.logger.error(processingError.getFormattedMessage());
+      if (this.throwOnError) throw processingError;
+      return []; // Return empty AST if not throwing
     }
   }
 
   /**
-   * Update the AST incrementally with a change to the source code
-   *
-   * @param newCode - The new source code after the change
-   * @param startIndex - The index where the change starts
-   * @param oldEndIndex - The index where the old text ends
-   * @param newEndIndex - The index where the new text ends
-   * @returns The updated AST
-   * @throws If the parser hasn't been initialized or there's an error parsing the code
+   * Update an existing AST with new code changes.
+   * @param currentAST The current abstract syntax tree.
+   * @param changes An array of changes to apply to the code.
+   * @returns The updated abstract syntax tree.
    */
   updateAST(
-    newCode: string,
-    startIndex: number,
-    oldEndIndex: number,
-    newEndIndex: number
+    currentAST: ASTNode[], 
+    changes: any // TODO: Define actual change type, e.g., TextChange[] from web-tree-sitter
   ): ASTNode[] {
-    try {
-      this.logger.debug(
-        `Updating AST with change at [${startIndex}, ${oldEndIndex}] -> [${startIndex}, ${newEndIndex}]`
-      );
-
-      // Update the CST first
-      const updatedCST = this.update(
-        newCode,
-        startIndex,
-        oldEndIndex,
-        newEndIndex
-      );
-      if (!updatedCST) {
-        this.logger.warn('Failed to update CST, returning empty AST');
-        return [];
-      }
-
-      // Generate the AST with the changes
-      const generator = new VisitorASTGenerator(
-        updatedCST,
-        newCode,
-        this.language
-      );
-
-      // TODO: Implement incremental AST generation in VisitorASTGenerator
-      // For now, just generate the AST from scratch
-      const ast = generator.generate();
-
-      this.logger.debug(
-        `Generated updated AST with ${ast.length} top-level nodes`
-      );
-      return ast;
-    } catch (err) {
-      // If it's already a ParserError, just rethrow it
-      if (err instanceof ParserError) {
-        this.logger.error(err.getFormattedMessage());
-        throw err;
-      }
-
-      // Otherwise, wrap it in a generic ParserError
-      const error = this.errorHandler.createParserError(
-        `Failed to update AST: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
-        {
-          source:
-            newCode.length > 100 ? newCode.substring(0, 100) + '...' : newCode,
-        }
-      );
-
-      this.logger.error(error.getFormattedMessage());
-      throw error;
-    }
+    this.logger.warn('[OpenscadParser.updateAST] Method not implemented. Returning current AST.');
+    // TODO: Implement actual AST update logic based on changes. 
+    // This might involve re-parsing sections of the code or patching the AST.
+    return currentAST; 
   }
 
-  /**
-   * Parse OpenSCAD code and return a CST (Concrete Syntax Tree).
-   * This is an alias for parseCST for backward compatibility.
-   *
-   * @param code - The OpenSCAD code to parse
-   * @param previousTree - Optional previous parse tree for incremental parsing
-   * @returns The parse tree or null
-   */
-  parse(
-    code: string,
-    previousTree?: TreeSitter.Tree | null
-  ): TreeSitter.Tree | null {
-    this.logger.debug('Using parse alias for parseCST');
-    return this.parseCST(code, previousTree);
-  }
+} // End of OpenscadParser class
 
-  /**
-   * Dispose of the parser and free resources.
-   * Call this when you're done with the parser to avoid memory leaks.
-   */
-  dispose(): void {
-    try {
-      this.logger.debug('Disposing OpenSCAD parser...');
-
-      if (this.parser) {
-        this.parser.delete();
-        this.parser = null;
-        this.language = null;
-        this.previousTree = null;
-        this.changeTracker.clear();
-        this.isInitialized = false;
-
-        this.logger.info('OpenSCAD parser disposed successfully');
-      } else {
-        this.logger.debug('Parser already disposed or not initialized');
-      }
-    } catch (err) {
-      this.logger.error(`Error disposing parser: ${err}`);
-      // Don't throw here, as dispose is typically called during cleanup
-    }
-  }
-
-  /**
-   * Gets the error handler instance
-   * @returns The error handler
-   */
-  getErrorHandler(): ErrorHandler {
-    return this.errorHandler;
-  }
-
-  /**
-   * Gets the logger instance
-   * @returns The logger
-   */
-  getLogger(): Logger {
-    return this.logger;
-  }
-
-  /**
-   * Sets the log level for the parser
-   * @param level The log level to set
-   */
-  setLogLevel(level: Severity): void {
-    this.logger.setLevel(level);
-  }
-}

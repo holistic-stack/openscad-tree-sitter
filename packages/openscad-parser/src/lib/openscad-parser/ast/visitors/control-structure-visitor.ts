@@ -19,6 +19,7 @@ import { extractArguments } from '../extractors/argument-extractor';
 import { IfElseVisitor } from './control-structure-visitor/if-else-visitor';
 import { ForLoopVisitor } from './control-structure-visitor/for-loop-visitor';
 import { ExpressionVisitor } from './expression-visitor';
+import { ErrorHandler } from '../../error-handling'; // Added ErrorHandler import
 
 /**
  * Visitor for control structures
@@ -31,12 +32,14 @@ export class ControlStructureVisitor extends BaseASTVisitor {
   /**
    * Create a new ControlStructureVisitor
    * @param source The source code (optional, defaults to empty string)
+   * @param errorHandler The error handler instance
    */
-  constructor(source: string = '') {
+  constructor(source: string = '', protected errorHandler: ErrorHandler) {
     super(source);
-    this.ifElseVisitor = new IfElseVisitor(source);
-    this.forLoopVisitor = new ForLoopVisitor(source);
-    this.expressionVisitor = new ExpressionVisitor(source);
+    // These sub-visitors will also need ErrorHandler in their constructors eventually
+    this.ifElseVisitor = new IfElseVisitor(source, errorHandler);
+    this.forLoopVisitor = new ForLoopVisitor(source, errorHandler);
+    this.expressionVisitor = new ExpressionVisitor(source, errorHandler);
   }
 
   /**

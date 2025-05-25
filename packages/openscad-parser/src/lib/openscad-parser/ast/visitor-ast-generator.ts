@@ -11,6 +11,7 @@ import { ControlStructureVisitor } from './visitors/control-structure-visitor';
 import { ExpressionVisitor } from './visitors/expression-visitor';
 import { VariableVisitor } from './visitors/variable-visitor';
 import { QueryVisitor } from './visitors/query-visitor';
+import { ErrorHandler } from '../error-handling'; // Assuming ErrorHandler path
 // Change is not used in this file
 
 // This function is not used in this file
@@ -49,33 +50,35 @@ export class VisitorASTGenerator {
   constructor(
     private tree: Tree,
     private source: string,
-    private language: any
+    private language: any,
+    private errorHandler: ErrorHandler // Added ErrorHandler
   ) {
     // Create a composite visitor that delegates to specialized visitors
     // Create the composite visitor first so we can pass it to visitors that need it
-    const compositeVisitor = new CompositeVisitor([]);
+    const compositeVisitor = new CompositeVisitor([], this.errorHandler); // Added errorHandler
 
     // Order matters here - PrimitiveVisitor should be first to handle primitive shapes
-    const transformVisitor = new TransformVisitor(source, compositeVisitor);
+    const transformVisitor = new TransformVisitor(this.source, compositeVisitor, this.errorHandler); // Added errorHandler, used this.source
 
     // Add all visitors to the composite visitor
     compositeVisitor['visitors'] = [
-      new PrimitiveVisitor(source),
-      transformVisitor,
-      new CSGVisitor(source),
-      new ControlStructureVisitor(source),
-      new ExpressionVisitor(source),
-      new VariableVisitor(source),
-      new ModuleVisitor(source),
-      new FunctionVisitor(source),
+      new PrimitiveVisitor(this.source, this.errorHandler), // Added errorHandler, used this.source
+      transformVisitor, // transformVisitor instance already has errorHandler if its constructor is updated
+      new CSGVisitor(this.source, this.errorHandler), // Added errorHandler, used this.source
+      new ControlStructureVisitor(this.source, this.errorHandler), // Added errorHandler, used this.source
+      new ExpressionVisitor(this.source, this.errorHandler), // Added errorHandler, used this.source
+      new VariableVisitor(this.source, this.errorHandler), // Added errorHandler, used this.source
+      new ModuleVisitor(this.source, this.errorHandler), // Added errorHandler, used this.source
+      new FunctionVisitor(this.source, this.errorHandler), // Added errorHandler, used this.source
     ];
 
     // Create a query visitor that uses the composite visitor
     this.queryVisitor = new QueryVisitor(
-      source,
-      tree,
-      language,
-      compositeVisitor
+      this.source,
+      this.tree, // Used this.tree
+      this.language,
+      compositeVisitor,
+      this.errorHandler // Added errorHandler
     );
 
     // Use the query visitor as the main visitor

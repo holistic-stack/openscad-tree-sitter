@@ -9,25 +9,21 @@
     "build:parser": "nx build openscad-parser",
     "build:editor": "nx build openscad-editor",
     "build:demo": "nx build openscad-demo",
-    
     "test": "nx run-many --target=test --all",
     "test:grammar": "cd packages/tree-sitter-openscad && vitest run",
     "test:parser": "cd packages/openscad-parser && vitest run",
     "test:editor": "cd packages/openscad-editor && vitest run",
     "test:demo": "cd packages/openscad-demo && vitest run",
-    
     "test:grammar:file": "cd packages/tree-sitter-openscad && vitest run",
     "test:parser:file": "cd packages/openscad-parser && vitest run",
     "test:editor:file": "cd packages/openscad-editor && vitest run",
     "test:demo:file": "cd packages/openscad-demo && vitest run",
-    
     "test:watch": "nx run-many --target=test:watch --all",
     "test:watch:grammar": "cd packages/tree-sitter-openscad && vitest",
     "test:watch:parser": "cd packages/openscad-parser && vitest",
     "test:watch:file": "cd packages/openscad-parser && vitest --run ",
     "test:watch:editor": "cd packages/openscad-editor && vitest",
     "test:watch:demo": "cd packages/openscad-demo && vitest",
-    
     "test:coverage": "nx run-many --target=test:coverage --all",
     "test:coverage:grammar": "cd packages/tree-sitter-openscad && vitest run --coverage",
     "test:coverage:parser": "cd packages/openscad-parser && vitest run --coverage",
@@ -101,6 +97,7 @@
     "jsdom": "~22.1.0",
     "nx": "^21.1.1",
     "prettier": "^2.6.2",
+    "rimraf": "^6.0.1",
     "tslib": "^2.3.0",
     "typescript": "^5.8.3",
     "verdaccio": "^6.0.5",

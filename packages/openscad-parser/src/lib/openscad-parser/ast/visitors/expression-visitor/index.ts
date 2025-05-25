@@ -7,7 +7,7 @@
  */
 
 export * from './function-call-visitor';
-export * from './binary-expression-visitor';
-export * from './unary-expression-visitor';
-export * from './conditional-expression-visitor';
-export * from './parenthesized-expression-visitor';
+export * from './binary-expression-visitor/binary-expression-visitor';
+export * from './unary-expression-visitor/unary-expression-visitor';
+export * from './conditional-expression-visitor/conditional-expression-visitor';
+export * from './parenthesized-expression-visitor/parenthesized-expression-visitor';

@@ -12,6 +12,7 @@ import * as ast from '../../ast-types';
 import { BaseASTVisitor } from '../base-ast-visitor';
 import { getLocation } from '../../utils/location-utils';
 import { findDescendantOfType } from '../../utils/node-utils';
+import { ErrorHandler } from '../../../error-handling'; // Added ErrorHandler import
 
 /**
  * Custom parameter interface for function call visitor
@@ -28,8 +29,9 @@ export class FunctionCallVisitor extends BaseASTVisitor {
   /**
    * Create a new FunctionCallVisitor
    * @param source The source code
+   * @param errorHandler The error handler instance
    */
-  constructor(source: string) {
+  constructor(source: string, protected errorHandler: ErrorHandler) {
     super(source);
   }
 

@@ -1,6 +1,7 @@
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 import { ASTVisitor } from './ast-visitor';
+import { ErrorHandler } from '../../error-handling'; // Added ErrorHandler import
 
 /**
  * A visitor that delegates to multiple specialized visitors
@@ -11,8 +12,12 @@ export class CompositeVisitor implements ASTVisitor {
   /**
    * Create a new CompositeVisitor
    * @param visitors The visitors to delegate to
+   * @param errorHandler The error handler instance
    */
-  constructor(protected visitors: ASTVisitor[]) {}
+  constructor(
+    protected visitors: ASTVisitor[],
+    protected errorHandler: ErrorHandler // Added errorHandler
+  ) {}
 
   /**
    * Visit a node and return the corresponding AST node
