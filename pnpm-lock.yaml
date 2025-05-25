@@ -278,9 +278,15 @@ importers:
       shx:
         specifier: ^0.3.4
         version: 0.3.4
-      vite-plugin-monaco-editor:
-        specifier: ^1.1.0
-        version: 1.1.0(monaco-editor@0.52.2)
+      vite-plugin-dts:
+        specifier: ^3.9.1
+        version: 3.9.1(@types/node@22.15.18)(rollup@4.41.0)(typescript@5.8.3)(vite@6.3.5(@types/node@22.15.18)(jiti@2.4.2)(terser@5.39.2)(yaml@2.8.0))
+      vitest:
+        specifier: ^3.1.4
+        version: 3.1.4(@types/node@22.15.18)(@vitest/ui@3.1.4)(jiti@2.4.2)(jsdom@26.1.0)(terser@5.39.2)(yaml@2.8.0)
+      vitest-fetch-mock:
+        specifier: ^0.4.5
+        version: 0.4.5(vitest@3.1.4)
 
   packages/openscad-parser:
     dependencies:
@@ -14606,6 +14612,23 @@ snapshots:
       vue-tsc: 1.8.27(typescript@5.8.3)
     optionalDependencies:
       vite: 5.4.19(@types/node@22.15.18)(terser@5.39.2)
+    transitivePeerDependencies:
+      - '@types/node'
+      - rollup
+      - supports-color
+
+  vite-plugin-dts@3.9.1(@types/node@22.15.18)(rollup@4.41.0)(typescript@5.8.3)(vite@6.3.5(@types/node@22.15.18)(jiti@2.4.2)(terser@5.39.2)(yaml@2.8.0)):
+    dependencies:
+      '@microsoft/api-extractor': 7.43.0(@types/node@22.15.18)
+      '@rollup/pluginutils': 5.1.4(rollup@4.41.0)
+      '@vue/language-core': 1.8.27(typescript@5.8.3)
+      debug: 4.4.0
+      kolorist: 1.8.0
+      magic-string: 0.30.17
+      typescript: 5.8.3
+      vue-tsc: 1.8.27(typescript@5.8.3)
+    optionalDependencies:
+      vite: 6.3.5(@types/node@22.15.18)(jiti@2.4.2)(terser@5.39.2)(yaml@2.8.0)
     transitivePeerDependencies:
       - '@types/node'
       - rollup
