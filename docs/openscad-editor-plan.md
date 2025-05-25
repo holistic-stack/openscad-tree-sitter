@@ -39,15 +39,120 @@ This document outlines the plan for implementing a Monaco-based OpenSCAD editor 
 - `packages/openscad-demo/src/simple-demo.tsx` - Fallback demo component
 
 ### Phase 3: `openscad-parser` Integration for AST-based Features 🔄 NEXT PRIORITY
-**Status**: Ready to implement with solid Monaco foundation
+**Status**: Ready to implement with solid Monaco foundation - **DETAILED IMPLEMENTATION PLAN**
 
-#### Priority Tasks:
-1. **Resolve Parser Build Issues**: Complete the openscad-parser build problems for full Tree-sitter integration
-2. **Parse Code with `openscad-parser`**: Integrate AST generation on editor content changes
-3. **Display Syntax Errors**: Use Monaco's Markers API to show syntax errors from `openscad-parser`
-4. **Basic AST-driven Features**: 
-   - Outline View (list of module/function definitions)
-   - Hover Provider for symbol information
+#### 🚨 CRITICAL BLOCKER: Parser Build Issues (Must Fix First)
+**Current Status**: 6 specific TypeScript errors prevent openscad-parser from building
+
+**Specific Errors Identified**:
+1. **FunctionCallNode vs ExpressionNode Type Conflicts** (2 errors):
+   - `expression-visitor.ts:127`: `FunctionCallNode` missing `expressionType` property
+   - `expression-visitor.ts:216`: Return type incompatibility in function call delegation
+   
+2. **ParameterValue Null Assignment Error** (1 error):
+   - `expression-visitor.ts:397`: Cannot assign `null` to `ParameterValue` type for `undef` literals
+   
+3. **Expression Sub-visitor Type Inheritance Problems** (3 errors):
+   - `binary-expression-visitor.ts:67`: `ExpressionNode` not assignable to `BinaryExpressionNode`
+   - `conditional-expression-visitor.ts:55`: `ExpressionNode` not assignable to `ConditionalExpressionNode`  
+   - `unary-expression-visitor.ts:56`: Missing `prefix` property in `UnaryExpressionNode`
+
+#### Priority Tasks - REFINED IMPLEMENTATION PLAN:
+
+**TASK 1: Fix Parser Build Issues** 🚨 CRITICAL - ESTIMATED: 2-4 hours
+1. **Type System Corrections**:
+   - Add `expressionType` property to `FunctionCallNode` interface or adjust type hierarchy
+   - Update `ParameterValue` type to allow `null` for `undef` literals
+   - Fix expression sub-visitor return type compatibility
+
+2. **Delegation Pattern Fixes**:
+   - Ensure expression visitor delegation returns compatible types
+   - Update sub-visitor parent delegation to handle type constraints
+   - Verify visitor pattern type safety throughout expression hierarchy
+
+3. **Validation**:
+   - Run `pnpm build:parser` to confirm zero TypeScript errors
+   - Execute parser test suite to validate functionality
+   - Test AST generation with demo's OpenSCAD examples
+
+**TASK 2: Integrate AST Parsing** ⏳ ESTIMATED: 4-6 hours
+1. **Real-time Parser Integration**:
+   - Add `openscad-parser` dependency to `openscad-editor` package
+   - Create parser service to handle code-to-AST conversion
+   - Implement debounced parsing on editor content changes
+
+2. **AST Integration Points**:
+   - Parse editor content on initialization and changes
+   - Extract document structure (modules, functions, variables)
+   - Generate semantic information for hover and completion
+
+**TASK 3: Error Detection & Markers** ⏳ ESTIMATED: 3-4 hours
+1. **Monaco Markers Integration**:
+   - Use Monaco's `IMarkerData` API to display syntax errors
+   - Map parser errors to Monaco editor positions
+   - Provide error severities (error, warning, info)
+
+2. **Error Visualization**:
+   - Red underlines for syntax errors
+   - Error tooltips with descriptive messages
+   - Problem panel integration (optional)
+
+**TASK 4: AST-driven Features** ⏳ ESTIMATED: 6-8 hours
+1. **Outline View Implementation**:
+   - Extract module definitions, function definitions, variable declarations
+   - Create hierarchical document structure
+   - Implement click-to-navigate functionality
+
+2. **Hover Information Provider**:
+   - Show symbol information (type, definition location)
+   - Display parameter information for modules/functions
+   - Include OpenSCAD documentation where applicable
+
+#### Technical Implementation Details:
+
+**Parser Service Architecture**:
+```typescript
+class OpenSCADParserService {
+  private parser: OpenscadParser;
+  private documentAST: ASTNode | null = null;
+  
+  async parseDocument(content: string): Promise<ParseResult> {
+    // Parse with error recovery
+    // Extract AST and errors
+    // Cache results for performance
+  }
+  
+  getDocumentOutline(): OutlineItem[] {
+    // Extract structure from AST
+  }
+  
+  getHoverInfo(position: Position): HoverInfo | null {
+    // Find AST node at position
+    // Return symbol information
+  }
+}
+```
+
+**Monaco Integration Points**:
+- **Language Service**: Register OpenSCAD language with Monaco
+- **Diagnostic Provider**: Convert parser errors to Monaco markers
+- **Hover Provider**: Use AST to provide contextual information
+- **Outline Provider**: Generate document structure from AST
+
+#### Success Criteria:
+- ✅ **Parser Builds Successfully**: Zero TypeScript compilation errors
+- ✅ **Real-time AST Generation**: Code changes trigger AST updates
+- ✅ **Error Detection**: Syntax errors displayed with red underlines
+- ✅ **Working Outline**: Document structure shows modules/functions
+- ✅ **Hover Information**: Symbol details appear on mouse hover
+- ✅ **Performance**: <100ms parsing for typical files (<1000 lines)
+
+#### Demo Integration:
+The `openscad-demo` is already prepared with:
+- AST-optimized OpenSCAD code examples
+- Comprehensive test cases for all language constructs
+- Error test cases (commented) for validation
+- Visual presentation of implementation progress
 
 ### Phase 4: Advanced Features and Refinements 📋 PLANNED
 **Status**: Well-defined roadmap with Monaco foundation complete

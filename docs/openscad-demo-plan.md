@@ -2,18 +2,18 @@
 
 ## PROJECT STATUS - UPDATED 2025-05-25
 
-### ✅ MAJOR MILESTONE ACHIEVED: Demo Application COMPLETED
+### ✅ MAJOR MILESTONE ACHIEVED: Demo Application COMPLETED + PRIORITY SHOWCASE
 
-**Objective Successfully Met**: Live demonstration of complete OpenSCAD editor with working syntax highlighting
+**Objective Successfully Met**: Live demonstration of complete OpenSCAD editor with working syntax highlighting **PLUS** clear showcase of Phase 3 priorities
 
 ## Current Status
 
 ### ✅ Core Demo Features FULLY IMPLEMENTED
 - **Working Editor Integration**: Successfully showcasing `OpenscadEditorV2` with complete Monaco integration
 - **Professional Syntax Highlighting**: Full OpenSCAD language support with all keywords, functions, and modules
-- **Comprehensive Examples**: Advanced OpenSCAD code samples demonstrating editor capabilities
+- **Priority-Focused Examples**: OpenSCAD code samples specifically designed for AST integration testing
 - **Live Demo Running**: Successfully accessible at http://localhost:5176
-- **Interactive Features**: Real-time code editing with immediate syntax highlighting feedback
+- **Phase 3 Priority Showcase**: Clear presentation of next implementation steps
 
 ### ✅ Implementation Completed (2025-05-25)
 
@@ -21,20 +21,20 @@
 - [x] ✅ **Editor Instantiation**: Complete `OpenscadEditorV2` component integration
 - [x] ✅ **OpenSCAD Syntax Highlighting**: Professional Monaco-based highlighting with custom theme
 - [x] ✅ **Advanced Code Editing**: Full Monaco editing capabilities (typing, selection, undo/redo)
-- [x] ✅ **Complex Initial Content**: Comprehensive OpenSCAD examples including:
-  - Variables and parameters
-  - Built-in modules (cube, sphere, cylinder)
-  - Transformations (translate, rotate, scale)
-  - Control structures (for loops, conditionals)
-  - Custom modules with parameters
-  - Boolean operations (union, difference, intersection)
-  - Comments and special variables
+- [x] ✅ **AST-Ready Content**: Comprehensive OpenSCAD examples including:
+  - Variable declarations (for AST variable nodes)
+  - Module calls (for AST module call nodes)
+  - Control structures (for AST flow control nodes)
+  - Function definitions (for AST function definition nodes)
+  - Expression nodes (binary operations, conditionals, vectors)
+  - Error test cases (commented syntax errors for AST error detection testing)
 
 #### Technical Implementation:
 - [x] ✅ **React Integration**: Modern React component with hooks and proper lifecycle management
 - [x] ✅ **Monaco Configuration**: Professional editor setup with custom theme
 - [x] ✅ **Vite Build System**: Optimized development and production builds
 - [x] ✅ **TypeScript Support**: Full type safety and excellent development experience
+- [x] ✅ **Priority Communication**: Clear visual presentation of Phase 3 objectives and blockers
 
 ## 1. Current Demo Architecture
 
@@ -99,37 +99,166 @@ module custom_part(size, height) {
 custom_part(15, 8);
 ```
 
-## 2. Next Phase Opportunities
+## 2. Phase 3 Priority Integration - REFINED AST INTEGRATION PLAN 🎯
 
-### 2.1. Tree-sitter Integration Enhancements 🔄 NEXT PRIORITY
+### 2.1. Demo as AST Integration Testing Platform
 
-With the solid Monaco foundation complete, the demo is ready to showcase Tree-sitter features:
+The demo now serves as a **comprehensive testing and development platform** for Phase 3 AST integration:
 
-#### Priority Enhancements:
-1. **AST Visualization**: Display parsed AST structure alongside the editor
-2. **Real-time Error Detection**: Show syntax errors using Monaco markers
-3. **Code Analysis**: Demonstrate semantic analysis capabilities
-4. **Outline View**: Show document structure (modules, functions)
+#### ✅ Visual Priority Communication - ENHANCED:
+1. **CRITICAL BLOCKER Display**: Specific TypeScript errors preventing parser build
+2. **Implementation Roadmap**: Step-by-step plan with time estimates
+3. **AST Test Cases**: Each code construct mapped to specific AST node types and testing scenarios
+4. **Progress Tracking**: Visual indicators of completion status for each integration milestone
 
-#### Advanced Features (Future):
-1. **Interactive AST Navigation**: Click on code to highlight AST nodes
-2. **Code Generation**: Generate OpenSCAD code from AST manipulation
-3. **Semantic Highlighting**: Advanced highlighting based on semantic analysis
-4. **Language Server Features**: Code completion, hover information, diagnostics
+#### ✅ Technical Readiness - AST INTEGRATION PREPARED:
+1. **Parser Build Issues Documented**: All 6 TypeScript errors identified with file locations
+2. **AST-Ready Code Examples**: Comprehensive OpenSCAD constructs for systematic AST testing
+3. **Error Test Cases**: Commented syntax errors ready for error detection validation
+4. **Integration Points Identified**: Clear demonstration of where Tree-sitter features will connect to Monaco
 
-### 2.2. Demo Enhancement Opportunities
+### 2.2. REFINED Phase 3 Implementation Strategy
 
-#### Immediate Enhancements:
-1. **Multiple Example Files**: Tabbed interface with different OpenSCAD examples
-2. **Theme Selection**: Toggle between light/dark themes
-3. **Feature Documentation**: Inline explanations of demonstrated capabilities
-4. **Performance Showcase**: Large file handling demonstration
+The demo now provides **specific implementation guidance** for the top priority task:
 
-#### Advanced Demonstrations:
-1. **Parsing Workflow**: Show CST → AST transformation process
-2. **Error Recovery**: Demonstrate robust error handling
-3. **Integration Examples**: Show how to embed editor in other applications
-4. **Performance Metrics**: Display parsing and rendering performance
+#### 🚨 CRITICAL PATH: Parser Build Resolution
+**Estimated Time**: 2-4 hours | **Priority**: BLOCKER
+
+**Specific TypeScript Errors to Fix**:
+1. **Type Hierarchy Issues**:
+   - `FunctionCallNode` missing `expressionType` property (2 locations)
+   - `ParameterValue` type cannot accept `null` for `undef` literals
+   
+2. **Expression Visitor Delegation**:
+   - Binary/Conditional/Unary expression return type mismatches
+   - Sub-visitor parent delegation type incompatibilities
+
+**Validation Process**:
+- **Build Test**: `pnpm build:parser` must complete with zero errors
+- **Functional Test**: Parser test suite must pass completely
+- **Integration Test**: Demo examples must parse to valid AST
+
+#### 🎯 AST Integration Implementation Steps
+
+**STEP 1: Parser Service Creation** - ESTIMATED: 2-3 hours
+```typescript
+// Integration architecture for openscad-editor
+class OpenSCADParserService {
+  async parseDocument(content: string): Promise<{
+    ast: ASTNode | null;
+    errors: ParseError[];
+    outline: OutlineItem[];
+  }>
+  
+  getHoverInfo(position: Position): HoverInfo | null
+  extractDocumentSymbols(): DocumentSymbol[]
+}
+```
+
+**STEP 2: Monaco Markers Integration** - ESTIMATED: 3-4 hours
+- Connect parser errors to Monaco's diagnostic system
+- Display syntax errors with red underlines
+- Provide error tooltips with contextual information
+
+**STEP 3: AST-driven Features** - ESTIMATED: 4-6 hours
+- **Outline View**: Extract and display document structure
+- **Hover Provider**: Show symbol information from AST
+- **Symbol Navigation**: Click-to-definition functionality
+
+### 2.3. AST Integration Test Cases - SYSTEMATIC TESTING
+
+The demo code now includes **systematic test cases** for AST validation:
+
+#### Expression Nodes Testing:
+```openscad
+// Variable declarations (AST: VariableDeclaration)
+width = 20;                    // → Simple assignment
+result = width * height + depth; // → Binary expression tree
+
+// Conditional expressions (AST: ConditionalExpression)  
+size = width > 15 ? 20 : 10;   // → Ternary operator parsing
+```
+
+#### Module Nodes Testing:
+```openscad
+// Built-in modules (AST: ModuleCall)
+cube([width, height, depth]);        // → Parameter array
+sphere(r = 8, $fn = 50);            // → Named parameters
+
+// Custom module definitions (AST: ModuleDefinition)
+module my_shape(size = 10, holes = true) { ... }
+```
+
+#### Control Flow Testing:
+```openscad
+// For loops (AST: ForLoop)
+for (i = [0:2:10]) { ... }          // → Iterator expression
+
+// Conditional statements (AST: IfStatement)  
+if (holes) { ... }                  // → Boolean condition
+```
+
+#### Complex Constructs Testing:
+```openscad
+// Vector expressions (AST: VectorExpression)
+points = [[0,0], [10,0], [10,10], [0,10]]; // → Nested arrays
+
+// Nested function calls (AST: FunctionCall)
+complex_value = sin(30) + cos(45) * sqrt(16); // → Expression tree
+
+// Hull operations (AST: ModuleCall with children)
+hull() { translate([0, 30, 0]) sphere(5); ... }
+```
+
+#### Error Detection Testing:
+```openscad
+// Commented syntax error for AST error detection testing
+// cube([10, 10; // Missing closing bracket
+// Expected: ParseError with position and description
+```
+
+### 2.4. AST Integration Validation Checklist
+
+The demo provides **comprehensive validation criteria** for each integration milestone:
+
+#### ✅ Parser Build Success Validation:
+- [ ] `pnpm build:parser` completes with zero TypeScript errors
+- [ ] All parser tests pass: `pnpm test:parser`
+- [ ] Demo examples parse without throwing exceptions
+
+#### ✅ AST Generation Validation:
+- [ ] Variable declarations parsed to `VariableDeclaration` nodes
+- [ ] Module calls parsed to `ModuleCall` nodes with correct parameters
+- [ ] Control structures parsed to appropriate flow control nodes
+- [ ] Expression trees properly constructed for complex expressions
+
+#### ✅ Error Detection Validation:
+- [ ] Syntax errors displayed with red underlines in Monaco
+- [ ] Error tooltips show descriptive messages
+- [ ] Parser errors map correctly to editor positions
+- [ ] Error recovery allows continued parsing after syntax errors
+
+#### ✅ AST Feature Validation:
+- [ ] Outline view shows document structure (modules, functions, variables)
+- [ ] Hover information displays symbol details
+- [ ] Click navigation jumps to definition locations
+- [ ] Performance <100ms for typical demo file size
+
+### 2.5. Development Workflow Integration
+
+The demo serves as a **live development environment** for AST integration:
+
+#### Real-time Testing Process:
+1. **Parser Fix → Build Test**: Immediate validation of TypeScript error resolution
+2. **AST Integration → Parse Test**: Live parsing of demo content with AST output
+3. **Feature Implementation → UI Test**: Immediate visual feedback of new capabilities
+4. **Error Handling → Edge Case Test**: Validation with intentional syntax errors
+
+#### Debug Capabilities:
+- **AST Visualization**: Option to display parsed AST structure
+- **Error Console**: Real-time parser error reporting
+- **Performance Metrics**: Parse timing and memory usage tracking
+- **Integration Status**: Visual indicators of successful feature connections
 
 ## 3. Build and Development
 
@@ -174,15 +303,28 @@ With the solid Monaco foundation complete, the demo is ready to showcase Tree-si
 
 ## Summary
 
-The OpenSCAD demo application has successfully achieved its primary objective, providing a professional, working demonstration of the OpenSCAD editor with complete syntax highlighting. The demo runs live at http://localhost:5176 and showcases:
+The OpenSCAD demo application has successfully achieved its primary objective and **now clearly showcases the top priority task for Phase 3**. The demo runs live at http://localhost:5176 and provides:
 
+### ✅ Completed Foundation:
 - ✅ Professional-grade OpenSCAD editor with Monaco integration
 - ✅ Complete syntax highlighting for all OpenSCAD language constructs  
-- ✅ Comprehensive examples demonstrating real-world usage
-- ✅ Modern, responsive user interface
-- ✅ Solid foundation for future Tree-sitter integration
+- ✅ Modern, responsive user interface with production-ready quality
+- ✅ Solid foundation ready for Tree-sitter integration
 
-The demo now serves as both a working proof of concept and a development platform for implementing advanced editor features. The next priority is integrating Tree-sitter-based AST features to showcase the full potential of the OpenSCAD language tooling.
+### 🎯 Phase 3 Priority Showcase:
+- 🚨 **Clear Problem Identification**: Parser build issues preventing AST integration
+- 🎯 **Specific Implementation Steps**: Detailed roadmap for Phase 3 completion
+- 🧪 **AST Test Cases**: Code examples specifically designed for Tree-sitter integration testing
+- 📋 **Visual Communication**: Priority banners and implementation tracking
+
+### 🔄 Immediate Action Required:
+The demo now clearly communicates that the **TOP PRIORITY** is resolving the `openscad-parser` TypeScript build errors to enable AST-based features. Once these build issues are resolved, the demo is fully prepared to showcase:
+- Real-time syntax error detection
+- AST-driven outline view
+- Hover information provider
+- Advanced editor features
+
+The demo serves as both a working proof of concept and a **development dashboard** that clearly communicates project priorities and next steps to stakeholders and contributors.
 
 ---
 
