@@ -8,20 +8,15 @@ import * as monaco from 'monaco-editor';
 // Determine paths relative to the current test file
 const baseDir = path.resolve(__dirname); // c:\\Users\\luciano\\git\\openscad-tree-sitter-p1\\packages\\openscad-editor\\src\\lib
 
-const treeSitterWasmPath = path.resolve(
-  baseDir,
-  '../../../../node_modules/web-tree-sitter/tree-sitter.wasm'
-);
+// Paths to WASM files, now expected to be in `packages/openscad-editor/public/`
+// due to the new postinstall script in openscad-editor's package.json
+const publicDir = path.resolve(baseDir, '../../public'); // Adjust to point to `packages/openscad-editor/public`
 
-const openSCADGrammarWasmPath = path.resolve(
-  baseDir,
-  '../../../tree-sitter-openscad/tree-sitter-openscad.wasm'
-);
+const treeSitterWasmPath = path.join(publicDir, 'tree-sitter.wasm');
+const openSCADGrammarWasmPath = path.join(publicDir, 'tree-sitter-openscad.wasm');
 
-const highlightQueryFilePath = path.resolve(
-  baseDir,
-  '../../../tree-sitter-openscad/queries/highlights.scm'
-);
+// Path to highlight query file, also expected to be in `packages/openscad-editor/public/`
+const highlightQueryFilePath = path.join(publicDir, 'highlights.scm');
 
 let ActualOpenSCADLanguage: TreeSitterLanguage;
 let actualHighlightQueryText: string;
@@ -53,7 +48,9 @@ beforeAll(async () => {
     if (!fs.existsSync(openSCADGrammarWasmPath)) {
       throw new Error(`OpenSCAD grammar WASM not found at ${openSCADGrammarWasmPath}. Ensure the tree-sitter-openscad package is built (npm run build:wasm in its directory).`);
     }
-    ActualOpenSCADLanguage = await TreeSitterLanguage.load(openSCADGrammarWasmPath);
+    // Load WASM as a buffer
+    const wasmBuffer = fs.readFileSync(openSCADGrammarWasmPath);
+    ActualOpenSCADLanguage = await TreeSitterLanguage.load(wasmBuffer);
 
     if (!fs.existsSync(highlightQueryFilePath)) {
       throw new Error(`Highlight query file not found at ${highlightQueryFilePath}.`);
