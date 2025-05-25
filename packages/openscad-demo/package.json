@@ -15,7 +15,7 @@
     "lint": "env-cmd -e plain eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "env-cmd -e plain eslint . --ext ts,tsx --fix",
     "typecheck": "env-cmd -e plain tsc --noEmit",
-    "postinstall": "shx mkdir -p ./public && shx cp ./node_modules/@openscad/tree-sitter-openscad/tree-sitter-openscad.wasm ./public/tree-sitter-openscad.wasm && shx cp ./node_modules/web-tree-sitter/tree-sitter.wasm ./public/tree-sitter.wasm"
+    "postinstall": "shx mkdir -p ./public && shx cp ./node_modules/@openscad/tree-sitter-openscad/tree-sitter-openscad.wasm ./public/tree-sitter-openscad.wasm && shx cp ./node_modules/web-tree-sitter/tree-sitter.wasm ./public/tree-sitter.wasm && shx cp ./node_modules/@openscad/tree-sitter-openscad/queries/highlights.scm ./public/highlights.scm"
   },
   "dependencies": {
     "@openscad/editor": "workspace:*",
