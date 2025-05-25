@@ -6,14 +6,19 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "postinstall": "shx mkdir -p ./public && shx cp ./node_modules/@openscad/tree-sitter-openscad/tree-sitter-openscad.wasm ./public/tree-sitter-openscad.wasm && shx cp ./node_modules/web-tree-sitter/tree-sitter.wasm ./public/tree-sitter.wasm"
   },
   "dependencies": {
     "@openscad/editor": "workspace:*",
+    "@openscad/parser": "workspace:*" ,
+    "@openscad/tree-sitter-openscad": "workspace:*",
+    "web-tree-sitter": "0.25.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "shx": "^0.3.4",
     "@nx/eslint-plugin": "^21.1.2",
     "@nx/react": "^21.1.2",
     "@nx/vite": "^21.1.1",

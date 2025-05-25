@@ -1,14 +1,37 @@
 {
   "name": "@openscad/editor",
-  "version": "0.0.1",
-  "main": "./index.js",
-  "types": "./index.d.ts",
+  "version": "0.1.0",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "public/tree-sitter-openscad.wasm",
+    "public/highlights.scm"
+  ],
   "exports": {
     ".": {
-      "import": "./index.mjs",
-      "require": "./index.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
     }
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-repo/openscad-tree-sitter-p1.git",
+    "directory": "packages/openscad-editor"
+  },
+  "keywords": [
+    "openscad",
+    "editor",
+    "monaco",
+    "react",
+    "tree-sitter"
+  ],
+  "license": "MIT",
   "scripts": {
     "build": "nx build openscad-editor",
     "dev": "nx dev openscad-editor",
@@ -19,6 +42,11 @@
     "@monaco-editor/react": "^4.7.0",
     "monaco-editor": "^0.52.2",
     "vite-plugin-monaco-editor": "^1.1.0",
-    "web-tree-sitter": "0.25.3"
+    "web-tree-sitter": "0.25.3",
+    "@openscad/parser": "workspace:*" 
+  },
+  "peerDependencies": {
+    "react": ">=17.0.0",
+    "react-dom": ">=17.0.0"
   }
 }

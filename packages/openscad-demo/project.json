@@ -4,6 +4,7 @@
   "sourceRoot": "packages/openscad-demo/src",
   "projectType": "library",
   "tags": ["demo", "ui"],
+  "implicitDependencies": ["tree-sitter-openscad"],
   "// targets": "to see all targets run: nx show project openscad-demo --web",
   "targets": {
     "dev": {

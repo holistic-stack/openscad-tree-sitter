@@ -14,7 +14,7 @@
     *   `monaco-editor`, `@monaco-editor/react` (installed)
     *   `vite-plugin-monaco-editor` (installed for Vite integration)
     *   `web-tree-sitter` (installed)
-    *   `openscad-parser` (as a workspace dependency - to be added/used in Phase 3)
+    *   `openscad-parser` (as a workspace dependency - added)
     *   `vite`, `vitest`, `@vitejs/plugin-react` (scaffolded/configured by Nx)
     *   `eslint`, `prettier`, relevant TypeScript and ESLint plugins (configured).
 
@@ -26,13 +26,14 @@
 4.  **Initial Tests - COMPLETED**
     *   Wrote basic Vitest tests to ensure the `OpenSCADEditor` component renders without errors, mocking the Monaco editor itself.
 
-**Phase 2: Tree-sitter Integration for Syntax Highlighting (6-8 hours) - IN PROGRESS**
+**Phase 2: Tree-sitter Integration for Syntax Highlighting (6-8 hours) - MOSTLY COMPLETED**
 
 1.  **Load OpenSCAD Grammar (WASM) & Queries - COMPLETED**
-    *   The `tree-sitter-openscad` package provides the `.wasm` file for the OpenSCAD grammar. (Verified)
-    *   Vite is configured to serve this WASM file from the `public` directory. (`tree-sitter-openscad.wasm` copied to `packages/openscad-editor/public/`)
+    *   The `tree-sitter-openscad` package provides the `.wasm` file for the OpenSCAD grammar. (Verified & build process updated to generate `tree-sitter-openscad.wasm` at package root via `npm run build:wasm` in its `install` script).
+    *   The `openscad-demo` package now has a `postinstall` script to copy `tree-sitter-openscad.wasm` (from `@openscad/tree-sitter-openscad`) and `tree-sitter.wasm` (from `web-tree-sitter`) into its `public/` directory. (Verified, WASM files are present in demo's public folder).
+    *   Vite is configured to serve these WASM files from the `public` directory. (`tree-sitter-openscad.wasm` copied to `packages/openscad-editor/public/` for library asset bundling, and also handled by the demo app).
     *   `highlights.scm` from `packages/tree-sitter-openscad/queries/` copied to `packages/openscad-editor/public/`. (Completed)
-    *   In the `OpenSCADEditor` component, `web-tree-sitter` is used to initialize the parser and load the OpenSCAD grammar WASM. (Basic loading implemented, `highlights.scm` is also fetched).
+    *   In the `OpenSCADEditor` component, `web-tree-sitter` is used to initialize the parser and load the OpenSCAD grammar WASM. (Basic loading implemented, `highlights.scm` is also fetched). (Corrected `web-tree-sitter` import and initialization in `openscad-editor.tsx`)
 
 2.  **Integrate with Monaco for Highlighting - PIVOTED & IN PROGRESS**
     *   Initial investigation of `monaco-tree-sitter` library showed it to be outdated and problematic for integration. (Attempted and abandoned)
@@ -89,7 +90,7 @@
 
 3.  **Build and Package Configuration**
     *   Finalize Vite library mode configuration.
-    *   Ensure `package.json` is correctly set up for publishing.
+    *   Ensure `package.json` is correctly set up for publishing. (Initial setup for publishing completed, including `private: false`, `publishConfig`, `files`, `repository`, `keywords`, `license`, and peer dependencies).
 
 4.  **README**
     *   Write a comprehensive README for `openscad-editor`.

@@ -8,7 +8,8 @@
   "scripts": {
     "build": "nx run tree-sitter-openscad:build",
     "build:node": "nx run tree-sitter-openscad:build:node",
-    "install": "tree-sitter init && tree-sitter generate && node-gyp-build",
+    "build:wasm": "tree-sitter build --wasm",
+    "install": "tree-sitter init && tree-sitter generate && npm run build:wasm && node-gyp-build",
     "prebuildify": "nx run tree-sitter-openscad:prebuildify",
     "test": "nx run tree-sitter-openscad:test",
     "parse": "nx run tree-sitter-openscad:parse",
@@ -33,7 +34,6 @@
     "src/**",
     "bindings/node/**",
     "bindings/web/**",
-    "bindings/wasm/**",
     "binding.gyp",
     "prebuilds/**",
     "tree-sitter-openscad.wasm"
