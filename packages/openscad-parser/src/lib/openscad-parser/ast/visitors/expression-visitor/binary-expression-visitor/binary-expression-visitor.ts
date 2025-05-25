@@ -90,18 +90,36 @@ export class BinaryExpressionVisitor extends BaseASTVisitor {
     // Type guard for valid operators if necessary, or let semantic analysis handle it
     // For now, we assume the grammar provides valid operator tokens.
 
+    // Debug: Log operand node details
+    this.errorHandler.logInfo(
+      `[BinaryExpressionVisitor] Processing operands - Left: ${leftNode.type} "${leftNode.text}", Right: ${rightNode.type} "${rightNode.text}"`,
+      'BinaryExpressionVisitor.visit',
+      node
+    );
+
     const leftAST = this.parentVisitor.visitExpression(leftNode);
     const rightAST = this.parentVisitor.visitExpression(rightNode);
+
+    // Debug: Log operand results
+    this.errorHandler.logInfo(
+      `[BinaryExpressionVisitor] Operand results - Left: ${leftAST ? 'success' : 'null'}, Right: ${rightAST ? 'success' : 'null'}`,
+      'BinaryExpressionVisitor.visit',
+      node
+    );
 
     if (!leftAST || !rightAST) {
       // Errors in sub-expressions should have been handled by the parentVisitor
       // or its delegates. If they return null, it means a parsing error occurred.
       const error = this.errorHandler.createParserError(
-        `Failed to parse operands in binary expression. Left: ${leftAST}, Right: ${rightAST}`,
+        `Failed to parse operands in binary expression. Left node: ${leftNode.type} "${leftNode.text}" -> ${leftAST}, Right node: ${rightNode.type} "${rightNode.text}" -> ${rightAST}`,
         {
           line: getLocation(node).start.line,
           column: getLocation(node).start.column,
-          nodeType: node.type
+          nodeType: node.type,
+          additionalInfo: {
+            leftNodeType: leftNode.type,
+            rightNodeType: rightNode.type
+          }
         }
       );
       this.errorHandler.report(error);

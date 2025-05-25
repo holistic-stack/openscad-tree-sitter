@@ -53,24 +53,35 @@ export class UnclosedBracketStrategy extends BaseRecoveryStrategy {
    * Attempts to recover from an unclosed bracket error
    */
   recover(error: ParserError, code: string): string | null {
-    const position = this.getErrorPosition(error);
-    if (!position) return null;
+    // Find all unclosed brackets in the code
+    const unclosedBrackets = this.findAllUnclosedBrackets(code);
+    if (unclosedBrackets.length === 0) return null;
 
-    const { line: lineNumber, column } = position;
-    const lineContent = this.getLine(code, lineNumber);
-    if (!lineContent) return null;
+    // For braces, add on a new line
+    if (unclosedBrackets.some(bracket => bracket.close === '}')) {
+      // If there are braces, handle them specially
+      const nonBraces = unclosedBrackets.filter(bracket => bracket.close !== '}');
+      const braces = unclosedBrackets.filter(bracket => bracket.close === '}');
 
-    // Find the last unclosed bracket before the error position
-    const bracketInfo = this.findLastUnclosedBracket(lineContent, column - 1);
-    if (!bracketInfo) return null;
+      let result = code;
+      // Add non-brace brackets at the end in reverse order
+      for (let i = nonBraces.length - 1; i >= 0; i--) {
+        result += nonBraces[i].close;
+      }
+      // Add braces on new lines
+      for (const bracket of braces) {
+        result += '\n}';
+      }
+      return result;
+    }
 
-    // Insert the missing closing bracket
-    return this.insertAtPosition(
-      code,
-      lineNumber,
-      column,
-      bracketInfo.close
-    );
+    // For brackets and parentheses, append all missing brackets at the end
+    // Close brackets in reverse order (LIFO - Last In, First Out)
+    let result = code;
+    for (let i = unclosedBrackets.length - 1; i >= 0; i--) {
+      result += unclosedBrackets[i].close;
+    }
+    return result;
   }
 
   /**
@@ -106,6 +117,70 @@ export class UnclosedBracketStrategy extends BaseRecoveryStrategy {
 
     // Return the last unclosed bracket, if any
     return stack.length > 0 ? stack[stack.length - 1] : null;
+  }
+
+  /**
+   * Finds the last unclosed bracket in the entire code
+   */
+  private findLastUnclosedBracketInCode(code: string): BracketInfo | null {
+    const stack: BracketInfo[] = [];
+
+    // Scan the entire code
+    for (let i = 0; i < code.length; i++) {
+      const char = code[i];
+      const bracket = this.bracketMap[char];
+
+      if (bracket) {
+        // Found an opening bracket
+        stack.push(bracket);
+      } else {
+        // Check for closing brackets
+        for (const bracketType of this.bracketTypes) {
+          if (char === bracketType.close) {
+            // If the top of the stack matches, pop it
+            if (stack.length > 0 && stack[stack.length - 1].close === char) {
+              stack.pop();
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    // Return the last unclosed bracket, if any
+    return stack.length > 0 ? stack[stack.length - 1] : null;
+  }
+
+  /**
+   * Finds all unclosed brackets in the entire code
+   */
+  private findAllUnclosedBrackets(code: string): BracketInfo[] {
+    const stack: BracketInfo[] = [];
+
+    // Scan the entire code
+    for (let i = 0; i < code.length; i++) {
+      const char = code[i];
+      const bracket = this.bracketMap[char];
+
+      if (bracket) {
+        // Found an opening bracket
+        stack.push(bracket);
+      } else {
+        // Check for closing brackets
+        for (const bracketType of this.bracketTypes) {
+          if (char === bracketType.close) {
+            // If the top of the stack matches, pop it
+            if (stack.length > 0 && stack[stack.length - 1].close === char) {
+              stack.pop();
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    // Return all unclosed brackets
+    return stack;
   }
 
   /**

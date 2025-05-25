@@ -1,13 +1,13 @@
-import { OpenscadParser } from '../openscad-parser';
+import { EnhancedOpenscadParser } from '../enhanced-parser';
 import { afterAll, beforeAll, describe, it, expect, beforeEach } from 'vitest';
 
 describe('AST Generator Integration Tests', () => {
-  let parser: OpenscadParser;
+  let parser: EnhancedOpenscadParser;
 
   beforeAll(async () => {
-    parser = new OpenscadParser();
+    parser = new EnhancedOpenscadParser();
     // Assuming the WASM file is in the public directory when served
-    await parser.init('./tree-sitter-openscad.wasm');
+    await parser.init();
   });
 
   afterAll(() => {

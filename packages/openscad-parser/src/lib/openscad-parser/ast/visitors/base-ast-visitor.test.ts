@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import { BaseASTVisitor } from './base-ast-visitor';
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
-import { OpenscadParser } from '../../openscad-parser';
+import { EnhancedOpenscadParser } from '../../enhanced-parser';
 import { getLocation } from '../utils/location-utils';
 
 // Mock implementation of BaseASTVisitor for testing
@@ -29,12 +29,12 @@ class TestVisitor extends BaseASTVisitor {
 }
 
 describe('BaseASTVisitor', () => {
-  let parser: OpenscadParser;
+  let parser: EnhancedOpenscadParser;
   let visitor: TestVisitor;
 
   beforeAll(async () => {
-    parser = new OpenscadParser();
-    await parser.init('./tree-sitter-openscad.wasm');
+    parser = new EnhancedOpenscadParser();
+    await parser.init();
   });
 
   afterAll(() => {

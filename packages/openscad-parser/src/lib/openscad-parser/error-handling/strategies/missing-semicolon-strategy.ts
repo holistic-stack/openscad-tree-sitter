@@ -48,9 +48,15 @@ export class MissingSemicolonStrategy extends BaseRecoveryStrategy {
       return null;
     }
 
+    // Skip if the line is a comment (starts with // after trimming whitespace)
+    const trimmed = lineContent.trimStart();
+    if (trimmed.startsWith('//')) {
+      return null;
+    }
+
     // Add semicolon at the end of the line
-    const trimmed = lineContent.trimEnd();
-    const modifiedLine = trimmed + ';';
+    const trimmedEnd = lineContent.trimEnd();
+    const modifiedLine = trimmedEnd + ';';
 
     return this.replaceLine(code, lineNumber, modifiedLine);
   }

@@ -4,18 +4,18 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { FunctionCallVisitor } from './function-call-visitor';
-import { OpenscadParser } from '../../../openscad-parser';
+import { EnhancedOpenscadParser } from '../../../enhanced-parser';
 import * as ast from '../../ast-types';
 import { Node as TSNode } from 'web-tree-sitter';
 import { findDescendantOfType } from '../../utils/node-utils';
 import { ErrorHandler } from '../../../error-handling';
 
 describe('FunctionCallVisitor', () => {
-  let parser: OpenscadParser;
+  let parser: EnhancedOpenscadParser;
   let errorHandler: ErrorHandler;
 
   beforeEach(async () => {
-    parser = new OpenscadParser();
+    parser = new EnhancedOpenscadParser();
     await parser.init();
     errorHandler = new ErrorHandler();
   });

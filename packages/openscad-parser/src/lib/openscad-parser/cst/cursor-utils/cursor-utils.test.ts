@@ -1,14 +1,14 @@
 import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
-import { OpenscadParser } from '../../openscad-parser';
+import { EnhancedOpenscadParser } from '../../enhanced-parser';
 import * as cursorUtils from './cursor-utils';
 import { cstTreeCursorWalkLog } from './cstTreeCursorWalkLog';
 
 describe('cursor-utils', () => {
-  let parser: OpenscadParser;
+  let parser: EnhancedOpenscadParser;
 
   beforeEach(async () => {
-    parser = new OpenscadParser();
-    await parser.init('./tree-sitter-openscad.wasm');
+    parser = new EnhancedOpenscadParser();
+    await parser.init();
     console.log('Parser initialized successfully');
   });
 

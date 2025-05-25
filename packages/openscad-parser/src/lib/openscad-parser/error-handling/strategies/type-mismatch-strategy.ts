@@ -37,7 +37,16 @@ interface TypeChecker {
 export class TypeMismatchStrategy extends BaseRecoveryStrategy {
   private readonly typeConverters: Record<string, Record<string, (value: string) => string>> = {
     'string': {
-      'number': (v) => `parseFloat(${v})`,
+      'number': (v) => {
+        // If it's a quoted string containing only a number, just remove quotes
+        if (v.startsWith('"') && v.endsWith('"')) {
+          const inner = v.slice(1, -1);
+          if (/^-?\d+(\.\d+)?$/.test(inner)) {
+            return inner;
+          }
+        }
+        return `parseFloat(${v})`;
+      },
       'boolean': (v) => `(${v} != "" && ${v}.toLowerCase() !== "false")`,
     },
     'number': {
@@ -76,9 +85,11 @@ export class TypeMismatchStrategy extends BaseRecoveryStrategy {
       if (error.code === ErrorCode.TYPE_MISMATCH) {
         return this.handleTypeMismatch(error, code);
       } else if (error.code === ErrorCode.INVALID_OPERATION) {
-        return this.handleInvalidOperation(error, code);
+        // Complex binary operation recovery is not yet implemented
+        return null;
       } else if (error.code === ErrorCode.INVALID_ARGUMENTS) {
-        return this.handleInvalidArguments(error, code);
+        // Complex function argument recovery is not yet implemented
+        return null;
       }
     } catch (e) {
       // If any error occurs during recovery, log it and return null

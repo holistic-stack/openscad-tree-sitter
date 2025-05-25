@@ -3,11 +3,11 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { OpenscadParser } from './openscad-parser';
+import { EnhancedOpenscadParser } from './enhanced-parser';
 import { ParserError, SyntaxError } from './ast/errors';
 
 describe('OpenscadParser Error Handling', () => {
-  let parser: OpenscadParser;
+  let parser: EnhancedOpenscadParser;
 
   // Sample valid and invalid OpenSCAD code
   const VALID_OPENSCAD_CODE = 'cube([10, 10, 10]);';
@@ -15,12 +15,8 @@ describe('OpenscadParser Error Handling', () => {
 
   beforeEach(async () => {
     // Configure parser for graceful error handling
-    parser = new OpenscadParser({
-      throwErrors: false, // Don't throw errors, handle them gracefully
-      attemptRecovery: true,
-      includeSource: true,
-    });
-    await parser.init('./tree-sitter-openscad.wasm');
+    parser = new EnhancedOpenscadParser();
+    await parser.init();
   });
 
   afterEach(() => {
@@ -69,7 +65,7 @@ describe('OpenscadParser Error Handling', () => {
   });
 
   it('should throw a ParserError for initialization errors', async () => {
-    const uninitializedParser = new OpenscadParser();
+    const uninitializedParser = new EnhancedOpenscadParser();
 
     // Should throw an error when trying to parse without initializing
     await expect(async () => {

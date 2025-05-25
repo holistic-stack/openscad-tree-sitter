@@ -21,8 +21,8 @@ describe('ParserError', () => {
     expect(error).toBeInstanceOf(ParserError);
     expect(error.name).toBe('ParserError');
     expect(error.message).toContain(message);
-    expect(error.message).toContain('line 1'); // 1-based line number
-    expect(error.message).toContain('column 6'); // 1-based column number
+    expect(error.getPositionString()).toContain('line 1'); // 1-based line number
+    expect(error.getPositionString()).toContain('column 6'); // 1-based column number
     expect(error.code).toBe(code);
     expect(error.source).toBe(source);
     expect(error.position).toEqual(position);

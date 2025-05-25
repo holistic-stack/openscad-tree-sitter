@@ -7,14 +7,16 @@ import {
   extractBooleanParameter,
   extractVectorParameter,
 } from '../extractors/parameter-extractor';
+import { ErrorHandler } from '../../error-handling';
 // findDescendantOfType is not used in this file
 
 /**
  * Extract a cube node from an accessor expression node
  * @param node The accessor expression node
+ * @param errorHandler Optional error handler for enhanced expression evaluation
  * @returns A cube AST node or null if the node cannot be processed
  */
-export function extractCubeNode(node: TSNode): ast.CubeNode | null {
+export function extractCubeNode(node: TSNode, errorHandler?: ErrorHandler): ast.CubeNode | null {
   console.log(
     `[extractCubeNode] Processing cube node: ${node.text.substring(0, 50)}`
   );
@@ -58,7 +60,7 @@ export function extractCubeNode(node: TSNode): ast.CubeNode | null {
     `[extractCubeNode] Found arguments node: type=${argsNode.type}, text='${argsNode.text}'`
   );
 
-  const args = extractArguments(argsNode);
+  const args = extractArguments(argsNode, errorHandler);
   console.log(
     `[extractCubeNode] Extracted ${args.length} arguments: ${JSON.stringify(
       args
@@ -88,7 +90,7 @@ export function extractCubeNode(node: TSNode): ast.CubeNode | null {
         );
       } else {
         // Try as a number parameter
-        const numberValue = extractNumberParameter(arg);
+        const numberValue = extractNumberParameter(arg, errorHandler);
         if (numberValue !== null) {
           size = numberValue;
           console.log(`[extractCubeNode] Found number size: ${size}`);
@@ -103,7 +105,7 @@ export function extractCubeNode(node: TSNode): ast.CubeNode | null {
     }
     // Handle center parameter (second positional parameter or named 'center')
     else if ((i === 1 && !arg.name) || arg.name === 'center') {
-      const centerValue = extractBooleanParameter(arg);
+      const centerValue = extractBooleanParameter(arg, errorHandler);
       if (centerValue !== null) {
         center = centerValue;
         console.log(`[extractCubeNode] Found center parameter: ${center}`);

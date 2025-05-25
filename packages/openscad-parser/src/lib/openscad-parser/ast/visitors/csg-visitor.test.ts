@@ -1,18 +1,18 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { CSGVisitor } from './csg-visitor';
-import { OpenscadParser } from '../../openscad-parser';
+import { EnhancedOpenscadParser } from '../../enhanced-parser';
 import { Node as TSNode } from 'web-tree-sitter';
 import { findDescendantOfType } from '../utils/node-utils';
 import { ErrorHandler } from '../../error-handling';
 
 describe('CSGVisitor', () => {
-  let parser: OpenscadParser;
+  let parser: EnhancedOpenscadParser;
   let visitor: CSGVisitor;
   let errorHandler: ErrorHandler;
 
   beforeAll(async () => {
-    parser = new OpenscadParser();
-    await parser.init('./tree-sitter-openscad.wasm');
+    parser = new EnhancedOpenscadParser();
+    await parser.init();
   });
 
   afterAll(() => {

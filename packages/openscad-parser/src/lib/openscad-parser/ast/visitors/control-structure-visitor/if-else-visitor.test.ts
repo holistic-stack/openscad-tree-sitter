@@ -4,7 +4,7 @@
  * @module lib/openscad-parser/ast/visitors/control-structure-visitor/if-else-visitor.test
  */
 
-import { OpenscadParser } from '../../../openscad-parser';
+import { EnhancedOpenscadParser } from '../../../enhanced-parser';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as ast from '../../ast-types';
 import { ControlStructureVisitor } from '../control-structure-visitor';
@@ -12,13 +12,13 @@ import { printNodeStructure } from '../../utils/debug-utils';
 import { ErrorHandler } from '../../../error-handling';
 
 describe('IfElseVisitor', () => {
-  let parser: OpenscadParser;
+  let parser: EnhancedOpenscadParser;
   let errorHandler: ErrorHandler;
   let visitor: ControlStructureVisitor;
 
   beforeEach(async () => {
-    parser = new OpenscadParser();
-    await parser.init('./tree-sitter-openscad.wasm');
+    parser = new EnhancedOpenscadParser();
+    await parser.init();
     errorHandler = new ErrorHandler();
     visitor = new ControlStructureVisitor('', errorHandler);
   });

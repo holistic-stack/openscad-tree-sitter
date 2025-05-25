@@ -3,9 +3,75 @@ import * as ast from '../ast-types';
 import { findDescendantOfType } from '../utils/node-utils';
 import { extractVector } from '../utils/vector-utils';
 import { getLocation } from '../utils/location-utils';
+import { ErrorHandler } from '../../error-handling';
+import { evaluateExpression } from '../evaluation/expression-evaluator-registry';
 
 /**
- * Extract a value from a node
+ * Check if a node represents a complex expression that needs evaluation
+ */
+function isComplexExpression(node: TSNode): boolean {
+  const complexTypes = new Set([
+    'additive_expression',
+    'multiplicative_expression',
+    'exponentiation_expression',
+    'logical_or_expression',
+    'logical_and_expression',
+    'equality_expression',
+    'relational_expression',
+    'binary_expression'
+  ]);
+
+  // Check if it's a complex type with multiple children (actual expression)
+  if (complexTypes.has(node.type) && node.childCount > 1) {
+    console.log(`[isComplexExpression] Detected complex expression: ${node.type} with ${node.childCount} children`);
+    return true;
+  }
+
+  // Also check for arguments and argument nodes that might contain complex expressions
+  if (node.type === 'arguments' || node.type === 'argument') {
+    // Look for complex expressions in children
+    for (let i = 0; i < node.childCount; i++) {
+      const child = node.child(i);
+      if (child && isComplexExpression(child)) {
+        console.log(`[isComplexExpression] Found complex child in ${node.type}: ${child.type}`);
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Enhanced value extraction with expression evaluation support
+ */
+export function extractValueEnhanced(node: TSNode, errorHandler?: ErrorHandler): ast.ParameterValue {
+  console.log(
+    `[extractValueEnhanced] Attempting to extract from node: type='${
+      node.type
+    }', text='${node.text.substring(0, 50)}'`
+  );
+
+  // Check if this is a complex expression that needs evaluation
+  if (isComplexExpression(node) && errorHandler) {
+    console.log(`[extractValueEnhanced] Detected complex expression: ${node.type}`);
+
+    try {
+      const result = evaluateExpression(node, errorHandler);
+      console.log(`[extractValueEnhanced] Evaluation result: ${result.type} = ${result.value}`);
+      return result.value;
+    } catch (error) {
+      console.warn(`[extractValueEnhanced] Expression evaluation failed: ${error}`);
+      // Fall back to simple extraction
+    }
+  }
+
+  // Fall back to the original simple extraction logic
+  return extractValue(node);
+}
+
+/**
+ * Extract a value from a node (original implementation)
  */
 export function extractValue(node: TSNode): ast.ParameterValue {
   console.log(
@@ -159,7 +225,39 @@ export function extractValue(node: TSNode): ast.ParameterValue {
         }
       }
 
-      // For complex expressions with multiple children, try to parse as number first
+      // For complex expressions with multiple children, this is likely a binary operation
+      // that should be handled by the expression evaluator
+      if (node.childCount > 1) {
+        console.log(
+          `[extractValue] Complex ${node.type} with ${node.childCount} children - attempting enhanced extraction`
+        );
+
+        // Try to use enhanced extraction if this is a complex expression
+        if (isComplexExpression(node)) {
+          console.log(
+            `[extractValue] Using enhanced extraction for complex ${node.type}`
+          );
+          // Create a simple error handler for this extraction
+          const tempErrorHandler = {
+            logInfo: (msg: string) => console.log(`[TempErrorHandler] ${msg}`),
+            logWarning: (msg: string) => console.warn(`[TempErrorHandler] ${msg}`),
+            handleError: (error: Error) => console.error(`[TempErrorHandler] ${error.message}`),
+            getErrors: () => [],
+            createParserError: (msg: string, context?: any) => new Error(msg),
+            report: (error: Error) => console.error(`[TempErrorHandler] ${error.message}`)
+          } as any;
+
+          const enhancedResult = extractValueEnhanced(node, tempErrorHandler);
+          if (enhancedResult !== undefined) {
+            console.log(
+              `[extractValue] Enhanced extraction succeeded: ${enhancedResult}`
+            );
+            return enhancedResult;
+          }
+        }
+      }
+
+      // For simple cases, try to parse as number first
       const potentialNumText = node.text.trim();
       const num = parseFloat(potentialNumText);
       if (!isNaN(num)) {
@@ -194,7 +292,7 @@ export function extractValue(node: TSNode): ast.ParameterValue {
       }
 
       console.warn(
-        `[extractValue] Unhandled ${node.type}: '${node.text.substring(0, 30)}'`
+        `[extractValue] Unhandled ${node.type}: '${node.text.substring(0, 30)}' - consider using extractValueEnhanced`
       );
       return undefined;
     }
@@ -310,6 +408,48 @@ export function extractValue(node: TSNode): ast.ParameterValue {
 
       console.warn(
         `[extractValue] Unhandled ${node.type}: ${node.text.substring(0, 30)}`
+      );
+      return undefined;
+    }
+    case 'argument': {
+      console.log(
+        `[extractValue] Processing argument node with ${node.childCount} children`
+      );
+
+      // Argument node is a container - look for the actual expression inside
+      for (let i = 0; i < node.childCount; i++) {
+        const child = node.child(i);
+        if (child && child.type !== ',' && child.type !== '(' && child.type !== ')' && child.type !== '=') {
+          console.log(
+            `[extractValue] Found expression child in argument: type='${child.type}', text='${child.text}'`
+          );
+          return extractValue(child);
+        }
+      }
+
+      console.warn(
+        `[extractValue] No expression found in argument node: '${node.text}'`
+      );
+      return undefined;
+    }
+    case 'arguments': {
+      console.log(
+        `[extractValue] Processing arguments node with ${node.childCount} children`
+      );
+
+      // Arguments node is a container - look for the actual expression inside
+      for (let i = 0; i < node.childCount; i++) {
+        const child = node.child(i);
+        if (child && child.type !== ',' && child.type !== '(' && child.type !== ')') {
+          console.log(
+            `[extractValue] Found expression child in arguments: type='${child.type}', text='${child.text}'`
+          );
+          return extractValue(child);
+        }
+      }
+
+      console.warn(
+        `[extractValue] No expression found in arguments node: '${node.text}'`
       );
       return undefined;
     }

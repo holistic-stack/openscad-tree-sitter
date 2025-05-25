@@ -11,7 +11,7 @@ import { CompositeVisitor } from './composite-visitor';
 import { PrimitiveVisitor } from './primitive-visitor';
 import { TransformVisitor } from './transform-visitor';
 import { CSGVisitor } from './csg-visitor';
-import { OpenscadParser } from '../../../index'; // Use the minimal parser from index
+import { EnhancedOpenscadParser } from '../../enhanced-parser';
 import { Node as TSNode } from 'web-tree-sitter';
 import { findDescendantOfType } from '../utils/node-utils';
 import * as ast from '../ast-types';
@@ -55,7 +55,7 @@ class MockErrorHandler {
 }
 
 describe('CompositeVisitor', () => {
-  let parser: OpenscadParser;
+  let parser: EnhancedOpenscadParser;
   let visitor: CompositeVisitor;
   let errorHandler: MockErrorHandler;
 
@@ -92,8 +92,8 @@ describe('CompositeVisitor', () => {
 
   beforeEach(async () => {
     // Create a new parser instance for each test
-    parser = new OpenscadParser();
-    await parser.init('./tree-sitter-openscad.wasm');
+    parser = new EnhancedOpenscadParser();
+    await parser.init();
 
     // Create a mock ErrorHandler for testing
     errorHandler = new MockErrorHandler();

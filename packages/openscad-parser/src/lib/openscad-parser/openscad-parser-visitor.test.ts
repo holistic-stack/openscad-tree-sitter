@@ -1,11 +1,11 @@
-import { OpenscadParser } from './openscad-parser';
+import { EnhancedOpenscadParser } from './enhanced-parser';
 
 describe('OpenscadParser with Visitor AST Generator', () => {
-  let parser: OpenscadParser;
+  let parser: EnhancedOpenscadParser;
 
   beforeAll(async () => {
-    parser = new OpenscadParser();
-    await parser.init('./tree-sitter-openscad.wasm');
+    parser = new EnhancedOpenscadParser();
+    await parser.init();
   });
 
   afterAll(() => {

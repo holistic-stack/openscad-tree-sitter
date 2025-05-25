@@ -1,4 +1,6 @@
 import * as ast from '../ast-types';
+import { ErrorHandler } from '../../error-handling';
+import { evaluateExpression } from '../evaluation/expression-evaluator-registry';
 
 /**
  * Check if a value is an expression node
@@ -19,9 +21,10 @@ function isExpressionNode(
 /**
  * Extract a number parameter from a parameter object
  * @param param The parameter object
+ * @param errorHandler Optional error handler for expression evaluation
  * @returns The number value or null if the parameter is not a number
  */
-export function extractNumberParameter(param: ast.Parameter): number | null {
+export function extractNumberParameter(param: ast.Parameter, errorHandler?: ErrorHandler): number | null {
   if (!param || !param.value) return null;
 
   // Handle number as raw value
@@ -48,6 +51,21 @@ export function extractNumberParameter(param: ast.Parameter): number | null {
         return -(unaryExpr.operand as ast.LiteralNode).value as number;
       }
     }
+
+    // Handle binary expressions with expression evaluation
+    if (param.value.expressionType === 'binary' && errorHandler) {
+      console.log(`[extractNumberParameter] Attempting to evaluate binary expression`);
+      try {
+        // For binary expressions, we need the original TSNode to evaluate
+        // This is a limitation of the current architecture - we need to pass the TSNode
+        // For now, we'll return null and let the enhanced value extractor handle it
+        console.log(`[extractNumberParameter] Binary expression detected but TSNode not available`);
+        return null;
+      } catch (error) {
+        console.warn(`[extractNumberParameter] Failed to evaluate binary expression: ${error}`);
+        return null;
+      }
+    }
   }
 
   // Try to parse the value as a number if it's a string
@@ -64,9 +82,10 @@ export function extractNumberParameter(param: ast.Parameter): number | null {
 /**
  * Extract a boolean parameter from a parameter object
  * @param param The parameter object
+ * @param errorHandler Optional error handler for enhanced expression evaluation
  * @returns The boolean value or null if the parameter is not a boolean
  */
-export function extractBooleanParameter(param: ast.Parameter): boolean | null {
+export function extractBooleanParameter(param: ast.Parameter, errorHandler?: ErrorHandler): boolean | null {
   if (!param || !param.value) return null;
 
   // Handle boolean as raw value

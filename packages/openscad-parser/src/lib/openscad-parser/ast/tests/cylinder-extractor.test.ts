@@ -1,18 +1,18 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { OpenscadParser } from '../../openscad-parser';
+import { EnhancedOpenscadParser } from '../../enhanced-parser';
 import { type Node as SyntaxNode } from 'web-tree-sitter';
 import { extractCylinderNode } from '../extractors/cylinder-extractor';
 import * as ast from '../ast-types';
 
-let parser: OpenscadParser;
+let parser: EnhancedOpenscadParser;
 const defaultWasmPath = '/tree-sitter-openscad.wasm'; // Adjust if your WASM path is different
 
 describe('Cylinder Extractor', () => {
   beforeAll(async () => {
-    parser = new OpenscadParser();
+    parser = new EnhancedOpenscadParser();
     // Attempt to initialize the parser. If it fails, log an error and skip tests.
     try {
-      await parser.init(defaultWasmPath);
+      await parser.init();
     } catch (error) {
       console.error(
         'Failed to initialize parser in cylinder-extractor.test.ts:',

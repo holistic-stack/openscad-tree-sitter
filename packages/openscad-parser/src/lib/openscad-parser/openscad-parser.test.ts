@@ -14,8 +14,8 @@
  * - tree-sitter-openscad.wasm: WebAssembly module containing the OpenSCAD grammar
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { OpenscadParser } from './openscad-parser';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { EnhancedOpenscadParser } from './enhanced-parser';
 
 // Sample OpenSCAD code for testing
 const SAMPLE_OPENSCAD_CODE = `
@@ -59,11 +59,11 @@ const INVALID_OPENSCAD_CODE = `
 `;
 
 describe('OpenSCADParser', () => {
-  let parser: OpenscadParser;
+  let parser: EnhancedOpenscadParser;
 
   beforeEach(async () => {
     // Create a new parser instance before each test
-    parser = new OpenscadParser();
+    parser = new EnhancedOpenscadParser();
 
     // Initialize the parser
     await parser.init();
@@ -125,24 +125,16 @@ describe('OpenSCADParser', () => {
     // Wait for initialization to complete
     await parser.init();
 
-    // Configure the parser to not throw errors
-    parser.getErrorHandler().options.throwErrors = false;
-
-    // Spy on the error error-handling's createSyntaxError method
-    const createSyntaxErrorSpy = vi.spyOn(
-      parser.getErrorHandler(),
-      'createSyntaxError'
-    );
-
     // Parse the invalid code
-    const result = parser.parse(INVALID_OPENSCAD_CODE);
+    const result = parser.parseCST(INVALID_OPENSCAD_CODE);
 
     // Should still parse but with syntax errors in the tree
     expect(result).toBeDefined();
     expect(result?.rootNode).toBeDefined();
 
-    // Should have created a syntax error
-    expect(createSyntaxErrorSpy).toHaveBeenCalled();
+    // Check if there are any errors in the tree
+    const hasErrors = result?.rootNode.hasError;
+    expect(hasErrors).toBe(true);
 
     // The tree should contain ERROR nodes
     const rootNodeString = result?.rootNode.toString();

@@ -4,19 +4,19 @@
 
 /*
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { OpenscadParser } from '../../../openscad-parser';
+import { EnhancedOpenscadParser } from '../../../enhanced-parser';
 import { BinaryExpressionVisitor } from '../expression-visitor/binary-expression-visitor/binary-expression-visitor';
 import { ErrorHandler } from '../../../error-handling';
 import * as ast from '../../ast-types';
 
 describe('BinaryExpressionVisitor', () => {
-  let parser: OpenscadParser;
+  let parser: EnhancedOpenscadParser;
   let errorHandler: ErrorHandler;
   let visitor: BinaryExpressionVisitor;
 
   beforeEach(async () => {
     // Create a new parser instance before each test
-    parser = new OpenscadParser();
+    parser = new EnhancedOpenscadParser();
 
     // Initialize the parser
     await parser.init();

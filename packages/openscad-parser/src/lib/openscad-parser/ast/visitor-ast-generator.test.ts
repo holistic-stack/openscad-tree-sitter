@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { VisitorASTGenerator } from './visitor-ast-generator';
-import { OpenscadParser } from '../openscad-parser';
+import { EnhancedOpenscadParser } from '../enhanced-parser';
 import { PrimitiveVisitor } from './visitors/primitive-visitor';
 import { TransformVisitor } from './visitors/transform-visitor';
 import { CSGVisitor } from './visitors/csg-visitor';
@@ -17,11 +17,11 @@ const mockLanguage = {
 const mockErrorHandler = new ErrorHandler();
 
 describe('VisitorASTGenerator', () => {
-  let parser: OpenscadParser;
+  let parser: EnhancedOpenscadParser;
 
   beforeAll(async () => {
-    parser = new OpenscadParser();
-    await parser.init('./tree-sitter-openscad.wasm');
+    parser = new EnhancedOpenscadParser();
+    await parser.init();
   });
 
   afterAll(() => {

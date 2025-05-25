@@ -374,7 +374,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
    */
   private visitLiteral(node: TSNode): ast.LiteralNode | null {
     this.errorHandler.logInfo(
-      `[ExpressionVisitor.visitLiteral] Processing literal: ${node.text.substring(0,50)}`,
+      `[ExpressionVisitor.visitLiteral] Processing literal: type="${node.type}", text="${node.text.substring(0,50)}"`,
       'ExpressionVisitor.visitLiteral',
       node
     );
@@ -385,16 +385,31 @@ export class ExpressionVisitor extends BaseASTVisitor {
     switch (node.type) {
       case 'number_literal':
       case 'number':
-        const numValue = parseFloat(node.text);
+        const nodeText = node.text.trim();
+        if (!nodeText || nodeText.length === 0) {
+          this.errorHandler.logWarning(
+            `Empty number literal node: "${node.text}"`,
+            'ExpressionVisitor.visitLiteral',
+            node
+          );
+          return null;
+        }
+
+        const numValue = parseFloat(nodeText);
         if (isNaN(numValue)) {
-          this.errorHandler.handleError(
-            new Error(`Invalid number literal: ${node.text}`),
+          this.errorHandler.logWarning(
+            `Invalid number literal: "${nodeText}" (original: "${node.text}")`,
             'ExpressionVisitor.visitLiteral',
             node
           );
           return null;
         }
         value = numValue;
+        this.errorHandler.logInfo(
+          `[ExpressionVisitor.visitLiteral] Successfully parsed number: ${numValue}`,
+          'ExpressionVisitor.visitLiteral',
+          node
+        );
         break;
 
       case 'string_literal':

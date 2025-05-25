@@ -3,13 +3,13 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { OpenscadParser } from './openscad-parser';
+import { EnhancedOpenscadParser } from './enhanced-parser';
 
 describe('OpenSCAD Argument Debug', () => {
-  let parser: OpenscadParser;
+  let parser: EnhancedOpenscadParser;
 
   beforeEach(async () => {
-    parser = new OpenscadParser();
+    parser = new EnhancedOpenscadParser();
     await parser.init('./tree-sitter-openscad.wasm');
   });
 

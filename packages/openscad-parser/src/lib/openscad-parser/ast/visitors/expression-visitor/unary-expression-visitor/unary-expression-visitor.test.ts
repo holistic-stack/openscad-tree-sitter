@@ -4,9 +4,9 @@ import { Node as TSNode } from 'web-tree-sitter';
 import { UnaryExpressionVisitor } from './unary-expression-visitor';
 import { ExpressionVisitor } from '../../expression-visitor';
 import { ErrorHandler } from '../../../../error-handling';
-import { OpenscadParser } from '../../../../openscad-parser';
+import { EnhancedOpenscadParser } from '../../../../enhanced-parser';
 
-async function getExpressionNode(parser: OpenscadParser, code: string): Promise<TSNode | null> {
+async function getExpressionNode(parser: EnhancedOpenscadParser, code: string): Promise<TSNode | null> {
   const tree = parser.parse(code);
   if (!tree) return null;
 
@@ -29,14 +29,14 @@ async function getExpressionNode(parser: OpenscadParser, code: string): Promise<
 }
 
 describe('UnaryExpressionVisitor', () => {
-  let parser: OpenscadParser;
+  let parser: EnhancedOpenscadParser;
   let errorHandler: ErrorHandler;
   let parentExpressionVisitor: ExpressionVisitor;
   let visitor: UnaryExpressionVisitor;
 
   beforeEach(async () => {
     // Create a new parser instance before each test
-    parser = new OpenscadParser();
+    parser = new EnhancedOpenscadParser();
 
     // Initialize the parser
     await parser.init();

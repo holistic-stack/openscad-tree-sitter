@@ -1,16 +1,16 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import { ModuleVisitor } from './module-visitor';
-import { OpenscadParser } from '../../openscad-parser';
+import { EnhancedOpenscadParser } from '../../enhanced-parser';
 import * as ast from '../ast-types';
 import { ErrorHandler } from '../../error-handling';
 
 describe('ModuleVisitor', () => {
-  let parser: OpenscadParser;
+  let parser: EnhancedOpenscadParser;
   let errorHandler: ErrorHandler;
 
   beforeAll(async () => {
-    parser = new OpenscadParser();
-    await parser.init('./tree-sitter-openscad.wasm');
+    parser = new EnhancedOpenscadParser();
+    await parser.init();
     errorHandler = new ErrorHandler();
   });
 

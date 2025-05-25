@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { Node as TSNode } from 'web-tree-sitter';
-import { OpenscadParser } from '../../openscad-parser';
+import { EnhancedOpenscadParser } from '../../enhanced-parser';
 import * as ast from '../ast-types';
 import { TransformVisitor } from './transform-visitor';
 import { extractArguments } from '../../ast/extractors/argument-extractor';
@@ -8,13 +8,13 @@ import { getLocation } from '../utils/location-utils';
 import { ErrorHandler } from '../../error-handling';
 
 describe('TransformVisitor', () => {
-  let parser: OpenscadParser;
+  let parser: EnhancedOpenscadParser;
   let visitor: TransformVisitor;
   let errorHandler: ErrorHandler;
 
   beforeEach(async () => {
-    parser = new OpenscadParser();
-    await parser.init('/tree-sitter-openscad.wasm');
+    parser = new EnhancedOpenscadParser();
+    await parser.init();
     errorHandler = new ErrorHandler();
     visitor = new TransformVisitor('', undefined, errorHandler);
   });

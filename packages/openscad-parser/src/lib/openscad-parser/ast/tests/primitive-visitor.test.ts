@@ -4,7 +4,7 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 import { getLocation } from '../utils/location-utils';
 import { ErrorHandler } from '../../error-handling';
-import { OpenscadParser } from '../../openscad-parser';
+import { EnhancedOpenscadParser } from '../../enhanced-parser';
 
 // Create a test class that extends PrimitiveVisitor to expose the private methods
 class TestPrimitiveVisitor extends PrimitiveVisitor {
@@ -35,11 +35,11 @@ const createMockNode = (text: string): TSNode => {
 const mockErrorHandler = new ErrorHandler();
 
 describe('PrimitiveVisitor', () => {
-  let parser: OpenscadParser;
+  let parser: EnhancedOpenscadParser;
 
   beforeEach(async () => {
     // Create a new parser instance before each test
-    parser = new OpenscadParser();
+    parser = new EnhancedOpenscadParser();
 
     // Initialize the parser
     await parser.init();

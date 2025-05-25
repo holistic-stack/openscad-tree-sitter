@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import { extractModuleParametersFromText } from './module-parameter-extractor';
 import * as ast from '../ast-types';
-import { OpenscadParser } from '../../openscad-parser';
+import { EnhancedOpenscadParser } from '../../enhanced-parser';
 
 describe('Module Parameter Extractor', () => {
-  let parser: OpenscadParser;
+  let parser: EnhancedOpenscadParser;
 
   beforeAll(async () => {
-    parser = new OpenscadParser();
-    await parser.init('./tree-sitter-openscad.wasm');
+    parser = new EnhancedOpenscadParser();
+    await parser.init();
   });
 
   afterAll(() => {

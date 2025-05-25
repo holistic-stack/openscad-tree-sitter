@@ -1,15 +1,15 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { OpenscadParser } from '../../openscad-parser';
+import { EnhancedOpenscadParser } from '../../enhanced-parser';
 import * as cursorUtils from './cursor-utils';
 import * as fs from 'fs';
 import * as path from 'path';
 import { cstTreeCursorWalkLog } from './cstTreeCursorWalkLog';
 
 describe('Cursor Utils Integration', () => {
-  let parser: OpenscadParser;
+  let parser: EnhancedOpenscadParser;
 
   beforeEach(async () => {
-    parser = new OpenscadParser();
+    parser = new EnhancedOpenscadParser();
     await parser.init();
   });
 
