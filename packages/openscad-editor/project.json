@@ -4,6 +4,7 @@
   "sourceRoot": "packages/openscad-editor/src",
   "projectType": "library",
   "tags": ["editor", "ui"],
+  "implicitDependencies": ["tree-sitter-openscad"],
   "targets": {
     "build": {
       "executor": "@nx/vite:build",
@@ -13,7 +14,14 @@
         "outputPath": "dist/packages/openscad-editor",
         "main": "packages/openscad-editor/src/index.ts",
         "tsConfig": "packages/openscad-editor/tsconfig.lib.json",
-        "assets": ["packages/openscad-editor/*.md"]
+        "assets": [
+          "packages/openscad-editor/README.md",
+          {
+            "glob": "**/*",
+            "input": "packages/openscad-editor/public/",
+            "output": "./public/"
+          }
+        ]
       },
       "configurations": {
         "development": {
@@ -46,7 +54,8 @@
       "outputs": ["{options.reportsDirectory}"],
       "options": {
         "passWithNoTests": true,
-        "reportsDirectory": "../../coverage/packages/openscad-editor"
+        "reportsDirectory": "../../coverage/packages/openscad-editor",
+        "args": ["run"]
       }
     },
     "lint": {

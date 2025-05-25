@@ -17,7 +17,7 @@
     "test:demo": "cd packages/openscad-demo && vitest run",
     
     "test:grammar:file": "cd packages/tree-sitter-openscad && vitest run",
-    "test:parser:file": "cd packages/openscad-parser && vitest run --run ",
+    "test:parser:file": "cd packages/openscad-parser && vitest run",
     "test:editor:file": "cd packages/openscad-editor && vitest run",
     "test:demo:file": "cd packages/openscad-demo && vitest run",
     
