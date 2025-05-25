@@ -1,6 +1,6 @@
 /**
  * @file Enhanced OpenSCAD parser with AST generation
- * 
+ *
  * This extends the minimal parser to include AST generation functionality
  * while maintaining compatibility with the existing test infrastructure.
  */
@@ -8,10 +8,12 @@
 import * as TreeSitter from 'web-tree-sitter';
 import { SimpleErrorHandler, IErrorHandler } from './error-handling/simple-error-handler';
 import { ASTNode } from './ast/ast-types';
+import { VisitorASTGenerator } from './ast/visitor-ast-generator';
+import { ErrorHandler } from './error-handling';
 
 /**
  * Enhanced OpenSCAD parser with AST generation capabilities
- * 
+ *
  * This class extends the minimal parser functionality to include
  * AST generation using the visitor pattern, while maintaining
  * the same simple interface.
@@ -36,7 +38,7 @@ export class EnhancedOpenscadParser {
   async init(wasmPath = './tree-sitter-openscad.wasm'): Promise<void> {
     try {
       this.errorHandler.logInfo('Initializing enhanced OpenSCAD parser...');
-      
+
       const bytes = await fetch(wasmPath).then(response => {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -49,7 +51,7 @@ export class EnhancedOpenscadParser {
       this.language = await TreeSitter.Language.load(bytes);
       this.parser.setLanguage(this.language);
       this.isInitialized = true;
-      
+
       this.errorHandler.logInfo('Enhanced OpenSCAD parser initialized successfully');
     } catch (error) {
       const errorMessage = `Failed to initialize parser: ${error}`;
@@ -69,12 +71,12 @@ export class EnhancedOpenscadParser {
     try {
       const tree = this.parser.parse(code, this.previousTree);
       this.previousTree = tree;
-      
+
       // Check for syntax errors
       if (tree && this.hasErrorNodes(tree.rootNode)) {
         this.errorHandler.logWarning('Syntax errors found in parsed code');
       }
-      
+
       return tree;
     } catch (error) {
       this.errorHandler.handleError(`Failed to parse code: ${error}`);
@@ -83,25 +85,67 @@ export class EnhancedOpenscadParser {
   }
 
   /**
+   * Create an ErrorHandler adapter from IErrorHandler
+   * This allows the enhanced parser to work with the visitor system
+   */
+  private createErrorHandlerAdapter(): ErrorHandler {
+    const adapter = new ErrorHandler({
+      throwErrors: false,
+      attemptRecovery: false
+    });
+
+    // Override the logging methods to delegate to our IErrorHandler
+    const originalLogInfo = adapter.logInfo.bind(adapter);
+    const originalLogWarning = adapter.logWarning.bind(adapter);
+    const originalHandleError = adapter.handleError.bind(adapter);
+
+    adapter.logInfo = (message: string) => {
+      this.errorHandler.logInfo(message);
+      originalLogInfo(message);
+    };
+
+    adapter.logWarning = (message: string) => {
+      this.errorHandler.logWarning(message);
+      originalLogWarning(message);
+    };
+
+    adapter.handleError = (error: Error) => {
+      this.errorHandler.handleError(error);
+      originalHandleError(error);
+    };
+
+    return adapter;
+  }
+
+  /**
    * Parse OpenSCAD code and return AST
-   * 
-   * This method will be enhanced to use the visitor pattern
-   * for AST generation once the visitors are properly integrated.
+   *
+   * Uses the visitor pattern for AST generation with real Tree-sitter integration.
    */
   parseAST(code: string): ASTNode[] {
     try {
       this.errorHandler.logInfo('Generating AST from OpenSCAD code...');
-      
+
       const cst = this.parseCST(code);
       if (!cst) {
         this.errorHandler.logWarning('Failed to generate CST, returning empty AST');
         return [];
       }
 
-      // TODO: Integrate visitor-based AST generation
-      // For now, return empty array to maintain compatibility
-      this.errorHandler.logInfo('AST generation not yet implemented, returning empty array');
-      return [];
+      // Create visitor-based AST generator with adapter
+      const errorHandlerAdapter = this.createErrorHandlerAdapter();
+      const astGenerator = new VisitorASTGenerator(
+        cst,
+        code,
+        this.language,
+        errorHandlerAdapter
+      );
+
+      // Generate AST using visitor pattern
+      const ast = astGenerator.generate();
+
+      this.errorHandler.logInfo(`AST generation completed. Generated ${ast.length} top-level nodes.`);
+      return ast;
     } catch (error) {
       this.errorHandler.handleError(`Failed to generate AST: ${error}`);
       throw error;
@@ -143,7 +187,7 @@ export class EnhancedOpenscadParser {
       this.previousTree.edit(edit);
       const newTree = this.parser.parse(newCode, this.previousTree);
       this.previousTree = newTree;
-      
+
       return newTree;
     } catch (error) {
       this.errorHandler.handleError(`Failed to update parse tree: ${error}`);
@@ -183,14 +227,14 @@ export class EnhancedOpenscadParser {
     if (node.type === 'ERROR') {
       return true;
     }
-    
+
     for (let i = 0; i < node.childCount; i++) {
       const child = node.child(i);
       if (child && this.hasErrorNodes(child)) {
         return true;
       }
     }
-    
+
     return false;
   }
 
@@ -200,7 +244,7 @@ export class EnhancedOpenscadParser {
   private indexToPosition(text: string, index: number): { row: number; column: number } {
     let row = 0;
     let column = 0;
-    
+
     for (let i = 0; i < index && i < text.length; i++) {
       if (text[i] === '\n') {
         row++;
@@ -209,7 +253,7 @@ export class EnhancedOpenscadParser {
         column++;
       }
     }
-    
+
     return { row, column };
   }
 }
