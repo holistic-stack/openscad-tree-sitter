@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ModuleVisitor } from './module-visitor';
 import { EnhancedOpenscadParser } from '../../enhanced-parser';
 import * as ast from '../ast-types';
@@ -8,14 +8,18 @@ describe('ModuleVisitor', () => {
   let parser: EnhancedOpenscadParser;
   let errorHandler: ErrorHandler;
 
-  beforeAll(async () => {
+  // FIX: Use beforeEach/afterEach for proper test isolation
+  // This prevents Tree-sitter memory corruption between tests
+  beforeEach(async () => {
     parser = new EnhancedOpenscadParser();
     await parser.init();
     errorHandler = new ErrorHandler();
   });
 
-  afterAll(() => {
-    parser.dispose();
+  afterEach(() => {
+    if (parser) {
+      parser.dispose();
+    }
     vi.clearAllMocks();
   });
 

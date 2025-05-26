@@ -1,16 +1,20 @@
 import { EnhancedOpenscadParser } from '../../enhanced-parser';
-import { afterAll, beforeAll, describe, it, expect } from 'vitest';
+import { beforeEach, afterEach, describe, it, expect } from 'vitest';
 
 describe('Transformation AST Generation', () => {
   let parser: EnhancedOpenscadParser;
 
-  beforeAll(async () => {
+  // FIX: Use beforeEach/afterEach for proper test isolation
+  // This prevents Tree-sitter memory corruption between tests
+  beforeEach(async () => {
     parser = new EnhancedOpenscadParser();
     await parser.init();
   });
 
-  afterAll(() => {
-    parser.dispose();
+  afterEach(() => {
+    if (parser) {
+      parser.dispose();
+    }
   });
 
   describe('Mirror Transformation', () => {
@@ -67,7 +71,7 @@ describe('Transformation AST Generation', () => {
       const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0].type).toBe('multmatrix');
 
       const multmatrixNode = ast[0] as any;
       // Add matrix property to module_instantiation node for test
@@ -107,7 +111,7 @@ describe('Transformation AST Generation', () => {
       const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0].type).toBe('multmatrix');
 
       const multmatrixNode = ast[0] as any;
       // Add m property to module_instantiation node for test

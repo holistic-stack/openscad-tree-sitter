@@ -8,7 +8,7 @@ import {
   extractVectorParameter,
 } from '../extractors/parameter-extractor';
 import { getLocation } from '../utils/location-utils';
-import { findDescendantOfType } from '../utils/node-utils';
+// import { findDescendantOfType } from '../utils/node-utils'; // Unused import
 import { ErrorHandler } from '../../error-handling'; // Added ErrorHandler import
 
 /**

@@ -58,6 +58,7 @@ export default defineConfig({
         resources: 'usable',
       },
     },
+    isolate: true,
     setupFiles: './src/test-utils/setupTest.ts',
   },
 });
