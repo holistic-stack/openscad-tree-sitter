@@ -42,6 +42,10 @@
   ],
   "author": "OpenSCAD Community",
   "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=10.0.0"
+  },
   "optionalDependencies": {
     "node-gyp-build": "^4.8.0"
   },

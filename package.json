@@ -4,6 +4,7 @@
   "description": "Monorepo for OpenSCAD Tree-sitter grammar and parser",
   "private": true,
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "build": "env-cmd -e plain nx run-many --target=build --all",
     "build:grammar": "cd packages/tree-sitter-openscad && node scripts/echo-prebuilt-message.js",
     "build:grammar:native": "env-cmd -e plain nx build:native tree-sitter-openscad",
@@ -54,6 +55,10 @@
   "author": "OpenSCAD Community",
   "license": "MIT",
   "packageManager": "pnpm@10.10.0",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=10.0.0"
+  },
   "devDependencies": {
     "@babel/core": "^7.14.5",
     "@babel/preset-react": "^7.14.5",

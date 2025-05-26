@@ -31,6 +31,10 @@
     "tree-sitter"
   ],
   "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=10.0.0"
+  },
   "scripts": {
     "build": "env-cmd -e plain vite build",
     "dev": "vite build --watch",
