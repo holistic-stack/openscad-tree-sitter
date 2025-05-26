@@ -30,7 +30,7 @@ class MockQuery {
     this.matches_ = matches;
   }
 
-  matches(node: MockNode): MockMatch[] {
+  matches(_node: MockNode): MockMatch[] {
     return this.matches_;
   }
 }
@@ -43,7 +43,7 @@ class MockQueryCache implements QueryCache {
 
   get(queryString: string, sourceText: string): any[] | null {
     const key = `${queryString}:${sourceText}`;
-    const result = this.cache.get(key) || null;
+    const result = this.cache.get(key) ?? null;
 
     if (result) {
       this._hits++;
@@ -82,7 +82,7 @@ describe('QueryManager', () => {
   it('should execute a query and cache the results', () => {
     // Create a mock language
     const mockLanguage = {
-      query: vi.fn().mockImplementation(queryString => {
+      query: vi.fn().mockImplementation((_queryString) => {
         const mockQuery = new MockQuery([
           new MockMatch([
             new MockCapture(new MockNode('node1', 'type1')),
@@ -121,7 +121,7 @@ describe('QueryManager', () => {
   it('should find nodes by type', () => {
     // Create a mock language
     const mockLanguage = {
-      query: vi.fn().mockImplementation(queryString => {
+      query: vi.fn().mockImplementation((_queryString) => {
         return new MockQuery([
           new MockMatch([
             new MockCapture(new MockNode('node1', 'type1')),
@@ -148,7 +148,7 @@ describe('QueryManager', () => {
   it('should clear the cache', () => {
     // Create a mock language
     const mockLanguage = {
-      query: vi.fn().mockImplementation(queryString => {
+      query: vi.fn().mockImplementation((_queryString) => {
         return new MockQuery([
           new MockMatch([new MockCapture(new MockNode('node1', 'type1'))]),
         ]);
@@ -180,7 +180,7 @@ describe('QueryManager', () => {
   it('should get cache statistics', () => {
     // Create a mock language
     const mockLanguage = {
-      query: vi.fn().mockImplementation(queryString => {
+      query: vi.fn().mockImplementation((_queryString) => {
         return new MockQuery([
           new MockMatch([new MockCapture(new MockNode('node1', 'type1'))]),
         ]);

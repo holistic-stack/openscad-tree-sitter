@@ -1,6 +1,6 @@
 import { EnhancedOpenscadParser } from '../../enhanced-parser';
 import { afterAll, beforeAll, describe, it, expect, vi } from 'vitest';
-import { getLocation } from '../utils/location-utils';
+
 
 describe('Rotate AST Generation', () => {
   let parser: EnhancedOpenscadParser;

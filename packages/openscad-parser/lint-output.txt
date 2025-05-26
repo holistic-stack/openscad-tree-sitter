@@ -1,0 +1,199 @@
+
+> @openscad/parser@0.1.0 lint C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser
+> env-cmd -e plain eslint . "--max-warnings=300"
+
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\extractors\argument-extractor.ts
+  581:13  warning  Prefer using an optional chain expression instead, as it's more concise and easier to read  @typescript-eslint/prefer-optional-chain
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\extractors\value-extractor.ts
+  91:49  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\tests\transformations.test.ts
+  158:28  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  180:28  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  263:29  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\base-ast-visitor.test.ts
+   33:7   warning  'visitor' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+  485:10  warning  'findNodeOfType' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\base-ast-visitor.ts
+    5:10  warning  'getLocation' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+   17:59  warning  Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+  111:66  warning  Unexpected any. Specify a different type                                         @typescript-eslint/no-explicit-any
+  618:22  warning  'name' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  715:20  warning  'name' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\control-structure-visitor.ts
+  17:10  warning  'findDescendantOfType' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\control-structure-visitor\for-loop-visitor.test.ts
+  9:13  warning  'ast' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\csg-visitor.test.ts
+  516:10  warning  'findNodeOfType' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\csg-visitor.ts
+  23:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\expression-visitor.debug.test.ts
+   4:18  warning  'TSNode' is defined but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+   5:13  warning  'ast' is defined but never used. Allowed unused vars must match /^_/u               @typescript-eslint/no-unused-vars
+  11:7   warning  'visitor' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\expression-visitor.integration.test.ts
+  1095:12  warning  'findNodeOfType' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\expression-visitor.test.ts
+   92:13  warning  'code' is assigned a value but never used. Allowed unused vars must match /^_/u             @typescript-eslint/no-unused-vars
+  168:13  warning  'code' is assigned a value but never used. Allowed unused vars must match /^_/u             @typescript-eslint/no-unused-vars
+  246:13  warning  'code' is assigned a value but never used. Allowed unused vars must match /^_/u             @typescript-eslint/no-unused-vars
+  306:13  warning  'code' is assigned a value but never used. Allowed unused vars must match /^_/u             @typescript-eslint/no-unused-vars
+  368:13  warning  'code' is assigned a value but never used. Allowed unused vars must match /^_/u             @typescript-eslint/no-unused-vars
+  631:12  warning  'findBinaryExpressionNode' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\expression-visitor.ts
+   19:10  warning  'findDescendantOfType' is defined but never used. Allowed unused vars must match /^_/u                     @typescript-eslint/no-unused-vars
+   21:10  warning  'extractValue' is defined but never used. Allowed unused vars must match /^_/u                             @typescript-eslint/no-unused-vars
+  179:55  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\expression-visitor\binary-expression-visitor\binary-expression-visitor.test.ts
+  10:10  warning  'getExpressionNode' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  44:7   warning  'visitor' is assigned a value but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\expression-visitor\binary-expression-visitor\simple-binary.test.ts
+  2:18  warning  'TSNode' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\expression-visitor\function-call-visitor.ts
+   35:28  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  158:15  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  190:18  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  590:55  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  594:10  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\expression-visitor\parenthesized-expression-visitor\parenthesized-expression-visitor.ts
+  42:70  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\function-visitor.test.ts
+  4:13  warning  'ast' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\module-visitor.ts
+  728:9  warning  Prefer using nullish coalescing operator (`??`) instead of a ternary expression, as it is simpler to read  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\primitive-visitor.test.ts
+  2422:10  warning  'findNodeOfType' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\primitive-visitor.ts
+  45:38  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\query-visitor.test.ts
+   17:16  warning  'node' is defined but never used. Allowed unused args must match /^_/u                 @typescript-eslint/no-unused-vars
+  120:11  warning  'arguments_' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\query-visitor.ts
+   42:15  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  127:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\transform-visitor.test.ts
+  7:10  warning  'getLocation' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\transform-visitor.ts
+  250:25  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\variable-visitor.ts
+  204:28  warning  'node' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\cst\cursor-utils\cstTreeCursorWalkLog.test.ts
+  5:8  warning  'path' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\cst\cursor-utils\cstTreeCursorWalkLog.ts
+  53:54  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\cst\cursor-utils\cursor-utils.integration.test.ts
+   17:9   warning  Prefer using an optional chain expression instead, as it's more concise and easier to read  @typescript-eslint/prefer-optional-chain
+   48:16  warning  'e' is defined but never used. Allowed unused caught errors must match /^_/u                @typescript-eslint/no-unused-vars
+  141:9   warning  Empty block statement                                                                       no-empty
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\cst\cursor-utils\cursor-utils.test.ts
+  1:55  warning  'vi' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\cst\cursor-utils\cursor-utils.ts
+  222:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  223:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\cst\query-utils.ts
+  23:21  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  27:41  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  49:32  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  57:14  warning  Forbidden non-null assertion                                                                               @typescript-eslint/no-non-null-assertion
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\error-handling\error-handler.ts
+  250:28  warning  'context' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  250:46  warning  'node' is defined but never used. Allowed unused args must match /^_/u     @typescript-eslint/no-unused-vars
+  250:53  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  260:29  warning  'context' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  260:47  warning  'node' is defined but never used. Allowed unused args must match /^_/u     @typescript-eslint/no-unused-vars
+  260:54  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  270:31  warning  'context' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  270:49  warning  'node' is defined but never used. Allowed unused args must match /^_/u     @typescript-eslint/no-unused-vars
+  270:56  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  280:29  warning  'context' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  280:47  warning  'node' is defined but never used. Allowed unused args must match /^_/u     @typescript-eslint/no-unused-vars
+  280:54  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+  290:47  warning  'node' is defined but never used. Allowed unused args must match /^_/u     @typescript-eslint/no-unused-vars
+  290:54  warning  Unexpected any. Specify a different type                                   @typescript-eslint/no-explicit-any
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\error-handling\recovery-strategy-registry.ts
+  143:72  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\error-handling\strategies\missing-semicolon-strategy.ts
+  69:25  warning  'error' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\error-handling\strategies\recovery-strategy.ts
+  6:23  warning  'ErrorContext' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\error-handling\strategies\type-mismatch-strategy.ts
+    6:34  warning  'Severity' is defined but never used. Allowed unused vars must match /^_/u                                 @typescript-eslint/no-unused-vars
+    6:49  warning  'ErrorContext' is defined but never used. Allowed unused vars must match /^_/u                             @typescript-eslint/no-unused-vars
+  111:54  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  117:17  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  180:7   warning  'functionName' is assigned a value but never used. Allowed unused vars must match /^_/u                    @typescript-eslint/no-unused-vars
+  181:7   warning  'paramIndex' is assigned a value but never used. Allowed unused vars must match /^_/u                      @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\error-handling\strategies\unclosed-bracket-strategy.ts
+   6:34  warning  'Severity' is defined but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
+  72:18  warning  'bracket' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\error-handling\strategies\unknown-identifier-strategy.ts
+    6:34  warning  'Severity' is defined but never used. Allowed unused vars must match /^_/u                                 @typescript-eslint/no-unused-vars
+    6:49  warning  'ErrorContext' is defined but never used. Allowed unused vars must match /^_/u                             @typescript-eslint/no-unused-vars
+  114:11  warning  Prefer using an optional chain expression instead, as it's more concise and easier to read                 @typescript-eslint/prefer-optional-chain
+  133:61  warning  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  @typescript-eslint/prefer-nullish-coalescing
+  143:27  warning  Unexpected any. Specify a different type                                                                   @typescript-eslint/no-explicit-any
+  204:11  warning  'lineEnd' is assigned a value but never used. Allowed unused vars must match /^_/u                         @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\error-handling\types\error-types.ts
+   71:11  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   81:15  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+   83:16  warning  Unexpected any. Specify a different type                                           @typescript-eslint/no-explicit-any
+  121:27  warning  'source' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\incremental-parsing.test.ts
+   14:10  warning  'ChangeTracker' is defined but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+   90:11  warning  'initialTree' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  139:11  warning  'initialTree' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\node-types.test.ts
+  70:14  warning  Unexpected constant condition  no-constant-condition
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\openscad-parser-error-handling.test.ts
+  7:10  warning  'ParserError' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  7:23  warning  'SyntaxError' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\test-utils\setupTest.ts
+  17:10  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  23:8   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Ô£û 104 problems (0 errors, 104 warnings)
+

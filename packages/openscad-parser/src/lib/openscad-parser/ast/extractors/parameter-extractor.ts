@@ -1,6 +1,6 @@
 import * as ast from '../ast-types';
 import { ErrorHandler } from '../../error-handling';
-import { evaluateExpression } from '../evaluation/expression-evaluator-registry';
+// import { evaluateExpression } from '../evaluation/expression-evaluator-registry';
 
 /**
  * Check if a value is an expression node
@@ -85,7 +85,7 @@ export function extractNumberParameter(param: ast.Parameter, errorHandler?: Erro
  * @param errorHandler Optional error handler for enhanced expression evaluation
  * @returns The boolean value or null if the parameter is not a boolean
  */
-export function extractBooleanParameter(param: ast.Parameter, errorHandler?: ErrorHandler): boolean | null {
+export function extractBooleanParameter(param: ast.Parameter, _errorHandler?: ErrorHandler): boolean | null {
   if (!param?.value) return null;
 
   // Handle boolean as raw value

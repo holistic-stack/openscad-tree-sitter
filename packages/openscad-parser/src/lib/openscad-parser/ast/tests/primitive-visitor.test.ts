@@ -1,8 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { PrimitiveVisitor } from '../visitors/primitive-visitor';
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
-import { getLocation } from '../utils/location-utils';
 import { ErrorHandler } from '../../error-handling';
 import { EnhancedOpenscadParser } from '../../enhanced-parser';
 

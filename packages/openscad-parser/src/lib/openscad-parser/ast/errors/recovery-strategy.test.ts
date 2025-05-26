@@ -3,7 +3,6 @@
  */
 
 import {
-  RecoveryStrategy,
   SkipToNextStatementStrategy,
   InsertMissingTokenStrategy,
   DeleteExtraTokenStrategy,

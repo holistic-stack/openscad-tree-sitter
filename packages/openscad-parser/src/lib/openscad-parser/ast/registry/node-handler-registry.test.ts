@@ -2,8 +2,6 @@ import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { DefaultNodeHandlerRegistry } from './default-node-handler-registry';
 import { NodeHandlerRegistryFactory } from './node-handler-registry-factory';
 import { NodeHandler } from './node-handler-registry';
-import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
 
 describe('NodeHandlerRegistry', () => {
   describe('DefaultNodeHandlerRegistry', () => {

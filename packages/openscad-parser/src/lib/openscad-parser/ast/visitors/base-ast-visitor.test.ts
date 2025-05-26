@@ -8,9 +8,9 @@ import { getLocation } from '../utils/location-utils';
 // Mock implementation of BaseASTVisitor for testing
 class TestVisitor extends BaseASTVisitor {
   protected createASTNodeForFunction(
-    node: TSNode,
+    _node: TSNode,
     functionName: string,
-    args: ast.Parameter[]
+    _args: ast.Parameter[]
   ): ast.ASTNode | null {
     // Simple implementation for testing
     if (functionName === 'cube') {
@@ -30,7 +30,7 @@ class TestVisitor extends BaseASTVisitor {
 
 describe('BaseASTVisitor', () => {
   let parser: EnhancedOpenscadParser;
-  let visitor: TestVisitor;
+  let _visitor: TestVisitor;
 
   beforeAll(async () => {
     parser = new EnhancedOpenscadParser();
@@ -89,9 +89,9 @@ describe('BaseASTVisitor', () => {
         }
 
         protected createASTNodeForFunction(
-          node: TSNode,
-          functionName: string,
-          args: ast.Parameter[]
+          _node: TSNode,
+          _functionName: string,
+          _args: ast.Parameter[]
         ): ast.ASTNode | null {
           return null;
         }
@@ -182,9 +182,9 @@ describe('BaseASTVisitor', () => {
         }
 
         protected createASTNodeForFunction(
-          node: TSNode,
-          functionName: string,
-          args: ast.Parameter[]
+          _node: TSNode,
+          _functionName: string,
+          _args: ast.Parameter[]
         ): ast.ASTNode | null {
           return null;
         }
@@ -263,9 +263,9 @@ describe('BaseASTVisitor', () => {
       // Create a test visitor
       const testVisitor = new (class extends BaseASTVisitor {
         protected createASTNodeForFunction(
-          node: TSNode,
-          functionName: string,
-          args: ast.Parameter[]
+          _node: TSNode,
+          _functionName: string,
+          _args: ast.Parameter[]
         ): ast.ASTNode | null {
           return null;
         }
@@ -367,9 +367,9 @@ describe('BaseASTVisitor', () => {
         }
 
         protected createASTNodeForFunction(
-          node: TSNode,
-          functionName: string,
-          args: ast.Parameter[]
+          _node: TSNode,
+          _functionName: string,
+          _args: ast.Parameter[]
         ): ast.ASTNode | null {
           return null;
         }
@@ -439,9 +439,9 @@ describe('BaseASTVisitor', () => {
         }
 
         protected createASTNodeForFunction(
-          node: TSNode,
-          functionName: string,
-          args: ast.Parameter[]
+          _node: TSNode,
+          _functionName: string,
+          _args: ast.Parameter[]
         ): ast.ASTNode | null {
           return null;
         }
@@ -482,7 +482,7 @@ describe('BaseASTVisitor', () => {
 });
 
 // Helper function to find a node of a specific type
-function findNodeOfType(node: TSNode, type: string): TSNode | null {
+function _findNodeOfType(node: TSNode, type: string): TSNode | null {
   if (node.type === type) {
     return node;
   }
@@ -520,7 +520,7 @@ function findNodeOfType(node: TSNode, type: string): TSNode | null {
     for (let i = 0; i < node.childCount; i++) {
       const child = node.child(i);
       if (child && child.type === 'expression_statement') {
-        const result = findNodeOfType(child, type);
+        const result = _findNodeOfType(child, type);
         if (result) {
           return result;
         }

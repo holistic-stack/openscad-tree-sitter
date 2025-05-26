@@ -26,7 +26,7 @@ export function extractVectorFromString(text: string): number[] | null {
         );
         return vectorValues;
       }
-    } catch (e) {
+    } catch (_e) {
       console.log(
         `[extractVectorFromString] Failed to parse vector string: ${text}`
       );

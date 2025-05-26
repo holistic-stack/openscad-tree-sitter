@@ -2,10 +2,9 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { EnhancedOpenscadParser } from '../../enhanced-parser';
 import { type Node as SyntaxNode } from 'web-tree-sitter';
 import { extractCylinderNode } from '../extractors/cylinder-extractor';
-import * as ast from '../ast-types';
 
 let parser: EnhancedOpenscadParser;
-const defaultWasmPath = '/tree-sitter-openscad.wasm'; // Adjust if your WASM path is different
+const _defaultWasmPath = '/tree-sitter-openscad.wasm'; // Adjust if your WASM path is different
 
 describe('Cylinder Extractor', () => {
   beforeAll(async () => {
@@ -30,7 +29,7 @@ describe('Cylinder Extractor', () => {
   });
 
   const parseToSyntaxNode = (code: string): SyntaxNode | null => {
-    if (!parser || !parser.isInitialized) {
+    if (!parser?.isInitialized) {
       throw new Error('Parser not initialized. Cannot parse code.');
     }
     const tree = parser.parseCST(code);

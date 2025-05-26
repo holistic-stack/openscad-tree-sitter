@@ -59,10 +59,11 @@ export class CompositeVisitor implements ASTVisitor {
         return this.visitCallExpression(node);
       case 'expression':
         return this.visitExpression(node);
-      case 'block':
+      case 'block': {
         // For block nodes, return the first child that produces a result
         const blockResults = this.visitBlock(node);
         return blockResults.length > 0 ? blockResults[0] : null;
+      }
       default:
         // For unknown node types, try each visitor in sequence
         for (const visitor of this.visitors) {

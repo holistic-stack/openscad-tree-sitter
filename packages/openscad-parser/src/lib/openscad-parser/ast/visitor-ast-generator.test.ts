@@ -1,9 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { VisitorASTGenerator } from './visitor-ast-generator';
 import { EnhancedOpenscadParser } from '../enhanced-parser';
-import { PrimitiveVisitor } from './visitors/primitive-visitor';
-import { TransformVisitor } from './visitors/transform-visitor';
-import { CSGVisitor } from './visitors/csg-visitor';
+
 import { ErrorHandler } from '../error-handling';
 
 // Create a mock language object for testing

@@ -243,9 +243,9 @@ export function extractValue(node: TSNode): ast.ParameterValue {
             logWarning: (msg: string) => console.warn(`[TempErrorHandler] ${msg}`),
             handleError: (error: Error) => console.error(`[TempErrorHandler] ${error.message}`),
             getErrors: () => [],
-            createParserError: (msg: string, context?: any) => new Error(msg),
+            createParserError: (msg: string, _context?: unknown) => new Error(msg),
             report: (error: Error) => console.error(`[TempErrorHandler] ${error.message}`)
-          } as any;
+          } as ErrorHandler;
 
           const enhancedResult = extractValueEnhanced(node, tempErrorHandler);
           if (enhancedResult !== undefined) {
@@ -427,7 +427,7 @@ export function extractValue(node: TSNode): ast.ParameterValue {
       // For positional arguments, look for the actual expression inside
       for (let i = 0; i < node.childCount; i++) {
         const child = node.child(i);
-        if (child && child.type !== ',' && child.type !== '(' && child.type !== ')' && child.type !== '=') {
+        if (child?.type !== ',' && child?.type !== '(' && child?.type !== ')' && child?.type !== '=') {
           console.log(
             `[extractValue] Found expression child in argument: type='${child.type}', text='${child.text}'`
           );
@@ -448,7 +448,7 @@ export function extractValue(node: TSNode): ast.ParameterValue {
       // Arguments node is a container - look for the actual expression inside
       for (let i = 0; i < node.childCount; i++) {
         const child = node.child(i);
-        if (child && child.type !== ',' && child.type !== '(' && child.type !== ')') {
+        if (child?.type !== ',' && child?.type !== '(' && child?.type !== ')') {
           console.log(
             `[extractValue] Found expression child in arguments: type='${child.type}', text='${child.text}'`
           );

@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import { extractModuleParametersFromText } from './module-parameter-extractor';
-import * as ast from '../ast-types';
 import { EnhancedOpenscadParser } from '../../enhanced-parser';
 
 describe('Module Parameter Extractor', () => {

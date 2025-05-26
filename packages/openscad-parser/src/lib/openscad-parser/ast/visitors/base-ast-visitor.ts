@@ -2,7 +2,6 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 import { ASTVisitor } from './ast-visitor';
 import { findDescendantOfType } from '../utils/node-utils';
-import { getLocation } from '../utils/location-utils';
 import {
   extractArguments,
   ExtractedParameter,
@@ -615,7 +614,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
           for (const argValue of argValues) {
             if (argValue.includes('=')) {
               // Named argument
-              const [name, value] = argValue.split('=').map(p => p.trim());
+              const [_name, value] = argValue.split('=').map(p => p.trim());
               if (!isNaN(Number(value))) {
                 args.push({
                   type: 'number',
@@ -712,7 +711,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
         for (const argValue of argValues) {
           if (argValue.includes('=')) {
             // Named argument
-            const [name, value] = argValue.split('=').map(p => p.trim());
+            const [_name, value] = argValue.split('=').map(p => p.trim());
             if (!isNaN(Number(value))) {
               tempArgs.push({
                 type: 'number',

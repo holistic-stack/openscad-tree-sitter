@@ -2,23 +2,17 @@ import {
   describe,
   it,
   expect,
-  beforeAll,
-  afterAll,
   beforeEach,
-  vi,
 } from 'vitest';
 import { CompositeVisitor } from './composite-visitor';
-import { PrimitiveVisitor } from './primitive-visitor';
-import { TransformVisitor } from './transform-visitor';
-import { CSGVisitor } from './csg-visitor';
 import { EnhancedOpenscadParser } from '../../enhanced-parser';
 import { Node as TSNode } from 'web-tree-sitter';
-import { findDescendantOfType } from '../utils/node-utils';
 import * as ast from '../ast-types';
+
 // import { ErrorHandler } from '../../error-handling'; // Temporarily commented out due to build issues
 
-// Define mock nodes for testing
-const mockCubeNode: ast.CubeNode = {
+// Define mock nodes for testing (currently unused but kept for future reference)
+const _mockCubeNode: ast.CubeNode = {
   type: 'cube',
   size: 10,
   center: false,
@@ -28,7 +22,7 @@ const mockCubeNode: ast.CubeNode = {
   },
 };
 
-const mockSphereNode: ast.SphereNode = {
+const _mockSphereNode: ast.SphereNode = {
   type: 'sphere',
   radius: 5,
   location: {
@@ -37,7 +31,7 @@ const mockSphereNode: ast.SphereNode = {
   },
 };
 
-const mockTranslateNode: ast.TranslateNode = {
+const _mockTranslateNode: ast.TranslateNode = {
   type: 'translate',
   v: [1, 2, 3],
   children: [],
@@ -112,7 +106,6 @@ describe('CompositeVisitor', () => {
 
   afterEach(() => {
     parser.dispose();
-    vi.clearAllMocks();
   });
 
   describe('visitNode', () => {

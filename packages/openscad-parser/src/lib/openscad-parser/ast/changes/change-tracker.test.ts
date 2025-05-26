@@ -52,7 +52,7 @@ describe('ChangeTracker', () => {
       // Wait
     }
 
-    const change2 = tracker.trackChange(20, 22, 25, sourceText);
+    const _change2 = tracker.trackChange(20, 22, 25, sourceText);
 
     const changesSince = tracker.getChangesSince(change1.timestamp);
 

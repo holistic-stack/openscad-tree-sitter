@@ -1,6 +1,5 @@
 import { EnhancedOpenscadParser } from '../../enhanced-parser';
 import { afterAll, beforeAll, describe, it, expect, vi } from 'vitest';
-import { getLocation } from '../utils/location-utils';
 import * as ast from '../ast-types';
 
 describe('Difference AST Generation', () => {

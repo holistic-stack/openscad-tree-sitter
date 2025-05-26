@@ -1,6 +1,6 @@
 /**
  * @file Expression Evaluation Context
- * 
+ *
  * Provides context and caching for expression evaluation.
  * Supports variable resolution, function calls, and memoization.
  */
@@ -31,7 +31,7 @@ export interface VariableScope {
 export interface FunctionDefinition {
   name: string;
   parameters: string[];
-  body: TSNode | ast.ExpressionNode;
+  body?: TSNode | ast.ExpressionNode; // Optional for built-in functions
   evaluator: (args: EvaluationResult[], context: ExpressionEvaluationContext) => EvaluationResult;
 }
 
@@ -59,7 +59,7 @@ export class ExpressionEvaluationContext {
   private functions: Map<string, FunctionDefinition> = new Map();
   private memoCache: Map<string, EvaluationResult> = new Map();
   private recursionDepth = 0;
-  
+
   constructor(
     private errorHandler: ErrorHandler,
     private options: EvaluationOptions = {}
@@ -73,7 +73,7 @@ export class ExpressionEvaluationContext {
       allowUndefinedVariables: false,
       ...options
     };
-    
+
     // Register built-in functions
     this.registerBuiltinFunctions();
   }
@@ -114,11 +114,11 @@ export class ExpressionEvaluationContext {
         return scope[name];
       }
     }
-    
+
     if (!this.options.allowUndefinedVariables) {
       this.errorHandler.logWarning(`Undefined variable: ${name}`);
     }
-    
+
     return undefined;
   }
 
@@ -166,7 +166,7 @@ export class ExpressionEvaluationContext {
    * Check recursion depth
    */
   checkRecursionDepth(): boolean {
-    return this.recursionDepth < (this.options.maxRecursionDepth || 100);
+    return this.recursionDepth < (this.options.maxRecursionDepth ?? 100);
   }
 
   /**
@@ -205,7 +205,6 @@ export class ExpressionEvaluationContext {
     this.registerFunction({
       name: 'max',
       parameters: ['a', 'b'],
-      body: null as any,
       evaluator: (args) => {
         if (args.length !== 2) {
           throw new Error('max() requires exactly 2 arguments');
@@ -219,7 +218,6 @@ export class ExpressionEvaluationContext {
     this.registerFunction({
       name: 'min',
       parameters: ['a', 'b'],
-      body: null as any,
       evaluator: (args) => {
         if (args.length !== 2) {
           throw new Error('min() requires exactly 2 arguments');
@@ -233,7 +231,6 @@ export class ExpressionEvaluationContext {
     this.registerFunction({
       name: 'abs',
       parameters: ['x'],
-      body: null as any,
       evaluator: (args) => {
         if (args.length !== 1) {
           throw new Error('abs() requires exactly 1 argument');

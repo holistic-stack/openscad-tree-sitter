@@ -32,7 +32,7 @@ describe('ConditionalExpressionVisitor', () => {
   let parser: EnhancedOpenscadParser;
   let errorHandler: ErrorHandler;
   let parentExpressionVisitor: ExpressionVisitor;
-  let visitor: ConditionalExpressionVisitor;
+  let _visitor: ConditionalExpressionVisitor;
 
   beforeEach(async () => {
     // Create a new parser instance before each test
@@ -43,7 +43,7 @@ describe('ConditionalExpressionVisitor', () => {
 
     errorHandler = new ErrorHandler();
     parentExpressionVisitor = new ExpressionVisitor('dummy source', errorHandler);
-    visitor = new ConditionalExpressionVisitor(parentExpressionVisitor, errorHandler);
+    _visitor = new ConditionalExpressionVisitor(parentExpressionVisitor, errorHandler);
   });
 
   afterEach(() => {
@@ -57,7 +57,7 @@ describe('ConditionalExpressionVisitor', () => {
     expect(tsNode).not.toBeNull();
     if (!tsNode) return;
 
-    const astNode = visitor.visit(tsNode);
+    const astNode = _visitor.visit(tsNode);
 
     expect(astNode).toEqual({
       type: 'expression',

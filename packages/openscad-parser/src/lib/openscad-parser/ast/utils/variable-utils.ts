@@ -4,7 +4,6 @@
  */
 
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
 
 /**
  * Check if a node represents a special OpenSCAD variable ($fn, $fa, $fs, etc.)
@@ -25,7 +24,7 @@ export function extractVariableName(node: TSNode): string | null {
   if (node.type !== 'identifier') {
     return null;
   }
-  
+
   const name = node.text.trim();
   return name.length > 0 ? name : null;
 }

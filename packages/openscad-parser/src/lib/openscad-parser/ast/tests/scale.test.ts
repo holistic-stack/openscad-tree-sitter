@@ -1,6 +1,6 @@
 import { EnhancedOpenscadParser } from '../../enhanced-parser';
 import { afterAll, beforeAll, describe, it, expect, vi } from 'vitest';
-import { getLocation } from '../utils/location-utils';
+
 
 describe('Scale AST Generation', () => {
   let parser: EnhancedOpenscadParser;
@@ -11,7 +11,7 @@ describe('Scale AST Generation', () => {
 
     // Mock the parseAST method to return hardcoded values for tests
     vi.spyOn(parser, 'parseAST').mockImplementation(
-      (code: string, generator?: string) => {
+      (code: string, _generator?: string) => {
         if (code === 'scale([2, 1, 0.5]) cube(10);') {
           return [
             {

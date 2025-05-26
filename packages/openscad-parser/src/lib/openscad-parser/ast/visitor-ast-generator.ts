@@ -50,7 +50,7 @@ export class VisitorASTGenerator {
   constructor(
     private tree: Tree,
     private source: string,
-    private language: any,
+    private language: unknown,
     private errorHandler: ErrorHandler // Added ErrorHandler
   ) {
     // Create a composite visitor that delegates to specialized visitors

@@ -303,7 +303,7 @@ describe('ModuleVisitor', () => {
         expect(
           childNode.type === 'cube' ||
             (childNode.type === 'module_instantiation' &&
-              (childNode as ast.ModuleInstantiationNode).name === 'cube')
+              (childNode).name === 'cube')
         ).toBe(true);
       }
     });

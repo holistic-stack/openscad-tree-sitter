@@ -29,7 +29,7 @@ export class EnhancedOpenscadParser {
    * Create a new enhanced parser
    */
   constructor(errorHandler?: IErrorHandler) {
-    this.errorHandler = errorHandler || new SimpleErrorHandler();
+    this.errorHandler = errorHandler ?? new SimpleErrorHandler();
   }
 
   /**

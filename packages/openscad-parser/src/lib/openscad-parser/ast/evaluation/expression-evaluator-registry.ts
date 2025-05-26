@@ -95,7 +95,7 @@ export class ExpressionEvaluatorRegistry {
   /**
    * Evaluate with automatic context creation
    */
-  evaluateWithContext(node: TSNode, variables: Record<string, any> = {}): EvaluationResult {
+  evaluateWithContext(node: TSNode, variables: Record<string, unknown> = {}): EvaluationResult {
     const context = new ExpressionEvaluationContext(this.errorHandler);
 
     // Set variables in context
@@ -143,6 +143,7 @@ export class ExpressionEvaluatorRegistry {
     const binaryEvaluator = this.evaluators.find(e => e instanceof BinaryExpressionEvaluator) as BinaryExpressionEvaluator;
     if (binaryEvaluator) {
       // Override the evaluateOperand method to use this registry
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (binaryEvaluator as any).evaluateOperand = (node: TSNode, context: ExpressionEvaluationContext) => {
         return this.evaluate(node, context);
       };
@@ -154,7 +155,7 @@ export class ExpressionEvaluatorRegistry {
   /**
    * Infer type from JavaScript value
    */
-  private inferType(value: any): 'number' | 'string' | 'boolean' | 'vector' | 'undef' {
+  private inferType(value: unknown): 'number' | 'string' | 'boolean' | 'vector' | 'undef' {
     if (value === null || value === undefined) {
       return 'undef';
     }
@@ -187,7 +188,7 @@ export function createExpressionEvaluatorRegistry(errorHandler: ErrorHandler): E
 export function evaluateExpression(
   node: TSNode,
   errorHandler: ErrorHandler,
-  variables: Record<string, any> = {}
+  variables: Record<string, unknown> = {}
 ): EvaluationResult {
   const registry = createExpressionEvaluatorRegistry(errorHandler);
   return registry.evaluateWithContext(node, variables);
@@ -199,8 +200,8 @@ export function evaluateExpression(
 export function evaluateExpressionValue(
   node: TSNode,
   errorHandler: ErrorHandler,
-  variables: Record<string, any> = {}
-): any {
+  variables: Record<string, unknown> = {}
+): unknown {
   const result = evaluateExpression(node, errorHandler, variables);
   return result.value;
 }

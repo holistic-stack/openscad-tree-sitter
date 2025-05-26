@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { extractSphereNode } from '../extractors/sphere-extractor';
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
 
 // Mock the TSNode for testing
 const createMockNode = (text: string): TSNode => {

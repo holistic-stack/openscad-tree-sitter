@@ -29,8 +29,8 @@ export class QueryManager {
    * @param language The tree-sitter language
    * @param cache The query cache to use (default: new LRUQueryCache())
    */
-  constructor(private language: any, cache?: QueryCache) {
-    this.cache = cache || new LRUQueryCache();
+  constructor(private language: unknown, cache?: QueryCache) {
+    this.cache = cache ?? new LRUQueryCache();
   }
 
   /**
@@ -106,7 +106,7 @@ export class QueryManager {
             results.push(capture.node); // Old API format: { node, ... }
           }
         }
-      } catch (error) {
+      } catch (_error) {
         try {
           // Fallback to the old API (matches method)
           const matches = query.matches(node);
@@ -115,9 +115,9 @@ export class QueryManager {
               results.push(capture.node);
             }
           }
-        } catch (error) {
+        } catch (_error) {
           console.error(
-            `[QueryManager.executeQueryOnNode] Error executing query: ${error}`
+            `[QueryManager.executeQueryOnNode] Error executing query: ${_error}`
           );
         }
       }
@@ -200,7 +200,7 @@ export class QueryManager {
             results.push(capture.node); // Old API format: { node, ... }
           }
         }
-      } catch (error) {
+      } catch (_error) {
         try {
           // Fallback to the old API (matches method)
           const matches = query.matches(tree.rootNode);
@@ -209,9 +209,9 @@ export class QueryManager {
               results.push(capture.node);
             }
           }
-        } catch (error) {
+        } catch (_error) {
           console.error(
-            `[QueryManager.executeQueryInternal] Error executing query: ${error}`
+            `[QueryManager.executeQueryInternal] Error executing query: ${_error}`
           );
         }
       }

@@ -20,7 +20,7 @@ export class BinaryExpression extends Expression {
     return `(${this.left} ${this.operator} ${this.right})`;
   }
 
-  accept<T>(visitor: any): T {
+  accept<T>(visitor: unknown): T {
     return visitor.visitBinaryExpression(this);
   }
 }

@@ -6,7 +6,6 @@
 
 import { EnhancedOpenscadParser } from '../../../enhanced-parser';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import * as ast from '../../ast-types';
 import { ControlStructureVisitor } from '../control-structure-visitor';
 import { printNodeStructure } from '../../utils/debug-utils';
 import { ErrorHandler } from '../../../error-handling';

@@ -31,9 +31,9 @@ export class PrimitiveVisitor extends BaseASTVisitor {
    * @returns The AST node or null if the function is not supported
    */
   protected createASTNodeForFunction(
-    node: TSNode,
+    _node: TSNode,
     functionName: string,
-    args: ast.Parameter[]
+    _args: ast.Parameter[]
   ): ast.ASTNode | null {
     console.log(
       `[PrimitiveVisitor.createASTNodeForFunction] Processing function: ${functionName}`

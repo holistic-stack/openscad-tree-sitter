@@ -14,7 +14,6 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 import { BaseASTVisitor } from './base-ast-visitor';
 import { getLocation } from '../utils/location-utils';
-import { findDescendantOfType } from '../utils/node-utils';
 import { extractArguments } from '../extractors/argument-extractor';
 import { IfElseVisitor } from './control-structure-visitor/if-else-visitor';
 import { ForLoopVisitor } from './control-structure-visitor/for-loop-visitor';

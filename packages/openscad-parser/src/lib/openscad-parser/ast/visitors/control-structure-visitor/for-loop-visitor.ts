@@ -301,15 +301,15 @@ export class ForLoopVisitor {
       // In a real implementation, this would delegate to other visitors
       // Make sure child is not null before accessing its properties
       if (child) {
-        const childType =
+        const _childType =
           child.type === 'module_instantiation' && child.namedChildren[0]
-            ? child.namedChildren[0].text || 'expression'
+            ? child.namedChildren[0].text ?? 'expression'
             : 'expression';
 
         const childNode: ast.ASTNode = {
           type: 'expression' as const,
           expressionType: 'literal',
-          value: childType,
+          value: _childType,
           location: getLocation(child),
         };
 

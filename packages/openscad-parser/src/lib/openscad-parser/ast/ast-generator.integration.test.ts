@@ -1,5 +1,5 @@
 import { EnhancedOpenscadParser } from '../enhanced-parser';
-import { afterAll, beforeAll, describe, it, expect, beforeEach } from 'vitest';
+import { afterAll, beforeAll, describe, it, expect } from 'vitest';
 
 describe('AST Generator Integration Tests', () => {
   let parser: EnhancedOpenscadParser;

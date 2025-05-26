@@ -15,9 +15,9 @@ export class ParenthesizedExpressionVisitor extends BaseASTVisitor {
 
   // Implement the abstract method required by BaseASTVisitor
   protected createASTNodeForFunction(
-    node: TSNode,
-    functionName: string,
-    args: ast.Parameter[]
+    _node: TSNode,
+    _functionName: string,
+    _args: ast.Parameter[]
   ): ast.ASTNode | null {
     // Parenthesized expressions don't handle function calls
     return null;

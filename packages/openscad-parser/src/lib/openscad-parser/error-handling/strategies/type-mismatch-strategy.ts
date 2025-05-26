@@ -91,9 +91,9 @@ export class TypeMismatchStrategy extends BaseRecoveryStrategy {
         // Complex function argument recovery is not yet implemented
         return null;
       }
-    } catch (e) {
+    } catch (_e) {
       // If any error occurs during recovery, log it and return null
-      console.warn('Error during type mismatch recovery:', e);
+      console.warn('Error during type mismatch recovery:', _e);
     }
     return null;
   }
@@ -221,7 +221,7 @@ export class TypeMismatchStrategy extends BaseRecoveryStrategy {
    * Gets a converter function for converting between two types
    */
   private getConverter(from: string, to: string): ((value: string) => string) | null {
-    return this.typeConverters[from]?.[to] || null;
+    return this.typeConverters[from]?.[to] ?? null;
   }
 
   /**

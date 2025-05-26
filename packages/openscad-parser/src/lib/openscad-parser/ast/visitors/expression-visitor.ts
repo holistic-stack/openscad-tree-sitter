@@ -123,7 +123,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
         );
         // return this.parenthesizedExpressionVisitor.visit(node); // ANTLR visitor, not compatible
         return null;
-      case 'function_call':
+      case 'function_call': {
         // Convert function call to expression node for expression contexts
         const functionCall = this.functionCallVisitor.visitFunctionCall(node);
         if (functionCall) {
@@ -137,6 +137,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
           } as ast.ExpressionNode;
         }
         return null;
+      }
       // TODO: Add cases for other expression types (literals, identifiers, etc.)
       // For now, we attempt to use the generic visitExpression for other types
       default:
@@ -194,7 +195,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
     );
 
     this.errorHandler.logInfo(
-      `[ExpressionVisitor.visitExpression] Dispatching based on specific expression type: \"${specificExpressionNode.type}\", text: \"${specificExpressionNode.text.substring(0, 50)}\"`,
+      `[ExpressionVisitor.visitExpression] Dispatching based on specific expression type: "${specificExpressionNode.type}", text: "${specificExpressionNode.text.substring(0, 50)}"`,
       'ExpressionVisitor.visitExpression',
       specificExpressionNode
     );
@@ -223,7 +224,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
       case 'identifier':
         return this.visitIdentifier(node);
 
-      case 'function_call':
+      case 'function_call': {
         // Handle function calls
         const functionCallResult = this.functionCallVisitor.visit(node);
         if (functionCallResult && functionCallResult.type === 'function_call') {
@@ -237,8 +238,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
           } as ast.ExpressionNode;
         }
         return null;
+      }
 
-      case 'accessor_expression':
+      case 'accessor_expression': {
         // Handle accessor expressions (which can be function calls, literals, or identifiers)
         const accessorResult = this.functionCallVisitor.visit(node);
         if (accessorResult) {
@@ -273,6 +275,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
           }
         }
         return null;
+      }
 
       case 'vector_expression':
         return this.visitVectorExpression(node);
@@ -319,7 +322,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
       default:
         this.errorHandler.handleError(
           new Error(
-            `Unsupported specific expression type \"${node.type}\" in dispatchSpecificExpression. Text: ${node.text.substring(0,100)}`
+            `Unsupported specific expression type "${node.type}" in dispatchSpecificExpression. Text: ${node.text.substring(0,100)}`
           ),
           'ExpressionVisitor.dispatchSpecificExpression',
           node
@@ -424,7 +427,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
     switch (node.type) {
       case 'number_literal':
-      case 'number':
+      case 'number': {
         const nodeText = node.text.trim();
         if (!nodeText || nodeText.length === 0) {
           this.errorHandler.logWarning(
@@ -451,9 +454,10 @@ export class ExpressionVisitor extends BaseASTVisitor {
           node
         );
         break;
+      }
 
       case 'string_literal':
-      case 'string':
+      case 'string': {
         // Remove quotes from string literals
         const stringText = node.text;
         if (stringText.startsWith('"') && stringText.endsWith('"')) {
@@ -462,20 +466,24 @@ export class ExpressionVisitor extends BaseASTVisitor {
           value = stringText;
         }
         break;
+      }
 
       case 'boolean_literal':
-      case 'true':
+      case 'true': {
         value = true;
         break;
+      }
 
-      case 'false':
+      case 'false': {
         value = false;
         break;
+      }
 
       case 'undef_literal':
-      case 'undef':
+      case 'undef': {
         value = null; // OpenSCAD undef maps to null (now allowed in ParameterValue)
         break;
+      }
 
       default:
         this.errorHandler.handleError(
@@ -716,7 +724,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @param args The function arguments
    * @returns The function call AST node or null if not handled
    */
-  createASTNodeForFunction(node: TSNode, functionName?: string, args?: ast.Parameter[]): ast.ASTNode | null {
+  createASTNodeForFunction(node: TSNode, _functionName?: string, _args?: ast.Parameter[]): ast.ASTNode | null {
     // Expression visitor doesn't handle function definitions, only function calls
     // Function calls are handled by the FunctionCallVisitor
     if (node.type === 'function_call') {

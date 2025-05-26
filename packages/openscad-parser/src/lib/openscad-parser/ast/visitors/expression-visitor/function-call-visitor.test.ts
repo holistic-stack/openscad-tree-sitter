@@ -210,7 +210,7 @@ describe('FunctionCallVisitor', () => {
               ],
             } as ast.ExpressionNode;
           }
-          return originalMethod?.call(visitor, node) || null;
+          return originalMethod?.call(visitor, node) ?? null;
         }
       );
 

@@ -31,7 +31,7 @@ export class DefaultNodeHandlerRegistry implements NodeHandlerRegistry {
    * @returns The error-handling function or null if not found
    */
   getHandler(nodeType: string): NodeHandler | null {
-    return this.handlers.get(nodeType) || null;
+    return this.handlers.get(nodeType) ?? null;
   }
 
   /**
