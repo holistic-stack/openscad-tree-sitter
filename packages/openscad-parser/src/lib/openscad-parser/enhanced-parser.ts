@@ -4,7 +4,8 @@
  * This extends the minimal parser to include AST generation functionality
  * while maintaining compatibility with the existing test infrastructure.
  */
-
+import * as fs from 'fs';
+import * as path from 'path';
 import * as TreeSitter from 'web-tree-sitter';
 import { SimpleErrorHandler, IErrorHandler } from './error-handling/simple-error-handler';
 import { ASTNode } from './ast/ast-types';
@@ -38,17 +39,106 @@ export class EnhancedOpenscadParser {
   async init(wasmPath = './tree-sitter-openscad.wasm'): Promise<void> {
     try {
       this.errorHandler.logInfo('Initializing enhanced OpenSCAD parser...');
+      
+      let resolvedWasmPath: string;
+      if (path.isAbsolute(wasmPath)) {
+          resolvedWasmPath = wasmPath;
+      } else {
+          // Try resolving relative to the current file, then try relative to process.cwd()
+          const pathRelativeToCurrentFile = path.resolve(__dirname, wasmPath);
+          if (fs.existsSync(pathRelativeToCurrentFile)) {
+              resolvedWasmPath = pathRelativeToCurrentFile;
+          } else {
+              const pathRelativeToCwd = path.resolve(process.cwd(), wasmPath);
+              if (fs.existsSync(pathRelativeToCwd)) {
+                  resolvedWasmPath = pathRelativeToCwd;
+              } else {
+                  // Fallback for packages/openscad-parser/tree-sitter-openscad.wasm
+                  // This path is relative to the project root if CWD is the project root.
+                  const fallbackPath = path.resolve(process.cwd(), 'packages', 'openscad-parser', 'tree-sitter-openscad.wasm');
+                  if (fs.existsSync(fallbackPath)) {
+                      resolvedWasmPath = fallbackPath;
+                  } else {
+                     // Try one more fallback, directly in the 'dist' folder from potential CWD
+                     const distFallbackPath = path.resolve(process.cwd(), 'dist', 'tree-sitter-openscad.wasm');
+                     if (fs.existsSync(distFallbackPath)) {
+                        resolvedWasmPath = distFallbackPath;
+                     } else {
+                       const finalFallback = path.resolve(__dirname, '../../../../node_modules/@openscad/tree-sitter-openscad/tree-sitter-openscad.wasm');
+                       if(fs.existsSync(finalFallback)) {
+                         resolvedWasmPath = finalFallback;
+                       } else {
+                         throw new Error(`WASM file not found. Checked: default '${wasmPath}', relative to __dirname '${pathRelativeToCurrentFile}', relative to CWD '${pathRelativeToCwd}', CWD/packages/openscad-parser '${fallbackPath}', CWD/dist '${distFallbackPath}', and node_modules relative to __dirname '${finalFallback}'.`);
+                       }
+                     }
+                  }
+              }
+          }
+      }
+      this.errorHandler.logInfo(`Attempting to load OpenSCAD grammar WASM from: ${resolvedWasmPath}`);
+      const openscadWasmBuffer = fs.readFileSync(resolvedWasmPath);
 
-      const bytes = await fetch(wasmPath).then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+      // Resolve path for the generic tree-sitter.wasm
+      const genericWasmName = 'tree-sitter.wasm';
+      let resolvedGenericWasmPath: string;
+      const grammarWasmDir = path.dirname(resolvedWasmPath);
+
+      // 1. Attempt to resolve genericWasmName relative to the directory of the resolved OpenSCAD grammar WASM.
+      const coLocatedGenericWasm = path.resolve(grammarWasmDir, genericWasmName);
+      if (fs.existsSync(coLocatedGenericWasm)) {
+        resolvedGenericWasmPath = coLocatedGenericWasm;
+      } else {
+        // 2. Fallback: try CWD/packages/openscad-parser/tree-sitter.wasm (if CWD is project root)
+        const cwdPackagesPath = path.resolve(process.cwd(), 'packages', 'openscad-parser', genericWasmName);
+        if (fs.existsSync(cwdPackagesPath)) {
+          resolvedGenericWasmPath = cwdPackagesPath;
+        } else {
+          // 3. Fallback: try CWD/tree-sitter.wasm (if CWD is project root and wasm is there)
+          const cwdPath = path.resolve(process.cwd(), genericWasmName);
+          if (fs.existsSync(cwdPath)) {
+            resolvedGenericWasmPath = cwdPath;
+          } else {
+            // 4. Fallback: node_modules/web-tree-sitter/tree-sitter.wasm relative to this file's __dirname
+            // This path assumes enhanced-parser.ts is in src/lib/openscad-parser/
+            const nodeModulesFallback = path.resolve(__dirname, '../../../../node_modules/web-tree-sitter/tree-sitter.wasm');
+            if(fs.existsSync(nodeModulesFallback)) {
+              resolvedGenericWasmPath = nodeModulesFallback;
+            } else {
+              throw new Error(
+`Generic ${genericWasmName} not found. Checked:
+1. Co-located with OpenSCAD WASM: ${coLocatedGenericWasm}
+2. CWD/packages/openscad-parser/${genericWasmName}: ${cwdPackagesPath}
+3. CWD/${genericWasmName}: ${cwdPath}
+4. node_modules fallback: ${nodeModulesFallback}`
+              );
+            }
+          }
         }
-        return response.bytes();
+      }
+      
+      this.errorHandler.logInfo(`Initializing TreeSitter.Parser with generic WASM from: ${resolvedGenericWasmPath}`);
+      
+      await TreeSitter.Parser.init({
+        locateFile: (scriptName: string, scriptDirectory: string) => {
+          if (scriptName === 'tree-sitter.wasm') {
+            return resolvedGenericWasmPath;
+          }
+          // For other files like tree-sitter.worker.js
+          let workerPath = path.join(scriptDirectory, scriptName); // Default web-tree-sitter expects it here
+          if (fs.existsSync(workerPath)) {
+            return workerPath;
+          }
+          // Fallback to the directory of the resolvedGenericWasmPath (where tree-sitter.wasm is)
+          workerPath = path.resolve(path.dirname(resolvedGenericWasmPath), scriptName);
+          if (fs.existsSync(workerPath)) {
+            return workerPath;
+          }
+          // Final fallback: CWD
+          return path.resolve(process.cwd(), scriptName); 
+        }
       });
-
-      await TreeSitter.Parser.init();
       this.parser = new TreeSitter.Parser();
-      this.language = await TreeSitter.Language.load(bytes);
+      this.language = await TreeSitter.Language.load(openscadWasmBuffer);
       this.parser.setLanguage(this.language);
       this.isInitialized = true;
 
