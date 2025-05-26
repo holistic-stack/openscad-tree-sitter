@@ -15,9 +15,9 @@ export class UnaryExpressionVisitor extends BaseASTVisitor {
 
   // Implement the abstract method required by BaseASTVisitor
   protected createASTNodeForFunction(
-    node: TSNode,
-    functionName: string,
-    args: ast.Parameter[]
+    _node: TSNode,
+    _functionName: string,
+    _args: ast.Parameter[]
   ): ast.ASTNode | null {
     // Unary expressions don't handle function calls
     return null;
@@ -36,10 +36,9 @@ export class UnaryExpressionVisitor extends BaseASTVisitor {
       this.errorHandler.report(error);
       return null;
     }
-    // Tree-sitter grammar might use 'argument' or 'operand' for the operand node
-    // and 'operator' for the operator node. This needs to match the grammar.
+    // Tree-sitter grammar uses 'operator' and 'operand' field names
     const operatorNode = node.childForFieldName('operator');
-    const operandNode = node.childForFieldName('argument'); // Or 'operand'
+    const operandNode = node.childForFieldName('operand');
 
     if (!operatorNode || !operandNode) {
       // WORKAROUND: Check if this is actually a single expression wrapped in a unary expression node
@@ -54,10 +53,11 @@ export class UnaryExpressionVisitor extends BaseASTVisitor {
           );
           // Delegate back to the parent visitor to handle this as a regular expression
           const result = this.parentVisitor.visitExpression(child);
-          // If the result is a unary expression, return it; otherwise return null
-          if (result && result.expressionType === 'unary') {
+          // Return any valid expression result, but only if it's actually a unary expression
+          if (result && result.type === 'expression' && 'expressionType' in result && result.expressionType === 'unary') {
             return result as ast.UnaryExpressionNode;
           }
+          // If it's not a unary expression, return null to indicate this isn't a unary expression
           return null;
         }
       }
@@ -100,6 +100,6 @@ export class UnaryExpressionVisitor extends BaseASTVisitor {
       operand: operandAST,
       prefix: true, // OpenSCAD unary operators are always prefix
       location: getLocation(node),
-    };
+    } as ast.UnaryExpressionNode;
   }
 }

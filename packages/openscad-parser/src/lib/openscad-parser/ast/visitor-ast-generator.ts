@@ -130,78 +130,7 @@ export class VisitorASTGenerator {
         console.log(
           `[VisitorASTGenerator.generate] Generated AST node: type=${astNode.type}`
         );
-
-        // Handle module_instantiation nodes
-        if (astNode.type === 'module_instantiation') {
-          // Extract the module name from the node
-          const moduleNameMatch = child.text.match(/^([a-zA-Z_][a-zA-Z0-9_]*)/);
-          const moduleName = moduleNameMatch ? moduleNameMatch[1] : '';
-
-          console.log(
-            `[VisitorASTGenerator.generate] Module name: ${moduleName}`
-          );
-
-          // Extract the body of the module instantiation
-          // const bodyNode = findChildOfType(child, 'block'); // Unused variable
-
-          // Try to use the appropriate visitor to process the node
-          let processedNode = null;
-
-          // Try CSG visitor first
-          if (
-            [
-              'union',
-              'difference',
-              'intersection',
-              'hull',
-              'minkowski',
-            ].includes(moduleName)
-          ) {
-            const csgVisitor = new CSGVisitor(this.source, this.errorHandler);
-            processedNode = csgVisitor.visitAccessorExpression(child);
-          }
-          // Try transform visitor next
-          else if (
-            [
-              'translate',
-              'rotate',
-              'scale',
-              'mirror',
-              'resize',
-              'multmatrix',
-              'color',
-              'offset',
-            ].includes(moduleName)
-          ) {
-            const transformVisitor = new TransformVisitor(this.source, undefined, this.errorHandler);
-            processedNode = transformVisitor.visitAccessorExpression(child);
-          }
-          // Try primitive visitor last
-          else if (
-            [
-              'cube',
-              'sphere',
-              'cylinder',
-              'polyhedron',
-              'square',
-              'circle',
-              'polygon',
-              'text',
-            ].includes(moduleName)
-          ) {
-            const primitiveVisitor = new PrimitiveVisitor(this.source, this.errorHandler);
-            processedNode = primitiveVisitor.visitAccessorExpression(child);
-          }
-
-          if (processedNode) {
-            statements.push(processedNode);
-          } else {
-            // If no visitor could process it, just push the original node
-            statements.push(astNode);
-          }
-        } else {
-          statements.push(astNode);
-        }
+        statements.push(astNode);
       }
     }
 

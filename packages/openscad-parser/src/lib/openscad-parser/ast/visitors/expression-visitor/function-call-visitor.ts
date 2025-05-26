@@ -28,11 +28,14 @@ interface FunctionCallParameter {
 export class FunctionCallVisitor extends BaseASTVisitor {
   /**
    * Create a new FunctionCallVisitor
-   * @param source The source code
+   * @param parentVisitor The parent expression visitor (optional for backward compatibility)
    * @param errorHandler The error handler instance
    */
-  constructor(source: string, protected errorHandler: ErrorHandler) {
-    super(source, errorHandler);
+  constructor(
+    private parentVisitor: any | null,
+    protected errorHandler: ErrorHandler
+  ) {
+    super('', errorHandler); // Source is not needed for this visitor
   }
 
   /**
@@ -101,17 +104,24 @@ export class FunctionCallVisitor extends BaseASTVisitor {
    * @returns The AST node or null if the node cannot be processed
    */
   visitAccessorExpression(node: TSNode): ast.ASTNode | null {
-    console.log(
+    this.errorHandler.logInfo(
       `[FunctionCallVisitor.visitAccessorExpression] Processing accessor expression: ${node.text.substring(
         0,
         50
-      )}`
+      )}`,
+      'FunctionCallVisitor.visitAccessorExpression',
+      node
     );
 
     // Check if this accessor expression has an argument list (making it a function call)
     const argumentListNode = findDescendantOfType(node, 'argument_list');
     if (argumentListNode) {
       // This is a function call, delegate to visitFunctionCall
+      this.errorHandler.logInfo(
+        `[FunctionCallVisitor.visitAccessorExpression] Found argument_list, delegating to visitFunctionCall`,
+        'FunctionCallVisitor.visitAccessorExpression',
+        node
+      );
       return this.visitFunctionCall(node);
     }
 
@@ -133,12 +143,38 @@ export class FunctionCallVisitor extends BaseASTVisitor {
 
     // This is a simple identifier access, try to find the identifier
     let identifierNode = findDescendantOfType(node, 'identifier');
+    this.errorHandler.logInfo(
+      `[FunctionCallVisitor.visitAccessorExpression] Initial identifier search result: ${identifierNode ? `"${identifierNode.text}" (type: ${identifierNode.type})` : 'null'}`,
+      'FunctionCallVisitor.visitAccessorExpression',
+      node
+    );
 
     // If no identifier found, check if the child node itself is the identifier
     if (!identifierNode && node.namedChildCount === 1) {
       const child = node.namedChild(0);
-      if (child && (child.type === 'identifier' || child.text === node.text)) {
+      this.errorHandler.logInfo(
+        `[FunctionCallVisitor.visitAccessorExpression] Checking single child: type="${child?.type}", text="${child?.text}"`,
+        'FunctionCallVisitor.visitAccessorExpression',
+        child || node
+      );
+
+      // Only treat actual identifier nodes as identifiers, not primary_expressions or other wrappers
+      if (child && child.type === 'identifier') {
         identifierNode = child;
+        this.errorHandler.logInfo(
+          `[FunctionCallVisitor.visitAccessorExpression] Found identifier child: "${child.text}" (type: ${child.type})`,
+          'FunctionCallVisitor.visitAccessorExpression',
+          child
+        );
+      } else if (child && child.type === 'primary_expression') {
+        // For primary_expressions, we should delegate to the ExpressionVisitor to handle the child properly
+        this.errorHandler.logInfo(
+          `[FunctionCallVisitor.visitAccessorExpression] Found primary_expression child, should delegate to ExpressionVisitor`,
+          'FunctionCallVisitor.visitAccessorExpression',
+          child
+        );
+        // Return null to indicate this should be handled elsewhere
+        return null;
       }
     }
 
@@ -172,13 +208,8 @@ export class FunctionCallVisitor extends BaseASTVisitor {
       } as ast.LiteralNode;
     }
 
-    // Create an identifier expression node
-    return {
-      type: 'expression',
-      expressionType: 'identifier',
-      name: identifierNode.text,
-      location: getLocation(node),
-    } as ast.IdentifierNode;
+    // Delegate to the parent visitor to handle identifier as variable reference
+    return this.parentVisitor.visitExpression(identifierNode);
   }
 
   /**
@@ -442,7 +473,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
       ) {
         return {
           name: arg.name,
-          value: arg.value as ast.ExpressionNode,
+          value: arg.value,
         };
       }
 

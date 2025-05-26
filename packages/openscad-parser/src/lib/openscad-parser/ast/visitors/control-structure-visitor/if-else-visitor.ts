@@ -231,7 +231,7 @@ export class IfElseVisitor {
         args[0].value.type === 'expression'
       ) {
         // Use the expression directly if it's already an expression node
-        condition = args[0].value as ast.ExpressionNode;
+        condition = args[0].value;
       } else {
         // Create a literal expression for other value types
         condition = {

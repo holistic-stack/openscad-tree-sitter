@@ -1,6 +1,6 @@
 /**
  * @file Expression Evaluator Registry
- * 
+ *
  * Central registry for managing expression evaluators.
  * Uses the Strategy pattern to select the appropriate evaluator for each node type.
  */
@@ -38,10 +38,10 @@ export class ExpressionEvaluatorRegistry {
    */
   findEvaluator(node: TSNode): IExpressionEvaluator | null {
     const nodeType = node.type;
-    
+
     // Check cache first
     const cached = this.evaluatorCache.get(nodeType);
-    if (cached && cached.canEvaluate(node)) {
+    if (cached?.canEvaluate(node)) {
       return cached;
     }
 
@@ -97,7 +97,7 @@ export class ExpressionEvaluatorRegistry {
    */
   evaluateWithContext(node: TSNode, variables: Record<string, any> = {}): EvaluationResult {
     const context = new ExpressionEvaluationContext(this.errorHandler);
-    
+
     // Set variables in context
     for (const [name, value] of Object.entries(variables)) {
       context.setVariable(name, {
@@ -131,8 +131,8 @@ export class ExpressionEvaluatorRegistry {
     this.registerEvaluator(new LiteralEvaluator());
     this.registerEvaluator(new IdentifierEvaluator());
     this.registerEvaluator(new BinaryExpressionEvaluator());
-    
-    // Patch binary expression evaluator to use this registry
+
+    // Patch evaluators to use this registry
     this.patchBinaryExpressionEvaluator();
   }
 
@@ -148,6 +148,8 @@ export class ExpressionEvaluatorRegistry {
       };
     }
   }
+
+
 
   /**
    * Infer type from JavaScript value

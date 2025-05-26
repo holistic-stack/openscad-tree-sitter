@@ -25,7 +25,7 @@ function isExpressionNode(
  * @returns The number value or null if the parameter is not a number
  */
 export function extractNumberParameter(param: ast.Parameter, errorHandler?: ErrorHandler): number | null {
-  if (!param || !param.value) return null;
+  if (!param?.value) return null;
 
   // Handle number as raw value
   if (typeof param.value === 'number') {
@@ -48,7 +48,7 @@ export function extractNumberParameter(param: ast.Parameter, errorHandler?: Erro
         unaryExpr.operand.expressionType === 'literal' &&
         typeof (unaryExpr.operand as ast.LiteralNode).value === 'number'
       ) {
-        return -(unaryExpr.operand as ast.LiteralNode).value as number;
+        return -(unaryExpr.operand as ast.LiteralNode).value;
       }
     }
 
@@ -86,7 +86,7 @@ export function extractNumberParameter(param: ast.Parameter, errorHandler?: Erro
  * @returns The boolean value or null if the parameter is not a boolean
  */
 export function extractBooleanParameter(param: ast.Parameter, errorHandler?: ErrorHandler): boolean | null {
-  if (!param || !param.value) return null;
+  if (!param?.value) return null;
 
   // Handle boolean as raw value
   if (typeof param.value === 'boolean') {
@@ -118,7 +118,7 @@ export function extractBooleanParameter(param: ast.Parameter, errorHandler?: Err
  * @returns The string value or null if the parameter is not a string
  */
 export function extractStringParameter(param: ast.Parameter): string | null {
-  if (!param || !param.value) return null;
+  if (!param?.value) return null;
 
   // Handle string as raw value
   if (typeof param.value === 'string') {
@@ -144,7 +144,7 @@ export function extractStringParameter(param: ast.Parameter): string | null {
  * @returns The vector values as an array of numbers or null if the parameter is not a vector
  */
 export function extractVectorParameter(param: ast.Parameter): number[] | null {
-  if (!param || !param.value) return null;
+  if (!param?.value) return null;
 
   // Handle Vector2D or Vector3D as raw value
   if (
@@ -207,7 +207,7 @@ export function extractVectorParameter(param: ast.Parameter): number[] | null {
 export function extractRangeParameter(
   param: ast.Parameter
 ): [number, number, number] | null {
-  if (!param || !param.value) return null;
+  if (!param?.value) return null;
 
   // Handle array as raw value with 2 or 3 elements
   if (
@@ -259,7 +259,7 @@ export function extractRangeParameter(
 export function extractIdentifierParameter(
   param: ast.Parameter
 ): string | null {
-  if (!param || !param.value) return null;
+  if (!param?.value) return null;
 
   // Handle string as identifier
   if (

@@ -45,7 +45,7 @@ export class ForLoopVisitor {
     );
 
     // Extract variables and ranges
-    let argumentsNode = node.childForFieldName('arguments');
+    const argumentsNode = node.childForFieldName('arguments');
     if (!argumentsNode) {
       console.log(
         `[ForLoopVisitor.visitForStatement] No arguments found in field, trying child index`
@@ -97,7 +97,7 @@ export class ForLoopVisitor {
           arg.value.type === 'expression'
         ) {
           // Use the expression directly if it's already an expression node
-          range = arg.value as ast.ExpressionNode;
+          range = arg.value;
         } else if (
           Array.isArray(arg.value) &&
           (arg.value.length === 2 || arg.value.length === 3)
@@ -115,7 +115,7 @@ export class ForLoopVisitor {
             continue;
           } else {
             // Simple range: [start, end]
-            range = arg.value as ast.Vector2D;
+            range = arg.value;
           }
         } else {
           // Create a literal expression for other value types
@@ -493,7 +493,7 @@ export class ForLoopVisitor {
             arg.value.type === 'expression'
           ) {
             // Use the expression directly if it's already an expression node
-            range = arg.value as ast.ExpressionNode;
+            range = arg.value;
           } else if (
             Array.isArray(arg.value) &&
             (arg.value.length === 2 || arg.value.length === 3)
@@ -511,7 +511,7 @@ export class ForLoopVisitor {
               continue;
             } else {
               // Simple range: [start, end]
-              range = arg.value as ast.Vector2D;
+              range = arg.value;
             }
           } else {
             // Create a literal expression for other value types

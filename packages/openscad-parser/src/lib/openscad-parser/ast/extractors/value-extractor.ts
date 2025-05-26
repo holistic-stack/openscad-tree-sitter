@@ -416,7 +416,15 @@ export function extractValue(node: TSNode): ast.ParameterValue {
         `[extractValue] Processing argument node with ${node.childCount} children`
       );
 
-      // Argument node is a container - look for the actual expression inside
+      // Check if this is a named argument (contains '=')
+      if (node.text.includes('=')) {
+        console.log(
+          `[extractValue] Detected named argument in value-extractor, should be handled by extractArgument. Returning undefined.`
+        );
+        return undefined;
+      }
+
+      // For positional arguments, look for the actual expression inside
       for (let i = 0; i < node.childCount; i++) {
         const child = node.child(i);
         if (child && child.type !== ',' && child.type !== '(' && child.type !== ')' && child.type !== '=') {

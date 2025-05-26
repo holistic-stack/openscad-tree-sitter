@@ -234,7 +234,7 @@ export class UnknownIdentifierStrategy extends BaseRecoveryStrategy {
    * Gets a human-readable description of the recovery action
    */
   getRecoverySuggestion(error: ParserError): string {
-    const suggestions = error.context.suggestions as string[] | undefined;
+    const suggestions = error.context.suggestions;
     if (!suggestions || suggestions.length === 0) {
       return 'Check for typos or missing variable/function declarations';
     }

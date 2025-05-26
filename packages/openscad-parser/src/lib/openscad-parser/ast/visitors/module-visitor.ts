@@ -270,7 +270,7 @@ export class ModuleVisitor extends BaseASTVisitor {
       arg => arg.name === undefined || arg.name === 'v'
     );
 
-    if (vectorParam && vectorParam.value) {
+    if (vectorParam?.value) {
       if (Array.isArray(vectorParam.value) && vectorParam.value.length >= 2) {
         if (vectorParam.value.length === 2) {
           // 2D vector, Z should default to 0
@@ -344,7 +344,7 @@ export class ModuleVisitor extends BaseASTVisitor {
     );
     const vParam = args.find(arg => arg.name === 'v');
 
-    if (angleParam && angleParam.value) {
+    if (angleParam?.value) {
       if (Array.isArray(angleParam.value) && angleParam.value.length === 3) {
         angle = [angleParam.value[0], angleParam.value[1], angleParam.value[2]];
       } else if (typeof angleParam.value === 'number') {
@@ -421,7 +421,7 @@ export class ModuleVisitor extends BaseASTVisitor {
       arg => arg.name === undefined || arg.name === 'v'
     );
 
-    if (vectorParam && vectorParam.value) {
+    if (vectorParam?.value) {
       if (Array.isArray(vectorParam.value) && vectorParam.value.length >= 2) {
         if (vectorParam.value.length === 2) {
           // 2D vector, Z should default to 1
@@ -487,7 +487,7 @@ export class ModuleVisitor extends BaseASTVisitor {
       arg => arg.name === undefined || arg.name === 'v'
     );
 
-    if (vectorParam && vectorParam.value) {
+    if (vectorParam?.value) {
       if (Array.isArray(vectorParam.value) && vectorParam.value.length >= 2) {
         if (vectorParam.value.length === 2) {
           // 2D vector, Z should default to 0
@@ -551,7 +551,7 @@ export class ModuleVisitor extends BaseASTVisitor {
       arg => arg.name === undefined || arg.name === 'm'
     );
 
-    if (matrixParam && matrixParam.value) {
+    if (matrixParam?.value) {
       // Matrix extraction would be more complex and depends on how matrices are represented in the AST
       // For now, we'll just use the identity matrix
       console.log(
@@ -622,7 +622,7 @@ export class ModuleVisitor extends BaseASTVisitor {
     );
     const alphaParam = args.find(arg => arg.name === 'alpha');
 
-    if (colorParam && colorParam.value) {
+    if (colorParam?.value) {
       if (typeof colorParam.value === 'string') {
         color = colorParam.value;
       } else if (Array.isArray(colorParam.value)) {

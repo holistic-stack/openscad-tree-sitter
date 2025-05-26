@@ -65,10 +65,11 @@ describe('UnaryExpressionVisitor', () => {
       operator: '-',
       operand: {
         type: 'expression',
-        expressionType: 'variable_reference',
+        expressionType: 'variable',
         name: 'y',
         location: expect.anything(),
       },
+      prefix: true,
       location: expect.anything(),
     });
     expect(errorHandler.getErrors()).toHaveLength(0);
@@ -88,10 +89,11 @@ describe('UnaryExpressionVisitor', () => {
       operator: '!',
       operand: {
         type: 'expression',
-        expressionType: 'variable_reference',
+        expressionType: 'variable',
         name: 'z',
         location: expect.anything(),
       },
+      prefix: true,
       location: expect.anything(),
     });
     expect(errorHandler.getErrors()).toHaveLength(0);

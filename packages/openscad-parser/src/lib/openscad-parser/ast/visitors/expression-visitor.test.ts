@@ -294,7 +294,7 @@ describe('ExpressionVisitor', () => {
 
       expect(result).not.toBeNull();
       expect(result?.type).toBe('expression');
-      expect(result?.expressionType).toBe('unary');
+      expect(result?.expressionType).toBe('unary_expression');
       expect((result as ast.UnaryExpressionNode).operator).toBe('-');
       expect((result as ast.UnaryExpressionNode).operand.expressionType).toBe(
         'literal'
@@ -354,7 +354,7 @@ describe('ExpressionVisitor', () => {
 
       expect(result).not.toBeNull();
       expect(result?.type).toBe('expression');
-      expect(result?.expressionType).toBe('unary');
+      expect(result?.expressionType).toBe('unary_expression');
       expect((result as ast.UnaryExpressionNode).operator).toBe('!');
       expect((result as ast.UnaryExpressionNode).operand.expressionType).toBe(
         'literal'
@@ -431,11 +431,24 @@ describe('ExpressionVisitor', () => {
         endPosition: { row: 0, column: 15 },
         childForFieldName: (name: string) => {
           if (name === 'condition') {
-            return { text: 'x > 5' };
+            return {
+              type: 'relational_expression',
+              text: 'x > 5',
+              childForFieldName: (fieldName: string) => {
+                if (fieldName === 'left') {
+                  return { type: 'identifier', text: 'x' };
+                } else if (fieldName === 'operator') {
+                  return { type: '>', text: '>' };
+                } else if (fieldName === 'right') {
+                  return { type: 'number', text: '5' };
+                }
+                return null;
+              },
+            };
           } else if (name === 'consequence') {
-            return { text: '10' };
+            return { type: 'number', text: '10' };
           } else if (name === 'alternative') {
-            return { text: '20' };
+            return { type: 'number', text: '20' };
           }
           return null;
         },
@@ -583,11 +596,11 @@ describe('ExpressionVisitor', () => {
         namedChildCount: 3,
         namedChild: (index: number) => {
           if (index === 0) {
-            return { text: '1' };
+            return { type: 'number', text: '1' };
           } else if (index === 1) {
-            return { text: '2' };
+            return { type: 'number', text: '2' };
           } else if (index === 2) {
-            return { text: '3' };
+            return { type: 'number', text: '3' };
           }
           return null;
         },

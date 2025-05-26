@@ -1,6 +1,6 @@
 /**
  * @file Binary Expression Evaluator
- * 
+ *
  * Evaluates binary expressions with proper operator precedence and type handling.
  * Supports arithmetic, comparison, and logical operations.
  */
@@ -22,12 +22,20 @@ export class BinaryExpressionEvaluator extends BaseExpressionEvaluator {
       'logical_or_expression',
       'logical_and_expression',
       'equality_expression',
-      'relational_expression'
+      'relational_expression',
+      'unary_expression',
+      'accessor_expression',
+      'primary_expression',
+      'conditional_expression'
     ]);
   }
 
   getPriority(): number {
     return 80; // High priority for binary operations
+  }
+
+  canEvaluate(node: TSNode): boolean {
+    return this.supportedTypes.has(node.type);
   }
 
   evaluate(node: TSNode, context: ExpressionEvaluationContext): EvaluationResult {
@@ -45,16 +53,29 @@ export class BinaryExpressionEvaluator extends BaseExpressionEvaluator {
     context.enterRecursion();
 
     try {
-      const result = this.evaluateBinaryExpression(node, context);
-      context.setCachedResult(cacheKey, result);
-      return result;
+      // Check if this is a real binary expression or a single-value expression
+      const leftNode = this.getChildByField(node, 'left');
+      const operatorNode = this.getChildByField(node, 'operator');
+      const rightNode = this.getChildByField(node, 'right');
+
+      if (leftNode && operatorNode && rightNode) {
+        // Real binary expression
+        const result = this.evaluateBinaryExpression(node, context);
+        context.setCachedResult(cacheKey, result);
+        return result;
+      } else {
+        // Single-value expression - delegate to child
+        const result = this.evaluateSingleValueExpression(node, context);
+        context.setCachedResult(cacheKey, result);
+        return result;
+      }
     } finally {
       context.exitRecursion();
     }
   }
 
   private evaluateBinaryExpression(node: TSNode, context: ExpressionEvaluationContext): EvaluationResult {
-    // Get operands using field names
+    // Get operands using field names as defined in the grammar
     const leftNode = this.getChildByField(node, 'left');
     const operatorNode = this.getChildByField(node, 'operator');
     const rightNode = this.getChildByField(node, 'right');
@@ -69,18 +90,23 @@ export class BinaryExpressionEvaluator extends BaseExpressionEvaluator {
     const leftResult = this.evaluateOperand(leftNode, context);
     const rightResult = this.evaluateOperand(rightNode, context);
 
-    if (!leftResult || !rightResult) {
-      return this.createErrorResult(`Failed to evaluate operands`, context);
+    // Check if operands evaluated to error states
+    if (leftResult.type === 'undef' && leftResult.value === null) {
+      return this.createErrorResult(`Failed to evaluate left operand`, context);
+    }
+    if (rightResult.type === 'undef' && rightResult.value === null) {
+      return this.createErrorResult(`Failed to evaluate right operand`, context);
     }
 
     // Perform operation based on operator
     return this.performOperation(operator, leftResult, rightResult, context);
   }
 
-  private evaluateOperand(node: TSNode, context: ExpressionEvaluationContext): EvaluationResult | null {
-    // This will be called by the main ExpressionEvaluatorRegistry
-    // For now, we'll handle simple cases directly
-    
+  private evaluateOperand(node: TSNode, context: ExpressionEvaluationContext): EvaluationResult {
+    // This method will be patched by the ExpressionEvaluatorRegistry
+    // to use the registry's evaluate method for proper delegation
+
+    // Fallback implementation for direct usage (should not be reached when patched)
     if (node.type === 'number') {
       const value = parseFloat(node.text);
       return {
@@ -90,18 +116,36 @@ export class BinaryExpressionEvaluator extends BaseExpressionEvaluator {
     }
 
     if (node.type === 'identifier') {
-      return context.getVariable(node.text) || {
+      return context.getVariable(node.text) ?? {
         value: null,
         type: 'undef'
       };
     }
 
-    // For complex expressions, we need the main evaluator
-    // This is a placeholder - will be properly implemented in the registry
+    // For complex expressions, return a default result
+    // This should not be reached when the registry patches this method
     return {
-      value: 0,
-      type: 'number'
+      value: null,
+      type: 'undef'
     };
+  }
+
+  /**
+   * Evaluate single-value expression by delegating to its child
+   */
+  private evaluateSingleValueExpression(node: TSNode, context: ExpressionEvaluationContext): EvaluationResult {
+    // For single-value expressions, delegate to the first child
+    if (node.childCount === 1) {
+      const child = node.child(0);
+      if (child) {
+        const result = this.evaluateOperand(child, context);
+        // The evaluateOperand method now always returns a result, never null
+        return result;
+      }
+    }
+
+    // If no child or multiple children, return error
+    return this.createErrorResult(`Single-value expression has unexpected structure: ${node.childCount} children`, context);
   }
 
   private performOperation(
@@ -110,7 +154,7 @@ export class BinaryExpressionEvaluator extends BaseExpressionEvaluator {
     right: EvaluationResult,
     context: ExpressionEvaluationContext
   ): EvaluationResult {
-    
+
     switch (operator) {
       // Arithmetic operators
       case '+':
@@ -159,7 +203,7 @@ export class BinaryExpressionEvaluator extends BaseExpressionEvaluator {
         type: 'number'
       };
     }
-    
+
     // String concatenation
     if (left.type === 'string' || right.type === 'string') {
       return {

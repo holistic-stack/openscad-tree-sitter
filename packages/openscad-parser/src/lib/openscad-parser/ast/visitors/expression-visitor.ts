@@ -57,7 +57,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
   constructor(source: string, errorHandler: ErrorHandler) {
     super(source, errorHandler);
-    this.functionCallVisitor = new FunctionCallVisitor(source, errorHandler);
+    this.functionCallVisitor = new FunctionCallVisitor(this, errorHandler);
     this.binaryExpressionVisitor = new BinaryExpressionVisitor(
       this,
       errorHandler
@@ -224,12 +224,10 @@ export class ExpressionVisitor extends BaseASTVisitor {
         return this.visitIdentifier(node);
 
       case 'function_call':
-      case 'accessor_expression':
-        // Convert function call to expression node for expression contexts
+        // Handle function calls
         const functionCallResult = this.functionCallVisitor.visit(node);
         if (functionCallResult && functionCallResult.type === 'function_call') {
-          const functionCall = functionCallResult as ast.FunctionCallNode;
-          // Create an expression wrapper for the function call
+          const functionCall = functionCallResult;
           return {
             type: 'expression',
             expressionType: 'function_call',
@@ -240,8 +238,47 @@ export class ExpressionVisitor extends BaseASTVisitor {
         }
         return null;
 
+      case 'accessor_expression':
+        // Handle accessor expressions (which can be function calls, literals, or identifiers)
+        const accessorResult = this.functionCallVisitor.visit(node);
+        if (accessorResult) {
+          // If it's a function call, wrap it as an expression
+          if (accessorResult.type === 'function_call') {
+            const functionCall = accessorResult;
+            return {
+              type: 'expression',
+              expressionType: 'function_call',
+              name: functionCall.name,
+              arguments: functionCall.arguments,
+              location: functionCall.location,
+            } as ast.ExpressionNode;
+          }
+          // If it's already an expression (literal, identifier), return it directly
+          if (accessorResult.type === 'expression') {
+            return accessorResult as ast.ExpressionNode;
+          }
+        }
+
+        // If the function call visitor returns null, handle the child directly
+        // This happens when the accessor_expression contains a primary_expression (literal)
+        if (node.namedChildCount === 1) {
+          const child = node.namedChild(0);
+          if (child) {
+            this.errorHandler.logInfo(
+              `[ExpressionVisitor.dispatchSpecificExpression] FunctionCallVisitor returned null for accessor_expression, processing child: ${child.type}`,
+              'ExpressionVisitor.dispatchSpecificExpression',
+              child
+            );
+            return this.dispatchSpecificExpression(child);
+          }
+        }
+        return null;
+
       case 'vector_expression':
         return this.visitVectorExpression(node);
+
+      case 'array_literal':
+        return this.visitArrayExpression(node);
 
       case 'index_expression':
         return this.visitIndexExpression(node);
@@ -275,6 +312,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
       case 'parenthesized_expression':
         return this.visitParenthesizedExpression(node);
+
+      case 'primary_expression':
+        return this.visitPrimaryExpression(node);
 
       default:
         this.errorHandler.handleError(
@@ -457,10 +497,10 @@ export class ExpressionVisitor extends BaseASTVisitor {
   /**
    * Visit an identifier node (variable reference)
    * @param node The identifier node to visit
-   * @returns The identifier AST node or null if the node cannot be processed
+   * @returns The variable reference AST node or null if the node cannot be processed
    * @private
    */
-  private visitIdentifier(node: TSNode): ast.IdentifierNode | null {
+  private visitIdentifier(node: TSNode): ast.VariableNode | null {
     this.errorHandler.logInfo(
       `[ExpressionVisitor.visitIdentifier] Processing identifier: ${node.text.substring(0,50)}`,
       'ExpressionVisitor.visitIdentifier',
@@ -477,12 +517,13 @@ export class ExpressionVisitor extends BaseASTVisitor {
       return null;
     }
 
+    // In expressions, identifiers are variable references
     return {
       type: 'expression',
-      expressionType: 'identifier',
+      expressionType: 'variable',
       name,
       location: getLocation(node),
-    } as ast.IdentifierNode;
+    } as ast.VariableNode;
   }
 
   /**
@@ -499,6 +540,46 @@ export class ExpressionVisitor extends BaseASTVisitor {
     );
     // TODO: Implement parsing of vector elements
     return null;
+  }
+
+  /**
+   * Visit an array expression node (e.g., [1, 2, 3])
+   * @param node The array expression node to visit
+   * @returns The array expression AST node or null if the node cannot be processed
+   * @private
+   */
+  private visitArrayExpression(node: TSNode): ast.ArrayExpressionNode | null {
+    this.errorHandler.logInfo(
+      `[ExpressionVisitor.visitArrayExpression] Processing array expression: ${node.text.substring(0,50)}`,
+      'ExpressionVisitor.visitArrayExpression',
+      node
+    );
+
+    // Parse array elements
+    const items: ast.ExpressionNode[] = [];
+
+    for (let i = 0; i < node.namedChildCount; i++) {
+      const elementNode = node.namedChild(i);
+      if (elementNode) {
+        const elementAST = this.visitExpression(elementNode);
+        if (elementAST) {
+          items.push(elementAST);
+        } else {
+          this.errorHandler.logWarning(
+            `Failed to parse array element at index ${i}: ${elementNode.text}`,
+            'ExpressionVisitor.visitArrayExpression',
+            elementNode
+          );
+        }
+      }
+    }
+
+    return {
+      type: 'expression',
+      expressionType: 'array',
+      items,
+      location: getLocation(node),
+    } as ast.ArrayExpressionNode;
   }
 
   /**
@@ -564,6 +645,69 @@ export class ExpressionVisitor extends BaseASTVisitor {
     return null;
   }
   // --- End of new stub methods ---
+
+  /**
+   * Visit an accessor expression node (function calls, variable access)
+   * @param node The accessor expression node to visit
+   * @returns The AST node or null if the node cannot be processed
+   */
+  visitAccessorExpression(node: TSNode): ast.ASTNode | null {
+    this.errorHandler.logInfo(
+      `[ExpressionVisitor.visitAccessorExpression] Processing accessor expression: ${node.text.substring(0,50)}`,
+      'ExpressionVisitor.visitAccessorExpression',
+      node
+    );
+
+    // First try to delegate to the function call visitor
+    const functionCallResult = this.functionCallVisitor.visitAccessorExpression(node);
+    if (functionCallResult) {
+      return functionCallResult;
+    }
+
+    // If the function call visitor returns null, handle the child directly
+    // This happens when the accessor_expression contains a primary_expression (literal)
+    if (node.namedChildCount === 1) {
+      const child = node.namedChild(0);
+      if (child) {
+        this.errorHandler.logInfo(
+          `[ExpressionVisitor.visitAccessorExpression] FunctionCallVisitor returned null, processing child: ${child.type}`,
+          'ExpressionVisitor.visitAccessorExpression',
+          child
+        );
+        return this.dispatchSpecificExpression(child);
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Visit a primary expression node (literals, identifiers)
+   * @param node The primary expression node to visit
+   * @returns The expression node or null if the node cannot be processed
+   */
+  visitPrimaryExpression(node: TSNode): ast.ExpressionNode | null {
+    this.errorHandler.logInfo(
+      `[ExpressionVisitor.visitPrimaryExpression] Processing primary expression: ${node.text.substring(0,50)}`,
+      'ExpressionVisitor.visitPrimaryExpression',
+      node
+    );
+
+    // Primary expressions typically contain a single child that is the actual value
+    if (node.namedChildCount === 1) {
+      const child = node.namedChild(0);
+      if (child) {
+        const result = this.dispatchSpecificExpression(child);
+        // Only return if it's an ExpressionNode
+        if (result && result.type === 'expression') {
+          return result;
+        }
+      }
+    }
+
+    // If no child or multiple children, try to handle as literal
+    return this.visitLiteral(node);
+  }
 
   /**
    * Create an AST node for a function (required by BaseASTVisitor)

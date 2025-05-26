@@ -115,14 +115,63 @@ describe('TransformVisitor', () => {
 
     it('should parse translate(5) /* single number */ cylinder(h=10, r=1);', () => {
       const code = 'translate(5) cylinder(h=10, r=1);';
+      console.log(`\n=== DEBUG: Testing translate(5) ===`);
+      console.log(`Code: ${code}`);
+
       // Update the visitor with the current code being tested
       visitor = new TransformVisitor(code, undefined, errorHandler);
       const transformCstNode = getTransformCstNode(code, 'translate');
+
+      console.log(`CST node found: ${transformCstNode !== null}`);
+      if (transformCstNode) {
+        console.log(`CST node type: ${transformCstNode.type}`);
+        console.log(`CST node text: ${transformCstNode.text}`);
+      }
+
       expect(
         transformCstNode,
         `CST node for 'translate' not found in: "${code}"`
       ).not.toBeNull();
       if (!transformCstNode) return;
+
+      // Debug: Let's examine the CST structure for translate(5)
+      console.log('\n=== DEBUG: CST structure for translate(5) ===');
+      console.log(`Transform node: type=${transformCstNode.type}, text="${transformCstNode.text}"`);
+      console.log(`Transform node children count: ${transformCstNode.childCount}`);
+
+      // Check all children of the transform node
+      for (let i = 0; i < transformCstNode.childCount; i++) {
+        const child = transformCstNode.child(i);
+        if (child) {
+          console.log(`  Transform child ${i}: type=${child.type}, text="${child.text}", isNamed=${child.isNamed}`);
+        }
+      }
+
+      const argsNode = transformCstNode.childForFieldName('arguments');
+      if (argsNode) {
+        console.log(`Arguments node: type=${argsNode.type}, text="${argsNode.text}"`);
+        console.log(`Arguments node namedChildCount: ${argsNode.namedChildCount}`);
+        console.log(`Arguments node childCount: ${argsNode.childCount}`);
+
+        // Check all children (including non-named)
+        for (let i = 0; i < argsNode.childCount; i++) {
+          const child = argsNode.child(i);
+          if (child) {
+            console.log(`  Child ${i}: type=${child.type}, text="${child.text}", isNamed=${child.isNamed}`);
+          }
+        }
+
+        // Check only named children
+        for (let i = 0; i < argsNode.namedChildCount; i++) {
+          const namedChild = argsNode.namedChild(i);
+          if (namedChild) {
+            console.log(`  Named child ${i}: type=${namedChild.type}, text="${namedChild.text}", isNamed=${namedChild.isNamed}`);
+          }
+        }
+      } else {
+        console.log('No arguments node found');
+      }
+      console.log('=== END DEBUG ===\n');
 
       const resultNode = visitor.visitModuleInstantiation(
         transformCstNode

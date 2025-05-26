@@ -1,12 +1,11 @@
 /**
  * @file Expression Evaluator Interface
- * 
+ *
  * Defines the interface for evaluating different types of expressions.
  * Uses the Strategy pattern to allow different evaluation approaches.
  */
 
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
 import { ExpressionEvaluationContext, EvaluationResult } from './expression-evaluation-context';
 
 /**
@@ -151,15 +150,16 @@ export class LiteralEvaluator extends BaseExpressionEvaluator {
     let result: EvaluationResult;
 
     switch (node.type) {
-      case 'number':
+      case 'number': {
         const numValue = parseFloat(node.text);
         result = {
           value: isNaN(numValue) ? 0 : numValue,
           type: 'number'
         };
         break;
+      }
 
-      case 'string':
+      case 'string': {
         // Remove quotes from string literals
         let stringValue = node.text;
         if (stringValue.startsWith('"') && stringValue.endsWith('"')) {
@@ -170,6 +170,7 @@ export class LiteralEvaluator extends BaseExpressionEvaluator {
           type: 'string'
         };
         break;
+      }
 
       case 'boolean':
       case 'true':
@@ -217,7 +218,7 @@ export class IdentifierEvaluator extends BaseExpressionEvaluator {
   evaluate(node: TSNode, context: ExpressionEvaluationContext): EvaluationResult {
     const variableName = node.text;
     const variable = context.getVariable(variableName);
-    
+
     if (variable) {
       return variable;
     }
@@ -229,3 +230,5 @@ export class IdentifierEvaluator extends BaseExpressionEvaluator {
     };
   }
 }
+
+
