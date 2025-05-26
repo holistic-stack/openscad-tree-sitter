@@ -3,7 +3,7 @@
  * @module openscad-parser/error-handling/strategies/type-mismatch-strategy
  */
 
-import { ParserError, ErrorCode, Severity, type ErrorContext } from '../types/error-types.ts';
+import { ParserError, ErrorCode } from '../types/error-types.ts';
 import { BaseRecoveryStrategy } from './recovery-strategy.ts';
 
 /**

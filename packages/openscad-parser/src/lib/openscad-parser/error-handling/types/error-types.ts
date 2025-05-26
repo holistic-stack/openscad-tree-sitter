@@ -118,7 +118,7 @@ export class ParserError extends Error {
    * @returns Formatted error message with context
    */
   getFormattedMessage(): string {
-    const { line, column, source } = this.context;
+    const { line, column } = this.context;
     const location = line !== undefined && column !== undefined
       ? `[${line}:${column}]`
       : '';

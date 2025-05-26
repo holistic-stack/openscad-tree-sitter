@@ -13,7 +13,6 @@ const __dirname = dirname(__filename);
 export async function setupParser(): Promise<Parser> {
   // Initialize the parser
   await Parser.init({
-    // @ts-expect-error - web-tree-sitter types are incorrect
     locateFile: (_wasm: string, _scriptDirectory: string) => {
       // Try to find the wasm file in the expected location
       const wasmPath = join(

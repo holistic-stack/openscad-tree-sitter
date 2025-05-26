@@ -14,7 +14,7 @@ describe('Cursor Utils Integration', () => {
   });
 
   afterEach(() => {
-    if (parser && parser.isInitialized) {
+    if (parser?.isInitialized) {
       parser.dispose();
     }
   });
@@ -45,7 +45,7 @@ describe('Cursor Utils Integration', () => {
       );
       try {
         fs.writeFileSync(logFilePath, '');
-      } catch (e) {
+      } catch (_e) {
         /* ensure file is clear or created */
       }
       const log = (message: string) =>
@@ -138,7 +138,9 @@ describe('Cursor Utils Integration', () => {
       while (
         cursor.nodeType !== 'module_instantiation' &&
         cursor.gotoParent()
-      ) {}
+      ) {
+        // Continue traversing up the tree
+      }
       expect(cursor.nodeType).toBe('module_instantiation');
 
       cursor.gotoFirstChild();

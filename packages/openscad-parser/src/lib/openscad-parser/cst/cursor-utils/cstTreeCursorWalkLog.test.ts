@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { cstTreeCursorWalkLog } from './cstTreeCursorWalkLog';
 import { EnhancedOpenscadParser } from '../../enhanced-parser';
 import { TreeCursor } from 'web-tree-sitter';
-import path from 'path';
+
 
 describe('cstTreeCursorWalkLog', () => {
   let parser: EnhancedOpenscadParser;

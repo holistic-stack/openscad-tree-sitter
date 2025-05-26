@@ -3,7 +3,7 @@
  * @module openscad-parser/error-handling/strategies/unknown-identifier-strategy
  */
 
-import { ParserError, ErrorCode, Severity, type ErrorContext } from '../types/error-types.ts';
+import { ParserError, ErrorCode } from '../types/error-types.ts';
 import { BaseRecoveryStrategy } from './recovery-strategy.ts';
 
 interface IdentifierSuggestion {
@@ -111,7 +111,7 @@ export class UnknownIdentifierStrategy extends BaseRecoveryStrategy {
 
     for (const pattern of patterns) {
       const match = message.match(pattern);
-      if (match && match[1]) {
+      if (match?.[1]) {
         return match[1];
       }
     }
@@ -130,7 +130,7 @@ export class UnknownIdentifierStrategy extends BaseRecoveryStrategy {
     const scopesToCheck = [scopeKey, ''];
 
     for (const scope of scopesToCheck) {
-      const identifiers = this.scopedIdentifiers.get(scope) || [];
+      const identifiers = this.scopedIdentifiers.get(scope) ?? [];
 
       for (const id of identifiers) {
         const [type, idName] = id.split(':', 2);
@@ -140,7 +140,7 @@ export class UnknownIdentifierStrategy extends BaseRecoveryStrategy {
           suggestions.push({
             name: idName,
             distance,
-            type: type as any
+            type: type as 'variable' | 'function' | 'module'
           });
         }
       }
@@ -201,7 +201,7 @@ export class UnknownIdentifierStrategy extends BaseRecoveryStrategy {
 
     // Find the exact position of the identifier in the line
     const lineStart = this.getLineStartPosition(code, lineNumber);
-    const lineEnd = lineStart + lineContent.length;
+
     const position = lineStart + (column - 1);
 
     // Get the surrounding text to ensure we're matching the full identifier

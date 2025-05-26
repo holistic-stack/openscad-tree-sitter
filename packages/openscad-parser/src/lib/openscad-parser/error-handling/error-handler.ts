@@ -247,7 +247,7 @@ export class ErrorHandler {
    * @param context - Optional context information
    * @param node - Optional tree-sitter node for additional context
    */
-  logInfo(message: string, context?: string, node?: any): void {
+  logInfo(message: string, _context?: string, _node?: any): void {
     this.logger.info(message);
   }
 
@@ -257,7 +257,7 @@ export class ErrorHandler {
    * @param context - Optional context information
    * @param node - Optional tree-sitter node for additional context
    */
-  logDebug(message: string, context?: string, node?: any): void {
+  logDebug(message: string, _context?: string, _node?: any): void {
     this.logger.debug(message);
   }
 
@@ -267,7 +267,7 @@ export class ErrorHandler {
    * @param context - Optional context information
    * @param node - Optional tree-sitter node for additional context
    */
-  logWarning(message: string, context?: string, node?: any): void {
+  logWarning(message: string, _context?: string, _node?: any): void {
     this.logger.warn(message);
   }
 
@@ -277,7 +277,7 @@ export class ErrorHandler {
    * @param context - Optional context information
    * @param node - Optional tree-sitter node for additional context
    */
-  logError(message: string, context?: string, node?: any): void {
+  logError(message: string, _context?: string, _node?: any): void {
     this.logger.error(message);
   }
 

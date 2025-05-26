@@ -7,7 +7,7 @@ import { ErrorHandler } from '../../../../error-handling';
 import { EnhancedOpenscadParser } from '../../../../enhanced-parser';
 
 // Helper function to get a Tree-sitter node for an expression
-function getExpressionNode(parser: EnhancedOpenscadParser, code: string): TSNode | null {
+function _getExpressionNode(parser: EnhancedOpenscadParser, code: string): TSNode | null {
   const tree = parser.parse(code);
   if (!tree) return null;
 
@@ -41,7 +41,7 @@ describe('BinaryExpressionVisitor', () => {
   let parser: EnhancedOpenscadParser;
   let errorHandler: ErrorHandler;
   let parentExpressionVisitor: ExpressionVisitor;
-  let visitor: BinaryExpressionVisitor;
+  let _visitor: BinaryExpressionVisitor;
 
   beforeEach(async () => {
     parser = new EnhancedOpenscadParser();
@@ -49,7 +49,7 @@ describe('BinaryExpressionVisitor', () => {
 
     errorHandler = new ErrorHandler();
     parentExpressionVisitor = new ExpressionVisitor('dummy source', errorHandler);
-    visitor = new BinaryExpressionVisitor(parentExpressionVisitor, errorHandler);
+    _visitor = new BinaryExpressionVisitor(parentExpressionVisitor, errorHandler);
   });
 
   afterEach(() => {

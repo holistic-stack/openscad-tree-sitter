@@ -13,7 +13,7 @@ import {
  * @returns A ParameterValue object
  */
 function convertExtractedValueToParameterValue(
-  value: ExtractedParameter | string | number | boolean | any[]
+  value: ExtractedParameter | string | number | boolean | unknown[]
 ): ast.ParameterValue {
   // Handle primitive types directly
   if (typeof value === 'number') {
@@ -107,7 +107,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
    * @param source The source code
    * @param errorHandler The error handler instance (optional for backward compatibility)
    */
-  constructor(protected source: string, protected errorHandler?: any) {}
+  constructor(protected source: string, protected errorHandler?: { logInfo(message: string, context?: string, node?: unknown): void; logDebug(message: string, context?: string, node?: unknown): void; logWarning(message: string, context?: string, node?: unknown): void; logError(message: string, context?: string, node?: unknown): void; handleError(error: Error, context?: string, node?: unknown): void }) {}
 
   /**
    * Visit a node and return the corresponding AST node

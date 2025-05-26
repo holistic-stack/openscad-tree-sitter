@@ -513,9 +513,9 @@ export class TransformVisitor extends BaseASTVisitor {
    * @returns The AST node or null if not supported
    */
   protected createASTNodeForFunction(
-    _node: TSNode,
+    node: TSNode,
     functionName: string,
-    _args: ast.Parameter[]
+    args: ast.Parameter[]
   ): ast.ASTNode | null {
     console.log(
       `[TransformVisitor.createASTNodeForFunction] Processing function: ${functionName}`

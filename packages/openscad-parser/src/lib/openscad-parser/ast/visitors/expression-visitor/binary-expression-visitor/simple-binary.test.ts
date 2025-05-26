@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { Node as TSNode } from 'web-tree-sitter';
 
 import { BinaryExpressionVisitor } from './binary-expression-visitor';
 import { ExpressionVisitor } from '../../expression-visitor';

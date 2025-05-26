@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { EnhancedOpenscadParser } from './enhanced-parser';
-import { ParserError, SyntaxError } from './ast/errors';
+
 
 describe('OpenscadParser Error Handling', () => {
   let parser: EnhancedOpenscadParser;

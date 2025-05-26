@@ -11,7 +11,7 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { EnhancedOpenscadParser } from './enhanced-parser';
-import { ChangeTracker } from './ast/changes/change-tracker';
+
 
 describe('Incremental Parsing', () => {
   let parser: EnhancedOpenscadParser;
@@ -87,7 +87,7 @@ describe('Incremental Parsing', () => {
   it('should handle multiple incremental updates', () => {
     // Initial code
     const initialCode = 'cube(10);';
-    const initialTree = parser.parseCST(initialCode);
+    const _initialTree = parser.parseCST(initialCode);
 
     // First update: change size from 10 to 20
     const firstModifiedCode = 'cube(20);';
@@ -136,7 +136,7 @@ describe('Incremental Parsing', () => {
       }
     `;
 
-    const initialTree = parser.parseCST(initialCode);
+    const _initialTree = parser.parseCST(initialCode);
 
     // Modified code - add a new statement
     const modifiedCode = `cube(10);

@@ -89,7 +89,7 @@ describe('ExpressionVisitor', () => {
     });
 
     it('should handle comparison binary expressions', async () => {
-      const code = 'x > 5;';
+      const _code = 'x > 5;';
 
       // Mock the necessary methods
       vi.spyOn(visitor as any, 'createExpressionNode').mockImplementation(
@@ -165,7 +165,7 @@ describe('ExpressionVisitor', () => {
     });
 
     it('should handle logical binary expressions', async () => {
-      const code = 'true || false;';
+      const _code = 'true || false;';
 
       // Mock the necessary methods
       vi.spyOn(visitor as any, 'createExpressionNode').mockImplementation(
@@ -243,7 +243,7 @@ describe('ExpressionVisitor', () => {
 
   describe('visitUnaryExpression', () => {
     it('should handle negation unary expressions', async () => {
-      const code = '-5;';
+      const _code = '-5;';
 
       // Mock the necessary methods
       vi.spyOn(visitor as any, 'createExpressionNode').mockImplementation(
@@ -303,7 +303,7 @@ describe('ExpressionVisitor', () => {
     });
 
     it('should handle logical not unary expressions', async () => {
-      const code = '!true;';
+      const _code = '!true;';
 
       // Mock the necessary methods
       vi.spyOn(visitor as any, 'createExpressionNode').mockImplementation(
@@ -365,7 +365,7 @@ describe('ExpressionVisitor', () => {
 
   describe('visitConditionalExpression', () => {
     it('should handle ternary conditional expressions', async () => {
-      const code = 'x > 5 ? 10 : 20;';
+      const _code = 'x > 5 ? 10 : 20;';
 
       // Mock the necessary methods
       vi.spyOn(visitor as any, 'createExpressionNode').mockImplementation(
@@ -628,7 +628,7 @@ describe('ExpressionVisitor', () => {
   });
 
   // Helper function to find a binary expression node in the tree
-  function findBinaryExpressionNode(node: TSNode): TSNode | null {
+  function _findBinaryExpressionNode(node: TSNode): TSNode | null {
     if (node.type === 'binary_expression') {
       return node;
     }
@@ -637,7 +637,7 @@ describe('ExpressionVisitor', () => {
       const child = node.child(i);
       if (!child) continue;
 
-      const result = findBinaryExpressionNode(child);
+      const result = _findBinaryExpressionNode(child);
       if (result) {
         return result;
       }

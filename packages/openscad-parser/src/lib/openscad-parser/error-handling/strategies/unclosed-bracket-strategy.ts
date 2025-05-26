@@ -3,7 +3,7 @@
  * @module openscad-parser/error-handling/strategies/unclosed-bracket-strategy
  */
 
-import { ParserError, ErrorCode, Severity } from '../types/error-types.ts';
+import { ParserError, ErrorCode } from '../types/error-types.ts';
 import { BaseRecoveryStrategy } from './recovery-strategy.ts';
 
 type BracketType = 'PAREN' | 'BRACKET' | 'BRACE';
@@ -69,7 +69,7 @@ export class UnclosedBracketStrategy extends BaseRecoveryStrategy {
         result += nonBraces[i].close;
       }
       // Add braces on new lines
-      for (const bracket of braces) {
+      for (const _bracket of braces) {
         result += '\n}';
       }
       return result;

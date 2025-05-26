@@ -66,7 +66,7 @@ export class MissingSemicolonStrategy extends BaseRecoveryStrategy {
    * @param error - The error being recovered from
    * @returns A description of the recovery action
    */
-  getRecoverySuggestion(error: ParserError): string {
+  getRecoverySuggestion(_error: ParserError): string {
     return 'Insert missing semicolon';
   }
 }

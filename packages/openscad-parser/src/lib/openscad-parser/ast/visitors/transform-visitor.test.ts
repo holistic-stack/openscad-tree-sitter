@@ -1,10 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { Node as TSNode } from 'web-tree-sitter';
 import { EnhancedOpenscadParser } from '../../enhanced-parser';
-import * as ast from '../ast-types';
 import { TransformVisitor } from './transform-visitor';
 import { extractArguments } from '../../ast/extractors/argument-extractor';
-import { getLocation } from '../utils/location-utils';
 import { ErrorHandler } from '../../error-handling';
 
 describe('TransformVisitor', () => {

@@ -513,7 +513,7 @@ describe('CSGVisitor', () => {
 });
 
 // Helper function to find a node of a specific type
-function findNodeOfType(node: TSNode, type: string): TSNode | null {
+function _findNodeOfType(node: TSNode, type: string): TSNode | null {
   // For test cases, create a mock node
   if (type === 'module_instantiation' && node.text.includes('difference()')) {
     return {
@@ -606,7 +606,7 @@ function findNodeOfType(node: TSNode, type: string): TSNode | null {
   if (node.type === 'statement' && type === 'module_instantiation') {
     const expressionStatement = node.childForFieldName('expression_statement');
     if (expressionStatement) {
-      return findNodeOfType(expressionStatement, type);
+      return _findNodeOfType(expressionStatement, type);
     }
   }
 
@@ -614,7 +614,7 @@ function findNodeOfType(node: TSNode, type: string): TSNode | null {
     const child = node.child(i);
     if (!child) continue;
 
-    const result = findNodeOfType(child, type);
+    const result = _findNodeOfType(child, type);
     if (result) {
       return result;
     }

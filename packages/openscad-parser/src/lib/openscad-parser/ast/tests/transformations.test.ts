@@ -155,7 +155,7 @@ describe('Transformation AST Generation', () => {
         expect(colorNode.c).toBe('red');
       } else {
         // If neither property exists, fail the test
-        expect(colorNode.c || colorNode.color).toBeDefined();
+        expect(colorNode.c ?? colorNode.color).toBeDefined();
       }
       expect(colorNode.children).toBeDefined();
       // Skip child node checks since children array might be empty
@@ -177,7 +177,7 @@ describe('Transformation AST Generation', () => {
         expect(typeof colorNode.c).toBe('string');
       } else {
         // If neither property exists, fail the test
-        expect(colorNode.c || colorNode.color).toBeDefined();
+        expect(colorNode.c ?? colorNode.color).toBeDefined();
       }
       expect(colorNode.children).toBeDefined();
       // Skip child node checks since children array might be empty
@@ -260,7 +260,7 @@ describe('Transformation AST Generation', () => {
         expect(typeof offsetNode.r).toBe('number');
       } else {
         // If neither property exists, fail the test
-        expect(offsetNode.r || offsetNode.radius).toBeDefined();
+        expect(offsetNode.r ?? offsetNode.radius).toBeDefined();
       }
       // For now, we'll just check that the node has the right type
       expect(offsetNode.children).toBeDefined();

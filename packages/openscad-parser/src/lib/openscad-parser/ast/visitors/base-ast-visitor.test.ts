@@ -532,7 +532,7 @@ function _findNodeOfType(node: TSNode, type: string): TSNode | null {
     const child = node.child(i);
     if (!child) continue;
 
-    const result = findNodeOfType(child, type);
+    const result = _findNodeOfType(child, type);
     if (result) {
       return result;
     }

@@ -10,6 +10,7 @@ import { IExpressionEvaluator, LiteralEvaluator, IdentifierEvaluator } from './e
 import { BinaryExpressionEvaluator } from './binary-expression-evaluator';
 import { ExpressionEvaluationContext, EvaluationResult } from './expression-evaluation-context';
 import { ErrorHandler } from '../../error-handling';
+import * as ast from '../ast-types';
 
 /**
  * Registry for managing and dispatching expression evaluators
@@ -101,7 +102,7 @@ export class ExpressionEvaluatorRegistry {
     // Set variables in context
     for (const [name, value] of Object.entries(variables)) {
       context.setVariable(name, {
-        value,
+        value: value as ast.ParameterValue,
         type: this.inferType(value)
       });
     }

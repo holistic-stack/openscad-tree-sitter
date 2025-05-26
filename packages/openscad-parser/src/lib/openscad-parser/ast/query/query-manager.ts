@@ -82,7 +82,7 @@ export class QueryManager {
     // Get or create the query
     let query = this.queryMap.get(queryString);
     if (!query) {
-      query = this.language.query(queryString);
+      query = (this.language as { query(queryString: string): Query }).query(queryString);
       if (query) {
         this.queryMap.set(queryString, query);
       }
@@ -176,7 +176,7 @@ export class QueryManager {
     // Get or create the query
     let query = this.queryMap.get(queryString);
     if (!query) {
-      query = this.language.query(queryString);
+      query = (this.language as { query(queryString: string): Query }).query(queryString);
       if (query) {
         this.queryMap.set(queryString, query);
       }

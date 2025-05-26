@@ -578,7 +578,7 @@ export function extractValue(valueNode: TSNode): ast.Value | null {
       // If no named children worked, try all children
       for (let i = 0; i < valueNode.childCount; i++) {
         const child = valueNode.child(i);
-        if (child && child.isNamed) {
+        if (child?.isNamed) {
           console.log(
             `[extractValue] Trying unnamed child ${i}: type=${child.type}, text='${child.text}'`
           );

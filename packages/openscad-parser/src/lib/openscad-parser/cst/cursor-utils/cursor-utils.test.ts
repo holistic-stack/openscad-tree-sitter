@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
+import { describe, it, expect, afterEach, beforeEach } from 'vitest';
 import { EnhancedOpenscadParser } from '../../enhanced-parser';
 import * as cursorUtils from './cursor-utils';
 import { cstTreeCursorWalkLog } from './cstTreeCursorWalkLog';

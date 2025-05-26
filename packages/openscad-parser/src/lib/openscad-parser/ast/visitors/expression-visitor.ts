@@ -16,9 +16,7 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 import { BaseASTVisitor } from './base-ast-visitor';
 import { getLocation } from '../utils/location-utils';
-import { findDescendantOfType } from '../utils/node-utils';
 // extractArguments is not used in this file
-import { extractValue } from '../extractors/value-extractor';
 import { FunctionCallVisitor } from './expression-visitor/function-call-visitor';
 import { BinaryExpressionVisitor } from './expression-visitor/binary-expression-visitor/binary-expression-visitor';
 import { UnaryExpressionVisitor } from './expression-visitor/unary-expression-visitor/unary-expression-visitor';
@@ -77,12 +75,46 @@ export class ExpressionVisitor extends BaseASTVisitor {
   }
 
   /**
+   * Safe logging helper that checks if errorHandler exists
+   */
+  private safeLog(level: 'info' | 'debug' | 'warning' | 'error', message: string, context?: string, node?: unknown): void {
+    if (this.errorHandler) {
+      switch (level) {
+        case 'info':
+          this.errorHandler.logInfo(message, context, node);
+          break;
+        case 'debug':
+          this.errorHandler.logDebug(message, context, node);
+          break;
+        case 'warning':
+          this.errorHandler.logWarning(message, context, node);
+          break;
+        case 'error':
+          this.errorHandler.logError(message, context, node);
+          break;
+      }
+    }
+  }
+
+  /**
+   * Safe error handling helper that checks if errorHandler exists
+   */
+  private safeHandleError(error: Error, context?: string, node?: unknown): void {
+    if (this.errorHandler?.handleError) {
+      this.errorHandler.handleError(error, context, node);
+    } else {
+      throw error;
+    }
+  }
+
+  /**
    * Create an expression node from a CST node
    * @param node The CST node representing the expression
    * @returns The expression AST node or null if the node cannot be processed
    */
   createExpressionNode(node: TSNode): ast.ExpressionNode | null {
-    this.errorHandler.logInfo(
+    this.safeLog(
+      'info',
       `[ExpressionVisitor.createExpressionNode] Creating expression for node type: ${
         node.type
       }, text: ${node.text.substring(0, 50)}`,
@@ -92,7 +124,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
     switch (node.type) {
       case 'binary_expression':
-        this.errorHandler.logWarning(
+        this.safeLog(
+          'warning',
           'BinaryExpressionVisitor is ANTLR-based and not yet fully integrated for Tree-sitter. Returning null.',
           'ExpressionVisitor.createExpressionNode',
           node
@@ -100,7 +133,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
         // return this.binaryExpressionVisitor.visit(node); // ANTLR visitor, not compatible
         return null;
       case 'unary_expression':
-        this.errorHandler.logWarning(
+        this.safeLog(
+          'warning',
           'UnaryExpressionVisitor is ANTLR-based and not yet fully integrated for Tree-sitter. Returning null.',
           'ExpressionVisitor.createExpressionNode',
           node
@@ -108,7 +142,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
         // return this.unaryExpressionVisitor.visit(node); // ANTLR visitor, not compatible
         return null;
       case 'conditional_expression':
-        this.errorHandler.logWarning(
+        this.safeLog(
+          'warning',
           'ConditionalExpressionVisitor is ANTLR-based and not yet fully integrated for Tree-sitter. Returning null.',
           'ExpressionVisitor.createExpressionNode',
           node
@@ -116,7 +151,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
         // return this.conditionalExpressionVisitor.visit(node); // ANTLR visitor, not compatible
         return null;
       case 'parenthesized_expression':
-        this.errorHandler.logWarning(
+        this.safeLog(
+          'warning',
           'ParenthesizedExpressionVisitor is ANTLR-based and not yet fully integrated for Tree-sitter. Returning null.',
           'ExpressionVisitor.createExpressionNode',
           node
@@ -141,7 +177,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
       // TODO: Add cases for other expression types (literals, identifiers, etc.)
       // For now, we attempt to use the generic visitExpression for other types
       default:
-        this.errorHandler.logInfo(
+        this.safeLog(
+          'info',
           `[ExpressionVisitor.createExpressionNode] Defaulting to visitExpression for type: ${node.type}`,
           'ExpressionVisitor.createExpressionNode',
           node
@@ -158,7 +195,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
    */
   visitExpression(node: TSNode): ast.ExpressionNode | null {
     // Debug: Log the node structure
-    this.errorHandler.logInfo(
+    this.safeLog(
+      'info',
       `[ExpressionVisitor.visitExpression] Input node type: "${node.type}", text: "${node.text.substring(0, 50)}", childCount: ${node.childCount}, namedChildCount: ${node.namedChildCount}`,
       'ExpressionVisitor.visitExpression',
       node
@@ -166,7 +204,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
     // If the node itself is a specific expression type, use it directly
     if (node.type !== 'expression') {
-      this.errorHandler.logInfo(
+      this.safeLog(
+        'info',
         `[ExpressionVisitor.visitExpression] Using node directly as it's not a generic expression wrapper: "${node.type}"`,
         'ExpressionVisitor.visitExpression',
         node
@@ -176,10 +215,10 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
     // An "expression" node in the grammar might be a wrapper.
     // We often need to look at its first named child to find the actual specific expression type.
-    const specificExpressionNode = node.namedChild(0) || node.child(0);
+    const specificExpressionNode = node.namedChild(0) ?? node.child(0);
 
     if (!specificExpressionNode) {
-      this.errorHandler.handleError(
+      this.safeHandleError(
         new Error(`No specific expression node found within CST node: ${node.text.substring(0,100)}`),
         'ExpressionVisitor.visitExpression',
         node
@@ -188,13 +227,15 @@ export class ExpressionVisitor extends BaseASTVisitor {
     }
 
     // Debug: Log detailed child node information
-    this.errorHandler.logInfo(
+    this.safeLog(
+      'info',
       `[ExpressionVisitor.visitExpression] Child node details: type="${specificExpressionNode.type}", text="${specificExpressionNode.text}", isNamed=${specificExpressionNode.isNamed}, childCount=${specificExpressionNode.childCount}`,
       'ExpressionVisitor.visitExpression',
       specificExpressionNode
     );
 
-    this.errorHandler.logInfo(
+    this.safeLog(
+      'info',
       `[ExpressionVisitor.visitExpression] Dispatching based on specific expression type: "${specificExpressionNode.type}", text: "${specificExpressionNode.text.substring(0, 50)}"`,
       'ExpressionVisitor.visitExpression',
       specificExpressionNode
@@ -266,7 +307,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
         if (node.namedChildCount === 1) {
           const child = node.namedChild(0);
           if (child) {
-            this.errorHandler.logInfo(
+            this.safeLog(
+              'info',
               `[ExpressionVisitor.dispatchSpecificExpression] FunctionCallVisitor returned null for accessor_expression, processing child: ${child.type}`,
               'ExpressionVisitor.dispatchSpecificExpression',
               child
@@ -320,7 +362,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
         return this.visitPrimaryExpression(node);
 
       default:
-        this.errorHandler.handleError(
+        this.safeHandleError(
           new Error(
             `Unsupported specific expression type "${node.type}" in dispatchSpecificExpression. Text: ${node.text.substring(0,100)}`
           ),
@@ -337,7 +379,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @returns The binary expression AST node or null if the node cannot be processed
    */
   visitBinaryExpression(node: TSNode): ast.BinaryExpressionNode | null {
-    this.errorHandler.logInfo(
+    this.safeLog(
+      'info',
       `[ExpressionVisitor.visitBinaryExpression] Processing binary expression: ${node.text.substring(
         0,
         50
@@ -356,7 +399,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @returns The unary expression AST node or null if the node cannot be processed
    */
   visitUnaryExpression(node: TSNode): ast.UnaryExpressionNode | null {
-    this.errorHandler.logInfo(
+    this.safeLog(
+      'info',
       `[ExpressionVisitor.visitUnaryExpression] Processing unary expression: ${node.text.substring(
         0,
         50
@@ -377,7 +421,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
   visitConditionalExpression(
     node: TSNode
   ): ast.ConditionalExpressionNode | null {
-    this.errorHandler.logInfo(
+    this.safeLog(
+      'info',
       `[ExpressionVisitor.visitConditionalExpression] Processing conditional expression: ${node.text.substring(
         0,
         50
@@ -396,7 +441,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @returns The expression AST node or null if the node cannot be processed
    */
   visitParenthesizedExpression(node: TSNode): ast.ExpressionNode | null {
-    this.errorHandler.logInfo(
+    this.safeLog(
+      'info',
       `[ExpressionVisitor.visitParenthesizedExpression] Processing parenthesized expression: ${node.text.substring(
         0,
         50
@@ -416,7 +462,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @private
    */
   private visitLiteral(node: TSNode): ast.LiteralNode | null {
-    this.errorHandler.logInfo(
+    this.safeLog(
+      'info',
       `[ExpressionVisitor.visitLiteral] Processing literal: type="${node.type}", text="${node.text.substring(0,50)}"`,
       'ExpressionVisitor.visitLiteral',
       node
@@ -430,7 +477,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
       case 'number': {
         const nodeText = node.text.trim();
         if (!nodeText || nodeText.length === 0) {
-          this.errorHandler.logWarning(
+          this.safeLog(
+            'warning',
             `Empty number literal node: "${node.text}"`,
             'ExpressionVisitor.visitLiteral',
             node
@@ -440,7 +488,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
         const numValue = parseFloat(nodeText);
         if (isNaN(numValue)) {
-          this.errorHandler.logWarning(
+          this.safeLog(
+            'warning',
             `Invalid number literal: "${nodeText}" (original: "${node.text}")`,
             'ExpressionVisitor.visitLiteral',
             node
@@ -448,7 +497,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
           return null;
         }
         value = numValue;
-        this.errorHandler.logInfo(
+        this.safeLog(
+          'info',
           `[ExpressionVisitor.visitLiteral] Successfully parsed number: ${numValue}`,
           'ExpressionVisitor.visitLiteral',
           node
@@ -486,7 +536,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
       }
 
       default:
-        this.errorHandler.handleError(
+        this.safeHandleError(
           new Error(`Unsupported literal type: ${node.type}`),
           'ExpressionVisitor.visitLiteral',
           node
@@ -509,7 +559,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @private
    */
   private visitIdentifier(node: TSNode): ast.VariableNode | null {
-    this.errorHandler.logInfo(
+    this.safeLog(
+      'info',
       `[ExpressionVisitor.visitIdentifier] Processing identifier: ${node.text.substring(0,50)}`,
       'ExpressionVisitor.visitIdentifier',
       node
@@ -517,7 +568,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
     const name = node.text;
     if (!name || name.trim() === '') {
-      this.errorHandler.handleError(
+      this.safeHandleError(
         new Error(`Empty identifier name`),
         'ExpressionVisitor.visitIdentifier',
         node
@@ -541,7 +592,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @private
    */
   private visitVectorExpression(node: TSNode): ast.VectorExpressionNode | null {
-    this.errorHandler.logWarning(
+    this.safeLog(
+      'warning',
       `[ExpressionVisitor.visitVectorExpression] Stub: Processing vector expression: ${node.text.substring(0,50)}. Implementation pending.`,
       'ExpressionVisitor.visitVectorExpression',
       node
@@ -557,7 +609,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @private
    */
   private visitArrayExpression(node: TSNode): ast.ArrayExpressionNode | null {
-    this.errorHandler.logInfo(
+    this.safeLog(
+      'info',
       `[ExpressionVisitor.visitArrayExpression] Processing array expression: ${node.text.substring(0,50)}`,
       'ExpressionVisitor.visitArrayExpression',
       node
@@ -573,7 +626,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
         if (elementAST) {
           items.push(elementAST);
         } else {
-          this.errorHandler.logWarning(
+          this.safeLog(
+            'warning',
             `Failed to parse array element at index ${i}: ${elementNode.text}`,
             'ExpressionVisitor.visitArrayExpression',
             elementNode
@@ -597,7 +651,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @private
    */
   private visitIndexExpression(node: TSNode): ast.IndexExpressionNode | null {
-    this.errorHandler.logWarning(
+    this.safeLog(
+      'warning',
       `[ExpressionVisitor.visitIndexExpression] Stub: Processing index expression: ${node.text.substring(0,50)}. Implementation pending.`,
       'ExpressionVisitor.visitIndexExpression',
       node
@@ -613,7 +668,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @private
    */
   private visitRangeExpression(node: TSNode): ast.RangeExpressionNode | null {
-    this.errorHandler.logWarning(
+    this.safeLog(
+      'warning',
       `[ExpressionVisitor.visitRangeExpression] Stub: Processing range expression: ${node.text.substring(0,50)}. Implementation pending.`,
       'ExpressionVisitor.visitRangeExpression',
       node
@@ -628,7 +684,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @returns The let expression AST node or null if the node cannot be processed
    */
   visitLetExpression(node: TSNode): ast.LetExpressionNode | null {
-    this.errorHandler.logWarning(
+    this.safeLog(
+      'warning',
       `[ExpressionVisitor.visitLetExpression] Stub: Processing let expression: ${node.text.substring(0,50)}. Implementation pending.`,
       'ExpressionVisitor.visitLetExpression',
       node
@@ -644,7 +701,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @private
    */
   private visitListComprehensionExpression(node: TSNode): ast.ListComprehensionExpressionNode | null {
-    this.errorHandler.logWarning(
+    this.safeLog(
+      'warning',
       `[ExpressionVisitor.visitListComprehensionExpression] Stub: Processing list comprehension: ${node.text.substring(0,50)}. Implementation pending.`,
       'ExpressionVisitor.visitListComprehensionExpression',
       node
@@ -660,7 +718,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @returns The AST node or null if the node cannot be processed
    */
   visitAccessorExpression(node: TSNode): ast.ASTNode | null {
-    this.errorHandler.logInfo(
+    this.safeLog(
+      'info',
       `[ExpressionVisitor.visitAccessorExpression] Processing accessor expression: ${node.text.substring(0,50)}`,
       'ExpressionVisitor.visitAccessorExpression',
       node
@@ -677,7 +736,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
     if (node.namedChildCount === 1) {
       const child = node.namedChild(0);
       if (child) {
-        this.errorHandler.logInfo(
+        this.safeLog(
+          'info',
           `[ExpressionVisitor.visitAccessorExpression] FunctionCallVisitor returned null, processing child: ${child.type}`,
           'ExpressionVisitor.visitAccessorExpression',
           child
@@ -695,7 +755,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @returns The expression node or null if the node cannot be processed
    */
   visitPrimaryExpression(node: TSNode): ast.ExpressionNode | null {
-    this.errorHandler.logInfo(
+    this.safeLog(
+      'info',
       `[ExpressionVisitor.visitPrimaryExpression] Processing primary expression: ${node.text.substring(0,50)}`,
       'ExpressionVisitor.visitPrimaryExpression',
       node

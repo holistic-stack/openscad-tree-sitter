@@ -2419,7 +2419,7 @@ describe('PrimitiveVisitor', () => {
 });
 
 // Helper function to find a node of a specific type
-function findNodeOfType(node: TSNode, type: string): TSNode | null {
+function _findNodeOfType(node: TSNode, type: string): TSNode | null {
   if (node.type === type) {
     return node;
   }
@@ -2447,7 +2447,7 @@ function findNodeOfType(node: TSNode, type: string): TSNode | null {
   if (node.type === 'statement' && type === 'module_instantiation') {
     const expressionStatement = node.childForFieldName('expression_statement');
     if (expressionStatement) {
-      return findNodeOfType(expressionStatement, type);
+      return _findNodeOfType(expressionStatement, type);
     }
   }
 
@@ -2455,7 +2455,7 @@ function findNodeOfType(node: TSNode, type: string): TSNode | null {
     const child = node.child(i);
     if (!child) continue;
 
-    const result = findNodeOfType(child, type);
+    const result = _findNodeOfType(child, type);
     if (result) {
       return result;
     }

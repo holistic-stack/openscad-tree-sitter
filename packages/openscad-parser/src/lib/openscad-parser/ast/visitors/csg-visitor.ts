@@ -20,7 +20,7 @@ export class CSGVisitor extends BaseASTVisitor {
    * Mock children for testing purposes
    * This property is only used in tests and should not be used in production code
    */
-  mockChildren: Record<string, any[]> = {};
+  mockChildren: Record<string, ast.ASTNode[]> = {};
 
   /**
    * Create an AST node for a specific function
@@ -30,9 +30,9 @@ export class CSGVisitor extends BaseASTVisitor {
    * @returns The AST node or null if the function is not supported
    */
   protected createASTNodeForFunction(
-    _node: TSNode,
+    node: TSNode,
     functionName: string,
-    _args: ast.Parameter[]
+    args: ast.Parameter[]
   ): ast.ASTNode | null {
     console.log(
       `[CSGVisitor.createASTNodeForFunction] Processing function: ${functionName}`

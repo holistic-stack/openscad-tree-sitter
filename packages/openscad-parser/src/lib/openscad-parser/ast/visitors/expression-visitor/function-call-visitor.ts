@@ -32,7 +32,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
    * @param errorHandler The error handler instance
    */
   constructor(
-    private parentVisitor: any | null,
+    private parentVisitor: { visitExpression(node: TSNode): ast.ExpressionNode | null } | null,
     protected errorHandler: ErrorHandler
   ) {
     super('', errorHandler); // Source is not needed for this visitor
@@ -155,7 +155,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
       this.errorHandler.logInfo(
         `[FunctionCallVisitor.visitAccessorExpression] Checking single child: type="${child?.type}", text="${child?.text}"`,
         'FunctionCallVisitor.visitAccessorExpression',
-        child || node
+        child ?? node
       );
 
       // Only treat actual identifier nodes as identifiers, not primary_expressions or other wrappers
@@ -187,7 +187,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
       );
 
       // Create a literal expression node for simple values like 'true', 'false', numbers, etc.
-      let value: any = node.text;
+      let value: ast.ParameterValue = node.text;
 
       // Try to parse as specific types
       if (node.text === 'true') {
@@ -209,7 +209,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
     }
 
     // Delegate to the parent visitor to handle identifier as variable reference
-    return this.parentVisitor.visitExpression(identifierNode);
+    return this.parentVisitor?.visitExpression(identifierNode) ?? null;
   }
 
   /**
@@ -554,44 +554,37 @@ export class FunctionCallVisitor extends BaseASTVisitor {
   }
 
   /**
-   * Create a mock node for testing
-   * @param text The text of the node
-   * @param type The type of the node
-   * @returns A mock TSNode
+   * Create a simple literal node from a TSNode
+   * @param node The TSNode to convert
+   * @returns A literal AST node
    */
-  private createMockNode(text: string, type: string): TSNode {
+  private createSimpleLiteralFromNode(node: TSNode): ast.LiteralNode {
+    // Parse the value based on the node text
+    const text = node.text.trim();
+    let value: ast.ParameterValue;
+
+    // Try to parse as number first
+    const numValue = parseFloat(text);
+    if (!isNaN(numValue)) {
+      value = numValue;
+    } else if (text === 'true') {
+      value = true;
+    } else if (text === 'false') {
+      value = false;
+    } else if (text === 'undef') {
+      value = null;
+    } else if (text.startsWith('"') && text.endsWith('"')) {
+      value = text.slice(1, -1); // Remove quotes
+    } else {
+      value = text; // Default to string
+    }
+
     return {
-      text,
-      type,
-      childCount: 0,
-      namedChildCount: 0,
-      startIndex: 0,
-      endIndex: text.length,
-      startPosition: { row: 0, column: 0 },
-      endPosition: { row: 0, column: text.length },
-      parent: null,
-      children: [],
-      namedChildren: [],
-      childForFieldName: () => null,
-      child: () => null,
-      namedChild: () => null,
-      firstChild: null,
-      lastChild: null,
-      firstNamedChild: null,
-      lastNamedChild: null,
-      nextSibling: null,
-      previousSibling: null,
-      nextNamedSibling: null,
-      previousNamedSibling: null,
-      hasError: false,
-      hasChanges: false,
-      isMissing: false,
-      toString: () => text,
-      walk: () => ({ gotoFirstChild: () => false } as any),
-      descendantForIndex: () => null,
-      descendantsOfType: () => [],
-      fieldNameForChild: () => null,
-    } as any;
+      type: 'expression',
+      expressionType: 'literal',
+      value,
+      location: getLocation(node),
+    } as ast.LiteralNode;
   }
 
   /**

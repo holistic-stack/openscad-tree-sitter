@@ -81,14 +81,16 @@ export function extractValue(node: TSNode): ast.ParameterValue {
   );
 
   switch (node.type) {
-    case 'expression':
+    case 'expression': {
       console.log(
         `[extractValue] Unwrapping 'expression', calling extractValue on child: type='${
           node.child(0)?.type
         }', text='${node.child(0)?.text.substring(0, 50)}'`
       );
       // Unwrap the expression and extract from its first child
-      return node.childCount > 0 ? extractValue(node.child(0)!) : undefined;
+      const firstChild = node.child(0);
+      return node.childCount > 0 && firstChild ? extractValue(firstChild) : undefined;
+    }
     case 'number': {
       const numValue = parseFloat(node.text);
       console.log(`[extractValue] Extracted number: ${numValue}`);
@@ -237,15 +239,8 @@ export function extractValue(node: TSNode): ast.ParameterValue {
           console.log(
             `[extractValue] Using enhanced extraction for complex ${node.type}`
           );
-          // Create a simple error handler for this extraction
-          const tempErrorHandler = {
-            logInfo: (msg: string) => console.log(`[TempErrorHandler] ${msg}`),
-            logWarning: (msg: string) => console.warn(`[TempErrorHandler] ${msg}`),
-            handleError: (error: Error) => console.error(`[TempErrorHandler] ${error.message}`),
-            getErrors: () => [],
-            createParserError: (msg: string, _context?: unknown) => new Error(msg),
-            report: (error: Error) => console.error(`[TempErrorHandler] ${error.message}`)
-          } as ErrorHandler;
+          // Create a minimal error handler for this extraction
+          const tempErrorHandler = new ErrorHandler();
 
           const enhancedResult = extractValueEnhanced(node, tempErrorHandler);
           if (enhancedResult !== undefined) {
@@ -427,7 +422,7 @@ export function extractValue(node: TSNode): ast.ParameterValue {
       // For positional arguments, look for the actual expression inside
       for (let i = 0; i < node.childCount; i++) {
         const child = node.child(i);
-        if (child?.type !== ',' && child?.type !== '(' && child?.type !== ')' && child?.type !== '=') {
+        if (child && child.type !== ',' && child.type !== '(' && child.type !== ')' && child.type !== '=') {
           console.log(
             `[extractValue] Found expression child in argument: type='${child.type}', text='${child.text}'`
           );
@@ -448,7 +443,7 @@ export function extractValue(node: TSNode): ast.ParameterValue {
       // Arguments node is a container - look for the actual expression inside
       for (let i = 0; i < node.childCount; i++) {
         const child = node.child(i);
-        if (child?.type !== ',' && child?.type !== '(' && child?.type !== ')') {
+        if (child && child.type !== ',' && child.type !== '(' && child.type !== ')') {
           console.log(
             `[extractValue] Found expression child in arguments: type='${child.type}', text='${child.text}'`
           );

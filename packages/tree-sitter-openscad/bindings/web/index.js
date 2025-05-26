@@ -24,5 +24,5 @@ module.exports = {
 
 // Include node types information if available
 try {
-  module.exports.nodeTypeInfo = require("../../src/node-types.json");
+  module.exports.nodeTypeInfo = require('../../src/node-types.json');
 } catch (_) {}

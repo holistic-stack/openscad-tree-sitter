@@ -1,20 +1,18 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { EnhancedOpenscadParser } from '../../enhanced-parser';
 import { ExpressionVisitor } from './expression-visitor';
-import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
 import { ErrorHandler } from '../../error-handling';
 
 describe('ExpressionVisitor Debug', () => {
   let parser: EnhancedOpenscadParser;
   let errorHandler: ErrorHandler;
-  let visitor: ExpressionVisitor;
+  let _visitor: ExpressionVisitor;
 
   beforeEach(async () => {
     parser = new EnhancedOpenscadParser();
     await parser.init();
     errorHandler = new ErrorHandler();
-    visitor = new ExpressionVisitor('', errorHandler);
+    _visitor = new ExpressionVisitor('', errorHandler);
   });
 
   afterEach(() => {

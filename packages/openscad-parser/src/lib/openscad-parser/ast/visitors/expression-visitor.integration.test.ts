@@ -1092,7 +1092,7 @@ describe('ExpressionVisitor Integration', () => {
   });
 
   // Helper function to find a node of a specific type in the tree
-  function findNodeOfType(node: TSNode, type: string): TSNode | null {
+  function _findNodeOfType(node: TSNode, type: string): TSNode | null {
     if (node.type === type) {
       return node;
     }
@@ -1101,7 +1101,7 @@ describe('ExpressionVisitor Integration', () => {
       const child = node.child(i);
       if (!child) continue;
 
-      const result = findNodeOfType(child, type);
+      const result = _findNodeOfType(child, type);
       if (result) {
         return result;
       }

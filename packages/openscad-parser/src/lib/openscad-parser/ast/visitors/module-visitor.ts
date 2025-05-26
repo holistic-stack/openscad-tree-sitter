@@ -26,9 +26,9 @@ export class ModuleVisitor extends BaseASTVisitor {
    * @returns The AST node or null if the function is not supported
    */
   protected createASTNodeForFunction(
-    _node: TSNode,
+    node: TSNode,
     functionName: string,
-    _args: ast.Parameter[]
+    args: ast.Parameter[]
   ): ast.ASTNode | null {
     console.log(
       `[ModuleVisitor.createASTNodeForFunction] Processing function: ${functionName}`

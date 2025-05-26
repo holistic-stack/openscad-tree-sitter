@@ -14,7 +14,7 @@ import { ErrorHandler } from '../../error-handling';
 // Create a mock language object for testing
 const mockLanguage = {
   query: (queryString: string) => ({
-    captures: (node: any) => {
+    captures: (_node: any) => {
       // Return mock captures for testing
       if (queryString.includes('accessor_expression')) {
         return [
@@ -117,7 +117,7 @@ describe('QueryVisitor', () => {
     const accessorExpressions = nodes.filter(
       node => node.type === 'accessor_expression'
     );
-    const arguments_ = nodes.filter(node => node.type === 'arguments');
+    const _arguments = nodes.filter(node => node.type === 'arguments');
 
     // We should have at least one accessor_expression
     expect(accessorExpressions.length).toBeGreaterThanOrEqual(1);
