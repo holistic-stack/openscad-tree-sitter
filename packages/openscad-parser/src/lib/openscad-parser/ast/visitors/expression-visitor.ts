@@ -197,7 +197,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
     // Debug: Log the node structure
     this.safeLog(
       'info',
-      `[ExpressionVisitor.visitExpression] Input node type: "${node.type}", text: "${node.text.substring(0, 50)}", childCount: ${node.childCount}, namedChildCount: ${node.namedChildCount}`,
+      `[ExpressionVisitor.visitExpression] Input node type: "${node.type}", text: "${node.text.substring(0, 50)}", childCount: ${node.childCount ?? 'undefined'}, namedChildCount: ${node.namedChildCount ?? 'undefined'}`,
       'ExpressionVisitor.visitExpression',
       node
     );
@@ -215,7 +215,16 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
     // An "expression" node in the grammar might be a wrapper.
     // We often need to look at its first named child to find the actual specific expression type.
-    const specificExpressionNode = node.namedChild(0) ?? node.child(0);
+    // Check if the node has the namedChild method (real TSNode) vs mock nodes in tests
+    let specificExpressionNode: TSNode | null = null;
+
+    if (typeof node.namedChild === 'function') {
+      specificExpressionNode = node.namedChild(0);
+    }
+
+    if (!specificExpressionNode && typeof node.child === 'function') {
+      specificExpressionNode = node.child(0);
+    }
 
     if (!specificExpressionNode) {
       this.safeHandleError(
@@ -229,7 +238,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
     // Debug: Log detailed child node information
     this.safeLog(
       'info',
-      `[ExpressionVisitor.visitExpression] Child node details: type="${specificExpressionNode.type}", text="${specificExpressionNode.text}", isNamed=${specificExpressionNode.isNamed}, childCount=${specificExpressionNode.childCount}`,
+      `[ExpressionVisitor.visitExpression] Child node details: type="${specificExpressionNode.type}", text="${specificExpressionNode.text}", isNamed=${specificExpressionNode.isNamed ?? 'undefined'}, childCount=${specificExpressionNode.childCount ?? 'undefined'}`,
       'ExpressionVisitor.visitExpression',
       specificExpressionNode
     );
@@ -347,7 +356,30 @@ export class ExpressionVisitor extends BaseASTVisitor {
       case 'additive_expression':
       case 'multiplicative_expression':
       case 'exponentiation_expression':
-        return this.visitBinaryExpression(node);
+        // Check if this is actually a binary expression (has 3+ children) or just a wrapper (1 child)
+        if (node.childCount >= 3) {
+          // This is a real binary expression with left operand, operator, right operand
+          return this.visitBinaryExpression(node);
+        } else if (node.namedChildCount === 1) {
+          // This is a single-child wrapper node, unwrap it
+          const child = node.namedChild(0);
+          if (child) {
+            this.safeLog(
+              'info',
+              `[ExpressionVisitor.dispatchSpecificExpression] Unwrapping single-child expression hierarchy node: ${node.type} -> ${child.type}`,
+              'ExpressionVisitor.dispatchSpecificExpression',
+              node
+            );
+            return this.dispatchSpecificExpression(child);
+          }
+        }
+        // If it's neither a binary expression nor a single-child wrapper, it's malformed
+        this.safeHandleError(
+          new Error(`Malformed expression hierarchy node: ${node.type} with ${node.childCount} children`),
+          'ExpressionVisitor.dispatchSpecificExpression',
+          node
+        );
+        return null;
 
       case 'unary_expression':
         return this.visitUnaryExpression(node);
@@ -410,7 +442,31 @@ export class ExpressionVisitor extends BaseASTVisitor {
     );
 
     // Delegate to the unary expression visitor
-    return this.unaryExpressionVisitor.visit(node);
+    const result = this.unaryExpressionVisitor.visit(node);
+    if (result) {
+      return result;
+    }
+
+    // If the unary expression visitor returns null, this might be a single-child wrapper node
+    // Try to unwrap it and process the child directly
+    if (node.namedChildCount === 1) {
+      const child = node.namedChild(0);
+      if (child) {
+        this.safeLog(
+          'info',
+          `[ExpressionVisitor.visitUnaryExpression] UnaryExpressionVisitor returned null, unwrapping child: ${child.type}`,
+          'ExpressionVisitor.visitUnaryExpression',
+          node
+        );
+        const childResult = this.visitExpression(child);
+        // Only return if it's an expression node (not a unary expression since that would have been handled above)
+        if (childResult && childResult.type === 'expression') {
+          return childResult as any; // Cast to satisfy return type, but this is actually any expression
+        }
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -432,7 +488,31 @@ export class ExpressionVisitor extends BaseASTVisitor {
     );
 
     // Delegate to the conditional expression visitor
-    return this.conditionalExpressionVisitor.visit(node);
+    const result = this.conditionalExpressionVisitor.visit(node);
+    if (result) {
+      return result;
+    }
+
+    // If the conditional expression visitor returns null, this might be a single-child wrapper node
+    // Try to unwrap it and process the child directly
+    if (node.namedChildCount === 1) {
+      const child = node.namedChild(0);
+      if (child) {
+        this.safeLog(
+          'info',
+          `[ExpressionVisitor.visitConditionalExpression] ConditionalExpressionVisitor returned null, unwrapping child: ${child.type}`,
+          'ExpressionVisitor.visitConditionalExpression',
+          node
+        );
+        const childResult = this.visitExpression(child);
+        // Only return if it's an expression node (not a conditional expression since that would have been handled above)
+        if (childResult && childResult.type === 'expression') {
+          return childResult as any; // Cast to satisfy return type, but this is actually any expression
+        }
+      }
+    }
+
+    return null;
   }
 
   /**

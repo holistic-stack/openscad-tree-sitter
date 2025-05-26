@@ -48,9 +48,21 @@ export class BinaryExpressionVisitor extends BaseASTVisitor {
       this.errorHandler.report(error);
       return null;
     }
-    const leftNode = node.childForFieldName('left');
-    const operatorNode = node.childForFieldName('operator');
-    const rightNode = node.childForFieldName('right');
+
+    // Try field-based access first, then fall back to positional access
+    let leftNode = node.childForFieldName('left');
+    let operatorNode = node.childForFieldName('operator');
+    let rightNode = node.childForFieldName('right');
+
+    // If field-based access fails, use positional access for binary expressions
+    // Binary expressions typically have structure: left_operand operator right_operand
+    if (!leftNode || !operatorNode || !rightNode) {
+      if (node.childCount >= 3) {
+        leftNode = node.child(0);
+        operatorNode = node.child(1);
+        rightNode = node.child(2);
+      }
+    }
 
     if (!leftNode || !operatorNode || !rightNode) {
       // WORKAROUND: Check if this is actually a single expression wrapped in a binary expression node
@@ -65,11 +77,12 @@ export class BinaryExpressionVisitor extends BaseASTVisitor {
           );
           // Delegate back to the parent visitor to handle this as a regular expression
           const result = this.parentVisitor.visitExpression(child);
-          // Return any valid expression result, but only if it's actually a binary expression
+          // If the result is a binary expression, return it as such
           if (result && result.type === 'expression' && 'expressionType' in result && result.expressionType === 'binary') {
             return result as ast.BinaryExpressionNode;
           }
-          // If it's not a binary expression, return null to indicate this isn't a binary expression
+          // If it's not a binary expression, this node is not actually a binary expression
+          // Return null to indicate this visitor cannot handle this node
           return null;
         }
       }

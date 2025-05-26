@@ -3,8 +3,12 @@ import {
   it,
   expect,
   beforeEach,
+  afterEach,
 } from 'vitest';
 import { CompositeVisitor } from './composite-visitor';
+import { PrimitiveVisitor } from './primitive-visitor';
+import { TransformVisitor } from './transform-visitor';
+import { CSGVisitor } from './csg-visitor';
 import { EnhancedOpenscadParser } from '../../enhanced-parser';
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';

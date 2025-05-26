@@ -11,7 +11,7 @@ describe('SimpleBinaryExpressionTest', () => {
   let nodeGenerator: RealNodeGenerator;
   let errorHandler: ErrorHandler;
   let parentExpressionVisitor: ExpressionVisitor;
-  let _visitor: BinaryExpressionVisitor;
+  let visitor: BinaryExpressionVisitor;
 
   beforeEach(async () => {
     parser = new EnhancedOpenscadParser();
@@ -22,7 +22,7 @@ describe('SimpleBinaryExpressionTest', () => {
 
     errorHandler = new ErrorHandler();
     parentExpressionVisitor = new ExpressionVisitor('test source', errorHandler);
-    _visitor = new BinaryExpressionVisitor(parentExpressionVisitor, errorHandler);
+    visitor = new BinaryExpressionVisitor(parentExpressionVisitor, errorHandler);
   });
 
   afterEach(() => {

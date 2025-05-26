@@ -95,7 +95,7 @@ export class UnaryExpressionVisitor extends BaseASTVisitor {
 
     return {
       type: 'expression',
-      expressionType: 'unary',
+      expressionType: 'unary_expression',
       operator: operator as ast.UnaryOperator, // Cast, assuming grammar aligns
       operand: operandAST,
       prefix: true, // OpenSCAD unary operators are always prefix
