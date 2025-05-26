@@ -217,7 +217,9 @@ describe("OpenSCADParser", () => {
 
 - **Build Commands (Plain Text Output)**:
   - `pnpm build`: Build all packages
-  - `pnpm build:grammar`: Build only the tree-sitter-openscad package
+  - `pnpm build:grammar`: Use pre-built WASM file for tree-sitter-openscad (no native compilation)
+  - `pnpm build:grammar:native`: Build tree-sitter-openscad with native compilation (requires C++ toolchain)
+  - `pnpm build:grammar:wasm`: Build only WASM file for tree-sitter-openscad (requires tree-sitter CLI)
   - `pnpm build:parser`: Build only the openscad-parser package
   - `pnpm build:editor`: Build only the openscad-editor package
   - `pnpm build:demo`: Build only the openscad-demo package
@@ -255,7 +257,9 @@ describe("OpenSCADParser", () => {
 
 #### tree-sitter-openscad (Plain Text Output)
 
-- `pnpm build:grammar`: Build the grammar and generate the parser
+- `pnpm build:grammar`: Use pre-built WASM file (no native compilation)
+- `pnpm build:grammar:native`: Build with native compilation (requires C++ toolchain)
+- `pnpm build:grammar:wasm`: Build only WASM file (requires tree-sitter CLI)
 - `pnpm test:grammar`: Run the grammar tests
 - `pnpm parse`: Parse an OpenSCAD file
 - `pnpm playground`: Open the Tree-sitter playground

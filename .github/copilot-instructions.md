@@ -146,7 +146,9 @@ These commands operate on all packages and **use plain text output by default**:
 These commands target individual packages.
 
 **Build (Plain Text Output):**
-- **`pnpm build:grammar`**: Build `tree-sitter-openscad` (plain text output).
+- **`pnpm build:grammar`**: Use pre-built WASM file for `tree-sitter-openscad` (no native compilation).
+- **`pnpm build:grammar:native`**: Build `tree-sitter-openscad` with native compilation (requires C++ toolchain).
+- **`pnpm build:grammar:wasm`**: Build only WASM file for `tree-sitter-openscad` (requires tree-sitter CLI).
 - **`pnpm build:parser`**: Build `openscad-parser` (plain text output).
 - **`pnpm build:editor`**: Build `openscad-editor` (plain text output).
 - **`pnpm build:demo`**: Build `openscad-demo` (plain text output).

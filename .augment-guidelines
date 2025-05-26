@@ -297,12 +297,15 @@ These commands operate on all packages within the monorepo and **use plain text 
 These commands target individual packages. Replace `<package-name>` with the actual package name (e.g., `tree-sitter-openscad`, `openscad-parser`, `openscad-editor`, `openscad-demo`).
 
 **Build:**
-- **`pnpm build:grammar`**: Builds the `tree-sitter-openscad` grammar package.
+- **`pnpm build:grammar`**: Uses pre-built WASM file for `tree-sitter-openscad` (no native compilation).
+- **`pnpm build:grammar:native`**: Builds `tree-sitter-openscad` with native compilation (requires C++ toolchain).
+- **`pnpm build:grammar:wasm`**: Builds only WASM file for `tree-sitter-openscad` (requires tree-sitter CLI).
 - **`pnpm build:parser`**: Builds the `openscad-parser` TypeScript package.
 - **`pnpm build:editor`**: Builds the `openscad-editor` React component package.
 - **`pnpm build:demo`**: Builds the `openscad-demo` application.
   - *When to use*: When you only need to build a specific package.
   - *Example*: `pnpm build:parser`
+  - *Note*: Use `build:grammar:native` only for grammar development requiring native toolchain setup.
 
 **Test:**
 - **`pnpm test:grammar`**: Tests `tree-sitter-openscad`.

@@ -7,6 +7,32 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
+        "command": "echo 'Grammar package uses pre-built WASM file. Use build:native or build:wasm for local development.'",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "build:native": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "tree-sitter generate",
+          "tree-sitter build --wasm",
+          "node-gyp rebuild"
+        ],
+        "cwd": "{projectRoot}",
+        "parallel": false
+      },
+      "outputs": [
+        "{projectRoot}/src/parser.c",
+        "{projectRoot}/src/grammar.json",
+        "{projectRoot}/src/node-types.json",
+        "{projectRoot}/tree-sitter-openscad.wasm",
+        "{projectRoot}/build"
+      ]
+    },
+    "build:wasm": {
+      "executor": "nx:run-commands",
+      "options": {
         "commands": [
           "tree-sitter generate",
           "tree-sitter build --wasm"

@@ -5,7 +5,9 @@
   "private": true,
   "scripts": {
     "build": "env-cmd -e plain nx run-many --target=build --all",
-    "build:grammar": "env-cmd -e plain nx build tree-sitter-openscad",
+    "build:grammar": "echo 'Grammar package uses pre-built WASM file. Use build:grammar:native for local development.'",
+    "build:grammar:native": "env-cmd -e plain nx build:native tree-sitter-openscad",
+    "build:grammar:wasm": "env-cmd -e plain nx build:wasm tree-sitter-openscad",
     "build:parser": "env-cmd -e plain nx build openscad-parser",
     "build:editor": "env-cmd -e plain nx build openscad-editor",
     "build:demo": "env-cmd -e plain nx build openscad-demo",
