@@ -357,9 +357,6 @@ importers:
 
   packages/tree-sitter-openscad:
     dependencies:
-      node-gyp-build:
-        specifier: ^4.8.0
-        version: 4.8.4
       tree-sitter:
         specifier: 0.22.4
         version: 0.22.4
@@ -379,6 +376,10 @@ importers:
       web-tree-sitter:
         specifier: 0.25.3
         version: 0.25.3
+    optionalDependencies:
+      node-gyp-build:
+        specifier: ^4.8.0
+        version: 4.8.4
 
 packages:
 

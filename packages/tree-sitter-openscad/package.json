@@ -10,7 +10,7 @@
     "build:native": "env-cmd -e plain tree-sitter generate && env-cmd -e plain tree-sitter build --wasm && env-cmd -e plain node-gyp rebuild",
     "build:node": "env-cmd -e plain node-gyp rebuild",
     "build:wasm": "env-cmd -e plain tree-sitter generate && env-cmd -e plain tree-sitter build --wasm",
-    "install": "node-gyp-build",
+    "install": "echo 'Using pre-built WASM file. Native bindings available via node-gyp-build if needed.'",
     "prebuildify": "env-cmd -e plain prebuildify --napi --strip",
     "test": "env-cmd -e plain tree-sitter test",
     "parse": "env-cmd -e plain tree-sitter parse",
@@ -41,7 +41,7 @@
   ],
   "author": "OpenSCAD Community",
   "license": "MIT",
-  "dependencies": {
+  "optionalDependencies": {
     "node-gyp-build": "^4.8.0"
   },
   "devDependencies": {

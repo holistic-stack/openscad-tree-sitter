@@ -10,6 +10,10 @@ This package contains the Tree-sitter grammar definition for OpenSCAD and provid
 
 **For most users**: This package ships with a pre-built WASM file (`tree-sitter-openscad.wasm`) that works out-of-the-box without requiring any native compilation toolchain. The WASM file is automatically used by the `packages/openscad-parser` package.
 
+**✅ No native compilation required during installation**
+**✅ Works on all platforms without C++ toolchain**
+**✅ Fast installation and CI/CD friendly**
+
 ## Native Development Setup
 
 **For grammar developers only**: If you need to modify the grammar or rebuild the parser from source, you'll need to install the native compilation toolchain.
