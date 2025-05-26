@@ -178,7 +178,7 @@ describe('Incremental Parsing', () => {
     expect(cylinderNode).toBeDefined();
     expect((cylinderNode as any).h).toBe(1);
 
-    // The property is named r1 in the implementation
-    expect((cylinderNode as any).r1).toBe(1);
+    // The property is named r1 in the implementation, and r=2 means radius1=2
+    expect((cylinderNode as any).r1).toBe(2);
   });
 });

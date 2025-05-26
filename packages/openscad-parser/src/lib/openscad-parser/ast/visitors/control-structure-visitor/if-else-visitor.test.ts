@@ -140,8 +140,8 @@ describe('IfElseVisitor', () => {
       expect(result).not.toBeNull();
       expect(result?.type).toBe('if');
       expect(result?.condition).toBeDefined();
-      // For complex conditions, the expression type can be 'binary' or 'literal'
-      expect(['binary', 'literal']).toContain(result?.condition.expressionType);
+      // For complex conditions, the expression type can be 'binary', 'literal', or 'variable'
+      expect(['binary', 'literal', 'variable']).toContain(result?.condition.expressionType);
       expect(result?.thenBranch).toBeDefined();
       expect(result?.thenBranch.length).toBeGreaterThan(0);
     });

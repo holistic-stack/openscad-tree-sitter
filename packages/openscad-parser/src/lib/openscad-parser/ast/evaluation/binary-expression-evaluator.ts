@@ -35,7 +35,23 @@ export class BinaryExpressionEvaluator extends BaseExpressionEvaluator {
   }
 
   canEvaluate(node: TSNode): boolean {
-    return this.supportedTypes.has(node.type);
+    // Support both direct binary expression types and expressions with binary expressionType
+    if (this.supportedTypes.has(node.type)) {
+      return true;
+    }
+    
+    // Also check for expression nodes that might have binary expressionType
+    if (node.type === 'expression') {
+      // Look for binary_expression descendants
+      for (let i = 0; i < node.namedChildCount; i++) {
+        const child = node.namedChild(i);
+        if (child && this.supportedTypes.has(child.type)) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
   }
 
   evaluate(node: TSNode, context: ExpressionEvaluationContext): EvaluationResult {
@@ -53,10 +69,32 @@ export class BinaryExpressionEvaluator extends BaseExpressionEvaluator {
     context.enterRecursion();
 
     try {
-      // Check if this is a real binary expression or a single-value expression
-      const leftNode = this.getChildByField(node, 'left');
-      const operatorNode = this.getChildByField(node, 'operator');
-      const rightNode = this.getChildByField(node, 'right');
+      // Handle both direct binary expressions and expressions with binary expressionType
+      let leftNode, operatorNode, rightNode;
+      
+      if (node.type === 'expression') {
+        // For expression nodes created by the ExpressionVisitor, find the binary expression child
+        for (let i = 0; i < node.namedChildCount; i++) {
+          const child = node.namedChild(i);
+          if (child && this.supportedTypes.has(child.type)) {
+            // Use this child as the binary expression node
+            leftNode = child.namedChild(0);
+            operatorNode = child.namedChild(1);
+            rightNode = child.namedChild(2);
+            break;
+          }
+        }
+      } else {
+        // For direct binary expression nodes
+        leftNode = this.getChildByField(node, 'left');
+        operatorNode = this.getChildByField(node, 'operator');
+        rightNode = this.getChildByField(node, 'right');
+      }
+      
+      // If we couldn't find the nodes using fields, try by index
+      if (!leftNode) leftNode = node.namedChild(0);
+      if (!operatorNode && node.childCount > 1) operatorNode = node.child(1);
+      if (!rightNode) rightNode = node.namedChild(2) || node.namedChild(1);
 
       if (leftNode && operatorNode && rightNode) {
         // Real binary expression

@@ -78,7 +78,7 @@ export class UnaryExpressionVisitor extends BaseASTVisitor {
     const operator = operatorNode.text;
     // Add type guard for ast.UnaryOperator if necessary
 
-    const operandAST = this.parentVisitor.visitExpression(operandNode);
+    const operandAST = this.parentVisitor.dispatchSpecificExpression(operandNode);
 
     if (!operandAST) {
       const error = this.errorHandler.createParserError(

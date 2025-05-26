@@ -8,11 +8,10 @@ import { CSGVisitor } from './visitors/csg-visitor';
 import { ModuleVisitor } from './visitors/module-visitor';
 import { FunctionVisitor } from './visitors/function-visitor';
 import { ControlStructureVisitor } from './visitors/control-structure-visitor';
-// import { ExpressionVisitor } from './visitors/expression-visitor'; // Temporarily commented out due to build issues
-// import { VariableVisitor } from './visitors/variable-visitor'; // Temporarily commented out due to build issues
+import { ExpressionVisitor } from './visitors/expression-visitor';
+import { VariableVisitor } from './visitors/variable-visitor';
 import { QueryVisitor } from './visitors/query-visitor';
-import { ErrorHandler } from '../error-handling'; // Assuming ErrorHandler path
-// Change is not used in this file
+import { ErrorHandler } from '../error-handling';
 
 // This function is not used in this file
 // /**
@@ -60,16 +59,19 @@ export class VisitorASTGenerator {
     // Order matters here - PrimitiveVisitor should be first to handle primitive shapes
     const transformVisitor = new TransformVisitor(this.source, compositeVisitor, this.errorHandler); // Added errorHandler, used this.source
 
+    // Create expression visitor first since other visitors may depend on it
+    const expressionVisitor = new ExpressionVisitor(this.source, this.errorHandler);
+    
     // Add all visitors to the composite visitor
     compositeVisitor['visitors'] = [
-      new PrimitiveVisitor(this.source, this.errorHandler), // Added errorHandler, used this.source
-      transformVisitor, // transformVisitor instance already has errorHandler if its constructor is updated
-      new CSGVisitor(this.source, this.errorHandler), // Added errorHandler, used this.source
-      new ControlStructureVisitor(this.source, this.errorHandler), // Added errorHandler, used this.source
-      // new ExpressionVisitor(this.source, this.errorHandler), // Temporarily commented out due to build issues
-      // new VariableVisitor(this.source, this.errorHandler), // Temporarily commented out due to build issues
-      new ModuleVisitor(this.source, this.errorHandler), // Added errorHandler, used this.source
-      new FunctionVisitor(this.source, this.errorHandler), // Added errorHandler, used this.source
+      new PrimitiveVisitor(this.source, this.errorHandler),
+      transformVisitor, // transformVisitor instance already has errorHandler
+      new CSGVisitor(this.source, this.errorHandler),
+      new ControlStructureVisitor(this.source, this.errorHandler),
+      expressionVisitor,
+      new VariableVisitor(this.source, this.errorHandler),
+      new ModuleVisitor(this.source, this.errorHandler),
+      new FunctionVisitor(this.source, this.errorHandler),
     ];
 
     // Create a query visitor that uses the composite visitor

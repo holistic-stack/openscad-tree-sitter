@@ -74,7 +74,8 @@ export class EnhancedOpenscadParser {
 
       // Check for syntax errors
       if (tree && this.hasErrorNodes(tree.rootNode)) {
-        this.errorHandler.logWarning('Syntax errors found in parsed code');
+        const errorDetails = this.formatSyntaxError(code, tree.rootNode);
+        this.errorHandler.handleError(errorDetails);
       }
 
       return tree;
@@ -196,6 +197,48 @@ export class EnhancedOpenscadParser {
   }
 
   /**
+   * Update the AST incrementally
+   *
+   * This method performs incremental parsing and then generates a new AST
+   * from the updated parse tree.
+   */
+  updateAST(
+    newCode: string,
+    startIndex: number,
+    oldEndIndex: number,
+    newEndIndex: number
+  ): ASTNode[] {
+    try {
+      this.errorHandler.logInfo('Updating AST incrementally...');
+
+      // First update the CST incrementally
+      const updatedTree = this.update(newCode, startIndex, oldEndIndex, newEndIndex);
+
+      if (!updatedTree) {
+        this.errorHandler.logWarning('Failed to update CST, returning empty AST');
+        return [];
+      }
+
+      // Generate new AST from updated CST
+      const errorHandlerAdapter = this.createErrorHandlerAdapter();
+      const astGenerator = new VisitorASTGenerator(
+        updatedTree,
+        newCode,
+        this.language,
+        errorHandlerAdapter
+      );
+
+      const ast = astGenerator.generate();
+
+      this.errorHandler.logInfo(`AST update completed. Generated ${ast.length} top-level nodes.`);
+      return ast;
+    } catch (error) {
+      this.errorHandler.handleError(`Failed to update AST: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
    * Dispose the parser
    */
   dispose(): void {
@@ -236,6 +279,52 @@ export class EnhancedOpenscadParser {
     }
 
     return false;
+  }
+
+  /**
+   * Format a detailed syntax error message with code context
+   */
+  private formatSyntaxError(code: string, rootNode: TreeSitter.Node): string {
+    const errorNode = this.findFirstErrorNode(rootNode);
+    if (!errorNode) {
+      return `Syntax error found in parsed code:\n${code}`;
+    }
+
+    const lines = code.split('\n');
+    const errorLine = errorNode.startPosition.row;
+    const errorColumn = errorNode.startPosition.column;
+
+    let errorMessage = `Syntax error at line ${errorLine + 1}, column ${errorColumn + 1}:\n`;
+
+    // Add the problematic line
+    if (errorLine < lines.length) {
+      errorMessage += `${lines[errorLine]}\n`;
+      // Add pointer to error position
+      errorMessage += ' '.repeat(errorColumn) + '^';
+    }
+
+    return errorMessage;
+  }
+
+  /**
+   * Find the first ERROR node in the tree
+   */
+  private findFirstErrorNode(node: TreeSitter.Node): TreeSitter.Node | null {
+    if (node.type === 'ERROR') {
+      return node;
+    }
+
+    for (let i = 0; i < node.childCount; i++) {
+      const child = node.child(i);
+      if (child) {
+        const errorNode = this.findFirstErrorNode(child);
+        if (errorNode) {
+          return errorNode;
+        }
+      }
+    }
+
+    return null;
   }
 
   /**

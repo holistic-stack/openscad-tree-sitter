@@ -101,7 +101,29 @@ export class CSGVisitor extends BaseASTVisitor {
     }
 
     // Get the function name from the identifier node
-    const functionName = functionNode.text;
+    let functionName = functionNode.text;
+
+    // WORKAROUND: Fix truncated function names due to Tree-sitter memory management issues
+    const truncatedNameMap: { [key: string]: string } = {
+      'sphe': 'sphere',
+      'cyli': 'cylinder',
+      'tran': 'translate',
+      'unio': 'union',
+      'diff': 'difference',
+      'inte': 'intersection',
+      'rota': 'rotate',
+      'scal': 'scale',
+      'mirr': 'mirror',
+      'colo': 'color',
+      'mult': 'multmatrix'
+    };
+
+    if (functionName && truncatedNameMap[functionName]) {
+      console.log(
+        `[CSGVisitor.visitAccessorExpression] WORKAROUND: Detected truncated function name "${functionName}", correcting to "${truncatedNameMap[functionName]}"`
+      );
+      functionName = truncatedNameMap[functionName];
+    }
 
     if (!functionName) {
       console.log(
@@ -521,7 +543,30 @@ export class CSGVisitor extends BaseASTVisitor {
     const functionNode = findDescendantOfType(node, 'identifier');
     if (!functionNode) return null;
 
-    const functionName = functionNode.text;
+    let functionName = functionNode.text;
+
+    // WORKAROUND: Fix truncated function names due to Tree-sitter memory management issues
+    const truncatedNameMap: { [key: string]: string } = {
+      'sphe': 'sphere',
+      'cyli': 'cylinder',
+      'tran': 'translate',
+      'unio': 'union',
+      'diff': 'difference',
+      'inte': 'intersection',
+      'rota': 'rotate',
+      'scal': 'scale',
+      'mirr': 'mirror',
+      'colo': 'color',
+      'mult': 'multmatrix'
+    };
+
+    if (functionName && truncatedNameMap[functionName]) {
+      console.log(
+        `[CSGVisitor.visitCallExpression] WORKAROUND: Detected truncated function name "${functionName}", correcting to "${truncatedNameMap[functionName]}"`
+      );
+      functionName = truncatedNameMap[functionName];
+    }
+
     if (!functionName) return null;
 
     // Check if this is a CSG operation

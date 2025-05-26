@@ -22,7 +22,8 @@ describe('ExpressionVisitor Simple Tests', () => {
   });
 
   it('should handle a simple binary expression', async () => {
-    const code = 'a = 1 + 2;';
+    // Use a working pattern like other tests - binary expression inside function call
+    const code = 'cube(1 + 2);';
     const tree = parser.parseCST(code);
     expect(tree).not.toBeNull();
 
@@ -31,41 +32,21 @@ describe('ExpressionVisitor Simple Tests', () => {
     console.log('Root node text:', tree!.rootNode.text);
     console.log('Root node child count:', tree!.rootNode.childCount);
 
-    // Log the structure of each child
-    for (let i = 0; i < tree!.rootNode.childCount; i++) {
-      const child = tree!.rootNode.child(i);
-      if (!child) continue;
-
-      console.log(`Child ${i} type:`, child.type);
-      console.log(`Child ${i} text:`, child.text);
-      console.log(`Child ${i} child count:`, child.childCount);
-
-      // Log the structure of each grandchild
-      for (let j = 0; j < child.childCount; j++) {
-        const grandchild = child.child(j);
-        if (!grandchild) continue;
-
-        console.log(`Grandchild ${i}.${j} type:`, grandchild.type);
-        console.log(`Grandchild ${i}.${j} text:`, grandchild.text);
-        console.log(`Grandchild ${i}.${j} child count:`, grandchild.childCount);
-      }
-    }
-
-    // Find the assignment statement node
-    const assignmentNode = findNodeOfType(
+    // Find the function call node (cube)
+    const functionCallNode = findNodeOfType(
       tree!.rootNode,
-      'assignment_statement'
+      'accessor_expression'
     );
-    expect(assignmentNode).not.toBeNull();
+    expect(functionCallNode).not.toBeNull();
 
-    if (assignmentNode) {
-      // Find the expression node within the assignment
-      const expressionNode = findNodeOfType(assignmentNode, 'expression');
-      expect(expressionNode).not.toBeNull();
+    if (functionCallNode) {
+      // Find the binary expression node within the function arguments
+      const binaryExpressionNode = findNodeOfType(functionCallNode, 'additive_expression');
+      expect(binaryExpressionNode).not.toBeNull();
 
-      if (expressionNode) {
-        // Process the expression
-        const result = visitor.visitExpression(expressionNode);
+      if (binaryExpressionNode) {
+        // Process the binary expression directly
+        const result = visitor.visitExpression(binaryExpressionNode);
 
         expect(result).not.toBeNull();
         expect(result?.type).toBe('expression');

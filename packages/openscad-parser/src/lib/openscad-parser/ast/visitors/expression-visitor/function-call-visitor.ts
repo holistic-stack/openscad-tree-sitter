@@ -80,7 +80,30 @@ export class FunctionCallVisitor extends BaseASTVisitor {
       return null;
     }
 
-    const functionName = functionNameNode.text;
+    let functionName = functionNameNode.text;
+
+    // WORKAROUND: Fix truncated function names due to Tree-sitter memory management issues
+    const truncatedNameMap: { [key: string]: string } = {
+      'sphe': 'sphere',
+      'cyli': 'cylinder',
+      'tran': 'translate',
+      'unio': 'union',
+      'diff': 'difference',
+      'inte': 'intersection',
+      'rota': 'rotate',
+      'scal': 'scale',
+      'mirr': 'mirror',
+      'colo': 'color',
+      'mult': 'multmatrix'
+    };
+
+    if (functionName && truncatedNameMap[functionName]) {
+      console.log(
+        `[FunctionCallVisitor.visitFunctionCall] WORKAROUND: Detected truncated function name "${functionName}", correcting to "${truncatedNameMap[functionName]}"`
+      );
+      functionName = truncatedNameMap[functionName];
+    }
+
     console.log(
       `[FunctionCallVisitor.visitFunctionCall] Function name: ${functionName}`
     );

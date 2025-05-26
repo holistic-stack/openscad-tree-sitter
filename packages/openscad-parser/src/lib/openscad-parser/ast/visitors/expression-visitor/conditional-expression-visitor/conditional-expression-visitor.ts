@@ -74,7 +74,7 @@ export class ConditionalExpressionVisitor extends BaseASTVisitor {
       return null;
     }
 
-    const conditionAST = this.parentVisitor.visitExpression(conditionNode);
+    const conditionAST = this.parentVisitor.dispatchSpecificExpression(conditionNode);
     if (!conditionAST) {
       const error = this.errorHandler.createParserError(
         `Failed to parse condition in conditional expression.`,
@@ -88,7 +88,7 @@ export class ConditionalExpressionVisitor extends BaseASTVisitor {
       return null;
     }
 
-    const consequenceAST = this.parentVisitor.visitExpression(consequenceNode);
+    const consequenceAST = this.parentVisitor.dispatchSpecificExpression(consequenceNode);
     if (!consequenceAST) {
       const error = this.errorHandler.createParserError(
         `Failed to parse consequence in conditional expression.`,
@@ -102,7 +102,7 @@ export class ConditionalExpressionVisitor extends BaseASTVisitor {
       return null;
     }
 
-    const alternativeAST = this.parentVisitor.visitExpression(alternativeNode);
+    const alternativeAST = this.parentVisitor.dispatchSpecificExpression(alternativeNode);
     if (!alternativeAST) {
       const error = this.errorHandler.createParserError(
         `Failed to parse alternative in conditional expression.`,
@@ -118,7 +118,7 @@ export class ConditionalExpressionVisitor extends BaseASTVisitor {
 
     return {
       type: 'expression',
-      expressionType: 'conditional',
+      expressionType: 'conditional_expression', // Changed from 'conditional' to 'conditional_expression' to match test expectations
       condition: conditionAST,
       thenBranch: consequenceAST,
       elseBranch: alternativeAST,

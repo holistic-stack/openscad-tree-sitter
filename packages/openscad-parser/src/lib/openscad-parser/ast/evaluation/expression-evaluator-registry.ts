@@ -1,208 +1,134 @@
 /**
- * @file Expression Evaluator Registry
- *
- * Central registry for managing expression evaluators.
- * Uses the Strategy pattern to select the appropriate evaluator for each node type.
+ * Expression Evaluator Registry
+ * 
+ * This module provides a central registry for evaluating expressions in OpenSCAD.
+ * It follows the Single Responsibility Principle by focusing only on expression evaluation.
+ * 
+ * @module lib/openscad-parser/ast/evaluation/expression-evaluator-registry
  */
 
-import { Node as TSNode } from 'web-tree-sitter';
-import { IExpressionEvaluator, LiteralEvaluator, IdentifierEvaluator } from './expression-evaluator';
-import { BinaryExpressionEvaluator } from './binary-expression-evaluator';
-import { ExpressionEvaluationContext, EvaluationResult } from './expression-evaluation-context';
-import { ErrorHandler } from '../../error-handling';
 import * as ast from '../ast-types';
+import { ErrorHandler } from '../../error-handling';
+import { evaluateBinaryExpression } from './binary-expression-evaluator/binary-expression-evaluator';
 
 /**
- * Registry for managing and dispatching expression evaluators
- */
-export class ExpressionEvaluatorRegistry {
-  private evaluators: IExpressionEvaluator[] = [];
-  private evaluatorCache: Map<string, IExpressionEvaluator> = new Map();
-
-  constructor(private errorHandler: ErrorHandler) {
-    this.registerDefaultEvaluators();
-  }
-
-  /**
-   * Register an expression evaluator
-   */
-  registerEvaluator(evaluator: IExpressionEvaluator): void {
-    this.evaluators.push(evaluator);
-    // Sort by priority (highest first)
-    this.evaluators.sort((a, b) => b.getPriority() - a.getPriority());
-    // Clear cache when evaluators change
-    this.evaluatorCache.clear();
-  }
-
-  /**
-   * Find the best evaluator for a given node
-   */
-  findEvaluator(node: TSNode): IExpressionEvaluator | null {
-    const nodeType = node.type;
-
-    // Check cache first
-    const cached = this.evaluatorCache.get(nodeType);
-    if (cached?.canEvaluate(node)) {
-      return cached;
-    }
-
-    // Find the best evaluator
-    for (const evaluator of this.evaluators) {
-      if (evaluator.canEvaluate(node)) {
-        this.evaluatorCache.set(nodeType, evaluator);
-        return evaluator;
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * Evaluate an expression node
-   */
-  evaluate(node: TSNode, context: ExpressionEvaluationContext): EvaluationResult {
-    this.errorHandler.logInfo(
-      `[ExpressionEvaluatorRegistry] Evaluating node: ${node.type} "${node.text.substring(0, 50)}"`
-    );
-
-    const evaluator = this.findEvaluator(node);
-    if (!evaluator) {
-      this.errorHandler.logWarning(
-        `No evaluator found for node type: ${node.type}`
-      );
-      return {
-        value: null,
-        type: 'undef'
-      };
-    }
-
-    try {
-      const result = evaluator.evaluate(node, context);
-      this.errorHandler.logInfo(
-        `[ExpressionEvaluatorRegistry] Evaluation result: ${result.type} = ${result.value}`
-      );
-      return result;
-    } catch (error) {
-      this.errorHandler.handleError(
-        new Error(`Failed to evaluate expression: ${error}`)
-      );
-      return {
-        value: null,
-        type: 'undef'
-      };
-    }
-  }
-
-  /**
-   * Evaluate with automatic context creation
-   */
-  evaluateWithContext(node: TSNode, variables: Record<string, unknown> = {}): EvaluationResult {
-    const context = new ExpressionEvaluationContext(this.errorHandler);
-
-    // Set variables in context
-    for (const [name, value] of Object.entries(variables)) {
-      context.setVariable(name, {
-        value: value as ast.ParameterValue,
-        type: this.inferType(value)
-      });
-    }
-
-    return this.evaluate(node, context);
-  }
-
-  /**
-   * Get all registered evaluators
-   */
-  getEvaluators(): IExpressionEvaluator[] {
-    return [...this.evaluators];
-  }
-
-  /**
-   * Clear all caches
-   */
-  clearCaches(): void {
-    this.evaluatorCache.clear();
-  }
-
-  /**
-   * Register default evaluators
-   */
-  private registerDefaultEvaluators(): void {
-    // Register in order of specificity (most specific first)
-    this.registerEvaluator(new LiteralEvaluator());
-    this.registerEvaluator(new IdentifierEvaluator());
-    this.registerEvaluator(new BinaryExpressionEvaluator());
-
-    // Patch evaluators to use this registry
-    this.patchBinaryExpressionEvaluator();
-  }
-
-  /**
-   * Patch the binary expression evaluator to use this registry for operand evaluation
-   */
-  private patchBinaryExpressionEvaluator(): void {
-    const binaryEvaluator = this.evaluators.find(e => e instanceof BinaryExpressionEvaluator) as BinaryExpressionEvaluator;
-    if (binaryEvaluator) {
-      // Override the evaluateOperand method to use this registry
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (binaryEvaluator as any).evaluateOperand = (node: TSNode, context: ExpressionEvaluationContext) => {
-        return this.evaluate(node, context);
-      };
-    }
-  }
-
-
-
-  /**
-   * Infer type from JavaScript value
-   */
-  private inferType(value: unknown): 'number' | 'string' | 'boolean' | 'vector' | 'undef' {
-    if (value === null || value === undefined) {
-      return 'undef';
-    }
-    if (typeof value === 'number') {
-      return 'number';
-    }
-    if (typeof value === 'string') {
-      return 'string';
-    }
-    if (typeof value === 'boolean') {
-      return 'boolean';
-    }
-    if (Array.isArray(value)) {
-      return 'vector';
-    }
-    return 'undef';
-  }
-}
-
-/**
- * Factory function to create a configured expression evaluator registry
- */
-export function createExpressionEvaluatorRegistry(errorHandler: ErrorHandler): ExpressionEvaluatorRegistry {
-  return new ExpressionEvaluatorRegistry(errorHandler);
-}
-
-/**
- * Convenience function to evaluate a simple expression
+ * Evaluates an expression node and returns a value
+ * @param expr The expression node to evaluate
+ * @param errorHandler Optional error handler for logging
+ * @returns The evaluated value or null if evaluation fails
  */
 export function evaluateExpression(
-  node: TSNode,
-  errorHandler: ErrorHandler,
-  variables: Record<string, unknown> = {}
-): EvaluationResult {
-  const registry = createExpressionEvaluatorRegistry(errorHandler);
-  return registry.evaluateWithContext(node, variables);
-}
+  expr: ast.ExpressionNode,
+  errorHandler?: ErrorHandler
+): number | boolean | string | null {
+  if (!expr) return null;
 
-/**
- * Convenience function to evaluate an expression and return just the value
- */
-export function evaluateExpressionValue(
-  node: TSNode,
-  errorHandler: ErrorHandler,
-  variables: Record<string, unknown> = {}
-): unknown {
-  const result = evaluateExpression(node, errorHandler, variables);
-  return result.value;
+  try {
+    // Log the evaluation attempt
+    if (errorHandler) {
+      errorHandler.logInfo(
+        `[evaluateExpression] Evaluating expression: ${expr.expressionType}`,
+        'evaluateExpression'
+      );
+    }
+
+    // Handle different expression types
+    switch (expr.expressionType) {
+      case 'literal': {
+        const literalNode = expr as ast.LiteralNode;
+        return literalNode.value;
+      }
+      case 'binary':
+      case 'binary_expression': {
+        // Use the dedicated binary expression evaluator
+        const binaryExpr = expr as ast.BinaryExpressionNode;
+        const result = evaluateBinaryExpression(binaryExpr, errorHandler);
+        
+        if (errorHandler) {
+          errorHandler.logInfo(
+            `[evaluateExpression] Binary expression evaluation result: ${result}`,
+            'evaluateExpression'
+          );
+        }
+        
+        return result;
+      }
+      case 'unary':
+      case 'unary_expression': {
+        const unaryNode = expr as ast.UnaryExpressionNode;
+        const operandValue = evaluateExpression(unaryNode.operand, errorHandler);
+        
+        if (operandValue === null) {
+          if (errorHandler) {
+            errorHandler.logWarning(
+              `[evaluateExpression] Cannot evaluate unary expression with null operand`,
+              'evaluateExpression'
+            );
+          }
+          return null;
+        }
+        
+        switch (unaryNode.operator) {
+          case '-':
+            if (typeof operandValue === 'number') {
+              return -operandValue;
+            }
+            break;
+          case '!':
+            if (typeof operandValue === 'boolean') {
+              return !operandValue;
+            } else if (typeof operandValue === 'number') {
+              return operandValue === 0;
+            }
+            break;
+          default:
+            if (errorHandler) {
+              errorHandler.logWarning(
+                `[evaluateExpression] Unsupported unary operator: ${unaryNode.operator}`,
+                'evaluateExpression'
+              );
+            }
+            return null;
+        }
+        
+        if (errorHandler) {
+          errorHandler.logWarning(
+            `[evaluateExpression] Failed to evaluate unary expression with operator ${unaryNode.operator} and operand ${operandValue}`,
+            'evaluateExpression'
+          );
+        }
+        return null;
+      }
+      case 'variable': {
+        // Variable references are not yet implemented
+        // In a real implementation, this would look up the variable value in a scope
+        if (errorHandler) {
+          errorHandler.logWarning(
+            `[evaluateExpression] Variable reference evaluation not yet implemented`,
+            'evaluateExpression'
+          );
+        }
+        return null;
+      }
+      default: {
+        // Other expression types are not yet implemented
+        if (errorHandler) {
+          errorHandler.logWarning(
+            `[evaluateExpression] Unsupported expression type: ${expr.expressionType}`,
+            'evaluateExpression'
+          );
+        }
+        return null;
+      }
+    }
+  } catch (error) {
+    // Log any errors that occur during evaluation
+    if (errorHandler) {
+      errorHandler.handleError(
+        error instanceof Error ? error : new Error(String(error)),
+        'evaluateExpression'
+      );
+    }
+    return null;
+  }
 }

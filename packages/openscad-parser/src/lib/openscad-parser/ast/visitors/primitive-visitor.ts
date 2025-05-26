@@ -140,6 +140,30 @@ export class PrimitiveVisitor extends BaseASTVisitor {
           const identifierNode = findDescendantOfType(functionChild, 'identifier');
           if (identifierNode) {
             functionName = identifierNode.text;
+
+            // WORKAROUND: Fix truncated function names due to Tree-sitter memory management issues
+            // This is a temporary fix until the root cause is resolved
+            const truncatedNameMap: { [key: string]: string } = {
+              'sphe': 'sphere',
+              'cyli': 'cylinder',
+              'tran': 'translate',
+              'unio': 'union',
+              'diff': 'difference',
+              'inte': 'intersection',
+              'rota': 'rotate',
+              'scal': 'scale',
+              'mirr': 'mirror',
+              'colo': 'color',
+              'mult': 'multmatrix'
+            };
+
+            if (functionName && truncatedNameMap[functionName]) {
+              console.log(
+                `[PrimitiveVisitor.visitAccessorExpression] WORKAROUND: Detected truncated function name "${functionName}", correcting to "${truncatedNameMap[functionName]}"`
+              );
+              functionName = truncatedNameMap[functionName];
+            }
+
             console.log(
               `[PrimitiveVisitor.visitAccessorExpression] Found function name: ${functionName}`
             );

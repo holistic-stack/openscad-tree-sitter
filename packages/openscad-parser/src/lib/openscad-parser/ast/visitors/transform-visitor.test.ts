@@ -218,7 +218,7 @@ describe('TransformVisitor', () => {
       ) as ast.TranslateNode | null;
       expect(resultNode).not.toBeNull();
       expect(resultNode?.type).toBe('translate');
-      expect(resultNode?.v).toEqual([-5, 10.5, 0]);
+      expect(resultNode?.v).toEqual([-5, 10.5]);
       // Children will be populated with child nodes that are handled by different visitor methods
       // This is expected behavior and doesn't need to be tested here
     });

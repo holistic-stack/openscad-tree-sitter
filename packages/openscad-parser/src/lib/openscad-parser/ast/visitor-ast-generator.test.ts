@@ -17,12 +17,12 @@ const mockErrorHandler = new ErrorHandler();
 describe('VisitorASTGenerator', () => {
   let parser: EnhancedOpenscadParser;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     parser = new EnhancedOpenscadParser();
     await parser.init();
   });
 
-  afterAll(() => {
+  afterEach(() => {
     parser.dispose();
   });
 
@@ -52,7 +52,7 @@ describe('VisitorASTGenerator', () => {
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0].type).toBe('sphere');
 
       // Instead of using the visitor directly, check the properties of the generated AST
       expect(ast[0]).toHaveProperty('type');
@@ -68,7 +68,7 @@ describe('VisitorASTGenerator', () => {
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0].type).toBe('cylinder');
 
       // Instead of using the visitor directly, check the properties of the generated AST
       expect(ast[0]).toHaveProperty('type');
@@ -132,7 +132,7 @@ describe('VisitorASTGenerator', () => {
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0].type).toBe('union');
 
       // Instead of using the visitor directly, check the properties of the generated AST
       expect(ast[0]).toHaveProperty('type');
@@ -148,7 +148,7 @@ describe('VisitorASTGenerator', () => {
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0].type).toBe('difference');
 
       // Instead of using the visitor directly, check the properties of the generated AST
       expect(ast[0]).toHaveProperty('type');
@@ -164,7 +164,7 @@ describe('VisitorASTGenerator', () => {
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0].type).toBe('intersection');
 
       // Instead of using the visitor directly, check the properties of the generated AST
       expect(ast[0]).toHaveProperty('type');
@@ -196,7 +196,7 @@ describe('VisitorASTGenerator', () => {
       const ast = generator.generate();
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0].type).toBe('difference');
 
       // Instead of using the visitor directly, check the properties of the generated AST
       expect(ast[0]).toHaveProperty('type');

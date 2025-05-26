@@ -80,17 +80,17 @@ describe('ParenthesizedExpressionVisitor', () => {
 
     expect(astNode).toEqual({
       type: 'expression',
-      expressionType: 'binary_expression',
+      expressionType: 'binary',
       operator: '+',
       left: {
         type: 'expression',
-        expressionType: 'variable_reference',
+        expressionType: 'variable',
         name: 'a',
         location: expect.anything(),
       },
       right: {
         type: 'expression',
-        expressionType: 'variable_reference',
+        expressionType: 'variable',
         name: 'b',
         location: expect.anything(),
       },

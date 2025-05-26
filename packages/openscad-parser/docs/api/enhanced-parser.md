@@ -121,17 +121,19 @@ Alias for `parseCST()` method for backward compatibility.
 
 **Returns:** Tree-sitter Tree object or null if parsing fails
 
-#### updateCode()
+#### update()
 
 ```typescript
-updateCode(newCode: string, oldTree?: TreeSitter.Tree): TreeSitter.Tree | null
+update(newCode: string, startIndex: number, oldEndIndex: number, newEndIndex: number): TreeSitter.Tree | null
 ```
 
 Performs incremental parsing by updating existing parse tree with new code.
 
 **Parameters:**
 - `newCode`: The updated OpenSCAD source code
-- `oldTree` (optional): Previous parse tree for incremental updates
+- `startIndex`: Start position of the edit in the original code
+- `oldEndIndex`: End position of the edit in the original code
+- `newEndIndex`: End position of the edit in the new code
 
 **Returns:** Updated Tree-sitter Tree object or null if parsing fails
 
@@ -141,7 +143,40 @@ const originalCode = 'cube(10);';
 const originalTree = parser.parseCST(originalCode);
 
 const updatedCode = 'cube(20);'; // Changed parameter
-const updatedTree = parser.updateCode(updatedCode, originalTree);
+const startIndex = originalCode.indexOf('10');
+const oldEndIndex = startIndex + 2; // '10' is 2 characters
+const newEndIndex = startIndex + 2; // '20' is also 2 characters
+
+const updatedTree = parser.update(updatedCode, startIndex, oldEndIndex, newEndIndex);
+```
+
+#### updateAST()
+
+```typescript
+updateAST(newCode: string, startIndex: number, oldEndIndex: number, newEndIndex: number): ASTNode[]
+```
+
+Performs incremental parsing and generates a new AST from the updated parse tree.
+
+**Parameters:**
+- `newCode`: The updated OpenSCAD source code
+- `startIndex`: Start position of the edit in the original code
+- `oldEndIndex`: End position of the edit in the original code
+- `newEndIndex`: End position of the edit in the new code
+
+**Returns:** Array of AST nodes representing the updated parsed code
+
+**Example:**
+```typescript
+const originalCode = 'cube(10);';
+const originalAST = parser.parseAST(originalCode);
+
+const updatedCode = 'cube(20);'; // Changed parameter
+const startIndex = originalCode.indexOf('10');
+const oldEndIndex = startIndex + 2; // '10' is 2 characters
+const newEndIndex = startIndex + 2; // '20' is also 2 characters
+
+const updatedAST = parser.updateAST(updatedCode, startIndex, oldEndIndex, newEndIndex);
 ```
 
 #### dispose()
@@ -242,7 +277,7 @@ try {
   // Check collected errors and warnings
   const errors = errorHandler.getErrors();
   const warnings = errorHandler.getWarnings();
-  
+
   console.log('Parsing errors:', errors);
   console.log('Parsing warnings:', warnings);
 }
@@ -257,7 +292,7 @@ try {
 
 ### Parsing Speed
 - Small files (<1KB): ~2ms
-- Medium files (10KB): ~15ms  
+- Medium files (10KB): ~15ms
 - Large files (100KB): ~120ms
 
 ### Best Practices

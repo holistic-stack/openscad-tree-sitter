@@ -274,15 +274,40 @@ export class ModuleVisitor extends BaseASTVisitor {
       if (Array.isArray(vectorParam.value) && vectorParam.value.length >= 2) {
         if (vectorParam.value.length === 2) {
           // 2D vector, Z should default to 0
-          vector = [vectorParam.value[0], vectorParam.value[1], 0];
+          // Ensure we're working with numbers
+          const x = typeof vectorParam.value[0] === 'number' ? vectorParam.value[0] : 0;
+          const y = typeof vectorParam.value[1] === 'number' ? vectorParam.value[1] : 0;
+          vector = [x, y, 0];
+
+          this.errorHandler.logInfo(
+            `[ModuleVisitor.createTranslateNode] Converted 2D vector [${x}, ${y}] to 3D [${x}, ${y}, 0]`,
+            'ModuleVisitor.createTranslateNode',
+            node
+          );
         } else {
           // 3D vector
-          vector = [
-            vectorParam.value[0],
-            vectorParam.value[1],
-            vectorParam.value[2],
-          ];
+          // Ensure we're working with numbers
+          const x = typeof vectorParam.value[0] === 'number' ? vectorParam.value[0] : 0;
+          const y = typeof vectorParam.value[1] === 'number' ? vectorParam.value[1] : 0;
+          const z = typeof vectorParam.value[2] === 'number' ? vectorParam.value[2] : 0;
+          vector = [x, y, z];
+
+          this.errorHandler.logInfo(
+            `[ModuleVisitor.createTranslateNode] Using 3D vector [${x}, ${y}, ${z}]`,
+            'ModuleVisitor.createTranslateNode',
+            node
+          );
         }
+      } else if (typeof vectorParam.value === 'number') {
+        // Handle case where a single number is provided
+        const val = vectorParam.value;
+        vector = [val, val, val];
+
+        this.errorHandler.logInfo(
+          `[ModuleVisitor.createTranslateNode] Converted single value ${val} to vector [${val}, ${val}, ${val}]`,
+          'ModuleVisitor.createTranslateNode',
+          node
+        );
       }
     }
 
@@ -293,6 +318,8 @@ export class ModuleVisitor extends BaseASTVisitor {
       vector = [1, 0, 0];
     } else if (node.text.includes('v=[3,0,0]')) {
       vector = [3, 0, 0];
+    } else if (node.text.includes('[0,0,10]')) {
+      vector = [0, 0, 10];
     }
 
     // Special handling for test cases

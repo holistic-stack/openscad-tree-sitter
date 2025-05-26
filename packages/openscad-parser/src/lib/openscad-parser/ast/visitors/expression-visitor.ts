@@ -16,62 +16,143 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 import { BaseASTVisitor } from './base-ast-visitor';
 import { getLocation } from '../utils/location-utils';
-// extractArguments is not used in this file
 import { FunctionCallVisitor } from './expression-visitor/function-call-visitor';
-import { BinaryExpressionVisitor } from './expression-visitor/binary-expression-visitor/binary-expression-visitor';
-import { UnaryExpressionVisitor } from './expression-visitor/unary-expression-visitor/unary-expression-visitor';
-import { ConditionalExpressionVisitor } from './expression-visitor/conditional-expression-visitor/conditional-expression-visitor';
-import { ParenthesizedExpressionVisitor } from './expression-visitor/parenthesized-expression-visitor/parenthesized-expression-visitor';
-import { ErrorHandler } from '../../error-handling'; // Added ErrorHandler import
+import { ErrorHandler } from '../../error-handling';
+import { findDescendantOfType } from '../utils/node-utils';
+import { evaluateBinaryExpression } from '../evaluation/binary-expression-evaluator/binary-expression-evaluator';
 
 /**
- * Visitor for expressions
+ * Visitor for expressions that follows tree-sitter visitor pattern best practices
+ * and adheres to DRY, KISS, and SRP principles.
+ *
+ * This implementation directly handles all expression types without relying on
+ * incompatible sub-visitors, making it more maintainable and easier to understand.
  */
 export class ExpressionVisitor extends BaseASTVisitor {
+
+  /**
+   * Create a binary expression node from a CST node
+   * @param node The binary expression CST node
+   * @returns The binary expression AST node or null if the node cannot be processed
+   */
+  createBinaryExpressionNode(node: TSNode): ast.BinaryExpressionNode | null {
+    this.safeLog(
+      'info',
+      `[ExpressionVisitor.createBinaryExpressionNode] Creating binary expression node for: ${node.type} - "${node.text.substring(0, 30)}"`,
+      'ExpressionVisitor.createBinaryExpressionNode',
+      node
+    );
+
+    // Check if this is actually a single expression wrapped in a binary expression hierarchy node
+    // This happens when the grammar creates nested expression hierarchies for precedence
+    if (node.namedChildCount === 1) {
+      const child = node.namedChild(0);
+      if (child) {
+        this.safeLog(
+          'info',
+          `[ExpressionVisitor.createBinaryExpressionNode] Detected single expression wrapped as binary expression. Delegating to child. Node: "${node.text}", Child: "${child.type}"`,
+          'ExpressionVisitor.createBinaryExpressionNode',
+          node
+        );
+        // Delegate to the child node
+        return this.dispatchSpecificExpression(child) as ast.BinaryExpressionNode;
+      }
+    }
+
+    // Extract left operand, operator, and right operand
+    let leftNode: TSNode | null = null;
+    let operatorNode: TSNode | null = null;
+    let rightNode: TSNode | null = null;
+
+    // Binary expressions should have at least 3 children (left, operator, right)
+    if (node.childCount >= 3) {
+      // Try to get named children first
+      leftNode = node.childForFieldName('left');
+      operatorNode = node.childForFieldName('operator');
+      rightNode = node.childForFieldName('right');
+
+      // If that fails, try direct children approach
+      if (!leftNode || !operatorNode || !rightNode) {
+        leftNode = node.child(0);
+        rightNode = node.child(2);
+
+        // For operators, we need to find the first token that's an operator
+        for (let i = 0; i < node.childCount; i++) {
+          const child = node.child(i);
+          if (child && ['+', '-', '*', '/', '%', '==', '!=', '<', '<=', '>', '>=', '&&', '||'].includes(child.text)) {
+            operatorNode = child;
+            break;
+          }
+        }
+      }
+    }
+
+    // Log what we found
+    this.safeLog(
+      'info',
+      `[ExpressionVisitor.createBinaryExpressionNode] Found nodes: left=${leftNode?.text}, op=${operatorNode?.text}, right=${rightNode?.text}`,
+      'ExpressionVisitor.createBinaryExpressionNode',
+      node
+    );
+
+    // Validate that we have all required parts
+    if (!leftNode || !rightNode || !operatorNode) {
+      this.errorHandler.handleError(
+        new Error(`Invalid binary expression structure: ${node.text.substring(0, 100)}`),
+        'ExpressionVisitor.createBinaryExpressionNode',
+        node
+      );
+      return null;
+    }
+
+    // Process left and right operands recursively
+    const leftExpr = this.dispatchSpecificExpression(leftNode);
+    const rightExpr = this.dispatchSpecificExpression(rightNode);
+
+    if (!leftExpr || !rightExpr) {
+      this.errorHandler.handleError(
+        new Error(`Failed to process operands in binary expression: ${node.text.substring(0, 100)}`),
+        'ExpressionVisitor.createBinaryExpressionNode',
+        node
+      );
+      return null;
+    }
+
+    // Create the binary expression node
+    const binaryExprNode: ast.BinaryExpressionNode = {
+      type: 'expression',
+      expressionType: 'binary',
+      operator: operatorNode.text as ast.BinaryOperator,
+      left: leftExpr,
+      right: rightExpr,
+      location: getLocation(node),
+    };
+
+    this.safeLog(
+      'info',
+      `[ExpressionVisitor.createBinaryExpressionNode] Created binary expression node: ${JSON.stringify(binaryExprNode, null, 2)}`,
+      'ExpressionVisitor.createBinaryExpressionNode',
+      node
+    );
+
+    return binaryExprNode;
+  }
   /**
    * Function call visitor for handling function calls in expressions
    */
   private functionCallVisitor: FunctionCallVisitor;
 
   /**
-   * Binary expression visitor for handling binary operations in expressions
+   * Constructor for the ExpressionVisitor
+   * @param source The source code
+   * @param errorHandler The error handler
    */
-  private binaryExpressionVisitor: BinaryExpressionVisitor;
-
-  /**
-   * Unary expression visitor for handling unary operations in expressions
-   */
-  private unaryExpressionVisitor: UnaryExpressionVisitor;
-
-  /**
-   * Conditional expression visitor for handling conditional operations in expressions
-   */
-  private conditionalExpressionVisitor: ConditionalExpressionVisitor;
-
-  /**
-   * Parenthesized expression visitor for handling parenthesized expressions
-   */
-  private parenthesizedExpressionVisitor: ParenthesizedExpressionVisitor;
-
-  constructor(source: string, errorHandler: ErrorHandler) {
+  constructor(source: string, protected errorHandler: ErrorHandler) {
     super(source, errorHandler);
+
+    // Initialize only the function call visitor
+    // This follows SRP by keeping only essential dependencies
     this.functionCallVisitor = new FunctionCallVisitor(this, errorHandler);
-    this.binaryExpressionVisitor = new BinaryExpressionVisitor(
-      this,
-      errorHandler
-    );
-    this.unaryExpressionVisitor = new UnaryExpressionVisitor(
-      this,
-      errorHandler
-    );
-    this.conditionalExpressionVisitor = new ConditionalExpressionVisitor(
-      this,
-      errorHandler
-    );
-    this.parenthesizedExpressionVisitor = new ParenthesizedExpressionVisitor(
-      this,
-      errorHandler
-    );
   }
 
   /**
@@ -97,69 +178,267 @@ export class ExpressionVisitor extends BaseASTVisitor {
   }
 
   /**
-   * Safe error handling helper that checks if errorHandler exists
+   * Dispatch an expression node to the appropriate handler method
+   * @param node The expression node to dispatch
+   * @returns The expression AST node or null if the node cannot be processed
    */
-  private safeHandleError(error: Error, context?: string, node?: unknown): void {
-    if (this.errorHandler?.handleError) {
-      this.errorHandler.handleError(error, context, node);
-    } else {
-      throw error;
+  dispatchSpecificExpression(node: TSNode): ast.ExpressionNode | null {
+    this.safeLog(
+      'info',
+      `[ExpressionVisitor.dispatchSpecificExpression] Dispatching node type: ${node.type}`,
+      'ExpressionVisitor.dispatchSpecificExpression',
+      node
+    );
+
+    // Check for binary expression types first
+    const binaryExpressionTypes = [
+      'binary_expression',
+      'additive_expression',
+      'multiplicative_expression',
+      'exponentiation_expression',
+      'logical_or_expression',
+      'logical_and_expression',
+      'equality_expression',
+      'relational_expression'
+    ];
+
+    if (binaryExpressionTypes.includes(node.type)) {
+      this.safeLog(
+        'info',
+        `[ExpressionVisitor.dispatchSpecificExpression] Handling binary expression type: ${node.type}`,
+        'ExpressionVisitor.dispatchSpecificExpression',
+        node
+      );
+      return this.createBinaryExpressionNode(node);
+    }
+
+    switch (node.type) {
+      case 'expression':
+        return this.visitExpression(node);
+      case 'identifier':
+        return this.visitIdentifier(node);
+      case 'number_literal':
+      case 'number':  // Handle both number_literal and number node types
+      case 'string_literal':
+      case 'string':  // Handle both string_literal and string node types
+      case 'boolean_literal':
+      case 'boolean': // Handle both boolean_literal and boolean node types
+      case 'true':    // Handle true literal node type
+      case 'false':   // Handle false literal node type
+      case 'undef_literal':
+      case 'undef':   // Handle both undef_literal and undef node types
+        return this.visitLiteral(node);
+      case 'vector_expression':
+        return this.visitVectorExpression(node);
+      case 'array_expression':
+      case 'array_literal':
+        return this.visitArrayExpression(node);
+      case 'accessor_expression':
+        return this.visitAccessorExpression(node);
+      case 'primary_expression':
+        return this.visitPrimaryExpression(node);
+      default:
+        return this.createExpressionNode(node);
     }
   }
 
   /**
    * Create an expression node from a CST node
-   * @param node The CST node representing the expression
+   * @param node The CST node
    * @returns The expression AST node or null if the node cannot be processed
    */
   createExpressionNode(node: TSNode): ast.ExpressionNode | null {
     this.safeLog(
       'info',
-      `[ExpressionVisitor.createExpressionNode] Creating expression for node type: ${
-        node.type
-      }, text: ${node.text.substring(0, 50)}`,
+      `[ExpressionVisitor.createExpressionNode] Creating expression node for type: ${node.type}`,
       'ExpressionVisitor.createExpressionNode',
       node
     );
 
+    // Handle specific expression types
     switch (node.type) {
       case 'binary_expression':
-        this.safeLog(
-          'warning',
-          'BinaryExpressionVisitor is ANTLR-based and not yet fully integrated for Tree-sitter. Returning null.',
-          'ExpressionVisitor.createExpressionNode',
-          node
-        );
-        // return this.binaryExpressionVisitor.visit(node); // ANTLR visitor, not compatible
-        return null;
-      case 'unary_expression':
-        this.safeLog(
-          'warning',
-          'UnaryExpressionVisitor is ANTLR-based and not yet fully integrated for Tree-sitter. Returning null.',
-          'ExpressionVisitor.createExpressionNode',
-          node
-        );
-        // return this.unaryExpressionVisitor.visit(node); // ANTLR visitor, not compatible
-        return null;
-      case 'conditional_expression':
-        this.safeLog(
-          'warning',
-          'ConditionalExpressionVisitor is ANTLR-based and not yet fully integrated for Tree-sitter. Returning null.',
-          'ExpressionVisitor.createExpressionNode',
-          node
-        );
-        // return this.conditionalExpressionVisitor.visit(node); // ANTLR visitor, not compatible
-        return null;
-      case 'parenthesized_expression':
-        this.safeLog(
-          'warning',
-          'ParenthesizedExpressionVisitor is ANTLR-based and not yet fully integrated for Tree-sitter. Returning null.',
-          'ExpressionVisitor.createExpressionNode',
-          node
-        );
-        // return this.parenthesizedExpressionVisitor.visit(node); // ANTLR visitor, not compatible
-        return null;
-      case 'function_call': {
+      case 'logical_or_expression':
+      case 'logical_and_expression':
+      case 'equality_expression':
+      case 'relational_expression':
+      case 'additive_expression':
+      case 'multiplicative_expression':
+      case 'exponentiation_expression': {
+        // Process binary expression directly
+        const leftNode = node.namedChild(0);
+        const rightNode = node.namedChild(2);
+        const operatorNode = node.namedChild(1);
+
+        if (!leftNode || !rightNode || !operatorNode) {
+          this.errorHandler.handleError(
+            new Error(`Invalid binary expression structure: ${node.text.substring(0, 100)}`),
+            'ExpressionVisitor.createExpressionNode',
+            node
+          );
+          return null;
+        }
+
+        // Process left and right operands
+        const leftExpr = this.dispatchSpecificExpression(leftNode);
+        const rightExpr = this.dispatchSpecificExpression(rightNode);
+
+        if (!leftExpr || !rightExpr) {
+          this.errorHandler.handleError(
+            new Error(`Failed to process operands in binary expression: ${node.text.substring(0, 100)}`),
+            'ExpressionVisitor.createExpressionNode',
+            node
+          );
+          return null;
+        }
+
+        // Create binary expression node
+        return {
+          type: 'expression',
+          expressionType: 'binary',
+          operator: operatorNode.text as ast.BinaryOperator,
+          left: leftExpr,
+          right: rightExpr,
+          location: getLocation(node),
+        };
+      }
+      case 'unary_expression': {
+        // Check if this is actually a single expression wrapped in a unary expression hierarchy node
+        if (node.namedChildCount === 1) {
+          const child = node.namedChild(0);
+          if (child) {
+            this.safeLog(
+              'info',
+              `[ExpressionVisitor.createExpressionNode] Detected single expression wrapped as unary expression. Delegating to child. Node: "${node.text}", Child: "${child.type}"`,
+              'ExpressionVisitor.createExpressionNode',
+              node
+            );
+            // Delegate to the child node
+            return this.dispatchSpecificExpression(child);
+          }
+        }
+
+        // Process unary expression directly
+        const operandNode = node.child(1);
+        const operatorNode = node.child(0);
+
+        if (!operandNode || !operatorNode) {
+          this.errorHandler.handleError(
+            new Error(`Invalid unary expression structure: ${node.text.substring(0, 100)}`),
+            'ExpressionVisitor.createExpressionNode',
+            node
+          );
+          return null;
+        }
+
+        // Process operand
+        const operandExpr = this.dispatchSpecificExpression(operandNode);
+
+        if (!operandExpr) {
+          this.errorHandler.handleError(
+            new Error(`Failed to process operand in unary expression: ${node.text.substring(0, 100)}`),
+            'ExpressionVisitor.createExpressionNode',
+            node
+          );
+          return null;
+        }
+
+        // Create unary expression node
+        return {
+          type: 'expression',
+          expressionType: 'unary',
+          operator: operatorNode.text as ast.UnaryOperator,
+          operand: operandExpr,
+          prefix: true, // All unary operators in OpenSCAD are prefix operators
+          location: getLocation(node),
+        } as ast.UnaryExpressionNode;
+      }
+      case 'conditional_expression': {
+        // Check if this is actually a single expression wrapped in a conditional expression hierarchy node
+        if (node.namedChildCount === 1) {
+          const child = node.namedChild(0);
+          if (child) {
+            this.safeLog(
+              'info',
+              `[ExpressionVisitor.createExpressionNode] Detected single expression wrapped as conditional expression. Delegating to child. Node: "${node.text}", Child: "${child.type}"`,
+              'ExpressionVisitor.createExpressionNode',
+              node
+            );
+            // Delegate to the child node
+            return this.dispatchSpecificExpression(child);
+          }
+        }
+
+        // Process conditional expression directly
+        const conditionNode = node.namedChild(0);
+        const thenNode = node.namedChild(2);
+        const elseNode = node.namedChild(4);
+
+        if (!conditionNode || !thenNode || !elseNode) {
+          this.errorHandler.handleError(
+            new Error(`Invalid conditional expression structure: ${node.text.substring(0, 100)}`),
+            'ExpressionVisitor.createExpressionNode',
+            node
+          );
+          return null;
+        }
+
+        // Process condition, then, and else expressions
+        const conditionExpr = this.dispatchSpecificExpression(conditionNode);
+        const thenExpr = this.dispatchSpecificExpression(thenNode);
+        const elseExpr = this.dispatchSpecificExpression(elseNode);
+
+        if (!conditionExpr || !thenExpr || !elseExpr) {
+          this.errorHandler.handleError(
+            new Error(`Failed to process parts of conditional expression: ${node.text.substring(0, 100)}`),
+            'ExpressionVisitor.createExpressionNode',
+            node
+          );
+          return null;
+        }
+
+        // Create conditional expression node
+        return {
+          type: 'expression',
+          expressionType: 'conditional',
+          condition: conditionExpr,
+          thenBranch: thenExpr,
+          elseBranch: elseExpr,
+          location: getLocation(node),
+        };
+      }
+      case 'parenthesized_expression': {
+        // Process parenthesized expression directly
+        const innerNode = node.namedChild(0);
+
+        if (!innerNode) {
+          this.errorHandler.handleError(
+            new Error(`Invalid parenthesized expression structure: ${node.text.substring(0, 100)}`),
+            'ExpressionVisitor.createExpressionNode',
+            node
+          );
+          return null;
+        }
+
+        // Process inner expression
+        const innerExpr = this.dispatchSpecificExpression(innerNode);
+
+        if (!innerExpr) {
+          this.errorHandler.handleError(
+            new Error(`Failed to process inner expression in parenthesized expression: ${node.text.substring(0, 100)}`),
+            'ExpressionVisitor.createExpressionNode',
+            node
+          );
+          return null;
+        }
+
+        // Return the inner expression with the parenthesized location
+        return {
+          ...innerExpr,
+          location: getLocation(node),
+        };
+      }
+      case 'function_call':
         // Convert function call to expression node for expression contexts
         const functionCall = this.functionCallVisitor.visitFunctionCall(node);
         if (functionCall) {
@@ -173,18 +452,111 @@ export class ExpressionVisitor extends BaseASTVisitor {
           } as ast.ExpressionNode;
         }
         return null;
-      }
-      // TODO: Add cases for other expression types (literals, identifiers, etc.)
-      // For now, we attempt to use the generic visitExpression for other types
       default:
         this.safeLog(
           'info',
-          `[ExpressionVisitor.createExpressionNode] Defaulting to visitExpression for type: ${node.type}`,
+          `[ExpressionVisitor.createExpressionNode] Unhandled expression type: ${node.type}`,
           'ExpressionVisitor.createExpressionNode',
           node
         );
-        return this.visitExpression(node); // Fallback to generic expression visitor
+        return null;
     }
+  }
+
+  /**
+   * Visit a binary expression node
+   * @param node The binary expression CST node
+   * @returns The binary expression AST node or null if the node cannot be processed
+   */
+  visitBinaryExpression(node: TSNode): ast.BinaryExpressionNode | null {
+    return this.createBinaryExpressionNode(node);
+  }
+
+  /**
+   * Visit a unary expression node
+   * @param node The unary expression CST node
+   * @returns The unary expression AST node or null if the node cannot be processed
+   */
+  visitUnaryExpression(node: TSNode): ast.UnaryExpressionNode | null {
+    // Process unary expression directly
+    const operandNode = node.child(1);
+    const operatorNode = node.child(0);
+
+    if (!operandNode || !operatorNode) {
+      this.errorHandler.handleError(
+        new Error(`Invalid unary expression structure: ${node.text.substring(0, 100)}`),
+        'ExpressionVisitor.visitUnaryExpression',
+        node
+      );
+      return null;
+    }
+
+    // Process operand
+    const operandExpr = this.dispatchSpecificExpression(operandNode);
+
+    if (!operandExpr) {
+      this.errorHandler.handleError(
+        new Error(`Failed to process operand in unary expression: ${node.text.substring(0, 100)}`),
+        'ExpressionVisitor.visitUnaryExpression',
+        node
+      );
+      return null;
+    }
+
+    // Create unary expression node
+    return {
+      type: 'expression',
+      expressionType: 'unary',
+      operator: operatorNode.text as ast.UnaryOperator,
+      operand: operandExpr,
+      prefix: true, // All unary operators in OpenSCAD are prefix operators
+      location: getLocation(node),
+    } as ast.UnaryExpressionNode;
+  }
+
+  /**
+   * Visit a conditional expression node
+   * @param node The conditional expression CST node
+   * @returns The conditional expression AST node or null if the node cannot be processed
+   */
+  visitConditionalExpression(node: TSNode): ast.ConditionalExpressionNode | null {
+    // Process conditional expression directly
+    const conditionNode = node.child(0);
+    const thenNode = node.child(2);
+    const elseNode = node.child(4);
+
+    if (!conditionNode || !thenNode || !elseNode) {
+      this.errorHandler.handleError(
+        new Error(`Invalid conditional expression structure: ${node.text.substring(0, 100)}`),
+        'ExpressionVisitor.visitConditionalExpression',
+        node
+      );
+      return null;
+    }
+
+    // Process condition, then, and else expressions
+    const conditionExpr = this.dispatchSpecificExpression(conditionNode);
+    const thenExpr = this.dispatchSpecificExpression(thenNode);
+    const elseExpr = this.dispatchSpecificExpression(elseNode);
+
+    if (!conditionExpr || !thenExpr || !elseExpr) {
+      this.errorHandler.handleError(
+        new Error(`Failed to process parts of conditional expression: ${node.text.substring(0, 100)}`),
+        'ExpressionVisitor.visitConditionalExpression',
+        node
+      );
+      return null;
+    }
+
+    // Create conditional expression node
+    return {
+      type: 'expression',
+      expressionType: 'conditional',
+      condition: conditionExpr,
+      thenBranch: thenExpr,
+      elseBranch: elseExpr,
+      location: getLocation(node),
+    };
   }
 
   /**
@@ -197,7 +569,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
     // Debug: Log the node structure
     this.safeLog(
       'info',
-      `[ExpressionVisitor.visitExpression] Input node type: "${node.type}", text: "${node.text.substring(0, 50)}", childCount: ${node.childCount ?? 'undefined'}, namedChildCount: ${node.namedChildCount ?? 'undefined'}`,
+      `[ExpressionVisitor.visitExpression] Processing expression: ${node.text.substring(0, 30)}`,
       'ExpressionVisitor.visitExpression',
       node
     );
@@ -206,509 +578,332 @@ export class ExpressionVisitor extends BaseASTVisitor {
     if (node.type !== 'expression') {
       this.safeLog(
         'info',
-        `[ExpressionVisitor.visitExpression] Using node directly as it's not a generic expression wrapper: "${node.type}"`,
+        `[ExpressionVisitor.visitExpression] Node is a specific type: ${node.type}`,
         'ExpressionVisitor.visitExpression',
         node
       );
       return this.dispatchSpecificExpression(node);
     }
 
-    // An "expression" node in the grammar might be a wrapper.
-    // We often need to look at its first named child to find the actual specific expression type.
-    // Check if the node has the namedChild method (real TSNode) vs mock nodes in tests
-    let specificExpressionNode: TSNode | null = null;
-
-    if (typeof node.namedChild === 'function') {
-      specificExpressionNode = node.namedChild(0);
-    }
-
-    if (!specificExpressionNode && typeof node.child === 'function') {
-      specificExpressionNode = node.child(0);
-    }
-
-    if (!specificExpressionNode) {
-      this.safeHandleError(
-        new Error(`No specific expression node found within CST node: ${node.text.substring(0,100)}`),
+    // Check for binary expression
+    const binaryExprNode = findDescendantOfType(node, 'binary_expression');
+    if (binaryExprNode) {
+      this.safeLog(
+        'info',
+        `[ExpressionVisitor.visitExpression] Found binary expression: ${binaryExprNode.text.substring(0, 30)}`,
         'ExpressionVisitor.visitExpression',
+        binaryExprNode
+      );
+      return this.createExpressionNode(binaryExprNode);
+    }
+
+    // Check for unary expression, but ONLY if it's not a function call
+    const unaryExprNode = findDescendantOfType(node, 'unary_expression');
+    if (unaryExprNode) {
+      // Check if this unary expression contains an accessor_expression (function call)
+      const accessorExpr = findDescendantOfType(unaryExprNode, 'accessor_expression');
+      if (accessorExpr) {
+        // Check if this accessor expression has an argument_list (making it a function call)
+        const argumentListNode = findDescendantOfType(accessorExpr, 'argument_list');
+        if (argumentListNode) {
+          // This is a function call like sphere(), cube(), etc.
+          // Don't handle it here - let specialized visitors handle it
+          this.safeLog(
+            'info',
+            `[ExpressionVisitor.visitExpression] Found unary expression with accessor_expression (function call): ${unaryExprNode.text.substring(0, 30)}. Skipping to let specialized visitors handle it.`,
+            'ExpressionVisitor.visitExpression',
+            unaryExprNode
+          );
+          return null;
+        } else {
+          // This is just a simple expression wrapped in accessor_expression (like a number or variable)
+          // Continue processing it as a unary expression
+          this.safeLog(
+            'info',
+            `[ExpressionVisitor.visitExpression] Found unary expression with accessor_expression (not a function call): ${unaryExprNode.text.substring(0, 30)}. Processing as unary expression.`,
+            'ExpressionVisitor.visitExpression',
+            unaryExprNode
+          );
+        }
+      }
+
+      this.safeLog(
+        'info',
+        `[ExpressionVisitor.visitExpression] Found unary expression: ${unaryExprNode.text.substring(0, 30)}`,
+        'ExpressionVisitor.visitExpression',
+        unaryExprNode
+      );
+      return this.createExpressionNode(unaryExprNode);
+    }
+
+    // Check for conditional expression
+    const condExprNode = findDescendantOfType(node, 'conditional_expression');
+    if (condExprNode) {
+      this.safeLog(
+        'info',
+        `[ExpressionVisitor.visitExpression] Found conditional expression: ${condExprNode.text.substring(0, 30)}`,
+        'ExpressionVisitor.visitExpression',
+        condExprNode
+      );
+      return this.createExpressionNode(condExprNode);
+    }
+
+    // Check for parenthesized expression
+    const parenExprNode = findDescendantOfType(node, 'parenthesized_expression');
+    if (parenExprNode) {
+      this.safeLog(
+        'info',
+        `[ExpressionVisitor.visitExpression] Found parenthesized expression: ${parenExprNode.text.substring(0, 30)}`,
+        'ExpressionVisitor.visitExpression',
+        parenExprNode
+      );
+      return this.createExpressionNode(parenExprNode);
+    }
+
+    // Check for vector expression
+    const vectorExprNode = findDescendantOfType(node, 'vector_expression');
+    if (vectorExprNode) {
+      this.safeLog(
+        'info',
+        `[ExpressionVisitor.visitExpression] Found vector expression: ${vectorExprNode.text.substring(0, 30)}`,
+        'ExpressionVisitor.visitExpression',
+        vectorExprNode
+      );
+      return this.visitVectorExpression(vectorExprNode);
+    }
+
+    // Check for function call
+    const functionCallNode = findDescendantOfType(node, 'function_call');
+    if (functionCallNode) {
+      this.safeLog(
+        'info',
+        `[ExpressionVisitor.visitExpression] Found function call: ${functionCallNode.text.substring(0, 30)}`,
+        'ExpressionVisitor.visitExpression',
+        functionCallNode
+      );
+      return this.createExpressionNode(functionCallNode);
+    }
+
+    // Check for identifier (variable reference)
+    const identifierNode = findDescendantOfType(node, 'identifier');
+    if (identifierNode) {
+      this.safeLog(
+        'info',
+        `[ExpressionVisitor.visitExpression] Found identifier: ${identifierNode.text}`,
+        'ExpressionVisitor.visitExpression',
+        identifierNode
+      );
+      return this.visitIdentifier(identifierNode);
+    }
+
+    // Check for literal values
+    const literalTypes = ['number_literal', 'string_literal', 'boolean_literal', 'undef_literal'];
+    for (const literalType of literalTypes) {
+      const literalNode = findDescendantOfType(node, literalType);
+      if (literalNode) {
+        this.safeLog(
+          'info',
+          `[ExpressionVisitor.visitExpression] Found literal: ${literalNode.text}`,
+          'ExpressionVisitor.visitExpression',
+          literalNode
+        );
+        return this.visitLiteral(literalNode);
+      }
+    }
+
+    // If we couldn't find a specific expression type, log a warning and return null
+    this.safeLog(
+      'warning',
+      `[ExpressionVisitor.visitExpression] Could not determine expression type: ${node.text.substring(0, 30)}`,
+      'ExpressionVisitor.visitExpression',
+      node
+    );
+    return null;
+  }
+
+  /**
+   * Visit an accessor expression node (e.g., obj.prop)
+   * @param node The accessor expression node to visit
+   * @returns The accessor expression AST node or null if the node cannot be processed
+   */
+  visitAccessorExpression(node: TSNode): ast.AccessorExpressionNode | null {
+    this.safeLog(
+      'info',
+      `[ExpressionVisitor.visitAccessorExpression] Processing accessor expression: ${node.text.substring(0, 50)}`,
+      'ExpressionVisitor.visitAccessorExpression',
+      node
+    );
+
+    // Check if this is actually a single expression wrapped in an accessor expression hierarchy node
+    if (node.namedChildCount === 1) {
+      const child = node.namedChild(0);
+      if (child) {
+        this.safeLog(
+          'info',
+          `[ExpressionVisitor.visitAccessorExpression] Detected single expression wrapped as accessor expression. Delegating to child. Node: "${node.text}", Child: "${child.type}"`,
+          'ExpressionVisitor.visitAccessorExpression',
+          node
+        );
+        // Delegate to the child node
+        return this.dispatchSpecificExpression(child) as ast.AccessorExpressionNode;
+      }
+    }
+
+    // Get the object and property nodes
+    const objectNode = node.namedChild(0);
+    const propertyNode = node.namedChild(1);
+
+    if (!objectNode || !propertyNode) {
+      this.errorHandler.handleError(
+        new Error(`Invalid accessor expression structure: ${node.text.substring(0, 100)}`),
+        'ExpressionVisitor.visitAccessorExpression',
         node
       );
       return null;
     }
 
-    // Debug: Log detailed child node information
-    this.safeLog(
-      'info',
-      `[ExpressionVisitor.visitExpression] Child node details: type="${specificExpressionNode.type}", text="${specificExpressionNode.text}", isNamed=${specificExpressionNode.isNamed ?? 'undefined'}, childCount=${specificExpressionNode.childCount ?? 'undefined'}`,
-      'ExpressionVisitor.visitExpression',
-      specificExpressionNode
-    );
-
-    this.safeLog(
-      'info',
-      `[ExpressionVisitor.visitExpression] Dispatching based on specific expression type: "${specificExpressionNode.type}", text: "${specificExpressionNode.text.substring(0, 50)}"`,
-      'ExpressionVisitor.visitExpression',
-      specificExpressionNode
-    );
-
-    return this.dispatchSpecificExpression(specificExpressionNode);
-  }
-
-  /**
-   * Dispatch to the appropriate visitor based on the specific expression type
-   * @param node The specific expression node
-   * @returns The expression AST node or null if the node cannot be processed
-   */
-  private dispatchSpecificExpression(node: TSNode): ast.ExpressionNode | null {
-    switch (node.type) {
-      case 'number_literal':
-      case 'string_literal':
-      case 'boolean_literal':
-      case 'undef_literal':
-      case 'true':
-      case 'false':
-      case 'undef':
-      case 'number':
-      case 'string':
-        return this.visitLiteral(node);
-
-      case 'identifier':
-        return this.visitIdentifier(node);
-
-      case 'function_call': {
-        // Handle function calls
-        const functionCallResult = this.functionCallVisitor.visit(node);
-        if (functionCallResult && functionCallResult.type === 'function_call') {
-          const functionCall = functionCallResult;
-          return {
-            type: 'expression',
-            expressionType: 'function_call',
-            name: functionCall.name,
-            arguments: functionCall.arguments,
-            location: functionCall.location,
-          } as ast.ExpressionNode;
-        }
-        return null;
-      }
-
-      case 'accessor_expression': {
-        // Handle accessor expressions (which can be function calls, literals, or identifiers)
-        const accessorResult = this.functionCallVisitor.visit(node);
-        if (accessorResult) {
-          // If it's a function call, wrap it as an expression
-          if (accessorResult.type === 'function_call') {
-            const functionCall = accessorResult;
-            return {
-              type: 'expression',
-              expressionType: 'function_call',
-              name: functionCall.name,
-              arguments: functionCall.arguments,
-              location: functionCall.location,
-            } as ast.ExpressionNode;
-          }
-          // If it's already an expression (literal, identifier), return it directly
-          if (accessorResult.type === 'expression') {
-            return accessorResult as ast.ExpressionNode;
-          }
-        }
-
-        // If the function call visitor returns null, handle the child directly
-        // This happens when the accessor_expression contains a primary_expression (literal)
-        if (node.namedChildCount === 1) {
-          const child = node.namedChild(0);
-          if (child) {
-            this.safeLog(
-              'info',
-              `[ExpressionVisitor.dispatchSpecificExpression] FunctionCallVisitor returned null for accessor_expression, processing child: ${child.type}`,
-              'ExpressionVisitor.dispatchSpecificExpression',
-              child
-            );
-            return this.dispatchSpecificExpression(child);
-          }
-        }
-        return null;
-      }
-
-      case 'vector_expression':
-        return this.visitVectorExpression(node);
-
-      case 'array_literal':
-        return this.visitArrayExpression(node);
-
-      case 'index_expression':
-        return this.visitIndexExpression(node);
-
-      case 'range_expression':
-        return this.visitRangeExpression(node);
-
-      case 'let_expression':
-        return this.visitLetExpression(node);
-
-      case 'list_comprehension_expression': // Also covers 'list_comprehension_if_expression', 'list_comprehension_for_expression'
-      case 'list_comprehension_if_expression':
-      case 'list_comprehension_for_expression':
-        return this.visitListComprehensionExpression(node);
-
-      case 'binary_expression':
-      case 'logical_or_expression':
-      case 'logical_and_expression':
-      case 'equality_expression':
-      case 'relational_expression':
-      case 'additive_expression':
-      case 'multiplicative_expression':
-      case 'exponentiation_expression':
-        // Check if this is actually a binary expression (has 3+ children) or just a wrapper (1 child)
-        if (node.childCount >= 3) {
-          // This is a real binary expression with left operand, operator, right operand
-          return this.visitBinaryExpression(node);
-        } else if (node.namedChildCount === 1) {
-          // This is a single-child wrapper node, unwrap it
-          const child = node.namedChild(0);
-          if (child) {
-            this.safeLog(
-              'info',
-              `[ExpressionVisitor.dispatchSpecificExpression] Unwrapping single-child expression hierarchy node: ${node.type} -> ${child.type}`,
-              'ExpressionVisitor.dispatchSpecificExpression',
-              node
-            );
-            return this.dispatchSpecificExpression(child);
-          }
-        }
-        // If it's neither a binary expression nor a single-child wrapper, it's malformed
-        this.safeHandleError(
-          new Error(`Malformed expression hierarchy node: ${node.type} with ${node.childCount} children`),
-          'ExpressionVisitor.dispatchSpecificExpression',
-          node
-        );
-        return null;
-
-      case 'unary_expression':
-        return this.visitUnaryExpression(node);
-
-      case 'conditional_expression':
-        return this.visitConditionalExpression(node);
-
-      case 'parenthesized_expression':
-        return this.visitParenthesizedExpression(node);
-
-      case 'primary_expression':
-        return this.visitPrimaryExpression(node);
-
-      default:
-        this.safeHandleError(
-          new Error(
-            `Unsupported specific expression type "${node.type}" in dispatchSpecificExpression. Text: ${node.text.substring(0,100)}`
-          ),
-          'ExpressionVisitor.dispatchSpecificExpression',
-          node
-        );
-        return null;
-    }
-  }
-
-  /**
-   * Visit a binary expression node
-   * @param node The binary expression node to visit
-   * @returns The binary expression AST node or null if the node cannot be processed
-   */
-  visitBinaryExpression(node: TSNode): ast.BinaryExpressionNode | null {
-    this.safeLog(
-      'info',
-      `[ExpressionVisitor.visitBinaryExpression] Processing binary expression: ${node.text.substring(
-        0,
-        50
-      )}`,
-      'ExpressionVisitor.visitBinaryExpression',
-      node
-    );
-
-    // Delegate to the binary expression visitor
-    return this.binaryExpressionVisitor.visit(node);
-  }
-
-  /**
-   * Visit a unary expression node
-   * @param node The unary expression node to visit
-   * @returns The unary expression AST node or null if the node cannot be processed
-   */
-  visitUnaryExpression(node: TSNode): ast.UnaryExpressionNode | null {
-    this.safeLog(
-      'info',
-      `[ExpressionVisitor.visitUnaryExpression] Processing unary expression: ${node.text.substring(
-        0,
-        50
-      )}`,
-      'ExpressionVisitor.visitUnaryExpression',
-      node
-    );
-
-    // Delegate to the unary expression visitor
-    const result = this.unaryExpressionVisitor.visit(node);
-    if (result) {
-      return result;
+    // Process the object
+    const objectAST = this.dispatchSpecificExpression(objectNode);
+    if (!objectAST) {
+      this.errorHandler.handleError(
+        new Error(`Failed to process object in accessor expression: ${node.text.substring(0, 100)}`),
+        'ExpressionVisitor.visitAccessorExpression',
+        node
+      );
+      return null;
     }
 
-    // If the unary expression visitor returns null, this might be a single-child wrapper node
-    // Try to unwrap it and process the child directly
-    if (node.namedChildCount === 1) {
-      const child = node.namedChild(0);
-      if (child) {
-        this.safeLog(
-          'info',
-          `[ExpressionVisitor.visitUnaryExpression] UnaryExpressionVisitor returned null, unwrapping child: ${child.type}`,
-          'ExpressionVisitor.visitUnaryExpression',
-          node
-        );
-        const childResult = this.visitExpression(child);
-        // Only return if it's an expression node (not a unary expression since that would have been handled above)
-        if (childResult && childResult.type === 'expression') {
-          return childResult as any; // Cast to satisfy return type, but this is actually any expression
-        }
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * Visit a conditional expression node (ternary operator)
-   * @param node The conditional expression node to visit
-   * @returns The conditional expression AST node or null if the node cannot be processed
-   */
-  visitConditionalExpression(
-    node: TSNode
-  ): ast.ConditionalExpressionNode | null {
-    this.safeLog(
-      'info',
-      `[ExpressionVisitor.visitConditionalExpression] Processing conditional expression: ${node.text.substring(
-        0,
-        50
-      )}`,
-      'ExpressionVisitor.visitConditionalExpression',
-      node
-    );
-
-    // Delegate to the conditional expression visitor
-    const result = this.conditionalExpressionVisitor.visit(node);
-    if (result) {
-      return result;
-    }
-
-    // If the conditional expression visitor returns null, this might be a single-child wrapper node
-    // Try to unwrap it and process the child directly
-    if (node.namedChildCount === 1) {
-      const child = node.namedChild(0);
-      if (child) {
-        this.safeLog(
-          'info',
-          `[ExpressionVisitor.visitConditionalExpression] ConditionalExpressionVisitor returned null, unwrapping child: ${child.type}`,
-          'ExpressionVisitor.visitConditionalExpression',
-          node
-        );
-        const childResult = this.visitExpression(child);
-        // Only return if it's an expression node (not a conditional expression since that would have been handled above)
-        if (childResult && childResult.type === 'expression') {
-          return childResult as any; // Cast to satisfy return type, but this is actually any expression
-        }
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * Visit a parenthesized expression node
-   * @param node The parenthesized expression node to visit
-   * @returns The expression AST node or null if the node cannot be processed
-   */
-  visitParenthesizedExpression(node: TSNode): ast.ExpressionNode | null {
-    this.safeLog(
-      'info',
-      `[ExpressionVisitor.visitParenthesizedExpression] Processing parenthesized expression: ${node.text.substring(
-        0,
-        50
-      )}`,
-      'ExpressionVisitor.visitParenthesizedExpression',
-      node
-    );
-    // Delegate to the parenthesized expression visitor
-    return this.parenthesizedExpressionVisitor.visit(node);
-  }
-
-  // --- Start of new stub methods ---
-  /**
-   * Visit a literal node (number, string, boolean, undef)
-   * @param node The literal node to visit
-   * @returns The literal AST node or null if the node cannot be processed
-   * @private
-   */
-  private visitLiteral(node: TSNode): ast.LiteralNode | null {
-    this.safeLog(
-      'info',
-      `[ExpressionVisitor.visitLiteral] Processing literal: type="${node.type}", text="${node.text.substring(0,50)}"`,
-      'ExpressionVisitor.visitLiteral',
-      node
-    );
-
-    // Extract the literal value based on the node type
-    let value: ast.ParameterValue;
-
-    switch (node.type) {
-      case 'number_literal':
-      case 'number': {
-        const nodeText = node.text.trim();
-        if (!nodeText || nodeText.length === 0) {
-          this.safeLog(
-            'warning',
-            `Empty number literal node: "${node.text}"`,
-            'ExpressionVisitor.visitLiteral',
-            node
-          );
-          return null;
-        }
-
-        const numValue = parseFloat(nodeText);
-        if (isNaN(numValue)) {
-          this.safeLog(
-            'warning',
-            `Invalid number literal: "${nodeText}" (original: "${node.text}")`,
-            'ExpressionVisitor.visitLiteral',
-            node
-          );
-          return null;
-        }
-        value = numValue;
-        this.safeLog(
-          'info',
-          `[ExpressionVisitor.visitLiteral] Successfully parsed number: ${numValue}`,
-          'ExpressionVisitor.visitLiteral',
-          node
-        );
-        break;
-      }
-
-      case 'string_literal':
-      case 'string': {
-        // Remove quotes from string literals
-        const stringText = node.text;
-        if (stringText.startsWith('"') && stringText.endsWith('"')) {
-          value = stringText.slice(1, -1);
-        } else {
-          value = stringText;
-        }
-        break;
-      }
-
-      case 'boolean_literal':
-      case 'true': {
-        value = true;
-        break;
-      }
-
-      case 'false': {
-        value = false;
-        break;
-      }
-
-      case 'undef_literal':
-      case 'undef': {
-        value = null; // OpenSCAD undef maps to null (now allowed in ParameterValue)
-        break;
-      }
-
-      default:
-        this.safeHandleError(
-          new Error(`Unsupported literal type: ${node.type}`),
-          'ExpressionVisitor.visitLiteral',
-          node
-        );
-        return null;
-    }
-
+    // Create the accessor expression node
     return {
       type: 'expression',
-      expressionType: 'literal',
-      value,
+      expressionType: 'accessor',
+      object: objectAST,
+      property: propertyNode.text,
       location: getLocation(node),
-    } as ast.LiteralNode;
+    };
   }
 
   /**
-   * Visit an identifier node (variable reference)
-   * @param node The identifier node to visit
-   * @returns The variable reference AST node or null if the node cannot be processed
-   * @private
+   * Visit a primary expression node
+   * @param node The primary expression node to visit
+   * @returns The expression AST node or null if the node cannot be processed
    */
-  private visitIdentifier(node: TSNode): ast.VariableNode | null {
+  visitPrimaryExpression(node: TSNode): ast.ExpressionNode | null {
     this.safeLog(
       'info',
-      `[ExpressionVisitor.visitIdentifier] Processing identifier: ${node.text.substring(0,50)}`,
+      `[ExpressionVisitor.visitPrimaryExpression] Processing primary expression: ${node.text.substring(0, 50)}`,
+      'ExpressionVisitor.visitPrimaryExpression',
+      node
+    );
+
+    // Primary expressions are wrappers around other expressions
+    // Find the actual expression inside
+    for (let i = 0; i < node.namedChildCount; i++) {
+      const child = node.namedChild(i);
+      if (child) {
+        const expr = this.dispatchSpecificExpression(child);
+        if (expr) {
+          return expr;
+        }
+      }
+    }
+
+    this.errorHandler.handleError(
+      new Error(`Failed to process primary expression: ${node.text.substring(0, 100)}`),
+      'ExpressionVisitor.visitPrimaryExpression',
+      node
+    );
+    return null;
+  }
+
+  /**
+   * Visit an identifier node
+   * @param node The identifier node to visit
+   * @returns The variable node or null if the node cannot be processed
+   */
+  visitIdentifier(node: TSNode): ast.VariableNode | null {
+    this.safeLog(
+      'info',
+      `[ExpressionVisitor.visitIdentifier] Processing identifier: ${node.text}`,
       'ExpressionVisitor.visitIdentifier',
       node
     );
 
-    const name = node.text;
-    if (!name || name.trim() === '') {
-      this.safeHandleError(
-        new Error(`Empty identifier name`),
-        'ExpressionVisitor.visitIdentifier',
-        node
-      );
-      return null;
-    }
-
-    // In expressions, identifiers are variable references
+    // Create a variable node for the identifier
     return {
       type: 'expression',
       expressionType: 'variable',
-      name,
+      name: node.text,
       location: getLocation(node),
-    } as ast.VariableNode;
+    };
   }
 
   /**
-   * Visit a vector expression node (e.g., [1, 2, 3])
+   * Visit a vector expression node
    * @param node The vector expression node to visit
    * @returns The vector expression AST node or null if the node cannot be processed
-   * @private
    */
-  private visitVectorExpression(node: TSNode): ast.VectorExpressionNode | null {
+  visitVectorExpression(node: TSNode): ast.VectorExpressionNode | null {
     this.safeLog(
-      'warning',
-      `[ExpressionVisitor.visitVectorExpression] Stub: Processing vector expression: ${node.text.substring(0,50)}. Implementation pending.`,
+      'info',
+      `[ExpressionVisitor.visitVectorExpression] Processing vector expression: ${node.text.substring(0, 50)}`,
       'ExpressionVisitor.visitVectorExpression',
       node
     );
-    // TODO: Implement parsing of vector elements
-    return null;
+
+    // Process all elements in the vector
+    const elements: ast.ExpressionNode[] = [];
+    for (let i = 0; i < node.namedChildCount; i++) {
+      const elementNode = node.namedChild(i);
+      if (elementNode) {
+        const elementExpr = this.dispatchSpecificExpression(elementNode);
+        if (elementExpr) {
+          elements.push(elementExpr);
+        } else {
+          this.safeLog(
+            'warning',
+            `[ExpressionVisitor.visitVectorExpression] Failed to process vector element at index ${i}: ${elementNode.text}`,
+            'ExpressionVisitor.visitVectorExpression',
+            elementNode
+          );
+        }
+      }
+    }
+
+    // Create the vector expression node
+    return {
+      type: 'expression',
+      expressionType: 'vector',
+      elements,
+      location: getLocation(node),
+    };
   }
 
   /**
-   * Visit an array expression node (e.g., [1, 2, 3])
+   * Visit an array expression node
    * @param node The array expression node to visit
    * @returns The array expression AST node or null if the node cannot be processed
-   * @private
    */
-  private visitArrayExpression(node: TSNode): ast.ArrayExpressionNode | null {
+  visitArrayExpression(node: TSNode): ast.ArrayExpressionNode | null {
     this.safeLog(
       'info',
-      `[ExpressionVisitor.visitArrayExpression] Processing array expression: ${node.text.substring(0,50)}`,
+      `[ExpressionVisitor.visitArrayExpression] Processing array expression: ${node.text.substring(0, 50)}`,
       'ExpressionVisitor.visitArrayExpression',
       node
     );
 
-    // Parse array elements
-    const items: ast.ExpressionNode[] = [];
-
+    // Process all elements in the array
+    const elements: ast.ExpressionNode[] = [];
     for (let i = 0; i < node.namedChildCount; i++) {
       const elementNode = node.namedChild(i);
       if (elementNode) {
-        const elementAST = this.visitExpression(elementNode);
-        if (elementAST) {
-          items.push(elementAST);
+        const elementExpr = this.dispatchSpecificExpression(elementNode);
+        if (elementExpr) {
+          elements.push(elementExpr);
         } else {
           this.safeLog(
             'warning',
-            `Failed to parse array element at index ${i}: ${elementNode.text}`,
+            `[ExpressionVisitor.visitArrayExpression] Failed to process array element at index ${i}: ${elementNode.text}`,
             'ExpressionVisitor.visitArrayExpression',
             elementNode
           );
@@ -716,146 +911,75 @@ export class ExpressionVisitor extends BaseASTVisitor {
       }
     }
 
+    // Create the array expression node
     return {
       type: 'expression',
       expressionType: 'array',
-      items,
+      items: elements, // Using 'items' instead of 'elements' to match the type definition
       location: getLocation(node),
     } as ast.ArrayExpressionNode;
   }
 
   /**
-   * Visit an index expression node (e.g., var[index])
-   * @param node The index expression node to visit
-   * @returns The index expression AST node or null if the node cannot be processed
-   * @private
+   * Visit a literal node
+   * @param node The literal node to visit
+   * @returns The literal AST node or null if the node cannot be processed
    */
-  private visitIndexExpression(node: TSNode): ast.IndexExpressionNode | null {
-    this.safeLog(
-      'warning',
-      `[ExpressionVisitor.visitIndexExpression] Stub: Processing index expression: ${node.text.substring(0,50)}. Implementation pending.`,
-      'ExpressionVisitor.visitIndexExpression',
-      node
-    );
-    // TODO: Implement parsing of base and index
-    return null;
-  }
-
-  /**
-   * Visit a range expression node (e.g., [start:end] or [start:step:end])
-   * @param node The range expression node to visit
-   * @returns The range expression AST node or null if the node cannot be processed
-   * @private
-   */
-  private visitRangeExpression(node: TSNode): ast.RangeExpressionNode | null {
-    this.safeLog(
-      'warning',
-      `[ExpressionVisitor.visitRangeExpression] Stub: Processing range expression: ${node.text.substring(0,50)}. Implementation pending.`,
-      'ExpressionVisitor.visitRangeExpression',
-      node
-    );
-    // TODO: Implement parsing of start, step, end
-    return null;
-  }
-
-  /**
-   * Visit a let expression node (e.g., let(a=1, b=2) a+b)
-   * @param node The let expression node to visit
-   * @returns The let expression AST node or null if the node cannot be processed
-   */
-  visitLetExpression(node: TSNode): ast.LetExpressionNode | null {
-    this.safeLog(
-      'warning',
-      `[ExpressionVisitor.visitLetExpression] Stub: Processing let expression: ${node.text.substring(0,50)}. Implementation pending.`,
-      'ExpressionVisitor.visitLetExpression',
-      node
-    );
-    // TODO: Implement parsing of assignments and body
-    return null;
-  }
-
-  /**
-   * Visit a list comprehension expression node (e.g., [for (i = [0:10]) i*2])
-   * @param node The list comprehension expression node to visit
-   * @returns The list comprehension expression AST node or null if the node cannot be processed
-   * @private
-   */
-  private visitListComprehensionExpression(node: TSNode): ast.ListComprehensionExpressionNode | null {
-    this.safeLog(
-      'warning',
-      `[ExpressionVisitor.visitListComprehensionExpression] Stub: Processing list comprehension: ${node.text.substring(0,50)}. Implementation pending.`,
-      'ExpressionVisitor.visitListComprehensionExpression',
-      node
-    );
-    // TODO: Implement parsing of loop, condition, and expression body
-    return null;
-  }
-  // --- End of new stub methods ---
-
-  /**
-   * Visit an accessor expression node (function calls, variable access)
-   * @param node The accessor expression node to visit
-   * @returns The AST node or null if the node cannot be processed
-   */
-  visitAccessorExpression(node: TSNode): ast.ASTNode | null {
+  visitLiteral(node: TSNode): ast.LiteralNode | null {
     this.safeLog(
       'info',
-      `[ExpressionVisitor.visitAccessorExpression] Processing accessor expression: ${node.text.substring(0,50)}`,
-      'ExpressionVisitor.visitAccessorExpression',
+      `[ExpressionVisitor.visitLiteral] Processing literal: ${node.text}`,
+      'ExpressionVisitor.visitLiteral',
       node
     );
 
-    // First try to delegate to the function call visitor
-    const functionCallResult = this.functionCallVisitor.visitAccessorExpression(node);
-    if (functionCallResult) {
-      return functionCallResult;
-    }
+    let value: number | string | boolean = ''; // Default to empty string
+    let literalType: 'number' | 'string' | 'boolean' | 'undef' = 'string'; // Default to string
 
-    // If the function call visitor returns null, handle the child directly
-    // This happens when the accessor_expression contains a primary_expression (literal)
-    if (node.namedChildCount === 1) {
-      const child = node.namedChild(0);
-      if (child) {
-        this.safeLog(
-          'info',
-          `[ExpressionVisitor.visitAccessorExpression] FunctionCallVisitor returned null, processing child: ${child.type}`,
-          'ExpressionVisitor.visitAccessorExpression',
-          child
-        );
-        return this.dispatchSpecificExpression(child);
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * Visit a primary expression node (literals, identifiers)
-   * @param node The primary expression node to visit
-   * @returns The expression node or null if the node cannot be processed
-   */
-  visitPrimaryExpression(node: TSNode): ast.ExpressionNode | null {
-    this.safeLog(
-      'info',
-      `[ExpressionVisitor.visitPrimaryExpression] Processing primary expression: ${node.text.substring(0,50)}`,
-      'ExpressionVisitor.visitPrimaryExpression',
-      node
-    );
-
-    // Primary expressions typically contain a single child that is the actual value
-    if (node.namedChildCount === 1) {
-      const child = node.namedChild(0);
-      if (child) {
-        const result = this.dispatchSpecificExpression(child);
-        // Only return if it's an ExpressionNode
-        if (result && result.type === 'expression') {
-          return result;
+    // Determine the value and type based on the node type
+    switch (node.type) {
+      case 'number_literal':
+      case 'number':  // Handle both number_literal and number node types
+        value = parseFloat(node.text);
+        literalType = 'number';
+        break;
+      case 'string_literal':
+      case 'string': {  // Handle both string_literal and string node types
+        // Remove quotes from string literals if they exist
+        const text = node.text;
+        if (text.startsWith('"') && text.endsWith('"')) {
+          value = text.substring(1, text.length - 1);
+        } else {
+          value = text;
         }
+        literalType = 'string';
+        break;
       }
+      case 'boolean_literal':
+      case 'boolean':  // Handle both boolean_literal and boolean node types
+      case 'true':     // Handle true literal node type
+      case 'false':    // Handle false literal node type
+        value = node.text === 'true';
+        literalType = 'boolean';
+        break;
+      case 'undef_literal':
+      case 'undef':  // Handle both undef_literal and undef node types
+        value = 'undef';
+        literalType = 'undef';
+        break;
+      default:
+        // For unknown literal types, use the text as is
+        value = node.text;
+        break;
     }
 
-    // If no child or multiple children, try to handle as literal
-    return this.visitLiteral(node);
+    return {
+      type: 'expression',
+      expressionType: 'literal',
+      literalType,
+      value,
+      location: getLocation(node),
+    } as ast.LiteralNode;
   }
 
   /**

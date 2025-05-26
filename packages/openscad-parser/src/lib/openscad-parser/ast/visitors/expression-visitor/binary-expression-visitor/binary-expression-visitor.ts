@@ -111,8 +111,8 @@ export class BinaryExpressionVisitor extends BaseASTVisitor {
       node
     );
 
-    const leftAST = this.parentVisitor.visitExpression(leftNode);
-    const rightAST = this.parentVisitor.visitExpression(rightNode);
+    const leftAST = this.parentVisitor.dispatchSpecificExpression(leftNode);
+    const rightAST = this.parentVisitor.dispatchSpecificExpression(rightNode);
 
     // Debug: Log operand results
     this.errorHandler.logInfo(
@@ -140,7 +140,7 @@ export class BinaryExpressionVisitor extends BaseASTVisitor {
 
     return {
       type: 'expression',
-      expressionType: 'binary',
+      expressionType: 'binary', // Use 'binary' to match test expectations in expression-visitor.test.ts
       operator: operator as ast.BinaryOperator, // Cast, assuming grammar aligns with ast.BinaryOperator
       left: leftAST,
       right: rightAST,

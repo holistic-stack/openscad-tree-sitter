@@ -56,6 +56,27 @@ export class ParenthesizedExpressionVisitor extends BaseASTVisitor {
 
     // Visit the inner expression and return its AST node directly.
     // The location information will be from the inner expression.
-    return this.parentVisitor.visitExpression(innerExpressionNode);
+
+    // If the inner expression is a generic 'expression' node, we need to find the actual content
+    if (innerExpressionNode.type === 'expression') {
+      // Look for the actual content within the expression node
+      for (let i = 0; i < innerExpressionNode.namedChildCount; i++) {
+        const child = innerExpressionNode.namedChild(i);
+        if (child) {
+          const result = this.parentVisitor.dispatchSpecificExpression(child);
+          if (result) {
+            return result;
+          }
+        }
+      }
+      // If no named children worked, try the first child
+      const firstChild = innerExpressionNode.child(0);
+      if (firstChild) {
+        return this.parentVisitor.dispatchSpecificExpression(firstChild);
+      }
+    }
+
+    // For non-expression nodes, dispatch directly
+    return this.parentVisitor.dispatchSpecificExpression(innerExpressionNode);
   }
 }

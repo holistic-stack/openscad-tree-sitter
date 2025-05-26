@@ -1,6 +1,7 @@
 import * as ast from '../ast-types';
 import { ErrorHandler } from '../../error-handling';
-// import { evaluateExpression } from '../evaluation/expression-evaluator-registry';
+import { evaluateBinaryExpression } from '../evaluation/binary-expression-evaluator/binary-expression-evaluator';
+import { evaluateExpression } from '../evaluation/expression-evaluator-registry';
 
 /**
  * Check if a value is an expression node
@@ -52,17 +53,63 @@ export function extractNumberParameter(param: ast.Parameter, errorHandler?: Erro
       }
     }
 
-    // Handle binary expressions with expression evaluation
+    // Handle binary expressions directly
     if (param.value.expressionType === 'binary' && errorHandler) {
-      console.log(`[extractNumberParameter] Attempting to evaluate binary expression`);
+      console.log(`[extractNumberParameter] Attempting to evaluate binary expression:`, JSON.stringify(param.value, null, 2));
       try {
-        // For binary expressions, we need the original TSNode to evaluate
-        // This is a limitation of the current architecture - we need to pass the TSNode
-        // For now, we'll return null and let the enhanced value extractor handle it
-        console.log(`[extractNumberParameter] Binary expression detected but TSNode not available`);
-        return null;
+        // Direct evaluation of binary expression
+        const binaryExpr = param.value as ast.BinaryExpressionNode;
+        
+        // Get the left and right operand values
+        const leftValue = extractNumberParameter({ value: binaryExpr.left }, errorHandler);
+        const rightValue = extractNumberParameter({ value: binaryExpr.right }, errorHandler);
+        
+        console.log(`[extractNumberParameter] Binary expression operands: left=${leftValue}, right=${rightValue}, op=${binaryExpr.operator}`);
+        
+        if (leftValue !== null && rightValue !== null) {
+          // Evaluate based on operator
+          let result: number;
+          switch (binaryExpr.operator) {
+            case '+': result = leftValue + rightValue; break;
+            case '-': result = leftValue - rightValue; break;
+            case '*': result = leftValue * rightValue; break;
+            case '/': result = leftValue / rightValue; break;
+            case '%': result = leftValue % rightValue; break;
+            default:
+              console.warn(`[extractNumberParameter] Unsupported binary operator: ${binaryExpr.operator}`);
+              return null;
+          }
+          
+          console.log(`[extractNumberParameter] Evaluated ${leftValue} ${binaryExpr.operator} ${rightValue} = ${result}`);
+          return result;
+        } else {
+          console.warn(`[extractNumberParameter] Could not extract numeric values from binary expression operands`);
+          return null;
+        }
       } catch (error) {
         console.warn(`[extractNumberParameter] Failed to evaluate binary expression: ${error}`);
+        return null;
+      }
+    }
+    
+    // Handle other expression types
+    if (errorHandler) {
+      console.log(`[extractNumberParameter] Attempting to evaluate expression:`, JSON.stringify(param.value, null, 2));
+      try {
+        // Use the expression evaluator registry for non-binary expressions
+        const result = evaluateExpression(param.value, errorHandler);
+        
+        console.log(`[extractNumberParameter] Expression evaluation result:`, result);
+        
+        // Check if the result is a number
+        if (result !== null && typeof result === 'number') {
+          return result;
+        } else {
+          console.log(`[extractNumberParameter] Expression did not evaluate to a number:`, result);
+          return null;
+        }
+      } catch (error) {
+        console.warn(`[extractNumberParameter] Failed to evaluate expression: ${error}`);
         return null;
       }
     }

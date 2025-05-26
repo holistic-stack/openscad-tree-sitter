@@ -171,33 +171,46 @@ function createVectorFromNumbers(
   numbers: number[],
   originalText: string
 ): ast.Vector2D | ast.Vector3D | undefined {
-  if (numbers.length === 2) {
+  // Filter out null, undefined, and NaN values
+  const validNumbers = numbers.filter(n => n !== null && n !== undefined && !isNaN(n));
+
+  if (validNumbers.length === 2) {
     console.log(
       `[createVectorFromNumbers] Returning 2D vector: ${JSON.stringify([
-        numbers[0],
-        numbers[1],
+        validNumbers[0],
+        validNumbers[1],
       ])}`
     );
-    return [numbers[0], numbers[1]] as ast.Vector2D;
-  } else if (numbers.length === 3) {
+    return [validNumbers[0], validNumbers[1]] as ast.Vector2D;
+  } else if (validNumbers.length === 3) {
     console.log(
       `[createVectorFromNumbers] Returning 3D vector: ${JSON.stringify([
-        numbers[0],
-        numbers[1],
-        numbers[2],
+        validNumbers[0],
+        validNumbers[1],
+        validNumbers[2],
       ])}`
     );
-    return [numbers[0], numbers[1], numbers[2]] as ast.Vector3D;
+    return [validNumbers[0], validNumbers[1], validNumbers[2]] as ast.Vector3D;
+  } else if (validNumbers.length === 1) {
+    // Single value - create uniform vector
+    console.log(
+      `[createVectorFromNumbers] Returning uniform 3D vector: ${JSON.stringify([
+        validNumbers[0],
+        validNumbers[0],
+        validNumbers[0],
+      ])}`
+    );
+    return [validNumbers[0], validNumbers[0], validNumbers[0]] as ast.Vector3D;
   }
 
   // This warning will now be more specific about failure.
   console.warn(
     `[createVectorFromNumbers] FAILURE: Extracted ${
-      numbers.length
-    } numbers from '${originalText.substring(
+      validNumbers.length
+    } valid numbers from '${originalText.substring(
       0,
       30
-    )}'. Expected 2 or 3. Numbers: ${JSON.stringify(numbers)}.`
+    )}'. Expected 1, 2 or 3. Valid numbers: ${JSON.stringify(validNumbers)}. Original numbers: ${JSON.stringify(numbers)}.`
   );
   return undefined;
 }

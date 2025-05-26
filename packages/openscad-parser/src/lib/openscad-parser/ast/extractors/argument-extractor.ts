@@ -519,6 +519,7 @@ export function extractValue(valueNode: TSNode): ast.Value | null {
       return { type: 'string', value: stringValue };
     }
 
+    case 'boolean': // Added support for 'boolean' node type
     case 'boolean_literal': // Reverted to previous correct logic
     case 'true': // Reverted to previous correct logic
     case 'false': {

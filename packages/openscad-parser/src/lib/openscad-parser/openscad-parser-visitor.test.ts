@@ -27,7 +27,7 @@ describe('OpenscadParser with Visitor AST Generator', () => {
       const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0].type).toBe('sphere');
       expect(ast[0]).toHaveProperty('location');
     });
 
@@ -36,7 +36,7 @@ describe('OpenscadParser with Visitor AST Generator', () => {
       const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0].type).toBe('cylinder');
       expect(ast[0]).toHaveProperty('location');
     });
 
@@ -45,7 +45,7 @@ describe('OpenscadParser with Visitor AST Generator', () => {
       const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0].type).toBe('translate');
       expect(ast[0]).toHaveProperty('location');
     });
 
@@ -54,7 +54,7 @@ describe('OpenscadParser with Visitor AST Generator', () => {
       const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0].type).toBe('union');
       expect(ast[0]).toHaveProperty('location');
     });
 
@@ -63,7 +63,7 @@ describe('OpenscadParser with Visitor AST Generator', () => {
       const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0].type).toBe('difference');
       expect(ast[0]).toHaveProperty('location');
     });
 
@@ -72,7 +72,7 @@ describe('OpenscadParser with Visitor AST Generator', () => {
       const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0].type).toBe('intersection');
       expect(ast[0]).toHaveProperty('location');
     });
 
@@ -82,7 +82,7 @@ describe('OpenscadParser with Visitor AST Generator', () => {
       const ast = parser.parseAST(code);
 
       expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('module_instantiation');
+      expect(ast[0].type).toBe('difference');
       expect(ast[0]).toHaveProperty('location');
     });
   });

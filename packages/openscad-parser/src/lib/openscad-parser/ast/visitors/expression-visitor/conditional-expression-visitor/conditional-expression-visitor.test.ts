@@ -64,17 +64,17 @@ describe('ConditionalExpressionVisitor', () => {
       expressionType: 'conditional_expression',
       condition: {
         type: 'expression',
-        expressionType: 'binary_expression', // Assuming a > b is a binary expression
+        expressionType: 'binary', // Fixed: should be 'binary' not 'binary_expression'
         operator: '>',
         left: {
           type: 'expression',
-          expressionType: 'variable_reference',
+          expressionType: 'variable', // Fixed: should be 'variable' not 'variable_reference'
           name: 'a',
           location: expect.anything(),
         },
         right: {
           type: 'expression',
-          expressionType: 'variable_reference',
+          expressionType: 'variable', // Fixed: should be 'variable' not 'variable_reference'
           name: 'b',
           location: expect.anything(),
         },

@@ -1,208 +1,133 @@
-/**
- * Visitor for variable assignments and references
- *
- * This visitor handles variable-related nodes in OpenSCAD, including:
- * - Variable assignments (var = value)
- * - Variable references (using variables in expressions)
- * - Special OpenSCAD variables ($fn, $fa, $fs, etc.)
- *
- * @module lib/openscad-parser/ast/visitors/variable-visitor
- */
-
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types';
 import { BaseASTVisitor } from './base-ast-visitor';
+import { ErrorHandler } from '../../error-handling';
 import { getLocation } from '../utils/location-utils';
 import { findDescendantOfType } from '../utils/node-utils';
-import { extractValue } from '../extractors/value-extractor';
-import { isSpecialVariable, extractVariableName, isValidVariableName } from '../utils/variable-utils';
-import { ErrorHandler } from '../../error-handling';
 
 /**
- * Visitor for variable assignments and references
+ * Visitor for handling variable references in the AST
  */
 export class VariableVisitor extends BaseASTVisitor {
+  /**
+   * Constructor for the VariableVisitor
+   * @param source The source code
+   * @param errorHandler The error handler
+   */
   constructor(source: string, protected errorHandler: ErrorHandler) {
     super(source, errorHandler);
   }
-
   /**
-   * Visit an assignment statement node
-   * @param node The assignment statement node to visit
-   * @returns The assignment AST node or null if the node cannot be processed
+   * Create a variable node from a variable node in the CST
+   * @param node The variable node from the CST
+   * @returns A variable node for the AST
    */
-  visitAssignmentStatement(node: TSNode): ast.AssignmentNode | ast.SpecialVariableAssignment | null {
-    this.errorHandler.logInfo(
-      `[VariableVisitor.visitAssignmentStatement] Processing assignment: ${node.text.substring(0, 50)}`,
-      'VariableVisitor.visitAssignmentStatement',
+  createVariableNode(node: TSNode): ast.VariableNode | null {
+    this.safeLog(
+      'info',
+      `[VariableVisitor.createVariableNode] Processing variable node: ${node.text}`,
+      'VariableVisitor.createVariableNode',
       node
     );
 
-    // Find the identifier (variable name)
-    const identifierNode = findDescendantOfType(node, 'identifier');
-    if (!identifierNode) {
-      this.errorHandler.handleError(
-        new Error(`No identifier found in assignment statement: ${node.text.substring(0, 100)}`),
-        'VariableVisitor.visitAssignmentStatement',
-        node
-      );
-      return null;
-    }
-
-    const variableName = extractVariableName(identifierNode);
-    if (!variableName) {
-      this.errorHandler.handleError(
-        new Error(`Invalid variable name in assignment: ${identifierNode.text}`),
-        'VariableVisitor.visitAssignmentStatement',
-        node
-      );
-      return null;
-    }
-
-    // Validate variable name
-    if (!isValidVariableName(variableName)) {
-      this.errorHandler.handleError(
-        new Error(`Invalid variable name format: ${variableName}`),
-        'VariableVisitor.visitAssignmentStatement',
-        node
-      );
-      return null;
-    }
-
-    // Find the value expression
-    let value: ast.ExpressionNode | ast.ParameterValue | null = null;
-
-    // Look for expression nodes that represent the value
-    for (let i = 0; i < node.childCount; i++) {
-      const child = node.child(i);
-      if (!child) continue;
-
-      // Skip the identifier and assignment operator
-      if (child.type === 'identifier' || child.text === '=') {
-        continue;
+    try {
+      // Extract the variable name from the identifier node
+      const identifierNode = findDescendantOfType(node, 'identifier');
+      if (!identifierNode) {
+        this.safeLog(
+          'warning',
+          `[VariableVisitor.createVariableNode] No identifier found in variable node: ${node.text}`,
+          'VariableVisitor.createVariableNode',
+          node
+        );
+        return null;
       }
 
-      // Try to extract a simple value first
-      const extractedValue = extractValue(child);
-      if (extractedValue !== null) {
-        value = extractedValue;
-        break;
-      }
-
-      // If not a simple value, treat as expression
-      // This would need to be handled by ExpressionVisitor
-      // For now, create a simple literal expression
-      if (child.type === 'number_literal' || child.type === 'string_literal' || child.type === 'boolean_literal') {
-        const literalValue = extractValue(child);
-        if (literalValue !== null) {
-          value = {
-            type: 'expression',
-            expressionType: 'literal',
-            value: literalValue,
-            location: getLocation(child),
-          } as ast.LiteralNode;
-          break;
-        }
-      }
-    }
-
-    if (value === null) {
-      this.errorHandler.handleError(
-        new Error(`No value found in assignment statement: ${node.text.substring(0, 100)}`),
-        'VariableVisitor.visitAssignmentStatement',
-        node
-      );
-      return null;
-    }
-
-    // Check if this is a special variable assignment
-    if (isSpecialVariable(identifierNode)) {
+      // Create the variable node
       return {
-        type: 'specialVariableAssignment',
-        variable: variableName as ast.SpecialVariable,
-        value: typeof value === 'object' && 'expressionType' in value ? value.value : value,
+        type: 'expression',
+        expressionType: 'variable',
+        name: identifierNode.text,
         location: getLocation(node),
-      } as ast.SpecialVariableAssignment;
+      };
+    } catch (error) {
+      this.errorHandler.handleError(
+        error instanceof Error ? error : new Error(String(error)),
+        'VariableVisitor.createVariableNode',
+        node
+      );
+      return null;
     }
-
-    // Regular variable assignment
-    return {
-      type: 'assignment',
-      variable: variableName,
-      value: value,
-      location: getLocation(node),
-    } as ast.AssignmentNode;
   }
 
   /**
-   * Visit a variable reference (identifier used in expressions)
-   * @param node The identifier node to visit
-   * @returns The variable reference AST node or null if the node cannot be processed
+   * Visit a variable node in the CST
+   * @param node The variable node from the CST
+   * @returns A variable node for the AST
    */
-  visitVariableReference(node: TSNode): ast.VariableNode | null {
-    this.errorHandler.logInfo(
-      `[VariableVisitor.visitVariableReference] Processing variable reference: ${node.text}`,
-      'VariableVisitor.visitVariableReference',
+  visitVariable(node: TSNode): ast.VariableNode | null {
+    this.safeLog(
+      'info',
+      `[VariableVisitor.visitVariable] Processing variable: ${node.text}`,
+      'VariableVisitor.visitVariable',
       node
     );
-
-    if (node.type !== 'identifier') {
-      this.errorHandler.handleError(
-        new Error(`Expected identifier but got ${node.type}: ${node.text}`),
-        'VariableVisitor.visitVariableReference',
-        node
-      );
-      return null;
-    }
-
-    const variableName = extractVariableName(node);
-    if (!variableName) {
-      this.errorHandler.handleError(
-        new Error(`Invalid variable name: ${node.text}`),
-        'VariableVisitor.visitVariableReference',
-        node
-      );
-      return null;
-    }
-
-    return {
-      type: 'expression',
-      expressionType: 'variable',
-      name: variableName,
-      location: getLocation(node),
-    };
+    return this.createVariableNode(node);
   }
 
   /**
-   * Visit an identifier node and determine if it's an assignment or reference
-   * @param node The identifier node to visit
-   * @returns The appropriate AST node or null if the node cannot be processed
+   * Visit an identifier node in the CST
+   * @param node The identifier node from the CST
+   * @returns A variable node for the AST
    */
-  visitIdentifier(node: TSNode): ast.ASTNode | null {
-    this.errorHandler.logInfo(
+  visitIdentifier(node: TSNode): ast.VariableNode | null {
+    this.safeLog(
+      'info',
       `[VariableVisitor.visitIdentifier] Processing identifier: ${node.text}`,
       'VariableVisitor.visitIdentifier',
       node
     );
-
-    // Check if this identifier is part of an assignment by looking at the parent
-    const parent = node.parent;
-    if (parent && parent.type === 'assignment_statement') {
-      // This is handled by visitAssignmentStatement
-      return null;
-    }
-
-    // Otherwise, treat as a variable reference
-    return this.visitVariableReference(node);
+    
+    // Create a variable node directly from the identifier
+    return {
+      type: 'expression',
+      expressionType: 'variable',
+      name: node.text,
+      location: getLocation(node),
+    };
   }
-
+  
+  /**
+   * Safe logging helper that checks if errorHandler exists
+   */
+  private safeLog(level: 'info' | 'debug' | 'warning' | 'error', message: string, context?: string, node?: unknown): void {
+    if (this.errorHandler) {
+      switch (level) {
+        case 'info':
+          this.errorHandler.logInfo(message, context, node);
+          break;
+        case 'debug':
+          this.errorHandler.logDebug(message, context, node);
+          break;
+        case 'warning':
+          this.errorHandler.logWarning(message, context, node);
+          break;
+        case 'error':
+          this.errorHandler.logError(message, context, node);
+          break;
+      }
+    }
+  }
+  
   /**
    * Create an AST node for a function (required by BaseASTVisitor)
    * @param node The function node
-   * @returns null (not handled by this visitor)
+   * @param functionName The function name
+   * @param args The function arguments
+   * @returns The function call AST node or null if not handled
    */
-  createASTNodeForFunction(_node: TSNode): ast.ASTNode | null {
-    // Variables don't handle functions
+  createASTNodeForFunction(node: TSNode, _functionName?: string, _args?: ast.Parameter[]): ast.ASTNode | null {
+    // VariableVisitor doesn't handle function definitions or calls
     return null;
   }
 }

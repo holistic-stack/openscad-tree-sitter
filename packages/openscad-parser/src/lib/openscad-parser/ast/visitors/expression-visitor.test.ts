@@ -60,12 +60,23 @@ describe('ExpressionVisitor', () => {
         endPosition: { row: 0, column: 5 },
         startIndex: 0,
         endIndex: 5,
+        childCount: 3,
         childForFieldName: (name: string) => {
           if (name === 'operator') {
             return { text: '+', type: 'operator' };
           } else if (name === 'left') {
             return { text: '1', type: 'number' };
           } else if (name === 'right') {
+            return { text: '2', type: 'number' };
+          }
+          return null;
+        },
+        child: (index: number) => {
+          if (index === 0) {
+            return { text: '1', type: 'number' };
+          } else if (index === 1) {
+            return { text: '+', type: 'operator' };
+          } else if (index === 2) {
             return { text: '2', type: 'number' };
           }
           return null;
@@ -294,7 +305,7 @@ describe('ExpressionVisitor', () => {
 
       expect(result).not.toBeNull();
       expect(result?.type).toBe('expression');
-      expect(result?.expressionType).toBe('unary_expression');
+      expect(result?.expressionType).toBe('unary');
       expect((result as ast.UnaryExpressionNode).operator).toBe('-');
       expect((result as ast.UnaryExpressionNode).operand.expressionType).toBe(
         'literal'
@@ -354,7 +365,7 @@ describe('ExpressionVisitor', () => {
 
       expect(result).not.toBeNull();
       expect(result?.type).toBe('expression');
-      expect(result?.expressionType).toBe('unary_expression');
+      expect(result?.expressionType).toBe('unary');
       expect((result as ast.UnaryExpressionNode).operator).toBe('!');
       expect((result as ast.UnaryExpressionNode).operand.expressionType).toBe(
         'literal'
@@ -429,11 +440,13 @@ describe('ExpressionVisitor', () => {
         text: 'x > 5 ? 10 : 20',
         startPosition: { row: 0, column: 0 },
         endPosition: { row: 0, column: 15 },
+        childCount: 5,
         childForFieldName: (name: string) => {
           if (name === 'condition') {
             return {
               type: 'relational_expression',
               text: 'x > 5',
+              childCount: 3,
               childForFieldName: (fieldName: string) => {
                 if (fieldName === 'left') {
                   return { type: 'identifier', text: 'x' };
@@ -444,10 +457,58 @@ describe('ExpressionVisitor', () => {
                 }
                 return null;
               },
+              child: (index: number) => {
+                if (index === 0) {
+                  return { type: 'identifier', text: 'x' };
+                } else if (index === 1) {
+                  return { type: '>', text: '>' };
+                } else if (index === 2) {
+                  return { type: 'number', text: '5' };
+                }
+                return null;
+              },
             };
           } else if (name === 'consequence') {
             return { type: 'number', text: '10' };
           } else if (name === 'alternative') {
+            return { type: 'number', text: '20' };
+          }
+          return null;
+        },
+        child: (index: number) => {
+          if (index === 0) {
+            return {
+              type: 'relational_expression',
+              text: 'x > 5',
+              childCount: 3,
+              childForFieldName: (fieldName: string) => {
+                if (fieldName === 'left') {
+                  return { type: 'identifier', text: 'x' };
+                } else if (fieldName === 'operator') {
+                  return { type: '>', text: '>' };
+                } else if (fieldName === 'right') {
+                  return { type: 'number', text: '5' };
+                }
+                return null;
+              },
+              child: (index: number) => {
+                if (index === 0) {
+                  return { type: 'identifier', text: 'x' };
+                } else if (index === 1) {
+                  return { type: '>', text: '>' };
+                } else if (index === 2) {
+                  return { type: 'number', text: '5' };
+                }
+                return null;
+              },
+            };
+          } else if (index === 1) {
+            return { type: 'question', text: '?' };
+          } else if (index === 2) {
+            return { type: 'number', text: '10' };
+          } else if (index === 3) {
+            return { type: 'colon', text: ':' };
+          } else if (index === 4) {
             return { type: 'number', text: '20' };
           }
           return null;

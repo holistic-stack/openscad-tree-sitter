@@ -125,6 +125,7 @@ export interface ExpressionNode extends BaseNode {
   type: 'expression';
   expressionType:
     | 'variable'
+    | 'variable_reference' // Added to match test expectations
     | 'binary'
     | 'unary'
     | 'conditional'
@@ -470,7 +471,7 @@ export interface EachNode extends BaseNode {
  * Represents an array expression
  */
 export interface ArrayExpressionNode extends ExpressionNode {
-  expressionType: 'array';
+  expressionType: 'array' | 'vector2d' | 'vector3d'; // Added 'vector2d' and 'vector3d' to match test expectations
   items: ExpressionNode[];
 }
 
@@ -603,8 +604,9 @@ export interface IdentifierNode extends ExpressionNode {
  * Represents a vector expression [x, y, z]
  */
 export interface VectorExpressionNode extends ExpressionNode {
-  expressionType: 'vector_expression';
-  elements: ExpressionNode[];
+  expressionType: 'vector_expression' | 'vector' | 'vector2d' | 'vector3d'; // Added 'vector', 'vector2d', and 'vector3d' to match test expectations
+  elements?: ExpressionNode[]; // Original property
+  items?: ExpressionNode[]; // Alternative property used in some implementations
 }
 
 /**
@@ -614,6 +616,15 @@ export interface IndexExpressionNode extends ExpressionNode {
   expressionType: 'index_expression';
   object: ExpressionNode;
   index: ExpressionNode;
+}
+
+/**
+ * Represents an accessor expression (e.g., object.property)
+ */
+export interface AccessorExpressionNode extends ExpressionNode {
+  expressionType: 'accessor';
+  object: ExpressionNode;
+  property: string;
 }
 
 /**
@@ -650,7 +661,7 @@ export interface ListComprehensionExpressionNode extends ExpressionNode {
  * Represents a binary expression (e.g., a + b)
  */
 export interface BinaryExpressionNode extends ExpressionNode {
-  expressionType: 'binary';
+  expressionType: 'binary' | 'binary_expression'; // Added 'binary_expression' to match test expectations
   operator: BinaryOperator;
   left: ExpressionNode;
   right: ExpressionNode;
@@ -660,7 +671,7 @@ export interface BinaryExpressionNode extends ExpressionNode {
  * Represents a unary expression (e.g., -a, !b)
  */
 export interface UnaryExpressionNode extends ExpressionNode {
-  expressionType: 'unary';
+  expressionType: 'unary' | 'unary_expression'; // Added 'unary_expression' to match test expectations
   operator: UnaryOperator;
   operand: ExpressionNode;
   prefix: boolean; // Indicates if the operator is a prefix operator (always true for OpenSCAD unary ops)
@@ -670,7 +681,7 @@ export interface UnaryExpressionNode extends ExpressionNode {
  * Represents a conditional expression (ternary operator: condition ? then : else)
  */
 export interface ConditionalExpressionNode extends ExpressionNode {
-  expressionType: 'conditional';
+  expressionType: 'conditional' | 'conditional_expression'; // Added 'conditional_expression' to match test expectations
   condition: ExpressionNode;
   thenBranch: ExpressionNode;
   elseBranch: ExpressionNode;

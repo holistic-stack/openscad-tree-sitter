@@ -23,9 +23,8 @@ describe('Transformation AST Generation', () => {
 
       const mirrorNode = ast[0] as any;
       expect(mirrorNode.v).toEqual([1, 0, 0]);
-      expect(mirrorNode.children).toHaveLength(0);
-      // Skip child node checks since children array is empty
-      // expect(mirrorNode.children[0].type).toBe('cube');
+      expect(mirrorNode.children).toHaveLength(1);
+      expect(mirrorNode.children[0].type).toBe('cube');
     });
 
     it('should parse a mirror with named v parameter', async () => {
@@ -36,10 +35,9 @@ describe('Transformation AST Generation', () => {
       expect(ast[0].type).toBe('mirror');
 
       const mirrorNode = ast[0] as any;
-      expect(mirrorNode.v).toEqual([1, 0, 0]);
-      expect(mirrorNode.children).toHaveLength(0);
-      // Skip child node checks since children array is empty
-      // expect(mirrorNode.children[0].type).toBe('cube');
+      expect(mirrorNode.v).toEqual([0, 1, 0]);
+      expect(mirrorNode.children).toHaveLength(1);
+      expect(mirrorNode.children[0].type).toBe('cube');
     });
 
     it('should parse a mirror with 2D vector parameter', async () => {
@@ -50,10 +48,9 @@ describe('Transformation AST Generation', () => {
       expect(ast[0].type).toBe('mirror');
 
       const mirrorNode = ast[0] as any;
-      expect(mirrorNode.v).toEqual([1, 0, 0]); // Z should default to 0
-      expect(mirrorNode.children).toHaveLength(0);
-      // Skip child node checks since children array is empty
-      // expect(mirrorNode.children[0].type).toBe('cube');
+      expect(mirrorNode.v).toEqual([1, 1, 0]); // Z should default to 0
+      expect(mirrorNode.children).toHaveLength(1);
+      expect(mirrorNode.children[0].type).toBe('cube');
     });
   });
 

@@ -57,9 +57,78 @@ export function extractValueEnhanced(node: TSNode, errorHandler?: ErrorHandler):
     console.log(`[extractValueEnhanced] Detected complex expression: ${node.type}`);
 
     try {
-      const result = evaluateExpression(node, errorHandler);
-      console.log(`[extractValueEnhanced] Evaluation result: ${result.type} = ${result.value}`);
-      return result.value;
+      // Simplified direct evaluation approach for binary expressions
+      const evaluateBinaryExpression = (node: TSNode): number | undefined => {
+        console.log(`[evaluateBinaryExpression] Evaluating binary expression: ${node.type} - "${node.text}"`);
+        
+        // Get left, operator, and right nodes - using a simplified approach
+        // This focuses on the most common structure in tree-sitter grammar
+        const leftNode = node.child(0);
+        const operatorNode = node.child(1);
+        const rightNode = node.child(2);
+        
+        console.log(`[evaluateBinaryExpression] Found nodes: left=${leftNode?.text}, op=${operatorNode?.text}, right=${rightNode?.text}`);
+        
+        if (!leftNode || !operatorNode || !rightNode) {
+          console.warn(`[evaluateBinaryExpression] Could not find all parts of the binary expression`);
+          return undefined;
+        }
+        
+        // Recursively evaluate operands
+        let leftValue: number | undefined;
+        let rightValue: number | undefined;
+        
+        // Handle nested expressions
+        if (isComplexExpression(leftNode)) {
+          leftValue = evaluateBinaryExpression(leftNode);
+        } else {
+          const extractedLeft = extractValueEnhanced(leftNode, errorHandler);
+          leftValue = typeof extractedLeft === 'number' ? extractedLeft : undefined;
+        }
+        
+        if (isComplexExpression(rightNode)) {
+          rightValue = evaluateBinaryExpression(rightNode);
+        } else {
+          const extractedRight = extractValueEnhanced(rightNode, errorHandler);
+          rightValue = typeof extractedRight === 'number' ? extractedRight : undefined;
+        }
+        
+        console.log(`[evaluateBinaryExpression] Evaluated operands: left=${leftValue}, right=${rightValue}`);
+        
+        if (leftValue === undefined || rightValue === undefined) {
+          console.warn(`[evaluateBinaryExpression] Could not evaluate operands`);
+          return undefined;
+        }
+        
+        // Perform the operation
+        let result: number;
+        switch (operatorNode.text) {
+          case '+': result = leftValue + rightValue; break;
+          case '-': result = leftValue - rightValue; break;
+          case '*': result = leftValue * rightValue; break;
+          case '/': result = leftValue / rightValue; break;
+          case '%': result = leftValue % rightValue; break;
+          default:
+            console.warn(`[evaluateBinaryExpression] Unsupported operator: ${operatorNode.text}`);
+            return undefined;
+        }
+        
+        console.log(`[evaluateBinaryExpression] Result: ${leftValue} ${operatorNode.text} ${rightValue} = ${result}`);
+        return result;
+      };
+      
+      // Handle different expression types
+      if (node.type === 'binary_expression' || 
+          node.type === 'additive_expression' || 
+          node.type === 'multiplicative_expression') {
+        const result = evaluateBinaryExpression(node);
+        if (result !== undefined) {
+          return result;
+        }
+      }
+      
+      console.warn(`[extractValueEnhanced] Could not evaluate expression directly`);
+      // Fall back to simple extraction
     } catch (error) {
       console.warn(`[extractValueEnhanced] Expression evaluation failed: ${error}`);
       // Fall back to simple extraction
