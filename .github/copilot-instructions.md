@@ -304,6 +304,44 @@ When suggesting commands, prefer the `pnpm` script aliases. All commands now use
 - Check error recovery behavior
 - Validate visitor implementations
 
+## Tree-Sitter Native Compilation
+
+### Pre-built vs Native Compilation
+
+**For most users and CI/CD**: The `tree-sitter-openscad` package ships with a pre-built WASM file that works out-of-the-box without requiring any native compilation toolchain.
+
+**For grammar developers**: If you need to modify the grammar or rebuild the parser from source, you'll need to install the native compilation toolchain.
+
+### Native Build Commands
+
+- **`pnpm build:grammar`**: Uses pre-built WASM file (no native compilation)
+- **`pnpm build:grammar:native`**: Build with native compilation (requires C++ toolchain)
+- **`pnpm build:grammar:wasm`**: Build only WASM file (requires tree-sitter CLI)
+
+### Native Build Prerequisites
+
+#### Windows
+- Visual Studio Build Tools or Visual Studio Community with C++ development tools
+- Python 3.x (required by node-gyp)
+
+#### macOS
+- Xcode Command Line Tools: `xcode-select --install`
+- Python 3.x (usually pre-installed)
+
+#### Linux (Ubuntu/Debian)
+```bash
+sudo apt-get update
+sudo apt-get install build-essential python3 python3-dev
+```
+
+#### Linux (CentOS/RHEL/Fedora)
+```bash
+sudo yum groupinstall "Development Tools"
+sudo yum install python3 python3-devel
+```
+
+**Note**: Tree-sitter native compilation commands should be separated from main Nx build pipeline to prevent cross-platform installation failures, moved to optional manual commands for grammar developers only.
+
 ## Common Tasks
 
 ### Adding New Grammar Rules
@@ -311,6 +349,7 @@ When suggesting commands, prefer the `pnpm` script aliases. All commands now use
 2. Add tests to corpus
 3. Update queries if needed
 4. Test with examples
+5. Rebuild parser with `pnpm build:grammar:wasm`
 
 ### Adding New AST Nodes
 1. Define TypeScript interfaces

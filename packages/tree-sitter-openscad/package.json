@@ -6,15 +6,15 @@
   "types": "bindings/node/index.d.ts",
   "browser": "bindings/web/index.js",
   "scripts": {
-    "build": "echo 'Grammar package uses pre-built WASM file. Use build:native or build:wasm for local development.'",
-    "build:native": "env-cmd -e plain tree-sitter generate && env-cmd -e plain tree-sitter build --wasm && env-cmd -e plain node-gyp rebuild",
-    "build:node": "env-cmd -e plain node-gyp rebuild",
-    "build:wasm": "env-cmd -e plain tree-sitter generate && env-cmd -e plain tree-sitter build --wasm",
-    "install": "echo 'Using pre-built WASM file. Native bindings available via node-gyp-build if needed.'",
-    "prebuildify": "env-cmd -e plain prebuildify --napi --strip",
-    "test": "env-cmd -e plain tree-sitter test",
-    "parse": "env-cmd -e plain tree-sitter parse",
-    "playground": "env-cmd -e plain tree-sitter playground",
+    "build": "node scripts/echo-prebuilt-message.js",
+    "build:native": "env-cmd -e plain npx tree-sitter generate && env-cmd -e plain npx tree-sitter build --wasm && env-cmd -e plain npx node-gyp rebuild",
+    "build:node": "env-cmd -e plain npx node-gyp rebuild",
+    "build:wasm": "env-cmd -e plain npx tree-sitter generate && env-cmd -e plain npx tree-sitter build --wasm",
+    "install": "node scripts/echo-install-message.js",
+    "prebuildify": "env-cmd -e plain npx prebuildify --napi --strip",
+    "test": "env-cmd -e plain npx tree-sitter test",
+    "parse": "env-cmd -e plain npx tree-sitter parse",
+    "playground": "env-cmd -e plain npx tree-sitter playground",
     "lint": "echo 'No linting configured for grammar package'"
   },
   "keywords": [
@@ -37,6 +37,7 @@
     "bindings/web/**",
     "binding.gyp",
     "prebuilds/**",
+    "scripts/**",
     "tree-sitter-openscad.wasm"
   ],
   "author": "OpenSCAD Community",

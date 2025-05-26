@@ -417,7 +417,7 @@ pnpm typecheck
 3. **Run Grammar Tests**: Use `pnpm test:grammar` to verify failure
 4. **Analyze Grammar**: Review grammar.js rules related to the issue
 5. **Modify Grammar**: Update grammar.js to handle the syntax correctly
-6. **Generate Parser**: Run `pnpm build:grammar` to rebuild the parser
+6. **Generate Parser**: Run `pnpm build:grammar:wasm` to rebuild the parser
 7. **Test Changes**: Run `pnpm test:grammar` to verify fix
 8. **Visualize Parse Tree**: Use `pnpm parse examples/test-case.scad` to inspect
 9. **Document Changes**: Update grammar documentation
@@ -439,6 +439,32 @@ This project aims to create a robust parser for OpenSCAD files using Tree-sitter
 - Node.js (latest LTS version)
 - PNPM (v10.10.0 or later)
 - Git
+
+### Native Build Prerequisites (Grammar Development Only)
+
+**For most users**: The tree-sitter-openscad package uses pre-built WASM files and doesn't require native compilation.
+
+**For grammar developers only**: If you need to modify the grammar or rebuild the parser from source:
+
+#### Windows
+- Visual Studio Build Tools or Visual Studio Community with C++ development tools
+- Python 3.x (required by node-gyp)
+
+#### macOS
+- Xcode Command Line Tools: `xcode-select --install`
+- Python 3.x (usually pre-installed)
+
+#### Linux (Ubuntu/Debian)
+```bash
+sudo apt-get update
+sudo apt-get install build-essential python3 python3-dev
+```
+
+#### Linux (CentOS/RHEL/Fedora)
+```bash
+sudo yum groupinstall "Development Tools"
+sudo yum install python3 python3-devel
+```
 
 ### Initial Setup
 

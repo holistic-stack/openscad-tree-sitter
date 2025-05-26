@@ -467,6 +467,47 @@ pnpm typecheck
 - Implement feature flags for gradual rollout
 - Have monitoring and rollback strategies
 
+## Tree-Sitter Grammar Development
+
+### Pre-built vs Native Compilation
+
+**For most users and CI/CD**: The `tree-sitter-openscad` package ships with a pre-built WASM file that works out-of-the-box without requiring any native compilation toolchain.
+
+**For grammar developers**: If you need to modify the grammar or rebuild the parser from source, you'll need to install the native compilation toolchain.
+
+### Native Build Prerequisites
+
+#### Windows
+- **Visual Studio Build Tools** or **Visual Studio Community** with C++ development tools
+- **Python 3.x** (required by node-gyp)
+- **Node.js** (latest LTS version)
+- **PNPM** (v10.10.0 or later)
+
+#### macOS
+- **Xcode Command Line Tools**: `xcode-select --install`
+- **Python 3.x** (usually pre-installed)
+- **Node.js** (latest LTS version)
+- **PNPM** (v10.10.0 or later)
+
+#### Linux (Ubuntu/Debian)
+```bash
+sudo apt-get update
+sudo apt-get install build-essential python3 python3-dev
+```
+
+#### Linux (CentOS/RHEL/Fedora)
+```bash
+sudo yum groupinstall "Development Tools"
+sudo yum install python3 python3-devel
+```
+
+### Grammar Development Commands
+
+- **`pnpm build:grammar:wasm`**: Build only WASM file (requires tree-sitter CLI)
+- **`pnpm build:grammar:native`**: Build native + WASM (requires full C++ toolchain)
+- **`pnpm test:grammar`**: Test grammar changes
+- **`pnpm parse examples/test.scad`**: Parse and visualize OpenSCAD files
+
 
 ## Mandatory Workflows
 
@@ -523,7 +564,7 @@ These workflows must never be skipped:
 3. **Run Grammar Tests**: Use `pnpm test:grammar` to verify failure
 4. **Analyze Grammar**: Review grammar.js rules related to the issue
 5. **Modify Grammar**: Update grammar.js to handle the syntax correctly
-6. **Generate Parser**: Run `pnpm build:grammar` to rebuild the parser
+6. **Generate Parser**: Run `pnpm build:grammar:wasm` to rebuild the parser
 7. **Test Changes**: Run `pnpm test:grammar` to verify fix
 8. **Visualize Parse Tree**: Use `pnpm parse examples/test-case.scad` to inspect
 9. **Document Changes**: Update grammar documentation

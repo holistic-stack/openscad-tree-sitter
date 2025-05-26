@@ -7,17 +7,19 @@
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "echo 'Grammar package uses pre-built WASM file. Use build:native or build:wasm for local development.'",
+        "command": "node scripts/echo-prebuilt-message.js",
         "cwd": "{projectRoot}"
-      }
+      },
+      "outputs": ["{projectRoot}/tree-sitter-openscad.wasm"],
+      "cache": false
     },
     "build:native": {
       "executor": "nx:run-commands",
       "options": {
         "commands": [
-          "tree-sitter generate",
-          "tree-sitter build --wasm",
-          "node-gyp rebuild"
+          "npx tree-sitter generate",
+          "npx tree-sitter build --wasm",
+          "npx node-gyp rebuild"
         ],
         "cwd": "{projectRoot}",
         "parallel": false
@@ -28,14 +30,15 @@
         "{projectRoot}/src/node-types.json",
         "{projectRoot}/tree-sitter-openscad.wasm",
         "{projectRoot}/build"
-      ]
+      ],
+      "cache": false
     },
     "build:wasm": {
       "executor": "nx:run-commands",
       "options": {
         "commands": [
-          "tree-sitter generate",
-          "tree-sitter build --wasm"
+          "npx tree-sitter generate",
+          "npx tree-sitter build --wasm"
         ],
         "cwd": "{projectRoot}",
         "parallel": false
@@ -45,44 +48,50 @@
         "{projectRoot}/src/grammar.json",
         "{projectRoot}/src/node-types.json",
         "{projectRoot}/tree-sitter-openscad.wasm"
-      ]
+      ],
+      "cache": false
     },
     "build:node": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "node-gyp rebuild",
+        "command": "npx node-gyp rebuild",
         "cwd": "{projectRoot}"
       },
-      "outputs": ["{projectRoot}/build"]
+      "outputs": ["{projectRoot}/build"],
+      "cache": false
     },
     "prebuildify": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "prebuildify --napi --strip",
+        "command": "npx prebuildify --napi --strip",
         "cwd": "{projectRoot}"
       },
-      "outputs": ["{projectRoot}/prebuilds"]
+      "outputs": ["{projectRoot}/prebuilds"],
+      "cache": false
     },
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tree-sitter test",
+        "command": "npx tree-sitter test",
         "cwd": "{projectRoot}"
-      }
+      },
+      "cache": false
     },
     "parse": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tree-sitter parse",
+        "command": "npx tree-sitter parse",
         "cwd": "{projectRoot}"
-      }
+      },
+      "cache": false
     },
     "playground": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "tree-sitter playground",
+        "command": "npx tree-sitter playground",
         "cwd": "{projectRoot}"
-      }
+      },
+      "cache": false
     },
     "lint": {
       "executor": "@nx/eslint:lint",
