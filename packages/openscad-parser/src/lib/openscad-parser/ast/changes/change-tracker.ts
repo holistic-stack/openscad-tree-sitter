@@ -24,7 +24,7 @@
  * ```
  */
 
-import { Point, Edit } from 'web-tree-sitter';
+import type { Point, Edit } from 'web-tree-sitter';
 
 /**
  * Represents a change to the source code

@@ -24,10 +24,10 @@ export class OpenscadParser {
    * Initialize the parser
    */
   async init(wasmPath = './tree-sitter-openscad.wasm'): Promise<void> {
-    const bytes = await fetch(wasmPath).then(response => response.bytes());
+    const bytes = await fetch(wasmPath).then(response => response.arrayBuffer());
     await TreeSitter.Parser.init();
     this.parser = new TreeSitter.Parser();
-    this.language = await TreeSitter.Language.load(bytes);
+    this.language = await TreeSitter.Language.load(new Uint8Array(bytes));
     this.parser.setLanguage(this.language);
     this.isInitialized = true;
   }

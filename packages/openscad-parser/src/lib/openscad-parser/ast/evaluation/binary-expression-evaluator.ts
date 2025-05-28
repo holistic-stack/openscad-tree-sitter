@@ -7,7 +7,7 @@
 
 import { Node as TSNode } from 'web-tree-sitter';
 import { BaseExpressionEvaluator } from './expression-evaluator.js';
-import { ExpressionEvaluationContext, EvaluationResult } from './expression-evaluation-context.js';
+import type { ExpressionEvaluationContext, EvaluationResult } from './expression-evaluation-context.js';
 
 /**
  * Binary expression evaluator with comprehensive operator support
@@ -30,11 +30,11 @@ export class BinaryExpressionEvaluator extends BaseExpressionEvaluator {
     ]);
   }
 
-  getPriority(): number {
+  override getPriority(): number {
     return 80; // High priority for binary operations
   }
 
-  canEvaluate(node: TSNode): boolean {
+  override canEvaluate(node: TSNode): boolean {
     // Support both direct binary expression types and expressions with binary expressionType
     if (this.supportedTypes.has(node.type)) {
       return true;
@@ -54,7 +54,7 @@ export class BinaryExpressionEvaluator extends BaseExpressionEvaluator {
     return false;
   }
 
-  evaluate(node: TSNode, context: ExpressionEvaluationContext): EvaluationResult {
+  override evaluate(node: TSNode, context: ExpressionEvaluationContext): EvaluationResult {
     const cacheKey = this.createCacheKey(node);
     const cached = context.getCachedResult(cacheKey);
     if (cached) {

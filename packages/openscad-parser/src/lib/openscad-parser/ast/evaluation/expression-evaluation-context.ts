@@ -100,7 +100,7 @@ export class ExpressionEvaluationContext {
    * Set a variable in the current scope
    */
   setVariable(name: string, result: EvaluationResult): void {
-    const currentScope = this.variableScopes[this.variableScopes.length - 1];
+    const currentScope = this.variableScopes[this.variableScopes.length - 1]!;
     currentScope[name] = result;
   }
 
@@ -109,7 +109,7 @@ export class ExpressionEvaluationContext {
    */
   getVariable(name: string): EvaluationResult | undefined {
     for (let i = this.variableScopes.length - 1; i >= 0; i--) {
-      const scope = this.variableScopes[i];
+      const scope = this.variableScopes[i]!;
       if (name in scope) {
         return scope[name];
       }
@@ -209,8 +209,8 @@ export class ExpressionEvaluationContext {
         if (args.length !== 2) {
           throw new Error('max() requires exactly 2 arguments');
         }
-        const a = args[0].value as number;
-        const b = args[1].value as number;
+        const a = args[0]!.value as number;
+        const b = args[1]!.value as number;
         return { value: Math.max(a, b), type: 'number' };
       }
     });
@@ -222,8 +222,8 @@ export class ExpressionEvaluationContext {
         if (args.length !== 2) {
           throw new Error('min() requires exactly 2 arguments');
         }
-        const a = args[0].value as number;
-        const b = args[1].value as number;
+        const a = args[0]!.value as number;
+        const b = args[1]!.value as number;
         return { value: Math.min(a, b), type: 'number' };
       }
     });

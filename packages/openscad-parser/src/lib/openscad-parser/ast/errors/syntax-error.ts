@@ -7,7 +7,8 @@
  * @module lib/openscad-parser/ast/errors/syntax-error
  */
 
-import { ParserError, ErrorPosition, ErrorSuggestion } from './parser-error.js';
+import { ParserError } from './parser-error.js';
+import type { ErrorPosition, ErrorSuggestion } from './parser-error.js';
 
 /**
  * SyntaxError class for syntax errors in the parser

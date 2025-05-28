@@ -91,7 +91,7 @@ export class ParserError extends Error {
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, this.constructor);
     } else {
-      this.stack = new Error(message).stack;
+      this.stack = new Error(message).stack || '';
     }
   }
 
