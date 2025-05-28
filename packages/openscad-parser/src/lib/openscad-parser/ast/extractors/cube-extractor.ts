@@ -24,9 +24,9 @@ export function extractCubeNode(node: TSNode, errorHandler?: ErrorHandler): ast.
     `[extractCubeNode] Node type: ${node.type}, childCount: ${node.childCount}`
   );
 
-  // Default values
-  let size: number | ast.Vector3D = 1;
-  let center = false;
+  // Initialize parameters with default values
+  let size: number | ast.Vector3D = 1; // Default size to 1
+  let center = false; // Default center to false
 
   // Find the argument_list node - it could be a direct child or a field
   let argsNode: TSNode | null = null;
@@ -72,47 +72,44 @@ export function extractCubeNode(node: TSNode, errorHandler?: ErrorHandler): ast.
     const arg = args[i];
 
     // Handle size parameter (first positional parameter or named 'size')
-    if ((i === 0 && !arg.name) || arg.name === 'size') {
+    if ((i === 0 && !arg!.name) || arg!.name === 'size') {
       // Check if it's a vector parameter
-      const vectorValue = extractVectorParameter(arg);
+      const vectorValue = extractVectorParameter(arg!);
       if (vectorValue && vectorValue.length >= 1) {
         if (vectorValue.length === 3) {
           size = vectorValue as ast.Vector3D;
         } else if (vectorValue.length === 2) {
-          // If only 2 values provided, use 0 for z
-          size = [vectorValue[0], vectorValue[1], 0] as ast.Vector3D;
-        } else if (vectorValue.length === 1) {
-          // If only 1 value provided, use it as a scalar
           size = vectorValue[0];
+          console.warn(`[extractCubeNode] Cube size given as 2D vector ${JSON.stringify(vectorValue)}, using first element ${vectorValue[0]} as scalar size.`);
+        } else if (vectorValue.length === 1) {
+          size = vectorValue[0];
+        } else {
+          // vectorValue.length is 0 or > 3, or other invalid cases.
+          size = 1; // Explicitly re-assign default
+          console.warn(`[extractCubeNode] Invalid vector size parameter: ${JSON.stringify(vectorValue)}, using default size.`);
         }
-        console.log(
-          `[extractCubeNode] Found vector size: ${JSON.stringify(size)}`
-        );
+        console.log(`[extractCubeNode] Found vector size: ${JSON.stringify(size)}`);
       } else {
-        // Try as a number parameter
-        const numberValue = extractNumberParameter(arg, errorHandler);
+        // vectorValue is null or empty
+        const numberValue = extractNumberParameter(arg!, errorHandler);
         if (numberValue !== null) {
           size = numberValue;
-          console.log(`[extractCubeNode] Found number size: ${size}`);
         } else {
-          console.log(
-            `[extractCubeNode] Invalid size parameter: ${JSON.stringify(
-              arg.value
-            )}`
-          );
+          size = 1; // Explicitly re-assign default
+          console.warn(`[extractCubeNode] Could not extract number for size parameter, using default size.`);
         }
       }
     }
     // Handle center parameter (second positional parameter or named 'center')
-    else if ((i === 1 && !arg.name) || arg.name === 'center') {
-      const centerValue = extractBooleanParameter(arg, errorHandler);
+    else if ((i === 1 && !arg!.name) || arg!.name === 'center') {
+      const centerValue = extractBooleanParameter(arg!, errorHandler);
       if (centerValue !== null) {
         center = centerValue;
         console.log(`[extractCubeNode] Found center parameter: ${center}`);
       } else {
         console.log(
           `[extractCubeNode] Invalid center parameter: ${JSON.stringify(
-            arg.value
+            arg!.value
           )}`
         );
       }

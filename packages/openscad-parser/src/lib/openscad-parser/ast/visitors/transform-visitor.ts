@@ -1,7 +1,7 @@
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types.js';
 import { BaseASTVisitor } from './base-ast-visitor.js';
-import { ASTVisitor } from './ast-visitor.js';
+import type { ASTVisitor } from './ast-visitor.js';
 import { extractArguments } from '../extractors/argument-extractor.js';
 import {
   extractNumberParameter,
@@ -26,7 +26,7 @@ export class TransformVisitor extends BaseASTVisitor {
   constructor(
     source: string,
     private compositeVisitor: ASTVisitor | undefined, // Made explicit undefined for clarity with optional errorHandler
-    protected errorHandler: ErrorHandler
+    protected override errorHandler: ErrorHandler
   ) {
     super(source);
   }
@@ -36,7 +36,7 @@ export class TransformVisitor extends BaseASTVisitor {
    * @param node The accessor expression node to visit
    * @returns The AST node or null if the node cannot be processed
    */
-  visitAccessorExpression(node: TSNode): ast.ASTNode | null {
+  override visitAccessorExpression(node: TSNode): ast.ASTNode | null {
     this.errorHandler.logInfo(
       `[TransformVisitor.visitAccessorExpression] Processing accessor expression: ${node.text.substring(
         0,
@@ -96,9 +96,12 @@ export class TransformVisitor extends BaseASTVisitor {
 
         if (functionName && truncatedNameMap[functionName]) {
           console.log(
-            `[TransformVisitor.visitAccessorExpression] WORKAROUND: Detected truncated function name "${functionName}", correcting to "${truncatedNameMap[functionName]}"`
+            `[TransformVisitor.visitAccessorExpression] WORKAROUND: Detected truncated function name "${functionName}", correcting to "${truncatedNameMap[functionName!]}"`
           );
-          functionName = truncatedNameMap[functionName];
+          const mappedName = truncatedNameMap[functionName!];
+          if (mappedName) {
+            functionName = mappedName;
+          }
         }
 
         console.log(
@@ -162,7 +165,7 @@ export class TransformVisitor extends BaseASTVisitor {
    * @param node The module instantiation node to visit
    * @returns The AST node or null if the node cannot be processed
    */
-  public visitModuleInstantiation(node: TSNode): ast.ASTNode | null {
+  public override visitModuleInstantiation(node: TSNode): ast.ASTNode | null {
     console.log(
       `[TransformVisitor.visitModuleInstantiation] Processing module instantiation: ${node.text.substring(
         0,
@@ -316,21 +319,21 @@ export class TransformVisitor extends BaseASTVisitor {
         // Handle color transform
         let colorValue: string | ast.Vector4D = 'black'; // Default color
 
-        if (args.length > 0 && args[0].value !== null) {
-          if (typeof args[0].value === 'string') {
+        if (args.length > 0 && args[0]!.value !== null) {
+          if (typeof args[0]!.value === 'string') {
             // If it's a string, use it directly
-            colorValue = args[0].value;
-          } else if (Array.isArray(args[0].value)) {
+            colorValue = args[0]!.value;
+          } else if (Array.isArray(args[0]!.value)) {
             // If it's an array, try to convert it to a Vector4D
             // First, ensure we're working with a safe array that has at least one element
-            if (args[0].value.length > 0) {
+            if (args[0]!.value.length > 0) {
               // Create a safe color array with default values
               const colorArray: [number, number, number, number] = [0, 0, 0, 1];
 
               // Fill in values from the input array, if they exist and are numbers
-              for (let i = 0; i < Math.min(args[0].value.length, 4); i++) {
-                if (typeof args[0].value[i] === 'number') {
-                  colorArray[i] = args[0].value[i];
+              for (let i = 0; i < Math.min(args[0]!.value.length, 4); i++) {
+                if (typeof args[0]!.value[i] === 'number') {
+                  colorArray[i] = args[0]!.value[i];
                 }
               }
 
@@ -342,9 +345,9 @@ export class TransformVisitor extends BaseASTVisitor {
                 node
               );
             }
-          } else if (typeof args[0].value === 'number') {
+          } else if (typeof args[0]!.value === 'number') {
             // If it's a number, convert it to a grayscale color
-            const value = Math.min(1, Math.max(0, args[0].value));
+            const value = Math.min(1, Math.max(0, args[0]!.value));
             colorValue = [value, value, value, 1];
           }
         }
@@ -398,7 +401,7 @@ export class TransformVisitor extends BaseASTVisitor {
         };
 
         // Get the matrix value from arguments
-        const matrixValue = args.length > 0 ? createMatrixFromValue(args[0].value) : identityMatrix;
+        const matrixValue = args.length > 0 ? createMatrixFromValue(args[0]!.value) : identityMatrix;
 
         return {
           type: 'multmatrix',
@@ -409,15 +412,15 @@ export class TransformVisitor extends BaseASTVisitor {
       case 'offset':
         // Handle offset transform
         let chamferValue = false; // Default to false for chamfer
-        if (args.length > 2 && args[2].value !== null) {
+        if (args.length > 2 && args[2]!.value !== null) {
           // Convert to boolean if it's not already
-          chamferValue = args[2].value === true || args[2].value === 1 || args[2].value === 'true';
+          chamferValue = args[2]!.value === true || args[2]!.value === 1 || args[2]!.value === 'true';
         }
 
         return {
           type: 'offset',
-          r: args.length > 0 ? (typeof args[0].value === 'number' ? args[0].value : 0) : 0,
-          delta: args.length > 1 ? (typeof args[1].value === 'number' ? args[1].value : 0) : 0,
+          r: args.length > 0 ? (typeof args[0]!.value === 'number' ? args[0]!.value : 0) : 0,
+          delta: args.length > 1 ? (typeof args[1]!.value === 'number' ? args[1]!.value : 0) : 0,
           chamfer: chamferValue,
           children: [],
           location: getLocation(node),

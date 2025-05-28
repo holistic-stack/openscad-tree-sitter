@@ -16,15 +16,25 @@ function convertValueToParameterValue(value: ast.Value): ast.ParameterValue {
   } else if (value.type === 'string') {
     return value.value as string;
   } else if (value.type === 'identifier') {
-    return value.value as string;
+    // For identifiers, we might want to create a VariableNode or IdentifierNode
+    // For now, returning as string to match previous behavior, but this might need refinement
+    // to align with how identifiers are treated as expressions.
+    return {
+      type: 'expression',
+      expressionType: 'identifier',
+      name: value.value as string,
+    } as ast.IdentifierNode;
   } else if (value.type === 'vector') {
     const vectorValues = (value.value as ast.Value[]).map(v => {
       if (v.type === 'number') {
         return parseFloat(v.value as string);
       }
-      return 0;
+      return 0; // Default for non-numeric elements in a vector context
     });
 
+    // Check if it's intended to be an ExpressionNode (VectorExpressionNode)
+    // This part is tricky as ast.Value for 'vector' is different from ast.VectorExpressionNode
+    // For now, let's assume if it's from ast.Value, it's a direct vector, not an expression node.
     if (vectorValues.length === 2) {
       return vectorValues as ast.Vector2D;
     } else if (vectorValues.length >= 3) {
@@ -34,22 +44,58 @@ function convertValueToParameterValue(value: ast.Value): ast.ParameterValue {
         vectorValues[2],
       ] as ast.Vector3D;
     }
-    return 0; // Default fallback
+    // Fallback for empty or 1-element vectors, or if conversion is ambiguous
+    // OpenSCAD allows single numbers to be treated as vectors in some contexts, but ParameterValue expects specific types.
+    // Returning an empty VectorExpressionNode or null might be alternatives.
+    // For now, returning a default vector to avoid crashes, but this needs review.
+    return [0, 0, 0] as ast.Vector3D; // Default fallback, consider implications
   } else if (value.type === 'range') {
     // Create an expression node for range
-    return {
+    const rangeNode: ast.RangeExpressionNode = {
       type: 'expression',
-      expressionType: 'range',
-      location: undefined,
+      expressionType: 'range_expression',
+      start: {
+        type: 'expression',
+        expressionType: 'literal',
+        value: value.start ? parseFloat(value.start) : 0, // Default to 0 if undefined
+      } as ast.LiteralNode,
+      end: {
+        type: 'expression',
+        expressionType: 'literal',
+        value: value.end ? parseFloat(value.end) : 0, // Default to 0 if undefined
+      } as ast.LiteralNode,
     };
+    if (value.step) {
+      rangeNode.step = {
+        type: 'expression',
+        expressionType: 'literal',
+        value: parseFloat(value.step),
+      } as ast.LiteralNode;
+    }
+    return rangeNode;
   }
 
-  // Default fallback - create a literal expression
+  // Default fallback - create a literal expression for unrecognized ast.Value types
+  // or if 'value.value' is not a string (e.g. for 'vector' type if not handled above)
+  let literalValue: string | number | boolean = '';
+  if (typeof value.value === 'string') {
+    literalValue = value.value;
+  } else if (typeof value.value === 'number') {
+    literalValue = value.value;
+  } else if (typeof value.value === 'boolean') {
+    literalValue = value.value;
+  } else {
+    // Fallback for complex value.value types or if unhandled
+    // This might occur if a 'vector' ast.Value.value (which is Value[]) reaches here.
+    // Consider logging a warning or throwing an error for unhandled ast.Value subtypes.
+    console.warn(`[convertValueToParameterValue] Unhandled ast.Value subtype or value for default literal: ${value.type}, value: ${JSON.stringify(value.value)}`);
+    // Defaulting to empty string, but this is likely not correct for all cases.
+  }
+
   return {
     type: 'expression',
     expressionType: 'literal',
-    value: typeof value.value === 'string' ? value.value : '',
-    location: undefined,
+    value: literalValue,
   } as ast.LiteralNode;
 }
 
@@ -667,17 +713,24 @@ function extractRangeLiteral(rangeNode: TSNode): ast.RangeValue | null {
   const endNode = rangeNode.childForFieldName('end');
   const stepNode = rangeNode.childForFieldName('step');
 
-  const start = startNode ? startNode.text : undefined;
-  const end = endNode ? endNode.text : undefined;
-  const step = stepNode ? stepNode.text : undefined;
-
-  return {
+  const rangeValue: Omit<ast.RangeValue, 'value'> = {
     type: 'range',
-    start,
-    end,
-    step,
-    value: rangeNode.text, // Add the required value property
   };
+
+  if (startNode) {
+    rangeValue.start = startNode.text;
+  }
+  if (endNode) {
+    rangeValue.end = endNode.text;
+  }
+  if (stepNode) {
+    rangeValue.step = stepNode.text;
+  }
+
+  // The 'value' property inherited from ast.Value is problematic here.
+  // ast.RangeValue should ideally not have a 'value: string | Value[]' field.
+  // For now, we cast to satisfy the return type, but ast-types.ts needs review.
+  return rangeValue as ast.RangeValue;
 }
 
 export interface ExtractedNamedArgument {

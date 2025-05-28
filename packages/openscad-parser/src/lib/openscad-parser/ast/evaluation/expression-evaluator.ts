@@ -6,7 +6,7 @@
  */
 
 import { Node as TSNode } from 'web-tree-sitter';
-import { ExpressionEvaluationContext, EvaluationResult } from './expression-evaluation-context.js';
+import type { ExpressionEvaluationContext, EvaluationResult } from './expression-evaluation-context.js';
 
 /**
  * Base interface for expression evaluators
@@ -230,5 +230,3 @@ export class IdentifierEvaluator extends BaseExpressionEvaluator {
     };
   }
 }
-
-

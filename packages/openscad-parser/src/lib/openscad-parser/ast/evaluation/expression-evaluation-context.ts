@@ -235,8 +235,94 @@ export class ExpressionEvaluationContext {
         if (args.length !== 1) {
           throw new Error('abs() requires exactly 1 argument');
         }
-        const x = args[0].value as number;
+        const x = args[0]!.value as number;
         return { value: Math.abs(x), type: 'number' };
+      }
+    });
+
+    // Trigonometric functions (degrees)
+    this.registerFunction({
+      name: 'sin',
+      parameters: ['x'],
+      evaluator: (args) => {
+        if (args.length !== 1) {
+          throw new Error('sin() requires exactly 1 argument');
+        }
+        const x = args[0]!.value as number;
+        return { value: Math.sin(x * Math.PI / 180), type: 'number' };
+      }
+    });
+
+    this.registerFunction({
+      name: 'cos',
+      parameters: ['x'],
+      evaluator: (args) => {
+        if (args.length !== 1) {
+          throw new Error('cos() requires exactly 1 argument');
+        }
+        const x = args[0]!.value as number;
+        return { value: Math.cos(x * Math.PI / 180), type: 'number' };
+      }
+    });
+
+    this.registerFunction({
+      name: 'tan',
+      parameters: ['x'],
+      evaluator: (args) => {
+        if (args.length !== 1) {
+          throw new Error('tan() requires exactly 1 argument');
+        }
+        const x = args[0]!.value as number;
+        return { value: Math.tan(x * Math.PI / 180), type: 'number' };
+      }
+    });
+
+    this.registerFunction({
+      name: 'asin',
+      parameters: ['x'],
+      evaluator: (args) => {
+        if (args.length !== 1) {
+          throw new Error('asin() requires exactly 1 argument');
+        }
+        const x = args[0]!.value as number;
+        return { value: Math.asin(x) * 180 / Math.PI, type: 'number' };
+      }
+    });
+
+    this.registerFunction({
+      name: 'acos',
+      parameters: ['x'],
+      evaluator: (args) => {
+        if (args.length !== 1) {
+          throw new Error('acos() requires exactly 1 argument');
+        }
+        const x = args[0]!.value as number;
+        return { value: Math.acos(x) * 180 / Math.PI, type: 'number' };
+      }
+    });
+
+    this.registerFunction({
+      name: 'atan',
+      parameters: ['x'],
+      evaluator: (args) => {
+        if (args.length !== 1) {
+          throw new Error('atan() requires exactly 1 argument');
+        }
+        const x = args[0]!.value as number;
+        return { value: Math.atan(x) * 180 / Math.PI, type: 'number' };
+      }
+    });
+
+    this.registerFunction({
+      name: 'atan2',
+      parameters: ['y', 'x'],
+      evaluator: (args) => {
+        if (args.length !== 2) {
+          throw new Error('atan2() requires exactly 2 arguments');
+        }
+        const y = args[0]!.value as number;
+        const x = args[1]!.value as number;
+        return { value: Math.atan2(y, x) * 180 / Math.PI, type: 'number' };
       }
     });
   }

@@ -47,9 +47,9 @@ export function extractColorNode(node: TSNode): ast.ColorNode | null {
     const arg = args[i];
 
     // Handle color parameter (first positional parameter or named 'c')
-    if ((i === 0 && !arg.name) || arg.name === 'c') {
+    if ((i === 0 && !arg!.name) || arg!.name === 'c') {
       // Check if it's a vector parameter (RGB or RGBA)
-      const vectorValue = extractVectorParameter(arg);
+      const vectorValue = extractVectorParameter(arg!);
       if (vectorValue) {
         if (vectorValue.length === 3) {
           // Convert RGB to RGBA by adding alpha=1
@@ -82,29 +82,29 @@ export function extractColorNode(node: TSNode): ast.ColorNode | null {
         }
       } else {
         // Try as a string parameter (color name or hex)
-        const stringValue = extractStringParameter(arg);
+        const stringValue = extractStringParameter(arg!);
         if (stringValue !== null) {
           color = stringValue;
           console.log(`[extractColorNode] Found color name: ${color}`);
         } else {
           console.log(
             `[extractColorNode] Invalid color parameter: ${JSON.stringify(
-              arg.value
+              arg!.value
             )}`
           );
         }
       }
     }
     // Handle alpha parameter (second positional parameter or named 'alpha')
-    else if ((i === 1 && !arg.name) || arg.name === 'alpha') {
-      const alphaValue = extractNumberParameter(arg);
+    else if ((i === 1 && !arg!.name) || arg!.name === 'alpha') {
+      const alphaValue = extractNumberParameter(arg!);
       if (alphaValue !== null) {
         alpha = alphaValue;
         console.log(`[extractColorNode] Found alpha parameter: ${alpha}`);
       } else {
         console.log(
           `[extractColorNode] Invalid alpha parameter: ${JSON.stringify(
-            arg.value
+            arg!.value
           )}`
         );
       }
