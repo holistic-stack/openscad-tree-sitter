@@ -1,21 +1,29 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    // React application configuration
     "jsx": "react-jsx",
     "allowJs": false,
-    "esModuleInterop": false,
     "allowSyntheticDefaultImports": true,
-    "strict": true,
+
+    // Application-specific settings
+    "lib": ["es2022", "dom", "dom.iterable"],
     "types": ["vite/client", "vitest"]
   },
   "files": [],
   "include": [],
   "references": [
     {
+      "path": "../tree-sitter-openscad"
+    },
+    {
+      "path": "../openscad-parser"
+    },
+    {
       "path": "./tsconfig.lib.json"
     },
     {
       "path": "./tsconfig.spec.json"
     }
-  ],
-  "extends": "../../tsconfig.base.json"
+  ]
 }

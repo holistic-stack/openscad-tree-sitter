@@ -1,12 +1,22 @@
 {
   "compilerOptions": {
-    "esModuleInterop": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
+    // Root-specific overrides
     "types": ["node", "vite/client", "vitest/globals", "vitest"]
   },
   "files": [],
-  "references": [],
+  "references": [
+    {
+      "path": "./packages/tree-sitter-openscad"
+    },
+    {
+      "path": "./packages/openscad-parser"
+    },
+    {
+      "path": "./packages/openscad-editor"
+    },
+    {
+      "path": "./packages/openscad-demo"
+    }
+  ],
   "extends": "./tsconfig.base.json"
 }

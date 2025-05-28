@@ -1,16 +1,29 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    // Application build configuration
+    "composite": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./.tsbuildinfo-lib",
+
+    // Bundler configuration for Vite
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+
+    // Output configuration
     "outDir": "../../dist/out-tsc",
+
+    // Application-specific types
     "types": [
       "node",
       "@nx/react/typings/cssmodule.d.ts",
       "@nx/react/typings/image.d.ts",
       "vite/client"
-    ],
-    "allowImportingTsExtensions": true,
-    "noEmit": true
+    ]
   },
+  "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"],
   "exclude": [
     "**/*.spec.ts",
     "**/*.test.ts",
@@ -33,5 +46,15 @@
     "src/**/*.test.jsx",
     "src/**/*.spec.jsx"
   ],
-  "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"]
+  "references": [
+    {
+      "path": "../tree-sitter-openscad"
+    },
+    {
+      "path": "../openscad-parser"
+    },
+    {
+      "path": "../openscad-editor/tsconfig.lib.json"
+    }
+  ]
 }

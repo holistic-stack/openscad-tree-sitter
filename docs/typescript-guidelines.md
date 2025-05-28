@@ -1078,3 +1078,341 @@ This guide covers the essential TypeScript best practices for modern development
 7. **Productivity**: Use developer tools and avoid common pitfalls
 
 Remember to always prioritize type safety, use strict mode, and leverage TypeScript's powerful type system to catch errors at compile time rather than runtime.
+
+## TypeScript 5.8 Configuration Best Practices
+
+### Recommended tsconfig.json for TypeScript 5.8
+
+**1. Base Configuration (All Projects)**
+```json
+{
+  "compilerOptions": {
+    // Base Options
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "es2022",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+
+    // Strictness (Essential)
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+
+    // TypeScript 5.8 Specific Options
+    "libReplacement": true,  // Enable lib replacement (default: true)
+
+    // For Node.js --experimental-strip-types compatibility
+    "erasableSyntaxOnly": false  // Set to true if using Node.js type stripping
+  }
+}
+```
+
+**2. For Libraries (Publishing to npm)**
+```json
+{
+  "extends": "@tsconfig/strictest/tsconfig.json",
+  "compilerOptions": {
+    // Module Configuration
+    "module": "node16",
+    "moduleResolution": "node16",
+    "target": "es2020",
+    "verbatimModuleSyntax": true,
+
+    // Declaration Generation
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+
+    // Monorepo Support
+    "composite": true,
+    "incremental": true,
+
+    // Output
+    "outDir": "./dist",
+    "rootDir": "./src",
+
+    // Library Specific
+    "lib": ["es2020"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["dist", "node_modules", "**/*.test.ts"]
+}
+```
+
+**3. For Applications (Using Bundlers)**
+```json
+{
+  "compilerOptions": {
+    // Modern Bundler Configuration
+    "module": "preserve",  // TypeScript 5.8+ for bundlers
+    "moduleResolution": "bundler",
+    "target": "esnext",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+
+    // Bundler-Specific Features
+    "allowArbitraryExtensions": true,
+    "resolvePackageJsonExports": true,
+    "resolvePackageJsonImports": true,
+
+    // DOM Support
+    "lib": ["esnext", "dom", "dom.iterable"],
+
+    // Development
+    "sourceMap": true
+  }
+}
+```
+
+**4. For Node.js Applications**
+```json
+{
+  "compilerOptions": {
+    // Node.js Configuration
+    "module": "nodenext",  // Latest Node.js features
+    "moduleResolution": "nodenext",
+    "target": "es2022",
+
+    // Node.js Specific
+    "lib": ["es2022"],
+    "types": ["node"],
+
+    // Output
+    "outDir": "./dist",
+    "rootDir": "./src"
+  }
+}
+```
+
+### TypeScript 4.8 to 5.8 Migration Checklist
+
+#### 1. Update Dependencies
+```bash
+# Update TypeScript
+npm install typescript@^5.8.0 --save-dev
+
+# Update @types/node if using Node.js
+npm install @types/node@latest --save-dev
+
+# Update other type packages
+npm update @types/*
+```
+
+#### 2. Configuration Updates Required
+
+**Remove Deprecated Options (Breaking Changes)**
+```json
+{
+  "compilerOptions": {
+    // ❌ Remove these deprecated options
+    // "target": "ES3",                    // Deprecated in 5.0
+    // "out": "./output.js",               // Deprecated in 5.0
+    // "noImplicitUseStrict": false,       // Deprecated in 5.0
+    // "keyofStringsOnly": false,          // Deprecated in 5.0
+    // "suppressExcessPropertyErrors": false, // Deprecated in 5.0
+    // "suppressImplicitAnyIndexErrors": false, // Deprecated in 5.0
+    // "noStrictGenericChecks": false,     // Deprecated in 5.0
+    // "charset": "utf8",                  // Deprecated in 5.0
+    // "importsNotUsedAsValues": "remove", // Deprecated in 5.0
+    // "preserveValueImports": false,      // Deprecated in 5.0
+
+    // ✅ Use these instead
+    "target": "es2020",                   // Minimum supported
+    "verbatimModuleSyntax": true          // Replaces import/preserve options
+  }
+}
+```
+
+**Update Module Resolution**
+```json
+{
+  "compilerOptions": {
+    // ❌ Old module resolution
+    // "module": "commonjs",
+    // "moduleResolution": "node",
+
+    // ✅ New module resolution options
+    "module": "node18",           // For Node.js 18 (stable)
+    "moduleResolution": "node18", // Or "nodenext" for latest
+
+    // Or for bundlers:
+    "module": "preserve",         // TypeScript 5.8+
+    "moduleResolution": "bundler"
+  }
+}
+```
+
+#### 3. Code Changes Required
+
+**1. Enum Usage Updates**
+```typescript
+// ❌ No longer allowed in 5.x
+enum SomeEvenDigit {
+  Zero = 0,
+  Two = 2,
+  Four = 4
+}
+let m: SomeEvenDigit = 1; // Error in 5.x
+
+// ✅ Correct usage
+let m: SomeEvenDigit = SomeEvenDigit.Zero;
+```
+
+**2. Catch Variable Types (4.4+)**
+```typescript
+// ❌ Old catch handling
+try {
+  // some code
+} catch (error) {
+  console.log(error.message); // error is any
+}
+
+// ✅ New catch handling
+try {
+  // some code
+} catch (error: unknown) {
+  if (error instanceof Error) {
+    console.log(error.message);
+  }
+}
+```
+
+**3. Import Assertions to Import Attributes**
+```typescript
+// ❌ Deprecated import assertions (Node.js 22+)
+import data from "./data.json" assert { type: "json" };
+
+// ✅ Use import attributes
+import data from "./data.json" with { type: "json" };
+```
+
+#### 4. New Features to Adopt
+
+**1. TypeScript 5.8 - erasableSyntaxOnly**
+```json
+{
+  "compilerOptions": {
+    // For Node.js --experimental-strip-types compatibility
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true
+  }
+}
+```
+
+**2. TypeScript 5.8 - libReplacement Control**
+```json
+{
+  "compilerOptions": {
+    // Control lib replacement behavior
+    "libReplacement": false  // Disable if not using @typescript/lib-* packages
+  }
+}
+```
+
+**3. TypeScript 5.0+ - New Decorators**
+```typescript
+// ✅ Use standard decorators (no --experimentalDecorators needed)
+function logged(target: any, context: ClassMethodDecoratorContext) {
+  return function (this: any, ...args: any[]) {
+    console.log(`Calling ${String(context.name)}`);
+    return target.call(this, ...args);
+  };
+}
+
+class MyClass {
+  @logged
+  method() {
+    return "result";
+  }
+}
+```
+
+#### 5. Performance Optimizations
+
+**Enable New Performance Features**
+```json
+{
+  "compilerOptions": {
+    // Performance improvements
+    "incremental": true,
+    "tsBuildInfoFile": "./.tsbuildinfo",
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+
+    // TypeScript 5.8 optimizations
+    "libReplacement": false  // If not using lib replacements
+  }
+}
+```
+
+#### 6. Validation Steps
+
+**1. Check for Deprecated Usage**
+```bash
+# Run TypeScript compiler to check for deprecation warnings
+npx tsc --noEmit
+
+# Look for warnings about deprecated options
+```
+
+**2. Test Module Resolution**
+```typescript
+// Test ESM imports work correctly
+import { something } from "./module.js";  // Note .js extension
+
+// Test dynamic imports
+const module = await import("./dynamic-module.js");
+```
+
+**3. Verify Strict Mode**
+```typescript
+// Ensure strict mode catches issues
+function test(param: unknown) {
+  // Should error without proper type checking
+  return param.someProperty; // Error: Object is of type 'unknown'
+}
+```
+
+#### 7. Common Migration Issues
+
+**1. Module Resolution Errors**
+```typescript
+// ❌ Missing file extensions in ESM
+import { utils } from "./utils";
+
+// ✅ Include .js extensions
+import { utils } from "./utils.js";
+```
+
+**2. Type-Only Import Issues**
+```typescript
+// ❌ Mixed imports that may cause issues
+import { type User, createUser, type Config } from "./module.js";
+
+// ✅ Separate type and value imports
+import type { User, Config } from "./module.js";
+import { createUser } from "./module.js";
+```
+
+**3. Enum Comparison Errors**
+```typescript
+// ❌ Invalid enum comparisons
+enum Status { Active = 1, Inactive = 0 }
+const status: Status = Status.Active;
+if (status === 2) {} // Error in 5.x
+
+// ✅ Valid enum usage
+if (status === Status.Active) {}
+```
+
+This migration checklist ensures a smooth transition from TypeScript 4.8 to 5.8 while adopting the latest best practices and performance improvements.

@@ -1,37 +1,50 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "esModuleInterop": true,
-    "strict": true,
-    "declaration": true,
-    "sourceMap": true,
-    "outDir": "dist",
+    // Library-specific configuration
+    "composite": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./.tsbuildinfo",
+
+    // Bundler configuration for Vite
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+
+    // Output configuration
+    "outDir": "./dist",
+    "declarationMap": true,
+
+    // Library-specific settings
+    "lib": ["es2022"],
+    "types": [
+      "node",
+      "vite/client",
+      "vitest/globals",
+      "vitest"
+    ],
+
+    // Path mapping
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
       "*": ["node_modules/*"]
-    },
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "types": [
-       "node",
-      // Include type definitions for:
-      "vite/client", // - Vite client types
-      "vitest/globals", // - Vitest globals for testing
-      "vitest" // - Vitest types for testing
-    ],
-    "allowImportingTsExtensions": true,
-    "noEmit": true
+    }
   },
-  "include": ["src/**/*", "vite.config.ts"],
+  "include": [
+    "src/**/*",
+    "vite.config.ts"
+  ],
   "exclude": [
     "node_modules",
     "dist",
-    "src/lib/openscad-parser/openscad-parser.ts",
     "**/*.test.ts",
     "**/*.spec.ts"
+  ],
+  "references": [
+    {
+      "path": "../tree-sitter-openscad"
+    }
   ]
 }

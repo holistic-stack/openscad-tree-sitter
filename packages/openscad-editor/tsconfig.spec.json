@@ -1,7 +1,21 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    // Test configuration
+    "composite": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./.tsbuildinfo-spec",
+
+    // Bundler configuration for Vite tests
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+
+    // Output configuration
     "outDir": "../../dist/out-tsc",
+
+    // Test-specific types
     "types": [
       "vitest/globals",
       "vitest/importMeta",
