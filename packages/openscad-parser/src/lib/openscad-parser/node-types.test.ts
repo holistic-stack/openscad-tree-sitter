@@ -4,6 +4,30 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { EnhancedOpenscadParser } from './enhanced-parser';
+import { TreeCursor } from 'web-tree-sitter';
+
+/**
+ * Collects all unique node types from a tree by traversing it depth-first.
+ * @param cursor - The tree cursor to traverse
+ * @returns Set of all unique node types found in the tree
+ */
+function collectNodeTypes(cursor: TreeCursor): Set<string> {
+  const nodeTypes = new Set<string>();
+
+  function traverseNode(cursor: TreeCursor): void {
+    nodeTypes.add(cursor.nodeType);
+
+    if (cursor.gotoFirstChild()) {
+      do {
+        traverseNode(cursor);
+      } while (cursor.gotoNextSibling());
+      cursor.gotoParent();
+    }
+  }
+
+  traverseNode(cursor);
+  return nodeTypes;
+}
 
 describe('OpenSCAD Node Types', () => {
   let parser: EnhancedOpenscadParser;
@@ -26,48 +50,9 @@ describe('OpenSCAD Node Types', () => {
     console.log('Tree structure:');
     console.log(tree.rootNode.toString());
 
-    // Print the node types
+    // Collect all node types using the utility function
     const cursor = tree.rootNode.walk();
-
-    const nodeTypes = new Set<string>();
-
-    // Go to the first child
-    cursor.gotoFirstChild();
-
-    do {
-      nodeTypes.add(cursor.nodeType);
-
-      // Try to go to the first child
-      if (cursor.gotoFirstChild()) {
-        // If successful, continue with the loop
-        continue;
-      }
-
-      // If no first child, try to go to the next sibling
-      if (cursor.gotoNextSibling()) {
-        // If successful, continue with the loop
-        continue;
-      }
-
-      // If no next sibling, go to the parent and then to the next sibling
-      let foundNextNode = false;
-      while (!foundNextNode) {
-        if (!cursor.gotoParent()) {
-          // If we can't go to the parent, we're done
-          break;
-        }
-
-        if (cursor.gotoNextSibling()) {
-          // If we found a next sibling, continue with the loop
-          foundNextNode = true;
-        }
-      }
-
-      if (!foundNextNode) {
-        // If we didn't find a next node, we're done
-        break;
-      }
-    } while (true);
+    const nodeTypes = collectNodeTypes(cursor);
 
     // Print the node types
     console.log('Node types:');

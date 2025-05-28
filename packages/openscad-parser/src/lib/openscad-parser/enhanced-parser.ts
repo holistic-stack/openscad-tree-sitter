@@ -6,9 +6,8 @@
  */
 
 import * as TreeSitter from 'web-tree-sitter';
-import { SimpleErrorHandler, IErrorHandler } from './error-handling/simple-error-handler';
-import { ASTNode } from './ast/ast-types';
-import { VisitorASTGenerator } from './ast/visitor-ast-generator';
+import { SimpleErrorHandler, IErrorHandler, ASTNode } from '@/lib';
+import { VisitorASTGenerator } from '@/lib/openscad-parser/ast';
 import { ErrorHandler } from './error-handling';
 
 /**

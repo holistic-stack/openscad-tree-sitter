@@ -58,8 +58,8 @@ describe('AST Generator Integration Tests', () => {
       expect(children).toHaveLength(1); // Should have 1 child (the cube)
       const cubeNode = children[0];
       expect(cubeNode?.type).toBe('cube');
-      expect((cubeNode as any).size).toEqual([1, 2, 3]);
-      expect((cubeNode as any).center).toBe(true);
+      expect((cubeNode).size).toEqual([1, 2, 3]);
+      expect((cubeNode).center).toBe(true);
     });
 
     it('should parse translate with cube using curly braces and named parameters', () => {
