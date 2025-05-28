@@ -10,11 +10,11 @@
  */
 
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../../ast-types';
-import { getLocation } from '../../utils/location-utils';
-import { extractArguments } from '../../extractors/argument-extractor';
-import { ExpressionVisitor } from '../expression-visitor';
-import { ErrorHandler } from '../../../error-handling'; // Added ErrorHandler import
+import * as ast from '../../ast-types.js';
+import { getLocation } from '../../utils/location-utils.js';
+import { extractArguments } from '../../extractors/argument-extractor.js';
+import { ExpressionVisitor } from '../expression-visitor.js';
+import { ErrorHandler } from '../../../error-handling/index.js'; // Added ErrorHandler import
 
 /**
  * Visitor for for loop statements

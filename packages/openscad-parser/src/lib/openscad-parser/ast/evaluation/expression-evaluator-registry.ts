@@ -7,9 +7,9 @@
  * @module lib/openscad-parser/ast/evaluation/expression-evaluator-registry
  */
 
-import * as ast from '../ast-types';
-import { ErrorHandler } from '../../error-handling';
-import { evaluateBinaryExpression } from './binary-expression-evaluator/binary-expression-evaluator';
+import * as ast from '../ast-types.js';
+import { ErrorHandler } from '../../error-handling/index.js';
+import { evaluateBinaryExpression } from './binary-expression-evaluator/binary-expression-evaluator.js';
 
 /**
  * Evaluates an expression node and returns a value

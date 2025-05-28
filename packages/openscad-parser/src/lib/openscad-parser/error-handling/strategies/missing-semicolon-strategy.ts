@@ -3,8 +3,8 @@
  * @module openscad-parser/error-handling/strategies/missing-semicolon-strategy
  */
 
-import { ParserError, ErrorCode } from '../types/error-types.ts';
-import { BaseRecoveryStrategy } from './recovery-strategy.ts';
+import { ParserError, ErrorCode } from '../types/error-types.js';
+import { BaseRecoveryStrategy } from './recovery-strategy.js';
 
 /**
  * Recovery strategy for handling missing semicolon errors.

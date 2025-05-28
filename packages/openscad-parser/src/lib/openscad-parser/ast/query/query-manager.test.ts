@@ -3,8 +3,8 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { QueryManager } from './query-manager';
-import { QueryCache } from './query-cache';
+import { QueryManager } from './query-manager.js';
+import { QueryCache } from './query-cache.js';
 
 // Mock the Tree-sitter types
 class MockTree {

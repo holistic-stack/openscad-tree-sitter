@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { EnhancedOpenscadParser } from '../../enhanced-parser';
-import { ErrorHandler } from '../../error-handling';
-import { extractCubeNode } from '../extractors/cube-extractor';
+import { EnhancedOpenscadParser } from '../../enhanced-parser.js';
+import { ErrorHandler } from '../../error-handling/index.js';
+import { extractCubeNode } from '../extractors/cube-extractor.js';
 
 describe('Enhanced Expression Evaluation', () => {
   let parser: EnhancedOpenscadParser;

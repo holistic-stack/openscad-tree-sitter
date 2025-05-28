@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { EnhancedOpenscadParser } from '../../enhanced-parser';
+import { EnhancedOpenscadParser } from '../../enhanced-parser.js';
 import { Node as TSNode } from 'web-tree-sitter';
 
 describe('Real Parser Integration Tests', () => {

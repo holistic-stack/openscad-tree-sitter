@@ -1,9 +1,9 @@
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../../../ast-types';
-import { BaseASTVisitor } from '../../base-ast-visitor'; // Assuming this is the correct path
-import { ErrorHandler } from '../../../../error-handling';
-import { ExpressionVisitor } from '../../expression-visitor'; // Parent visitor
-import { getLocation } from '../../../utils/location-utils';
+import * as ast from '../../../ast-types.js';
+import { BaseASTVisitor } from '../../base-ast-visitor.js'; // Assuming this is the correct path
+import { ErrorHandler } from '../../../../error-handling/index.js';
+import { ExpressionVisitor } from '../../expression-visitor.js'; // Parent visitor
+import { getLocation } from '../../../utils/location-utils.js';
 
 export class BinaryExpressionVisitor extends BaseASTVisitor {
   constructor(

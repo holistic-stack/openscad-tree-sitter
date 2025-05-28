@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
-import { BinaryExpressionVisitor } from './binary-expression-visitor';
-import { ExpressionVisitor } from '../../expression-visitor';
-import { ErrorHandler } from '../../../../error-handling';
-import { EnhancedOpenscadParser } from '../../../../enhanced-parser';
-import { RealNodeGenerator } from '../../../test-utils/real-node-generator';
+import { BinaryExpressionVisitor } from './binary-expression-visitor.js';
+import { ExpressionVisitor } from '../../expression-visitor.js';
+import { ErrorHandler } from '../../../../error-handling/index.js';
+import { EnhancedOpenscadParser } from '../../../../enhanced-parser.js';
+import { RealNodeGenerator } from '../../../test-utils/real-node-generator.js';
 
 describe('SimpleBinaryExpressionTest', () => {
   let parser: EnhancedOpenscadParser;

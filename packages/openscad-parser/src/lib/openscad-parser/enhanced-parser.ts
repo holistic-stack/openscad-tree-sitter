@@ -8,7 +8,7 @@
 import * as TreeSitter from 'web-tree-sitter';
 import { SimpleErrorHandler, IErrorHandler, ASTNode } from '@/lib';
 import { VisitorASTGenerator } from '@/lib/openscad-parser/ast';
-import { ErrorHandler } from './error-handling';
+import { ErrorHandler } from './error-handling/index.js';
 
 /**
  * Enhanced OpenSCAD parser with AST generation capabilities

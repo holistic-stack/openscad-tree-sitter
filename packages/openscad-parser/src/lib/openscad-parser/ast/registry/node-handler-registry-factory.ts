@@ -1,8 +1,8 @@
-import { DefaultNodeHandlerRegistry } from './default-node-handler-registry';
+import { DefaultNodeHandlerRegistry } from './default-node-handler-registry.js';
 // NodeHandler is not used directly in this file
-import { NodeHandlerRegistry } from './node-handler-registry';
+import { NodeHandlerRegistry } from './node-handler-registry.js';
 import { Node as TSNode } from 'web-tree-sitter';
-import { ExpressionNode } from '../ast-types';
+import { ExpressionNode } from '../ast-types.js';
 
 /**
  * Factory for creating and configuring NodeHandlerRegistry instances.

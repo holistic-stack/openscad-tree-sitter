@@ -6,8 +6,8 @@
  */
 
 import { Node as TSNode } from 'web-tree-sitter';
-import { BaseExpressionEvaluator } from './expression-evaluator';
-import { ExpressionEvaluationContext, EvaluationResult } from './expression-evaluation-context';
+import { BaseExpressionEvaluator } from './expression-evaluator.js';
+import { ExpressionEvaluationContext, EvaluationResult } from './expression-evaluation-context.js';
 
 /**
  * Binary expression evaluator with comprehensive operator support

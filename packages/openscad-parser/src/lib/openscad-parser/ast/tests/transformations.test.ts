@@ -1,4 +1,4 @@
-import { EnhancedOpenscadParser } from '../../enhanced-parser';
+import { EnhancedOpenscadParser } from '../../enhanced-parser.js';
 import { beforeEach, afterEach, describe, it, expect } from 'vitest';
 
 describe('Transformation AST Generation', () => {

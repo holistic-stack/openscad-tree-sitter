@@ -13,9 +13,9 @@ import {
   Severity,
   ErrorContext,
   ErrorCode
-} from './types/error-types.ts';
-import { Logger, LoggerOptions } from './logger.ts';
-import { RecoveryStrategyRegistry } from './recovery-strategy-registry.ts';
+} from './types/error-types.js';
+import { Logger, LoggerOptions } from './logger.js';
+import { RecoveryStrategyRegistry } from './recovery-strategy-registry.js';
 
 /** Configuration options for the ErrorHandler */
 export interface ErrorHandlerOptions {

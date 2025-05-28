@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { cstTreeCursorWalkLog } from './cstTreeCursorWalkLog';
-import { EnhancedOpenscadParser } from '../../enhanced-parser';
+import { cstTreeCursorWalkLog } from './cstTreeCursorWalkLog.js';
+import { EnhancedOpenscadParser } from '../../enhanced-parser.js';
 import { TreeCursor } from 'web-tree-sitter';
 
 

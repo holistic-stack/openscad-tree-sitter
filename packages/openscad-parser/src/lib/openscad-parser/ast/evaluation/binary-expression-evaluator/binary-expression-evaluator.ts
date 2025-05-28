@@ -8,8 +8,8 @@
  * @module lib/openscad-parser/ast/evaluation/binary-expression-evaluator
  */
 
-import * as ast from '../../ast-types';
-import { ErrorHandler } from '../../../error-handling';
+import * as ast from '../../ast-types.js';
+import { ErrorHandler } from '../../../error-handling/index.js';
 
 /**
  * Evaluates a binary expression node and returns the result

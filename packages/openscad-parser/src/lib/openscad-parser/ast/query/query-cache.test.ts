@@ -3,8 +3,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { QueryCache } from './query-cache';
-import { LRUQueryCache } from './lru-query-cache';
+import { QueryCache } from './query-cache.js';
+import { LRUQueryCache } from './lru-query-cache.js';
 
 // Mock the TSNode type
 class MockNode {

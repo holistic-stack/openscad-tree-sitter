@@ -54,8 +54,8 @@ export class OpenscadParser {
 }
 
 // Re-export enhanced parser and error handling
-export { EnhancedOpenscadParser } from './openscad-parser/enhanced-parser';
-export { SimpleErrorHandler, type IErrorHandler } from './openscad-parser/error-handling/simple-error-handler';
+export { EnhancedOpenscadParser } from './openscad-parser/enhanced-parser.js';
+export { SimpleErrorHandler, type IErrorHandler } from './openscad-parser/error-handling/simple-error-handler.js';
 
 // Re-export AST types for consumers
-export * from './openscad-parser/ast/ast-types';
+export * from './openscad-parser/ast/ast-types.js';

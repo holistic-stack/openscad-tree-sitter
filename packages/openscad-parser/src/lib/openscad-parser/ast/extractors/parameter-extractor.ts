@@ -1,7 +1,7 @@
-import * as ast from '../ast-types';
-import { ErrorHandler } from '../../error-handling';
-import { evaluateBinaryExpression } from '../evaluation/binary-expression-evaluator/binary-expression-evaluator';
-import { evaluateExpression } from '../evaluation/expression-evaluator-registry';
+import * as ast from '../ast-types.js';
+import { ErrorHandler } from '../../error-handling/index.js';
+import { evaluateBinaryExpression } from '../evaluation/binary-expression-evaluator/binary-expression-evaluator.js';
+import { evaluateExpression } from '../evaluation/expression-evaluator-registry.js';
 
 /**
  * Check if a value is an expression node

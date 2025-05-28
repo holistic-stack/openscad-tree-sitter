@@ -1,15 +1,15 @@
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
-import { BaseASTVisitor } from './base-ast-visitor';
-import { ASTVisitor } from './ast-visitor';
-import { extractArguments } from '../extractors/argument-extractor';
+import * as ast from '../ast-types.js';
+import { BaseASTVisitor } from './base-ast-visitor.js';
+import { ASTVisitor } from './ast-visitor.js';
+import { extractArguments } from '../extractors/argument-extractor.js';
 import {
   extractNumberParameter,
   extractVectorParameter,
-} from '../extractors/parameter-extractor';
-import { getLocation } from '../utils/location-utils';
-// import { findDescendantOfType } from '../utils/node-utils'; // Unused import
-import { ErrorHandler } from '../../error-handling'; // Added ErrorHandler import
+} from '../extractors/parameter-extractor.js';
+import { getLocation } from '../utils/location-utils.js';
+// import { findDescendantOfType } from '../utils/node-utils.js'; // Unused import
+import { ErrorHandler } from '../../error-handling/index.js'; // Added ErrorHandler import
 
 /**
  * Visitor for transform operations (translate, rotate, scale, mirror)

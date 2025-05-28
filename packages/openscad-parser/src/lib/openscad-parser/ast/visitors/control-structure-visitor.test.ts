@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { ControlStructureVisitor } from './control-structure-visitor';
-import { EnhancedOpenscadParser } from '../../enhanced-parser';
+import { ControlStructureVisitor } from './control-structure-visitor.js';
+import { EnhancedOpenscadParser } from '../../enhanced-parser.js';
 import { Node as TSNode } from 'web-tree-sitter';
-import * as extractorModule from '../extractors';
-import { getLocation } from '../utils/location-utils';
-import { ErrorHandler } from '../../error-handling';
+import * as extractorModule from '../extractors/index.js';
+import { getLocation } from '../utils/location-utils.js';
+import { ErrorHandler } from '../../error-handling/index.js';
 
 describe('ControlStructureVisitor', () => {
   let visitor: ControlStructureVisitor;

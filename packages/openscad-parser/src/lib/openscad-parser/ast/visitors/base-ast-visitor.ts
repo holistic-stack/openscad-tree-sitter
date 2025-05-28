@@ -1,11 +1,11 @@
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
-import { ASTVisitor } from './ast-visitor';
-import { findDescendantOfType } from '../utils/node-utils';
+import * as ast from '../ast-types.js';
+import { ASTVisitor } from './ast-visitor.js';
+import { findDescendantOfType } from '../utils/node-utils.js';
 import {
   extractArguments,
   ExtractedParameter,
-} from '../extractors/argument-extractor';
+} from '../extractors/argument-extractor.js';
 
 /**
  * Convert an ExtractedParameter to a ParameterValue

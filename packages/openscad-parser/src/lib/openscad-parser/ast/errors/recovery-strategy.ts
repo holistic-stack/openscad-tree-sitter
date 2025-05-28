@@ -8,8 +8,8 @@
  */
 
 import { Node as TSNode } from 'web-tree-sitter';
-import { ParserError } from './parser-error';
-import { SyntaxError } from './syntax-error';
+import { ParserError } from './parser-error.js';
+import { SyntaxError } from './syntax-error.js';
 
 /**
  * Interface for error recovery strategies

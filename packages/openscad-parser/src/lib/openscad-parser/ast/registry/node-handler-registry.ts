@@ -1,5 +1,5 @@
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
+import * as ast from '../ast-types.js';
 
 /**
  * Type definition for a node error-handling function

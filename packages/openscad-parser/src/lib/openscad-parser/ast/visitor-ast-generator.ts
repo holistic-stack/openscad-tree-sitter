@@ -1,17 +1,17 @@
 import { Tree } from 'web-tree-sitter'; // TSNode is not used in this file after removing findChildOfType
-import * as ast from './ast-types';
-import { ASTVisitor } from './visitors/ast-visitor';
-import { CompositeVisitor } from './visitors/composite-visitor';
-import { PrimitiveVisitor } from './visitors/primitive-visitor';
-import { TransformVisitor } from './visitors/transform-visitor';
-import { CSGVisitor } from './visitors/csg-visitor';
-import { ModuleVisitor } from './visitors/module-visitor';
-import { FunctionVisitor } from './visitors/function-visitor';
-import { ControlStructureVisitor } from './visitors/control-structure-visitor';
-import { ExpressionVisitor } from './visitors/expression-visitor';
-import { VariableVisitor } from './visitors/variable-visitor';
-import { QueryVisitor } from './visitors/query-visitor';
-import { ErrorHandler } from '../error-handling';
+import * as ast from './ast-types.js';
+import { ASTVisitor } from './visitors/ast-visitor.js';
+import { CompositeVisitor } from './visitors/composite-visitor.js';
+import { PrimitiveVisitor } from './visitors/primitive-visitor.js';
+import { TransformVisitor } from './visitors/transform-visitor.js';
+import { CSGVisitor } from './visitors/csg-visitor.js';
+import { ModuleVisitor } from './visitors/module-visitor.js';
+import { FunctionVisitor } from './visitors/function-visitor.js';
+import { ControlStructureVisitor } from './visitors/control-structure-visitor.js';
+import { ExpressionVisitor } from './visitors/expression-visitor.js';
+import { VariableVisitor } from './visitors/variable-visitor.js';
+import { QueryVisitor } from './visitors/query-visitor.js';
+import { ErrorHandler } from '../error-handling/index.js';
 
 // This function is not used in this file
 // /**
@@ -61,7 +61,7 @@ export class VisitorASTGenerator {
 
     // Create expression visitor first since other visitors may depend on it
     const expressionVisitor = new ExpressionVisitor(this.source, this.errorHandler);
-    
+
     // Add all visitors to the composite visitor
     compositeVisitor['visitors'] = [
       new PrimitiveVisitor(this.source, this.errorHandler),

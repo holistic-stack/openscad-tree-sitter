@@ -1,7 +1,7 @@
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
-import { extractValue } from '../extractors/value-extractor';
-import { findDescendantOfType } from './node-utils';
+import * as ast from '../ast-types.js';
+import { extractValue } from '../extractors/value-extractor.js';
+import { findDescendantOfType } from './node-utils.js';
 
 /**
  * Extract a vector (2D or 3D) from a vector node

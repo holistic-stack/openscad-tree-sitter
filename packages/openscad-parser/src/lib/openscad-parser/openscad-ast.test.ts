@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { EnhancedOpenscadParser } from './enhanced-parser';
+import { EnhancedOpenscadParser } from './enhanced-parser.js';
 import { Tree } from 'web-tree-sitter';
 
 describe('OpenSCAD Parser - AST Generation', () => {

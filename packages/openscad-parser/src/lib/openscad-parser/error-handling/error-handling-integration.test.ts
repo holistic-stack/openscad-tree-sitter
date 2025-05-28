@@ -4,10 +4,10 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ErrorHandler } from './error-handler.ts';
-import { Logger } from './logger.ts';
-import { RecoveryStrategyRegistry } from './recovery-strategy-registry.ts';
-import { Severity, ErrorCode, ParserError } from './types/error-types.ts';
+import { ErrorHandler } from './error-handler.js';
+import { Logger } from './logger.js';
+import { RecoveryStrategyRegistry } from './recovery-strategy-registry.js';
+import { Severity, ErrorCode, ParserError } from './types/error-types.js';
 
 describe('Error Handling Integration', () => {
   let errorHandler: ErrorHandler;

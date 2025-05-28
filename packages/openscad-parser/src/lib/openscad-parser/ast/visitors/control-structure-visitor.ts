@@ -11,14 +11,14 @@
  */
 
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
-import { BaseASTVisitor } from './base-ast-visitor';
-import { getLocation } from '../utils/location-utils';
-import { extractArguments } from '../extractors/argument-extractor';
-import { IfElseVisitor } from './control-structure-visitor/if-else-visitor';
-import { ForLoopVisitor } from './control-structure-visitor/for-loop-visitor';
-import { ExpressionVisitor } from './expression-visitor';
-import { ErrorHandler } from '../../error-handling'; // Added ErrorHandler import
+import * as ast from '../ast-types.js';
+import { BaseASTVisitor } from './base-ast-visitor.js';
+import { getLocation } from '../utils/location-utils.js';
+import { extractArguments } from '../extractors/argument-extractor.js';
+import { IfElseVisitor } from './control-structure-visitor/if-else-visitor.js';
+import { ForLoopVisitor } from './control-structure-visitor/for-loop-visitor.js';
+import { ExpressionVisitor } from './expression-visitor.js';
+import { ErrorHandler } from '../../error-handling/index.js'; // Added ErrorHandler import
 
 /**
  * Visitor for control structures

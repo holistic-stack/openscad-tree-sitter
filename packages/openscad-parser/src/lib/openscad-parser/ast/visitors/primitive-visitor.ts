@@ -1,17 +1,17 @@
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
-import { BaseASTVisitor } from './base-ast-visitor';
-import { getLocation } from '../utils/location-utils';
+import * as ast from '../ast-types.js';
+import { BaseASTVisitor } from './base-ast-visitor.js';
+import { getLocation } from '../utils/location-utils.js';
 import {
   extractNumberParameter,
   extractBooleanParameter,
   extractVectorParameter,
-} from '../extractors/parameter-extractor';
-import { findDescendantOfType } from '../utils/node-utils';
-import { extractArguments } from '../extractors/argument-extractor';
-import { extractCubeNode } from '../extractors/cube-extractor';
-import { extractSphereNode } from '../extractors/sphere-extractor';
-import { ErrorHandler } from '../../error-handling'; // Added ErrorHandler import
+} from '../extractors/parameter-extractor.js';
+import { findDescendantOfType } from '../utils/node-utils.js';
+import { extractArguments } from '../extractors/argument-extractor.js';
+import { extractCubeNode } from '../extractors/cube-extractor.js';
+import { extractSphereNode } from '../extractors/sphere-extractor.js';
+import { ErrorHandler } from '../../error-handling/index.js'; // Added ErrorHandler import
 
 /**
  * Visitor for primitive shapes (cube, sphere, cylinder, etc.)

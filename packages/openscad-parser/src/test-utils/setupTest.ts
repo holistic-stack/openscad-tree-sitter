@@ -8,7 +8,6 @@ fetchMocker.enableMocks();
 
 vi.mocked(fetch).mockImplementation(url => {
   console.log('using local fetch mock', url);
-  console.log('__dirname', join(__dirname, '../../', url));
   // Handle both string and URL objects
   let urlPath: string;
   if (typeof url === 'string') {
@@ -19,6 +18,7 @@ vi.mocked(fetch).mockImplementation(url => {
     // Handle other URL-like objects
     urlPath = String(url);
   }
+  console.log('__dirname', join(__dirname, '../../', urlPath));
 
   // Normalize the path
   urlPath = urlPath.startsWith('/') ? urlPath.slice(1) : urlPath;

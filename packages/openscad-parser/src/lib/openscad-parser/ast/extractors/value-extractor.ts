@@ -1,10 +1,10 @@
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
-import { findDescendantOfType } from '../utils/node-utils';
-import { extractVector } from '../utils/vector-utils';
-import { getLocation } from '../utils/location-utils';
-import { ErrorHandler } from '../../error-handling';
-import { evaluateExpression } from '../evaluation/expression-evaluator-registry';
+import * as ast from '../ast-types.js';
+import { findDescendantOfType } from '../utils/node-utils.js';
+import { extractVector } from '../utils/vector-utils.js';
+import { getLocation } from '../utils/location-utils.js';
+import { ErrorHandler } from '../../error-handling/index.js';
+import { evaluateExpression } from '../evaluation/expression-evaluator-registry.js';
 
 /**
  * Check if a node represents a complex expression that needs evaluation

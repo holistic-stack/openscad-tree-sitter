@@ -1,9 +1,9 @@
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
-import { BaseASTVisitor } from './base-ast-visitor';
-import { ErrorHandler } from '../../error-handling';
-import { getLocation } from '../utils/location-utils';
-import { findDescendantOfType } from '../utils/node-utils';
+import * as ast from '../ast-types.js';
+import { BaseASTVisitor } from './base-ast-visitor.js';
+import { ErrorHandler } from '../../error-handling/index.js';
+import { getLocation } from '../utils/location-utils.js';
+import { findDescendantOfType } from '../utils/node-utils.js';
 
 /**
  * Visitor for handling variable references in the AST

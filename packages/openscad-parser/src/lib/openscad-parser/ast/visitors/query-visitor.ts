@@ -8,11 +8,11 @@
  */
 
 import { Node as TSNode, Tree } from 'web-tree-sitter';
-import * as ast from '../ast-types';
-import { ASTVisitor } from './ast-visitor';
-import { BaseASTVisitor } from './base-ast-visitor';
-import { QueryManager } from '../query/query-manager';
-import { ErrorHandler } from '../../error-handling';
+import * as ast from '../ast-types.js';
+import { ASTVisitor } from './ast-visitor.js';
+import { BaseASTVisitor } from './base-ast-visitor.js';
+import { QueryManager } from '../query/query-manager.js';
+import { ErrorHandler } from '../../error-handling/index.js';
 
 /**
  * Visitor that uses the query manager to find nodes in the CST

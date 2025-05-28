@@ -7,10 +7,10 @@ import {
   InsertMissingTokenStrategy,
   DeleteExtraTokenStrategy,
   RecoveryStrategyFactory,
-} from './recovery-strategy';
-import { ParserError, ErrorPosition } from './parser-error';
-import { SyntaxError } from './syntax-error';
-import { SemanticError } from './semantic-error';
+} from './recovery-strategy.js';
+import { ParserError, ErrorPosition } from './parser-error.js';
+import { SyntaxError } from './syntax-error.js';
+import { SemanticError } from './semantic-error.js';
 
 // Mock the TreeSitter Node type
 class MockNode {

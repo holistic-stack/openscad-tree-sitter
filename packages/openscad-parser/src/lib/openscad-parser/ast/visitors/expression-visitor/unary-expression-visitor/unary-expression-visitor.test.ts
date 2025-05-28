@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { Node as TSNode } from 'web-tree-sitter';
 
-import { UnaryExpressionVisitor } from './unary-expression-visitor';
-import { ExpressionVisitor } from '../../expression-visitor';
-import { ErrorHandler } from '../../../../error-handling';
-import { EnhancedOpenscadParser } from '../../../../enhanced-parser';
+import { UnaryExpressionVisitor } from './unary-expression-visitor.js';
+import { ExpressionVisitor } from '../../expression-visitor.js';
+import { ErrorHandler } from '../../../../error-handling/index.js';
+import { EnhancedOpenscadParser } from '../../../../enhanced-parser.js';
 
 async function getExpressionNode(parser: EnhancedOpenscadParser, code: string): Promise<TSNode | null> {
   const tree = parser.parse(code);

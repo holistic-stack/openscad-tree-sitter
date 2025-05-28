@@ -6,8 +6,8 @@
  */
 
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
-import { ErrorHandler } from '../../error-handling';
+import * as ast from '../ast-types.js';
+import { ErrorHandler } from '../../error-handling/index.js';
 
 /**
  * Evaluation result with type information

@@ -1,5 +1,5 @@
 import { Node as TSNode, Point } from 'web-tree-sitter';
-import * as ast from '../ast-types';
+import * as ast from '../ast-types.js';
 
 /**
  * Convert a tree-sitter Point to a Position

@@ -1,6 +1,6 @@
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
-import { getLocation } from '../utils/location-utils';
+import * as ast from '../ast-types.js';
+import { getLocation } from '../utils/location-utils.js';
 
 /**
  * Extracts module parameters from a parameter list node

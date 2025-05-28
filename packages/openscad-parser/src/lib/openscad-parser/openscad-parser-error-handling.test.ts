@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { EnhancedOpenscadParser } from './enhanced-parser';
+import { EnhancedOpenscadParser } from './enhanced-parser.js';
 
 
 describe('OpenscadParser Error Handling', () => {

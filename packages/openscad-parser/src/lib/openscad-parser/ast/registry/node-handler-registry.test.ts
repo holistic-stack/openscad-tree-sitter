@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
-import { DefaultNodeHandlerRegistry } from './default-node-handler-registry';
-import { NodeHandlerRegistryFactory } from './node-handler-registry-factory';
-import { NodeHandler } from './node-handler-registry';
+import { DefaultNodeHandlerRegistry } from './default-node-handler-registry.js';
+import { NodeHandlerRegistryFactory } from './node-handler-registry-factory.js';
+import { NodeHandler } from './node-handler-registry.js';
 
 describe('NodeHandlerRegistry', () => {
   describe('DefaultNodeHandlerRegistry', () => {

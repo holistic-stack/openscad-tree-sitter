@@ -1,5 +1,5 @@
-import { Expression } from '../expression';
-import { NodeLocation } from '../../../../node-location';
+import { Expression } from '../expression.js';
+import { NodeLocation } from '../../../../node-location.js';
 
 type BinaryOperator =
   | '+' | '-' | '*' | '/' | '%'     // Arithmetic

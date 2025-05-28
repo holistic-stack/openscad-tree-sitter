@@ -10,7 +10,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ChangeTracker } from './change-tracker';
+import { ChangeTracker } from './change-tracker.js';
 
 describe('ChangeTracker', () => {
   let tracker: ChangeTracker;

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { extractSphereNode } from '../extractors/sphere-extractor';
+import { extractSphereNode } from '../extractors/sphere-extractor.js';
 import { Node as TSNode } from 'web-tree-sitter';
 
 // Mock the TSNode for testing

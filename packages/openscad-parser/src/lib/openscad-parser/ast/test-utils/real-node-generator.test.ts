@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { RealNodeGenerator, createRealNodeGenerator } from './real-node-generator';
+import { RealNodeGenerator, createRealNodeGenerator } from './real-node-generator.js';
 
 describe('RealNodeGenerator', () => {
   let generator: RealNodeGenerator;

@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
-import { CSGVisitor } from './csg-visitor';
-import { EnhancedOpenscadParser } from '../../enhanced-parser';
+import { CSGVisitor } from './csg-visitor.js';
+import { EnhancedOpenscadParser } from '../../enhanced-parser.js';
 import { Node as TSNode } from 'web-tree-sitter';
-import { findDescendantOfType } from '../utils/node-utils';
-import { ErrorHandler } from '../../error-handling';
+import { findDescendantOfType } from '../utils/node-utils.js';
+import { ErrorHandler } from '../../error-handling/index.js';
 
 describe('CSGVisitor', () => {
   let parser: EnhancedOpenscadParser;

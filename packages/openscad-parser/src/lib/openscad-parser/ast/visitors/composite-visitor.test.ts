@@ -5,15 +5,15 @@ import {
   beforeEach,
   afterEach,
 } from 'vitest';
-import { CompositeVisitor } from './composite-visitor';
-import { PrimitiveVisitor } from './primitive-visitor';
-import { TransformVisitor } from './transform-visitor';
-import { CSGVisitor } from './csg-visitor';
-import { EnhancedOpenscadParser } from '../../enhanced-parser';
+import { CompositeVisitor } from './composite-visitor.js';
+import { PrimitiveVisitor } from './primitive-visitor.js';
+import { TransformVisitor } from './transform-visitor.js';
+import { CSGVisitor } from './csg-visitor.js';
+import { EnhancedOpenscadParser } from '../../enhanced-parser.js';
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
+import * as ast from '../ast-types.js';
 
-// import { ErrorHandler } from '../../error-handling'; // Temporarily commented out due to build issues
+// import { ErrorHandler } from '../../error-handling/index.js'; // Temporarily commented out due to build issues
 
 // Define mock nodes for testing (currently unused but kept for future reference)
 const _mockCubeNode: ast.CubeNode = {

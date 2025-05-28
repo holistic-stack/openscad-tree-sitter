@@ -17,7 +17,7 @@
  */
 
 import { Node as TSNode } from 'web-tree-sitter';
-import { EnhancedOpenscadParser } from '../../enhanced-parser';
+import { EnhancedOpenscadParser } from '../../enhanced-parser.js';
 
 /**
  * Utility class for generating real Tree-sitter nodes for testing

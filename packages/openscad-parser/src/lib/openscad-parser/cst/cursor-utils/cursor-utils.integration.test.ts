@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { EnhancedOpenscadParser } from '../../enhanced-parser';
-import * as cursorUtils from './cursor-utils';
+import { EnhancedOpenscadParser } from '../../enhanced-parser.js';
+import * as cursorUtils from './cursor-utils.js';
 import * as fs from 'fs';
 import * as path from 'path';
-import { cstTreeCursorWalkLog } from './cstTreeCursorWalkLog';
+import { cstTreeCursorWalkLog } from './cstTreeCursorWalkLog.js';
 
 describe('Cursor Utils Integration', () => {
   let parser: EnhancedOpenscadParser;

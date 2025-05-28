@@ -10,11 +10,11 @@
  */
 
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../../ast-types';
-import { getLocation } from '../../utils/location-utils';
-import { findDescendantOfType } from '../../utils/node-utils';
-import { ExpressionVisitor } from '../expression-visitor';
-import { ErrorHandler } from '../../../error-handling'; // Added ErrorHandler import
+import * as ast from '../../ast-types.js';
+import { getLocation } from '../../utils/location-utils.js';
+import { findDescendantOfType } from '../../utils/node-utils.js';
+import { ExpressionVisitor } from '../expression-visitor.js';
+import { ErrorHandler } from '../../../error-handling/index.js'; // Added ErrorHandler import
 
 /**
  * Visitor for if-else statements

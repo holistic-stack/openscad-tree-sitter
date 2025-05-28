@@ -2,7 +2,7 @@
  * Tests for the ParserError class
  */
 
-import { ParserError, ErrorPosition, ErrorSuggestion } from './parser-error';
+import { ParserError, ErrorPosition, ErrorSuggestion } from './parser-error.js';
 
 describe('ParserError', () => {
   // Test data

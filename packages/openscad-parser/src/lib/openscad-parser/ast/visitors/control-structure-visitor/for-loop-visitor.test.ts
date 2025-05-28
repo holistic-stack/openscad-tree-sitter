@@ -4,11 +4,11 @@
  * @module lib/openscad-parser/ast/visitors/control-structure-visitor/for-loop-visitor.test
  */
 
-import { EnhancedOpenscadParser } from '../../../enhanced-parser';
+import { EnhancedOpenscadParser } from '../../../enhanced-parser.js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ControlStructureVisitor } from '../control-structure-visitor';
-import { printNodeStructure } from '../../utils/debug-utils';
-import { ErrorHandler } from '../../../error-handling';
+import { ControlStructureVisitor } from '../control-structure-visitor.js';
+import { printNodeStructure } from '../../utils/debug-utils.js';
+import { ErrorHandler } from '../../../error-handling/index.js';
 
 describe('ForLoopVisitor', () => {
   let parser: EnhancedOpenscadParser;

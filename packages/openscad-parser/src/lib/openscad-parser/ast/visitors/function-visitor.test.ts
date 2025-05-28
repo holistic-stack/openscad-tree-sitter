@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
-import { FunctionVisitor } from './function-visitor';
-import { EnhancedOpenscadParser } from '../../enhanced-parser';
+import { FunctionVisitor } from './function-visitor.js';
+import { EnhancedOpenscadParser } from '../../enhanced-parser.js';
 import { Node as TSNode } from 'web-tree-sitter';
-import { ErrorHandler } from '../../error-handling';
+import { ErrorHandler } from '../../error-handling/index.js';
 
 describe('FunctionVisitor', () => {
   let parser: EnhancedOpenscadParser;

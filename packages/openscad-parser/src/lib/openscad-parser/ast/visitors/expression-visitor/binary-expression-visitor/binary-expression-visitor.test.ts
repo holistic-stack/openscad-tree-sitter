@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { Node as TSNode } from 'web-tree-sitter';
 
-import { BinaryExpressionVisitor } from './binary-expression-visitor';
-import { ExpressionVisitor } from '../../expression-visitor';
-import { ErrorHandler } from '../../../../error-handling';
-import { EnhancedOpenscadParser } from '../../../../enhanced-parser';
+import { BinaryExpressionVisitor } from './binary-expression-visitor.js';
+import { ExpressionVisitor } from '../../expression-visitor.js';
+import { ErrorHandler } from '../../../../error-handling/index.js';
+import { EnhancedOpenscadParser } from '../../../../enhanced-parser.js';
 
 // Helper function to get a Tree-sitter node for an expression
 function _getExpressionNode(parser: EnhancedOpenscadParser, code: string): TSNode | null {

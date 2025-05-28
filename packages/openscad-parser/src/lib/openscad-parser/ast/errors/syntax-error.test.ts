@@ -2,8 +2,8 @@
  * Tests for the SyntaxError class
  */
 
-import { SyntaxError } from './syntax-error';
-import { ErrorPosition } from './parser-error';
+import { SyntaxError } from './syntax-error.js';
+import { ErrorPosition } from './parser-error.js';
 
 describe('SyntaxError', () => {
   // Test data

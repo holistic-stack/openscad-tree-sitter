@@ -3,7 +3,7 @@
  * @module openscad-parser/error-handling/logger
  */
 
-import { Severity } from './types/error-types.ts';
+import { Severity } from './types/error-types.js';
 
 /** Configuration options for the Logger */
 export interface LoggerOptions {

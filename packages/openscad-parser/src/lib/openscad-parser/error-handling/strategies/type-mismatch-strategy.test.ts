@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { ParserError, ErrorCode, Severity } from '../types/error-types.ts';
-import { TypeMismatchStrategy } from './type-mismatch-strategy.ts';
+import { ParserError, ErrorCode, Severity } from '../types/error-types.js';
+import { TypeMismatchStrategy } from './type-mismatch-strategy.js';
 
 describe('TypeMismatchStrategy', () => {
   let strategy: TypeMismatchStrategy;

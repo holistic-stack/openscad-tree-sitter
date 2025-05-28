@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { EnhancedOpenscadParser, SimpleErrorHandler } from './index';
+import { EnhancedOpenscadParser, SimpleErrorHandler } from './index.js';
 
 describe('EnhancedOpenscadParser', () => {
   let parser: EnhancedOpenscadParser;

@@ -3,7 +3,7 @@
  * @module openscad-parser/error-handling/strategies/recovery-strategy
  */
 
-import { ParserError } from '../types/error-types.ts';
+import { ParserError } from '../types/error-types.js';
 
 /**
  * Interface that all recovery strategies must implement

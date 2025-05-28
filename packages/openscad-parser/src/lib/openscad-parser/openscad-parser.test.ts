@@ -15,7 +15,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { EnhancedOpenscadParser } from './enhanced-parser';
+import { EnhancedOpenscadParser } from './enhanced-parser.js';
 
 // Sample OpenSCAD code for testing
 const SAMPLE_OPENSCAD_CODE = `

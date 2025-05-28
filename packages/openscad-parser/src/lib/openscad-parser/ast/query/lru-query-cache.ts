@@ -8,7 +8,7 @@
  */
 
 import { Node as TSNode } from 'web-tree-sitter';
-import { QueryCache } from './query-cache';
+import { QueryCache } from './query-cache.js';
 
 /**
  * LRU (Least Recently Used) implementation of the QueryCache interface

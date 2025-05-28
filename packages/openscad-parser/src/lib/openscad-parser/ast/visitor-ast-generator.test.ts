@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { VisitorASTGenerator } from './visitor-ast-generator';
-import { EnhancedOpenscadParser } from '../enhanced-parser';
+import { VisitorASTGenerator } from './visitor-ast-generator.js';
+import { EnhancedOpenscadParser } from '../enhanced-parser.js';
 
-import { ErrorHandler } from '../error-handling';
+import { ErrorHandler } from '../error-handling/index.js';
 
 // Create a mock language object for testing
 const mockLanguage = {

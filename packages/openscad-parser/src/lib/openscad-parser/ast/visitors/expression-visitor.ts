@@ -13,13 +13,13 @@
  */
 
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
-import { BaseASTVisitor } from './base-ast-visitor';
-import { getLocation } from '../utils/location-utils';
-import { FunctionCallVisitor } from './expression-visitor/function-call-visitor';
-import { ErrorHandler } from '../../error-handling';
-import { findDescendantOfType } from '../utils/node-utils';
-import { evaluateBinaryExpression } from '../evaluation/binary-expression-evaluator/binary-expression-evaluator';
+import * as ast from '../ast-types.js';
+import { BaseASTVisitor } from './base-ast-visitor.js';
+import { getLocation } from '../utils/location-utils.js';
+import { FunctionCallVisitor } from './expression-visitor/function-call-visitor.js';
+import { ErrorHandler } from '../../error-handling/index.js';
+import { findDescendantOfType } from '../utils/node-utils.js';
+import { evaluateBinaryExpression } from '../evaluation/binary-expression-evaluator/binary-expression-evaluator.js';
 
 /**
  * Visitor for expressions that follows tree-sitter visitor pattern best practices

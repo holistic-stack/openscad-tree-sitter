@@ -1,7 +1,7 @@
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
-import { ASTVisitor } from './ast-visitor';
-import { ErrorHandler } from '../../error-handling'; // Added ErrorHandler import
+import * as ast from '../ast-types.js';
+import { ASTVisitor } from './ast-visitor.js';
+import { ErrorHandler } from '../../error-handling/index.js'; // Added ErrorHandler import
 
 /**
  * A visitor that delegates to multiple specialized visitors

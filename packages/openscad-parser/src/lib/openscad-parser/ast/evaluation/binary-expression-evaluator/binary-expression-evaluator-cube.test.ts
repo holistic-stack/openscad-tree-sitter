@@ -7,9 +7,9 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { EnhancedOpenscadParser } from '../../../enhanced-parser';
-import { ErrorHandler } from '../../../error-handling';
-import { extractCubeNode } from '../../extractors/cube-extractor';
+import { EnhancedOpenscadParser } from '../../../enhanced-parser.js';
+import { ErrorHandler } from '../../../error-handling/index.js';
+import { extractCubeNode } from '../../extractors/cube-extractor.js';
 import { Node as TSNode } from 'web-tree-sitter';
 
 describe('Binary Expression Evaluation in Cube Arguments', () => {

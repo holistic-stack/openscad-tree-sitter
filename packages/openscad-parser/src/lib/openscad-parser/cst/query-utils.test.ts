@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterEach } from 'vitest';
 import { Parser } from 'web-tree-sitter';
-import { QueryManager } from './query-utils';
+import { QueryManager } from './query-utils.js';
 import * as path from 'path';
 
 describe('QueryManager', () => {

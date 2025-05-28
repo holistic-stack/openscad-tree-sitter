@@ -1,12 +1,12 @@
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
-import { BaseASTVisitor } from './base-ast-visitor';
-import { getLocation } from '../utils/location-utils';
+import * as ast from '../ast-types.js';
+import { BaseASTVisitor } from './base-ast-visitor.js';
+import { getLocation } from '../utils/location-utils.js';
 import {
   extractModuleParameters,
   extractModuleParametersFromText,
-} from '../extractors/module-parameter-extractor';
-import { ErrorHandler } from '../../error-handling'; // Added ErrorHandler import
+} from '../extractors/module-parameter-extractor.js';
+import { ErrorHandler } from '../../error-handling/index.js'; // Added ErrorHandler import
 
 /**
  * Visitor for module definitions and instantiations

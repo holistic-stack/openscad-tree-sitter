@@ -3,13 +3,13 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { QueryVisitor } from './query-visitor';
-import { CompositeVisitor } from './composite-visitor';
-import { PrimitiveVisitor } from './primitive-visitor';
-import { TransformVisitor } from './transform-visitor';
-import { CSGVisitor } from './csg-visitor';
-import { EnhancedOpenscadParser } from '../../enhanced-parser';
-import { ErrorHandler } from '../../error-handling';
+import { QueryVisitor } from './query-visitor.js';
+import { CompositeVisitor } from './composite-visitor.js';
+import { PrimitiveVisitor } from './primitive-visitor.js';
+import { TransformVisitor } from './transform-visitor.js';
+import { CSGVisitor } from './csg-visitor.js';
+import { EnhancedOpenscadParser } from '../../enhanced-parser.js';
+import { ErrorHandler } from '../../error-handling/index.js';
 
 // Create a mock language object for testing
 const mockLanguage = {

@@ -4,12 +4,12 @@
  * @module lib/openscad-parser/ast/visitors/control-structure-visitor/if-else-visitor.test
  */
 
-import { EnhancedOpenscadParser } from '../../../enhanced-parser';
+import { EnhancedOpenscadParser } from '../../../enhanced-parser.js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import * as ast from '../../ast-types';
-import { ControlStructureVisitor } from '../control-structure-visitor';
-import { printNodeStructure } from '../../utils/debug-utils';
-import { ErrorHandler } from '../../../error-handling';
+import * as ast from '../../ast-types.js';
+import { ControlStructureVisitor } from '../control-structure-visitor.js';
+import { printNodeStructure } from '../../utils/debug-utils.js';
+import { ErrorHandler } from '../../../error-handling/index.js';
 
 describe('IfElseVisitor', () => {
   let parser: EnhancedOpenscadParser;

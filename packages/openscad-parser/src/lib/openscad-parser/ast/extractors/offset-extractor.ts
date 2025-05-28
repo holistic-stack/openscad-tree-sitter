@@ -1,11 +1,11 @@
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
-import { extractArguments } from './argument-extractor';
-import { getLocation } from '../utils/location-utils';
+import * as ast from '../ast-types.js';
+import { extractArguments } from './argument-extractor.js';
+import { getLocation } from '../utils/location-utils.js';
 import {
   extractNumberParameter,
   extractBooleanParameter,
-} from '../extractors/parameter-extractor';
+} from '../extractors/parameter-extractor.js';
 // findDescendantOfType is not used in this file
 
 /**

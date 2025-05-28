@@ -3,11 +3,11 @@
  * @module openscad-parser/error-handling/recovery-strategy-registry
  */
 
-import { ParserError } from './types/error-types.ts';
-import { RecoveryStrategy } from './strategies/recovery-strategy.ts';
-import { MissingSemicolonStrategy } from './strategies/missing-semicolon-strategy.ts';
-import { UnclosedBracketStrategy } from './strategies/unclosed-bracket-strategy.ts';
-import { UnknownIdentifierStrategy } from './strategies/unknown-identifier-strategy.ts';
+import { ParserError } from './types/error-types.js';
+import { RecoveryStrategy } from './strategies/recovery-strategy.js';
+import { MissingSemicolonStrategy } from './strategies/missing-semicolon-strategy.js';
+import { UnclosedBracketStrategy } from './strategies/unclosed-bracket-strategy.js';
+import { UnknownIdentifierStrategy } from './strategies/unknown-identifier-strategy.js';
 // Note: TypeMismatchStrategy requires TypeChecker dependency, not included by default
 
 /**

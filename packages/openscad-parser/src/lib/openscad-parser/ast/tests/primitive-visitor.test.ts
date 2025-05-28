@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { PrimitiveVisitor } from '../visitors/primitive-visitor';
+import { PrimitiveVisitor } from '../visitors/primitive-visitor.js';
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
-import { ErrorHandler } from '../../error-handling';
-import { EnhancedOpenscadParser } from '../../enhanced-parser';
+import * as ast from '../ast-types.js';
+import { ErrorHandler } from '../../error-handling/index.js';
+import { EnhancedOpenscadParser } from '../../enhanced-parser.js';
 
 // Create a test class that extends PrimitiveVisitor to expose the private methods
 class TestPrimitiveVisitor extends PrimitiveVisitor {

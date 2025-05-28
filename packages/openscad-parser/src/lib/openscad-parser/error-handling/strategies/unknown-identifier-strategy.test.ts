@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ParserError, ErrorCode, Severity } from '../types/error-types.ts';
-import { UnknownIdentifierStrategy } from './unknown-identifier-strategy.ts';
+import { ParserError, ErrorCode, Severity } from '../types/error-types.js';
+import { UnknownIdentifierStrategy } from './unknown-identifier-strategy.js';
 
 describe('UnknownIdentifierStrategy', () => {
   let strategy: UnknownIdentifierStrategy;

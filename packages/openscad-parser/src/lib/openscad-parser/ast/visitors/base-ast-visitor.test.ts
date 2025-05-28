@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
-import { BaseASTVisitor } from './base-ast-visitor';
+import { BaseASTVisitor } from './base-ast-visitor.js';
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
-import { EnhancedOpenscadParser } from '../../enhanced-parser';
-import { getLocation } from '../utils/location-utils';
+import * as ast from '../ast-types.js';
+import { EnhancedOpenscadParser } from '../../enhanced-parser.js';
+import { getLocation } from '../utils/location-utils.js';
 
 // Mock implementation of BaseASTVisitor for testing
 class TestVisitor extends BaseASTVisitor {

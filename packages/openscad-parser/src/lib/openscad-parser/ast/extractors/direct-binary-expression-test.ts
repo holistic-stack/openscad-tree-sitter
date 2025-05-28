@@ -5,7 +5,7 @@
  * It follows the Single Responsibility Principle by focusing only on the specific issue.
  */
 
-import { ErrorHandler } from '../../error-handling';
+import { ErrorHandler } from '../../error-handling/index.js';
 
 /**
  * Mock TSNode for testing

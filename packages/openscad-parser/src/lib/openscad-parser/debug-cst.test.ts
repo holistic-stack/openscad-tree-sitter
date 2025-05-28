@@ -1,4 +1,4 @@
-import { EnhancedOpenscadParser } from './enhanced-parser';
+import { EnhancedOpenscadParser } from './enhanced-parser.js';
 
 describe('Debug CST Structure', () => {
   let parser: EnhancedOpenscadParser;

@@ -5,9 +5,9 @@
  * It follows the Single Responsibility Principle by focusing only on the specific issue.
  */
 
-import { EnhancedOpenscadParser } from '../../enhanced-parser';
-import { ErrorHandler } from '../../error-handling';
-import { extractCubeNode } from './cube-extractor';
+import { EnhancedOpenscadParser } from '../../enhanced-parser.js';
+import { ErrorHandler } from '../../error-handling/index.js';
+import { extractCubeNode } from './cube-extractor.js';
 import { Node as TSNode } from 'web-tree-sitter';
 
 /**

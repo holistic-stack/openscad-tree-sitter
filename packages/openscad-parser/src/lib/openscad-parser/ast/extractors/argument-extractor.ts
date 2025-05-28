@@ -1,7 +1,7 @@
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
-import { extractValue as extractParameterValue, extractValueEnhanced } from './value-extractor';
-import { ErrorHandler } from '../../error-handling';
+import * as ast from '../ast-types.js';
+import { extractValue as extractParameterValue, extractValueEnhanced } from './value-extractor.js';
+import { ErrorHandler } from '../../error-handling/index.js';
 
 /**
  * Convert a Value to a ParameterValue

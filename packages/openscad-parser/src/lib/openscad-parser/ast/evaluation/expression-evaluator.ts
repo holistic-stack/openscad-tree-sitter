@@ -6,7 +6,7 @@
  */
 
 import { Node as TSNode } from 'web-tree-sitter';
-import { ExpressionEvaluationContext, EvaluationResult } from './expression-evaluation-context';
+import { ExpressionEvaluationContext, EvaluationResult } from './expression-evaluation-context.js';
 
 /**
  * Base interface for expression evaluators

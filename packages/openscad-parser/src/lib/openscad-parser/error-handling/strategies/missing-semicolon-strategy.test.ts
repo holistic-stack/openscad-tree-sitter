@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ParserError, ErrorCode, Severity } from '../types/error-types.ts';
-import { MissingSemicolonStrategy } from './missing-semicolon-strategy.ts';
+import { ParserError, ErrorCode, Severity } from '../types/error-types.js';
+import { MissingSemicolonStrategy } from './missing-semicolon-strategy.js';
 
 describe('MissingSemicolonStrategy', () => {
   let strategy: MissingSemicolonStrategy;

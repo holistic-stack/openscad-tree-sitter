@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { EnhancedOpenscadParser } from '../../enhanced-parser';
-import { ExpressionVisitor } from './expression-visitor';
+import { EnhancedOpenscadParser } from '../../enhanced-parser.js';
+import { ExpressionVisitor } from './expression-visitor.js';
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
-import { ErrorHandler } from '../../error-handling';
+import * as ast from '../ast-types.js';
+import { ErrorHandler } from '../../error-handling/index.js';
 
 describe('ExpressionVisitor Simple Tests', () => {
   let parser: EnhancedOpenscadParser;

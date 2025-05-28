@@ -1,4 +1,4 @@
-import { EnhancedOpenscadParser } from './enhanced-parser';
+import { EnhancedOpenscadParser } from './enhanced-parser.js';
 
 describe('Debug Accessor Expression Structure', () => {
   let parser: EnhancedOpenscadParser;

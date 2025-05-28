@@ -1,11 +1,11 @@
 import { type Node as SyntaxNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
-import { extractArguments } from './argument-extractor';
+import * as ast from '../ast-types.js';
+import { extractArguments } from './argument-extractor.js';
 import {
   extractNumberParameter,
   extractBooleanParameter,
-} from './parameter-extractor';
-import { getLocation } from '../utils/location-utils';
+} from './parameter-extractor.js';
+import { getLocation } from '../utils/location-utils.js';
 
 /**
  * Extracts parameters for a cylinder node from a CST node.

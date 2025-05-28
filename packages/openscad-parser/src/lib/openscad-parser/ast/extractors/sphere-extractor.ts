@@ -1,8 +1,8 @@
 import { Node as TSNode } from 'web-tree-sitter';
-import * as ast from '../ast-types';
-import { extractArguments } from './argument-extractor';
-import { getLocation } from '../utils/location-utils';
-import { extractNumberParameter } from '../extractors/parameter-extractor';
+import * as ast from '../ast-types.js';
+import { extractArguments } from './argument-extractor.js';
+import { getLocation } from '../utils/location-utils.js';
+import { extractNumberParameter } from '../extractors/parameter-extractor.js';
 
 /**
  * Extract a sphere node from an accessor expression node

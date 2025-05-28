@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ParserError, ErrorCode, Severity } from '../types/error-types.ts';
-import { UnclosedBracketStrategy } from './unclosed-bracket-strategy.ts';
+import { ParserError, ErrorCode, Severity } from '../types/error-types.js';
+import { UnclosedBracketStrategy } from './unclosed-bracket-strategy.js';
 
 describe('UnclosedBracketStrategy', () => {
   let strategy: UnclosedBracketStrategy;

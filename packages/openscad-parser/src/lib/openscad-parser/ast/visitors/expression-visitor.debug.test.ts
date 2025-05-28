@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { EnhancedOpenscadParser } from '../../enhanced-parser';
-import { ExpressionVisitor } from './expression-visitor';
-import { ErrorHandler } from '../../error-handling';
+import { EnhancedOpenscadParser } from '../../enhanced-parser.js';
+import { ExpressionVisitor } from './expression-visitor.js';
+import { ErrorHandler } from '../../error-handling/index.js';
 
 describe('ExpressionVisitor Debug', () => {
   let parser: EnhancedOpenscadParser;

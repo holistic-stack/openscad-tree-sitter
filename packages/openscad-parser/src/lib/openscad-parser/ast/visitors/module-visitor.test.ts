@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { ModuleVisitor } from './module-visitor';
-import { EnhancedOpenscadParser } from '../../enhanced-parser';
-import * as ast from '../ast-types';
-import { ErrorHandler } from '../../error-handling';
+import { ModuleVisitor } from './module-visitor.js';
+import { EnhancedOpenscadParser } from '../../enhanced-parser.js';
+import * as ast from '../ast-types.js';
+import { ErrorHandler } from '../../error-handling/index.js';
 
 describe('ModuleVisitor', () => {
   let parser: EnhancedOpenscadParser;

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { EnhancedOpenscadParser } from '../../enhanced-parser';
+import { EnhancedOpenscadParser } from '../../enhanced-parser.js';
 import { type Node as SyntaxNode } from 'web-tree-sitter';
-import { extractCylinderNode } from '../extractors/cylinder-extractor';
+import { extractCylinderNode } from '../extractors/cylinder-extractor.js';
 
 let parser: EnhancedOpenscadParser;
 const _defaultWasmPath = '/tree-sitter-openscad.wasm'; // Adjust if your WASM path is different

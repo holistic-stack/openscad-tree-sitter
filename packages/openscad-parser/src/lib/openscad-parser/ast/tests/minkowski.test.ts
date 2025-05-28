@@ -1,6 +1,6 @@
-import { EnhancedOpenscadParser } from '../../enhanced-parser';
+import { EnhancedOpenscadParser } from '../../enhanced-parser.js';
 import { afterAll, beforeAll, describe, it, expect } from 'vitest';
-import * as ast from '../ast-types';
+import * as ast from '../ast-types.js';
 
 describe('Minkowski Operation AST Generation', () => {
   let parser: EnhancedOpenscadParser;
