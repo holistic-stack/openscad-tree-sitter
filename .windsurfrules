@@ -3,7 +3,7 @@
 ## IMPORTANT AND NEVER SKIP:
 - ALWAYS use desktop commander mcp to:
 
-    - execute_command: Execute a terminal command with timeout. Command will continue running in background if it doesn't complete within timeout.
+    - mcp2_execute_command: Execute a terminal command with timeout. Command will continue running in background if it doesn't complete within timeout.
 
 
 

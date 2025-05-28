@@ -333,7 +333,7 @@ export class TransformVisitor extends BaseASTVisitor {
               // Fill in values from the input array, if they exist and are numbers
               for (let i = 0; i < Math.min(args[0]!.value.length, 4); i++) {
                 if (typeof args[0]!.value[i] === 'number') {
-                  colorArray[i] = args[0]!.value[i];
+                  colorArray[i] = args[0]!.value[i]!;
                 }
               }
 
@@ -384,10 +384,10 @@ export class TransformVisitor extends BaseASTVisitor {
               value.length === 16 &&
               value.every(item => typeof item === 'number')) {
             return [
-              [value[0], value[1], value[2], value[3]],
-              [value[4], value[5], value[6], value[7]],
-              [value[8], value[9], value[10], value[11]],
-              [value[12], value[13], value[14], value[15]]
+              [value[0]!, value[1]!, value[2]!, value[3]!],
+              [value[4]!, value[5]!, value[6]!, value[7]!],
+              [value[8]!, value[9]!, value[10]!, value[11]!],
+              [value[12]!, value[13]!, value[14]!, value[15]!]
             ];
           }
 
@@ -533,7 +533,7 @@ export class TransformVisitor extends BaseASTVisitor {
         // Try vector first (for angle vector like [90, 0, 0])
         const vector = extractVectorParameter(arg);
         if (vector && vector.length >= 3) {
-          a = [vector[0], vector[1], vector[2]];
+          a = [vector[0]!, vector[1]!, vector[2]!];
           console.log(
             `[TransformVisitor.createRotateNode] Extracted angle vector: ${JSON.stringify(
               a
@@ -562,7 +562,7 @@ export class TransformVisitor extends BaseASTVisitor {
       if (arg.name === 'v') {
         const vector = extractVectorParameter(arg);
         if (vector && vector.length >= 3) {
-          v = [vector[0], vector[1], vector[2]];
+          v = [vector[0]!, vector[1]!, vector[2]!];
           console.log(
             `[TransformVisitor.createRotateNode] Extracted rotation axis: ${JSON.stringify(
               v
@@ -608,9 +608,9 @@ export class TransformVisitor extends BaseASTVisitor {
         const vector = extractVectorParameter(arg);
         if (vector) {
           if (vector.length === 2) {
-            v = [vector[0], vector[1], 1]; // Convert 2D to 3D
+            v = [vector[0]!, vector[1]!, 1]; // Convert 2D to 3D
           } else if (vector.length >= 3) {
-            v = [vector[0], vector[1], vector[2]];
+            v = [vector[0]!, vector[1]!, vector[2]!];
           }
           console.log(
             `[TransformVisitor.createScaleNode] Extracted scale vector: ${JSON.stringify(
@@ -665,9 +665,9 @@ export class TransformVisitor extends BaseASTVisitor {
         const vector = extractVectorParameter(arg);
         if (vector) {
           if (vector.length === 2) {
-            v = [vector[0], vector[1], 0]; // Convert 2D to 3D
+            v = [vector[0]!, vector[1]!, 0]; // Convert 2D to 3D
           } else if (vector.length >= 3) {
-            v = [vector[0], vector[1], vector[2]];
+            v = [vector[0]!, vector[1]!, vector[2]!];
           }
           console.log(
             `[TransformVisitor.createMirrorNode] Extracted mirror plane: ${JSON.stringify(
