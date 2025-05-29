@@ -14,7 +14,7 @@ export class VariableVisitor extends BaseASTVisitor {
    * @param source The source code
    * @param errorHandler The error handler
    */
-  constructor(source: string, protected errorHandler: ErrorHandler) {
+  constructor(source: string, protected override errorHandler: ErrorHandler) {
     super(source, errorHandler);
   }
   /**

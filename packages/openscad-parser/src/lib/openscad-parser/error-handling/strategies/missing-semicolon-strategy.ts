@@ -14,7 +14,7 @@ import { BaseRecoveryStrategy } from './recovery-strategy.js';
  */
 export class MissingSemicolonStrategy extends BaseRecoveryStrategy {
   /** Higher priority than default */
-  public readonly priority: number = 50;
+  public override readonly priority: number = 50;
 
   /**
    * Determines if this strategy can handle the given error

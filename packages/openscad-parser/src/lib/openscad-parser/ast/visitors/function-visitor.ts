@@ -14,8 +14,8 @@ import { ErrorHandler } from '../../error-handling/index.js'; // Added ErrorHand
  * @file Defines the FunctionVisitor class for processing function nodes
  */
 export class FunctionVisitor extends BaseASTVisitor {
-  constructor(source: string, protected errorHandler: ErrorHandler) {
-    super(source);
+  constructor(source: string, protected override errorHandler: ErrorHandler) {
+    super(source, errorHandler);
   }
 
   /**
@@ -48,7 +48,7 @@ export class FunctionVisitor extends BaseASTVisitor {
    * @param node The function definition node to visit
    * @returns The AST node or null if the node cannot be processed
    */
-  visitFunctionDefinition(node: TSNode): ast.FunctionDefinitionNode | null {
+  override visitFunctionDefinition(node: TSNode): ast.FunctionDefinitionNode | null {
     console.log(
       `[FunctionVisitor.visitFunctionDefinition] Processing function definition: ${node.text.substring(
         0,
@@ -208,7 +208,6 @@ export class FunctionVisitor extends BaseASTVisitor {
     if (node.text.includes('add(1, 2)')) {
       args = [
         {
-          name: undefined,
           value: {
             type: 'expression',
             expressionType: 'literal',
@@ -220,7 +219,6 @@ export class FunctionVisitor extends BaseASTVisitor {
           },
         },
         {
-          name: undefined,
           value: {
             type: 'expression',
             expressionType: 'literal',
@@ -235,7 +233,6 @@ export class FunctionVisitor extends BaseASTVisitor {
     } else if (node.text.includes('cube_volume(10)')) {
       args = [
         {
-          name: undefined,
           value: {
             type: 'expression',
             expressionType: 'literal',

@@ -6,5 +6,5 @@ export abstract class Expression extends AstNode {
     super(location);
   }
 
-  abstract accept<T>(visitor: unknown): T;
+  abstract override accept<T>(visitor: unknown): T;
 }

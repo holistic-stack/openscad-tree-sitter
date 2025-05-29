@@ -16,7 +16,7 @@ export class BinaryExpression extends Expression {
     super(location);
   }
 
-  toString(): string {
+  override toString(): string {
     return `(${this.left} ${this.operator} ${this.right})`;
   }
 

@@ -147,7 +147,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @param source The source code
    * @param errorHandler The error handler
    */
-  constructor(source: string, protected errorHandler: ErrorHandler) {
+  constructor(source: string, protected override errorHandler: ErrorHandler) {
     super(source, errorHandler);
 
     // Initialize only the function call visitor
@@ -519,7 +519,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @param node The conditional expression CST node
    * @returns The conditional expression AST node or null if the node cannot be processed
    */
-  visitConditionalExpression(node: TSNode): ast.ConditionalExpressionNode | null {
+  override visitConditionalExpression(node: TSNode): ast.ConditionalExpressionNode | null {
     // Process conditional expression directly
     const conditionNode = node.child(0);
     const thenNode = node.child(2);
@@ -565,7 +565,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @param node The expression node to visit (CST node)
    * @returns The expression AST node or null if the node cannot be processed
    */
-  visitExpression(node: TSNode): ast.ExpressionNode | null {
+  override visitExpression(node: TSNode): ast.ExpressionNode | null {
     // Debug: Log the node structure
     this.safeLog(
       'info',
@@ -726,7 +726,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @param node The accessor expression node to visit
    * @returns The accessor expression AST node or null if the node cannot be processed
    */
-  visitAccessorExpression(node: TSNode): ast.AccessorExpressionNode | null {
+  override visitAccessorExpression(node: TSNode): ast.AccessorExpressionNode | null {
     this.safeLog(
       'info',
       `[ExpressionVisitor.visitAccessorExpression] Processing accessor expression: ${node.text.substring(0, 50)}`,

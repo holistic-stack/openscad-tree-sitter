@@ -4,7 +4,7 @@
  */
 
 import { ParserError } from './types/error-types.js';
-import { RecoveryStrategy } from './strategies/recovery-strategy.js';
+import type { RecoveryStrategy } from './strategies/recovery-strategy.js';
 import { MissingSemicolonStrategy } from './strategies/missing-semicolon-strategy.js';
 import { UnclosedBracketStrategy } from './strategies/unclosed-bracket-strategy.js';
 import { UnknownIdentifierStrategy } from './strategies/unknown-identifier-strategy.js';

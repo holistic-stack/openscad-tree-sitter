@@ -8,7 +8,7 @@ import { getLocation } from '../../../utils/location-utils.js';
 export class ParenthesizedExpressionVisitor extends BaseASTVisitor {
   constructor(
     protected parentVisitor: ExpressionVisitor,
-    protected errorHandler: ErrorHandler
+    protected override errorHandler: ErrorHandler
   ) {
     super('', errorHandler); // Use empty string for source since we get it from parent
   }

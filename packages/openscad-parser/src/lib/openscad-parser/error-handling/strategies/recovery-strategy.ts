@@ -84,7 +84,7 @@ export abstract class BaseRecoveryStrategy implements RecoveryStrategy {
   protected getLine(code: string, lineNumber: number): string | null {
     const lines = code.split('\n');
     return lineNumber > 0 && lineNumber <= lines.length
-      ? lines[lineNumber - 1]
+      ? lines[lineNumber - 1] ?? null
       : null;
   }
 
@@ -116,6 +116,8 @@ export abstract class BaseRecoveryStrategy implements RecoveryStrategy {
     if (line < 1 || line > lines.length) return code;
 
     const lineContent = lines[line - 1];
+    if (lineContent === undefined) return code;
+
     const before = lineContent.slice(0, column - 1);
     const after = lineContent.slice(column - 1);
 

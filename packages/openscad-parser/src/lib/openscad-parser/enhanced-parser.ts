@@ -6,7 +6,8 @@
  */
 
 import * as TreeSitter from 'web-tree-sitter';
-import { SimpleErrorHandler, IErrorHandler, ASTNode } from '@/lib';
+import { SimpleErrorHandler } from '@/lib';
+import type { IErrorHandler, ASTNode } from '@/lib';
 import { VisitorASTGenerator } from '@/lib/openscad-parser/ast';
 import { ErrorHandler } from './error-handling/index.js';
 
@@ -38,12 +39,14 @@ export class EnhancedOpenscadParser {
     try {
       this.errorHandler.logInfo('Initializing enhanced OpenSCAD parser...');
 
-      const bytes = await fetch(wasmPath).then(response => {
+      const arrayBuffer = await fetch(wasmPath).then(response => {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        return response.bytes();
+        return response.arrayBuffer();
       });
+
+      const bytes = new Uint8Array(arrayBuffer);
 
       await TreeSitter.Parser.init();
       this.parser = new TreeSitter.Parser();

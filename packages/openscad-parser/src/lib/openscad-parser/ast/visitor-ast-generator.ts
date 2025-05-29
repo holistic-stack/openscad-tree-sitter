@@ -1,6 +1,6 @@
 import { Tree } from 'web-tree-sitter'; // TSNode is not used in this file after removing findChildOfType
 import * as ast from './ast-types.js';
-import { ASTVisitor } from './visitors/ast-visitor.js';
+import type { ASTVisitor } from './visitors/ast-visitor.js';
 import { CompositeVisitor } from './visitors/composite-visitor.js';
 import { PrimitiveVisitor } from './visitors/primitive-visitor.js';
 import { TransformVisitor } from './visitors/transform-visitor.js';

@@ -1,6 +1,6 @@
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types.js';
-import { ASTVisitor } from './ast-visitor.js';
+import type { ASTVisitor } from './ast-visitor.js';
 import { ErrorHandler } from '../../error-handling/index.js'; // Added ErrorHandler import
 
 /**
@@ -62,7 +62,7 @@ export class CompositeVisitor implements ASTVisitor {
       case 'block': {
         // For block nodes, return the first child that produces a result
         const blockResults = this.visitBlock(node);
-        return blockResults.length > 0 ? blockResults[0] : null;
+        return blockResults.length > 0 ? (blockResults[0] ?? null) : null;
       }
       default:
         // For unknown node types, try each visitor in sequence

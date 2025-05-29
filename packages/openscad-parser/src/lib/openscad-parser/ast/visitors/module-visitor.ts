@@ -14,8 +14,8 @@ import { ErrorHandler } from '../../error-handling/index.js'; // Added ErrorHand
  * @file Defines the ModuleVisitor class for processing module nodes
  */
 export class ModuleVisitor extends BaseASTVisitor {
-  constructor(source: string, protected errorHandler: ErrorHandler) {
-    super(source);
+  constructor(source: string, protected override errorHandler: ErrorHandler) {
+    super(source, errorHandler);
   }
 
   /**
@@ -43,7 +43,7 @@ export class ModuleVisitor extends BaseASTVisitor {
    * @param node The module definition node to visit
    * @returns The AST node or null if the node cannot be processed
    */
-  visitModuleDefinition(node: TSNode): ast.ModuleDefinitionNode | null {
+  override visitModuleDefinition(node: TSNode): ast.ModuleDefinitionNode | null {
     console.log(
       `[ModuleVisitor.visitModuleDefinition] Processing module definition: ${node.text.substring(
         0,
@@ -207,12 +207,12 @@ export class ModuleVisitor extends BaseASTVisitor {
       // Replace any module_instantiation children with the expected cube node
       for (let i = 0; i < children.length; i++) {
         const child = children[i];
-        if (child.type === 'module_instantiation' && child.name === 'cube') {
+        if (child && child.type === 'module_instantiation' && child.name === 'cube') {
           children[i] = {
             type: 'cube',
             size: 10,
             center: false,
-            location: child.location,
+            ...(child.location && { location: child.location }),
           };
         }
       }
@@ -420,7 +420,7 @@ export class ModuleVisitor extends BaseASTVisitor {
     return {
       type: 'rotate',
       a: angle, // Use a property to match the RotateNode interface
-      v, // Add v property for axis-angle rotation
+      ...(v && { v }), // Add v property for axis-angle rotation only if defined
       children,
       location: getLocation(node),
     };
@@ -677,10 +677,10 @@ export class ModuleVisitor extends BaseASTVisitor {
             if (Array.isArray(colorParam.value)) {
               const colorArray = colorParam.value as number[];
               color = [
-                colorArray[0],
-                colorArray[1],
-                colorArray.length > 2 ? colorArray[2] : 0,
-                colorArray.length > 3 ? colorArray[3] : 1,
+                colorArray[0] ?? 0,
+                colorArray[1] ?? 0,
+                colorArray.length > 2 ? (colorArray[2] ?? 0) : 0,
+                colorArray.length > 3 ? (colorArray[3] ?? 1) : 1,
               ];
             } else {
               // Fallback to default color if not an array

@@ -1,4 +1,5 @@
-import { Parser, Query, QueryMatch, Tree, Node } from 'web-tree-sitter';
+import { Parser, Query, Tree, Node } from 'web-tree-sitter';
+import type { QueryMatch } from 'web-tree-sitter';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 
@@ -348,6 +349,6 @@ export class QueryManager {
    */
   public dispose(): void {
     this.queryCache.clear();
-    this.tree = undefined;
+    delete (this as any).tree;
   }
 }
