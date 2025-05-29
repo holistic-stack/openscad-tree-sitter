@@ -222,14 +222,16 @@ export class ForLoopVisitor {
     }
 
     for (const part of variableParts) {
-      const [varName, rangeText] = part.split('=').map(p => p.trim());
+      const splitParts = part.split('=').map(p => p.trim());
+      const varName = splitParts[0];
+      const rangeText = splitParts[1];
 
       if (varName && rangeText) {
         // Check if this is a range with step
         const rangeWithStepMatch = rangeText.match(
           /\[\s*([^:]+)\s*:\s*([^:]+)\s*:\s*([^\]]+)\s*\]/
         );
-        if (rangeWithStepMatch) {
+        if (rangeWithStepMatch && rangeWithStepMatch[1] && rangeWithStepMatch[2] && rangeWithStepMatch[3]) {
           const start = parseFloat(rangeWithStepMatch[1]);
           const step = parseFloat(rangeWithStepMatch[2]);
           const end = parseFloat(rangeWithStepMatch[3]);
@@ -244,7 +246,7 @@ export class ForLoopVisitor {
           const rangeMatch = rangeText.match(
             /\[\s*([^:]+)\s*:\s*([^\]]+)\s*\]/
           );
-          if (rangeMatch) {
+          if (rangeMatch && rangeMatch[1] && rangeMatch[2]) {
             const start = parseFloat(rangeMatch[1]);
             const end = parseFloat(rangeMatch[2]);
 
@@ -424,42 +426,44 @@ export class ForLoopVisitor {
       const varName = parts[0];
       const rangeText = parts[1];
 
-      // Check if this is a range with step
-      const rangeWithStepMatch = rangeText.match(
-        /\[\s*([^:]+)\s*:\s*([^:]+)\s*:\s*([^\]]+)\s*\]/
-      );
-      if (rangeWithStepMatch) {
-        const start = parseFloat(rangeWithStepMatch[1]);
-        const step = parseFloat(rangeWithStepMatch[2]);
-        const end = parseFloat(rangeWithStepMatch[3]);
-
-        variables.push({
-          variable: varName,
-          range: [start, end],
-          step,
-        });
-      } else {
-        // Check if this is a simple range
-        const rangeMatch = rangeText.match(/\[\s*([^:]+)\s*:\s*([^\]]+)\s*\]/);
-        if (rangeMatch) {
-          const start = parseFloat(rangeMatch[1]);
-          const end = parseFloat(rangeMatch[2]);
+      if (varName && rangeText) {
+        // Check if this is a range with step
+        const rangeWithStepMatch = rangeText.match(
+          /\[\s*([^:]+)\s*:\s*([^:]+)\s*:\s*([^\]]+)\s*\]/
+        );
+        if (rangeWithStepMatch && rangeWithStepMatch[1] && rangeWithStepMatch[2] && rangeWithStepMatch[3]) {
+          const start = parseFloat(rangeWithStepMatch[1]);
+          const step = parseFloat(rangeWithStepMatch[2]);
+          const end = parseFloat(rangeWithStepMatch[3]);
 
           variables.push({
             variable: varName,
             range: [start, end],
+            step,
           });
         } else {
-          // This is a variable with an expression
-          variables.push({
-            variable: varName,
-            range: {
-              type: 'expression',
-              expressionType: 'literal',
-              value: rangeText,
-              location: getLocation(iteratorNode),
-            },
-          });
+          // Check if this is a simple range
+          const rangeMatch = rangeText.match(/\[\s*([^:]+)\s*:\s*([^\]]+)\s*\]/);
+          if (rangeMatch && rangeMatch[1] && rangeMatch[2]) {
+            const start = parseFloat(rangeMatch[1]);
+            const end = parseFloat(rangeMatch[2]);
+
+            variables.push({
+              variable: varName,
+              range: [start, end],
+            });
+          } else {
+            // This is a variable with an expression
+            variables.push({
+              variable: varName,
+              range: {
+                type: 'expression',
+                expressionType: 'literal',
+                value: rangeText,
+                location: getLocation(iteratorNode),
+              },
+            });
+          }
         }
       }
     }

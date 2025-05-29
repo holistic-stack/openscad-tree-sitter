@@ -99,7 +99,7 @@ export class InsertMissingTokenStrategy implements RecoveryStrategy {
 
     // Get the suggestions from the error
     const suggestions = error.suggestions;
-    if (!suggestions || suggestions.length === 0 || !suggestions[0] || !suggestions[0].replacement) {
+    if (!suggestions || suggestions.length === 0 || !suggestions[0]?.replacement) {
       return null;
     }
 

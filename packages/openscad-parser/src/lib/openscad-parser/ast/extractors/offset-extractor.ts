@@ -47,6 +47,7 @@ export function extractOffsetNode(node: TSNode): ast.OffsetNode | null {
   // Process arguments
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
+    if (!arg) continue; // Skip undefined arguments
 
     // Handle radius parameter (named 'r')
     if (arg.name === 'r') {

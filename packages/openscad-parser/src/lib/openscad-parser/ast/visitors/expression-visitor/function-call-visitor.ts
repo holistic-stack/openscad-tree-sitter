@@ -33,7 +33,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
    */
   constructor(
     private parentVisitor: { visitExpression(node: TSNode): ast.ExpressionNode | null } | null,
-    protected errorHandler: ErrorHandler
+    protected override errorHandler: ErrorHandler
   ) {
     super('', errorHandler); // Source is not needed for this visitor
   }
@@ -98,10 +98,13 @@ export class FunctionCallVisitor extends BaseASTVisitor {
     };
 
     if (functionName && truncatedNameMap[functionName]) {
-      console.log(
-        `[FunctionCallVisitor.visitFunctionCall] WORKAROUND: Detected truncated function name "${functionName}", correcting to "${truncatedNameMap[functionName]}"`
-      );
-      functionName = truncatedNameMap[functionName];
+      const correctedName = truncatedNameMap[functionName];
+      if (correctedName) {
+        console.log(
+          `[FunctionCallVisitor.visitFunctionCall] WORKAROUND: Detected truncated function name "${functionName}", correcting to "${correctedName}"`
+        );
+        functionName = correctedName;
+      }
     }
 
     console.log(
@@ -126,7 +129,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
    * @param node The accessor expression node to visit
    * @returns The AST node or null if the node cannot be processed
    */
-  visitAccessorExpression(node: TSNode): ast.ASTNode | null {
+  override visitAccessorExpression(node: TSNode): ast.ASTNode | null {
     this.errorHandler.logInfo(
       `[FunctionCallVisitor.visitAccessorExpression] Processing accessor expression: ${node.text.substring(
         0,
@@ -280,7 +283,6 @@ export class FunctionCallVisitor extends BaseASTVisitor {
     if (node.text.includes('bar(1, 2, 3)')) {
       return [
         {
-          name: undefined,
           value: {
             type: 'expression',
             expressionType: 'literal',
@@ -289,7 +291,6 @@ export class FunctionCallVisitor extends BaseASTVisitor {
           },
         },
         {
-          name: undefined,
           value: {
             type: 'expression',
             expressionType: 'literal',
@@ -298,7 +299,6 @@ export class FunctionCallVisitor extends BaseASTVisitor {
           },
         },
         {
-          name: undefined,
           value: {
             type: 'expression',
             expressionType: 'literal',
@@ -337,7 +337,6 @@ export class FunctionCallVisitor extends BaseASTVisitor {
     if (node.text.includes('qux(1, y = 20, "hello")')) {
       return [
         {
-          name: undefined,
           value: {
             type: 'expression',
             expressionType: 'literal',
@@ -355,7 +354,6 @@ export class FunctionCallVisitor extends BaseASTVisitor {
           },
         },
         {
-          name: undefined,
           value: {
             type: 'expression',
             expressionType: 'literal',
@@ -374,7 +372,6 @@ export class FunctionCallVisitor extends BaseASTVisitor {
         name: 'inner',
         arguments: [
           {
-            name: undefined,
             value: 10,
           },
         ],
@@ -383,7 +380,6 @@ export class FunctionCallVisitor extends BaseASTVisitor {
 
       return [
         {
-          name: undefined,
           value: innerFunctionCall,
         },
       ];
@@ -459,7 +455,6 @@ export class FunctionCallVisitor extends BaseASTVisitor {
             : argNode.text;
 
         args.push({
-          name: undefined,
           value: {
             type: 'expression',
             expressionType: 'literal',
@@ -495,14 +490,14 @@ export class FunctionCallVisitor extends BaseASTVisitor {
         arg.value.type === 'expression'
       ) {
         return {
-          name: arg.name,
+          ...(arg.name && { name: arg.name }),
           value: arg.value,
         };
       }
 
       // Otherwise, use the primitive value directly
       return {
-        name: arg.name,
+        ...(arg.name && { name: arg.name }),
         value: arg.value,
       };
     });

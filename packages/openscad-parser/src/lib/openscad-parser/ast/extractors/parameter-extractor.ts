@@ -227,7 +227,7 @@ export function extractVectorParameter(param: ast.Parameter): number[] | null {
     const matches = param.value.match(
       /\[\s*([\d.+-]+)\s*,\s*([\d.+-]+)\s*,\s*([\d.+-]+)\s*\]/
     );
-    if (matches && matches.length === 4) {
+    if (matches && matches.length === 4 && matches[1] && matches[2] && matches[3]) {
       return [
         parseFloat(matches[1]),
         parseFloat(matches[2]),
@@ -238,7 +238,7 @@ export function extractVectorParameter(param: ast.Parameter): number[] | null {
     const matches2D = param.value.match(
       /\[\s*([\d.+-]+)\s*,\s*([\d.+-]+)\s*\]/
     );
-    if (matches2D && matches2D.length === 3) {
+    if (matches2D && matches2D.length === 3 && matches2D[1] && matches2D[2]) {
       return [parseFloat(matches2D[1]), parseFloat(matches2D[2])];
     }
   }
@@ -281,7 +281,7 @@ export function extractRangeParameter(
     const matches = param.value.match(
       /\[\s*([\d.+-]+)\s*:\s*([\d.+-]+)\s*:\s*([\d.+-]+)\s*\]/
     );
-    if (matches && matches.length === 4) {
+    if (matches && matches.length === 4 && matches[1] && matches[2] && matches[3]) {
       return [
         parseFloat(matches[1]),
         parseFloat(matches[3]),
@@ -290,7 +290,7 @@ export function extractRangeParameter(
     }
 
     const matches2 = param.value.match(/\[\s*([\d.+-]+)\s*:\s*([\d.+-]+)\s*\]/);
-    if (matches2 && matches2.length === 3) {
+    if (matches2 && matches2.length === 3 && matches2[1] && matches2[2]) {
       return [parseFloat(matches2[1]), parseFloat(matches2[2]), 1];
     }
   }

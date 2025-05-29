@@ -31,7 +31,7 @@ export class UnclosedBracketStrategy extends BaseRecoveryStrategy {
   private readonly bracketTypes = Object.values(this.bracketMap);
 
   /** Higher priority than default */
-  public readonly priority: number = 40;
+  public override readonly priority: number = 40;
 
   /**
    * Determines if this strategy can handle the given error
@@ -66,7 +66,10 @@ export class UnclosedBracketStrategy extends BaseRecoveryStrategy {
       let result = code;
       // Add non-brace brackets at the end in reverse order
       for (let i = nonBraces.length - 1; i >= 0; i--) {
-        result += nonBraces[i].close;
+        const bracket = nonBraces[i];
+        if (bracket) {
+          result += bracket.close;
+        }
       }
       // Add braces on new lines
       for (const _bracket of braces) {
@@ -79,7 +82,10 @@ export class UnclosedBracketStrategy extends BaseRecoveryStrategy {
     // Close brackets in reverse order (LIFO - Last In, First Out)
     let result = code;
     for (let i = unclosedBrackets.length - 1; i >= 0; i--) {
-      result += unclosedBrackets[i].close;
+      const bracket = unclosedBrackets[i];
+      if (bracket) {
+        result += bracket.close;
+      }
     }
     return result;
   }
@@ -96,6 +102,7 @@ export class UnclosedBracketStrategy extends BaseRecoveryStrategy {
     // Scan the line up to the error position
     for (let i = 0; i <= Math.min(errorPosition, line.length - 1); i++) {
       const char = line[i];
+      if (char === undefined) continue;
       const bracket = this.bracketMap[char];
 
       if (bracket) {
@@ -106,7 +113,8 @@ export class UnclosedBracketStrategy extends BaseRecoveryStrategy {
         for (const bracketType of this.bracketTypes) {
           if (char === bracketType.close) {
             // If the top of the stack matches, pop it
-            if (stack.length > 0 && stack[stack.length - 1].close === char) {
+            const topBracket = stack[stack.length - 1];
+            if (stack.length > 0 && topBracket && topBracket.close === char) {
               stack.pop();
             }
             break;
@@ -116,7 +124,8 @@ export class UnclosedBracketStrategy extends BaseRecoveryStrategy {
     }
 
     // Return the last unclosed bracket, if any
-    return stack.length > 0 ? stack[stack.length - 1] : null;
+    const lastBracket = stack[stack.length - 1];
+    return lastBracket ?? null;
   }
 
   /**
@@ -128,6 +137,7 @@ export class UnclosedBracketStrategy extends BaseRecoveryStrategy {
     // Scan the entire code
     for (let i = 0; i < code.length; i++) {
       const char = code[i];
+      if (char === undefined) continue;
       const bracket = this.bracketMap[char];
 
       if (bracket) {
@@ -138,7 +148,8 @@ export class UnclosedBracketStrategy extends BaseRecoveryStrategy {
         for (const bracketType of this.bracketTypes) {
           if (char === bracketType.close) {
             // If the top of the stack matches, pop it
-            if (stack.length > 0 && stack[stack.length - 1].close === char) {
+            const topBracket = stack[stack.length - 1];
+            if (stack.length > 0 && topBracket && topBracket.close === char) {
               stack.pop();
             }
             break;
@@ -148,7 +159,8 @@ export class UnclosedBracketStrategy extends BaseRecoveryStrategy {
     }
 
     // Return the last unclosed bracket, if any
-    return stack.length > 0 ? stack[stack.length - 1] : null;
+    const lastBracket = stack[stack.length - 1];
+    return lastBracket ?? null;
   }
 
   /**
@@ -160,6 +172,7 @@ export class UnclosedBracketStrategy extends BaseRecoveryStrategy {
     // Scan the entire code
     for (let i = 0; i < code.length; i++) {
       const char = code[i];
+      if (char === undefined) continue;
       const bracket = this.bracketMap[char];
 
       if (bracket) {
@@ -170,7 +183,8 @@ export class UnclosedBracketStrategy extends BaseRecoveryStrategy {
         for (const bracketType of this.bracketTypes) {
           if (char === bracketType.close) {
             // If the top of the stack matches, pop it
-            if (stack.length > 0 && stack[stack.length - 1].close === char) {
+            const topBracket = stack[stack.length - 1];
+            if (stack.length > 0 && topBracket && topBracket.close === char) {
               stack.pop();
             }
             break;

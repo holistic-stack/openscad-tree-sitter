@@ -64,7 +64,7 @@ export class TypeMismatchStrategy extends BaseRecoveryStrategy {
   }
 
   /** Higher priority than default */
-  public readonly priority: number = 20;
+  public override readonly priority: number = 20;
 
   /**
    * Determines if this strategy can handle the given error
@@ -107,14 +107,17 @@ export class TypeMismatchStrategy extends BaseRecoveryStrategy {
 
     // Check if we can convert from found type to expected type
     const expectedType = Array.isArray(expected) ? expected[0] : expected;
-    if (this.canConvert(found, expectedType)) {
-      const convertedValue = this.convertValue(value || '', found, expectedType);
+    const safeExpectedType = expectedType ?? '';
+    const safeFound = found ?? '';
+    if (this.canConvert(safeFound, safeExpectedType)) {
+      const safeValue = value ?? '';
+      const convertedValue = this.convertValue(safeValue, safeFound, safeExpectedType);
       if (convertedValue !== null) {
         return this.replaceAtPosition(
           code,
           location.line,
           location.column,
-          value || '',
+          safeValue,
           convertedValue
         );
       }
@@ -191,14 +194,17 @@ export class TypeMismatchStrategy extends BaseRecoveryStrategy {
 
     // Check if we can convert the argument to the expected type
     const expectedType = Array.isArray(expected) ? expected[0] : expected;
-    if (this.canConvert(found, expectedType)) {
-      const convertedValue = this.convertValue(value, found, expectedType);
+    const safeExpectedType = expectedType ?? '';
+    const safeFound = found ?? '';
+    if (this.canConvert(safeFound, safeExpectedType)) {
+      const safeValue = value ?? '';
+      const convertedValue = this.convertValue(safeValue, safeFound, safeExpectedType);
       if (convertedValue !== null) {
         return this.replaceAtPosition(
           code,
           location.line,
           location.column,
-          value,
+          safeValue,
           convertedValue
         );
       }
@@ -290,8 +296,8 @@ export class TypeMismatchStrategy extends BaseRecoveryStrategy {
     }
 
     const targetLine = lines[line - 1];
-    if (column < 1 || column > targetLine.length + 1) {
-      return code; // Invalid column number
+    if (!targetLine || column < 1 || column > targetLine.length + 1) {
+      return code; // Invalid column number or line not found
     }
 
     // Find the old text starting at the specified position

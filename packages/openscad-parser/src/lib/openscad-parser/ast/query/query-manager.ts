@@ -7,7 +7,7 @@
  */
 
 import { Tree, Query, Node as TSNode } from 'web-tree-sitter';
-import { QueryCache } from './query-cache.js';
+import type { QueryCache } from './query-cache.js';
 import { LRUQueryCache } from './lru-query-cache.js';
 
 /**

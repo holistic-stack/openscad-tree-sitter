@@ -698,11 +698,11 @@ module.exports = grammar({
       // Double-quoted strings with proper termination
       seq('"', optional(token.immediate(/[^"]*/)), '"'),
       // Single-quoted strings with proper termination
-      seq("'", optional(token.immediate(/[^']*/)), "'"),
+      seq('\'', optional(token.immediate(/[^']*/)), '\''),
       // Error recovery for unterminated double-quoted strings
       seq('"', token.immediate(/[^"\n]*/)),
       // Error recovery for unterminated single-quoted strings
-      seq("'", token.immediate(/[^'\n]*/)),
+      seq('\'', token.immediate(/[^'\n]*/)),
     ),
 
     number: $ => {

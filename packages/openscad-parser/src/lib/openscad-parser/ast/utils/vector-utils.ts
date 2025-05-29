@@ -131,7 +131,7 @@ function extractVectorFromText(
   const matches = text.match(
     /\[\s*([\d.+-]+)\s*,\s*([\d.+-]+)\s*,\s*([\d.+-]+)\s*\]/
   );
-  if (matches && matches.length === 4) {
+  if (matches && matches.length === 4 && matches[1] && matches[2] && matches[3]) {
     const vector = [
       parseFloat(matches[1]),
       parseFloat(matches[2]),
@@ -147,7 +147,7 @@ function extractVectorFromText(
 
   // Try to extract 2D vector
   const matches2D = text.match(/\[\s*([\d.+-]+)\s*,\s*([\d.+-]+)\s*\]/);
-  if (matches2D && matches2D.length === 3) {
+  if (matches2D && matches2D.length === 3 && matches2D[1] && matches2D[2]) {
     const vector = [parseFloat(matches2D[1]), parseFloat(matches2D[2])];
     console.log(
       `[extractVectorFromText] Extracted 2D vector from text: ${JSON.stringify(

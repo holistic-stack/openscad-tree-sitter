@@ -93,10 +93,13 @@ export function extractCylinderNode(node: SyntaxNode): ast.CylinderNode | null {
 
   // 1. Positional 'h'
   if (h === undefined && positionalArgs.length > currentPositionalIndex) {
-    const val = extractNumberParameter(positionalArgs[currentPositionalIndex]);
-    if (val !== null) {
-      h = val;
-      currentPositionalIndex++;
+    const param = positionalArgs[currentPositionalIndex];
+    if (param) {
+      const val = extractNumberParameter(param);
+      if (val !== null) {
+        h = val;
+        currentPositionalIndex++;
+      }
     }
   }
 
@@ -110,13 +113,15 @@ export function extractCylinderNode(node: SyntaxNode): ast.CylinderNode | null {
   ) {
     const potential_r1_param = positionalArgs[currentPositionalIndex];
     const potential_r2_param = positionalArgs[currentPositionalIndex + 1];
-    const val_r1 = extractNumberParameter(potential_r1_param);
-    const val_r2 = extractNumberParameter(potential_r2_param);
+    if (potential_r1_param && potential_r2_param) {
+      const val_r1 = extractNumberParameter(potential_r1_param);
+      const val_r2 = extractNumberParameter(potential_r2_param);
 
-    if (val_r1 !== null && val_r2 !== null) {
-      r1 = val_r1;
-      r2 = val_r2;
-      currentPositionalIndex += 2;
+      if (val_r1 !== null && val_r2 !== null) {
+        r1 = val_r1;
+        r2 = val_r2;
+        currentPositionalIndex += 2;
+      }
     }
   }
 
@@ -128,23 +133,29 @@ export function extractCylinderNode(node: SyntaxNode): ast.CylinderNode | null {
   ) {
     // If r1 was set (either by name or above), this positional arg is not r.
     // If r1 is undefined, then this could be r.
-    const val = extractNumberParameter(positionalArgs[currentPositionalIndex]);
-    if (val !== null) {
-      // If r2 is defined (e.g. named r2= or positional r1,r2), this can't be r for cylinder(h,r,center)
-      // This logic is tricky. Standard OpenSCAD: cylinder(h,r) or cylinder(h,r1,r2).
-      // If we are here, it means r1,r2 as a pair was not matched positionally.
-      // So, if this is a number, it's 'r'.
-      r = val;
-      currentPositionalIndex++;
+    const param = positionalArgs[currentPositionalIndex];
+    if (param) {
+      const val = extractNumberParameter(param);
+      if (val !== null) {
+        // If r2 is defined (e.g. named r2= or positional r1,r2), this can't be r for cylinder(h,r,center)
+        // This logic is tricky. Standard OpenSCAD: cylinder(h,r) or cylinder(h,r1,r2).
+        // If we are here, it means r1,r2 as a pair was not matched positionally.
+        // So, if this is a number, it's 'r'.
+        r = val;
+        currentPositionalIndex++;
+      }
     }
   }
 
   // 3. Positional 'center'
   if (center === undefined && positionalArgs.length > currentPositionalIndex) {
-    const val = extractBooleanParameter(positionalArgs[currentPositionalIndex]);
-    if (val !== null) {
-      center = val;
-      currentPositionalIndex++;
+    const param = positionalArgs[currentPositionalIndex];
+    if (param) {
+      const val = extractBooleanParameter(param);
+      if (val !== null) {
+        center = val;
+        currentPositionalIndex++;
+      }
     }
   }
 

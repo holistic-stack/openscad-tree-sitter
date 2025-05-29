@@ -163,7 +163,7 @@ export class IfElseVisitor {
       type: 'if',
       condition,
       thenBranch,
-      elseBranch,
+      ...(elseBranch && { elseBranch }),
       location: getLocation(node),
     };
   }
@@ -224,25 +224,30 @@ export class IfElseVisitor {
     // Create condition expression
     let condition: ast.ExpressionNode;
 
-    if (args.length > 0 && args[0].value) {
+    if (args.length > 0 && args[0] && args[0].value) {
+      const firstArg = args[0];
+      const argValue = firstArg.value;
+
       if (
-        typeof args[0].value === 'object' &&
-        !Array.isArray(args[0].value) &&
-        args[0].value.type === 'expression'
+        typeof argValue === 'object' &&
+        argValue !== null &&
+        !Array.isArray(argValue) &&
+        'type' in argValue &&
+        argValue.type === 'expression'
       ) {
         // Use the expression directly if it's already an expression node
-        condition = args[0].value;
+        condition = argValue as ast.ExpressionNode;
       } else {
         // Create a literal expression for other value types
         condition = {
           type: 'expression',
           expressionType: 'literal',
           value:
-            typeof args[0].value === 'string' ||
-            typeof args[0].value === 'number' ||
-            typeof args[0].value === 'boolean'
-              ? args[0].value
-              : JSON.stringify(args[0].value),
+            typeof argValue === 'string' ||
+            typeof argValue === 'number' ||
+            typeof argValue === 'boolean'
+              ? argValue
+              : JSON.stringify(argValue),
           location: getLocation(node),
         };
       }
@@ -260,7 +265,6 @@ export class IfElseVisitor {
       type: 'if',
       condition,
       thenBranch: [],
-      elseBranch: undefined,
       location: getLocation(node),
     };
   }

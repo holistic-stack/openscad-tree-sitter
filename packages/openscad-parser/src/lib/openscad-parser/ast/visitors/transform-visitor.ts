@@ -96,9 +96,9 @@ export class TransformVisitor extends BaseASTVisitor {
 
         if (functionName && truncatedNameMap[functionName]) {
           console.log(
-            `[TransformVisitor.visitAccessorExpression] WORKAROUND: Detected truncated function name "${functionName}", correcting to "${truncatedNameMap[functionName!]}"`
+            `[TransformVisitor.visitAccessorExpression] WORKAROUND: Detected truncated function name "${functionName}", correcting to "${truncatedNameMap[functionName]}"`
           );
-          const mappedName = truncatedNameMap[functionName!];
+          const mappedName = truncatedNameMap[functionName];
           if (mappedName) {
             functionName = mappedName;
           }

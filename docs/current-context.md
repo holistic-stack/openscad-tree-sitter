@@ -14,15 +14,166 @@ The OpenSCAD Tree-sitter Parser project is an Nx monorepo with PNPM workspaces t
 
 ## ✅ `openscad-parser` Status Update (2025-05-28)
 
+**🎉 TypeScript Errors in `cube-extractor.ts` Resolved:**
+- **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/extractors/cube-extractor.ts`
+- **Issue**: `TS2322: Type 'number | undefined' is not assignable to type 'number | Vector3D'` errors on lines 82 and 85.
+- **Resolution**: Successfully fixed by adding proper type guards to check `vectorValue[0]` is a number before assignment, with fallback to default values.
+- **Impact**: Clean compilation for `cube-extractor.ts`, maintaining type safety while preserving functionality.
+
 **🎉 TypeScript Errors in `transform-visitor.ts` Resolved:**
 - **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/transform-visitor.ts`
 - **Issue**: `TS2322: Type 'number | undefined' is not assignable to type 'number'` errors.
 - **Resolution**: Successfully fixed by applying non-null assertions (`!`) where appropriate, ensuring type safety.
 - **Impact**: Clean compilation for `transform-visitor.ts`.
 
-**✅ `openscad-parser` Tests Passing:**
-- Following the resolution of TypeScript errors, all tests within the `openscad-parser` package are passing.
-- This confirms the stability and correctness of the transformation functions (`translate`, `rotate`, `scale`, `mirror`, `color`) and related AST generation logic.
+**🎉 TypeScript Errors in `sphere-extractor.ts` Resolved:**
+- **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/extractors/sphere-extractor.ts`
+- **Issues**: Multiple TypeScript errors including undefined parameter handling and exactOptionalPropertyTypes compliance
+- **Resolution**: Successfully fixed by adding proper type guards, null checks, and conditional property spreading for optional properties
+- **Impact**: Clean compilation for `sphere-extractor.ts`, maintaining type safety while preserving functionality
+
+**🎉 TypeScript Errors in `cylinder-extractor.ts` Resolved:**
+- **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/extractors/cylinder-extractor.ts`
+- **Issues**: Multiple TypeScript errors on lines 96, 113, 114, 131, and 144 where `positionalArgs[index]` could be undefined
+- **Resolution**: Successfully fixed by adding proper null checks before accessing array elements and calling parameter extraction functions
+- **Impact**: Clean compilation for `cylinder-extractor.ts`, maintaining type safety while preserving complex positional parameter logic
+
+**🎉 TypeScript Errors in `offset-extractor.ts` Resolved:**
+- **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/extractors/offset-extractor.ts`
+- **Issues**: Multiple TypeScript errors on lines 52, 53, 60, 66, 67, 74, 80, 81, and 88 where `arg` could be undefined
+- **Resolution**: Successfully fixed by adding proper null check `if (!arg) continue;` before accessing parameter properties and calling extraction functions
+- **Impact**: Clean compilation for `offset-extractor.ts`, maintaining type safety while preserving parameter processing logic
+
+**🎉 TypeScript Errors in `parameter-extractor.ts` Resolved:**
+- **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/extractors/parameter-extractor.ts`
+- **Issues**: Multiple TypeScript errors on lines 232, 233, 234, 242, 286, 287, 288, 294 where regex match results could be undefined
+- **Resolution**: Successfully fixed by adding proper null checks for regex capture groups before calling `parseFloat()`
+- **Technical Details**: Added checks like `matches[1] && matches[2] && matches[3]` to ensure capture groups exist before parsing
+- **Impact**: Clean compilation for `parameter-extractor.ts`, maintaining type safety while preserving regex parsing logic
+
+**🎉 TypeScript Errors in `vector-utils.ts` Resolved:**
+- **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/utils/vector-utils.ts`
+- **Issues**: Multiple TypeScript errors on lines 136, 137, 138, 151 where regex match results could be undefined
+- **Resolution**: Successfully fixed by adding proper null checks for regex capture groups before calling `parseFloat()`
+- **Technical Details**: Added checks like `matches[1] && matches[2] && matches[3]` and `matches2D[1] && matches2D[2]` to ensure capture groups exist before parsing
+- **Impact**: Clean compilation for `vector-utils.ts`, maintaining type safety while preserving vector parsing logic
+
+**🎉 TypeScript Errors in `ast/extractors/index.ts` Resolved:**
+- **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/extractors/index.ts`
+- **Issues**: TS1205 errors on lines 4 and 5 - re-exporting types when verbatimModuleSyntax is enabled requires using 'export type'
+- **Resolution**: Successfully fixed by separating type re-exports from value re-exports using proper `export type` syntax
+- **Technical Details**: Split the export statement to use `export type { ExtractedNamedArgument, ExtractedParameter }` for types and kept `export { extractArguments }` for values
+- **Impact**: Clean compilation for `ast/extractors/index.ts`, maintaining proper module syntax compliance with verbatimModuleSyntax TypeScript configuration
+
+**🎉 TypeScript Errors in `ast/query/lru-query-cache.ts` Resolved:**
+- **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/query/lru-query-cache.ts`
+- **Issues**: TS1484 error on line 11 - importing types when verbatimModuleSyntax is enabled requires using 'import type'
+- **Resolution**: Successfully fixed by changing `import { QueryCache }` to `import type { QueryCache }` for type-only import
+- **Technical Details**: Used proper `import type { QueryCache }` syntax to comply with verbatimModuleSyntax requirements for interface imports
+- **Impact**: Clean compilation for `ast/query/lru-query-cache.ts`, maintaining proper module syntax compliance with verbatimModuleSyntax TypeScript configuration
+
+**🎉 TypeScript Errors in `ast/query/query-manager.ts` Resolved:**
+- **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/query/query-manager.ts`
+- **Issues**: TS1484 error on line 10 - importing types when verbatimModuleSyntax is enabled requires using 'import type'
+- **Resolution**: Successfully fixed by changing `import { QueryCache }` to `import type { QueryCache }` for type-only import
+- **Technical Details**: Used proper `import type { QueryCache }` syntax to comply with verbatimModuleSyntax requirements for interface imports
+- **Impact**: Clean compilation for `ast/query/query-manager.ts`, maintaining proper module syntax compliance with verbatimModuleSyntax TypeScript configuration
+
+**🎉 TypeScript Errors in `ast/registry/default-node-handler-registry.ts` Resolved:**
+- **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/registry/default-node-handler-registry.ts`
+- **Issues**: TS1484 errors on line 4 - importing types when verbatimModuleSyntax is enabled requires using 'import type'
+- **Resolution**: Successfully fixed by changing `import { NodeHandler, NodeHandlerRegistry }` to `import type { NodeHandler, NodeHandlerRegistry }` for type-only imports
+- **Technical Details**: Used proper `import type { NodeHandler, NodeHandlerRegistry }` syntax to comply with verbatimModuleSyntax requirements for type alias and interface imports
+- **Impact**: Clean compilation for `ast/registry/default-node-handler-registry.ts`, maintaining proper module syntax compliance with verbatimModuleSyntax TypeScript configuration
+
+**🎉 TypeScript Errors in `ast/registry/node-handler-registry-factory.ts` Resolved:**
+- **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/registry/node-handler-registry-factory.ts`
+- **Issues**: TS1484 errors on lines 3 and 5 - importing types when verbatimModuleSyntax is enabled requires using 'import type', and TS2375 error on line 170 - exactOptionalPropertyTypes compliance issue
+- **Resolution**: Successfully fixed by changing `import { NodeHandlerRegistry }` to `import type { NodeHandlerRegistry }` and `import { ExpressionNode }` to `import type { ExpressionNode }` for type-only imports, and removing `location: undefined` property to comply with exactOptionalPropertyTypes
+- **Technical Details**: Used proper `import type` syntax for interface imports and omitted optional properties instead of setting them to `undefined` to comply with exactOptionalPropertyTypes requirements
+- **Impact**: Clean compilation for `ast/registry/node-handler-registry-factory.ts`, maintaining proper module syntax compliance with verbatimModuleSyntax and exactOptionalPropertyTypes TypeScript configuration
+
+**🎉 TypeScript Errors in `ast/utils/location-utils.ts` Resolved:**
+- **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/utils/location-utils.ts`
+- **Issues**: TS1484 error on line 1 - importing types when verbatimModuleSyntax is enabled requires using 'import type'
+- **Resolution**: Successfully fixed by separating the import statement: `import { Node as TSNode } from 'web-tree-sitter';` and `import type { Point } from 'web-tree-sitter';` for type-only import
+- **Technical Details**: Used proper `import type { Point }` syntax to comply with verbatimModuleSyntax requirements for type-only imports while keeping `Node as TSNode` as a regular import since it's used as a value in function parameters
+- **Impact**: Clean compilation for `ast/utils/location-utils.ts`, maintaining proper module syntax compliance with verbatimModuleSyntax TypeScript configuration
+
+**🎉 TypeScript Errors in `ast/visitors/base-ast-visitor.ts` Resolved:**
+- **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/base-ast-visitor.ts`
+- **Issues**: TS1484 errors on lines 3 and 7 - importing types when verbatimModuleSyntax is enabled requires using 'import type', and multiple TS2322, TS2375, TS18048 errors related to exactOptionalPropertyTypes compliance
+- **Resolution**: Successfully fixed by changing `import { ASTVisitor }` to `import type { ASTVisitor }` and `import { ExtractedParameter }` to `import type { ExtractedParameter }` for type-only imports, and removing `location: undefined` properties and using nullish coalescing operators for undefined handling
+- **Technical Details**: Used proper `import type` syntax for interface and type imports, omitted optional properties instead of setting them to `undefined` to comply with exactOptionalPropertyTypes, and used `?? null` and `?? ''` operators for safe undefined handling
+- **Impact**: Clean compilation for `ast/visitors/base-ast-visitor.ts`, maintaining proper module syntax compliance with verbatimModuleSyntax and exactOptionalPropertyTypes TypeScript configuration. This is a core base class that many other visitors depend on, making it high impact.
+
+**🎉 TypeScript Errors in `error-handling/strategies/type-mismatch-strategy.ts` Resolved:**
+- **File**: `packages/openscad-parser/src/lib/openscad-parser/error-handling/strategies/type-mismatch-strategy.ts`
+- **Issues**: TS4114 errors for missing override modifier on methods, TS2345 errors for string | undefined not assignable to parameter of type string, and TS18048 errors for object is possibly undefined in array access
+- **Resolution**: Successfully fixed by adding `override` modifier to priority property (`public override readonly priority: number = 20`), implementing comprehensive null checks for string parameters (`const safeValue = value ?? ''; const safeFound = found ?? ''; const safeExpectedType = expectedType ?? ''`), and adding proper undefined handling for array access (`if (!targetLine || column < 1 || column > targetLine.length + 1)`)
+- **Technical Details**: Applied override modifier compliance for inheritance hierarchy, used proper type narrowing with nullish coalescing operators for all string parameters to ensure type safety, implemented comprehensive undefined handling for type conversion operations in both handleTypeMismatch and handleInvalidArguments methods, and added safe array access patterns for line-based text replacement operations. Fixed all type conversion calls with consistent safe parameter handling.
+- **Impact**: Clean compilation for `error-handling/strategies/type-mismatch-strategy.ts`, maintaining proper override modifier compliance and comprehensive undefined handling. This is a core error recovery strategy that handles type mismatches, invalid operations, and invalid arguments, making it high impact.
+
+**🎉 TypeScript Errors in `error-handling/strategies/unclosed-bracket-strategy.ts` Resolved:**
+- **File**: `packages/openscad-parser/src/lib/openscad-parser/error-handling/strategies/unclosed-bracket-strategy.ts`
+- **Issues**: TS4114 errors for missing override modifier on methods, TS2532 errors for undefined handling in array access, TS2538 errors for undefined cannot be used as index type, and TS2322 errors for BracketInfo | undefined not assignable to BracketInfo | null
+- **Resolution**: Successfully fixed by adding `override` modifier to priority property (`public override readonly priority: number = 40`), implementing comprehensive null checks for array access (`const bracket = nonBraces[i]; if (bracket)`), adding undefined checks for string indexing (`if (char === undefined) continue`), implementing safe array access with explicit variable assignment (`const topBracket = stack[stack.length - 1]; if (stack.length > 0 && topBracket && topBracket.close === char)`), and using nullish coalescing for return type compliance (`const lastBracket = stack[stack.length - 1]; return lastBracket ?? null`)
+- **Technical Details**: Applied override modifier compliance for inheritance hierarchy, used proper type narrowing with explicit variable assignment for array access, implemented comprehensive undefined handling for string indexing operations, added consistent null checks across all bracket scanning methods (findLastUnclosedBracket, findLastUnclosedBracketInCode, findAllUnclosedBrackets), and ensured proper return type compliance by converting undefined to null using nullish coalescing. Fixed all bracket stack operations with safe access patterns.
+- **Impact**: Clean compilation for `error-handling/strategies/unclosed-bracket-strategy.ts`, maintaining proper override modifier compliance and comprehensive undefined handling. This is a core error recovery strategy that handles unclosed brackets, braces, and parentheses, making it high impact.
+
+**🎉 TypeScript Errors in `error-handling/strategies/unknown-identifier-strategy.ts` Resolved:**
+- **File**: `packages/openscad-parser/src/lib/openscad-parser/error-handling/strategies/unknown-identifier-strategy.ts`
+- **Issues**: TS4114 errors for missing override modifier on methods, TS2532 errors for undefined handling in array access and object property access, TS2345 errors for string | undefined not assignable to string, and TS2322 errors for type mismatches with undefined values
+- **Resolution**: Successfully fixed by adding `override` modifier to priority property (`public override readonly priority: number = 30`), implementing comprehensive null checks for array access (`const firstSuggestion = suggestions[0]; if (!firstSuggestion) return null`), refactoring array destructuring to avoid undefined values (`const parts = id.split(':', 2); const type = parts[0]; const idName = parts[1]; if (!type || !idName) continue`), implementing safe matrix operations in Levenshtein distance calculation with explicit undefined checks, and adding proper null checks for line array access (`const line = lines[i]; if (line !== undefined)`)
+- **Technical Details**: Applied override modifier compliance for inheritance hierarchy, used proper type narrowing with explicit variable assignment for array access, refactored complex array destructuring into explicit element access with null checks, implemented comprehensive undefined handling for matrix operations with proper bounds checking, and ensured all string operations have proper null safety. Fixed the Levenshtein distance algorithm with safe matrix access patterns and the line position calculation with safe array access.
+- **Impact**: Clean compilation for `error-handling/strategies/unknown-identifier-strategy.ts`, maintaining proper override modifier compliance and comprehensive undefined handling. This is a core error recovery strategy that affects parser recovery and error suggestions, making it high impact.
+
+**🎉 TypeScript Errors in `ast/visitors/csg-visitor.ts` Resolved:**
+- **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/csg-visitor.ts`
+- **Issues**: TS4115 errors for missing override modifier on constructor parameter, TS4114 errors for missing override modifier on methods, and TS2322 errors for undefined handling in array access and string operations
+- **Resolution**: Successfully fixed by adding `override` modifier to constructor parameter (`protected override errorHandler: ErrorHandler`), updating constructor to pass both source and errorHandler to base class (`super(source, errorHandler)`), adding `override` modifier to overridden methods (`override visitAccessorExpression`, `override visitModuleInstantiation`, `override visitCallExpression`), and implementing safe undefined handling for array access (`const correctedName = truncatedNameMap[functionName]; if (correctedName)`)
+- **Technical Details**: Applied override modifier compliance for inheritance hierarchy, fixed constructor signature to match BaseASTVisitor requirements, used proper type narrowing with explicit variable assignment for array access, and implemented consistent patterns across all truncated name map access points. Fixed both `visitAccessorExpression` and `visitCallExpression` methods with identical safe access patterns.
+- **Impact**: Clean compilation for `ast/visitors/csg-visitor.ts`, maintaining proper override modifier compliance and safe undefined handling. This is a core visitor that handles CSG operations (union, difference, intersection, hull, minkowski), making it high impact.
+
+**🎉 TypeScript Errors in `ast/visitors/control-structure-visitor.ts` Resolved:**
+- **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/control-structure-visitor.ts`
+- **Issues**: TS4115 errors for missing override modifier on constructor parameter, TS4114 errors for missing override modifier on methods, TS2375 errors for exactOptionalPropertyTypes compliance, and TS2532 errors for undefined handling in array access and complex conditional expressions
+- **Resolution**: Successfully fixed by adding `override` modifier to constructor parameter (`protected override errorHandler: ErrorHandler`), adding `override` modifier to overridden methods (`override visitIfStatement`, `override visitForStatement`, `override visitLetExpression`), implementing comprehensive null checks for array access (`if (!firstArg)`), and refactoring complex conditional expressions to avoid undefined values in exactOptionalPropertyTypes compliance
+- **Technical Details**: Applied override modifier compliance for inheritance hierarchy, used proper type narrowing with comprehensive null checks for array access, refactored complex conditional expression into explicit type checking with proper type guards, and ensured all expression values are properly typed as `string | number | boolean` without undefined. Fixed the `createEachNode` method with safe value extraction patterns.
+- **Impact**: Clean compilation for `ast/visitors/control-structure-visitor.ts`, maintaining proper override modifier compliance and exactOptionalPropertyTypes compliance. This is a core visitor that handles control structures (if, for, let, each), making it high impact.
+
+**🎉 TypeScript Errors in `ast/visitors/expression-visitor/function-call-visitor.ts` Resolved:**
+- **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor/function-call-visitor.ts`
+- **Issues**: TS4115 errors for missing override modifier on constructor parameter, TS4114 errors for missing override modifier on methods, TS2375 errors for exactOptionalPropertyTypes compliance, and TS2322 errors for undefined handling in array access
+- **Resolution**: Successfully fixed by adding `override` modifier to constructor parameter (`protected override errorHandler: ErrorHandler`), adding `override` modifier to overridden method (`override visitAccessorExpression`), using conditional property spreading for optional properties (`...(arg.name && { name: arg.name })`), and implementing safe undefined handling for array access (`if (correctedName)`)
+- **Technical Details**: Applied override modifier compliance for inheritance hierarchy, used exactOptionalPropertyTypes compliance by conditionally including optional properties instead of setting them to `undefined`, implemented safe array access patterns with proper null checks, and maintained consistent patterns across all parameter handling methods. Fixed both `createFunctionCallNode` and `visitFunctionCall` methods with identical patterns.
+- **Impact**: Clean compilation for `ast/visitors/expression-visitor/function-call-visitor.ts`, maintaining proper override modifier compliance and exactOptionalPropertyTypes compliance. This is a core visitor that handles function calls, making it high impact.
+
+**🎉 TypeScript Errors in `ast/visitors/control-structure-visitor/if-else-visitor.ts` Resolved:**
+- **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/control-structure-visitor/if-else-visitor.ts`
+- **Issues**: TS2375 errors for exactOptionalPropertyTypes compliance and TS2532 errors for undefined handling in array access and parameter processing
+- **Resolution**: Successfully fixed by using conditional property spreading for optional properties (`...(elseBranch && { elseBranch })`), adding comprehensive null checks for array access (`if (args.length > 0 && args[0] && args[0].value)`), implementing safe type checking with proper type guards (`typeof argValue === 'object' && argValue !== null && !Array.isArray(argValue) && 'type' in argValue`), and removing explicit `undefined` assignments for optional properties
+- **Technical Details**: Applied exactOptionalPropertyTypes compliance by conditionally including optional properties instead of setting them to `undefined`, used proper type narrowing with comprehensive null checks, and implemented safe object property access patterns. Fixed both `processIfStatement` and `createIfNode` methods with consistent patterns.
+- **Impact**: Clean compilation for `ast/visitors/control-structure-visitor/if-else-visitor.ts`, maintaining proper exactOptionalPropertyTypes compliance and undefined handling. This is a core visitor that handles if-else control structures, making it high impact.
+
+**🎉 TypeScript Errors in `ast/visitors/control-structure-visitor/for-loop-visitor.ts` Resolved:**
+- **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/control-structure-visitor/for-loop-visitor.ts`
+- **Issues**: TS2345, TS18048, TS2322 errors related to undefined handling for regex match results and string split operations
+- **Resolution**: Successfully fixed by adding proper null checks for array destructuring (`const splitParts = part.split('=').map(p => p.trim()); const varName = splitParts[0]; const rangeText = splitParts[1];`), comprehensive regex match validation (`if (rangeWithStepMatch && rangeWithStepMatch[1] && rangeWithStepMatch[2] && rangeWithStepMatch[3])`), and safe array access patterns (`if (varName && rangeText)`)
+- **Technical Details**: Used explicit array access instead of destructuring to avoid undefined issues, added comprehensive null checks for regex match results, and applied safe access patterns for string operations. Fixed both `extractVariablesFromArguments` and `extractVariableFromIterator` methods with identical patterns for consistency.
+- **Impact**: Clean compilation for `ast/visitors/control-structure-visitor/for-loop-visitor.ts`, maintaining proper undefined handling for regex operations and string parsing. This is a core visitor that handles for-loop control structures, making it high impact.
+
+**🎉 TypeScript Errors in `ast/visitors/primitive-visitor.ts` Resolved:**
+- **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/primitive-visitor.ts`
+- **Issues**: TS4115 and TS4114 errors for missing override modifiers, TS18048, TS2345, TS2322, TS2375, TS2532 errors related to undefined handling and exactOptionalPropertyTypes compliance
+- **Resolution**: Successfully fixed by adding `override` modifiers to constructor parameter and methods, adding proper null checks for array access (`if (!arg) continue`), using nullish coalescing operators (`?? 0`, `?? functionName`), and using conditional property spreading for optional properties (`...(fa !== undefined && { fa })`)
+- **Technical Details**: Used proper `override` syntax for overriding base class members, added comprehensive undefined handling for array access and parameter extraction, and applied exactOptionalPropertyTypes compliance by conditionally including optional properties instead of setting them to `undefined`
+- **Impact**: Clean compilation for `ast/visitors/primitive-visitor.ts`, maintaining proper override modifier compliance and exactOptionalPropertyTypes TypeScript configuration. This is a core visitor that handles primitive shapes (cube, sphere, cylinder), making it high impact.
+
+**✅ Progress on TypeScript Error Resolution:**
+- **Total Errors Reduced**: From 60 to ~52 errors (8 errors fixed in error-handling/strategies/type-mismatch-strategy.ts)
+- **Approach**: Following incremental single-file focus strategy as per TypeScript debugging workflow
+- **Next Target**: Continue with systematic file-by-file TypeScript error resolution
 
 ## ✅ MAJOR SUCCESS: Expression Evaluation System Fixed! (2025-01-26)
 

@@ -1,6 +1,10 @@
 // Re-export from argument-extractor
 export {
   extractArguments,
+} from './argument-extractor';
+
+// Re-export types from argument-extractor
+export type {
   ExtractedNamedArgument,
   ExtractedParameter,
 } from './argument-extractor';

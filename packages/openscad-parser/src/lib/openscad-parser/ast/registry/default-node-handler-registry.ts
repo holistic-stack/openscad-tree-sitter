@@ -1,7 +1,7 @@
 // These imports are not used directly in this file
 // import { Node as TSNode } from 'web-tree-sitter';
 // import * as ast from '../ast-types.js';
-import { NodeHandler, NodeHandlerRegistry } from './node-handler-registry.js';
+import type { NodeHandler, NodeHandlerRegistry } from './node-handler-registry.js';
 
 /**
  * Default implementation of the NodeHandlerRegistry interface

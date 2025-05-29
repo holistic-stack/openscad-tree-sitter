@@ -12,8 +12,8 @@ import { ErrorHandler } from '../../error-handling/index.js'; // Added ErrorHand
  * @file Defines the CSGVisitor class for processing CSG operation nodes
  */
 export class CSGVisitor extends BaseASTVisitor {
-  constructor(source: string, protected errorHandler: ErrorHandler) {
-    super(source); // BaseASTVisitor constructor takes source
+  constructor(source: string, protected override errorHandler: ErrorHandler) {
+    super(source, errorHandler); // BaseASTVisitor constructor takes source and errorHandler
   }
 
   /**
@@ -71,7 +71,7 @@ export class CSGVisitor extends BaseASTVisitor {
    * @param node The node to visit
    * @returns The AST node
    */
-  visitAccessorExpression(node: TSNode): ast.ASTNode | null {
+  override visitAccessorExpression(node: TSNode): ast.ASTNode | null {
     try {
       if (node.text) {
         console.log(
@@ -119,10 +119,13 @@ export class CSGVisitor extends BaseASTVisitor {
     };
 
     if (functionName && truncatedNameMap[functionName]) {
-      console.log(
-        `[CSGVisitor.visitAccessorExpression] WORKAROUND: Detected truncated function name "${functionName}", correcting to "${truncatedNameMap[functionName]}"`
-      );
-      functionName = truncatedNameMap[functionName];
+      const correctedName = truncatedNameMap[functionName];
+      if (correctedName) {
+        console.log(
+          `[CSGVisitor.visitAccessorExpression] WORKAROUND: Detected truncated function name "${functionName}", correcting to "${correctedName}"`
+        );
+        functionName = correctedName;
+      }
     }
 
     if (!functionName) {
@@ -162,7 +165,7 @@ export class CSGVisitor extends BaseASTVisitor {
    * @param node The node to visit
    * @returns The AST node
    */
-  visitModuleInstantiation(node: TSNode): ast.ASTNode | null {
+  override visitModuleInstantiation(node: TSNode): ast.ASTNode | null {
     try {
       if (node.text) {
         console.log(
@@ -531,7 +534,7 @@ export class CSGVisitor extends BaseASTVisitor {
    * @param node The node to visit
    * @returns The AST node
    */
-  visitCallExpression(node: TSNode): ast.ASTNode | null {
+  override visitCallExpression(node: TSNode): ast.ASTNode | null {
     console.log(
       `[CSGVisitor.visitCallExpression] Processing call expression: ${node.text.substring(
         0,
@@ -561,10 +564,13 @@ export class CSGVisitor extends BaseASTVisitor {
     };
 
     if (functionName && truncatedNameMap[functionName]) {
-      console.log(
-        `[CSGVisitor.visitCallExpression] WORKAROUND: Detected truncated function name "${functionName}", correcting to "${truncatedNameMap[functionName]}"`
-      );
-      functionName = truncatedNameMap[functionName];
+      const correctedName = truncatedNameMap[functionName];
+      if (correctedName) {
+        console.log(
+          `[CSGVisitor.visitCallExpression] WORKAROUND: Detected truncated function name "${functionName}", correcting to "${correctedName}"`
+        );
+        functionName = correctedName;
+      }
     }
 
     if (!functionName) return null;

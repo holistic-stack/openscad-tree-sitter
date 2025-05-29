@@ -79,10 +79,22 @@ export function extractCubeNode(node: TSNode, errorHandler?: ErrorHandler): ast.
         if (vectorValue.length === 3) {
           size = vectorValue as ast.Vector3D;
         } else if (vectorValue.length === 2) {
-          size = vectorValue[0];
-          console.warn(`[extractCubeNode] Cube size given as 2D vector ${JSON.stringify(vectorValue)}, using first element ${vectorValue[0]} as scalar size.`);
+          const firstElement = vectorValue[0];
+          if (typeof firstElement === 'number') {
+            size = firstElement;
+            console.warn(`[extractCubeNode] Cube size given as 2D vector ${JSON.stringify(vectorValue)}, using first element ${firstElement} as scalar size.`);
+          } else {
+            size = 1; // Default fallback
+            console.warn(`[extractCubeNode] Invalid first element in 2D vector ${JSON.stringify(vectorValue)}, using default size.`);
+          }
         } else if (vectorValue.length === 1) {
-          size = vectorValue[0];
+          const firstElement = vectorValue[0];
+          if (typeof firstElement === 'number') {
+            size = firstElement;
+          } else {
+            size = 1; // Default fallback
+            console.warn(`[extractCubeNode] Invalid element in 1D vector ${JSON.stringify(vectorValue)}, using default size.`);
+          }
         } else {
           // vectorValue.length is 0 or > 3, or other invalid cases.
           size = 1; // Explicitly re-assign default

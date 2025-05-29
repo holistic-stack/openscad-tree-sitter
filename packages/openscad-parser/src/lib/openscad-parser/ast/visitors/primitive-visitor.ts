@@ -19,7 +19,7 @@ import { ErrorHandler } from '../../error-handling/index.js'; // Added ErrorHand
  * @file Defines the PrimitiveVisitor class for processing primitive shape nodes
  */
 export class PrimitiveVisitor extends BaseASTVisitor {
-  constructor(source: string, protected errorHandler: ErrorHandler) {
+  constructor(source: string, protected override errorHandler: ErrorHandler) {
     super(source); // Assuming BaseASTVisitor constructor takes source
   }
 
@@ -96,7 +96,7 @@ export class PrimitiveVisitor extends BaseASTVisitor {
    * @param node The accessor expression node to visit
    * @returns The AST node or null if the node cannot be processed
    */
-  visitAccessorExpression(node: TSNode): ast.ASTNode | null {
+  override visitAccessorExpression(node: TSNode): ast.ASTNode | null {
     try {
       if (node.text) {
         console.log(
@@ -161,7 +161,7 @@ export class PrimitiveVisitor extends BaseASTVisitor {
               console.log(
                 `[PrimitiveVisitor.visitAccessorExpression] WORKAROUND: Detected truncated function name "${functionName}", correcting to "${truncatedNameMap[functionName]}"`
               );
-              functionName = truncatedNameMap[functionName];
+              functionName = truncatedNameMap[functionName] ?? functionName;
             }
 
             console.log(
@@ -268,7 +268,7 @@ export class PrimitiveVisitor extends BaseASTVisitor {
    * @param node The expression statement node to visit
    * @returns The AST node or null if the node cannot be processed
    */
-  visitExpressionStatement(node: TSNode): ast.ASTNode | null {
+  override visitExpressionStatement(node: TSNode): ast.ASTNode | null {
     console.log(
       `[PrimitiveVisitor.visitExpressionStatement] Processing expression statement: ${node.text.substring(
         0,
@@ -344,6 +344,7 @@ export class PrimitiveVisitor extends BaseASTVisitor {
       // Process arguments based on position or name
       for (let i = 0; i < args.length; i++) {
         const arg = args[i];
+        if (!arg) continue;
 
         // Handle size parameter (first positional parameter or named 'size')
         if ((i === 0 && !arg.name) || arg.name === 'size') {
@@ -351,10 +352,10 @@ export class PrimitiveVisitor extends BaseASTVisitor {
           const vector = extractVectorParameter(arg);
           if (vector) {
             if (vector.length === 3) {
-              size = [vector[0], vector[1], vector[2]];
+              size = [vector[0] ?? 0, vector[1] ?? 0, vector[2] ?? 0];
             } else if (vector.length === 2) {
               // For 2D vectors, add a default z value
-              size = [vector[0], vector[1], 1];
+              size = [vector[0] ?? 0, vector[1] ?? 0, 1];
             } else {
               console.log(
                 `[PrimitiveVisitor.createCubeNode] Invalid vector size length: ${vector.length}`
@@ -429,6 +430,7 @@ export class PrimitiveVisitor extends BaseASTVisitor {
     // Process all parameters
     for (let i = 0; i < args.length; i++) {
       const arg = args[i];
+      if (!arg) continue;
 
       // Handle radius parameter (first positional parameter or named 'r')
       if ((i === 0 && !arg.name) || arg.name === 'r') {
@@ -524,9 +526,9 @@ export class PrimitiveVisitor extends BaseASTVisitor {
         // r property removed to match the SphereNode interface
         radius, // For tests that expect radius
         diameter,
-        fa,
-        fs,
-        fn,
+        ...(fa !== undefined && { fa }),
+        ...(fs !== undefined && { fs }),
+        ...(fn !== undefined && { fn }),
         location: getLocation(node),
       };
     } else {
@@ -534,9 +536,9 @@ export class PrimitiveVisitor extends BaseASTVisitor {
         type: 'sphere',
         // r property removed to match the SphereNode interface
         radius, // For tests that expect radius
-        fa,
-        fs,
-        fn,
+        ...(fa !== undefined && { fa }),
+        ...(fs !== undefined && { fs }),
+        ...(fn !== undefined && { fn }),
         location: getLocation(node),
       };
     }
@@ -574,7 +576,7 @@ export class PrimitiveVisitor extends BaseASTVisitor {
       if (heightValue !== null) {
         height = heightValue;
       }
-    } else if (args.length >= 1 && args[0].name === undefined) {
+    } else if (args.length >= 1 && args[0] && args[0].name === undefined) {
       // Handle case where height is provided as the first positional parameter
       const heightValue = extractNumberParameter(args[0]);
       if (heightValue !== null) {
@@ -617,7 +619,7 @@ export class PrimitiveVisitor extends BaseASTVisitor {
           radius1 = radiusValue;
           radius2 = radiusValue;
         }
-      } else if (args.length >= 2 && args[1].name === undefined) {
+      } else if (args.length >= 2 && args[1] && args[1].name === undefined) {
         // Handle case where radius is provided as the second positional parameter
         const radiusValue = extractNumberParameter(args[1]);
         if (radiusValue !== null) {
@@ -688,9 +690,9 @@ export class PrimitiveVisitor extends BaseASTVisitor {
       r1: radius1,
       r2: radius2,
       center,
-      $fa: fa,
-      $fs: fs,
-      $fn: fn,
+      ...(fa !== undefined && { $fa: fa }),
+      ...(fs !== undefined && { $fs: fs }),
+      ...(fn !== undefined && { $fn: fn }),
       location: getLocation(node),
     };
   }

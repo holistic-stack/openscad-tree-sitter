@@ -1,11 +1,11 @@
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types.js';
-import { ASTVisitor } from './ast-visitor.js';
+import type { ASTVisitor } from './ast-visitor.js';
 import { findDescendantOfType } from '../utils/node-utils.js';
 import {
   extractArguments,
-  ExtractedParameter,
 } from '../extractors/argument-extractor.js';
+import type { ExtractedParameter } from '../extractors/argument-extractor.js';
 
 /**
  * Convert an ExtractedParameter to a ParameterValue
@@ -41,7 +41,6 @@ function convertExtractedValueToParameterValue(
     type: 'expression',
     expressionType: 'literal',
     value: '',
-    location: undefined,
   } as ast.LiteralNode;
 }
 
@@ -82,7 +81,6 @@ function convertValueToParameterValue(value: ast.Value): ast.ParameterValue {
     return {
       type: 'expression',
       expressionType: 'range',
-      location: undefined,
     };
   }
 
@@ -91,7 +89,6 @@ function convertValueToParameterValue(value: ast.Value): ast.ParameterValue {
     type: 'expression',
     expressionType: 'literal',
     value: typeof value.value === 'string' ? value.value : '',
-    location: undefined,
   } as ast.LiteralNode;
 }
 
@@ -150,7 +147,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
         return this.visitExpression(node);
       case 'block': {
         const blockNodes = this.visitBlock(node);
-        return blockNodes.length > 0 ? blockNodes[0] : null;
+        return blockNodes.length > 0 ? (blockNodes[0] ?? null) : null;
       }
       default:
         return null;
@@ -672,7 +669,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
       console.log(
         `[BaseASTVisitor.visitAccessorExpression] WORKAROUND: Detected truncated function name "${functionName}", correcting to "${truncatedNameMap[functionName]}"`
       );
-      functionName = truncatedNameMap[functionName];
+      functionName = truncatedNameMap[functionName] ?? functionName;
     }
 
     if (!functionName) {
@@ -714,7 +711,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
               } else {
                 args.push({
                   type: 'string',
-                  value: value,
+                  value: value ?? '',
                 });
               }
             } else if (!isNaN(Number(argValue))) {
@@ -811,7 +808,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
             } else {
               tempArgs.push({
                 type: 'string',
-                value: value,
+                value: value ?? '',
               });
             }
           } else if (!isNaN(Number(argValue))) {

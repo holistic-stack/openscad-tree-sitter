@@ -33,7 +33,7 @@ export class ControlStructureVisitor extends BaseASTVisitor {
    * @param source The source code (optional, defaults to empty string)
    * @param errorHandler The error handler instance
    */
-  constructor(source: string = '', protected errorHandler: ErrorHandler) {
+  constructor(source: string = '', protected override errorHandler: ErrorHandler) {
     super(source);
     // These sub-visitors will also need ErrorHandler in their constructors eventually
     this.ifElseVisitor = new IfElseVisitor(source, errorHandler);
@@ -46,7 +46,7 @@ export class ControlStructureVisitor extends BaseASTVisitor {
    * @param node The if statement node to visit
    * @returns The if AST node or null if the node cannot be processed
    */
-  visitIfStatement(node: TSNode): ast.IfNode | null {
+  override visitIfStatement(node: TSNode): ast.IfNode | null {
     console.log(
       `[ControlStructureVisitor.visitIfStatement] Processing if statement: ${node.text.substring(
         0,
@@ -63,7 +63,7 @@ export class ControlStructureVisitor extends BaseASTVisitor {
    * @param node The for statement node to visit
    * @returns The for loop AST node or null if the node cannot be processed
    */
-  visitForStatement(node: TSNode): ast.ForLoopNode | null {
+  override visitForStatement(node: TSNode): ast.ForLoopNode | null {
     console.log(
       `[ControlStructureVisitor.visitForStatement] Processing for statement: ${node.text.substring(
         0,
@@ -80,7 +80,7 @@ export class ControlStructureVisitor extends BaseASTVisitor {
    * @param node The let expression node to visit
    * @returns The let AST node or null if the node cannot be processed
    */
-  visitLetExpression(node: TSNode): ast.LetNode | null {
+  override visitLetExpression(node: TSNode): ast.LetNode | null {
     console.log(
       `[ControlStructureVisitor.visitLetExpression] Processing let expression: ${node.text.substring(
         0,
@@ -254,20 +254,46 @@ export class ControlStructureVisitor extends BaseASTVisitor {
     }
 
     // Create a simple expression node
+    const firstArg = args[0];
+    if (!firstArg) {
+      console.log(
+        `[ControlStructureVisitor.createEachNode] First argument is undefined`
+      );
+      return null;
+    }
+
+    const argValue = firstArg.value;
+    let expressionValue: string | number | boolean;
+
+    if (
+      typeof argValue === 'object' &&
+      argValue !== null &&
+      !Array.isArray(argValue) &&
+      'type' in argValue &&
+      argValue.type === 'expression' &&
+      'value' in argValue &&
+      (typeof argValue.value === 'string' ||
+        typeof argValue.value === 'number' ||
+        typeof argValue.value === 'boolean')
+    ) {
+      // Use the expression's value directly if it's a valid type
+      expressionValue = argValue.value;
+    } else if (
+      typeof argValue === 'string' ||
+      typeof argValue === 'number' ||
+      typeof argValue === 'boolean'
+    ) {
+      // Use the primitive value directly
+      expressionValue = argValue;
+    } else {
+      // Fallback to string representation
+      expressionValue = JSON.stringify(argValue);
+    }
+
     const expression: ast.ExpressionNode = {
       type: 'expression',
       expressionType: 'literal',
-      value:
-        typeof args[0].value === 'object' &&
-        args[0].value !== null &&
-        !Array.isArray(args[0].value) &&
-        args[0].value.type === 'expression'
-          ? args[0].value.value
-          : typeof args[0].value === 'string' ||
-            typeof args[0].value === 'number' ||
-            typeof args[0].value === 'boolean'
-          ? args[0].value
-          : JSON.stringify(args[0].value),
+      value: expressionValue,
       location: getLocation(node),
     };
 

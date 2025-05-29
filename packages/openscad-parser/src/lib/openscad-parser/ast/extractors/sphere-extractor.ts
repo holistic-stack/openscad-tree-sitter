@@ -40,7 +40,7 @@ export function extractSphereNode(node: TSNode): ast.SphereNode | null {
   );
 
   // First, check for positional parameters
-  if (args.length > 0 && !args[0].name) {
+  if (args.length > 0 && args[0] && !args[0].name) {
     // First positional parameter could be radius
     const radiusValue = extractNumberParameter(args[0]);
     if (radiusValue !== null) {
@@ -54,6 +54,7 @@ export function extractSphereNode(node: TSNode): ast.SphereNode | null {
   // Then process all named parameters
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
+    if (!arg) continue; // Skip undefined arguments
 
     // Handle radius parameter (named 'r')
     if (arg.name === 'r') {
@@ -140,18 +141,18 @@ export function extractSphereNode(node: TSNode): ast.SphereNode | null {
       type: 'sphere',
       radius,
       diameter,
-      fn,
-      fa,
-      fs,
+      ...(fn !== undefined && { fn }),
+      ...(fa !== undefined && { fa }),
+      ...(fs !== undefined && { fs }),
       location: getLocation(node),
     };
   } else {
     return {
       type: 'sphere',
       radius,
-      fn,
-      fa,
-      fs,
+      ...(fn !== undefined && { fn }),
+      ...(fa !== undefined && { fa }),
+      ...(fs !== undefined && { fs }),
       location: getLocation(node),
     };
   }
