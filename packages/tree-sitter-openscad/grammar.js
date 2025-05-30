@@ -58,6 +58,10 @@ module.exports = grammar({
     // range_expression conflict is needed for handling nested range expressions
     [$.range_expression],
 
+    // range_expression vs array_literal conflict is needed for handling ambiguous bracket syntax
+    // [0:5] could be parsed as either a range_expression or array_literal
+    [$.range_expression, $.array_literal],
+
     // primary_expression and object_field conflict is needed for handling string literals
     // that could be either a string value or an object key
     [$.primary_expression, $.object_field],
@@ -65,7 +69,7 @@ module.exports = grammar({
     // array_literal and list_comprehension_for conflict is needed for handling list comprehensions
     [$.array_literal, $.list_comprehension_for],
 
-    // Declare a conflict between a module_instantiation_with_body 
+    // Declare a conflict between a module_instantiation_with_body
     // and an expression. This is the core of our issue:
     // `translate()` could be an expression, or it could be the start
     // of `translate() cube();`
@@ -313,25 +317,33 @@ module.exports = grammar({
      *   for(i = [1,2,3,4])    // Array-based iteration
      *   for($fn = 36)         // Special variable iteration
      */
-    for_header: $ => prec(2, seq(
+    for_header: $ => prec(3, seq(
       field('iterator', choice($.identifier, $.special_variable)),
       '=',
       // Use higher precedence for range_expression to resolve conflict with array_literal
-      choice(prec(2, $.range_expression), $.expression)
+      choice(prec(3, $.range_expression), $.expression)
     )),
 
-    range_expression: $ => choice(
-      seq(
-        field('start', $.expression),
-        ':',
-        field('end', $.expression)
+    range_expression: $ => seq(
+      '[',
+      choice(
+        seq(
+          field('start', $.expression),
+          ':',
+          field('end', $.expression)
+        ),
+        seq(
+          field('start', $.expression),
+          ':',
+          field('step', $.expression),
+          ':',
+          field('end', $.expression)
+        )
       ),
-      seq(
-        field('start', $.expression),
-        ':',
-        field('step', $.expression),
-        ':',
-        field('end', $.expression)
+      choice(
+        ']',
+        // Error recovery for missing closing bracket
+        token.immediate(prec(-1, /[;,){}]/)) // Match semicolon, comma, closing parenthesis, or braces
       )
     ),
 
@@ -510,6 +522,7 @@ module.exports = grammar({
       $.string,
       $.boolean,
       $.undef,
+      prec.dynamic(10, $.range_expression),
       $.array_literal,
       $.list_comprehension,
       $.object_literal,
@@ -526,17 +539,14 @@ module.exports = grammar({
       )
     ),
 
-    array_literal: $ => prec(1, choice(
-      $.range_expression,
-      seq('[',
-        optional(commaSep1($.expression)),
-        choice(
-          ']',
-          // Error recovery for missing closing bracket
-          token.immediate(prec(-1, /[;,){}]/)) // Match semicolon, comma, closing parenthesis, or braces
-        )
+    array_literal: $ => seq('[',
+      optional(commaSep1($.expression)),
+      choice(
+        ']',
+        // Error recovery for missing closing bracket
+        token.immediate(prec(-1, /[;,){}]/)) // Match semicolon, comma, closing parenthesis, or braces
       )
-    )),
+    ),
 
     /**
      * List comprehension rule

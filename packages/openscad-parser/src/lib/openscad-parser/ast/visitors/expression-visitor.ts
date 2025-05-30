@@ -85,6 +85,7 @@ import * as ast from '../ast-types.js';
 import { BaseASTVisitor } from './base-ast-visitor.js';
 import { getLocation } from '../utils/location-utils.js';
 import { FunctionCallVisitor } from './expression-visitor/function-call-visitor.js';
+import { ListComprehensionVisitor } from './expression-visitor/list-comprehension-visitor/list-comprehension-visitor.js';
 import { ErrorHandler } from '../../error-handling/index.js';
 import { findDescendantOfType } from '../utils/node-utils.js';
 import { evaluateBinaryExpression } from '../evaluation/binary-expression-evaluator/binary-expression-evaluator.js';
@@ -227,6 +228,11 @@ export class ExpressionVisitor extends BaseASTVisitor {
   private functionCallVisitor: FunctionCallVisitor;
 
   /**
+   * List comprehension visitor for handling list comprehensions in expressions
+   */
+  private listComprehensionVisitor: ListComprehensionVisitor;
+
+  /**
    * Constructor for the ExpressionVisitor
    * @param source The source code
    * @param errorHandler The error handler
@@ -234,9 +240,10 @@ export class ExpressionVisitor extends BaseASTVisitor {
   constructor(source: string, protected override errorHandler: ErrorHandler) {
     super(source, errorHandler);
 
-    // Initialize only the function call visitor
+    // Initialize specialized visitors
     // This follows SRP by keeping only essential dependencies
     this.functionCallVisitor = new FunctionCallVisitor(this, errorHandler);
+    this.listComprehensionVisitor = new ListComprehensionVisitor(this, errorHandler);
   }
 
   /**
@@ -321,6 +328,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
         return this.visitAccessorExpression(node);
       case 'primary_expression':
         return this.visitPrimaryExpression(node);
+      case 'list_comprehension':
+        return this.listComprehensionVisitor.visitListComprehension(node);
       default:
         return this.createExpressionNode(node);
     }
@@ -536,6 +545,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
           } as ast.ExpressionNode;
         }
         return null;
+      case 'list_comprehension':
+        // Handle list comprehension expressions
+        return this.listComprehensionVisitor.visitListComprehension(node);
       default:
         this.safeLog(
           'info',
@@ -754,6 +766,18 @@ export class ExpressionVisitor extends BaseASTVisitor {
         vectorExprNode
       );
       return this.visitVectorExpression(vectorExprNode);
+    }
+
+    // Check for list comprehension
+    const listComprehensionNode = findDescendantOfType(node, 'list_comprehension');
+    if (listComprehensionNode) {
+      this.safeLog(
+        'info',
+        `[ExpressionVisitor.visitExpression] Found list comprehension: ${listComprehensionNode.text.substring(0, 30)}`,
+        'ExpressionVisitor.visitExpression',
+        listComprehensionNode
+      );
+      return this.listComprehensionVisitor.visitListComprehension(listComprehensionNode);
     }
 
     // Check for function call

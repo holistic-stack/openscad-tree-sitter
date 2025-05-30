@@ -9,10 +9,16 @@ const copyWasmFile = () => {
   return {
     name: 'copy-wasm-file',
     closeBundle() {
-      const srcWasmPath = resolve(
+      // Try local build first, then fallback to npm package
+      const localWasmPath = resolve(
+        __dirname,
+        '../tree-sitter-openscad/tree-sitter-openscad.wasm'
+      );
+      const npmWasmPath = resolve(
         __dirname,
         './node_modules/@openscad/tree-sitter-openscad/tree-sitter-openscad.wasm'
       );
+
       const destDir = resolve(__dirname, 'dist');
       const destWasmPath = resolve(destDir, 'tree-sitter-openscad.wasm');
 
@@ -20,11 +26,17 @@ const copyWasmFile = () => {
         mkdirSync(destDir, { recursive: true });
       }
 
+      // Prefer local build over npm package
+      let srcWasmPath = localWasmPath;
+      if (!existsSync(localWasmPath)) {
+        srcWasmPath = npmWasmPath;
+      }
+
       if (existsSync(srcWasmPath)) {
         console.log(`Copying WASM file from ${srcWasmPath} to ${destWasmPath}`);
         copyFileSync(srcWasmPath, destWasmPath);
       } else {
-        console.error(`WASM file not found at ${srcWasmPath}`);
+        console.error(`WASM file not found at either ${localWasmPath} or ${npmWasmPath}`);
       }
     },
   };
