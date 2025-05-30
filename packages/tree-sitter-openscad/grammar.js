@@ -113,7 +113,11 @@ module.exports = grammar({
     // Conflict for simple literals in object_field vs primary_expression
     [$.object_field, $.primary_expression],
     // Conflict for binary expressions in object_field vs expression
-    [$.object_field, $.expression]
+    [$.object_field, $.expression],
+    // Conflict for simple literals in call_expression vs primary_expression
+    [$.call_expression, $.primary_expression],
+    // Conflict for binary expressions in call_expression vs expression
+    [$.call_expression, $.expression]
   ],
 
   rules: {
@@ -718,7 +722,20 @@ module.exports = grammar({
 
     // Function call expression
     call_expression: $ => prec.left(9, seq(
-      field('function', $.expression),
+      field('function', choice(
+        // Simple literals can be parsed directly without expression wrapper (higher precedence)
+        prec.dynamic(10, $.number),
+        prec.dynamic(10, $.string),
+        prec.dynamic(10, $.boolean),
+        prec.dynamic(10, $.identifier),
+        prec.dynamic(10, $.special_variable),
+        prec.dynamic(10, $.vector_expression),
+        // Binary expressions can be parsed directly without expression wrapper (higher precedence)
+        prec.dynamic(10, $.binary_expression),
+        prec.dynamic(10, $.unary_expression),
+        // Complex expressions need the full expression hierarchy (lower precedence)
+        prec(1, $.expression)
+      )),
       field('arguments', $.argument_list)
     )),
 
