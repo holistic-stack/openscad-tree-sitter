@@ -17,16 +17,16 @@ square(size=[10, 20], center=true);
       arguments: (argument_list
         (arguments
           (argument
-            (identifier)
-            (number))))))
+            name: (identifier)
+            value: (number))))))
   (statement
     (module_instantiation
       name: (identifier)
       arguments: (argument_list
         (arguments
           (argument
-            (identifier)
-            (number))))))
+            name: (identifier)
+            value: (number))))))
   (statement
     (module_instantiation
       name: (identifier)
@@ -49,13 +49,13 @@ square(size=[10, 20], center=true);
       arguments: (argument_list
         (arguments
           (argument
-            (identifier)
-            (vector_expression
+            name: (identifier)
+            value: (vector_expression
               (number)
               (number)))
           (argument
-            (identifier)
-            (boolean)))))))
+            name: (identifier)
+            value: (boolean)))))))
 
 ==================
 Polygon Primitive
@@ -92,8 +92,8 @@ polygon(points=[[0,0], [10,0], [10,10], [0,10]], paths=[[0,1,2,3]]);
       arguments: (argument_list
         (arguments
           (argument
-            (identifier)
-            (vector_expression
+            name: (identifier)
+            value: (vector_expression
               (vector_expression
                 (number)
                 (number))
@@ -107,8 +107,8 @@ polygon(points=[[0,0], [10,0], [10,10], [0,10]], paths=[[0,1,2,3]]);
                 (number)
                 (number))))
           (argument
-            (identifier)
-            (vector_expression
+            name: (identifier)
+            value: (vector_expression
               (vector_expression
                 (number)
                 (number)
@@ -141,8 +141,8 @@ text("OpenSCAD", size=12, font="Arial", halign="center", valign="center");
           (argument
             (string))
           (argument
-            (identifier)
-            (number))))))
+            name: (identifier)
+            value: (number))))))
   (statement
     (module_instantiation
       name: (identifier)
@@ -151,17 +151,17 @@ text("OpenSCAD", size=12, font="Arial", halign="center", valign="center");
           (argument
             (string))
           (argument
-            (identifier)
-            (number))
+            name: (identifier)
+            value: (number))
           (argument
-            (identifier)
-            (string))
+            name: (identifier)
+            value: (string))
           (argument
-            (identifier)
-            (string))
+            name: (identifier)
+            value: (string))
           (argument
-            (identifier)
-            (string)))))))
+            name: (identifier)
+            value: (string)))))))
 
 ==================
 Linear Extrude Basic
@@ -179,31 +179,33 @@ linear_extrude(height=10, center=true) circle(5);
       arguments: (argument_list
         (arguments
           (argument
-            (identifier)
-            (number))))
-      (module_instantiation
-        name: (identifier)
-        arguments: (argument_list
-          (arguments
-            (argument
-              (number)))))))
+            name: (identifier)
+            value: (number))))
+      (statement
+        (module_instantiation
+          name: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument
+                (number))))))))
   (statement
     (module_instantiation
       name: (identifier)
       arguments: (argument_list
         (arguments
           (argument
-            (identifier)
-            (number))
+            name: (identifier)
+            value: (number))
           (argument
-            (identifier)
-            (boolean))))
-      (module_instantiation
-        name: (identifier)
-        arguments: (argument_list
-          (arguments
-            (argument
-              (number))))))))
+            name: (identifier)
+            value: (boolean))))
+      (statement
+        (module_instantiation
+          name: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument
+                (number)))))))))
 
 ==================
 Linear Extrude Advanced
@@ -221,44 +223,46 @@ linear_extrude(height=15, scale=[2, 1], center=true) square([5, 10]);
       arguments: (argument_list
         (arguments
           (argument
-            (identifier)
-            (number))
+            name: (identifier)
+            value: (number))
           (argument
-            (identifier)
-            (number))
+            name: (identifier)
+            value: (number))
           (argument
-            (identifier)
-            (number))))
-      (module_instantiation
-        name: (identifier)
-        arguments: (argument_list
-          (arguments
-            (argument
-              (number)))))))
+            name: (identifier)
+            value: (number))))
+      (statement
+        (module_instantiation
+          name: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument
+                (number))))))))
   (statement
     (module_instantiation
       name: (identifier)
       arguments: (argument_list
         (arguments
           (argument
-            (identifier)
-            (number))
+            name: (identifier)
+            value: (number))
           (argument
-            (identifier)
-            (vector_expression
+            name: (identifier)
+            value: (vector_expression
               (number)
               (number)))
           (argument
-            (identifier)
-            (boolean))))
-      (module_instantiation
-        name: (identifier)
-        arguments: (argument_list
-          (arguments
-            (argument
-              (vector_expression
-                (number)
-                (number)))))))))
+            name: (identifier)
+            value: (boolean))))
+      (statement
+        (module_instantiation
+          name: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument
+                (vector_expression
+                  (number)
+                  (number)))))))))))
 
 ==================
 Rotate Extrude Basic
@@ -274,15 +278,7 @@ rotate_extrude(angle=270) polygon([[0,0], [2,0], [1,3]]);
     (module_instantiation
       name: (identifier)
       arguments: (argument_list)
-      (module_instantiation
-        name: (identifier)
-        arguments: (argument_list
-          (arguments
-            (argument
-              (vector_expression
-                (number)
-                (number)
-                (number)))))
+      (statement
         (module_instantiation
           name: (identifier)
           arguments: (argument_list
@@ -290,30 +286,41 @@ rotate_extrude(angle=270) polygon([[0,0], [2,0], [1,3]]);
               (argument
                 (vector_expression
                   (number)
-                  (number)))))))))
+                  (number)
+                  (number)))))
+          (statement
+            (module_instantiation
+              name: (identifier)
+              arguments: (argument_list
+                (arguments
+                  (argument
+                    (vector_expression
+                      (number)
+                      (number))))))))))))
   (statement
     (module_instantiation
       name: (identifier)
       arguments: (argument_list
         (arguments
           (argument
-            (identifier)
-            (number))))
-      (module_instantiation
-        name: (identifier)
-        arguments: (argument_list
-          (arguments
-            (argument
-              (vector_expression
+            name: (identifier)
+            value: (number))))
+      (statement
+        (module_instantiation
+          name: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument
                 (vector_expression
-                  (number)
-                  (number))
-                (vector_expression
-                  (number)
-                  (number))
-                (vector_expression
-                  (number)
-                  (number))))))))))
+                  (vector_expression
+                    (number)
+                    (number))
+                  (vector_expression
+                    (number)
+                    (number))
+                  (vector_expression
+                    (number)
+                    (number))))))))))))
 
 ==================
 Rotate Extrude Advanced
@@ -334,14 +341,14 @@ rotate_extrude(angle=180, convexity=2, $fn=100) {
       arguments: (argument_list
         (arguments
           (argument
-            (identifier)
-            (number))
+            name: (identifier)
+            value: (number))
           (argument
-            (identifier)
-            (number))
+            name: (identifier)
+            value: (number))
           (argument
-            (special_variable)
-            (number))))
+            name: (special_variable)
+            value: (number))))
       (block
         (statement
           (module_instantiation
@@ -360,8 +367,8 @@ rotate_extrude(angle=180, convexity=2, $fn=100) {
                   arguments: (argument_list
                     (arguments
                       (argument
-                        (identifier)
-                        (number)))))))))))))
+                        name: (identifier)
+                        value: (number)))))))))))))
 
 ==================
 Import Operations
@@ -389,8 +396,8 @@ import("mesh.off", convexity=5);
           (argument
             (string))
           (argument
-            (identifier)
-            (number))))))
+            name: (identifier)
+            value: (number))))))
   (statement
     (module_instantiation
       name: (identifier)
@@ -399,8 +406,8 @@ import("mesh.off", convexity=5);
           (argument
             (string))
           (argument
-            (identifier)
-            (number)))))))
+            name: (identifier)
+            value: (number)))))))
 
 ==================
 Surface Operation
@@ -418,14 +425,14 @@ surface("terrain.dat", center=false, invert=true);
       arguments: (argument_list
         (arguments
           (argument
-            (identifier)
-            (string))
+            name: (identifier)
+            value: (string))
           (argument
-            (identifier)
-            (boolean))
+            name: (identifier)
+            value: (boolean))
           (argument
-            (identifier)
-            (number))))))
+            name: (identifier)
+            value: (number))))))
   (statement
     (module_instantiation
       name: (identifier)
@@ -434,11 +441,11 @@ surface("terrain.dat", center=false, invert=true);
           (argument
             (string))
           (argument
-            (identifier)
-            (boolean))
+            name: (identifier)
+            value: (boolean))
           (argument
-            (identifier)
-            (boolean)))))))
+            name: (identifier)
+            value: (boolean)))))))
 
 ==================
 Projection Operations
@@ -457,31 +464,9 @@ projection() cylinder(h=20, r=5);
       arguments: (argument_list
         (arguments
           (argument
-            (identifier)
-            (boolean))))
-      (module_instantiation
-        name: (identifier)
-        arguments: (argument_list
-          (arguments
-            (argument
-              (number)))))))
-  (statement
-    (module_instantiation
-      name: (identifier)
-      arguments: (argument_list
-        (arguments
-          (argument
-            (identifier)
-            (boolean))))
-      (module_instantiation
-        name: (identifier)
-        arguments: (argument_list
-          (arguments
-            (argument
-              (vector_expression
-                (number)
-                (number)
-                (number)))))
+            name: (identifier)
+            value: (boolean))))
+      (statement
         (module_instantiation
           name: (identifier)
           arguments: (argument_list
@@ -491,14 +476,40 @@ projection() cylinder(h=20, r=5);
   (statement
     (module_instantiation
       name: (identifier)
+      arguments: (argument_list
+        (arguments
+          (argument
+            name: (identifier)
+            value: (boolean))))
+      (statement
+        (module_instantiation
+          name: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument
+                (vector_expression
+                  (number)
+                  (number)
+                  (number)))))
+          (statement
+            (module_instantiation
+              name: (identifier)
+              arguments: (argument_list
+                (arguments
+                  (argument
+                    (number)))))))))))
+  (statement
+    (module_instantiation
+      name: (identifier)
       arguments: (argument_list)
-      (module_instantiation
-        name: (identifier)
-        arguments: (argument_list
-          (arguments
-            (argument
-              (identifier)
-              (number))
-            (argument
-              (identifier)
-              (number))))))))
+      (statement
+        (module_instantiation
+          name: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument
+                name: (identifier)
+                value: (number))
+              (argument
+                name: (identifier)
+                value: (number)))))))))

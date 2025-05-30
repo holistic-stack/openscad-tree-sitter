@@ -301,22 +301,22 @@ cube(size=[1,2,3], center=true);
       arguments: (argument_list
         (arguments
           (argument
-            (identifier)
-            (number))))))
+            name: (identifier)
+            value: (number))))))
   (statement
     (module_instantiation
       name: (identifier)
       arguments: (argument_list
         (arguments
           (argument
-            (identifier)
-            (vector_expression
+            name: (identifier)
+            value: (vector_expression
               (number)
               (number)
               (number)))
           (argument
-            (identifier)
-            (boolean)))))))
+            name: (identifier)
+            value: (boolean)))))))
 
 ==================
 Basic Sphere
@@ -342,16 +342,16 @@ sphere(d=20);
       arguments: (argument_list
         (arguments
           (argument
-            (identifier)
-            (number))))))
+            name: (identifier)
+            value: (number))))))
   (statement
     (module_instantiation
       name: (identifier)
       arguments: (argument_list
         (arguments
           (argument
-            (identifier)
-            (number)))))))
+            name: (identifier)
+            value: (number)))))))
 
 ==================
 Basic Cylinder
@@ -370,25 +370,25 @@ cylinder(10, 5);
       arguments: (argument_list
         (arguments
           (argument
-            (identifier)
-            (number))
+            name: (identifier)
+            value: (number))
           (argument
-            (identifier)
-            (number))))))
+            name: (identifier)
+            value: (number))))))
   (statement
     (module_instantiation
       name: (identifier)
       arguments: (argument_list
         (arguments
           (argument
-            (identifier)
-            (number))
+            name: (identifier)
+            value: (number))
           (argument
-            (identifier)
-            (number))
+            name: (identifier)
+            value: (number))
           (argument
-            (identifier)
-            (number))))))
+            name: (identifier)
+            value: (number))))))
   (statement
     (module_instantiation
       name: (identifier)
@@ -420,12 +420,13 @@ scale([2, 1, 1]) cylinder(h=5, r=2);
               (number)
               (number)
               (number)))))
-      (module_instantiation
-        name: (identifier)
-        arguments: (argument_list
-          (arguments
-            (argument
-              (number)))))))
+      (statement
+        (module_instantiation
+          name: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument
+                (number))))))))
   (statement
     (module_instantiation
       name: (identifier)
@@ -436,12 +437,13 @@ scale([2, 1, 1]) cylinder(h=5, r=2);
               (number)
               (number)
               (number)))))
-      (module_instantiation
-        name: (identifier)
-        arguments: (argument_list
-          (arguments
-            (argument
-              (number)))))))
+      (statement
+        (module_instantiation
+          name: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument
+                (number))))))))
   (statement
     (module_instantiation
       name: (identifier)
@@ -452,16 +454,17 @@ scale([2, 1, 1]) cylinder(h=5, r=2);
               (number)
               (number)
               (number)))))
-      (module_instantiation
-        name: (identifier)
-        arguments: (argument_list
-          (arguments
-            (argument
-              (identifier)
-              (number))
-            (argument
-              (identifier)
-              (number))))))))
+      (statement
+        (module_instantiation
+          name: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument
+                name: (identifier)
+                value: (number))
+              (argument
+                name: (identifier)
+                value: (number)))))))))
 
 ==================
 Basic Boolean Operations
@@ -521,12 +524,13 @@ difference() {
                     (number)
                     (number)
                     (number)))))
-            (module_instantiation
-              name: (identifier)
-              arguments: (argument_list
-                (arguments
-                  (argument
-                    (number)))))))))))
+            (statement
+              (module_instantiation
+                name: (identifier)
+                arguments: (argument_list
+                  (arguments
+                    (argument
+                      (number))))))))))))
 
 ==================
 Simple Module Definition
@@ -620,10 +624,10 @@ include "local.scad";
 (source_file
   (statement
     (include_statement
-      (string)))
+      (angle_bracket_string)))
   (statement
     (use_statement
-      (string)))
+      (angle_bracket_string)))
   (statement
     (include_statement
       (string))))

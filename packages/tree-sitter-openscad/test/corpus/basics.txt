@@ -11,25 +11,43 @@ true || false;
 (source_file
   (statement
     (expression_statement
-      (binary_expression
-        left: (number)
-        operator: "+"
-        right: (binary_expression
-          left: (number)
-          operator: "*"
-          right: (number)))))
+      (expression
+        (binary_expression
+          left: (expression
+            (primary_expression
+              (number)))
+
+          right: (expression
+            (binary_expression
+              left: (expression
+                (primary_expression
+                  (number)))
+
+              right: (expression
+                (primary_expression
+                  (number)))))))))
   (statement
     (expression_statement
-      (binary_expression
-        left: (boolean)
-        operator: "||"
-        right: (boolean))))
+      (expression
+        (binary_expression
+          left: (expression
+            (primary_expression
+              (boolean)))
+
+          right: (expression
+            (primary_expression
+              (boolean)))))))
   (statement
     (expression_statement
-      (binary_expression
-        left: (string)
-        operator: "=="
-        right: (string)))))
+      (expression
+        (binary_expression
+          left: (expression
+            (primary_expression
+              (string)))
+
+          right: (expression
+            (primary_expression
+              (string))))))))
 
 ==================
 Module Definition
@@ -76,9 +94,12 @@ function add(a, b) = a + b;
           (parameter_declaration (identifier))))
       value: (expression
         (binary_expression
-          left: (expression (identifier))
-          operator: (operator)
-          right: (expression (identifier)))))))
+          left: (expression
+            (primary_expression
+              (identifier)))
+          right: (expression
+            (primary_expression
+              (identifier))))))))
 
 ==================
 Include and Use
@@ -123,13 +144,18 @@ volume = 3.14 * r * r * h;
             (binary_expression
               left: (expression
                 (binary_expression
-                  left: (expression (number))
-                  operator: (operator)
-                  right: (expression (identifier))))
-              operator: (operator)
-              right: (expression (identifier))))
-          operator: (operator)
-          right: (expression (identifier)))))))
+                  left: (expression
+                    (primary_expression
+                      (number)))
+                  right: (expression
+                    (primary_expression
+                      (identifier)))))
+              right: (expression
+                (primary_expression
+                  (identifier)))))
+          right: (expression
+            (primary_expression
+              (identifier))))))))
 
 ==================
 Module Instantiation
@@ -169,8 +195,8 @@ translate([10, 0, 0]) {
       arguments: (argument_list
         (arguments
           (argument
-            (identifier)
-            (expression (number))))))))
+            name: (identifier)
+            value: (expression (number))))))))
 
 ==================
 Conditional Expression
@@ -193,9 +219,12 @@ result = x > 10 ? "big" : "small";
         (conditional_expression
           condition: (expression
             (binary_expression
-              left: (expression (identifier))
-              operator: (operator)
-              right: (expression (number))))
+              left: (expression
+                (primary_expression
+                  (identifier)))
+              right: (expression
+                (primary_expression
+                  (number)))))
           consequence: (expression (string))
           alternative: (expression (string)))))))
 

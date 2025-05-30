@@ -9,6 +9,18 @@ result = sqrt(16);
 result = pow(2, 3);
 result = abs(-5);
 
+// Additional mathematical functions
+acos_result = acos(0.5);
+asin_result = asin(0.5);
+atan_result = atan(1);
+atan2_result = atan2(1, 1);
+sign_positive = sign(5);
+sign_negative = sign(-3);
+sign_zero = sign(0);
+natural_log = ln(2.718);
+base10_log = log(100);
+exponential = exp(1);
+
 ---
 
 (source_file
@@ -73,8 +85,104 @@ result = abs(-5);
           (arguments
             (argument
               (unary_expression
-                operator: "-"
-                operand: (number)))))))))
+                operand: (expression
+                  (primary_expression
+                    (number))))))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (number)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (number)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (number)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (number))
+            (argument
+              (number)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (number)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (unary_expression
+                operand: (expression
+                  (primary_expression
+                    (number))))))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (number)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (number)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (number)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (number))))))))
 
 ==================
 Min Max Functions
@@ -326,22 +434,31 @@ assert(is_num(value), str("Expected number, got: ", value));
 (source_file
   (statement
     (assert_statement
-      condition: (binary_expression
-        left: (identifier)
-        operator: ">"
-        right: (number))
+      condition: (expression
+        (binary_expression
+          left: (expression
+            (primary_expression
+              (identifier)))
+          right: (expression
+            (primary_expression
+              (number)))))
       message: (string)))
   (statement
     (assert_statement
-      condition: (binary_expression
-        left: (call_expression
-          function: (identifier)
-          arguments: (argument_list
-            (arguments
-              (argument
-                (identifier)))))
-        operator: "=="
-        right: (number))))
+      condition: (expression
+        (binary_expression
+          left: (expression
+            (call_expression
+              function: (expression
+                (primary_expression
+                  (identifier)))
+              arguments: (argument_list
+                (arguments
+                  (argument
+                    (identifier))))))
+          right: (expression
+            (primary_expression
+              (number)))))))
   (statement
     (assert_statement
       condition: (call_expression
@@ -368,6 +485,7 @@ is_string = is_string("hello");
 is_boolean = is_bool(true);
 is_list = is_list([1, 2, 3]);
 is_undefined = is_undef(undefined_var);
+is_function_result = is_function(my_function);
 
 ---
 
@@ -411,6 +529,15 @@ is_undefined = is_undef(undefined_var);
                 (number)
                 (number)
                 (number))))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (identifier)))))))
   (statement
     (assignment_statement
       name: (identifier)

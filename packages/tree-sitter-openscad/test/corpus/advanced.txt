@@ -14,11 +14,14 @@ matrix = [[i+j for (j = [0:2])] for (i = [0:2])];
       name: (identifier)
       value: (expression
         (list_comprehension
-          expr: (expression
+          element: (expression
             (binary_expression
-              left: (expression (identifier))
-              operator: (operator)
-              right: (expression (identifier))))
+              left: (expression
+                (primary_expression
+                  (identifier)))
+              right: (expression
+                (primary_expression
+                  (identifier)))))
           (list_comprehension_for
             iterator: (identifier)
             range: (expression (range_expression
@@ -29,43 +32,54 @@ matrix = [[i+j for (j = [0:2])] for (i = [0:2])];
       name: (identifier)
       value: (expression
         (list_comprehension
-          expr: (expression (identifier))
-          (list_comprehension_for
+          element: (expression
+            (primary_expression
+              (identifier)))
+          for_clause: (list_comprehension_for
             iterator: (identifier)
-            range: (expression (range_expression
-              start: (expression (number))
-              end: (expression (number)))))
-          condition: (expression
-            (binary_expression
-              left: (expression
-                (binary_expression
-                  left: (expression (identifier))
-                  operator: (operator)
-                  right: (expression (number))))
-              operator: (operator)
-              right: (expression (number))))))))
+            range: (range_expression
+              start: (number)
+              end: (number)))
+          if_clause: (list_comprehension_if
+            condition: (expression
+              (binary_expression
+                left: (expression
+                  (binary_expression
+                    left: (expression
+                      (primary_expression
+                        (identifier)))
+                    right: (expression
+                      (primary_expression
+                        (number)))))
+                right: (expression
+                  (primary_expression
+                    (number))))))))))
   (statement
     (assignment_statement
       name: (identifier)
       value: (expression
         (list_comprehension
-          expr: (expression
-            (list_comprehension
-              expr: (expression
-                (binary_expression
-                  left: (expression (identifier))
-                  operator: (operator)
-                  right: (expression (identifier))))
-              (list_comprehension_for
-                iterator: (identifier)
-                range: (expression (range_expression
-                  start: (expression (number))
-                  end: (expression (number)))))))
-          (list_comprehension_for
+          element: (expression
+            (primary_expression
+              (list_comprehension
+                element: (expression
+                  (binary_expression
+                    left: (expression
+                      (primary_expression
+                        (identifier)))
+                    right: (expression
+                      (primary_expression
+                        (identifier)))))
+                for_clause: (list_comprehension_for
+                  iterator: (identifier)
+                  range: (range_expression
+                    start: (number)
+                    end: (number))))))
+          for_clause: (list_comprehension_for
             iterator: (identifier)
-            range: (expression (range_expression
-              start: (expression (number))
-              end: (expression (number))))))))))
+            range: (range_expression
+              start: (number)
+              end: (number))))))))
 
 ==================
 Object Literals
@@ -284,8 +298,8 @@ dist = $vpd;
         (arguments
           (argument (expression (number)))
           (argument
-            (special_variable)
-            (expression (number)))))))
+            name: (special_variable)
+            value: (expression (number)))))))
   (statement
     (module_instantiation
       name: (identifier)
@@ -296,9 +310,12 @@ dist = $vpd;
               (vector_expression
                 (expression
                   (binary_expression
-                    left: (expression (special_variable))
-                    operator: (operator)
-                    right: (expression (number))))
+                    left: (expression
+                      (primary_expression
+                        (special_variable)))
+                    right: (expression
+                      (primary_expression
+                        (number)))))
                 (expression (number))
                 (expression (number)))))))
       (block
@@ -414,11 +431,16 @@ b = (2 + 3;
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression (parenthesized_expression
-        (expression (binary_expression
-          left: (expression (number))
-          operator: (operator)
-          right: (expression (number)))))))))
+      value: (expression
+        (parenthesized_expression
+          (expression
+            (binary_expression
+              left: (expression
+                (primary_expression
+                  (number)))
+              right: (expression
+                (primary_expression
+                  (number))))))))))
 
 ==================
 Incomplete Expression
@@ -432,10 +454,12 @@ c = 1 + ;
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression (binary_expression
-        left: (expression (number))
-        operator: (operator)
-        right: (expression (ERROR)))))))
+      value: (expression
+        (binary_expression
+          left: (expression
+            (primary_expression
+              (number)))
+          right: (expression (ERROR)))))))
 
 ==================
 Unclosed String

@@ -131,14 +131,27 @@ module.exports = grammar({
 
     include_statement: $ => seq(
       'include',
-      $.string,
+      $._file_path,
       optional(';')
     ),
 
     use_statement: $ => seq(
       'use',
-      $.string,
+      $._file_path,
       optional(';')
+    ),
+
+    // File path - can be quoted string or angle bracket string (hidden rule, DRY principle)
+    _file_path: $ => choice(
+      $.string,
+      $.angle_bracket_string
+    ),
+
+    // Angle bracket string for include/use statements
+    angle_bracket_string: $ => seq(
+      '<',
+      token.immediate(/[^>]*/),
+      '>'
     ),
 
     module_definition: $ => seq(
@@ -247,7 +260,7 @@ module.exports = grammar({
       field('arguments', $.argument_list),
       choice(
         $.block,
-        prec.dynamic(10, $.module_instantiation), // Direct module instantiation without statement wrapping - dynamic precedence
+        prec.dynamic(10, $.module_instantiation), // Direct module instantiation without statement wrapping - DRY principle applied
         $.statement // A full statement, which will handle its own termination (e.g., semicolon for an inner module_instantiation_simple)
       )
     ),
@@ -282,8 +295,8 @@ module.exports = grammar({
 
     argument: $ => choice(
       $._argument_value,
-      seq($.special_variable, '=', $._argument_value),
-      seq($.identifier, '=', $._argument_value)
+      seq(field('name', $.special_variable), '=', field('value', $._argument_value)),
+      seq(field('name', $.identifier), '=', field('value', $._argument_value))
     ),
 
     // Argument value - can be a simple value or complex expression (hidden rule)

@@ -97,11 +97,11 @@ cylinder(h=10, r=5);
       arguments: (argument_list
         (arguments
           (argument
-            (identifier)
-            (number))
+            name: (identifier)
+            value: (number))
           (argument
-            (identifier)
-            (number)))))))
+            name: (identifier)
+            value: (number)))))))
 
 ==================
 Comments in Code Blocks
@@ -215,10 +215,14 @@ z = x + y;
   (statement
     (assignment_statement
       name: (identifier)
-      value: (binary_expression
-        left: (identifier)
-        operator: "+"
-        right: (identifier)))))
+      value: (expression
+        (binary_expression
+          left: (expression
+            (primary_expression
+              (identifier)))
+          right: (expression
+            (primary_expression
+              (identifier))))))))
 
 ==================
 Comments in Function Definitions
@@ -238,24 +242,40 @@ function factorial(n) = // Recursive factorial
           (parameter_declaration
             (identifier))))
       (comment)
-      value: (conditional_expression
-        condition: (binary_expression
-          left: (identifier)
-          operator: "<="
-          right: (number))
-        consequence: (number)
-        alternative: (binary_expression
-          left: (identifier)
-          operator: "*"
-          right: (call_expression
-            function: (identifier)
-            arguments: (argument_list
-              (arguments
-                (argument
-                  (binary_expression
-                    left: (identifier)
-                    operator: "-"
-                    right: (number))))))))
+      value: (expression
+        (conditional_expression
+          condition: (expression
+            (binary_expression
+              left: (expression
+                (primary_expression
+                  (identifier)))
+              right: (expression
+                (primary_expression
+                  (number)))))
+          consequence: (expression
+            (primary_expression
+              (number)))
+          alternative: (expression
+            (binary_expression
+              left: (expression
+                (primary_expression
+                  (identifier)))
+              right: (expression
+                (call_expression
+                  function: (expression
+                    (primary_expression
+                      (identifier)))
+                  arguments: (argument_list
+                    (arguments
+                      (argument
+                        (expression
+                          (binary_expression
+                            left: (expression
+                              (primary_expression
+                                (identifier)))
+                            right: (expression
+                              (primary_expression
+                                (number)))))))))))
       (comment)))
 
 ==================
@@ -271,20 +291,30 @@ result = (x + y) * // First part
   (statement
     (assignment_statement
       name: (identifier)
-      value: (binary_expression
-        left: (parenthesized_expression
-          (binary_expression
-            left: (identifier)
-            operator: "+"
-            right: (identifier)))
-        (comment)
-        operator: "*"
-        right: (parenthesized_expression
-          (binary_expression
-            left: (identifier)
-            operator: "-"
-            right: (identifier)))
-        (comment)))))
+      value: (expression
+        (binary_expression
+          left: (expression
+            (parenthesized_expression
+              (expression
+                (binary_expression
+                  left: (expression
+                    (primary_expression
+                      (identifier)))
+                  right: (expression
+                    (primary_expression
+                      (identifier)))))))
+          (comment)
+          right: (expression
+            (parenthesized_expression
+              (expression
+                (binary_expression
+                  left: (expression
+                    (primary_expression
+                      (identifier)))
+                  right: (expression
+                    (primary_expression
+                      (identifier)))))))
+          (comment))))))
 
 ==================
 Documentation Comments

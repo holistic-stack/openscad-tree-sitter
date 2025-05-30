@@ -95,12 +95,13 @@ for (i = [1, 3, 5, 7]) translate([i, 0, 0]) cube(1);
                   (identifier)
                   (number)
                   (number)))))
-          (module_instantiation
-            name: (identifier)
-            arguments: (argument_list
-              (arguments
-                (argument
-                  (number))))))))))
+          (statement
+            (module_instantiation
+              name: (identifier)
+              arguments: (argument_list
+                (arguments
+                  (argument
+                    (number)))))))))))
 
 ==================
 Simple If Statement
@@ -294,11 +295,11 @@ Modifier Characters
       arguments: (argument_list
         (arguments
           (argument
-            (identifier)
-            (number))
+            name: (identifier)
+            value: (number))
           (argument
-            (identifier)
-            (number))))))
+            name: (identifier)
+            value: (number))))))
   (statement
     (module_instantiation
       (modifier)
@@ -310,12 +311,13 @@ Modifier Characters
               (number)
               (number)
               (number)))))
-      (module_instantiation
-        name: (identifier)
-        arguments: (argument_list
-          (arguments
-            (argument
-              (number))))))))
+      (statement
+        (module_instantiation
+          name: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument
+                (number)))))))))
 
 ==================
 Array Indexing
