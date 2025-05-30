@@ -699,7 +699,17 @@ module.exports = grammar({
     // Simplified unary expression
     unary_expression: $ => prec.right(8, seq(
       field('operator', choice('!', '-')),
-      field('operand', $.expression)
+      field('operand', choice(
+        // Simple literals can be parsed directly without expression wrapper (higher precedence)
+        prec.dynamic(10, $.number),
+        prec.dynamic(10, $.string),
+        prec.dynamic(10, $.boolean),
+        prec.dynamic(10, $.identifier),
+        prec.dynamic(10, $.special_variable),
+        prec.dynamic(10, $.vector_expression),
+        // Complex expressions need the full expression hierarchy (lower precedence)
+        prec(1, $.expression)
+      ))
     )),
 
     // Function call expression
@@ -728,11 +738,50 @@ module.exports = grammar({
 
     // Simplified conditional expression
     conditional_expression: $ => prec.right(1, seq(
-      field('condition', $.expression),
+      field('condition', choice(
+        // Simple literals can be parsed directly without expression wrapper (higher precedence)
+        prec.dynamic(10, $.number),
+        prec.dynamic(10, $.string),
+        prec.dynamic(10, $.boolean),
+        prec.dynamic(10, $.identifier),
+        prec.dynamic(10, $.special_variable),
+        prec.dynamic(10, $.vector_expression),
+        // Binary expressions can be parsed directly without expression wrapper (higher precedence)
+        prec.dynamic(10, $.binary_expression),
+        prec.dynamic(10, $.unary_expression),
+        // Complex expressions need the full expression hierarchy (lower precedence)
+        prec(1, $.expression)
+      )),
       '?',
-      field('consequence', $.expression),
+      field('consequence', choice(
+        // Simple literals can be parsed directly without expression wrapper (higher precedence)
+        prec.dynamic(10, $.number),
+        prec.dynamic(10, $.string),
+        prec.dynamic(10, $.boolean),
+        prec.dynamic(10, $.identifier),
+        prec.dynamic(10, $.special_variable),
+        prec.dynamic(10, $.vector_expression),
+        // Binary expressions can be parsed directly without expression wrapper (higher precedence)
+        prec.dynamic(10, $.binary_expression),
+        prec.dynamic(10, $.unary_expression),
+        // Complex expressions need the full expression hierarchy (lower precedence)
+        prec(1, $.expression)
+      )),
       ':',
-      field('alternative', $.expression)
+      field('alternative', choice(
+        // Simple literals can be parsed directly without expression wrapper (higher precedence)
+        prec.dynamic(10, $.number),
+        prec.dynamic(10, $.string),
+        prec.dynamic(10, $.boolean),
+        prec.dynamic(10, $.identifier),
+        prec.dynamic(10, $.special_variable),
+        prec.dynamic(10, $.vector_expression),
+        // Binary expressions can be parsed directly without expression wrapper (higher precedence)
+        prec.dynamic(10, $.binary_expression),
+        prec.dynamic(10, $.unary_expression),
+        // Complex expressions need the full expression hierarchy (lower precedence)
+        prec(1, $.expression)
+      ))
     )),
 
 
