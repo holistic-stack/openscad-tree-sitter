@@ -117,7 +117,11 @@ module.exports = grammar({
     // Conflict for simple literals in call_expression vs primary_expression
     [$.call_expression, $.primary_expression],
     // Conflict for binary expressions in call_expression vs expression
-    [$.call_expression, $.expression]
+    [$.call_expression, $.expression],
+    // Conflict for module instantiation vs call expression in statement context
+    [$.module_instantiation, $.call_expression],
+    // Conflict for module instantiation vs expression statement
+    [$.module_instantiation, $.expression_statement]
   ],
 
   rules: {
@@ -141,7 +145,7 @@ module.exports = grammar({
       $.function_definition,
       $.assignment_statement,
       $.assign_statement,
-      prec(2, $.module_instantiation), // Higher precedence than expression_statement
+      prec(15, $.module_instantiation), // Much higher precedence than expression_statement and call_expression
       $.if_statement,
       $.for_statement,
       $.echo_statement,
@@ -326,8 +330,8 @@ module.exports = grammar({
     ),
 
     module_instantiation: $ => choice(
-      prec(10, $._module_instantiation_with_body), // Higher precedence than call_expression (9)
-      prec(10, $._module_instantiation_simple) // Higher precedence than call_expression (9)
+      prec(20, $._module_instantiation_with_body), // Much higher precedence than call_expression (9)
+      prec(20, $._module_instantiation_simple) // Much higher precedence than call_expression (9)
     ),
 
     argument_list: $ => seq(
