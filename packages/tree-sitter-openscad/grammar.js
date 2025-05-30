@@ -85,23 +85,27 @@ module.exports = grammar({
     // Added to resolve: for (for_header) block • next_token
     [$.statement, $.for_statement],
 
-    // New conflicts for simplified grammar
-    [$._module_instantiation_with_body, $._module_instantiation_simple, $.call_expression],
-    [$.primary_expression, $.call_expression],
-    [$.expression, $.call_expression],
-    [$._module_instantiation_with_body, $._module_instantiation_simple, $.primary_expression],
+    // Reduced conflicts - removed those that should be resolved by precedence
     [$.binary_expression, $.let_expression],
-    [$.primary_expression, $._vector_element],
-    [$.primary_expression, $._argument_value],
-    [$.primary_expression, $._assignment_value],
-    [$.primary_expression, $._range_value],
     [$._vector_element, $.array_literal],
-    [$._module_instantiation_with_body, $.module_instantiation],
 
-    // Conflict for simple literals in expression_statement vs primary_expression
-    [$.expression_statement, $.primary_expression],
-    // Conflict for binary expressions in expression_statement vs expression
-    [$.expression_statement, $.expression],
+    // Critical conflict: module_instantiation vs call_expression in statement context
+    // This allows the parser to choose based on context (statement vs expression)
+    [$.module_instantiation, $.call_expression],
+
+    // New conflict exposed after removing expression_statement: assignment_value vs primary_expression
+    [$._assignment_value, $.primary_expression],
+
+    // New conflict exposed after removing expression_statement: call_expression vs let_expression
+    [$.call_expression, $.let_expression],
+
+    // Conflict between statement expression hierarchy and regular expression hierarchy
+    [$._statement_expression, $.expression],
+
+    // Conflicts between statement-specific expressions and regular expressions
+    [$._statement_unary_expression, $.unary_expression, $.primary_expression],
+    [$._statement_binary_expression, $.binary_expression, $.primary_expression],
+    [$._statement_conditional_expression, $.conditional_expression, $.primary_expression],
     // Conflict for simple literals in function_value vs primary_expression
     [$._function_value, $.primary_expression],
     // Conflict for simple literals in parameter_default_value vs primary_expression
@@ -118,9 +122,7 @@ module.exports = grammar({
     [$.call_expression, $.primary_expression],
     // Conflict for binary expressions in call_expression vs expression
     [$.call_expression, $.expression],
-    // Conflict for module instantiation vs expression statement containing call expression
-    // This allows GLR to explore both paths and choose based on context (semicolon lookahead)
-    [$.module_instantiation, $.expression_statement],
+    // Removed: module instantiation vs expression statement - resolved by precedence
     // Conflict for instantiation statements vs module instantiation with body (tree-sitter best practice)
     [$._instantiation_statements, $._module_instantiation_with_body],
     // Conflict for control flow statements vs if statement (tree-sitter best practice)
@@ -147,8 +149,8 @@ module.exports = grammar({
       $._assignment_statements,
       $._control_flow_statements,
       $._action_statements,
-      prec(2, $._instantiation_statements), // Higher precedence than expression_statement
-      prec(1, $.expression_statement), // Lower precedence than instantiation_statements
+      prec(10, $._instantiation_statements), // Much higher precedence than expression_statement
+      prec(1, $.expression_statement), // Lower precedence than instantiation_statements - now uses _statement_expression
       $.block
     ),
 
@@ -363,8 +365,8 @@ module.exports = grammar({
     ),
 
     module_instantiation: $ => choice(
-      prec(10, $._module_instantiation_with_body), // Higher precedence than call_expression (9)
-      prec(10, $._module_instantiation_simple) // Higher precedence than call_expression (9)
+      prec(15, $._module_instantiation_with_body), // Much higher precedence than call_expression (9)
+      prec(15, $._module_instantiation_simple) // Much higher precedence than call_expression (9)
     ),
 
     argument_list: $ => seq(
@@ -554,7 +556,209 @@ module.exports = grammar({
     ),
 
     expression_statement: $ => seq(
+      $._statement_expression,
+      ';'
+    ),
+
+    // Statement expression - excludes call_expression to avoid conflict with module_instantiation
+    _statement_expression: $ => choice(
+      $._statement_conditional_expression,
+      $._statement_binary_expression,
+      $._statement_unary_expression,
+      $.index_expression,
+      $.member_expression,
+      $._statement_parenthesized_expression,
+      $.primary_expression
+    ),
+
+    // Statement parenthesized expression - excludes call_expression
+    _statement_parenthesized_expression: $ => seq(
+      '(',
+      $._statement_expression,
       choice(
+        ')',
+        // Error recovery for missing closing parenthesis
+        token.immediate(prec(-1, /[;,{}\[]/)) // Match semicolon, comma, braces, or opening bracket
+      )
+    ),
+
+    // Statement-specific binary expression - uses _statement_expression instead of expression
+    _statement_binary_expression: $ => choice(
+      // Logical OR (lowest precedence)
+      prec.left(1, seq(
+        field('left', choice(
+          prec.dynamic(10, $.number),
+          prec.dynamic(10, $.string),
+          prec.dynamic(10, $.boolean),
+          prec.dynamic(10, $.identifier),
+          prec.dynamic(10, $.special_variable),
+          prec.dynamic(10, $.vector_expression),
+          prec(1, $._statement_expression)
+        )),
+        field('operator', '||'),
+        field('right', choice(
+          prec.dynamic(10, $.number),
+          prec.dynamic(10, $.string),
+          prec.dynamic(10, $.boolean),
+          prec.dynamic(10, $.identifier),
+          prec.dynamic(10, $.special_variable),
+          prec.dynamic(10, $.vector_expression),
+          prec(1, $._statement_expression)
+        ))
+      )),
+      // Logical AND
+      prec.left(2, seq(
+        field('left', choice(
+          prec.dynamic(10, $.number),
+          prec.dynamic(10, $.string),
+          prec.dynamic(10, $.boolean),
+          prec.dynamic(10, $.identifier),
+          prec.dynamic(10, $.special_variable),
+          prec.dynamic(10, $.vector_expression),
+          prec(1, $._statement_expression)
+        )),
+        field('operator', '&&'),
+        field('right', choice(
+          prec.dynamic(10, $.number),
+          prec.dynamic(10, $.string),
+          prec.dynamic(10, $.boolean),
+          prec.dynamic(10, $.identifier),
+          prec.dynamic(10, $.special_variable),
+          prec.dynamic(10, $.vector_expression),
+          prec(1, $._statement_expression)
+        ))
+      )),
+      // Equality
+      prec.left(3, seq(
+        field('left', choice(
+          prec.dynamic(10, $.number),
+          prec.dynamic(10, $.string),
+          prec.dynamic(10, $.boolean),
+          prec.dynamic(10, $.identifier),
+          prec.dynamic(10, $.special_variable),
+          prec.dynamic(10, $.vector_expression),
+          prec(1, $._statement_expression)
+        )),
+        field('operator', choice('==', '!=')),
+        field('right', choice(
+          prec.dynamic(10, $.number),
+          prec.dynamic(10, $.string),
+          prec.dynamic(10, $.boolean),
+          prec.dynamic(10, $.identifier),
+          prec.dynamic(10, $.special_variable),
+          prec.dynamic(10, $.vector_expression),
+          prec(1, $._statement_expression)
+        ))
+      )),
+      // Relational
+      prec.left(4, seq(
+        field('left', choice(
+          prec.dynamic(10, $.number),
+          prec.dynamic(10, $.string),
+          prec.dynamic(10, $.boolean),
+          prec.dynamic(10, $.identifier),
+          prec.dynamic(10, $.special_variable),
+          prec.dynamic(10, $.vector_expression),
+          prec(1, $._statement_expression)
+        )),
+        field('operator', choice('<', '<=', '>', '>=')),
+        field('right', choice(
+          prec.dynamic(10, $.number),
+          prec.dynamic(10, $.string),
+          prec.dynamic(10, $.boolean),
+          prec.dynamic(10, $.identifier),
+          prec.dynamic(10, $.special_variable),
+          prec.dynamic(10, $.vector_expression),
+          prec(1, $._statement_expression)
+        ))
+      )),
+      // Additive
+      prec.left(5, seq(
+        field('left', choice(
+          prec.dynamic(10, $.number),
+          prec.dynamic(10, $.string),
+          prec.dynamic(10, $.boolean),
+          prec.dynamic(10, $.identifier),
+          prec.dynamic(10, $.special_variable),
+          prec.dynamic(10, $.vector_expression),
+          prec(1, $._statement_expression)
+        )),
+        field('operator', choice('+', '-')),
+        field('right', choice(
+          prec.dynamic(10, $.number),
+          prec.dynamic(10, $.string),
+          prec.dynamic(10, $.boolean),
+          prec.dynamic(10, $.identifier),
+          prec.dynamic(10, $.special_variable),
+          prec.dynamic(10, $.vector_expression),
+          prec(1, $._statement_expression)
+        ))
+      )),
+      // Multiplicative
+      prec.left(6, seq(
+        field('left', choice(
+          prec.dynamic(10, $.number),
+          prec.dynamic(10, $.string),
+          prec.dynamic(10, $.boolean),
+          prec.dynamic(10, $.identifier),
+          prec.dynamic(10, $.special_variable),
+          prec.dynamic(10, $.vector_expression),
+          prec(1, $._statement_expression)
+        )),
+        field('operator', choice('*', '/', '%')),
+        field('right', choice(
+          prec.dynamic(10, $.number),
+          prec.dynamic(10, $.string),
+          prec.dynamic(10, $.boolean),
+          prec.dynamic(10, $.identifier),
+          prec.dynamic(10, $.special_variable),
+          prec.dynamic(10, $.vector_expression),
+          prec(1, $._statement_expression)
+        ))
+      )),
+      // Exponentiation (right associative)
+      prec.right(7, seq(
+        field('left', choice(
+          prec.dynamic(10, $.number),
+          prec.dynamic(10, $.string),
+          prec.dynamic(10, $.boolean),
+          prec.dynamic(10, $.identifier),
+          prec.dynamic(10, $.special_variable),
+          prec.dynamic(10, $.vector_expression),
+          prec(1, $._statement_expression)
+        )),
+        field('operator', '^'),
+        field('right', choice(
+          prec.dynamic(10, $.number),
+          prec.dynamic(10, $.string),
+          prec.dynamic(10, $.boolean),
+          prec.dynamic(10, $.identifier),
+          prec.dynamic(10, $.special_variable),
+          prec.dynamic(10, $.vector_expression),
+          prec(1, $._statement_expression)
+        ))
+      ))
+    ),
+
+    // Statement-specific unary expression - uses _statement_expression instead of expression
+    _statement_unary_expression: $ => prec.right(8, seq(
+      field('operator', choice('!', '-')),
+      field('operand', choice(
+        // Simple literals can be parsed directly without expression wrapper (higher precedence)
+        prec.dynamic(10, $.number),
+        prec.dynamic(10, $.string),
+        prec.dynamic(10, $.boolean),
+        prec.dynamic(10, $.identifier),
+        prec.dynamic(10, $.special_variable),
+        prec.dynamic(10, $.vector_expression),
+        // Complex expressions need the statement expression hierarchy (lower precedence)
+        prec(1, $._statement_expression)
+      ))
+    )),
+
+    // Statement-specific conditional expression - uses _statement_expression instead of expression
+    _statement_conditional_expression: $ => prec.right(1, seq(
+      field('condition', choice(
         // Simple literals can be parsed directly without expression wrapper (higher precedence)
         prec.dynamic(10, $.number),
         prec.dynamic(10, $.string),
@@ -563,13 +767,42 @@ module.exports = grammar({
         prec.dynamic(10, $.special_variable),
         prec.dynamic(10, $.vector_expression),
         // Binary expressions can be parsed directly without expression wrapper (higher precedence)
-        prec.dynamic(10, $.binary_expression),
-        prec.dynamic(10, $.unary_expression),
-        // Complex expressions need the full expression hierarchy (lower precedence)
-        prec(1, $.expression)
-      ),
-      ';'
-    ),
+        prec.dynamic(10, $._statement_binary_expression),
+        prec.dynamic(10, $._statement_unary_expression),
+        // Complex expressions need the statement expression hierarchy (lower precedence)
+        prec(1, $._statement_expression)
+      )),
+      '?',
+      field('consequence', choice(
+        // Simple literals can be parsed directly without expression wrapper (higher precedence)
+        prec.dynamic(10, $.number),
+        prec.dynamic(10, $.string),
+        prec.dynamic(10, $.boolean),
+        prec.dynamic(10, $.identifier),
+        prec.dynamic(10, $.special_variable),
+        prec.dynamic(10, $.vector_expression),
+        // Binary expressions can be parsed directly without expression wrapper (higher precedence)
+        prec.dynamic(10, $._statement_binary_expression),
+        prec.dynamic(10, $._statement_unary_expression),
+        // Complex expressions need the statement expression hierarchy (lower precedence)
+        prec(1, $._statement_expression)
+      )),
+      ':',
+      field('alternative', choice(
+        // Simple literals can be parsed directly without expression wrapper (higher precedence)
+        prec.dynamic(10, $.number),
+        prec.dynamic(10, $.string),
+        prec.dynamic(10, $.boolean),
+        prec.dynamic(10, $.identifier),
+        prec.dynamic(10, $.special_variable),
+        prec.dynamic(10, $.vector_expression),
+        // Binary expressions can be parsed directly without expression wrapper (higher precedence)
+        prec.dynamic(10, $._statement_binary_expression),
+        prec.dynamic(10, $._statement_unary_expression),
+        // Complex expressions need the statement expression hierarchy (lower precedence)
+        prec(1, $._statement_expression)
+      ))
+    )),
 
     // Simplified expression hierarchy - allow direct access to simple expressions
     expression: $ => choice(
@@ -759,8 +992,8 @@ module.exports = grammar({
       ))
     )),
 
-    // Function call expression
-    call_expression: $ => prec.left(9, seq(
+    // Function call expression - reduced precedence to allow module_instantiation to take priority
+    call_expression: $ => prec.left(5, seq(
       field('function', choice(
         // Simple literals can be parsed directly without expression wrapper (higher precedence)
         prec.dynamic(10, $.number),
