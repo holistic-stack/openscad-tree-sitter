@@ -1,0 +1,484 @@
+==================
+Mathematical Functions
+==================
+
+result = sin(45);
+result = cos(radians(45));
+result = tan(30);
+result = sqrt(16);
+result = pow(2, 3);
+result = abs(-5);
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (number)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (call_expression
+                function: (identifier)
+                arguments: (argument_list
+                  (arguments
+                    (argument
+                      (number)))))))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (number)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (number)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (number))
+            (argument
+              (number)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (unary_expression
+                operator: "-"
+                operand: (number)))))))))
+
+==================
+Min Max Functions
+==================
+
+minimum = min(1, 2, 3);
+maximum = max([1, 2, 3]);
+minimum_list = min([5, 2, 8, 1]);
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (number))
+            (argument
+              (number))
+            (argument
+              (number)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (vector_expression
+                (number)
+                (number)
+                (number))))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (vector_expression
+                (number)
+                (number)
+                (number)
+                (number)))))))))
+
+==================
+String Functions
+==================
+
+text = str("Value: ", 42);
+length = len("hello");
+concatenated = concat("hello", " ", "world");
+character = chr(65);
+code = ord("A");
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (string))
+            (argument
+              (number)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (string)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (string))
+            (argument
+              (string))
+            (argument
+              (string)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (number)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (string))))))))
+
+==================
+Vector and List Functions
+==================
+
+vector_len = norm([3, 4]);
+cross_product = cross([1,0,0], [0,1,0]);
+list_length = len([1, 2, 3]);
+rounding = round(3.7);
+ceiling = ceil(3.2);
+flooring = floor(3.8);
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (vector_expression
+                (number)
+                (number))))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (vector_expression
+                (number)
+                (number)
+                (number)))
+            (argument
+              (vector_expression
+                (number)
+                (number)
+                (number))))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (vector_expression
+                (number)
+                (number)
+                (number))))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (number)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (number)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (number))))))))
+
+==================
+Echo Statements
+==================
+
+echo("Debug message");
+echo("Value:", x, "Result:", y);
+echo(str("Formatted: ", x));
+
+---
+
+(source_file
+  (statement
+    (echo_statement
+      (arguments
+        (argument
+          (string)))))
+  (statement
+    (echo_statement
+      (arguments
+        (argument
+          (string))
+        (argument
+          (identifier))
+        (argument
+          (string))
+        (argument
+          (identifier)))))
+  (statement
+    (echo_statement
+      (arguments
+        (argument
+          (call_expression
+            function: (identifier)
+            arguments: (argument_list
+              (arguments
+                (argument
+                  (string))
+                (argument
+                  (identifier))))))))))
+
+==================
+Assert Statements
+==================
+
+assert(x > 0, "x must be positive");
+assert(len(points) == 3);
+assert(is_num(value), str("Expected number, got: ", value));
+
+---
+
+(source_file
+  (statement
+    (assert_statement
+      condition: (binary_expression
+        left: (identifier)
+        operator: ">"
+        right: (number))
+      message: (string)))
+  (statement
+    (assert_statement
+      condition: (binary_expression
+        left: (call_expression
+          function: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument
+                (identifier)))))
+        operator: "=="
+        right: (number))))
+  (statement
+    (assert_statement
+      condition: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (identifier)))))
+      message: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (string))
+            (argument
+              (identifier))))))))
+
+==================
+Type Checking Functions
+==================
+
+is_number = is_num(42);
+is_string = is_string("hello");
+is_boolean = is_bool(true);
+is_list = is_list([1, 2, 3]);
+is_undefined = is_undef(undefined_var);
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (number)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (string)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (boolean)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (vector_expression
+                (number)
+                (number)
+                (number))))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (identifier))))))))
+
+==================
+Random and Search Functions
+==================
+
+random_val = rands(0, 1, 5);
+search_result = search("needle", ["hay", "needle", "stack"]);
+lookup_result = lookup(2.5, [[0,0], [1,1], [2,4], [3,9]]);
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (number))
+            (argument
+              (number))
+            (argument
+              (number)))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (string))
+            (argument
+              (vector_expression
+                (string)
+                (string)
+                (string))))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (call_expression
+        function: (identifier)
+        arguments: (argument_list
+          (arguments
+            (argument
+              (number))
+            (argument
+              (vector_expression
+                (vector_expression
+                  (number)
+                  (number))
+                (vector_expression
+                  (number)
+                  (number))
+                (vector_expression
+                  (number)
+                  (number))
+                (vector_expression
+                  (number)
+                  (number))))))))))

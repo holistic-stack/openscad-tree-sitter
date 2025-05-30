@@ -83,7 +83,20 @@ module.exports = grammar({
     [$.statement, $._module_instantiation_with_body],
 
     // Added to resolve: for (for_header) block • next_token
-    [$.statement, $.for_statement]
+    [$.statement, $.for_statement],
+
+    // New conflicts for simplified grammar
+    [$._module_instantiation_with_body, $._module_instantiation_simple, $.call_expression],
+    [$.primary_expression, $.call_expression],
+    [$.expression, $.call_expression],
+    [$._module_instantiation_with_body, $._module_instantiation_simple, $.primary_expression],
+    [$.binary_expression, $.let_expression],
+    [$.primary_expression, $._vector_element],
+    [$.primary_expression, $._argument_value],
+    [$.primary_expression, $._assignment_value],
+    [$.primary_expression, $._range_value],
+    [$._vector_element, $.array_literal],
+    [$._module_instantiation_with_body, $.module_instantiation]
   ],
 
   rules: {
@@ -107,12 +120,12 @@ module.exports = grammar({
       $.function_definition,
       $.assignment_statement,
       $.assign_statement,
-      $.module_instantiation, // Directly use the module_instantiation rule
+      prec(2, $.module_instantiation), // Higher precedence than expression_statement
       $.if_statement,
       $.for_statement,
       $.echo_statement,
       $.assert_statement,
-      $.expression_statement, // Make semicolon mandatory for expression statements
+      prec(1, $.expression_statement), // Lower precedence than module_instantiation
       $.block
     ),
 
@@ -170,8 +183,19 @@ module.exports = grammar({
     assignment_statement: $ => seq(
       field('name', choice($.special_variable, $.identifier)),
       '=',
-      field('value', $.expression),
+      field('value', $._assignment_value),
       optional(';') // Make semicolon optional for error recovery
+    ),
+
+    // Assignment value - can be a simple value or complex expression (hidden rule)
+    _assignment_value: $ => choice(
+      $.number,
+      $.string,
+      $.boolean,
+      $.identifier,
+      $.special_variable,
+      $.vector_expression,
+      $.expression
     ),
 
     /**
@@ -219,24 +243,25 @@ module.exports = grammar({
 
     _module_instantiation_with_body: $ => seq(
       optional($.modifier),
-      field('name', $.accessor_expression),
+      field('name', $.identifier),
       field('arguments', $.argument_list),
-      field('body', choice(
+      choice(
         $.block,
+        prec.dynamic(10, $.module_instantiation), // Direct module instantiation without statement wrapping - dynamic precedence
         $.statement // A full statement, which will handle its own termination (e.g., semicolon for an inner module_instantiation_simple)
-      ))
+      )
     ),
 
     _module_instantiation_simple: $ => seq(
       optional($.modifier),
-      field('name', $.accessor_expression),
+      field('name', $.identifier),
       field('arguments', $.argument_list),
       ';'
     ),
 
     module_instantiation: $ => choice(
-      prec(2, $._module_instantiation_with_body),
-      prec(1, $._module_instantiation_simple)
+      prec(10, $._module_instantiation_with_body), // Higher precedence than call_expression (9)
+      prec(10, $._module_instantiation_simple) // Higher precedence than call_expression (9)
     ),
 
     argument_list: $ => seq(
@@ -256,9 +281,20 @@ module.exports = grammar({
     ),
 
     argument: $ => choice(
-      $.expression,
-      seq($.special_variable, '=', $.expression),
-      seq($.identifier, '=', $.expression)
+      $._argument_value,
+      seq($.special_variable, '=', $._argument_value),
+      seq($.identifier, '=', $._argument_value)
+    ),
+
+    // Argument value - can be a simple value or complex expression (hidden rule)
+    _argument_value: $ => choice(
+      prec(5, $.number),
+      prec(5, $.string),
+      prec(5, $.boolean),
+      prec(5, $.identifier),
+      prec(5, $.special_variable),
+      prec(4, $.vector_expression),
+      prec(1, $.expression)
     ),
 
     module_child: $ => seq(
@@ -355,23 +391,23 @@ module.exports = grammar({
       field('iterator', choice($.identifier, $.special_variable)),
       '=',
       // Use higher precedence for range_expression to resolve conflict with array_literal
-      choice(prec(3, $.range_expression), $.expression)
+      field('range', choice(prec(3, $.range_expression), $.expression))
     )),
 
     range_expression: $ => seq(
       '[',
       choice(
         seq(
-          field('start', $.expression),
+          field('start', $._range_value),
           ':',
-          field('end', $.expression)
+          field('end', $._range_value)
         ),
         seq(
-          field('start', $.expression),
+          field('start', $._range_value),
           ':',
-          field('step', $.expression),
+          field('step', $._range_value),
           ':',
-          field('end', $.expression)
+          field('end', $._range_value)
         )
       ),
       choice(
@@ -379,6 +415,14 @@ module.exports = grammar({
         // Error recovery for missing closing bracket
         token.immediate(prec(-1, /[;,){}]/)) // Match semicolon, comma, closing parenthesis, or braces
       )
+    ),
+
+    // Range value - can be a simple value or complex expression (hidden rule)
+    _range_value: $ => choice(
+      prec(5, $.number),
+      prec(5, $.identifier),
+      prec(5, $.special_variable),
+      prec(1, $.expression)
     ),
 
     echo_statement: $ => seq(
@@ -408,148 +452,108 @@ module.exports = grammar({
 
     expression_statement: $ => seq($.expression, ';'),
 
-    expression: $ => $.conditional_expression,
-
-    // Precedence levels (higher number = higher precedence)
-    // Conditional: 1, Logical OR: 2, Logical AND: 3, Equality: 4, Relational: 5,
-    // Additive: 6, Multiplicative: 7, Exponentiation: 8, Unary: 9, Postfix: 10
-
-    conditional_expression: $ => choice(
-      prec.right(1, seq(
-        field('condition', $.logical_or_expression),
-        '?',
-        field('consequence', $.expression), // Recursive call to $.expression for consequence
-        ':',
-        field('alternative', $.conditional_expression) // Allows right-chaining
-      )),
-      $.logical_or_expression // Pass to next higher precedence
+    // Simplified expression hierarchy - allow direct access to simple expressions
+    expression: $ => choice(
+      $.conditional_expression,
+      $.binary_expression,
+      $.unary_expression,
+      $.call_expression,
+      $.index_expression,
+      $.member_expression,
+      $.parenthesized_expression,
+      $.primary_expression
     ),
 
-    logical_or_expression: $ => choice(
-      prec.left(2, seq(
-        field('left', $.logical_or_expression),
+    // Simplified binary expression that handles all operators with proper precedence
+    binary_expression: $ => choice(
+      // Logical OR (lowest precedence)
+      prec.left(1, seq(
+        field('left', $.expression),
         field('operator', '||'),
-        field('right', $.logical_and_expression)
+        field('right', $.expression)
       )),
-      $.logical_and_expression // Pass to next higher precedence
-    ),
-
-    logical_and_expression: $ => choice(
-      prec.left(3, seq(
-        field('left', $.logical_and_expression),
+      // Logical AND
+      prec.left(2, seq(
+        field('left', $.expression),
         field('operator', '&&'),
-        field('right', $.equality_expression)
+        field('right', $.expression)
       )),
-      $.equality_expression // Pass to next higher precedence
-    ),
-
-    equality_expression: $ => choice(
-      prec.left(4, seq(
-        field('left', $.equality_expression),
+      // Equality
+      prec.left(3, seq(
+        field('left', $.expression),
         field('operator', choice('==', '!=')),
-        field('right', $.relational_expression)
+        field('right', $.expression)
       )),
-      $.relational_expression // Pass to next higher precedence
-    ),
-
-    relational_expression: $ => choice(
-      prec.left(5, seq(
-        field('left', $.relational_expression),
+      // Relational
+      prec.left(4, seq(
+        field('left', $.expression),
         field('operator', choice('<', '<=', '>', '>=')),
-        field('right', $.additive_expression)
+        field('right', $.expression)
       )),
-      $.additive_expression // Pass to next higher precedence
-    ),
-
-    additive_expression: $ => choice(
-      prec.left(6, seq(
-        field('left', $.additive_expression),
+      // Additive
+      prec.left(5, seq(
+        field('left', $.expression),
         field('operator', choice('+', '-')),
-        field('right', $.multiplicative_expression)
+        field('right', $.expression)
       )),
-      $.multiplicative_expression // Pass to next higher precedence
-    ),
-
-    multiplicative_expression: $ => choice(
-      prec.left(7, seq(
-        field('left', $.multiplicative_expression),
+      // Multiplicative
+      prec.left(6, seq(
+        field('left', $.expression),
         field('operator', choice('*', '/', '%')),
-        field('right', $.exponentiation_expression)
+        field('right', $.expression)
       )),
-      $.exponentiation_expression // Pass to next higher precedence
-    ),
-
-    exponentiation_expression: $ => choice(
-      prec.right(8, seq(
-        field('left', $.unary_expression),
+      // Exponentiation (right associative)
+      prec.right(7, seq(
+        field('left', $.expression),
         field('operator', '^'),
-        field('right', $.exponentiation_expression)
-      )),
-      $.unary_expression // Pass to next higher precedence
-    ),
-
-    unary_expression: $ => choice(
-      prec.right(9, seq(
-        field('operator', choice('!', '-')),
-        field('operand', $.accessor_expression)
-      )),
-      $.accessor_expression // Pass to next higher precedence
-    ),
-
-    /**
-     * Accessor expression rule
-     *
-     * This rule handles various ways to access values:
-     * - Primary expressions (variables, literals)
-     * - Array indexing (arr[i])
-     * - Member access (obj.prop)
-     * - Function calls (func())
-     *
-     * We use different precedence levels to resolve conflicts:
-     * - Primary expression: precedence 1 (lowest)
-     * - Member access and function calls: precedence 10
-     * - Array indexing: precedence 20 (highest)
-     *
-     * Examples:
-     *   x                // Variable access
-     *   arr[i]           // Array indexing
-     *   obj.prop         // Member access
-     *   func()           // Function call
-     *   arr[i].prop      // Chained access
-     *   func()[i]        // Function call with indexing
-     */
-    accessor_expression: $ => choice(
-      // Primary expression has lowest precedence in this context
-      prec(1, $.primary_expression),
-
-      // Index access (highest precedence for nesting)
-      prec.right(20, seq(
-        field('array', $.accessor_expression),
-        '[',
-        field('index', $.expression),
-        choice(
-          ']',
-          // Error recovery for missing closing bracket
-          token.immediate(prec(-1, /[;,){}]/)) // Match semicolon, comma, closing parenthesis, or braces
-        )
-      )),
-
-      // Member access
-      prec.left(10, seq(
-        field('object', $.accessor_expression),
-        '.',
-        field('property', $.identifier)
-      )),
-
-      // Call expression
-      prec.left(10, seq(
-        field('function', $.accessor_expression),
-        $.argument_list
+        field('right', $.expression)
       ))
     ),
 
+    // Simplified unary expression
+    unary_expression: $ => prec.right(8, seq(
+      field('operator', choice('!', '-')),
+      field('operand', $.expression)
+    )),
+
+    // Function call expression
+    call_expression: $ => prec.left(9, seq(
+      field('function', $.expression),
+      field('arguments', $.argument_list)
+    )),
+
+    // Array index expression
+    index_expression: $ => prec.left(10, seq(
+      field('array', $.expression),
+      '[',
+      field('index', $.expression),
+      choice(
+        ']',
+        token.immediate(prec(-1, /[;,){}]/))
+      )
+    )),
+
+    // Member access expression
+    member_expression: $ => prec.left(10, seq(
+      field('object', $.expression),
+      '.',
+      field('property', $.identifier)
+    )),
+
+    // Simplified conditional expression
+    conditional_expression: $ => prec.right(1, seq(
+      field('condition', $.expression),
+      '?',
+      field('consequence', $.expression),
+      ':',
+      field('alternative', $.expression)
+    )),
+
+
+
+
+
     primary_expression: $ => choice(
-      $.parenthesized_expression,
       $.special_variable,
       $.identifier,
       $.number,
@@ -557,10 +561,32 @@ module.exports = grammar({
       $.boolean,
       $.undef,
       prec.dynamic(10, $.range_expression),
+      $.vector_expression,
       $.array_literal,
       $.list_comprehension,
       $.object_literal,
       $.let_expression
+    ),
+
+    // OpenSCAD vector expression [x, y, z] - much higher precedence than array_literal
+    vector_expression: $ => prec(10, seq('[',
+      optional(commaSep1($._vector_element)),
+      choice(
+        ']',
+        // Error recovery for missing closing bracket
+        token.immediate(prec(-1, /[;,){}]/)) // Match semicolon, comma, closing parenthesis, or braces
+      )
+    )),
+
+    // Vector element - can be a simple value, nested vector, or complex expression (hidden rule)
+    _vector_element: $ => choice(
+      prec(5, $.number),
+      prec(5, $.string),
+      prec(5, $.boolean),
+      prec(5, $.identifier),
+      prec(5, $.special_variable),
+      prec(4, $.vector_expression),
+      prec(1, $.expression)
     ),
 
     parenthesized_expression: $ => seq(
