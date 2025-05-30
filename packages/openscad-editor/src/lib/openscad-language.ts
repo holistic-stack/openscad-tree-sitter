@@ -1,4 +1,6 @@
 import * as monaco from 'monaco-editor';
+import { OpenSCADParserService } from './services/openscad-parser-service';
+import { FormattingService, registerFormattingProvider } from './formatting/formatting-service';
 
 export interface OpenSCADLanguageConfig {
   comments?: {
@@ -203,8 +205,12 @@ export const openscadTheme: monaco.editor.IStandaloneThemeData = {
 /**
  * Register OpenSCAD language with Monaco Editor
  */
-export function registerOpenSCADLanguage(monaco: typeof import('monaco-editor')): void {
+export function registerOpenSCADLanguage(
+  monaco: typeof import('monaco-editor'),
+  parserService?: OpenSCADParserService
+): { disposables: monaco.IDisposable[]; formattingService?: FormattingService } {
   const LANGUAGE_ID = 'openscad';
+  const disposables: monaco.IDisposable[] = [];
 
   // Register the language
   monaco.languages.register({ id: LANGUAGE_ID });
@@ -217,4 +223,22 @@ export function registerOpenSCADLanguage(monaco: typeof import('monaco-editor'))
 
   // Define and set the theme
   monaco.editor.defineTheme('openscad-dark', openscadTheme);
+
+  // Register formatting provider if parser service is available
+  let formattingService: FormattingService | undefined;
+  if (parserService) {
+    formattingService = new FormattingService(parserService);
+    const formattingDisposables = registerFormattingProvider(monaco, LANGUAGE_ID, formattingService);
+    disposables.push(...formattingDisposables);
+  }
+
+  const result: { disposables: monaco.IDisposable[]; formattingService?: FormattingService } = {
+    disposables
+  };
+  
+  if (formattingService) {
+    result.formattingService = formattingService;
+  }
+  
+  return result;
 }

@@ -26,7 +26,7 @@
     "baseUrl": ".",
     "paths": {
       "@openscad/editor": ["packages/openscad-editor/src/index.ts"],
-      "@openscad/parser": ["packages/openscad-parser/src/lib/index.ts"],
+      "@openscad/parser": ["packages/openscad-parser/dist/lib/index.d.ts"],
       "@openscad/tree-sitter-openscad": [
         "packages/tree-sitter-openscad/src/index.ts"
       ],

@@ -1,6 +1,6 @@
 import * as monaco from 'monaco-editor';
 // Try importing Parser as a named export and alias it
-import { Parser as TreeSitterParserClass, Language, Query, Tree, Point } from 'web-tree-sitter';
+import { Parser as TreeSitterParserClass, Language, Query, Tree, type Point } from 'web-tree-sitter';
 
 // Define a mapping from Tree-sitter capture names to Monaco token types
 const captureToTokenMap: Record<string, string> = {
@@ -195,18 +195,28 @@ export class OpenSCADTokensProvider implements monaco.languages.TokensProvider {
     
     const finalTokens: monaco.languages.IToken[] = [];
     if (tokens.length > 0) {
-        let currentToken = tokens[0];
-        for (let i = 1; i < tokens.length; i++) {
-            if (tokens[i].startIndex > currentToken.startIndex) {
-                finalTokens.push(currentToken);
-                currentToken = tokens[i];
-            } else if (tokens[i].startIndex === currentToken.startIndex) {
-                if (tokens[i].scopes.length >= currentToken.scopes.length) { 
-                    currentToken = tokens[i];
+    let currentToken = tokens[0];
+    if (!currentToken) {
+    return [{ startIndex: 0, scopes: 'source.openscad' }];
+    }
+    
+    for (let i = 1; i < tokens.length; i++) {
+    const token = tokens[i];
+    if (!token || !currentToken) continue;
+    
+    if (token.startIndex > currentToken.startIndex) {
+            finalTokens.push(currentToken);
+            currentToken = token;
+            } else if (token.startIndex === currentToken.startIndex) {
+                if (token.scopes.length >= currentToken.scopes.length) {
+                    currentToken = token;
                 }
             }
         }
-        finalTokens.push(currentToken);
+        
+        if (currentToken) {
+            finalTokens.push(currentToken);
+        }
     }
     return finalTokens.length > 0 ? finalTokens : [{ startIndex: 0, scopes: 'source.openscad' }];
   }

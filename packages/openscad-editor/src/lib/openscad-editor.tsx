@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import Editor, { Monaco, loader } from '@monaco-editor/react';
+import Editor, { type Monaco, loader } from '@monaco-editor/react';
 import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 import { Parser as TreeSitterParser, Language as TreeSitterLanguage } from 'web-tree-sitter';
 import { OpenSCADTokensProvider } from './OpenSCADTokensProvider';
@@ -124,6 +124,8 @@ const OpenscadEditor: React.FC<OpenscadEditorProps> = ({
         }
       };
     }
+    // Return undefined if conditions aren't met
+    return undefined;
   }, [isMonacoReady, isTreeSitterReady]);
 
   const handleEditorDidMount = (editor: monacoEditor.editor.IStandaloneCodeEditor, monaco: Monaco) => {

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import Editor, { Monaco, loader } from '@monaco-editor/react';
+import Editor, { type Monaco, loader } from '@monaco-editor/react';
 import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
 import { registerOpenSCADLanguage } from './openscad-language';
 
