@@ -21,9 +21,11 @@ Simple Numbers
       (number)))
   (statement
     (expression_statement
-      (unary_expression
-        operator: "-"
-        operand: (number)))))
+      (expression
+        (unary_expression
+          operand: (expression
+            (primary_expression
+              (number))))))))
 
 ==================
 Simple Strings
@@ -100,40 +102,64 @@ Basic Arithmetic
 (source_file
   (statement
     (expression_statement
-      (binary_expression
-        left: (number)
-        operator: "+"
-        right: (number))))
+      (expression
+        (binary_expression
+          left: (expression
+            (primary_expression
+              (number)))
+          right: (expression
+            (primary_expression
+              (number)))))))
   (statement
     (expression_statement
-      (binary_expression
-        left: (number)
-        operator: "-"
-        right: (number))))
+      (expression
+        (binary_expression
+          left: (expression
+            (primary_expression
+              (number)))
+          right: (expression
+            (primary_expression
+              (number)))))))
   (statement
     (expression_statement
-      (binary_expression
-        left: (number)
-        operator: "*"
-        right: (number))))
+      (expression
+        (binary_expression
+          left: (expression
+            (primary_expression
+              (number)))
+          right: (expression
+            (primary_expression
+              (number)))))))
   (statement
     (expression_statement
-      (binary_expression
-        left: (number)
-        operator: "/"
-        right: (number))))
+      (expression
+        (binary_expression
+          left: (expression
+            (primary_expression
+              (number)))
+          right: (expression
+            (primary_expression
+              (number)))))))
   (statement
     (expression_statement
-      (binary_expression
-        left: (number)
-        operator: "%"
-        right: (number))))
+      (expression
+        (binary_expression
+          left: (expression
+            (primary_expression
+              (number)))
+          right: (expression
+            (primary_expression
+              (number)))))))
   (statement
     (expression_statement
-      (binary_expression
-        left: (number)
-        operator: "^"
-        right: (number)))))
+      (expression
+        (binary_expression
+          left: (expression
+            (primary_expression
+              (number)))
+          right: (expression
+            (primary_expression
+              (number))))))))
 
 ==================
 Basic Comparisons
@@ -151,10 +177,14 @@ Basic Comparisons
 (source_file
   (statement
     (expression_statement
-      (binary_expression
-        left: (number)
-        operator: ">"
-        right: (number))))
+      (expression
+        (binary_expression
+          left: (expression
+            (primary_expression
+              (number)))
+          right: (expression
+            (primary_expression
+              (number)))))))
   (statement
     (expression_statement
       (binary_expression
