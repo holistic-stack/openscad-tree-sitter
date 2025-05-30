@@ -15,8 +15,7 @@
  */
 
 import * as TreeSitter from 'web-tree-sitter';
-import { SimpleErrorHandler } from './error-handling/simple-error-handler.js';
-import type { IErrorHandler } from './error-handling/simple-error-handler.js';
+import { SimpleErrorHandler, type IErrorHandler } from './error-handling/simple-error-handler.js';
 import type { ASTNode } from './ast/ast-types.js';
 import { VisitorASTGenerator } from './ast/index.js';
 import { ErrorHandler } from './error-handling/index.js';

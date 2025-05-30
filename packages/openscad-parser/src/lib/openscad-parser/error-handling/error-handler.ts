@@ -48,11 +48,10 @@ import {
   ReferenceError,
   InternalError,
   Severity,
-  ErrorCode
+  ErrorCode,
+  type ErrorContext
 } from './types/error-types.js';
-import type { ErrorContext } from './types/error-types.js';
-import { Logger } from './logger.js';
-import type { LoggerOptions } from './logger.js';
+import { Logger, type LoggerOptions } from './logger.js';
 import { RecoveryStrategyRegistry } from './recovery-strategy-registry.js';
 
 /** Configuration options for the ErrorHandler */

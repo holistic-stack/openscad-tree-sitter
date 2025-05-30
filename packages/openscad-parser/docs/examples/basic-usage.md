@@ -274,6 +274,129 @@ errors.forEach((error, index) => {
 });
 ```
 
+## Working with Range Expressions
+
+### Range Expression Integration
+
+Range expressions are fully integrated into the parser and work seamlessly in **contextual usage** (for loops, list comprehensions, variable assignments):
+
+**Important Note**: Range expressions work when used in proper OpenSCAD contexts, not as standalone expressions. This is because the Tree-sitter grammar recognizes ranges within their syntactic contexts.
+
+```typescript
+// ✅ Range expressions work in for loops
+const forLoopCode = `
+for (i = [0:5]) {
+  cube(i);
+}
+`;
+const forAst = parser.parseAST(forLoopCode);
+console.log('For loop with range parsed successfully');
+
+// ✅ Range expressions work in variable assignments
+const assignmentCode = `
+range = [0:2:10];
+cube(range[0]);
+`;
+const assignAst = parser.parseAST(assignmentCode);
+console.log('Variable assignment with range parsed successfully');
+
+// ✅ Range expressions work in list comprehensions
+const listCompCode = `
+values = [for (i = [1:5]) i*2];
+`;
+const listAst = parser.parseAST(listCompCode);
+console.log('List comprehension with range parsed successfully');
+```
+
+### Range Expressions in For Loops
+
+```typescript
+const forLoopCode = `
+for (i = [0:2:10]) {
+  translate([i, 0, 0]) cube(1);
+}
+`;
+
+const ast = parser.parseAST(forLoopCode);
+const forLoop = ast[0] as ForLoopNode;
+
+console.log(`For loop variable: ${forLoop.variable}`);
+console.log(`Range type: ${forLoop.range.expressionType}`);
+
+// Access range details
+const range = forLoop.range as RangeExpressionNode;
+console.log(`Range: ${range.start.value}:${range.step.value}:${range.end.value}`);
+// Output: Range: 0:2:10
+```
+
+### Range Expressions in List Comprehensions
+
+```typescript
+const listCompCode = `
+points = [for (i = [0:5]) [i, i*2, 0]];
+`;
+
+const ast = parser.parseAST(listCompCode);
+console.log('List comprehension with range expression parsed successfully');
+
+// The range [0:5] within the list comprehension is properly recognized
+// and converted to a RangeExpressionNode
+```
+
+### Complex Range Expressions
+
+```typescript
+// Negative ranges
+const negativeRange = parser.parseAST('[10:-1:0]');
+console.log('Negative step range:', negativeRange[0]);
+
+// Decimal ranges
+const decimalRange = parser.parseAST('[0:0.5:5]');
+console.log('Decimal step range:', decimalRange[0]);
+
+// Expression ranges (with variables)
+const expressionRange = parser.parseAST('[start+1:step:end-1]');
+console.log('Expression range:', expressionRange[0]);
+```
+
+### Range Expression Type Guards
+
+```typescript
+import { isRangeExpressionNode } from '@openscad/parser';
+
+function processExpression(node: ExpressionNode) {
+  if (isRangeExpressionNode(node)) {
+    // TypeScript knows this is a RangeExpressionNode
+    console.log(`Range from ${node.start} to ${node.end}`);
+    if (node.step) {
+      console.log(`Step: ${node.step}`);
+    }
+  }
+}
+```
+
+### Before/After Integration Comparison
+
+**Before Integration** (would show warnings):
+```
+[WARN] Unhandled expression type: range_expression
+[WARN] List comprehension parsing incomplete
+```
+
+**After Integration** (seamless processing):
+```typescript
+const code = `
+for (i = [0:2:10]) {
+  cube(i);
+}
+`;
+
+const ast = parser.parseAST(code);
+// No warnings - range expressions are fully supported
+// Range [0:2:10] is properly parsed as RangeExpressionNode
+// Integration works seamlessly in all contexts
+```
+
 ## Working with CST
 
 ### Direct CST Access

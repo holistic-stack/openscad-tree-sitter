@@ -86,6 +86,7 @@ import { BaseASTVisitor } from './base-ast-visitor.js';
 import { getLocation } from '../utils/location-utils.js';
 import { FunctionCallVisitor } from './expression-visitor/function-call-visitor.js';
 import { ListComprehensionVisitor } from './expression-visitor/list-comprehension-visitor/list-comprehension-visitor.js';
+import { RangeExpressionVisitor } from './expression-visitor/range-expression-visitor/range-expression-visitor.js';
 import { ErrorHandler } from '../../error-handling/index.js';
 import { findDescendantOfType } from '../utils/node-utils.js';
 import { evaluateBinaryExpression } from '../evaluation/binary-expression-evaluator/binary-expression-evaluator.js';
@@ -233,6 +234,11 @@ export class ExpressionVisitor extends BaseASTVisitor {
   private listComprehensionVisitor: ListComprehensionVisitor;
 
   /**
+   * Range expression visitor for handling range expressions in expressions
+   */
+  private rangeExpressionVisitor: RangeExpressionVisitor;
+
+  /**
    * Constructor for the ExpressionVisitor
    * @param source The source code
    * @param errorHandler The error handler
@@ -244,6 +250,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
     // This follows SRP by keeping only essential dependencies
     this.functionCallVisitor = new FunctionCallVisitor(this, errorHandler);
     this.listComprehensionVisitor = new ListComprehensionVisitor(this, errorHandler);
+    this.rangeExpressionVisitor = new RangeExpressionVisitor(this, errorHandler);
   }
 
   /**
@@ -330,6 +337,10 @@ export class ExpressionVisitor extends BaseASTVisitor {
         return this.visitPrimaryExpression(node);
       case 'list_comprehension':
         return this.listComprehensionVisitor.visitListComprehension(node);
+      case 'range_expression':
+        return this.rangeExpressionVisitor.visitRangeExpression(node);
+      case 'let_expression':
+        return this.visitLetExpression(node);
       default:
         return this.createExpressionNode(node);
     }
@@ -531,7 +542,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
           location: getLocation(node),
         };
       }
-      case 'function_call':
+      case 'function_call': {
         // Convert function call to expression node for expression contexts
         const functionCall = this.functionCallVisitor.visitFunctionCall(node);
         if (functionCall) {
@@ -545,9 +556,16 @@ export class ExpressionVisitor extends BaseASTVisitor {
           } as ast.ExpressionNode;
         }
         return null;
+      }
       case 'list_comprehension':
         // Handle list comprehension expressions
         return this.listComprehensionVisitor.visitListComprehension(node);
+      case 'range_expression':
+        // Handle range expressions
+        return this.rangeExpressionVisitor.visitRangeExpression(node);
+      case 'let_expression':
+        // Handle let expressions
+        return this.visitLetExpression(node);
       default:
         this.safeLog(
           'info',
@@ -681,6 +699,18 @@ export class ExpressionVisitor extends BaseASTVisitor {
       return this.dispatchSpecificExpression(node);
     }
 
+    // Check for let expression first (before other checks)
+    const letExprNode = findDescendantOfType(node, 'let_expression');
+    if (letExprNode) {
+      this.safeLog(
+        'info',
+        `[ExpressionVisitor.visitExpression] Found let expression: ${letExprNode.text.substring(0, 30)}`,
+        'ExpressionVisitor.visitExpression',
+        letExprNode
+      );
+      return this.visitLetExpression(letExprNode);
+    }
+
     // Check for binary expression
     const binaryExprNode = findDescendantOfType(node, 'binary_expression');
     if (binaryExprNode) {
@@ -693,24 +723,37 @@ export class ExpressionVisitor extends BaseASTVisitor {
       return this.createExpressionNode(binaryExprNode);
     }
 
-    // Check for unary expression, but ONLY if it's not a function call
+    // Check for unary expression, but be more selective about function call detection
     const unaryExprNode = findDescendantOfType(node, 'unary_expression');
     if (unaryExprNode) {
-      // Check if this unary expression contains an accessor_expression (function call)
+      // Check if this unary expression contains an accessor_expression
       const accessorExpr = findDescendantOfType(unaryExprNode, 'accessor_expression');
       if (accessorExpr) {
         // Check if this accessor expression has an argument_list (making it a function call)
         const argumentListNode = findDescendantOfType(accessorExpr, 'argument_list');
         if (argumentListNode) {
-          // This is a function call like sphere(), cube(), etc.
-          // Don't handle it here - let specialized visitors handle it
-          this.safeLog(
-            'info',
-            `[ExpressionVisitor.visitExpression] Found unary expression with accessor_expression (function call): ${unaryExprNode.text.substring(0, 30)}. Skipping to let specialized visitors handle it.`,
-            'ExpressionVisitor.visitExpression',
-            unaryExprNode
-          );
-          return null;
+          // Check if this is a direct function call (not an array containing function calls)
+          // If the unary expression starts with '[', it's likely an array containing function calls
+          const nodeText = unaryExprNode.text.trim();
+          if (nodeText.startsWith('[') && nodeText.endsWith(']')) {
+            // This is an array that contains function calls - we should process it
+            this.safeLog(
+              'info',
+              `[ExpressionVisitor.visitExpression] Found array containing function calls: ${unaryExprNode.text.substring(0, 30)}. Processing as array.`,
+              'ExpressionVisitor.visitExpression',
+              unaryExprNode
+            );
+          } else {
+            // This is a direct function call like sphere(), cube(), etc.
+            // Don't handle it here - let specialized visitors handle it
+            this.safeLog(
+              'info',
+              `[ExpressionVisitor.visitExpression] Found direct function call: ${unaryExprNode.text.substring(0, 30)}. Skipping to let specialized visitors handle it.`,
+              'ExpressionVisitor.visitExpression',
+              unaryExprNode
+            );
+            return null;
+          }
         } else {
           // This is just a simple expression wrapped in accessor_expression (like a number or variable)
           // Continue processing it as a unary expression
@@ -942,6 +985,130 @@ export class ExpressionVisitor extends BaseASTVisitor {
       type: 'expression',
       expressionType: 'variable',
       name: node.text,
+      location: getLocation(node),
+    };
+  }
+
+  /**
+   * Visit a let expression node
+   * @param node The let expression node to visit
+   * @returns The let expression node or null if the node cannot be processed
+   */
+  visitLetExpression(node: TSNode): ast.LetExpressionNode | null {
+    this.safeLog(
+      'info',
+      `[ExpressionVisitor.visitLetExpression] Processing let expression: ${node.text.substring(0, 50)}`,
+      'ExpressionVisitor.visitLetExpression',
+      node
+    );
+
+    // Extract assignments from let_assignment nodes
+    const assignments: ast.AssignmentNode[] = [];
+
+    // Find all let_assignment children
+    for (let i = 0; i < node.childCount; i++) {
+      const child = node.child(i);
+      if (child && child.type === 'let_assignment') {
+        const assignment = this.processLetAssignment(child);
+        if (assignment) {
+          assignments.push(assignment);
+        }
+      }
+    }
+
+    // Extract the body expression
+    const bodyNode = node.childForFieldName('body');
+    if (!bodyNode) {
+      this.safeLog(
+        'warning',
+        `[ExpressionVisitor.visitLetExpression] No body found in let expression`,
+        'ExpressionVisitor.visitLetExpression',
+        node
+      );
+      return null;
+    }
+
+    const expression = this.visitExpression(bodyNode);
+    if (!expression) {
+      this.safeLog(
+        'warning',
+        `[ExpressionVisitor.visitLetExpression] Failed to process body expression`,
+        'ExpressionVisitor.visitLetExpression',
+        bodyNode
+      );
+      return null;
+    }
+
+    this.safeLog(
+      'info',
+      `[ExpressionVisitor.visitLetExpression] Successfully created let expression with ${assignments.length} assignments`,
+      'ExpressionVisitor.visitLetExpression',
+      node
+    );
+
+    return {
+      type: 'expression',
+      expressionType: 'let_expression',
+      assignments,
+      expression,
+      location: getLocation(node),
+    };
+  }
+
+  /**
+   * Process a let assignment node
+   * @param node The let assignment node to process
+   * @returns The assignment node or null if the node cannot be processed
+   */
+  private processLetAssignment(node: TSNode): ast.AssignmentNode | null {
+    this.safeLog(
+      'info',
+      `[ExpressionVisitor.processLetAssignment] Processing let assignment: ${node.text}`,
+      'ExpressionVisitor.processLetAssignment',
+      node
+    );
+
+    // Extract variable name
+    const nameNode = node.childForFieldName('name');
+    if (!nameNode) {
+      this.safeLog(
+        'warning',
+        `[ExpressionVisitor.processLetAssignment] No name found in let assignment`,
+        'ExpressionVisitor.processLetAssignment',
+        node
+      );
+      return null;
+    }
+
+    const variable = nameNode.text;
+
+    // Extract value expression
+    const valueNode = node.childForFieldName('value');
+    if (!valueNode) {
+      this.safeLog(
+        'warning',
+        `[ExpressionVisitor.processLetAssignment] No value found in let assignment`,
+        'ExpressionVisitor.processLetAssignment',
+        node
+      );
+      return null;
+    }
+
+    const value = this.visitExpression(valueNode);
+    if (!value) {
+      this.safeLog(
+        'warning',
+        `[ExpressionVisitor.processLetAssignment] Failed to process value expression`,
+        'ExpressionVisitor.processLetAssignment',
+        valueNode
+      );
+      return null;
+    }
+
+    return {
+      type: 'assignment',
+      variable,
+      value,
       location: getLocation(node),
     };
   }

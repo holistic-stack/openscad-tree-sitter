@@ -156,10 +156,9 @@ describe('ListComprehensionVisitor', () => {
       }
     });
 
-    it.skip('should parse list comprehension with let expression [for (i = [0:5]) let(angle = i * 36) [cos(angle), sin(angle)]]', () => {
-      // Skipped: let expressions are not yet implemented
-      // This test will be enabled when let expression visitor is implemented
-      const code = '[for (i = [0:5]) let(angle = i * 36) [cos(angle), sin(angle)]]';
+    it('should parse list comprehension with let expression (basic test)', () => {
+      // Basic test for let expressions without function calls - this should work with current implementation
+      const code = '[for (i = [0:5]) let(angle = i * 36) [angle, angle]]';
       const tree = parser.parse(code);
       expect(tree).toBeTruthy();
 
@@ -171,6 +170,48 @@ describe('ListComprehensionVisitor', () => {
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
         expect(result?.expressionType).toBe('list_comprehension_expression');
+      }
+    });
+  });
+
+  describe('Let Expressions', () => {
+    it('should parse list comprehension with let expression [for (i = [0:3]) let(angle = i * 36) [cos(angle), sin(angle)]]', () => {
+      // Test let expressions within list comprehensions
+      const code = '[for (i = [0:3]) let(angle = i * 36) [cos(angle), sin(angle)]]';
+      const tree = parser.parse(code);
+      expect(tree).toBeTruthy();
+
+      const listCompNode = tree?.rootNode.descendantForIndex(0, code.length);
+      expect(listCompNode).toBeTruthy();
+
+      if (listCompNode) {
+        const result = visitor.visitListComprehension(listCompNode);
+        expect(result).toBeTruthy();
+        expect(result?.type).toBe('expression');
+        expect(result?.expressionType).toBe('list_comprehension_expression');
+        // Should handle let expressions in the element
+        expect(result?.expression).toBeTruthy();
+        expect((result?.expression as any)?.expressionType).toBe('let_expression');
+      }
+    });
+
+    it('should parse list comprehension with multiple let assignments [for (a = [1:4]) let(b = a*a, c = 2*b) [a, b, c]]', () => {
+      // Test multiple let assignments
+      const code = '[for (a = [1:4]) let(b = a*a, c = 2*b) [a, b, c]]';
+      const tree = parser.parse(code);
+      expect(tree).toBeTruthy();
+
+      const listCompNode = tree?.rootNode.descendantForIndex(0, code.length);
+      expect(listCompNode).toBeTruthy();
+
+      if (listCompNode) {
+        const result = visitor.visitListComprehension(listCompNode);
+        expect(result).toBeTruthy();
+        expect(result?.type).toBe('expression');
+        expect(result?.expressionType).toBe('list_comprehension_expression');
+        // Should handle let expressions with multiple assignments
+        expect(result?.expression).toBeTruthy();
+        expect((result?.expression as any)?.expressionType).toBe('let_expression');
       }
     });
   });

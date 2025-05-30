@@ -19,6 +19,7 @@ The OpenSCAD Parser is part of the OpenSCAD Tree-sitter monorepo and provides so
 - 🛡️ **Error Handling**: Robust error recovery and reporting
 - 📈 **Production Ready**: Thoroughly tested with Real Parser Pattern
 - 🧪 **Test-Driven**: No mocks - all tests use real parser instances
+- ✨ **Range Expression Integration**: Seamless range expression support in all contexts
 
 ## Quick Start
 
@@ -52,7 +53,7 @@ const ast = parser.parseAST(code);
 console.log(ast[0].type); // 'difference'
 console.log(ast[0].children.length); // Number of child operations
 
-// Parse range expressions
+// Parse range expressions - fully integrated in context!
 const rangeCode = `
   for (i = [0:2:10]) {
     translate([i, 0, 0]) cube(1);
@@ -60,7 +61,33 @@ const rangeCode = `
 `;
 
 const rangeAst = parser.parseAST(rangeCode);
-// Range [0:2:10] is parsed as RangeExpressionNode
+// Range [0:2:10] is parsed as RangeExpressionNode with proper integration
+
+// List comprehensions with ranges work seamlessly
+const listCompCode = `
+  points = [for (i = [0:5]) [i, i*2, 0]];
+`;
+const listAst = parser.parseAST(listCompCode);
+// Range expressions in list comprehensions are fully supported
+
+// Let expressions in list comprehensions - NEW FEATURE!
+const letExprCode = `
+  // Single let assignment
+  coords = [for (i = [0:3]) let(angle = i * 36) [cos(angle), sin(angle)]];
+
+  // Multiple let assignments
+  values = [for (a = [1:4]) let(b = a*a, c = 2*b) [a, b, c]];
+`;
+const letAst = parser.parseAST(letExprCode);
+// Let expressions with single and multiple assignments fully supported
+
+// Variable assignments with ranges
+const assignmentCode = `
+  range = [1:0.5:5];
+  for (i = range) cube(i);
+`;
+const assignAst = parser.parseAST(assignmentCode);
+// Range expressions work in variable assignments
 
 // Clean up
 parser.dispose();
@@ -219,7 +246,9 @@ graph TD
 - ✅ Function definitions and calls
 
 ### Expressions
-- ✅ Range expressions: `[0:5]`, `[0:2:10]`, `[start:end]`
+- ✅ **Range expressions**: `[0:5]`, `[0:2:10]`, `[start:end]` - **Fully integrated with ExpressionVisitor**
+- ✅ **List comprehensions**: `[for (i = [0:5]) i*2]` - **Range expressions work seamlessly**
+- ✅ **Let expressions**: `[for (i = [0:3]) let(angle = i * 36) [cos(angle), sin(angle)]]` - **Full support with multiple assignments**
 - ✅ Binary expressions: `+`, `-`, `*`, `/`, `&&`, `||`, `==`, `!=`
 - ✅ Unary expressions: `-`, `!`
 - ✅ Variable references and literals

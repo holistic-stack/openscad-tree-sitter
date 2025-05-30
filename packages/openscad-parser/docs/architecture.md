@@ -71,6 +71,7 @@ classDiagram
 2. **Resource Management**: Explicit initialization and disposal for memory management
 3. **Incremental Parsing**: Support for efficient updates to large documents
 4. **Error Handling**: Pluggable error handling system
+5. **Range Expression Integration**: Seamless integration approach that works with existing grammar
 
 ### 2. Visitor Pattern
 
@@ -113,12 +114,21 @@ classDiagram
         +visitExpression(node): ASTNode
         +visitBinaryExpression(node): BinaryExpressionNode
         +visitVariableReference(node): VariableNode
+        +createExpressionNode(node): ExpressionNode
+        +dispatchSpecificExpression(node): ExpressionNode
+    }
+
+    class RangeExpressionVisitor {
+        +visitRangeExpression(node): RangeExpressionNode
+        +visitArrayLiteralAsRange(node): RangeExpressionNode
+        +createLiteralExpression(text): ExpressionNode
     }
     
     BaseASTVisitor <|-- PrimitiveVisitor
     BaseASTVisitor <|-- TransformVisitor
     BaseASTVisitor <|-- CSGVisitor
     BaseASTVisitor <|-- ExpressionVisitor
+    ExpressionVisitor --> RangeExpressionVisitor : integrates
 ```
 
 #### Visitor Chain Processing
@@ -213,7 +223,77 @@ classDiagram
     CSGNode <|-- UnionNode
 ```
 
-### 4. Error Handling System
+### 4. Range Expression Integration Architecture
+
+The Range Expression Integration represents a sophisticated solution to Tree-sitter grammar precedence challenges:
+
+```mermaid
+flowchart TD
+    A[OpenSCAD Range: '[0:5]'] --> B[Tree-sitter Parser]
+    B --> C{Grammar Recognition}
+    C -->|Primary| D[range_expression node]
+    C -->|Fallback| E[array_literal node]
+    D --> F[ExpressionVisitor.createExpressionNode]
+    E --> F
+    F --> G{Node Type Check}
+    G -->|range_expression| H[RangeExpressionVisitor.visitRangeExpression]
+    G -->|array_literal| I[RangeExpressionVisitor.visitArrayLiteralAsRange]
+    H --> J[Pattern Detection]
+    I --> J
+    J --> K{Range Pattern?}
+    K -->|Yes| L[Create RangeExpressionNode]
+    K -->|No| M[Return null - not a range]
+    L --> N[Integrated AST Node]
+
+    style A fill:#e1f5fe
+    style N fill:#e8f5e8
+    style J fill:#fff3e0
+```
+
+#### Integration Approach
+
+**Problem Solved**: Tree-sitter grammar consistently parses `[0:5]` as `array_literal` instead of `range_expression` due to precedence rules.
+
+**Solution**: Hybrid visitor approach that:
+1. **Primary Handler**: Processes actual `range_expression` nodes when grammar recognizes them
+2. **Fallback Handler**: Detects range patterns within `array_literal` nodes using regex
+3. **Seamless Integration**: Works through main ExpressionVisitor dispatch system
+
+**Benefits**:
+- Works with existing grammar without modifications
+- More robust than grammar changes
+- Provides foundation for similar expression visitor implementations
+- Maintains backward compatibility
+
+#### Range Expression Dispatch Flow
+
+```mermaid
+sequenceDiagram
+    participant EV as ExpressionVisitor
+    participant REV as RangeExpressionVisitor
+    participant AST as AST Generator
+
+    EV->>EV: createExpressionNode(node)
+    EV->>EV: Check node.type
+    alt node.type === 'range_expression'
+        EV->>REV: visitRangeExpression(node)
+        REV->>REV: Process range_expression node
+        REV->>AST: Create RangeExpressionNode
+    else node.type === 'array_literal'
+        EV->>REV: visitRangeExpression(node)
+        REV->>REV: visitArrayLiteralAsRange(node)
+        REV->>REV: Regex pattern detection
+        alt Pattern matches range
+            REV->>AST: Create RangeExpressionNode
+        else No range pattern
+            REV->>EV: Return null
+        end
+    end
+    AST-->>EV: RangeExpressionNode | null
+    EV-->>EV: Continue processing
+```
+
+### 5. Error Handling System
 
 ```mermaid
 classDiagram

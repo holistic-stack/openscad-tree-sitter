@@ -25,8 +25,8 @@ import type { ASTVisitor } from './ast-visitor.js';
 import { findDescendantOfType } from '../utils/node-utils.js';
 import {
   extractArguments,
+  type ExtractedParameter,
 } from '../extractors/argument-extractor.js';
-import type { ExtractedParameter } from '../extractors/argument-extractor.js';
 
 /**
  * Converts an ExtractedParameter to a ParameterValue for AST node creation.

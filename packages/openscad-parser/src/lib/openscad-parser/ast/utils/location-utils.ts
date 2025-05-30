@@ -52,8 +52,7 @@
  * @since 0.1.0
  */
 
-import { Node as TSNode } from 'web-tree-sitter';
-import type { Point } from 'web-tree-sitter';
+import { Node as TSNode, type Point } from 'web-tree-sitter';
 import * as ast from '../ast-types.js';
 
 /**

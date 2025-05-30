@@ -1,5 +1,4 @@
-import { Parser, Query, Tree, Node } from 'web-tree-sitter';
-import type { QueryMatch } from 'web-tree-sitter';
+import { Parser, Query, Tree, Node, type QueryMatch } from 'web-tree-sitter';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 

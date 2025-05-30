@@ -7,8 +7,7 @@
  * @module lib/openscad-parser/ast/errors/semantic-error
  */
 
-import { ParserError } from './parser-error.js';
-import type { ErrorPosition, ErrorSuggestion } from './parser-error.js';
+import { ParserError, type ErrorPosition, type ErrorSuggestion } from './parser-error.js';
 
 /**
  * SemanticError class for semantic errors in the parser

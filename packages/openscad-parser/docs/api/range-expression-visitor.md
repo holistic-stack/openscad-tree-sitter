@@ -4,6 +4,8 @@
 
 The `RangeExpressionVisitor` is a specialized visitor that handles OpenSCAD range expressions like `[0:5]` and `[0:2:10]`. It implements a hybrid approach to solve Tree-sitter grammar precedence issues by detecting range patterns within `array_literal` nodes.
 
+**✨ Integration Status**: **FULLY INTEGRATED** with ExpressionVisitor - Range expressions work seamlessly in all contexts including for loops, list comprehensions, and variable assignments.
+
 ## Class: RangeExpressionVisitor
 
 ### Constructor
@@ -112,6 +114,42 @@ const ast = parser.parseAST(forLoopCode);
 // The range [0:2:10] is properly parsed as a RangeExpressionNode
 ```
 
+## Integration with ExpressionVisitor
+
+### Seamless Integration Architecture
+
+The RangeExpressionVisitor is fully integrated into the main ExpressionVisitor system:
+
+```typescript
+// In ExpressionVisitor.createExpressionNode()
+case 'range_expression':
+  return this.rangeExpressionVisitor.visitRangeExpression(node);
+
+// In ExpressionVisitor.dispatchSpecificExpression()
+case 'range_expression':
+  return this.rangeExpressionVisitor.visitRangeExpression(node);
+```
+
+**Integration Benefits**:
+- ✅ **No "Unhandled expression type" warnings**: Range expressions are properly dispatched
+- ✅ **List comprehension support**: Ranges work seamlessly in `[for (i = [0:5]) ...]`
+- ✅ **For loop support**: Ranges work in `for (i = [0:2:10]) { ... }`
+- ✅ **Variable assignment support**: Ranges work in `range = [1:0.5:5];`
+- ✅ **Type safety**: Full TypeScript support with proper AST node types
+
+### Integration Evidence
+
+**Before Integration**:
+```
+[WARN] [ExpressionVisitor.createExpressionNode] Unhandled expression type: range_expression
+```
+
+**After Integration**:
+```
+[INFO] [RangeExpressionVisitor.visitRangeExpression] Processing range expression: 1:5
+[INFO] [RangeExpressionVisitor.visitRangeExpression] Successfully created range expression AST node
+```
+
 ## Technical Implementation
 
 ### Hybrid Approach
@@ -121,6 +159,7 @@ The visitor uses a hybrid approach to handle Tree-sitter grammar precedence issu
 1. **Primary Handler**: Attempts to handle `range_expression` nodes directly
 2. **Fallback Handler**: Detects range patterns within `array_literal` nodes using regex
 3. **Pattern Detection**: Uses robust regex patterns to identify range syntax
+4. **ExpressionVisitor Integration**: Works through the main expression visitor dispatch system
 
 ### Pattern Detection Regex
 

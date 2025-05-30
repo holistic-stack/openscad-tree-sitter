@@ -368,6 +368,66 @@ interface BinaryExpressionNode extends ASTNode {
 }
 ```
 
+### RangeExpressionNode
+
+Represents OpenSCAD range expressions like `[0:5]` and `[0:2:10]`.
+
+```typescript
+interface RangeExpressionNode extends ExpressionNode {
+  type: 'expression';
+  expressionType: 'range_expression';
+  start: ExpressionNode;
+  end: ExpressionNode;
+  step?: ExpressionNode;
+  location: SourceLocation;
+}
+```
+
+**Properties:**
+- `start`: Starting value of the range
+- `end`: Ending value of the range
+- `step` (optional): Step size for the range
+- `location`: Source location information
+
+**Example AST Output:**
+Range expressions are parsed when used in proper OpenSCAD contexts:
+
+```typescript
+// For loop: for (i = [0:5]) { ... }
+// The range [0:5] produces:
+{
+  type: 'expression',
+  expressionType: 'range_expression',
+  start: { type: 'literal', value: 0 },
+  end: { type: 'literal', value: 5 }
+}
+
+// For loop: for (i = [0:2:10]) { ... }
+// The range [0:2:10] produces:
+{
+  type: 'expression',
+  expressionType: 'range_expression',
+  start: { type: 'literal', value: 0 },
+  step: { type: 'literal', value: 2 },
+  end: { type: 'literal', value: 10 }
+}
+
+// Variable assignment: range = [start:end];
+// The range [start:end] produces:
+{
+  type: 'expression',
+  expressionType: 'range_expression',
+  start: { type: 'variable', name: 'start' },
+  end: { type: 'variable', name: 'end' }
+}
+```
+
+**Integration with ExpressionVisitor:**
+Range expressions are fully integrated into the main ExpressionVisitor system and work seamlessly in all contexts including:
+- For loops: `for (i = [0:5]) { ... }`
+- List comprehensions: `[for (i = [0:2:10]) i*2]`
+- Variable assignments: `range = [1:0.5:5];`
+
 ## Control Structure Nodes
 
 ### ForLoopNode
