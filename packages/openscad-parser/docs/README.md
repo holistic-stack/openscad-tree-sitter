@@ -89,6 +89,40 @@ const assignmentCode = `
 const assignAst = parser.parseAST(assignmentCode);
 // Range expressions work in variable assignments
 
+// Assert statements - NEW FEATURE!
+const assertCode = `
+  // Basic assertion
+  assert(true);
+
+  // Assert with condition
+  assert(x > 0);
+
+  // Assert with custom message
+  assert(len(points) >= 3, "Need at least 3 points for polygon");
+
+  // Complex conditions
+  assert(x > 0 && y < 100, "Coordinates out of bounds");
+`;
+const assertAst = parser.parseAST(assertCode);
+// Assert statements with conditions and messages fully supported
+
+// Echo statements - NEW FEATURE!
+const echoCode = `
+  // Basic echo
+  echo("Hello World");
+
+  // Echo with variables
+  echo("Value:", x);
+
+  // Echo with arithmetic expressions
+  echo(x + y);
+
+  // Echo with multiple arguments
+  echo("Debug:", x, y, x + y);
+`;
+const echoAst = parser.parseAST(echoCode);
+// Echo statements with complex expressions fully supported
+
 // Clean up
 parser.dispose();
 ```
@@ -201,6 +235,7 @@ graph TD
 - [Error Handling](./api/error-handling.md) - Error classes and handling patterns
 - [Utilities](./api/utilities.md) - Helper functions and type guards
 - [Range Expression Visitor](./api/range-expression-visitor.md) - Range expression parsing implementation
+- [Echo Statement Visitor](./visitors/echo-statement-visitor.md) - Echo statement parsing with complex expressions
 
 ## Advanced Usage
 
@@ -214,6 +249,7 @@ graph TD
 - [Advanced Parsing](./examples/advanced-parsing.md) - Complex OpenSCAD syntax
 - [Error Handling](./examples/error-handling.md) - Error scenarios and recovery
 - [Performance](./examples/performance.md) - Optimization strategies
+- [Echo Statements](./examples/echo-statements.md) - Echo statement parsing examples
 
 ## Supported OpenSCAD Features
 
@@ -244,6 +280,10 @@ graph TD
 - ✅ `if()` conditionals
 - ✅ Module definitions and calls
 - ✅ Function definitions and calls
+
+### Validation & Debugging
+- ✅ **Assert statements**: `assert(condition)`, `assert(condition, "message")` - **Full support with complex conditions and error messages**
+- ✅ **Echo statements**: `echo("message")`, `echo(variable)`, `echo(x + y)` - **Complete debugging support with complex expressions**
 
 ### Expressions
 - ✅ **Range expressions**: `[0:5]`, `[0:2:10]`, `[start:end]` - **Fully integrated with ExpressionVisitor**

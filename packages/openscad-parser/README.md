@@ -19,6 +19,9 @@ The OpenSCAD Parser is the core parsing engine that bridges the gap between raw 
 - **🧩 Visitor Pattern Architecture**: Extensible design for custom language features
 - **📊 Incremental Parsing**: Efficient updates for real-time editor integration
 - **🛡️ Type Safety**: Full TypeScript support with comprehensive type definitions
+- **🔄 Legacy Support**: Complete support for deprecated assign statements and assert statements
+- **📝 Statement Coverage**: Full OpenSCAD statement support including control structures, modules, functions, and echo statements
+- **🔍 Debug Support**: Complete echo statement parsing with complex expression support for debugging workflows
 
 ### Architecture Overview
 
