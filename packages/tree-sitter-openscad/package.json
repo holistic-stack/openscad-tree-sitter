@@ -2,7 +2,26 @@
   "name": "@openscad/tree-sitter-openscad",
   "version": "0.1.0",
   "description": "Tree-sitter grammar for OpenSCAD",
-  "main": "bindings/node",
+  "exports": {
+    ".": {
+      "import": "./bindings/web/index.js",
+      "require": "./bindings/web/index.cjs",
+      "types": "./bindings/web/index.d.ts"
+    },
+    "./node": {
+      "import": "./bindings/node/index.js",
+      "require": "./bindings/node/index.cjs",
+      "types": "./bindings/node/index.d.ts"
+    },
+    "./web": {
+      "import": "./bindings/web/index.js",
+      "require": "./bindings/web/index.cjs",
+      "types": "./bindings/web/index.d.ts"
+    },
+    "./wasm": "./tree-sitter-openscad.wasm"
+  },
+  "main": "bindings/node/index.cjs",
+  "module": "bindings/node/index.js",
   "types": "bindings/node/index.d.ts",
   "browser": "bindings/web/index.js",
   "scripts": {

@@ -3,7 +3,7 @@
   "grammars": [
     {
       "name": "openscad",
-      "path": "grammar.js",
+      "path": ".",
       "scope": "source.openscad",
       "file-types": ["scad"],
       "wasm": true,

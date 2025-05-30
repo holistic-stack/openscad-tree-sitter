@@ -3,16 +3,24 @@
   "version": "0.1.0",
   "description": "TypeScript parser for OpenSCAD using tree-sitter",
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/lib/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/lib/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    }
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
   "scripts": {
     "build": "env-cmd -e plain vite build",
     "dev": "vite build --watch",
@@ -24,7 +32,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "env-cmd -e plain tsc --noEmit",
-    "check": "pnpm typecheck && pnpm lint && pnpm format:check"
+    "check": "pnpm typecheck && pnpm lint && pnpm format:check",
+    "prepublishOnly": "pnpm build"
   },
   "keywords": [
     "openscad",
@@ -57,7 +66,7 @@
     "node-fetch": "^3.3.2",
     "prettier": "^2.8.8",
     "typescript": "^5.8.3",
-    "vite": "^5.4.19",
+    "vite": "^6.0.0",
     "vite-plugin-dts": "^3.9.1",
     "vitest": "^3.1.4",
     "vitest-fetch-mock": "^0.4.5",

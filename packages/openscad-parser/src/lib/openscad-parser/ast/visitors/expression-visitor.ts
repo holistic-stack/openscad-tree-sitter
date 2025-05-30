@@ -115,7 +115,6 @@ import { evaluateBinaryExpression } from '../evaluation/binary-expression-evalua
  * @since 0.1.0
  */
 export class ExpressionVisitor extends BaseASTVisitor {
-
   /**
    * Create a binary expression node from a CST node
    * @param node The binary expression CST node
@@ -124,7 +123,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
   createBinaryExpressionNode(node: TSNode): ast.BinaryExpressionNode | null {
     this.safeLog(
       'info',
-      `[ExpressionVisitor.createBinaryExpressionNode] Creating binary expression node for: ${node.type} - "${node.text.substring(0, 30)}"`,
+      `[ExpressionVisitor.createBinaryExpressionNode] Creating binary expression node for: ${
+        node.type
+      } - "${node.text.substring(0, 30)}"`,
       'ExpressionVisitor.createBinaryExpressionNode',
       node
     );
@@ -141,7 +142,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
           node
         );
         // Delegate to the child node
-        return this.dispatchSpecificExpression(child) as ast.BinaryExpressionNode;
+        return this.dispatchSpecificExpression(
+          child
+        ) as ast.BinaryExpressionNode;
       }
     }
 
@@ -165,7 +168,24 @@ export class ExpressionVisitor extends BaseASTVisitor {
         // For operators, we need to find the first token that's an operator
         for (let i = 0; i < node.childCount; i++) {
           const child = node.child(i);
-          if (child && ['+', '-', '*', '/', '%', '==', '!=', '<', '<=', '>', '>=', '&&', '||'].includes(child.text)) {
+          if (
+            child &&
+            [
+              '+',
+              '-',
+              '*',
+              '/',
+              '%',
+              '==',
+              '!=',
+              '<',
+              '<=',
+              '>',
+              '>=',
+              '&&',
+              '||',
+            ].includes(child.text)
+          ) {
             operatorNode = child;
             break;
           }
@@ -184,7 +204,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
     // Validate that we have all required parts
     if (!leftNode || !rightNode || !operatorNode) {
       this.errorHandler.handleError(
-        new Error(`Invalid binary expression structure: ${node.text.substring(0, 100)}`),
+        new Error(
+          `Invalid binary expression structure: ${node.text.substring(0, 100)}`
+        ),
         'ExpressionVisitor.createBinaryExpressionNode',
         node
       );
@@ -197,7 +219,12 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
     if (!leftExpr || !rightExpr) {
       this.errorHandler.handleError(
-        new Error(`Failed to process operands in binary expression: ${node.text.substring(0, 100)}`),
+        new Error(
+          `Failed to process operands in binary expression: ${node.text.substring(
+            0,
+            100
+          )}`
+        ),
         'ExpressionVisitor.createBinaryExpressionNode',
         node
       );
@@ -216,7 +243,11 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
     this.safeLog(
       'info',
-      `[ExpressionVisitor.createBinaryExpressionNode] Created binary expression node: ${JSON.stringify(binaryExprNode, null, 2)}`,
+      `[ExpressionVisitor.createBinaryExpressionNode] Created binary expression node: ${JSON.stringify(
+        binaryExprNode,
+        null,
+        2
+      )}`,
       'ExpressionVisitor.createBinaryExpressionNode',
       node
     );
@@ -249,14 +280,25 @@ export class ExpressionVisitor extends BaseASTVisitor {
     // Initialize specialized visitors
     // This follows SRP by keeping only essential dependencies
     this.functionCallVisitor = new FunctionCallVisitor(this, errorHandler);
-    this.listComprehensionVisitor = new ListComprehensionVisitor(this, errorHandler);
-    this.rangeExpressionVisitor = new RangeExpressionVisitor(this, errorHandler);
+    this.listComprehensionVisitor = new ListComprehensionVisitor(
+      this,
+      errorHandler
+    );
+    this.rangeExpressionVisitor = new RangeExpressionVisitor(
+      this,
+      errorHandler
+    );
   }
 
   /**
    * Safe logging helper that checks if errorHandler exists
    */
-  private safeLog(level: 'info' | 'debug' | 'warning' | 'error', message: string, context?: string, node?: unknown): void {
+  private safeLog(
+    level: 'info' | 'debug' | 'warning' | 'error',
+    message: string,
+    context?: string,
+    node?: unknown
+  ): void {
     if (this.errorHandler) {
       switch (level) {
         case 'info':
@@ -297,7 +339,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
       'logical_or_expression',
       'logical_and_expression',
       'equality_expression',
-      'relational_expression'
+      'relational_expression',
     ];
 
     if (binaryExpressionTypes.includes(node.type)) {
@@ -316,15 +358,15 @@ export class ExpressionVisitor extends BaseASTVisitor {
       case 'identifier':
         return this.visitIdentifier(node);
       case 'number_literal':
-      case 'number':  // Handle both number_literal and number node types
+      case 'number': // Handle both number_literal and number node types
       case 'string_literal':
-      case 'string':  // Handle both string_literal and string node types
+      case 'string': // Handle both string_literal and string node types
       case 'boolean_literal':
       case 'boolean': // Handle both boolean_literal and boolean node types
-      case 'true':    // Handle true literal node type
-      case 'false':   // Handle false literal node type
+      case 'true': // Handle true literal node type
+      case 'false': // Handle false literal node type
       case 'undef_literal':
-      case 'undef':   // Handle both undef_literal and undef node types
+      case 'undef': // Handle both undef_literal and undef node types
         return this.visitLiteral(node);
       case 'vector_expression':
         return this.visitVectorExpression(node);
@@ -376,7 +418,12 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
         if (!leftNode || !rightNode || !operatorNode) {
           this.errorHandler.handleError(
-            new Error(`Invalid binary expression structure: ${node.text.substring(0, 100)}`),
+            new Error(
+              `Invalid binary expression structure: ${node.text.substring(
+                0,
+                100
+              )}`
+            ),
             'ExpressionVisitor.createExpressionNode',
             node
           );
@@ -389,7 +436,12 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
         if (!leftExpr || !rightExpr) {
           this.errorHandler.handleError(
-            new Error(`Failed to process operands in binary expression: ${node.text.substring(0, 100)}`),
+            new Error(
+              `Failed to process operands in binary expression: ${node.text.substring(
+                0,
+                100
+              )}`
+            ),
             'ExpressionVisitor.createExpressionNode',
             node
           );
@@ -428,7 +480,12 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
         if (!operandNode || !operatorNode) {
           this.errorHandler.handleError(
-            new Error(`Invalid unary expression structure: ${node.text.substring(0, 100)}`),
+            new Error(
+              `Invalid unary expression structure: ${node.text.substring(
+                0,
+                100
+              )}`
+            ),
             'ExpressionVisitor.createExpressionNode',
             node
           );
@@ -440,7 +497,12 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
         if (!operandExpr) {
           this.errorHandler.handleError(
-            new Error(`Failed to process operand in unary expression: ${node.text.substring(0, 100)}`),
+            new Error(
+              `Failed to process operand in unary expression: ${node.text.substring(
+                0,
+                100
+              )}`
+            ),
             'ExpressionVisitor.createExpressionNode',
             node
           );
@@ -480,7 +542,12 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
         if (!conditionNode || !thenNode || !elseNode) {
           this.errorHandler.handleError(
-            new Error(`Invalid conditional expression structure: ${node.text.substring(0, 100)}`),
+            new Error(
+              `Invalid conditional expression structure: ${node.text.substring(
+                0,
+                100
+              )}`
+            ),
             'ExpressionVisitor.createExpressionNode',
             node
           );
@@ -494,7 +561,12 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
         if (!conditionExpr || !thenExpr || !elseExpr) {
           this.errorHandler.handleError(
-            new Error(`Failed to process parts of conditional expression: ${node.text.substring(0, 100)}`),
+            new Error(
+              `Failed to process parts of conditional expression: ${node.text.substring(
+                0,
+                100
+              )}`
+            ),
             'ExpressionVisitor.createExpressionNode',
             node
           );
@@ -517,7 +589,12 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
         if (!innerNode) {
           this.errorHandler.handleError(
-            new Error(`Invalid parenthesized expression structure: ${node.text.substring(0, 100)}`),
+            new Error(
+              `Invalid parenthesized expression structure: ${node.text.substring(
+                0,
+                100
+              )}`
+            ),
             'ExpressionVisitor.createExpressionNode',
             node
           );
@@ -529,7 +606,12 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
         if (!innerExpr) {
           this.errorHandler.handleError(
-            new Error(`Failed to process inner expression in parenthesized expression: ${node.text.substring(0, 100)}`),
+            new Error(
+              `Failed to process inner expression in parenthesized expression: ${node.text.substring(
+                0,
+                100
+              )}`
+            ),
             'ExpressionVisitor.createExpressionNode',
             node
           );
@@ -598,7 +680,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
     if (!operandNode || !operatorNode) {
       this.errorHandler.handleError(
-        new Error(`Invalid unary expression structure: ${node.text.substring(0, 100)}`),
+        new Error(
+          `Invalid unary expression structure: ${node.text.substring(0, 100)}`
+        ),
         'ExpressionVisitor.visitUnaryExpression',
         node
       );
@@ -610,7 +694,12 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
     if (!operandExpr) {
       this.errorHandler.handleError(
-        new Error(`Failed to process operand in unary expression: ${node.text.substring(0, 100)}`),
+        new Error(
+          `Failed to process operand in unary expression: ${node.text.substring(
+            0,
+            100
+          )}`
+        ),
         'ExpressionVisitor.visitUnaryExpression',
         node
       );
@@ -633,7 +722,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @param node The conditional expression CST node
    * @returns The conditional expression AST node or null if the node cannot be processed
    */
-  override visitConditionalExpression(node: TSNode): ast.ConditionalExpressionNode | null {
+  override visitConditionalExpression(
+    node: TSNode
+  ): ast.ConditionalExpressionNode | null {
     // Process conditional expression directly
     const conditionNode = node.child(0);
     const thenNode = node.child(2);
@@ -641,7 +732,12 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
     if (!conditionNode || !thenNode || !elseNode) {
       this.errorHandler.handleError(
-        new Error(`Invalid conditional expression structure: ${node.text.substring(0, 100)}`),
+        new Error(
+          `Invalid conditional expression structure: ${node.text.substring(
+            0,
+            100
+          )}`
+        ),
         'ExpressionVisitor.visitConditionalExpression',
         node
       );
@@ -655,7 +751,12 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
     if (!conditionExpr || !thenExpr || !elseExpr) {
       this.errorHandler.handleError(
-        new Error(`Failed to process parts of conditional expression: ${node.text.substring(0, 100)}`),
+        new Error(
+          `Failed to process parts of conditional expression: ${node.text.substring(
+            0,
+            100
+          )}`
+        ),
         'ExpressionVisitor.visitConditionalExpression',
         node
       );
@@ -683,7 +784,10 @@ export class ExpressionVisitor extends BaseASTVisitor {
     // Debug: Log the node structure
     this.safeLog(
       'info',
-      `[ExpressionVisitor.visitExpression] Processing expression: ${node.text.substring(0, 30)}`,
+      `[ExpressionVisitor.visitExpression] Processing expression: ${node.text.substring(
+        0,
+        30
+      )}`,
       'ExpressionVisitor.visitExpression',
       node
     );
@@ -704,7 +808,10 @@ export class ExpressionVisitor extends BaseASTVisitor {
     if (letExprNode) {
       this.safeLog(
         'info',
-        `[ExpressionVisitor.visitExpression] Found let expression: ${letExprNode.text.substring(0, 30)}`,
+        `[ExpressionVisitor.visitExpression] Found let expression: ${letExprNode.text.substring(
+          0,
+          30
+        )}`,
         'ExpressionVisitor.visitExpression',
         letExprNode
       );
@@ -716,7 +823,10 @@ export class ExpressionVisitor extends BaseASTVisitor {
     if (binaryExprNode) {
       this.safeLog(
         'info',
-        `[ExpressionVisitor.visitExpression] Found binary expression: ${binaryExprNode.text.substring(0, 30)}`,
+        `[ExpressionVisitor.visitExpression] Found binary expression: ${binaryExprNode.text.substring(
+          0,
+          30
+        )}`,
         'ExpressionVisitor.visitExpression',
         binaryExprNode
       );
@@ -727,10 +837,16 @@ export class ExpressionVisitor extends BaseASTVisitor {
     const unaryExprNode = findDescendantOfType(node, 'unary_expression');
     if (unaryExprNode) {
       // Check if this unary expression contains an accessor_expression
-      const accessorExpr = findDescendantOfType(unaryExprNode, 'accessor_expression');
+      const accessorExpr = findDescendantOfType(
+        unaryExprNode,
+        'accessor_expression'
+      );
       if (accessorExpr) {
         // Check if this accessor expression has an argument_list (making it a function call)
-        const argumentListNode = findDescendantOfType(accessorExpr, 'argument_list');
+        const argumentListNode = findDescendantOfType(
+          accessorExpr,
+          'argument_list'
+        );
         if (argumentListNode) {
           // Check if this is a direct function call (not an array containing function calls)
           // If the unary expression starts with '[', it's likely an array containing function calls
@@ -739,7 +855,10 @@ export class ExpressionVisitor extends BaseASTVisitor {
             // This is an array that contains function calls - we should process it
             this.safeLog(
               'info',
-              `[ExpressionVisitor.visitExpression] Found array containing function calls: ${unaryExprNode.text.substring(0, 30)}. Processing as array.`,
+              `[ExpressionVisitor.visitExpression] Found array containing function calls: ${unaryExprNode.text.substring(
+                0,
+                30
+              )}. Processing as array.`,
               'ExpressionVisitor.visitExpression',
               unaryExprNode
             );
@@ -748,7 +867,10 @@ export class ExpressionVisitor extends BaseASTVisitor {
             // Don't handle it here - let specialized visitors handle it
             this.safeLog(
               'info',
-              `[ExpressionVisitor.visitExpression] Found direct function call: ${unaryExprNode.text.substring(0, 30)}. Skipping to let specialized visitors handle it.`,
+              `[ExpressionVisitor.visitExpression] Found direct function call: ${unaryExprNode.text.substring(
+                0,
+                30
+              )}. Skipping to let specialized visitors handle it.`,
               'ExpressionVisitor.visitExpression',
               unaryExprNode
             );
@@ -759,7 +881,10 @@ export class ExpressionVisitor extends BaseASTVisitor {
           // Continue processing it as a unary expression
           this.safeLog(
             'info',
-            `[ExpressionVisitor.visitExpression] Found unary expression with accessor_expression (not a function call): ${unaryExprNode.text.substring(0, 30)}. Processing as unary expression.`,
+            `[ExpressionVisitor.visitExpression] Found unary expression with accessor_expression (not a function call): ${unaryExprNode.text.substring(
+              0,
+              30
+            )}. Processing as unary expression.`,
             'ExpressionVisitor.visitExpression',
             unaryExprNode
           );
@@ -768,7 +893,10 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
       this.safeLog(
         'info',
-        `[ExpressionVisitor.visitExpression] Found unary expression: ${unaryExprNode.text.substring(0, 30)}`,
+        `[ExpressionVisitor.visitExpression] Found unary expression: ${unaryExprNode.text.substring(
+          0,
+          30
+        )}`,
         'ExpressionVisitor.visitExpression',
         unaryExprNode
       );
@@ -780,7 +908,10 @@ export class ExpressionVisitor extends BaseASTVisitor {
     if (condExprNode) {
       this.safeLog(
         'info',
-        `[ExpressionVisitor.visitExpression] Found conditional expression: ${condExprNode.text.substring(0, 30)}`,
+        `[ExpressionVisitor.visitExpression] Found conditional expression: ${condExprNode.text.substring(
+          0,
+          30
+        )}`,
         'ExpressionVisitor.visitExpression',
         condExprNode
       );
@@ -788,11 +919,17 @@ export class ExpressionVisitor extends BaseASTVisitor {
     }
 
     // Check for parenthesized expression
-    const parenExprNode = findDescendantOfType(node, 'parenthesized_expression');
+    const parenExprNode = findDescendantOfType(
+      node,
+      'parenthesized_expression'
+    );
     if (parenExprNode) {
       this.safeLog(
         'info',
-        `[ExpressionVisitor.visitExpression] Found parenthesized expression: ${parenExprNode.text.substring(0, 30)}`,
+        `[ExpressionVisitor.visitExpression] Found parenthesized expression: ${parenExprNode.text.substring(
+          0,
+          30
+        )}`,
         'ExpressionVisitor.visitExpression',
         parenExprNode
       );
@@ -804,7 +941,10 @@ export class ExpressionVisitor extends BaseASTVisitor {
     if (vectorExprNode) {
       this.safeLog(
         'info',
-        `[ExpressionVisitor.visitExpression] Found vector expression: ${vectorExprNode.text.substring(0, 30)}`,
+        `[ExpressionVisitor.visitExpression] Found vector expression: ${vectorExprNode.text.substring(
+          0,
+          30
+        )}`,
         'ExpressionVisitor.visitExpression',
         vectorExprNode
       );
@@ -812,15 +952,23 @@ export class ExpressionVisitor extends BaseASTVisitor {
     }
 
     // Check for list comprehension
-    const listComprehensionNode = findDescendantOfType(node, 'list_comprehension');
+    const listComprehensionNode = findDescendantOfType(
+      node,
+      'list_comprehension'
+    );
     if (listComprehensionNode) {
       this.safeLog(
         'info',
-        `[ExpressionVisitor.visitExpression] Found list comprehension: ${listComprehensionNode.text.substring(0, 30)}`,
+        `[ExpressionVisitor.visitExpression] Found list comprehension: ${listComprehensionNode.text.substring(
+          0,
+          30
+        )}`,
         'ExpressionVisitor.visitExpression',
         listComprehensionNode
       );
-      return this.listComprehensionVisitor.visitListComprehension(listComprehensionNode);
+      return this.listComprehensionVisitor.visitListComprehension(
+        listComprehensionNode
+      );
     }
 
     // Check for function call
@@ -828,7 +976,10 @@ export class ExpressionVisitor extends BaseASTVisitor {
     if (functionCallNode) {
       this.safeLog(
         'info',
-        `[ExpressionVisitor.visitExpression] Found function call: ${functionCallNode.text.substring(0, 30)}`,
+        `[ExpressionVisitor.visitExpression] Found function call: ${functionCallNode.text.substring(
+          0,
+          30
+        )}`,
         'ExpressionVisitor.visitExpression',
         functionCallNode
       );
@@ -848,7 +999,12 @@ export class ExpressionVisitor extends BaseASTVisitor {
     }
 
     // Check for literal values
-    const literalTypes = ['number_literal', 'string_literal', 'boolean_literal', 'undef_literal'];
+    const literalTypes = [
+      'number_literal',
+      'string_literal',
+      'boolean_literal',
+      'undef_literal',
+    ];
     for (const literalType of literalTypes) {
       const literalNode = findDescendantOfType(node, literalType);
       if (literalNode) {
@@ -865,7 +1021,10 @@ export class ExpressionVisitor extends BaseASTVisitor {
     // If we couldn't find a specific expression type, log a warning and return null
     this.safeLog(
       'warning',
-      `[ExpressionVisitor.visitExpression] Could not determine expression type: ${node.text.substring(0, 30)}`,
+      `[ExpressionVisitor.visitExpression] Could not determine expression type: ${node.text.substring(
+        0,
+        30
+      )}`,
       'ExpressionVisitor.visitExpression',
       node
     );
@@ -877,10 +1036,15 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @param node The accessor expression node to visit
    * @returns The accessor expression AST node or null if the node cannot be processed
    */
-  override visitAccessorExpression(node: TSNode): ast.AccessorExpressionNode | null {
+  override visitAccessorExpression(
+    node: TSNode
+  ): ast.AccessorExpressionNode | null {
     this.safeLog(
       'info',
-      `[ExpressionVisitor.visitAccessorExpression] Processing accessor expression: ${node.text.substring(0, 50)}`,
+      `[ExpressionVisitor.visitAccessorExpression] Processing accessor expression: ${node.text.substring(
+        0,
+        50
+      )}`,
       'ExpressionVisitor.visitAccessorExpression',
       node
     );
@@ -896,7 +1060,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
           node
         );
         // Delegate to the child node
-        return this.dispatchSpecificExpression(child) as ast.AccessorExpressionNode;
+        return this.dispatchSpecificExpression(
+          child
+        ) as ast.AccessorExpressionNode;
       }
     }
 
@@ -906,7 +1072,12 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
     if (!objectNode || !propertyNode) {
       this.errorHandler.handleError(
-        new Error(`Invalid accessor expression structure: ${node.text.substring(0, 100)}`),
+        new Error(
+          `Invalid accessor expression structure: ${node.text.substring(
+            0,
+            100
+          )}`
+        ),
         'ExpressionVisitor.visitAccessorExpression',
         node
       );
@@ -917,7 +1088,12 @@ export class ExpressionVisitor extends BaseASTVisitor {
     const objectAST = this.dispatchSpecificExpression(objectNode);
     if (!objectAST) {
       this.errorHandler.handleError(
-        new Error(`Failed to process object in accessor expression: ${node.text.substring(0, 100)}`),
+        new Error(
+          `Failed to process object in accessor expression: ${node.text.substring(
+            0,
+            100
+          )}`
+        ),
         'ExpressionVisitor.visitAccessorExpression',
         node
       );
@@ -942,7 +1118,10 @@ export class ExpressionVisitor extends BaseASTVisitor {
   visitPrimaryExpression(node: TSNode): ast.ExpressionNode | null {
     this.safeLog(
       'info',
-      `[ExpressionVisitor.visitPrimaryExpression] Processing primary expression: ${node.text.substring(0, 50)}`,
+      `[ExpressionVisitor.visitPrimaryExpression] Processing primary expression: ${node.text.substring(
+        0,
+        50
+      )}`,
       'ExpressionVisitor.visitPrimaryExpression',
       node
     );
@@ -960,7 +1139,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
     }
 
     this.errorHandler.handleError(
-      new Error(`Failed to process primary expression: ${node.text.substring(0, 100)}`),
+      new Error(
+        `Failed to process primary expression: ${node.text.substring(0, 100)}`
+      ),
       'ExpressionVisitor.visitPrimaryExpression',
       node
     );
@@ -994,10 +1175,13 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @param node The let expression node to visit
    * @returns The let expression node or null if the node cannot be processed
    */
-  visitLetExpression(node: TSNode): ast.LetExpressionNode | null {
+  override visitLetExpression(node: TSNode): ast.LetExpressionNode | null {
     this.safeLog(
       'info',
-      `[ExpressionVisitor.visitLetExpression] Processing let expression: ${node.text.substring(0, 50)}`,
+      `[ExpressionVisitor.visitLetExpression] Processing let expression: ${node.text.substring(
+        0,
+        50
+      )}`,
       'ExpressionVisitor.visitLetExpression',
       node
     );
@@ -1121,7 +1305,10 @@ export class ExpressionVisitor extends BaseASTVisitor {
   visitVectorExpression(node: TSNode): ast.VectorExpressionNode | null {
     this.safeLog(
       'info',
-      `[ExpressionVisitor.visitVectorExpression] Processing vector expression: ${node.text.substring(0, 50)}`,
+      `[ExpressionVisitor.visitVectorExpression] Processing vector expression: ${node.text.substring(
+        0,
+        50
+      )}`,
       'ExpressionVisitor.visitVectorExpression',
       node
     );
@@ -1162,7 +1349,10 @@ export class ExpressionVisitor extends BaseASTVisitor {
   visitArrayExpression(node: TSNode): ast.ArrayExpressionNode | null {
     this.safeLog(
       'info',
-      `[ExpressionVisitor.visitArrayExpression] Processing array expression: ${node.text.substring(0, 50)}`,
+      `[ExpressionVisitor.visitArrayExpression] Processing array expression: ${node.text.substring(
+        0,
+        50
+      )}`,
       'ExpressionVisitor.visitArrayExpression',
       node
     );
@@ -1214,12 +1404,13 @@ export class ExpressionVisitor extends BaseASTVisitor {
     // Determine the value and type based on the node type
     switch (node.type) {
       case 'number_literal':
-      case 'number':  // Handle both number_literal and number node types
+      case 'number': // Handle both number_literal and number node types
         value = parseFloat(node.text);
         literalType = 'number';
         break;
       case 'string_literal':
-      case 'string': {  // Handle both string_literal and string node types
+      case 'string': {
+        // Handle both string_literal and string node types
         // Remove quotes from string literals if they exist
         const text = node.text;
         if (text.startsWith('"') && text.endsWith('"')) {
@@ -1231,14 +1422,14 @@ export class ExpressionVisitor extends BaseASTVisitor {
         break;
       }
       case 'boolean_literal':
-      case 'boolean':  // Handle both boolean_literal and boolean node types
-      case 'true':     // Handle true literal node type
-      case 'false':    // Handle false literal node type
+      case 'boolean': // Handle both boolean_literal and boolean node types
+      case 'true': // Handle true literal node type
+      case 'false': // Handle false literal node type
         value = node.text === 'true';
         literalType = 'boolean';
         break;
       case 'undef_literal':
-      case 'undef':  // Handle both undef_literal and undef node types
+      case 'undef': // Handle both undef_literal and undef node types
         value = 'undef';
         literalType = 'undef';
         break;
@@ -1264,7 +1455,11 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @param args The function arguments
    * @returns The function call AST node or null if not handled
    */
-  createASTNodeForFunction(node: TSNode, _functionName?: string, _args?: ast.Parameter[]): ast.ASTNode | null {
+  createASTNodeForFunction(
+    node: TSNode,
+    _functionName?: string,
+    _args?: ast.Parameter[]
+  ): ast.ASTNode | null {
     // Expression visitor doesn't handle function definitions, only function calls
     // Function calls are handled by the FunctionCallVisitor
     if (node.type === 'function_call') {

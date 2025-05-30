@@ -18,14 +18,15 @@ vi.mocked(fetch).mockImplementation(url => {
     // Handle other URL-like objects
     urlPath = String(url);
   }
-  console.log('__dirname', join(__dirname, '../../', urlPath));
+  const treeSitterPath = join(__dirname, '../../node_modules/@openscad/tree-sitter-openscad');
+  console.log('__dirname', join(treeSitterPath, urlPath));
 
   // Normalize the path
   urlPath = urlPath.startsWith('/') ? urlPath.slice(1) : urlPath;
 
   try {
     // read file in urlPath as Uint8Array
-    const localFile = readFileSync(join(__dirname, '../../', urlPath));
+    const localFile = readFileSync(join(treeSitterPath, urlPath));
     const uint8Array = new Uint8Array(localFile);
     return Promise.resolve({
       ok: true,

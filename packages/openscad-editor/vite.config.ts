@@ -1,62 +1,56 @@
 /// <reference types='vitest' />
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+import { defineConfig, type LibraryFormats } from 'vite';
 import dts from 'vite-plugin-dts';
 import * as path from 'path';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import react from '@vitejs/plugin-react';
 import monacoEditorPlugin from 'vite-plugin-monaco-editor';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 export default defineConfig(() => ({
-  root: __dirname,
-  cacheDir: '../../node_modules/.vite/packages/openscad-editor',
   plugins: [
     react(),
     nxViteTsPaths(),
     nxCopyAssetsPlugin(['*.md']),
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    // // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // // @ts-ignore
     monacoEditorPlugin({}), // Add this line
     dts({
       entryRoot: 'src',
       tsconfigPath: path.join(__dirname, 'tsconfig.lib.json'),
     }),
   ],
-  // Uncomment this if you are using workers.
-  // worker: {
-  //  plugins: [ nxViteTsPaths() ],
-  // },
-  // Configuration for building your library.
-  // See: https://vitejs.dev/guide/build.html#library-mode
   build: {
-    outDir: '../../dist/packages/openscad-editor',
-    emptyOutDir: true,
-    reportCompressedSize: true,
-    commonjsOptions: {
-      transformMixedEsModules: true,
-    },
     lib: {
-      // Could also be a dictionary or array of multiple entry points.
-      entry: 'src/index.ts',
-      name: 'openscad-editor',
+      entry: resolve(__dirname, 'src/index.ts'),
+      name: 'openscadEditor',
       fileName: 'index',
-      // Change this to the formats you want to support.
-      // Don't forget to update your package.json as well.
-      formats: ['es' as const],
+      formats: ['es', 'cjs'] as LibraryFormats[],
     },
     rollupOptions: {
-      // External packages that should not be bundled into your library.
-      external: ['react', 'react-dom', 'react/jsx-runtime', 'monaco-editor'], // Add 'monaco-editor' here
+      preserveModulesRoot: 'src',
+      output: {
+        entryFileNames: '[name].js',
+        preserveModules: true,
+      },
+      external: [
+        'react',
+        'react-dom',
+        'react/jsx-runtime',
+        'monaco-editor',
+        '@openscad/parser',
+        '@openscad/tree-sitter-openscad',
+        'web-tree-sitter',
+      ],
     },
   },
   test: {
     globals: true,
     environment: 'jsdom',
-    environmentOptions: {
-      jsdom: {
-        resources: 'usable',
-      },
-    },
-    setupFiles: './src/test-utils/setupTest.ts'
+    setupFiles: './src/test-utils/setupTest.ts',
   },
 }));

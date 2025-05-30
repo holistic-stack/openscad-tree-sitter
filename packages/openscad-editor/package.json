@@ -10,7 +10,13 @@
   "files": [
     "README.md",
     "./public/tree-sitter-openscad.wasm",
-    "./public/highlights.scm"
+    "./public/highlights.scm",
+    "index.js",
+    "index.d.ts",
+    "index.mjs",
+    "lib/**/*.js",
+    "lib/**/*.d.ts",
+    "lib/**/*.mjs"
   ],
   "exports": {
     ".": {
@@ -47,22 +53,24 @@
     "postinstall": "shx mkdir -p ./public && shx cp ./node_modules/@openscad/tree-sitter-openscad/tree-sitter-openscad.wasm ./public/tree-sitter-openscad.wasm && shx cp ./node_modules/web-tree-sitter/tree-sitter.wasm ./public/tree-sitter.wasm"
   },
   "dependencies": {
-    "web-tree-sitter": "0.25.3",
     "@openscad/parser": "workspace:*",
-    "@openscad/tree-sitter-openscad": "workspace:*"
+    "@openscad/tree-sitter-openscad": "workspace:*",
+    "vite-plugin-monaco-editor": "^1.1.0",
+    "web-tree-sitter": "0.25.3"
   },
   "peerDependencies": {
-    "react": ">=17.0.0",
-    "react-dom": ">=17.0.0",
-    "@monaco-editor/react": "^4.7.0",
-    "monaco-editor": "^0.52.2"
-  },
-  "devDependencies": {
-    "shx": "^0.3.4",
     "@monaco-editor/react": "^4.7.0",
     "monaco-editor": "^0.52.2",
-     "vite-plugin-dts": "^3.9.1",
-    "vitest-fetch-mock": "^0.4.5",
-        "vitest": "^3.1.4"
+    "react": ">=17.0.0",
+    "react-dom": ">=17.0.0"
+  },
+  "devDependencies": {
+    "@monaco-editor/react": "^4.7.0",
+    "monaco-editor": "^0.52.2",
+    "vite": "^6.0.0",
+    "shx": "^0.3.4",
+    "vite-plugin-dts": "^3.9.1",
+    "vitest": "^3.1.4",
+    "vitest-fetch-mock": "^0.4.5"
   }
 }
