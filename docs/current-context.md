@@ -4,6 +4,24 @@
 
 The OpenSCAD Tree-sitter Parser project is an Nx monorepo with PNPM workspaces that provides robust parsing of OpenSCAD code. The project converts OpenSCAD code into a structured Abstract Syntax Tree (AST) using tree-sitter for initial parsing.
 
+## 🎉 LATEST COMPLETION: Range Expression Visitor (2025-05-30)
+
+**✅ RANGE EXPRESSION PARSING FULLY IMPLEMENTED**
+- **Status**: COMPLETED ✅ - All 12 tests passing
+- **Implementation**: Hybrid approach using regex-based pattern detection within array_literal nodes
+- **Range Types Supported**:
+  - Simple ranges: `[0:5]`, `[-5:5]`, `[1.5:10.5]`
+  - Stepped ranges: `[0:2:10]`, `[1:0.5:5]`, `[10:-1:0]`
+  - Variable ranges: `[x:y]`, `[start:end]`
+  - Expression ranges: `[a+1:b*2]` (with appropriate warnings)
+- **Technical Achievement**: Solved Tree-sitter grammar precedence issues by working with existing grammar instead of fighting it
+- **Files Modified**:
+  - `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.ts`
+  - `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.test.ts`
+  - `packages/tree-sitter-openscad/grammar.js` (conflict declarations)
+- **Key Methods**: `visitArrayLiteralAsRange()`, `createLiteralExpression()`, hybrid `visit()` dispatcher
+- **Production Ready**: Clean code, comprehensive error handling, full TypeScript type safety
+
 ## 🎉 MAJOR BREAKTHROUGH ACHIEVED! (2025-01-26)
 
 **📊 OVERALL TEST RESULTS:**

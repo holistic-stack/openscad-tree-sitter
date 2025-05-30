@@ -52,6 +52,16 @@ const ast = parser.parseAST(code);
 console.log(ast[0].type); // 'difference'
 console.log(ast[0].children.length); // Number of child operations
 
+// Parse range expressions
+const rangeCode = `
+  for (i = [0:2:10]) {
+    translate([i, 0, 0]) cube(1);
+  }
+`;
+
+const rangeAst = parser.parseAST(rangeCode);
+// Range [0:2:10] is parsed as RangeExpressionNode
+
 // Clean up
 parser.dispose();
 ```
@@ -163,6 +173,7 @@ graph TD
 - [AST Types](./api/ast-types.md) - All AST node interfaces and types
 - [Error Handling](./api/error-handling.md) - Error classes and handling patterns
 - [Utilities](./api/utilities.md) - Helper functions and type guards
+- [Range Expression Visitor](./api/range-expression-visitor.md) - Range expression parsing implementation
 
 ## Advanced Usage
 
@@ -206,6 +217,12 @@ graph TD
 - ✅ `if()` conditionals
 - ✅ Module definitions and calls
 - ✅ Function definitions and calls
+
+### Expressions
+- ✅ Range expressions: `[0:5]`, `[0:2:10]`, `[start:end]`
+- ✅ Binary expressions: `+`, `-`, `*`, `/`, `&&`, `||`, `==`, `!=`
+- ✅ Unary expressions: `-`, `!`
+- ✅ Variable references and literals
 
 ## Performance
 
