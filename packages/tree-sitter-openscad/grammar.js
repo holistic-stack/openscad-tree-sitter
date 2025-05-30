@@ -109,7 +109,11 @@ module.exports = grammar({
     // Conflict for binary expressions in function_value vs expression
     [$._function_value, $.expression],
     // Conflict for binary expressions in parameter_default_value vs expression
-    [$._parameter_default_value, $.expression]
+    [$._parameter_default_value, $.expression],
+    // Conflict for simple literals in object_field vs primary_expression
+    [$.object_field, $.primary_expression],
+    // Conflict for binary expressions in object_field vs expression
+    [$.object_field, $.expression]
   ],
 
   rules: {
@@ -731,7 +735,20 @@ module.exports = grammar({
 
     // Member access expression
     member_expression: $ => prec.left(10, seq(
-      field('object', $.expression),
+      field('object', choice(
+        // Simple literals can be parsed directly without expression wrapper (higher precedence)
+        prec.dynamic(10, $.number),
+        prec.dynamic(10, $.string),
+        prec.dynamic(10, $.boolean),
+        prec.dynamic(10, $.identifier),
+        prec.dynamic(10, $.special_variable),
+        prec.dynamic(10, $.vector_expression),
+        // Binary expressions can be parsed directly without expression wrapper (higher precedence)
+        prec.dynamic(10, $.binary_expression),
+        prec.dynamic(10, $.unary_expression),
+        // Complex expressions need the full expression hierarchy (lower precedence)
+        prec(1, $.expression)
+      )),
       '.',
       field('property', $.identifier)
     )),
@@ -963,7 +980,20 @@ module.exports = grammar({
     object_field: $ => seq(
       field('key', $.string),
       ':',
-      field('value', $.expression)
+      field('value', choice(
+        // Simple literals can be parsed directly without expression wrapper (higher precedence)
+        prec.dynamic(10, $.number),
+        prec.dynamic(10, $.string),
+        prec.dynamic(10, $.boolean),
+        prec.dynamic(10, $.identifier),
+        prec.dynamic(10, $.special_variable),
+        prec.dynamic(10, $.vector_expression),
+        // Binary expressions can be parsed directly without expression wrapper (higher precedence)
+        prec.dynamic(10, $.binary_expression),
+        prec.dynamic(10, $.unary_expression),
+        // Complex expressions need the full expression hierarchy (lower precedence)
+        prec(1, $.expression)
+      ))
     ),
 
     /**
