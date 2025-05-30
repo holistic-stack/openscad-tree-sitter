@@ -420,6 +420,33 @@ export abstract class BaseASTVisitor implements ASTVisitor {
       }
     }
 
+    // Look for assert_statement in the statement
+    const assertStatement = findDescendantOfType(node, 'assert_statement');
+    if (assertStatement) {
+      console.log(
+        `[BaseASTVisitor.visitStatement] Found assert_statement in statement`
+      );
+      return this.visitAssertStatement(assertStatement);
+    }
+
+    // Look for echo_statement in the statement
+    const echoStatement = findDescendantOfType(node, 'echo_statement');
+    if (echoStatement) {
+      console.log(
+        `[BaseASTVisitor.visitStatement] Found echo_statement in statement`
+      );
+      return this.visitEchoStatement(echoStatement);
+    }
+
+    // Look for assign_statement in the statement
+    const assignStatement = findDescendantOfType(node, 'assign_statement');
+    if (assignStatement) {
+      console.log(
+        `[BaseASTVisitor.visitStatement] Found assign_statement in statement`
+      );
+      return this.visitAssignStatement(assignStatement);
+    }
+
     // Look for module_instantiation in the statement (legacy support)
     const moduleInstantiation = findDescendantOfType(
       node,
@@ -612,6 +639,57 @@ export abstract class BaseASTVisitor implements ASTVisitor {
 
     // Implementation would depend on how expressions are handled
     return null; // Default implementation
+  }
+
+  /**
+   * Visit an assert statement node
+   * @param node The assert statement node to visit
+   * @returns The assert statement AST node or null if the node cannot be processed
+   */
+  visitAssertStatement(node: TSNode): ast.AssertStatementNode | null {
+    console.log(
+      `[BaseASTVisitor.visitAssertStatement] Processing assert statement: ${node.text.substring(
+        0,
+        50
+      )}`
+    );
+
+    // Default implementation - subclasses should override this method
+    return null;
+  }
+
+  /**
+   * Visit an echo statement node
+   * @param node The echo statement node to visit
+   * @returns The echo statement AST node or null if the node cannot be processed
+   */
+  visitEchoStatement(node: TSNode): ast.EchoStatementNode | null {
+    console.log(
+      `[BaseASTVisitor.visitEchoStatement] Processing echo statement: ${node.text.substring(
+        0,
+        50
+      )}`
+    );
+
+    // Default implementation - subclasses should override this method
+    return null;
+  }
+
+  /**
+   * Visit an assign statement node
+   * @param node The assign statement node to visit
+   * @returns The assign statement AST node or null if the node cannot be processed
+   */
+  visitAssignStatement(node: TSNode): ast.AssignStatementNode | null {
+    console.log(
+      `[BaseASTVisitor.visitAssignStatement] Processing assign statement: ${node.text.substring(
+        0,
+        50
+      )}`
+    );
+
+    // Default implementation - subclasses should override this method
+    return null;
   }
 
   /**

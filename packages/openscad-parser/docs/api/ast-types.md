@@ -500,6 +500,62 @@ function processNode(node: ASTNode) {
 }
 ```
 
+## Statement Nodes
+
+### AssertStatementNode
+
+Represents an `assert()` statement for runtime validation.
+
+```typescript
+interface AssertStatementNode extends ASTNode {
+  type: 'assert';
+  condition: ExpressionNode;
+  message?: ExpressionNode;
+}
+```
+
+**Properties:**
+- `condition`: The boolean expression to evaluate
+- `message`: Optional error message to display if assertion fails
+
+**Examples:**
+```openscad
+assert(x > 0);
+assert(y < 100, "y value out of range");
+assert(len(points) >= 3, "Need at least 3 points for polygon");
+```
+
+### AssignStatementNode
+
+Represents an `assign()` statement for variable scoping (deprecated in OpenSCAD).
+
+```typescript
+interface AssignStatementNode extends ASTNode {
+  type: 'assign';
+  assignments: AssignmentNode[];
+  body: ASTNode;
+}
+
+interface AssignmentNode extends ASTNode {
+  type: 'assignment';
+  variable: string;
+  value: ExpressionNode;
+}
+```
+
+**Properties:**
+- `assignments`: Array of variable assignments within the assign statement
+- `body`: The statement or block to execute with the assigned variables
+
+**Examples:**
+```openscad
+assign(x = 5) cube(x);
+assign(x = 5, y = 10) cube([x, y, 1]);
+assign(r = 10) { sphere(r); translate([r*2, 0, 0]) sphere(r); }
+```
+
+**Note:** Assign statements are deprecated in OpenSCAD but still supported for legacy code compatibility.
+
 ## Usage Examples
 
 ### Processing AST Nodes
@@ -512,17 +568,34 @@ function processAST(nodes: ASTNode[]) {
         const cube = node as CubeNode;
         console.log(`Cube: ${cube.size}, centered: ${cube.center}`);
         break;
-        
+
       case 'translate':
         const translate = node as TranslateNode;
         console.log(`Translate by [${translate.vector.join(', ')}]`);
         processAST(translate.children); // Process children recursively
         break;
-        
+
       case 'difference':
         const diff = node as DifferenceNode;
         console.log(`Difference with ${diff.children.length} children`);
         processAST(diff.children);
+        break;
+
+      case 'assert':
+        const assert = node as AssertStatementNode;
+        console.log(`Assert: ${assert.condition}`);
+        if (assert.message) {
+          console.log(`  Message: ${assert.message}`);
+        }
+        break;
+
+      case 'assign':
+        const assign = node as AssignStatementNode;
+        console.log(`Assign: ${assign.assignments.length} assignments`);
+        assign.assignments.forEach(assignment => {
+          console.log(`  ${assignment.variable} = ${assignment.value}`);
+        });
+        processAST([assign.body]); // Process body
         break;
     }
   });

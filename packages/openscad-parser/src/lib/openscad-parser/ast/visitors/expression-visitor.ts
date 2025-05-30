@@ -994,7 +994,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @param node The let expression node to visit
    * @returns The let expression node or null if the node cannot be processed
    */
-  visitLetExpression(node: TSNode): ast.LetExpressionNode | null {
+  override visitLetExpression(node: TSNode): ast.LetExpressionNode | null {
     this.safeLog(
       'info',
       `[ExpressionVisitor.visitLetExpression] Processing let expression: ${node.text.substring(0, 50)}`,

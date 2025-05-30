@@ -613,6 +613,107 @@ export interface EachNode extends BaseNode {
   expression: ExpressionNode;
 }
 
+/**
+ * Represents an assert statement in OpenSCAD
+ *
+ * Assert statements validate conditions during compilation and halt execution
+ * if the condition is false. They are essential for input validation and
+ * ensuring code correctness.
+ *
+ * @example Basic assertion
+ * ```openscad
+ * assert(true);
+ * ```
+ *
+ * @example Assertion with condition
+ * ```openscad
+ * assert(x > 0);
+ * ```
+ *
+ * @example Assertion with custom message
+ * ```openscad
+ * assert(x > 0, "x must be positive");
+ * ```
+ *
+ * @example Complex assertion
+ * ```openscad
+ * assert(len(points) >= 3, "Need at least 3 points for polygon");
+ * ```
+ *
+ * @since 0.1.0
+ */
+export interface AssertStatementNode extends BaseNode {
+  type: 'assert';
+  /** The condition expression to evaluate */
+  condition: ExpressionNode;
+  /** Optional error message to display if assertion fails */
+  message?: ExpressionNode;
+}
+
+/**
+ * Represents an echo statement for debugging and output
+ *
+ * Echo statements provide a way to output values and messages to the console
+ * during OpenSCAD execution. They are commonly used for debugging and
+ * displaying intermediate values during script execution.
+ *
+ * @example Basic echo statement
+ * ```openscad
+ * echo("Hello World");
+ * ```
+ *
+ * @example Multiple arguments
+ * ```openscad
+ * echo("Value:", x, "Result:", x + y);
+ * ```
+ *
+ * @example Variable output
+ * ```openscad
+ * echo(value);
+ * ```
+ *
+ * @since 0.1.0
+ * @category Statements
+ */
+export interface EchoStatementNode extends BaseNode {
+  type: 'echo';
+  /** The arguments/expressions to output */
+  arguments: ExpressionNode[];
+}
+
+/**
+ * Represents an assign statement for variable scoping (deprecated in OpenSCAD).
+ *
+ * Assign statements in OpenSCAD are deprecated but still supported for legacy code.
+ * They provide a way to assign variables within a specific scope and follow the
+ * pattern: `assign(var1 = value1, var2 = value2, ...) { statements }`
+ *
+ * @example Basic assign statement
+ * ```openscad
+ * assign(x = 5) cube(x);
+ * ```
+ *
+ * @example Multiple assignments
+ * ```openscad
+ * assign(x = 5, y = 10) cube([x, y, 1]);
+ * ```
+ *
+ * @example Assign with block
+ * ```openscad
+ * assign(r = 10) { sphere(r); translate([r*2, 0, 0]) sphere(r); }
+ * ```
+ *
+ * @since 1.0.0
+ * @deprecated Assign statements are deprecated in OpenSCAD. Use regular variable assignments instead.
+ */
+export interface AssignStatementNode extends BaseNode {
+  type: 'assign';
+  /** The variable assignments within the assign statement */
+  assignments: AssignmentNode[];
+  /** The body statement or block to execute with the assigned variables */
+  body: ASTNode;
+}
+
 
 
 /**
@@ -860,6 +961,9 @@ export type ASTNode =
   | ForLoopNode
   | LetNode
   | EachNode
+  | AssertStatementNode
+  | EchoStatementNode
+  | AssignStatementNode
   | RotateNode
   | ScaleNode
   | MirrorNode

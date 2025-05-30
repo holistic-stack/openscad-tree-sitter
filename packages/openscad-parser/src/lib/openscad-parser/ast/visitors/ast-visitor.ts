@@ -216,6 +216,20 @@ export interface ASTVisitor {
   visitAssignmentStatement(node: TSNode): ast.ASTNode | null;
 
   /**
+   * Visit an assert statement node
+   * @param node The assert statement node to visit
+   * @returns The assert statement AST node or null if the node cannot be processed
+   */
+  visitAssertStatement(node: TSNode): ast.AssertStatementNode | null;
+
+  /**
+   * Visit an echo statement node
+   * @param node The echo statement node to visit
+   * @returns The echo statement AST node or null if the node cannot be processed
+   */
+  visitEchoStatement(node: TSNode): ast.EchoStatementNode | null;
+
+  /**
    * Visit an expression statement node
    * @param node The expression statement node to visit
    * @returns The AST node or null if the node cannot be processed

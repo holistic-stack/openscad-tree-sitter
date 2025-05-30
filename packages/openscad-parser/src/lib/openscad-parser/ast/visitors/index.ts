@@ -106,3 +106,4 @@ export * from './primitive-visitor';
 export * from './query-visitor';
 export * from './transform-visitor';
 // export * from './variable-visitor'; // Temporarily commented out due to build issues
+export * from './assert-statement-visitor/assert-statement-visitor';

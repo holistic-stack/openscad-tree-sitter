@@ -54,6 +54,9 @@ import { FunctionVisitor } from './visitors/function-visitor.js';
 import { ControlStructureVisitor } from './visitors/control-structure-visitor.js';
 import { ExpressionVisitor } from './visitors/expression-visitor.js';
 import { VariableVisitor } from './visitors/variable-visitor.js';
+import { AssertStatementVisitor } from './visitors/assert-statement-visitor/assert-statement-visitor.js';
+import { EchoStatementVisitor } from './visitors/echo-statement-visitor/echo-statement-visitor.js';
+import { AssignStatementVisitor } from './visitors/assign-statement-visitor/assign-statement-visitor.js';
 import { QueryVisitor } from './visitors/query-visitor.js';
 import { ErrorHandler } from '../error-handling/index.js';
 
@@ -176,6 +179,9 @@ export class VisitorASTGenerator {
       transformVisitor, // transformVisitor instance already has errorHandler
       new CSGVisitor(this.source, this.errorHandler),
       new ControlStructureVisitor(this.source, this.errorHandler),
+      new AssertStatementVisitor(this.source, this.errorHandler),
+      new EchoStatementVisitor(this.source, this.errorHandler),
+      new AssignStatementVisitor(this.source, this.errorHandler),
       expressionVisitor,
       new VariableVisitor(this.source, this.errorHandler),
       new ModuleVisitor(this.source, this.errorHandler),

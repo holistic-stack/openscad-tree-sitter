@@ -132,6 +132,10 @@ export class CompositeVisitor implements ASTVisitor {
     switch (node.type) {
       case 'assignment_statement':
         return this.visitAssignmentStatement(node);
+      case 'assert_statement':
+        return this.visitAssertStatement(node);
+      case 'echo_statement':
+        return this.visitEchoStatement(node);
       case 'statement':
         return this.visitStatement(node);
       case 'module_instantiation':
@@ -554,6 +558,66 @@ visitModuleDefinition(node: TSNode): ast.ModuleDefinitionNode | null {
 
     console.log(
       `[CompositeVisitor.visitAssignmentStatement] No visitor could process assignment statement`
+    );
+    return null;
+  }
+
+  /**
+   * Visit an assert statement node
+   * @param node The assert statement node to visit
+   * @returns The assert statement AST node or null if the node cannot be processed
+   */
+  visitAssertStatement(node: TSNode): ast.AssertStatementNode | null {
+    console.log(
+      `[CompositeVisitor.visitAssertStatement] Processing assert statement: ${node.text.substring(
+        0,
+        50
+      )}`
+    );
+
+    // Try each visitor in sequence
+    for (const visitor of this.visitors) {
+      const result = visitor.visitAssertStatement(node);
+      if (result) {
+        console.log(
+          `[CompositeVisitor.visitAssertStatement] Visitor ${visitor.constructor.name} processed assert statement`
+        );
+        return result;
+      }
+    }
+
+    console.log(
+      `[CompositeVisitor.visitAssertStatement] No visitor could process assert statement`
+    );
+    return null;
+  }
+
+  /**
+   * Visit an echo statement node
+   * @param node The echo statement node to visit
+   * @returns The echo statement AST node or null if the node cannot be processed
+   */
+  visitEchoStatement(node: TSNode): ast.EchoStatementNode | null {
+    console.log(
+      `[CompositeVisitor.visitEchoStatement] Processing echo statement: ${node.text.substring(
+        0,
+        50
+      )}`
+    );
+
+    // Try each visitor in sequence
+    for (const visitor of this.visitors) {
+      const result = visitor.visitEchoStatement(node);
+      if (result) {
+        console.log(
+          `[CompositeVisitor.visitEchoStatement] Visitor ${visitor.constructor.name} processed echo statement`
+        );
+        return result;
+      }
+    }
+
+    console.log(
+      `[CompositeVisitor.visitEchoStatement] No visitor could process echo statement`
     );
     return null;
   }

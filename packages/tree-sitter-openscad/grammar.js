@@ -106,6 +106,7 @@ module.exports = grammar({
       $.module_definition,
       $.function_definition,
       $.assignment_statement,
+      $.assign_statement,
       $.module_instantiation, // Directly use the module_instantiation rule
       $.if_statement,
       $.for_statement,
@@ -171,6 +172,39 @@ module.exports = grammar({
       '=',
       field('value', $.expression),
       optional(';') // Make semicolon optional for error recovery
+    ),
+
+    /**
+     * Assign statement rule (deprecated in OpenSCAD but still supported for legacy code)
+     *
+     * This rule handles assign statements in OpenSCAD which follow the pattern:
+     * assign(var1 = value1, var2 = value2, ...) { statements }
+     *
+     * We use precedence 2 to resolve conflicts with expression statements.
+     *
+     * Examples:
+     *   assign(x = 5, y = 10) cube([x, y, 1]);
+     *   assign(r = 10) { sphere(r); translate([r*2, 0, 0]) sphere(r); }
+     */
+    assign_statement: $ => prec(2, seq(
+      'assign',
+      '(',
+      optional(commaSep1($.assign_assignment)),
+      choice(
+        ')',
+        // Error recovery for missing closing parenthesis
+        token.immediate(prec(-1, /[{]/)) // Match opening brace
+      ),
+      choice(
+        $.block,
+        $.statement
+      )
+    )),
+
+    assign_assignment: $ => seq(
+      field('name', choice($.identifier, $.special_variable)),
+      '=',
+      field('value', $.expression)
     ),
 
     block: $ => seq(
