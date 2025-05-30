@@ -118,10 +118,13 @@ module.exports = grammar({
     [$.call_expression, $.primary_expression],
     // Conflict for binary expressions in call_expression vs expression
     [$.call_expression, $.expression],
-    // Conflict for module instantiation vs call expression in statement context
-    [$.module_instantiation, $.call_expression],
-    // Conflict for module instantiation vs expression statement
-    [$.module_instantiation, $.expression_statement]
+    // Conflict for module instantiation vs expression statement containing call expression
+    // This allows GLR to explore both paths and choose based on context (semicolon lookahead)
+    [$.module_instantiation, $.expression_statement],
+    // Conflict for instantiation statements vs module instantiation with body (tree-sitter best practice)
+    [$._instantiation_statements, $._module_instantiation_with_body],
+    // Conflict for control flow statements vs if statement (tree-sitter best practice)
+    [$._control_flow_statements, $.if_statement]
   ],
 
   rules: {
@@ -139,19 +142,49 @@ module.exports = grammar({
     _error_recovery: $ => token(prec(-1, /[^;{}()\[\]\s]+/)),
 
     statement: $ => choice(
-      $.include_statement,
-      $.use_statement,
-      $.module_definition,
-      $.function_definition,
-      $.assignment_statement,
-      $.assign_statement,
-      prec(15, $.module_instantiation), // Much higher precedence than expression_statement and call_expression
-      $.if_statement,
-      $.for_statement,
-      $.echo_statement,
-      $.assert_statement,
-      prec(1, $.expression_statement), // Lower precedence than module_instantiation
+      $._declaration_statements,
+      $._import_statements,
+      $._assignment_statements,
+      $._control_flow_statements,
+      $._action_statements,
+      prec(2, $._instantiation_statements), // Higher precedence than expression_statement
+      prec(1, $.expression_statement), // Lower precedence than instantiation_statements
       $.block
+    ),
+
+    // Declaration statements (hidden rule for reducing complexity)
+    _declaration_statements: $ => choice(
+      $.module_definition,
+      $.function_definition
+    ),
+
+    // Import statements (hidden rule for reducing complexity)
+    _import_statements: $ => choice(
+      $.include_statement,
+      $.use_statement
+    ),
+
+    // Assignment statements (hidden rule for reducing complexity)
+    _assignment_statements: $ => choice(
+      $.assignment_statement,
+      $.assign_statement
+    ),
+
+    // Control flow statements (hidden rule for reducing complexity)
+    _control_flow_statements: $ => choice(
+      $.if_statement,
+      $.for_statement
+    ),
+
+    // Action statements (hidden rule for reducing complexity)
+    _action_statements: $ => choice(
+      $.echo_statement,
+      $.assert_statement
+    ),
+
+    // Instantiation statements (hidden rule for reducing complexity)
+    _instantiation_statements: $ => choice(
+      $.module_instantiation
     ),
 
     include_statement: $ => seq(
@@ -330,8 +363,8 @@ module.exports = grammar({
     ),
 
     module_instantiation: $ => choice(
-      prec(20, $._module_instantiation_with_body), // Much higher precedence than call_expression (9)
-      prec(20, $._module_instantiation_simple) // Much higher precedence than call_expression (9)
+      prec(10, $._module_instantiation_with_body), // Higher precedence than call_expression (9)
+      prec(10, $._module_instantiation_simple) // Higher precedence than call_expression (9)
     ),
 
     argument_list: $ => seq(
@@ -549,6 +582,8 @@ module.exports = grammar({
       $.parenthesized_expression,
       $.primary_expression
     ),
+
+
 
     // Simplified binary expression that handles all operators with proper precedence
     binary_expression: $ => choice(

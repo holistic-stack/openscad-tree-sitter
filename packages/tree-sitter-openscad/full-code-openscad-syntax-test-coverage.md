@@ -1010,6 +1010,62 @@ I have successfully created comprehensive test coverage for the OpenSCAD tree-si
 
 **Next Priority**: Implement structural grammar changes to properly distinguish module instantiations from function calls in statement contexts.
 
+#### **Cycle 29: Tree-Sitter Best Practices Investigation** 🎯
+- **Target**: Implement tree-sitter best practices for module/function disambiguation
+- **Discovery**: **Conflicts approach partially successful**, **Fundamental grammar design issue confirmed**
+- **Grammar Changes**: Applied tree-sitter best practices using conflicts array for GLR disambiguation
+- **Key Discovery**: Conflicts work for module instantiations with bodies but not simple module instantiations
+
+**Tree-Sitter Best Practices Applied**:
+- **✅ Conflicts Array**: Used `[$.module_instantiation, $.expression_statement]` for GLR disambiguation
+- **✅ Precedence Restoration**: Reverted to standard precedence values (2 for module_instantiation, 10 for components)
+- **✅ GLR Exploration**: Allows parser to explore both paths and choose based on context
+- **❌ Partial Success**: Works for module instantiations with bodies, fails for simple module instantiations
+
+**Investigation Results**:
+- **✅ Module Instantiations with Bodies**: `translate([1,2,3]) cube(5);` correctly parsed as module_instantiation
+- **✅ Boolean Operations**: `union() { ... }` correctly parsed as module_instantiation
+- **❌ Simple Module Instantiations**: `cube(10);` still parsed as `(expression_statement (expression (call_expression ...)))`
+- **🎯 Pattern Discovery**: GLR disambiguation works in some contexts but not others
+
+**Technical Analysis**:
+- **Conflicts Effectiveness**: GLR successfully disambiguates module instantiations with bodies
+- **Limitation Discovery**: Simple module instantiations ending with semicolons still problematic
+- **Grammar Structure**: The fundamental issue remains in the grammar design, not just precedence/conflicts
+- **Best Practice Confirmation**: Tree-sitter conflicts are the correct approach, but grammar structure needs refinement
+
+**Current Status**: Tree-sitter best practices partially resolve the issue. Module instantiations with bodies work correctly, but simple module instantiations require additional structural changes.
+
+**Next Priority**: Refine grammar structure to handle simple module instantiation patterns while maintaining tree-sitter best practices.
+
+#### **Cycle 30: Grammar Complexity Reduction Following Tree-Sitter Best Practices** 🎯
+- **Target**: Apply tree-sitter best practices for reducing grammar complexity to resolve module/function disambiguation
+- **Discovery**: **Grammar complexity successfully reduced**, **Fundamental issue confirmed beyond standard tree-sitter techniques**
+- **Grammar Changes**: Refactored complex statement rule into smaller hidden rules following tree-sitter best practices
+- **Key Discovery**: Issue is not about grammar complexity but fundamental OpenSCAD syntax ambiguity
+
+**Tree-Sitter Best Practices Successfully Applied**:
+- **✅ Grammar Refactoring**: Reduced statement rule from 13 choices to 8 grouped choices using hidden rules
+- **✅ State Count Reduction**: Applied tree-sitter best practice of breaking complex rules into smaller components
+- **✅ Maintainability**: Improved grammar structure with logical groupings (_declaration_statements, _import_statements, etc.)
+- **✅ Conflicts Resolution**: Added required conflicts for new hidden rules as suggested by tree-sitter generator
+
+**Investigation Results**:
+- **✅ Grammar Structure**: Successfully optimized following tree-sitter best practices for complexity reduction
+- **✅ Parser Generation**: Successfully resolved all conflicts and generated parser without errors
+- **❌ Module/Function Disambiguation**: Same issue persists despite grammar optimization
+- **🎯 Fundamental Discovery**: Issue is not about grammar complexity but about OpenSCAD syntax ambiguity
+
+**Technical Analysis**:
+- **Grammar Optimization**: Successfully applied tree-sitter best practice of refactoring complex rules
+- **Hidden Rules**: Created logical groupings for statement types to reduce parser state complexity
+- **Conflicts Management**: Properly handled all conflicts suggested by tree-sitter generator
+- **Core Issue Persistence**: `identifier(arguments);` still parsed as call_expression instead of module_instantiation
+
+**Current Status**: Tree-sitter best practices successfully applied for grammar optimization, but module/function disambiguation requires approaches beyond standard tree-sitter techniques.
+
+**Next Priority**: Investigate advanced tree-sitter techniques (external scanners, semantic analysis) or alternative approaches for resolving fundamental OpenSCAD syntax ambiguity.
+
 #### **Cumulative Impact of Expression Simplification + Structural Discovery** 📊
 - **Test Coverage**: Maintained 13% while identifying fundamental structural issue
 - **Grammar Foundation**: **COMPLETE semantic accuracy** for ALL expression contexts including call expression functions
