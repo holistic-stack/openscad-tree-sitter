@@ -1,6 +1,136 @@
 /**
- * @file Implements recovery strategy for unknown identifier errors.
- * @module openscad-parser/error-handling/strategies/unknown-identifier-strategy
+ * @file Unknown identifier recovery strategy for OpenSCAD parser error handling
+ *
+ * This module implements a sophisticated recovery strategy for handling unknown
+ * identifier errors in OpenSCAD code. Unknown identifiers are common when
+ * variables, functions, or modules are misspelled or referenced before declaration.
+ * This strategy uses advanced string similarity algorithms and scope-aware
+ * identifier tracking to provide intelligent suggestions and automatic corrections.
+ *
+ * The unknown identifier strategy includes:
+ * - **Scope-Aware Tracking**: Maintains identifier visibility across different scopes
+ * - **Levenshtein Distance**: Uses edit distance algorithms for similarity matching
+ * - **Multi-Type Support**: Handles variables, functions, and modules separately
+ * - **Intelligent Suggestions**: Provides ranked suggestions based on similarity and context
+ * - **Automatic Correction**: Attempts to replace unknown identifiers with best matches
+ * - **Context Preservation**: Maintains error context with suggestion information
+ *
+ * Key features:
+ * - **Advanced String Matching**: Levenshtein distance algorithm for fuzzy matching
+ * - **Scope Management**: Tracks identifiers across nested scopes and modules
+ * - **Type-Aware Suggestions**: Prioritizes suggestions based on identifier type
+ * - **Configurable Thresholds**: Adjustable edit distance and suggestion limits
+ * - **Pattern Recognition**: Extracts unknown identifiers from various error message formats
+ * - **High Priority Processing**: Executes early (priority 30) for common identifier errors
+ *
+ * Identifier types handled:
+ * - **Variables**: Local variables, parameters, and global constants
+ * - **Functions**: Built-in functions, user-defined functions, and mathematical operations
+ * - **Modules**: User-defined modules and built-in OpenSCAD modules
+ *
+ * Recovery patterns supported:
+ * - **Typo Correction**: `cuve(10)` → `cube(10)` (single character error)
+ * - **Case Sensitivity**: `Cube(10)` → `cube(10)` (case mismatch)
+ * - **Missing Characters**: `spere(5)` → `sphere(5)` (missing character)
+ * - **Extra Characters**: `cuube(10)` → `cube(10)` (extra character)
+ * - **Character Transposition**: `pshere(5)` → `sphere(5)` (swapped characters)
+ *
+ * The strategy implements intelligent scope resolution:
+ * 1. **Scope Tracking**: Maintain current scope hierarchy for identifier visibility
+ * 2. **Identifier Registration**: Track available identifiers by scope and type
+ * 3. **Error Analysis**: Extract unknown identifier from error messages and context
+ * 4. **Similarity Matching**: Find similar identifiers using Levenshtein distance
+ * 5. **Suggestion Ranking**: Sort suggestions by distance, type priority, and name
+ * 6. **Automatic Correction**: Replace unknown identifier with best match
+ *
+ * @example Basic unknown identifier recovery
+ * ```typescript
+ * import { UnknownIdentifierStrategy } from './unknown-identifier-strategy';
+ * import { ReferenceError } from '../types/error-types';
+ *
+ * const strategy = new UnknownIdentifierStrategy();
+ *
+ * // Register available identifiers
+ * strategy.setCurrentScope(['main']);
+ * strategy.addIdentifier('cube', 'function');
+ * strategy.addIdentifier('sphere', 'function');
+ * strategy.addIdentifier('cylinder', 'function');
+ *
+ * // Create error for unknown identifier
+ * const error = new ReferenceError('Unknown identifier: cuve', {
+ *   line: 1,
+ *   column: 1,
+ *   found: 'cuve'
+ * });
+ *
+ * // Attempt recovery
+ * if (strategy.canHandle(error)) {
+ *   const fixedCode = strategy.recover(error, 'cuve(10);');
+ *   console.log('Fixed code:', fixedCode);
+ *   // Output: 'cube(10);'
+ *
+ *   const suggestion = strategy.getRecoverySuggestion(error);
+ *   console.log('Suggestion:', suggestion);
+ *   // Output: "Did you mean 'cube'?"
+ * }
+ * ```
+ *
+ * @example Advanced scope-aware identifier tracking
+ * ```typescript
+ * const strategy = new UnknownIdentifierStrategy();
+ *
+ * // Set up nested scope hierarchy
+ * strategy.setCurrentScope(['main', 'my_module']);
+ *
+ * // Register identifiers in different scopes
+ * strategy.addIdentifier('width', 'variable');
+ * strategy.addIdentifier('height', 'variable');
+ * strategy.addIdentifier('create_shape', 'function');
+ *
+ * // Switch to different scope
+ * strategy.setCurrentScope(['main']);
+ * strategy.addIdentifier('global_size', 'variable');
+ *
+ * // Handle error with scope-aware suggestions
+ * const error = new ReferenceError('Undefined variable: widht', {
+ *   line: 5,
+ *   column: 10,
+ *   found: 'widht'
+ * });
+ *
+ * const fixedCode = strategy.recover(error, 'translate([widht, 0, 0])');
+ * // Suggests 'width' from the appropriate scope
+ * ```
+ *
+ * @example Complex error handling with multiple suggestions
+ * ```typescript
+ * const strategy = new UnknownIdentifierStrategy();
+ *
+ * // Register similar identifiers
+ * strategy.addIdentifier('translate', 'function');
+ * strategy.addIdentifier('rotate', 'function');
+ * strategy.addIdentifier('scale', 'function');
+ * strategy.addIdentifier('transformation', 'variable');
+ *
+ * // Handle ambiguous error
+ * const error = new ReferenceError('Unknown function: transalte', {
+ *   line: 3,
+ *   column: 1,
+ *   found: 'transalte'
+ * });
+ *
+ * if (strategy.canHandle(error)) {
+ *   const fixedCode = strategy.recover(error, 'transalte([1,0,0]) cube(5);');
+ *   // Automatically corrects to 'translate' (closest match)
+ *
+ *   const suggestions = error.context.suggestions;
+ *   console.log('All suggestions:', suggestions);
+ *   // Output: ['translate', 'transformation'] (ranked by similarity)
+ * }
+ * ```
+ *
+ * @module unknown-identifier-strategy
+ * @since 0.1.0
  */
 
 import { ParserError, ErrorCode } from '../types/error-types.js';
@@ -13,10 +143,37 @@ interface IdentifierSuggestion {
 }
 
 /**
- * Recovery strategy for handling unknown identifier errors.
+ * Sophisticated recovery strategy for automatically fixing unknown identifier errors.
  *
- * This strategy suggests corrections for unknown variables and functions
- * by finding similar names in the current scope.
+ * The UnknownIdentifierStrategy extends BaseRecoveryStrategy to provide intelligent
+ * recovery for misspelled or undefined variables, functions, and modules in OpenSCAD
+ * code. This strategy implements advanced string similarity algorithms and scope-aware
+ * identifier tracking to provide accurate suggestions and automatic corrections.
+ *
+ * This implementation provides:
+ * - **High Priority Processing**: Executes early (priority 30) for common identifier errors
+ * - **Scope-Aware Tracking**: Maintains identifier visibility across nested scopes
+ * - **Levenshtein Distance**: Advanced string similarity matching with configurable thresholds
+ * - **Multi-Type Support**: Handles variables, functions, and modules with type-aware prioritization
+ * - **Intelligent Ranking**: Sorts suggestions by edit distance, type priority, and alphabetical order
+ * - **Context Preservation**: Updates error context with suggestion information for user feedback
+ *
+ * The strategy maintains sophisticated identifier tracking:
+ * - **Scoped Identifiers**: Map of scope keys to identifier sets with type information
+ * - **Current Scope**: Array representing the current scope hierarchy (innermost last)
+ * - **Type Classification**: Separate tracking for variables, functions, and modules
+ * - **Configurable Limits**: Maximum suggestions (3) and edit distance (2) for performance
+ *
+ * Algorithm features:
+ * - **Pattern Recognition**: Extracts unknown identifiers from various error message formats
+ * - **Fuzzy Matching**: Uses Levenshtein distance for similarity calculation
+ * - **Scope Resolution**: Checks current scope and global scope for identifier visibility
+ * - **Type Prioritization**: Prefers variables over functions/modules in suggestion ranking
+ * - **Exact Replacement**: Performs precise identifier replacement at error locations
+ *
+ * @class UnknownIdentifierStrategy
+ * @extends {BaseRecoveryStrategy}
+ * @since 0.1.0
  */
 export class UnknownIdentifierStrategy extends BaseRecoveryStrategy {
   private readonly maxSuggestions = 3;

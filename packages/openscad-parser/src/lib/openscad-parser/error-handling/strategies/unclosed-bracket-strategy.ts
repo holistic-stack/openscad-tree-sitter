@@ -1,6 +1,117 @@
 /**
- * @file Implements recovery strategy for unclosed bracket/brace/parenthesis errors.
- * @module openscad-parser/error-handling/strategies/unclosed-bracket-strategy
+ * @file Unclosed bracket recovery strategy for OpenSCAD parser error handling
+ *
+ * This module implements a sophisticated recovery strategy for handling unclosed
+ * bracket, brace, and parenthesis errors in OpenSCAD code. These errors are common
+ * when writing complex nested structures, function calls with multiple parameters,
+ * or module definitions with body blocks. The strategy automatically detects and
+ * corrects these errors by inserting the appropriate closing characters.
+ *
+ * The unclosed bracket strategy includes:
+ * - **Multi-Type Support**: Handles parentheses (), brackets [], and braces {}
+ * - **Stack-Based Tracking**: Uses a stack algorithm to track nested bracket pairs
+ * - **Intelligent Insertion**: Adds closing brackets in the correct order (LIFO)
+ * - **Context-Aware Formatting**: Handles braces differently with proper line breaks
+ * - **Comprehensive Detection**: Recognizes various error patterns and messages
+ * - **High Priority Processing**: Executes early due to structural importance
+ *
+ * Key features:
+ * - **Complete Bracket Support**: Handles all three bracket types used in OpenSCAD
+ * - **Nested Structure Handling**: Correctly processes deeply nested bracket combinations
+ * - **Smart Closing Order**: Closes brackets in Last-In-First-Out (LIFO) order
+ * - **Brace Formatting**: Adds closing braces on new lines for better readability
+ * - **Error Pattern Recognition**: Detects unclosed brackets through multiple criteria
+ * - **Stack-Based Algorithm**: Efficient tracking of bracket nesting levels
+ *
+ * Bracket types handled:
+ * - **Parentheses ()**: Function calls, parameter lists, grouping expressions
+ * - **Square Brackets []**: Array/vector literals, indexing operations
+ * - **Curly Braces {}**: Module bodies, conditional blocks, loop bodies
+ *
+ * Recovery patterns supported:
+ * - **Function Calls**: `translate([1,0,0` → `translate([1,0,0])`
+ * - **Array Literals**: `points = [[0,0], [1,1]` → `points = [[0,0], [1,1]]`
+ * - **Module Bodies**: `module test() { cube(10);` → `module test() { cube(10); }`
+ * - **Nested Structures**: `translate([sin(angle` → `translate([sin(angle)])`
+ * - **Complex Expressions**: `result = max(a, min(b, c` → `result = max(a, min(b, c))`
+ *
+ * The strategy implements a sophisticated bracket tracking algorithm:
+ * 1. **Stack Initialization**: Create empty stack for tracking open brackets
+ * 2. **Character Scanning**: Iterate through code character by character
+ * 3. **Opening Detection**: Push opening brackets onto the stack
+ * 4. **Closing Detection**: Pop matching brackets from the stack
+ * 5. **Unclosed Identification**: Remaining stack items are unclosed brackets
+ * 6. **Intelligent Insertion**: Add closing brackets in reverse order
+ *
+ * @example Basic unclosed bracket recovery
+ * ```typescript
+ * import { UnclosedBracketStrategy } from './unclosed-bracket-strategy';
+ * import { SyntaxError } from '../types/error-types';
+ *
+ * const strategy = new UnclosedBracketStrategy();
+ *
+ * // Create error for unclosed bracket
+ * const error = new SyntaxError('Missing closing bracket', {
+ *   line: 1,
+ *   column: 15,
+ *   expected: [']'],
+ *   found: 'EOF'
+ * });
+ *
+ * // Original code with unclosed bracket
+ * const originalCode = 'translate([1,0,0) cube(5);';
+ *
+ * // Attempt recovery
+ * if (strategy.canHandle(error)) {
+ *   const fixedCode = strategy.recover(error, originalCode);
+ *   console.log('Fixed code:', fixedCode);
+ *   // Output: 'translate([1,0,0]) cube(5);'
+ * }
+ * ```
+ *
+ * @example Complex nested bracket recovery
+ * ```typescript
+ * const strategy = new UnclosedBracketStrategy();
+ *
+ * // Complex nested structure with multiple unclosed brackets
+ * const complexCode = `
+ * module complex_shape() {
+ *   translate([10, 0, 0])
+ *     rotate([0, 0, 45])
+ *       cube([max(5, min(10, 15)), 5, 10];
+ * `;
+ *
+ * const error = new SyntaxError('Unclosed brackets', { line: 4, column: 45 });
+ *
+ * if (strategy.canHandle(error)) {
+ *   const fixedCode = strategy.recover(error, complexCode);
+ *   // Adds missing closing brackets: ]) and }
+ * }
+ * ```
+ *
+ * @example Strategy integration with error handler
+ * ```typescript
+ * import { RecoveryStrategyRegistry } from '../recovery-strategy-registry';
+ * import { ErrorHandler } from '../error-handler';
+ *
+ * // Register the strategy
+ * const registry = new RecoveryStrategyRegistry();
+ * registry.register(new UnclosedBracketStrategy());
+ *
+ * // Use with error handler
+ * const errorHandler = new ErrorHandler({ recoveryRegistry: registry });
+ *
+ * // Parse code with unclosed brackets
+ * const parser = new OpenSCADParser('cube([10, 5, 3)', errorHandler);
+ * const ast = await parser.generateAST();
+ *
+ * // Check if recovery was applied
+ * const errors = errorHandler.getErrors();
+ * const recoveredCode = errorHandler.getRecoveredCode();
+ * ```
+ *
+ * @module unclosed-bracket-strategy
+ * @since 0.1.0
  */
 
 import { ParserError, ErrorCode } from '../types/error-types.js';
@@ -16,10 +127,34 @@ interface BracketInfo {
 }
 
 /**
- * Recovery strategy for handling unclosed bracket/brace/parenthesis errors.
+ * Sophisticated recovery strategy for automatically fixing unclosed bracket errors.
  *
- * This strategy detects and recovers from unclosed brackets, braces, and parentheses
- * by automatically inserting the corresponding closing character.
+ * The UnclosedBracketStrategy extends BaseRecoveryStrategy to provide comprehensive
+ * recovery for unclosed parentheses, brackets, and braces in OpenSCAD code. This
+ * strategy implements a stack-based algorithm to track nested bracket structures
+ * and automatically insert the appropriate closing characters in the correct order.
+ *
+ * This implementation provides:
+ * - **High Priority Processing**: Executes early (priority 40) due to structural importance
+ * - **Multi-Bracket Support**: Handles parentheses (), brackets [], and braces {}
+ * - **Stack-Based Tracking**: Uses efficient stack algorithm for nested structure tracking
+ * - **LIFO Closing Order**: Closes brackets in Last-In-First-Out order for correct nesting
+ * - **Context-Aware Formatting**: Special handling for braces with proper line breaks
+ * - **Comprehensive Detection**: Recognizes various error patterns and messages
+ *
+ * The strategy maintains a bracket mapping system:
+ * - **Parentheses ()**: Used for function calls, parameter lists, and expression grouping
+ * - **Square Brackets []**: Used for array/vector literals and indexing operations
+ * - **Curly Braces {}**: Used for module bodies, conditional blocks, and loop bodies
+ *
+ * Special formatting rules:
+ * - **Parentheses and Brackets**: Added immediately at the end of the code
+ * - **Braces**: Added on new lines for better code readability and structure
+ * - **Mixed Types**: Handles combinations of different bracket types correctly
+ *
+ * @class UnclosedBracketStrategy
+ * @extends {BaseRecoveryStrategy}
+ * @since 0.1.0
  */
 export class UnclosedBracketStrategy extends BaseRecoveryStrategy {
   private readonly bracketMap: Record<string, BracketInfo> = {

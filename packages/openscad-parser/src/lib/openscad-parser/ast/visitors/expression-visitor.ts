@@ -1,15 +1,83 @@
 /**
- * Visitor for expressions (binary, unary, conditional, etc.)
+ * @file Expression evaluation visitor for OpenSCAD parser
  *
- * This visitor handles expressions in OpenSCAD, including:
- * - Binary expressions (arithmetic, comparison, logical)
- * - Unary expressions (negation, logical not)
- * - Conditional expressions (ternary operator)
- * - Variable references
- * - Literal values (numbers, strings, vectors)
- * - Array/vector indexing
+ * This module implements the ExpressionVisitor class, which specializes in processing
+ * OpenSCAD expressions and converting them to structured AST representations. Expressions
+ * are fundamental to OpenSCAD's computational model, enabling mathematical calculations,
+ * logical operations, and dynamic value generation.
  *
- * @module lib/openscad-parser/ast/visitors/expression-visitor
+ * The ExpressionVisitor handles:
+ * - **Binary Expressions**: Arithmetic (+, -, *, /, %), comparison (==, !=, <, <=, >, >=), and logical (&&, ||) operations
+ * - **Unary Expressions**: Negation (-), logical not (!), and other prefix operators
+ * - **Conditional Expressions**: Ternary operator (condition ? then : else) for conditional evaluation
+ * - **Variable References**: Identifier resolution and variable access
+ * - **Literal Values**: Numbers, strings, booleans, vectors, and undefined values
+ * - **Array Operations**: Vector/array construction, indexing, and manipulation
+ * - **Function Calls**: Function invocation within expression contexts
+ * - **Parenthesized Expressions**: Grouping and precedence control
+ *
+ * Key features:
+ * - **Expression Hierarchy Processing**: Handles complex nested expression structures
+ * - **Operator Precedence**: Respects mathematical and logical operator precedence
+ * - **Type-Safe Evaluation**: Maintains type information throughout expression processing
+ * - **Error Recovery**: Graceful handling of malformed expressions with detailed error reporting
+ * - **Performance Optimization**: Efficient dispatching and minimal overhead for simple expressions
+ * - **Location Tracking**: Preserves source location information for debugging and IDE integration
+ *
+ * Expression processing patterns:
+ * - **Simple Literals**: `42`, `"hello"`, `true`, `[1, 2, 3]` - direct value extraction
+ * - **Binary Operations**: `a + b`, `x > y`, `p && q` - operator-based calculations
+ * - **Nested Expressions**: `(a + b) * (c - d)` - complex hierarchical evaluation
+ * - **Conditional Logic**: `x > 0 ? x : -x` - ternary conditional expressions
+ * - **Function Integration**: `sin(angle)`, `len(vector)` - function calls within expressions
+ * - **Variable Access**: `myVar`, `dimensions[0]` - identifier and array access
+ *
+ * The visitor implements a comprehensive dispatching strategy:
+ * 1. **Type-Based Routing**: Routes nodes to appropriate handlers based on CST node type
+ * 2. **Hierarchical Processing**: Handles expression precedence through recursive evaluation
+ * 3. **Error Propagation**: Maintains error context throughout the expression tree
+ *
+ * @example Basic expression processing
+ * ```typescript
+ * import { ExpressionVisitor } from './expression-visitor';
+ *
+ * const visitor = new ExpressionVisitor(sourceCode, errorHandler);
+ *
+ * // Process arithmetic expression
+ * const binaryExpr = visitor.visitBinaryExpression(binaryCST);
+ * // Returns: { type: 'expression', expressionType: 'binary', operator: '+', left: ..., right: ... }
+ *
+ * // Process conditional expression
+ * const conditionalExpr = visitor.visitConditionalExpression(conditionalCST);
+ * // Returns: { type: 'expression', expressionType: 'conditional', condition: ..., thenBranch: ..., elseBranch: ... }
+ * ```
+ *
+ * @example Complex expression hierarchies
+ * ```typescript
+ * // For OpenSCAD code: (x + y) * sin(angle) > threshold ? max_value : min_value
+ * const complexExpr = visitor.dispatchSpecificExpression(complexCST);
+ * // Returns nested expression structure with proper precedence and evaluation order
+ *
+ * // For vector operations: [x, y, z][index] + offset
+ * const vectorExpr = visitor.dispatchSpecificExpression(vectorCST);
+ * // Returns expression with array access and arithmetic operation
+ * ```
+ *
+ * @example Error handling and recovery
+ * ```typescript
+ * const visitor = new ExpressionVisitor(sourceCode, errorHandler);
+ *
+ * // Process malformed expression
+ * const result = visitor.dispatchSpecificExpression(malformedCST);
+ *
+ * if (!result) {
+ *   const errors = errorHandler.getErrors();
+ *   console.log('Expression processing errors:', errors);
+ * }
+ * ```
+ *
+ * @module expression-visitor
+ * @since 0.1.0
  */
 
 import { Node as TSNode } from 'web-tree-sitter';
@@ -22,11 +90,27 @@ import { findDescendantOfType } from '../utils/node-utils.js';
 import { evaluateBinaryExpression } from '../evaluation/binary-expression-evaluator/binary-expression-evaluator.js';
 
 /**
- * Visitor for expressions that follows tree-sitter visitor pattern best practices
- * and adheres to DRY, KISS, and SRP principles.
+ * Visitor for processing OpenSCAD expressions with comprehensive type support.
  *
- * This implementation directly handles all expression types without relying on
- * incompatible sub-visitors, making it more maintainable and easier to understand.
+ * The ExpressionVisitor extends BaseASTVisitor to provide specialized handling for
+ * all types of expressions in OpenSCAD. It follows tree-sitter visitor pattern
+ * best practices and adheres to DRY, KISS, and SRP principles by directly handling
+ * all expression types without relying on incompatible sub-visitors.
+ *
+ * This implementation provides:
+ * - **Direct Expression Handling**: All expression types processed in a single visitor
+ * - **Efficient Dispatching**: Type-based routing to appropriate processing methods
+ * - **Error Context Preservation**: Maintains detailed error information throughout processing
+ * - **Performance Optimization**: Minimal overhead for simple expressions
+ * - **Comprehensive Coverage**: Supports all OpenSCAD expression constructs
+ *
+ * The visitor maintains a single FunctionCallVisitor dependency for handling function
+ * calls within expressions, following the Single Responsibility Principle by keeping
+ * only essential dependencies.
+ *
+ * @class ExpressionVisitor
+ * @extends {BaseASTVisitor}
+ * @since 0.1.0
  */
 export class ExpressionVisitor extends BaseASTVisitor {
 

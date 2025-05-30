@@ -1,3 +1,75 @@
+/**
+ * @file CSG operations visitor for OpenSCAD parser
+ *
+ * This module implements the CSGVisitor class, which specializes in processing
+ * Constructive Solid Geometry (CSG) operations and converting them to structured
+ * AST representations. CSG operations are fundamental to 3D modeling, allowing
+ * complex shapes to be created by combining simpler geometric primitives.
+ *
+ * The CSGVisitor handles all CSG operations:
+ * - **Boolean Operations**: union, difference, intersection
+ * - **Geometric Operations**: hull (convex hull), minkowski (Minkowski sum)
+ * - **Advanced Operations**: Support for nested CSG hierarchies
+ *
+ * Key features:
+ * - **Child Processing**: Manages hierarchical CSG operations with multiple child objects
+ * - **Block Handling**: Processes both single statements and block statements with multiple children
+ * - **Recursive Processing**: Supports nested CSG operations for complex geometries
+ * - **Error Recovery**: Graceful handling of malformed CSG operations
+ * - **Type Safety**: Validates CSG operation types and provides appropriate AST nodes
+ * - **Location Tracking**: Maintains source location information for debugging
+ *
+ * The visitor implements a dual processing strategy:
+ * 1. **Accessor Expressions**: For simple CSG operations without explicit children
+ * 2. **Module Instantiations**: For CSG operations with child objects in blocks
+ *
+ * CSG operation patterns supported:
+ * - **Simple Operations**: `union()` - CSG operation without explicit children
+ * - **Block Operations**: `union() { cube(5); sphere(3); }` - multiple child objects
+ * - **Single Child**: `difference() cube(10)` - single child object
+ * - **Nested Operations**: `union() { difference() { cube(10); sphere(5); } }` - nested CSG
+ *
+ * @example Basic CSG processing
+ * ```typescript
+ * import { CSGVisitor } from './csg-visitor';
+ *
+ * const visitor = new CSGVisitor(sourceCode, errorHandler);
+ *
+ * // Process union operation
+ * const unionNode = visitor.visitModuleInstantiation(unionCST);
+ * // Returns: { type: 'union', children: [cubeNode, sphereNode] }
+ *
+ * // Process difference operation
+ * const differenceNode = visitor.visitModuleInstantiation(differenceCST);
+ * // Returns: { type: 'difference', children: [baseNode, subtractNode] }
+ * ```
+ *
+ * @example Complex CSG hierarchies
+ * ```typescript
+ * // For OpenSCAD code: union() { cube(10); difference() { sphere(8); cube(5); } }
+ * const complexCSG = visitor.visitModuleInstantiation(complexCST);
+ * // Returns nested CSG structure with union containing cube and difference
+ *
+ * // For intersection: intersection() { cube([20, 20, 20]); sphere(15); }
+ * const intersectionNode = visitor.visitModuleInstantiation(intersectionCST);
+ * // Returns: { type: 'intersection', children: [cubeNode, sphereNode] }
+ * ```
+ *
+ * @example Advanced geometric operations
+ * ```typescript
+ * // Hull operation: hull() { translate([10, 0, 0]) cube(5); sphere(3); }
+ * const hullNode = visitor.visitModuleInstantiation(hullCST);
+ * // Returns: { type: 'hull', children: [translatedCube, sphereNode] }
+ *
+ * // Minkowski sum: minkowski() { cube(2); sphere(1); }
+ * const minkowskiNode = visitor.visitModuleInstantiation(minkowskiCST);
+ * // Returns: { type: 'minkowski', children: [cubeNode, sphereNode] }
+ * ```
+ *
+ * @module csg-visitor
+ * @since 0.1.0
+ */
+
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types.js';
 import { BaseASTVisitor } from './base-ast-visitor.js';
@@ -9,7 +81,9 @@ import { ErrorHandler } from '../../error-handling/index.js'; // Added ErrorHand
 /**
  * Visitor for CSG operations (union, difference, intersection, etc.)
  *
- * @file Defines the CSGVisitor class for processing CSG operation nodes
+ * @class CSGVisitor
+ * @extends {BaseASTVisitor}
+ * @since 0.1.0
  */
 export class CSGVisitor extends BaseASTVisitor {
   constructor(source: string, protected override errorHandler: ErrorHandler) {

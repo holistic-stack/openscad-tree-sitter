@@ -1,3 +1,82 @@
+/**
+ * @file Variable references visitor for OpenSCAD parser
+ *
+ * This module implements the VariableVisitor class, which specializes in processing
+ * OpenSCAD variable references and identifier nodes, converting them to structured
+ * AST representations. Variables are fundamental to OpenSCAD's programming model,
+ * enabling data storage, parameter passing, and dynamic value computation.
+ *
+ * The VariableVisitor handles:
+ * - **Variable References**: Identifier resolution and variable access
+ * - **Identifier Processing**: Direct identifier node conversion to variable expressions
+ * - **Scope Resolution**: Variable name extraction and validation
+ * - **Expression Integration**: Variable nodes as part of larger expressions
+ * - **Error Recovery**: Graceful handling of malformed variable references
+ * - **Location Tracking**: Source location preservation for debugging and IDE integration
+ *
+ * Key features:
+ * - **Identifier Extraction**: Robust extraction of variable names from CST nodes
+ * - **Type-Safe Processing**: Conversion to strongly-typed variable expression nodes
+ * - **Error Context Preservation**: Detailed error information for debugging
+ * - **Safe Logging**: Conditional logging that handles missing error handlers
+ * - **Performance Optimization**: Efficient processing with minimal overhead
+ * - **CST Integration**: Seamless integration with tree-sitter node structures
+ *
+ * Variable processing patterns:
+ * - **Simple Variables**: `myVar` - direct variable reference
+ * - **Parameter Variables**: Function and module parameter references
+ * - **Built-in Variables**: `$fn`, `$fa`, `$fs` - OpenSCAD special variables
+ * - **Scoped Variables**: Variables within let expressions and function scopes
+ * - **Array Elements**: Variables used in array indexing expressions
+ *
+ * The visitor implements a focused processing strategy:
+ * 1. **Identifier Extraction**: Locate identifier nodes within variable contexts
+ * 2. **Name Validation**: Ensure valid variable names and handle edge cases
+ * 3. **Expression Creation**: Convert to variable expression nodes with proper typing
+ * 4. **Error Handling**: Provide detailed error context for malformed references
+ *
+ * @example Basic variable processing
+ * ```typescript
+ * import { VariableVisitor } from './variable-visitor';
+ *
+ * const visitor = new VariableVisitor(sourceCode, errorHandler);
+ *
+ * // Process variable reference
+ * const varNode = visitor.visitVariable(variableCST);
+ * // Returns: { type: 'expression', expressionType: 'variable', name: 'myVar', location: {...} }
+ *
+ * // Process identifier directly
+ * const identNode = visitor.visitIdentifier(identifierCST);
+ * // Returns: { type: 'expression', expressionType: 'variable', name: 'identifier', location: {...} }
+ * ```
+ *
+ * @example Variable processing in expressions
+ * ```typescript
+ * // For OpenSCAD code: x + y * z
+ * // Each variable (x, y, z) is processed by VariableVisitor
+ * const xVar = visitor.visitIdentifier(xCST);
+ * const yVar = visitor.visitIdentifier(yCST);
+ * const zVar = visitor.visitIdentifier(zCST);
+ * // Each returns a variable expression node
+ * ```
+ *
+ * @example Error handling for malformed variables
+ * ```typescript
+ * const visitor = new VariableVisitor(sourceCode, errorHandler);
+ *
+ * // Process malformed variable reference
+ * const result = visitor.createVariableNode(malformedCST);
+ *
+ * if (!result) {
+ *   const errors = errorHandler.getErrors();
+ *   console.log('Variable processing errors:', errors);
+ * }
+ * ```
+ *
+ * @module variable-visitor
+ * @since 0.1.0
+ */
+
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types.js';
 import { BaseASTVisitor } from './base-ast-visitor.js';
@@ -6,7 +85,23 @@ import { getLocation } from '../utils/location-utils.js';
 import { findDescendantOfType } from '../utils/node-utils.js';
 
 /**
- * Visitor for handling variable references in the AST
+ * Visitor for processing OpenSCAD variable references and identifiers.
+ *
+ * The VariableVisitor extends BaseASTVisitor to provide specialized handling for
+ * variable references and identifier nodes. It focuses on converting CST identifier
+ * nodes to properly typed variable expression nodes while maintaining error context
+ * and location information.
+ *
+ * This implementation provides:
+ * - **Focused Processing**: Specialized handling only for variable-related nodes
+ * - **Robust Extraction**: Safe identifier extraction with error handling
+ * - **Type Safety**: Conversion to strongly-typed variable expression nodes
+ * - **Error Recovery**: Graceful handling of malformed variable references
+ * - **Performance Optimization**: Minimal overhead for simple variable processing
+ *
+ * @class VariableVisitor
+ * @extends {BaseASTVisitor}
+ * @since 0.1.0
  */
 export class VariableVisitor extends BaseASTVisitor {
   /**

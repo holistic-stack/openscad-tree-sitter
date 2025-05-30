@@ -1,13 +1,76 @@
 /**
- * Visitor for control structures (if, for, let, each)
+ * @file Control structures visitor for OpenSCAD parser
  *
- * This visitor handles control structures in OpenSCAD, including:
- * - if statements
- * - for loops
- * - let expressions
- * - each statements
+ * This module implements the ControlStructureVisitor class, which specializes in processing
+ * OpenSCAD control structures and converting them to structured AST representations.
+ * Control structures are fundamental to OpenSCAD's programming model, enabling conditional
+ * logic, iteration, variable scoping, and collection processing.
  *
- * @module lib/openscad-parser/ast/visitors/control-structure-visitor
+ * The ControlStructureVisitor handles:
+ * - **If Statements**: Conditional execution with optional else branches
+ * - **For Loops**: Iteration over ranges, arrays, and collections
+ * - **Let Expressions**: Variable scoping and local assignments
+ * - **Each Statements**: Collection iteration and element processing
+ * - **Nested Structures**: Complex combinations of control structures
+ * - **Expression Integration**: Seamless integration with expression evaluation
+ *
+ * Key features:
+ * - **Specialized Sub-Visitors**: Dedicated visitors for complex control structures
+ * - **Conditional Logic**: Complete if/else statement processing with condition evaluation
+ * - **Loop Processing**: Comprehensive for loop handling with range and collection iteration
+ * - **Variable Scoping**: Let expression processing with local variable assignments
+ * - **Collection Iteration**: Each statement processing for array and object iteration
+ * - **Error Recovery**: Graceful handling of malformed control structures
+ * - **Location Tracking**: Source location preservation for debugging and IDE integration
+ *
+ * Control structure processing patterns:
+ * - **Simple Conditionals**: `if (condition) statement` - basic conditional execution
+ * - **If-Else Chains**: `if (cond1) stmt1 else if (cond2) stmt2 else stmt3` - complex conditionals
+ * - **Range Loops**: `for (i = [0:10]) statement` - numeric range iteration
+ * - **Array Loops**: `for (item = array) statement` - collection iteration
+ * - **Let Scoping**: `let (a = 10, b = 20) statement` - local variable assignments
+ * - **Each Processing**: `each array` - element-wise collection processing
+ *
+ * The visitor implements a delegation strategy using specialized sub-visitors:
+ * 1. **IfElseVisitor**: Handles complex conditional logic and else branches
+ * 2. **ForLoopVisitor**: Processes various loop patterns and iteration types
+ * 3. **ExpressionVisitor**: Evaluates conditions and expressions within control structures
+ *
+ * @example Basic control structure processing
+ * ```typescript
+ * import { ControlStructureVisitor } from './control-structure-visitor';
+ *
+ * const visitor = new ControlStructureVisitor(sourceCode, errorHandler);
+ *
+ * // Process if statement
+ * const ifNode = visitor.visitIfStatement(ifCST);
+ * // Returns: { type: 'if', condition: {...}, thenBranch: {...}, elseBranch: {...} }
+ *
+ * // Process for loop
+ * const forNode = visitor.visitForStatement(forCST);
+ * // Returns: { type: 'for_loop', variable: 'i', iterable: {...}, body: {...} }
+ * ```
+ *
+ * @example Complex control structure combinations
+ * ```typescript
+ * // For OpenSCAD code: if (x > 0) for (i = [0:x]) let (y = i * 2) cube(y);
+ * const complexNode = visitor.visitIfStatement(complexCST);
+ * // Returns nested structure with if containing for containing let
+ *
+ * // For collection iteration: for (point = points) translate(point) sphere(1);
+ * const iterationNode = visitor.visitForStatement(iterationCST);
+ * // Returns for loop with array iteration and transformation
+ * ```
+ *
+ * @example Variable scoping with let expressions
+ * ```typescript
+ * // For OpenSCAD code: let (size = 10, height = size * 2) cube([size, size, height]);
+ * const letNode = visitor.visitLetExpression(letCST);
+ * // Returns let expression with local variable assignments and cube body
+ * ```
+ *
+ * @module control-structure-visitor
+ * @since 0.1.0
  */
 
 import { Node as TSNode } from 'web-tree-sitter';
@@ -21,7 +84,28 @@ import { ExpressionVisitor } from './expression-visitor.js';
 import { ErrorHandler } from '../../error-handling/index.js'; // Added ErrorHandler import
 
 /**
- * Visitor for control structures
+ * Visitor for processing OpenSCAD control structures with specialized sub-visitors.
+ *
+ * The ControlStructureVisitor extends BaseASTVisitor to provide comprehensive handling
+ * for all types of control structures in OpenSCAD. It implements a delegation pattern
+ * using specialized sub-visitors for complex control structures while handling simpler
+ * structures directly.
+ *
+ * This implementation provides:
+ * - **Delegation Strategy**: Uses specialized visitors for complex control structures
+ * - **Direct Processing**: Handles simpler structures like let and each directly
+ * - **Expression Integration**: Seamless integration with expression evaluation
+ * - **Error Context Preservation**: Maintains detailed error information throughout processing
+ * - **Performance Optimization**: Efficient routing to appropriate processing methods
+ *
+ * The visitor maintains three specialized sub-visitors:
+ * - **IfElseVisitor**: Handles conditional logic and else branches
+ * - **ForLoopVisitor**: Processes various loop patterns and iteration types
+ * - **ExpressionVisitor**: Evaluates expressions within control structure contexts
+ *
+ * @class ControlStructureVisitor
+ * @extends {BaseASTVisitor}
+ * @since 0.1.0
  */
 export class ControlStructureVisitor extends BaseASTVisitor {
   private ifElseVisitor: IfElseVisitor;

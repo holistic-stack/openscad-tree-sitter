@@ -1,3 +1,75 @@
+/**
+ * @file Function definitions and calls visitor for OpenSCAD parser
+ *
+ * This module implements the FunctionVisitor class, which specializes in processing
+ * OpenSCAD function definitions and function calls, converting them to structured
+ * AST representations. Functions are essential to OpenSCAD's computational model,
+ * enabling mathematical calculations, code reuse, and parametric design patterns.
+ *
+ * The FunctionVisitor handles:
+ * - **Function Definitions**: User-defined functions with parameters and expressions
+ * - **Function Calls**: Invocation of user-defined and built-in functions
+ * - **Parameter Processing**: Function parameter extraction and validation
+ * - **Expression Processing**: Function body expression parsing and evaluation
+ * - **Return Value Handling**: Processing of function return expressions
+ * - **Scope Management**: Function parameter scope and variable resolution
+ *
+ * Key features:
+ * - **Parametric Functions**: Support for functions with typed parameters and default values
+ * - **Expression Integration**: Comprehensive expression parsing for function bodies
+ * - **Call Resolution**: Function call processing with argument binding
+ * - **Type Safety**: Parameter and return type validation
+ * - **Error Recovery**: Graceful handling of malformed function definitions
+ * - **Location Tracking**: Source location preservation for debugging and IDE integration
+ *
+ * Function processing patterns:
+ * - **Simple Functions**: `function name() = expression;` - functions without parameters
+ * - **Parametric Functions**: `function name(param1, param2=default) = expression;` - functions with parameters
+ * - **Function Calls**: `name(arg1, arg2)` - calling user-defined functions
+ * - **Mathematical Functions**: `function area(r) = PI * r * r;` - mathematical calculations
+ * - **Conditional Functions**: `function abs(x) = x >= 0 ? x : -x;` - conditional expressions
+ *
+ * The visitor implements a dual processing strategy:
+ * 1. **Function Definitions**: Extract name, parameters, and expression for reusable functions
+ * 2. **Function Calls**: Process invocations with argument binding and expression evaluation
+ *
+ * @example Basic function processing
+ * ```typescript
+ * import { FunctionVisitor } from './function-visitor';
+ *
+ * const visitor = new FunctionVisitor(sourceCode, errorHandler);
+ *
+ * // Process function definition
+ * const funcDefNode = visitor.visitFunctionDefinition(funcDefCST);
+ * // Returns: { type: 'function_definition', name: 'add', parameters: [...], expression: {...} }
+ *
+ * // Process function call
+ * const funcCallNode = visitor.createFunctionCallNode(funcCallCST, 'add', args);
+ * // Returns: { type: 'function_call', name: 'add', arguments: [...] }
+ * ```
+ *
+ * @example Mathematical function processing
+ * ```typescript
+ * // For OpenSCAD code: function area(radius) = PI * radius * radius;
+ * const funcNode = visitor.visitFunctionDefinition(funcCST);
+ * // Returns function definition with mathematical expression
+ *
+ * // For function call: area(5)
+ * const callNode = visitor.createFunctionCallNode(callCST, 'area', [radiusArg]);
+ * // Returns function call with bound argument
+ * ```
+ *
+ * @example Conditional function processing
+ * ```typescript
+ * // For OpenSCAD code: function abs(x) = x >= 0 ? x : -x;
+ * const conditionalFunc = visitor.visitFunctionDefinition(conditionalCST);
+ * // Returns function definition with conditional expression
+ * ```
+ *
+ * @module function-visitor
+ * @since 0.1.0
+ */
+
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types.js';
 import { BaseASTVisitor } from './base-ast-visitor.js';
@@ -9,9 +81,23 @@ import {
 import { ErrorHandler } from '../../error-handling/index.js'; // Added ErrorHandler import
 
 /**
- * Visitor for function definitions and calls
+ * Visitor for processing OpenSCAD function definitions and calls.
  *
- * @file Defines the FunctionVisitor class for processing function nodes
+ * The FunctionVisitor extends BaseASTVisitor to provide specialized handling for
+ * user-defined functions and function invocations. It manages the complex process
+ * of extracting function parameters, processing function expressions, and handling
+ * both simple and parametric function patterns.
+ *
+ * This implementation provides:
+ * - **Function Definition Processing**: Complete extraction of function metadata and expressions
+ * - **Function Call Processing**: Argument binding and call resolution
+ * - **Parameter Management**: Type-safe parameter extraction and validation
+ * - **Expression Integration**: Seamless integration with expression evaluation system
+ * - **Error Context Preservation**: Detailed error information for debugging
+ *
+ * @class FunctionVisitor
+ * @extends {BaseASTVisitor}
+ * @since 0.1.0
  */
 export class FunctionVisitor extends BaseASTVisitor {
   constructor(source: string, protected override errorHandler: ErrorHandler) {

@@ -1,3 +1,35 @@
+/**
+ * @file Argument extraction utilities for OpenSCAD parser
+ *
+ * This module provides utilities for extracting and converting function arguments
+ * from Tree-sitter CST nodes into structured AST parameter objects. It handles
+ * both positional and named arguments, supporting various OpenSCAD data types
+ * including numbers, strings, booleans, vectors, ranges, and expressions.
+ *
+ * The argument extractor is a critical component of the AST generation process,
+ * responsible for:
+ * - Parsing function call arguments from CST nodes
+ * - Converting raw values to typed ParameterValue objects
+ * - Handling named vs positional argument patterns
+ * - Supporting complex expressions and nested structures
+ * - Providing error handling and recovery
+ *
+ * @example Basic usage
+ * ```typescript
+ * import { extractArguments } from './argument-extractor';
+ *
+ * // Extract arguments from a function call like cube(10, center=true)
+ * const args = extractArguments(argumentsNode);
+ * // Returns: [
+ * //   { value: 10 },                    // positional argument
+ * //   { name: 'center', value: true }   // named argument
+ * // ]
+ * ```
+ *
+ * @module argument-extractor
+ * @since 0.1.0
+ */
+
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types.js';
 import { extractValue as extractParameterValue, extractValueEnhanced } from './value-extractor.js';
@@ -119,10 +151,71 @@ function convertNodeToParameterValue(
 }
 
 /**
- * Extract arguments from an arguments node or argument_list node
- * @param argsNode The arguments node or argument_list node
- * @param errorHandler Optional error handler for enhanced expression evaluation
- * @returns An array of parameters
+ * Extracts function arguments from Tree-sitter CST nodes and converts them to AST parameters.
+ *
+ * This function is the main entry point for argument extraction, handling both simple
+ * and complex argument patterns found in OpenSCAD function calls. It supports:
+ * - Positional arguments: `cube(10, 20, 30)`
+ * - Named arguments: `cube(size=[10, 20, 30], center=true)`
+ * - Mixed arguments: `cube(10, center=true)`
+ * - Complex expressions: `cube(x + 5, center=condition)`
+ * - Vector arguments: `translate([x, y, z])`
+ * - Range arguments: `for(i = [0:10:100])`
+ *
+ * The function handles different CST node types that can contain arguments:
+ * - `arguments`: Standard argument container
+ * - `argument_list`: Alternative argument container format
+ * - `argument`: Individual argument nodes
+ * - `named_argument`: Explicitly named arguments
+ *
+ * @param argsNode - The CST node containing the arguments to extract
+ * @param errorHandler - Optional error handler for enhanced expression evaluation and error reporting
+ * @returns Array of Parameter objects with optional names and typed values
+ *
+ * @example Extracting positional arguments
+ * ```typescript
+ * // For OpenSCAD code: cube(10, 20, 30)
+ * const args = extractArguments(argumentsNode);
+ * // Returns: [
+ * //   { value: 10 },
+ * //   { value: 20 },
+ * //   { value: 30 }
+ * // ]
+ * ```
+ *
+ * @example Extracting named arguments
+ * ```typescript
+ * // For OpenSCAD code: cylinder(h=20, r=5, center=true)
+ * const args = extractArguments(argumentsNode);
+ * // Returns: [
+ * //   { name: 'h', value: 20 },
+ * //   { name: 'r', value: 5 },
+ * //   { name: 'center', value: true }
+ * // ]
+ * ```
+ *
+ * @example Extracting mixed arguments
+ * ```typescript
+ * // For OpenSCAD code: cube([10, 20, 30], center=true)
+ * const args = extractArguments(argumentsNode);
+ * // Returns: [
+ * //   { value: [10, 20, 30] },
+ * //   { name: 'center', value: true }
+ * // ]
+ * ```
+ *
+ * @example With error handling
+ * ```typescript
+ * const errorHandler = new SimpleErrorHandler();
+ * const args = extractArguments(argumentsNode, errorHandler);
+ *
+ * if (errorHandler.getErrors().length > 0) {
+ *   console.log('Argument extraction errors:', errorHandler.getErrors());
+ * }
+ * ```
+ *
+ * @since 0.1.0
+ * @category Extractors
  */
 export function extractArguments(argsNode: TSNode, errorHandler?: ErrorHandler): ast.Parameter[] {
   console.log(

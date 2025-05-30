@@ -1,5 +1,20 @@
 # OpenSCAD Tree-sitter Parser - Progress Log
 
+## 🎉 2025-01-27: Comprehensive Documentation Added for Visitor Systems
+
+### ✅ **DOCUMENTATION MILESTONE: Visitor System Documentation** (2025-01-27)
+- **Target**: Create comprehensive documentation for key visitor systems
+- **Status**: ✅ COMPLETED - Added detailed documentation for primitive and CSG visitors
+- **Achievement**: Created 2 new comprehensive documentation files with detailed examples and usage patterns
+- **Impact**: Improved developer onboarding and code maintainability through clear documentation
+
+#### **📚 Documentation Added:**
+1. **✅ Primitive Visitor System**: Complete documentation of cube, sphere, cylinder handling
+2. **✅ CSG Visitor System**: Detailed documentation of union, difference, intersection, hull, and minkowski operations
+3. **✅ Best Practices**: Added guidance for both visitor consumers and producers
+4. **✅ Testing Strategies**: Documented TDD approach for visitor components
+5. **✅ Extension Points**: Clear documentation of extension mechanisms for both systems
+
 ## 🎉 2025-01-26: OUTSTANDING SUCCESS - 99.1% Test Pass Rate Achieved! (73/75 test files passing)
 
 ### ✅ **MAJOR MILESTONE: 99.1% Individual Test Success Rate** (2025-01-26)

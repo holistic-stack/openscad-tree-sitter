@@ -1,3 +1,24 @@
+/**
+ * @file Base AST visitor implementation for OpenSCAD parser
+ *
+ * This module provides the base implementation of the ASTVisitor interface, serving as the
+ * foundation for all specialized visitors in the OpenSCAD parser. The BaseASTVisitor implements
+ * the Visitor pattern to traverse Tree-sitter CST nodes and convert them into structured AST nodes.
+ *
+ * The base visitor provides:
+ * - Default implementations for all visit methods
+ * - Common utility functions for node processing
+ * - Parameter extraction and conversion utilities
+ * - Error handling integration
+ * - Extensible architecture for specialized visitors
+ *
+ * Specialized visitors extend this base class and override specific methods to handle
+ * their domain-specific OpenSCAD constructs (primitives, transformations, expressions, etc.).
+ *
+ * @module base-ast-visitor
+ * @since 0.1.0
+ */
+
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types.js';
 import type { ASTVisitor } from './ast-visitor.js';
@@ -8,9 +29,38 @@ import {
 import type { ExtractedParameter } from '../extractors/argument-extractor.js';
 
 /**
- * Convert an ExtractedParameter to a ParameterValue
- * @param value The ExtractedParameter object to convert
- * @returns A ParameterValue object
+ * Converts an ExtractedParameter to a ParameterValue for AST node creation.
+ *
+ * This utility function handles the conversion between the raw extracted parameter
+ * values from the CST and the structured ParameterValue types used in AST nodes.
+ * It supports various input types including primitives, arrays, and complex Value objects.
+ *
+ * @param value - The extracted parameter value to convert
+ * @returns A properly typed ParameterValue suitable for AST nodes
+ *
+ * @example Converting primitive values
+ * ```typescript
+ * const numberParam = convertExtractedValueToParameterValue(42);
+ * // Returns: 42
+ *
+ * const boolParam = convertExtractedValueToParameterValue(true);
+ * // Returns: true
+ *
+ * const stringParam = convertExtractedValueToParameterValue("hello");
+ * // Returns: "hello"
+ * ```
+ *
+ * @example Converting vector values
+ * ```typescript
+ * const vector2D = convertExtractedValueToParameterValue([10, 20]);
+ * // Returns: [10, 20] as Vector2D
+ *
+ * const vector3D = convertExtractedValueToParameterValue([10, 20, 30]);
+ * // Returns: [10, 20, 30] as Vector3D
+ * ```
+ *
+ * @since 0.1.0
+ * @category Utilities
  */
 function convertExtractedValueToParameterValue(
   value: ExtractedParameter | string | number | boolean | unknown[]
@@ -93,16 +143,83 @@ function convertValueToParameterValue(value: ast.Value): ast.ParameterValue {
 }
 
 /**
- * Base implementation of the ASTVisitor interface
- * Provides default implementations for all visit methods
+ * Abstract base class that provides the foundation for all AST visitors in the OpenSCAD parser.
  *
- * @file Defines the BaseASTVisitor class that implements the ASTVisitor interface
+ * The BaseASTVisitor implements the Visitor pattern to traverse Tree-sitter CST nodes and
+ * convert them into structured AST nodes. It provides default implementations for all visit
+ * methods defined in the ASTVisitor interface, allowing specialized visitors to override
+ * only the methods they need to customize.
+ *
+ * This class serves as the backbone of the AST generation process, handling:
+ * - Node type routing and delegation
+ * - Parameter extraction and conversion
+ * - Error handling integration
+ * - Common traversal patterns
+ * - Source location tracking
+ *
+ * Specialized visitors extend this class to handle specific OpenSCAD language constructs:
+ * - PrimitiveVisitor: cube, sphere, cylinder, etc.
+ * - TransformVisitor: translate, rotate, scale, etc.
+ * - CSGVisitor: union, difference, intersection, etc.
+ * - ExpressionVisitor: binary operations, variables, etc.
+ *
+ * @example Creating a custom visitor
+ * ```typescript
+ * class CustomVisitor extends BaseASTVisitor {
+ *   protected createASTNodeForFunction(
+ *     node: TSNode,
+ *     functionName: string,
+ *     args: ast.Parameter[]
+ *   ): ast.ASTNode | null {
+ *     switch (functionName) {
+ *       case 'my_custom_function':
+ *         return this.createCustomNode(node, args);
+ *       default:
+ *         return null;
+ *     }
+ *   }
+ *
+ *   private createCustomNode(node: TSNode, args: ast.Parameter[]): ast.ASTNode {
+ *     return {
+ *       type: 'custom',
+ *       // ... custom properties
+ *     };
+ *   }
+ * }
+ * ```
+ *
+ * @example Using with error handling
+ * ```typescript
+ * const errorHandler = new SimpleErrorHandler();
+ * const visitor = new PrimitiveVisitor(sourceCode, errorHandler);
+ *
+ * const astNode = visitor.visitNode(cstNode);
+ * if (!astNode) {
+ *   const errors = errorHandler.getErrors();
+ *   console.log('Parsing errors:', errors);
+ * }
+ * ```
+ *
+ * @since 0.1.0
+ * @category Visitors
  */
 export abstract class BaseASTVisitor implements ASTVisitor {
   /**
-   * Create a new BaseASTVisitor
-   * @param source The source code
-   * @param errorHandler The error handler instance (optional for backward compatibility)
+   * Creates a new BaseASTVisitor instance.
+   *
+   * @param source - The original OpenSCAD source code being parsed
+   * @param errorHandler - Optional error handler for logging and error collection
+   *
+   * @example Basic usage
+   * ```typescript
+   * const visitor = new MyCustomVisitor(sourceCode);
+   * ```
+   *
+   * @example With error handling
+   * ```typescript
+   * const errorHandler = new SimpleErrorHandler();
+   * const visitor = new MyCustomVisitor(sourceCode, errorHandler);
+   * ```
    */
   constructor(protected source: string, protected errorHandler?: { logInfo(message: string, context?: string, node?: unknown): void; logDebug(message: string, context?: string, node?: unknown): void; logWarning(message: string, context?: string, node?: unknown): void; logError(message: string, context?: string, node?: unknown): void; handleError(error: Error, context?: string, node?: unknown): void }) {}
 

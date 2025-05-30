@@ -1,3 +1,77 @@
+/**
+ * @file Primitive shapes visitor for OpenSCAD parser
+ *
+ * This module implements the PrimitiveVisitor class, which specializes in processing
+ * OpenSCAD primitive shape nodes and converting them to structured AST representations.
+ * Primitive shapes are the fundamental building blocks of 3D models in OpenSCAD.
+ *
+ * The PrimitiveVisitor handles all basic geometric primitives:
+ * - **3D Primitives**: cube, sphere, cylinder, polyhedron
+ * - **2D Primitives**: square, circle, polygon
+ * - **Text Primitives**: text (for 2D/3D text generation)
+ *
+ * Key features:
+ * - **Parameter Extraction**: Handles both positional and named parameters
+ * - **Type Safety**: Validates parameter types and provides sensible defaults
+ * - **Vector Support**: Processes vector parameters for size and positioning
+ * - **Resolution Parameters**: Supports $fn, $fa, $fs for mesh quality control
+ * - **Error Recovery**: Graceful handling of malformed or missing parameters
+ * - **Specialized Extractors**: Uses dedicated extractors for complex primitives
+ *
+ * The visitor implements a two-tier processing strategy:
+ * 1. **Specialized Extractors**: For complex primitives with dedicated extraction logic
+ * 2. **Generic Processing**: For standard parameter extraction and validation
+ *
+ * Parameter handling patterns:
+ * - **Positional Parameters**: `cube(10)` - size parameter by position
+ * - **Named Parameters**: `cube(size=10, center=true)` - explicit parameter names
+ * - **Mixed Parameters**: `cube(10, center=true)` - combination of both
+ * - **Vector Parameters**: `cube([10, 20, 30])` - multi-dimensional values
+ * - **Resolution Parameters**: `sphere(r=5, $fn=20)` - mesh quality control
+ *
+ * @example Basic primitive processing
+ * ```typescript
+ * import { PrimitiveVisitor } from './primitive-visitor';
+ *
+ * const visitor = new PrimitiveVisitor(sourceCode, errorHandler);
+ *
+ * // Process cube with size parameter
+ * const cubeNode = visitor.visitAccessorExpression(cubeCST);
+ * // Returns: { type: 'cube', size: 10, center: false }
+ *
+ * // Process sphere with radius and resolution
+ * const sphereNode = visitor.visitAccessorExpression(sphereCST);
+ * // Returns: { type: 'sphere', radius: 5, fn: 20 }
+ * ```
+ *
+ * @example Complex parameter handling
+ * ```typescript
+ * // For OpenSCAD code: cube([10, 20, 30], center=true)
+ * const complexCube = visitor.visitAccessorExpression(complexCST);
+ * // Returns: { type: 'cube', size: [10, 20, 30], center: true }
+ *
+ * // For OpenSCAD code: cylinder(h=20, r1=5, r2=10, $fn=16)
+ * const cylinder = visitor.visitAccessorExpression(cylinderCST);
+ * // Returns: { type: 'cylinder', height: 20, radius1: 5, radius2: 10, fn: 16 }
+ * ```
+ *
+ * @example Error handling and recovery
+ * ```typescript
+ * const visitor = new PrimitiveVisitor(sourceCode, errorHandler);
+ *
+ * // Process malformed primitive
+ * const result = visitor.visitAccessorExpression(malformedCST);
+ *
+ * if (!result) {
+ *   const errors = errorHandler.getErrors();
+ *   console.log('Processing errors:', errors);
+ * }
+ * ```
+ *
+ * @module primitive-visitor
+ * @since 0.1.0
+ */
+
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types.js';
 import { BaseASTVisitor } from './base-ast-visitor.js';
@@ -16,7 +90,9 @@ import { ErrorHandler } from '../../error-handling/index.js'; // Added ErrorHand
 /**
  * Visitor for primitive shapes (cube, sphere, cylinder, etc.)
  *
- * @file Defines the PrimitiveVisitor class for processing primitive shape nodes
+ * @class PrimitiveVisitor
+ * @extends {BaseASTVisitor}
+ * @since 0.1.0
  */
 export class PrimitiveVisitor extends BaseASTVisitor {
   constructor(source: string, protected override errorHandler: ErrorHandler) {

@@ -1,3 +1,79 @@
+/**
+ * @file Transform operations visitor for OpenSCAD parser
+ *
+ * This module implements the TransformVisitor class, which specializes in processing
+ * OpenSCAD transformation operations and converting them to structured AST representations.
+ * Transformations are fundamental operations that modify the position, orientation, and
+ * scale of geometric objects in 3D space.
+ *
+ * The TransformVisitor handles all transformation operations:
+ * - **Spatial Transforms**: translate, rotate, scale, mirror
+ * - **Visual Transforms**: color (appearance modification)
+ * - **Matrix Transforms**: multmatrix (arbitrary 4x4 matrix transformations)
+ * - **2D Transforms**: offset (2D path operations)
+ * - **Advanced Transforms**: hull, minkowski (geometric operations)
+ *
+ * Key features:
+ * - **Vector Processing**: Handles 2D and 3D vector parameters for spatial operations
+ * - **Matrix Operations**: Supports 4x4 transformation matrices for complex operations
+ * - **Child Processing**: Manages transformation hierarchies with child objects
+ * - **Parameter Validation**: Type-safe parameter extraction with sensible defaults
+ * - **Error Recovery**: Graceful handling of malformed transformation parameters
+ * - **Composite Integration**: Works seamlessly with the composite visitor pattern
+ *
+ * The visitor implements a dual processing strategy:
+ * 1. **Accessor Expressions**: For simple transformations without children
+ * 2. **Module Instantiations**: For transformations with child objects
+ *
+ * Transformation patterns supported:
+ * - **Simple Transforms**: `translate([10, 0, 0])` - transformation without children
+ * - **Transform with Child**: `translate([10, 0, 0]) cube(5)` - single child object
+ * - **Transform with Block**: `translate([10, 0, 0]) { cube(5); sphere(3); }` - multiple children
+ * - **Nested Transforms**: `translate([10, 0, 0]) rotate([0, 0, 45]) cube(5)` - transformation chains
+ *
+ * @example Basic transformation processing
+ * ```typescript
+ * import { TransformVisitor } from './transform-visitor';
+ *
+ * const visitor = new TransformVisitor(sourceCode, compositeVisitor, errorHandler);
+ *
+ * // Process translate operation
+ * const translateNode = visitor.visitModuleInstantiation(translateCST);
+ * // Returns: { type: 'translate', v: [10, 0, 0], children: [...] }
+ *
+ * // Process rotation with child
+ * const rotateNode = visitor.visitModuleInstantiation(rotateCST);
+ * // Returns: { type: 'rotate', a: [0, 0, 45], children: [cubeNode] }
+ * ```
+ *
+ * @example Complex transformation hierarchies
+ * ```typescript
+ * // For OpenSCAD code: translate([10, 0, 0]) rotate([0, 0, 45]) { cube(5); sphere(3); }
+ * const complexTransform = visitor.visitModuleInstantiation(complexCST);
+ * // Returns nested transformation with multiple children
+ *
+ * // For matrix transformation: multmatrix([[1,0,0,10],[0,1,0,0],[0,0,1,0],[0,0,0,1]]) cube(5)
+ * const matrixTransform = visitor.visitModuleInstantiation(matrixCST);
+ * // Returns: { type: 'multmatrix', m: [[...]], children: [cubeNode] }
+ * ```
+ *
+ * @example Error handling and parameter validation
+ * ```typescript
+ * const visitor = new TransformVisitor(sourceCode, compositeVisitor, errorHandler);
+ *
+ * // Process malformed transformation
+ * const result = visitor.visitModuleInstantiation(malformedCST);
+ *
+ * if (!result) {
+ *   const errors = errorHandler.getErrors();
+ *   console.log('Transformation errors:', errors);
+ * }
+ * ```
+ *
+ * @module transform-visitor
+ * @since 0.1.0
+ */
+
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types.js';
 import { BaseASTVisitor } from './base-ast-visitor.js';
@@ -14,7 +90,9 @@ import { ErrorHandler } from '../../error-handling/index.js'; // Added ErrorHand
 /**
  * Visitor for transform operations (translate, rotate, scale, mirror)
  *
- * @file Defines the TransformVisitor class for processing transform nodes
+ * @class TransformVisitor
+ * @extends {BaseASTVisitor}
+ * @since 0.1.0
  */
 export class TransformVisitor extends BaseASTVisitor {
   /**

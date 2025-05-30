@@ -1,3 +1,74 @@
+/**
+ * @file Module definitions and instantiations visitor for OpenSCAD parser
+ *
+ * This module implements the ModuleVisitor class, which specializes in processing
+ * OpenSCAD module definitions and instantiations, converting them to structured
+ * AST representations. Modules are fundamental to OpenSCAD's modular programming
+ * approach, allowing code reuse and parametric design.
+ *
+ * The ModuleVisitor handles:
+ * - **Module Definitions**: User-defined modules with parameters and body
+ * - **Module Instantiations**: Calls to user-defined modules with arguments
+ * - **Built-in Transformations**: Transform operations (translate, rotate, scale, etc.)
+ * - **Parameter Processing**: Module parameter extraction and validation
+ * - **Child Management**: Processing of child objects within module contexts
+ *
+ * Key features:
+ * - **Parametric Modules**: Support for modules with typed parameters and default values
+ * - **Transformation Integration**: Built-in support for common transformation modules
+ * - **Child Object Processing**: Proper handling of child objects and nested structures
+ * - **Parameter Validation**: Type checking and validation of module parameters
+ * - **Error Recovery**: Graceful handling of malformed module definitions
+ * - **Location Tracking**: Source location preservation for debugging and IDE integration
+ *
+ * Module processing patterns:
+ * - **Simple Modules**: `module name() { ... }` - modules without parameters
+ * - **Parametric Modules**: `module name(param1, param2=default) { ... }` - modules with parameters
+ * - **Module Instantiation**: `name(arg1, arg2);` - calling user-defined modules
+ * - **Transform Modules**: `translate([1,0,0]) cube(5);` - transformation operations
+ * - **Nested Modules**: Modules containing other module calls and definitions
+ *
+ * The visitor implements a dual processing strategy:
+ * 1. **Module Definitions**: Extract name, parameters, and body for reusable modules
+ * 2. **Module Instantiations**: Process calls with argument binding and child processing
+ *
+ * @example Basic module processing
+ * ```typescript
+ * import { ModuleVisitor } from './module-visitor';
+ *
+ * const visitor = new ModuleVisitor(sourceCode, errorHandler);
+ *
+ * // Process module definition
+ * const moduleDefNode = visitor.visitModuleDefinition(moduleDefCST);
+ * // Returns: { type: 'module_definition', name: 'mycube', parameters: [...], body: [...] }
+ *
+ * // Process module instantiation
+ * const moduleInstNode = visitor.visitModuleInstantiation(moduleInstCST);
+ * // Returns: { type: 'module_instantiation', name: 'mycube', arguments: [...], children: [...] }
+ * ```
+ *
+ * @example Parametric module processing
+ * ```typescript
+ * // For OpenSCAD code: module box(size=[10,10,10], center=false) { cube(size, center); }
+ * const moduleNode = visitor.visitModuleDefinition(moduleCST);
+ * // Returns module definition with typed parameters and cube body
+ *
+ * // For module call: box([20,15,10], true);
+ * const callNode = visitor.visitModuleInstantiation(callCST);
+ * // Returns module instantiation with bound arguments
+ * ```
+ *
+ * @example Transform module processing
+ * ```typescript
+ * // For OpenSCAD code: translate([10,0,0]) rotate([0,0,45]) cube(5);
+ * const transformNode = visitor.visitModuleInstantiation(transformCST);
+ * // Returns nested transformation structure with cube child
+ * ```
+ *
+ * @module module-visitor
+ * @since 0.1.0
+ */
+
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types.js';
 import { BaseASTVisitor } from './base-ast-visitor.js';
@@ -9,9 +80,16 @@ import {
 import { ErrorHandler } from '../../error-handling/index.js'; // Added ErrorHandler import
 
 /**
- * Visitor for module definitions and instantiations
+ * Visitor for processing OpenSCAD module definitions and instantiations.
  *
- * @file Defines the ModuleVisitor class for processing module nodes
+ * The ModuleVisitor extends BaseASTVisitor to provide specialized handling for
+ * user-defined modules and built-in transformation operations. It manages the
+ * complex process of extracting module parameters, processing module bodies,
+ * and handling both simple and parametric module patterns.
+ *
+ * @class ModuleVisitor
+ * @extends {BaseASTVisitor}
+ * @since 0.1.0
  */
 export class ModuleVisitor extends BaseASTVisitor {
   constructor(source: string, protected override errorHandler: ErrorHandler) {

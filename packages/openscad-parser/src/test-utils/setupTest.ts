@@ -29,6 +29,7 @@ vi.mocked(fetch).mockImplementation(url => {
     const uint8Array = new Uint8Array(localFile);
     return Promise.resolve({
       ok: true,
+      arrayBuffer: () => Promise.resolve(uint8Array.buffer),
       bytes: () => Promise.resolve(uint8Array),
     } as unknown as Response);
   } catch (error) {

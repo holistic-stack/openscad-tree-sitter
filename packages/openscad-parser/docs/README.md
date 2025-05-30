@@ -1,6 +1,14 @@
 # OpenSCAD Parser
 
-A robust TypeScript parser for OpenSCAD code that generates structured Abstract Syntax Trees (AST) using Tree-sitter for initial parsing and a sophisticated visitor pattern for AST generation.
+A comprehensive TypeScript parser for OpenSCAD that converts Tree-sitter Concrete Syntax Trees (CST) to structured Abstract Syntax Trees (AST) with full type safety and error handling.
+
+## Overview
+
+The OpenSCAD Parser is part of the OpenSCAD Tree-sitter monorepo and provides sophisticated parsing capabilities for OpenSCAD code. It follows a layered architecture:
+
+1. **Tree-sitter Layer**: Low-level syntax parsing using the `tree-sitter-openscad` grammar
+2. **Visitor Pattern Layer**: Converts CST to structured AST using specialized visitors
+3. **Error Handling Layer**: Comprehensive error reporting and recovery mechanisms
 
 ## Features
 
@@ -9,7 +17,8 @@ A robust TypeScript parser for OpenSCAD code that generates structured Abstract 
 - 🔧 **Extensible**: Visitor pattern architecture for easy customization
 - 📊 **Comprehensive**: Supports all OpenSCAD language constructs
 - 🛡️ **Error Handling**: Robust error recovery and reporting
-- 📈 **Production Ready**: Thoroughly tested with 100% core functionality coverage
+- 📈 **Production Ready**: Thoroughly tested with Real Parser Pattern
+- 🧪 **Test-Driven**: No mocks - all tests use real parser instances
 
 ## Quick Start
 
@@ -22,10 +31,11 @@ npm install @openscad/parser
 ### Basic Usage
 
 ```typescript
-import { EnhancedOpenscadParser } from '@openscad/parser';
+import { EnhancedOpenscadParser, SimpleErrorHandler } from '@openscad/parser';
 
-// Create parser instance
-const parser = new EnhancedOpenscadParser();
+// Create error handler and parser
+const errorHandler = new SimpleErrorHandler();
+const parser = new EnhancedOpenscadParser(errorHandler);
 
 // Initialize the parser (loads WASM)
 await parser.init();
@@ -39,11 +49,42 @@ const code = `
 `;
 
 const ast = parser.parseAST(code);
-console.log(ast);
-// Output: [{ type: 'difference', children: [...], ... }]
+console.log(ast[0].type); // 'difference'
+console.log(ast[0].children.length); // Number of child operations
 
 // Clean up
 parser.dispose();
+```
+
+### Real Parser Pattern for Testing
+
+The library follows the "Real Parser Pattern" - no mocks are used in tests. Instead, real parser instances are created with proper lifecycle management:
+
+```typescript
+import { EnhancedOpenscadParser, SimpleErrorHandler } from '@openscad/parser';
+
+describe('OpenSCAD Parser Tests', () => {
+  let parser: EnhancedOpenscadParser;
+  let errorHandler: SimpleErrorHandler;
+
+  beforeEach(async () => {
+    errorHandler = new SimpleErrorHandler();
+    parser = new EnhancedOpenscadParser(errorHandler);
+    await parser.init();
+  });
+
+  afterEach(() => {
+    parser.dispose();
+  });
+
+  it('should parse primitives correctly', () => {
+    const ast = parser.parseAST('cube([10, 20, 30]);');
+
+    expect(ast).toHaveLength(1);
+    expect(ast[0].type).toBe('cube');
+    expect(ast[0].size).toEqual([10, 20, 30]);
+  });
+});
 ```
 
 ### Advanced Usage
@@ -97,13 +138,44 @@ graph TD
     I --> J[Structured AST]
 ```
 
-## Documentation
+## Core Components
 
-- **[API Reference](./api/)** - Complete API documentation
-- **[User Guides](./guides/)** - Getting started and advanced usage
-- **[Architecture](./architecture/)** - System design and patterns
-- **[Examples](./examples/)** - Code examples and use cases
-- **[Contributing](./contributing/)** - Development and contribution guidelines
+### Parsers
+
+- **[OpenscadParser](./api/parser.md#openscadparser)**: Basic CST parsing using Tree-sitter
+- **[EnhancedOpenscadParser](./api/parser.md#enhancedopenscadparser)**: Full AST generation with error handling
+
+### AST Types
+
+- **[Primitive Nodes](./api/ast-types.md#primitive-nodes)**: `cube`, `sphere`, `cylinder`, `polyhedron`
+- **[Transform Nodes](./api/ast-types.md#transform-nodes)**: `translate`, `rotate`, `scale`, `mirror`
+- **[CSG Nodes](./api/ast-types.md#csg-nodes)**: `union`, `difference`, `intersection`
+- **[Expression Nodes](./api/ast-types.md#expression-nodes)**: Variables, literals, operations
+
+### Error Handling
+
+- **[SimpleErrorHandler](./api/error-handling.md#simpleerrorhandler)**: Basic error collection
+- **[IErrorHandler](./api/error-handling.md#ierrorhandler)**: Interface for custom error handlers
+
+## API Reference
+
+- [Parser Classes](./api/parser.md) - Complete parser documentation
+- [AST Types](./api/ast-types.md) - All AST node interfaces and types
+- [Error Handling](./api/error-handling.md) - Error classes and handling patterns
+- [Utilities](./api/utilities.md) - Helper functions and type guards
+
+## Advanced Usage
+
+- [Architecture Deep Dive](./architecture.md) - Technical implementation details
+- [Testing Guide](./testing.md) - Real Parser Pattern and test strategies
+- [Performance Optimization](./examples/performance.md) - Large file handling
+
+## Examples
+
+- [Basic Usage](./examples/basic-usage.md) - Simple parsing scenarios
+- [Advanced Parsing](./examples/advanced-parsing.md) - Complex OpenSCAD syntax
+- [Error Handling](./examples/error-handling.md) - Error scenarios and recovery
+- [Performance](./examples/performance.md) - Optimization strategies
 
 ## Supported OpenSCAD Features
 

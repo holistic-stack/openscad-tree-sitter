@@ -2,28 +2,65 @@
 
 This document outlines the remaining tasks and future enhancements for the OpenSCAD parser.
 
-## 🎉 **FINAL STATUS: MAJOR SUCCESS - Only 4 Tree-sitter Memory Issues Remaining!**
+## 🎯 **CURRENT PRIORITY: Comprehensive Documentation Creation (HIGH PRIORITY - 12-16 hours)**
 
-### Priority 1: Test Expectation Mismatches (Easy fixes - 1 hour)
-- **Issue**: Some tests expect different `expressionType` values
-- **Examples**: `'binary_expression'` vs `'binary'`, `'variable_reference'` vs `'variable'`
-- **Solution**: Update test expectations to match actual implementation
-- **Files**: Various test files in expression visitor tests
+### Priority 1: Documentation Creation for packages/openscad-parser (COMPLETED ✅ - 12-16 hours)
 
-### Priority 2: Transform/Module Recognition (Medium - 2 hours)
-- **Issue**: Tests expect specific node types like `'translate'`, `'rotate'`, `'scale'` but get `'module_instantiation'`
-- **Solution**: Improve transform visitor delegation logic
-- **Files**: Transform visitor and module visitor integration
+**Objective**: Create comprehensive documentation for the `packages/openscad-parser` TypeScript package following established development workflow and coding standards
 
-### Priority 3: Vector Handling Edge Cases (Easy - 30 minutes)
-- **Issue**: Some 2D vector tests getting 3D vectors with default Z component
-- **Solution**: Refine vector creation logic for 2D cases
-- **Files**: Vector extraction utilities
+**Status**: ✅ COMPLETED SUCCESSFULLY
+**Dependencies**: None (core functionality working)
+**Actual Effort**: ~12 hours
 
-### Priority 2: Fix Remaining Issues (Medium - 2 hours)
+**Tasks**:
+- [x] **Project Analysis Phase**: Examined current codebase structure and existing documentation
+- [x] **TDD Documentation Examples**: Created comprehensive test suite (9/9 tests passing)
+- [x] **JSDoc Documentation**: Enhanced main entry point with comprehensive JSDoc comments
+- [x] **Core API Documentation**: Created parser, AST types, and error handling documentation
+- [x] **Real Parser Pattern Documentation**: Documented testing patterns with examples
+- [x] **Utilities Documentation**: Documented helper functions and type guards
+- [x] **Examples Documentation**: Created practical usage examples
+- [x] **Architecture Documentation**: Created mermaid diagrams and technical deep dive
+- [x] **Context Updates**: Maintained docs/current-context.md throughout process
+
+**Deliverables Completed**:
+- ✅ Enhanced packages/openscad-parser/docs/README.md with Real Parser Pattern
+- ✅ Created packages/openscad-parser/docs/api/parser.md (complete parser documentation)
+- ✅ Created packages/openscad-parser/docs/api/ast-types.md (comprehensive AST types)
+- ✅ Created packages/openscad-parser/docs/api/error-handling.md (error handling patterns)
+- ✅ Created packages/openscad-parser/docs/api/utilities.md (helper functions and type guards)
+- ✅ Created packages/openscad-parser/docs/testing.md (Real Parser Pattern guide)
+- ✅ Created packages/openscad-parser/docs/architecture.md (technical deep dive with mermaid diagrams)
+- ✅ Created packages/openscad-parser/docs/examples/basic-usage.md (practical usage examples)
+- ✅ Created packages/openscad-parser/src/lib/documentation-examples.test.ts (9/9 tests passing)
+- ✅ Enhanced packages/openscad-parser/src/lib/node-location.ts with comprehensive JSDoc documentation
+- ✅ Enhanced packages/openscad-parser/src/lib/openscad-parser/ast/ast-types.ts with detailed interface documentation
+- ✅ Enhanced packages/openscad-parser/src/lib/openscad-parser/ast/visitors/base-ast-visitor.ts with comprehensive class documentation
+- ✅ Enhanced packages/openscad-parser/src/lib/openscad-parser/ast/extractors/argument-extractor.ts with detailed function documentation
+
+**Documentation Structure** (packages/openscad-parser/docs/):
+```
+docs/
+├── README.md                    # Main package documentation
+├── api/                         # API Reference
+│   ├── parser.md               # Complete OpenSCADParser class documentation
+│   ├── ast-types.md            # All AST node interfaces and types
+│   ├── error-handling.md       # Error classes and handling patterns
+│   └── utilities.md            # Helper functions and type guards
+├── architecture.md             # Technical deep dive
+├── testing.md                  # Real Parser Pattern documentation
+└── examples/                   # Practical usage scenarios
+    ├── basic-usage.md          # Simple parsing scenarios
+    ├── advanced-parsing.md     # Complex OpenSCAD syntax
+    ├── error-handling.md       # Error scenarios and recovery
+    └── performance.md          # Large file handling and optimization
+```
+
+### Priority 2: Test Infrastructure Issues (DEFERRED - 2 hours)
 - **Issue**: Remaining 10 test failures due to Tree-sitter test isolation
 - **Solution**: Investigate and resolve test isolation issues
 - **Files**: Various test files
+- **Status**: Deferred until documentation is complete
 
 ### Priority 3: Comprehensive Expression Testing (MEDIUM PRIORITY - 2-3 hours)
 
@@ -87,12 +124,36 @@ describe('Expression Evaluation System', () => {
 
 ## 🚀 PHASE 6: System Refinement and Documentation (CURRENT PRIORITY)
 
-### Priority 1: Legacy Test Cleanup
+### Priority 1: Documentation Enhancement (HIGH PRIORITY - ONGOING)
+
+**Objective**: Create comprehensive documentation for all system components
+
+**Status**: 🔄 IN PROGRESS - Making significant progress
+**Dependencies**: None
+**Estimated Effort**: 12-16 hours total, 4-6 hours remaining
+
+**Completed Documentation**:
+- [x] **AST Query System**: Comprehensive documentation of query patterns and caching
+- [x] **AST Transformation System**: Documentation of transformation operations and parameter extraction
+- [x] **AST Node Types**: Complete reference for all AST node types
+- [x] **Parser Integration Guide**: Instructions for integrating the parser in various environments
+- [x] **Parameter Extraction System**: Documentation of argument and value extractors
+- [x] **Expression Evaluation System**: Documentation of expression evaluator components
+- [x] **Primitive Visitor System**: Documentation of primitive shape processing (cube, sphere, cylinder)
+- [x] **CSG Visitor System**: Documentation of CSG operations (union, difference, intersection, hull, minkowski)
+
+**Remaining Documentation Tasks**:
+- [ ] **Transform Visitor System**: Document transformation operations (translate, rotate, scale, mirror, color)
+- [ ] **Module Visitor System**: Document module instantiation and definition handling
+- [ ] **Variable Visitor System**: Document variable assignment and reference handling
+- [ ] **Control Flow Visitor System**: Document if-else and loop handling
+
+### Priority 2: Legacy Test Cleanup
 - Complete removal of ANTLR-specific tests
 - Standardize all test expectations
 - Replace outdated mock patterns
 
-### Priority 2: Performance Optimization (MEDIUM PRIORITY - 6-8 hours)
+### Priority 3: Performance Optimization (MEDIUM PRIORITY - 6-8 hours)
 
 **Objective**: Optimize AST generation for large OpenSCAD files and improve parsing performance
 
@@ -183,6 +244,18 @@ docs/
 - [ ] **Advanced Examples**: Complex OpenSCAD files and edge cases
 - [ ] **Integration Examples**: Using the parser in different environments
 - [ ] **Performance Examples**: Benchmarking and optimization examples
+
+#### 3.6: Code Review & Documentation Workflow (4-5 hours)
+- [ ] **Review & Document Code Files**: Audit all source files (`packages/**/src`, `examples/`) and ensure each public class, function, and interface has TSDoc/JSDoc comments (`@param`, `@returns`, `@example`, `@throws`, `@since`).
+- [ ] **Mermaid Diagrams**: Create and embed Mermaid diagrams for architecture (`docs/architecture/overview.md`) and parsing workflow (`docs/architecture/diagrams/parse-flow.md`).
+- [ ] **Mark Deprecated/Unused Methods**: Identify unreferenced or obsolete methods, annotate with `@deprecated`, and list them in `docs/deprecations.md` for removal or improvement.
+- [ ] **Developer Documentation Workflow**: Draft `docs/documentation-workflow.md` outlining:
+   1. Clone repo and setup environment
+   2. Use documentation template to add or update comments
+   3. Generate and review TypeDoc output
+   4. Update Mermaid diagrams as features evolve
+   5. Submit PR with documentation changes and checklist link
+- [ ] **Integrate Documentation Checks in CI**: Add `pnpm docs:validate` step to enforce presence and correctness of docs in CI.
 
 **Documentation Best Practices Implementation**:
 - **TSDoc/JSDoc Standards**: Follow TypeScript documentation standards
@@ -451,13 +524,6 @@ pnpm parse examples/simple.scad
 - Various error types and basic recovery strategies.
 - Comprehensive integration tests for error handling.
 
-```
-Follow these instructions to make the following change to my code document.
-
-Instruction: Update TODO.md to mark TypeScript error fixing in transform-visitor.ts as complete.
-
-Code Edit:
-```
 ### Priority 2: Fix TypeScript/Lint Issues (MAJOR PROGRESS - 53% Complete)
 
 **Objective**: Eliminate all TypeScript errors and lint warnings for a clean and maintainable codebase

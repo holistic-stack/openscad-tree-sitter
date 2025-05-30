@@ -1,12 +1,107 @@
+/**
+ * @file Parameter extraction utilities for OpenSCAD parser
+ *
+ * This module provides specialized utilities for extracting typed parameter values from
+ * OpenSCAD AST parameter objects. These extractors handle the conversion from generic
+ * parameter values to specific TypeScript types, supporting both literal values and
+ * complex expression evaluation.
+ *
+ * The parameter extraction system handles:
+ * - **Type-Safe Extraction**: Converts generic parameter values to specific types
+ * - **Expression Evaluation**: Evaluates mathematical and logical expressions
+ * - **Multiple Input Formats**: Supports literals, expressions, and string representations
+ * - **Error Recovery**: Graceful handling of malformed or incompatible parameters
+ * - **OpenSCAD Compatibility**: Follows OpenSCAD parameter conventions and syntax
+ *
+ * Supported parameter types:
+ * - **Numbers**: Integer and floating-point values with expression evaluation
+ * - **Booleans**: True/false values with string parsing support
+ * - **Strings**: Text values with proper escaping and encoding
+ * - **Vectors**: 2D and 3D numeric arrays for positions and sizes
+ * - **Ranges**: Start:step:end ranges for iteration and array generation
+ * - **Identifiers**: Variable names and references with validation
+ *
+ * Expression evaluation features:
+ * - **Literal Values**: Direct number, boolean, and string literals
+ * - **Unary Expressions**: Negation and other unary operators
+ * - **Binary Expressions**: Arithmetic operations (+, -, *, /, %)
+ * - **Variable References**: Identifier resolution and substitution
+ * - **Array Expressions**: Vector and list construction
+ * - **Complex Expressions**: Nested expressions with proper precedence
+ *
+ * @example Basic parameter extraction
+ * ```typescript
+ * import { extractNumberParameter, extractVectorParameter } from './parameter-extractor';
+ *
+ * // Extract numeric parameter
+ * const sizeParam = { value: 10 };
+ * const size = extractNumberParameter(sizeParam);
+ * // Returns: 10
+ *
+ * // Extract vector parameter
+ * const positionParam = { value: [10, 20, 30] };
+ * const position = extractVectorParameter(positionParam);
+ * // Returns: [10, 20, 30]
+ * ```
+ *
+ * @example Expression evaluation
+ * ```typescript
+ * // Extract from mathematical expression
+ * const expressionParam = {
+ *   value: {
+ *     type: 'expression',
+ *     expressionType: 'binary',
+ *     operator: '+',
+ *     left: { expressionType: 'literal', value: 10 },
+ *     right: { expressionType: 'literal', value: 5 }
+ *   }
+ * };
+ *
+ * const result = extractNumberParameter(expressionParam, errorHandler);
+ * // Returns: 15
+ * ```
+ *
+ * @example Complex parameter processing
+ * ```typescript
+ * // Process cube parameters with mixed types
+ * function processCubeParameters(params: ast.Parameter[]) {
+ *   const size = extractVectorParameter(params.find(p => p.name === 'size')) ?? [1, 1, 1];
+ *   const center = extractBooleanParameter(params.find(p => p.name === 'center')) ?? false;
+ *
+ *   return { size, center };
+ * }
+ * ```
+ *
+ * @module parameter-extractor
+ * @since 0.1.0
+ */
+
 import * as ast from '../ast-types.js';
 import { ErrorHandler } from '../../error-handling/index.js';
 import { evaluateBinaryExpression } from '../evaluation/binary-expression-evaluator/binary-expression-evaluator.js';
 import { evaluateExpression } from '../evaluation/expression-evaluator-registry.js';
 
 /**
- * Check if a value is an expression node
- * @param value The value to check
- * @returns True if the value is an expression node
+ * Check if a value is an expression node.
+ *
+ * Type guard function that determines whether a parameter value represents an
+ * expression node that requires evaluation rather than a simple literal value.
+ *
+ * @param value - The parameter value to check
+ * @returns True if the value is an expression node, false otherwise
+ *
+ * @example Type checking for expressions
+ * ```typescript
+ * const param = { value: { type: 'expression', expressionType: 'binary', ... } };
+ *
+ * if (isExpressionNode(param.value)) {
+ *   // Handle expression evaluation
+ *   const result = evaluateExpression(param.value, errorHandler);
+ * } else {
+ *   // Handle literal value
+ *   const result = param.value;
+ * }
+ * ```
  */
 function isExpressionNode(
   value: ast.ParameterValue
@@ -20,10 +115,72 @@ function isExpressionNode(
 }
 
 /**
- * Extract a number parameter from a parameter object
- * @param param The parameter object
- * @param errorHandler Optional error handler for expression evaluation
- * @returns The number value or null if the parameter is not a number
+ * Extract a numeric parameter from a parameter object.
+ *
+ * This function handles the extraction of numeric values from OpenSCAD parameters,
+ * supporting multiple input formats including literal numbers, mathematical expressions,
+ * and string representations. It provides comprehensive expression evaluation for
+ * complex mathematical operations.
+ *
+ * Supported input formats:
+ * - **Literal Numbers**: Direct numeric values (10, 3.14, -5)
+ * - **Mathematical Expressions**: Binary operations (+, -, *, /, %)
+ * - **Unary Expressions**: Negation and other unary operators
+ * - **String Numbers**: Numeric strings that can be parsed ("10", "3.14")
+ * - **Complex Expressions**: Nested expressions with proper evaluation
+ *
+ * Expression evaluation features:
+ * - Arithmetic operations with proper precedence
+ * - Unary negation support
+ * - Error handling and recovery for malformed expressions
+ * - Integration with the expression evaluator registry
+ *
+ * @param param - The parameter object containing the value to extract
+ * @param errorHandler - Optional error handler for expression evaluation and logging
+ * @returns The extracted numeric value, or null if extraction fails
+ *
+ * @example Basic numeric extraction
+ * ```typescript
+ * // Extract literal number
+ * const param1 = { value: 42 };
+ * const result1 = extractNumberParameter(param1);
+ * // Returns: 42
+ *
+ * // Extract from string
+ * const param2 = { value: "3.14" };
+ * const result2 = extractNumberParameter(param2);
+ * // Returns: 3.14
+ * ```
+ *
+ * @example Expression evaluation
+ * ```typescript
+ * // Extract from binary expression
+ * const param = {
+ *   value: {
+ *     type: 'expression',
+ *     expressionType: 'binary',
+ *     operator: '*',
+ *     left: { expressionType: 'literal', value: 5 },
+ *     right: { expressionType: 'literal', value: 3 }
+ *   }
+ * };
+ *
+ * const result = extractNumberParameter(param, errorHandler);
+ * // Returns: 15
+ * ```
+ *
+ * @example Error handling
+ * ```typescript
+ * const errorHandler = new ErrorHandler();
+ * const param = { value: "not-a-number" };
+ *
+ * const result = extractNumberParameter(param, errorHandler);
+ * // Returns: null
+ *
+ * if (result === null) {
+ *   console.log('Failed to extract numeric value');
+ * }
+ * ```
  */
 export function extractNumberParameter(param: ast.Parameter, errorHandler?: ErrorHandler): number | null {
   if (!param?.value) return null;

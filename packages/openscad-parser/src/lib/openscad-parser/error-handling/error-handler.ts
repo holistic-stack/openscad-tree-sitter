@@ -1,6 +1,43 @@
 /**
- * @file Central error error-handling for the OpenSCAD parser.
+ * @file Central error handling system for the OpenSCAD parser
+ *
+ * This module provides comprehensive error handling capabilities for the OpenSCAD parser,
+ * including error collection, reporting, recovery strategies, and logging integration.
+ * The ErrorHandler class serves as the central coordinator for all error-related operations
+ * throughout the parsing and AST generation process.
+ *
+ * Key features:
+ * - Structured error types with severity levels and context information
+ * - Configurable error handling behavior (throw vs collect)
+ * - Error recovery strategies for common syntax issues
+ * - Integrated logging system with multiple output levels
+ * - Type-safe error creation and management
+ * - Support for error filtering and analysis
+ *
+ * The error handling system supports multiple error types:
+ * - SyntaxError: Issues with OpenSCAD syntax (missing semicolons, brackets, etc.)
+ * - TypeError: Type mismatches and invalid type operations
+ * - ValidationError: Semantic validation failures
+ * - ReferenceError: Undefined variables or functions
+ * - InternalError: Parser implementation issues
+ *
+ * @example Basic error handling setup
+ * ```typescript
+ * import { ErrorHandler, Severity } from './error-handler';
+ *
+ * const errorHandler = new ErrorHandler({
+ *   throwErrors: false,        // Collect errors instead of throwing
+ *   minSeverity: Severity.WARNING,  // Include warnings and above
+ *   attemptRecovery: true,     // Try to recover from errors
+ *   includeSource: true        // Include source context in errors
+ * });
+ *
+ * // Use throughout parsing
+ * const parser = new EnhancedOpenscadParser(errorHandler);
+ * ```
+ *
  * @module openscad-parser/error-handling/error-handler
+ * @since 0.1.0
  */
 
 import {
@@ -263,30 +300,111 @@ export class ErrorHandler {
   }
 
   /**
-   * Logs a warning message
-   * @param message - The message to log
-   * @param context - Optional context information
-   * @param node - Optional tree-sitter node for additional context
+   * Logs a warning message with optional context information.
+   * 
+   * Warning messages indicate potential issues that might not prevent parsing but
+   * could lead to unexpected behavior or AST structure. These warnings are useful for
+   * diagnostic purposes and can help identify problematic code patterns.
+   * 
+   * @param message - The warning message to log
+   * @param context - Optional context information (e.g., method name, phase)
+   * @param node - Optional tree-sitter node for additional context such as location
+   * 
+   * @example
+   * ```typescript
+   * // Log a simple warning
+   * errorHandler.logWarning('Deprecated syntax detected');
+   * 
+   * // Log a warning with context
+   * errorHandler.logWarning('Missing parentheses in expression', 'visitExpression');
+   * 
+   * // Log a warning with both context and node information
+   * errorHandler.logWarning(
+   *   'Ambiguous operator precedence', 
+   *   'ExpressionVisitor.visitBinaryExpression',
+   *   node
+   * );
+   * ```
+   * 
+   * @since 0.1.0
    */
   logWarning(message: string, _context?: string, _node?: any): void {
     this.logger.warn(message);
   }
 
   /**
-   * Logs an error message
-   * @param message - The message to log
-   * @param context - Optional context information
-   * @param node - Optional tree-sitter node for additional context
+   * Logs an error message with optional context information.
+   * 
+   * Error messages indicate significant issues that may prevent successful parsing or
+   * result in an incomplete/incorrect AST. These errors are critical for understanding
+   * parsing failures and should provide clear information about what went wrong and where.
+   * 
+   * This method should be used instead of console.log/error throughout the parser codebase
+   * to ensure consistent error handling and logging.
+   * 
+   * @param message - The error message to log
+   * @param context - Optional context information (e.g., method name, component)
+   * @param node - Optional tree-sitter node for additional context such as location
+   * 
+   * @example
+   * ```typescript
+   * // Log a simple error
+   * errorHandler.logError('Failed to parse expression');
+   * 
+   * // Log an error with context
+   * errorHandler.logError('Invalid parameter type', 'ModuleVisitor.processCube');
+   * 
+   * // Log an error with both context and node information for location tracking
+   * errorHandler.logError(
+   *   'Unexpected token in module instantiation', 
+   *   'CompositeVisitor.visitModuleInstantiation',
+   *   node
+   * );
+   * ```
+   * 
+   * @since 0.1.0
    */
   logError(message: string, _context?: string, _node?: any): void {
     this.logger.error(message);
   }
 
   /**
-   * Handles an error by logging it and optionally reporting it
-   * @param error - The error to handle
-   * @param context - Optional context information
-   * @param node - Optional tree-sitter node for additional context
+   * Handles an error by logging it and optionally reporting it to the error collection system.
+   * 
+   * This method serves as the central error handling mechanism in the parser, providing
+   * consistent error processing for both standard JavaScript errors and specialized
+   * parser errors. It can optionally convert generic errors to parser-specific errors
+   * and adds them to the error collection if appropriate.
+   * 
+   * The context parameter allows providing information about where the error occurred,
+   * which is particularly useful for debugging complex parsing scenarios.
+   * 
+   * @param error - The error to handle (can be a standard Error or a ParserError)
+   * @param context - Optional context information (e.g., class and method where error occurred)
+   * @param node - Optional tree-sitter node for additional context such as location information
+   * 
+   * @example Standard Error
+   * ```typescript
+   * try {
+   *   // Some parsing operation that might fail
+   *   processNode(node);
+   * } catch (err) {
+   *   // Handle any generic error
+   *   errorHandler.handleError(err, 'VisitorASTGenerator.generate', node);
+   * }
+   * ```
+   * 
+   * @example With Parser Error
+   * ```typescript
+   * // Creating and handling a specific parser error
+   * const syntaxError = errorHandler.createSyntaxError(
+   *   'Unexpected closing brace',
+   *   { line: 42, column: 10 }
+   * );
+   * errorHandler.handleError(syntaxError, 'BlockVisitor.processBlock');
+   * ```
+   * 
+   * @since 0.1.0
    */
   handleError(error: Error, context?: string, node?: any): void {
     const message = context ? `${context}: ${error.message}` : error.message;

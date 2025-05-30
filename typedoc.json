@@ -1,0 +1,7 @@
+{
+  "entryPoints": [
+    "packages/openscad-parser/src"
+  ],
+  "out": "docs/api",
+  "tsconfig": "packages/openscad-parser/tsconfig.json"
+}

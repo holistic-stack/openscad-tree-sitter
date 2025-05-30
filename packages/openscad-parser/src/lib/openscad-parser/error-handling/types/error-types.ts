@@ -1,6 +1,108 @@
 /**
- * @file Defines the core error types and interfaces for the OpenSCAD parser.
- * @module openscad-parser/error-handling/types/error-types
+ * @file Core error types and classification system for OpenSCAD parser
+ *
+ * This module defines a comprehensive error type system for the OpenSCAD parser,
+ * providing structured error classification, detailed context information, and
+ * type-safe error handling capabilities. The error system is designed to support
+ * both development and production environments with rich diagnostic information
+ * and programmatic error handling.
+ *
+ * The error type system includes:
+ * - **Hierarchical Error Classification**: Structured error codes and categories
+ * - **Severity-Based Filtering**: Multiple severity levels for different error types
+ * - **Rich Context Information**: Detailed error context with source location and suggestions
+ * - **Type-Safe Error Handling**: Strong typing for error detection and recovery
+ * - **Serialization Support**: JSON-serializable error representations
+ * - **Recovery Guidance**: Error classification for automatic recovery strategies
+ *
+ * Key components:
+ * - **Severity Enum**: DEBUG, INFO, WARNING, ERROR, FATAL severity levels
+ * - **ErrorCode Enum**: Structured error codes organized by category
+ * - **ErrorContext Interface**: Rich context information for error diagnosis
+ * - **ParserError Class**: Base error class with comprehensive error information
+ * - **Specialized Error Classes**: Domain-specific error types for different error categories
+ * - **Type Guards**: Utility functions for error type detection and classification
+ *
+ * Error classification features:
+ * - **Syntax Errors (100-199)**: Missing semicolons, unclosed brackets, malformed syntax
+ * - **Type Errors (200-299)**: Type mismatches, invalid operations, type validation failures
+ * - **Reference Errors (300-399)**: Undefined variables, functions, and modules
+ * - **Validation Errors (400-499)**: Invalid arguments, modifiers, and parameter validation
+ * - **Internal Errors (900-999)**: Parser internal errors and unimplemented features
+ *
+ * Context information includes:
+ * - **Source Location**: Line and column numbers with character length
+ * - **Code Context**: Source code snippets around the error location
+ * - **Diagnostic Information**: Expected vs. found tokens, node types, and suggestions
+ * - **Recovery Guidance**: Suggested fixes and links to documentation
+ * - **Operation Context**: Detailed information for binary operations and function calls
+ *
+ * @example Basic error creation and handling
+ * ```typescript
+ * import { ParserError, ErrorCode, Severity, SyntaxError } from './error-types';
+ *
+ * // Create a syntax error with context
+ * const error = new SyntaxError('Missing semicolon', {
+ *   line: 10,
+ *   column: 25,
+ *   source: 'cube(10)',
+ *   suggestion: 'Add semicolon after statement',
+ *   expected: [';'],
+ *   found: 'EOF'
+ * });
+ *
+ * // Handle error with type checking
+ * if (isParserError(error)) {
+ *   console.log(error.getFormattedMessage());
+ *   console.log('Error code:', error.code);
+ *   console.log('Severity:', error.severity);
+ * }
+ * ```
+ *
+ * @example Advanced error context and recovery
+ * ```typescript
+ * import { TypeError, ErrorCode, isRecoverable, isFatal } from './error-types';
+ *
+ * // Create type error with detailed context
+ * const typeError = new TypeError('Type mismatch in binary operation', {
+ *   line: 15,
+ *   column: 10,
+ *   operation: '+',
+ *   leftType: 'string',
+ *   rightType: 'number',
+ *   leftValue: 'hello',
+ *   rightValue: 42,
+ *   suggestion: 'Convert operands to compatible types'
+ * });
+ *
+ * // Check error recoverability
+ * if (isRecoverable(typeError)) {
+ *   console.log('Error can be recovered automatically');
+ * } else if (isFatal(typeError)) {
+ *   console.log('Fatal error - parsing must stop');
+ * }
+ * ```
+ *
+ * @example Error serialization and reporting
+ * ```typescript
+ * import { ParserError, InternalError } from './error-types';
+ *
+ * // Create internal error
+ * const internalError = new InternalError('Unexpected parser state', {
+ *   nodeType: 'module_instantiation',
+ *   source: 'translate([1,0,0]) cube(5);'
+ * });
+ *
+ * // Serialize for logging or transmission
+ * const errorData = internalError.toJSON();
+ * console.log('Serialized error:', JSON.stringify(errorData, null, 2));
+ *
+ * // Format for user display
+ * console.log('Formatted message:', internalError.getFormattedMessage());
+ * ```
+ *
+ * @module error-types
+ * @since 0.1.0
  */
 
 /** Severity levels for error reporting */

@@ -1,3 +1,49 @@
+/**
+ * @file Value extraction utilities for OpenSCAD parser
+ *
+ * This module provides utilities for extracting and converting values from Tree-sitter CST nodes
+ * into typed ParameterValue objects for AST generation. It handles various OpenSCAD data types
+ * including numbers, strings, booleans, vectors, and complex expressions.
+ *
+ * The value extractor supports two extraction modes:
+ * - Basic extraction: Direct value extraction from simple nodes
+ * - Enhanced extraction: Expression evaluation for complex mathematical expressions
+ *
+ * Key features:
+ * - Type-safe value extraction with proper TypeScript typing
+ * - Support for all OpenSCAD primitive types (number, string, boolean, vector)
+ * - Complex expression evaluation with arithmetic operations
+ * - Error handling and recovery for malformed expressions
+ * - Recursive extraction for nested expression hierarchies
+ * - Vector and array literal processing
+ *
+ * @example Basic value extraction
+ * ```typescript
+ * import { extractValue } from './value-extractor';
+ *
+ * // Extract a number
+ * const numberValue = extractValue(numberNode); // Returns: 42
+ *
+ * // Extract a string
+ * const stringValue = extractValue(stringNode); // Returns: "hello"
+ *
+ * // Extract a vector
+ * const vectorValue = extractValue(arrayNode); // Returns: [1, 2, 3]
+ * ```
+ *
+ * @example Enhanced expression extraction
+ * ```typescript
+ * import { extractValueEnhanced } from './value-extractor';
+ *
+ * // Extract complex expression like "10 + 5 * 2"
+ * const result = extractValueEnhanced(expressionNode, errorHandler);
+ * // Returns: 20 (with proper operator precedence)
+ * ```
+ *
+ * @module value-extractor
+ * @since 0.1.0
+ */
+
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types.js';
 import { findDescendantOfType } from '../utils/node-utils.js';
@@ -7,7 +53,40 @@ import { ErrorHandler } from '../../error-handling/index.js';
 import { evaluateExpression } from '../evaluation/expression-evaluator-registry.js';
 
 /**
- * Check if a node represents a complex expression that needs evaluation
+ * Determines if a Tree-sitter node represents a complex expression requiring evaluation.
+ *
+ * This function identifies nodes that contain mathematical or logical expressions
+ * that need to be evaluated rather than simply extracted as literal values.
+ * Complex expressions include arithmetic operations, logical operations, and
+ * nested expressions with multiple operands.
+ *
+ * @param node - The Tree-sitter node to analyze
+ * @returns True if the node represents a complex expression, false otherwise
+ *
+ * @example Detecting arithmetic expressions
+ * ```typescript
+ * // For OpenSCAD code: "10 + 5 * 2"
+ * const isComplex = isComplexExpression(additive_expression_node);
+ * // Returns: true (requires evaluation)
+ *
+ * // For OpenSCAD code: "42"
+ * const isSimple = isComplexExpression(number_node);
+ * // Returns: false (direct extraction)
+ * ```
+ *
+ * @example Complex expression types detected
+ * ```typescript
+ * // These node types are considered complex when they have multiple children:
+ * // - additive_expression: "a + b", "x - y"
+ * // - multiplicative_expression: "a * b", "x / y"
+ * // - logical_or_expression: "a || b"
+ * // - logical_and_expression: "a && b"
+ * // - equality_expression: "a == b", "x != y"
+ * // - relational_expression: "a < b", "x >= y"
+ * ```
+ *
+ * @since 0.1.0
+ * @category Expression Analysis
  */
 function isComplexExpression(node: TSNode): boolean {
   const complexTypes = new Set([
@@ -43,7 +122,57 @@ function isComplexExpression(node: TSNode): boolean {
 }
 
 /**
- * Enhanced value extraction with expression evaluation support
+ * Enhanced value extraction with support for complex expression evaluation.
+ *
+ * This function extends the basic value extraction capabilities with the ability
+ * to evaluate complex mathematical and logical expressions. It automatically
+ * detects when a node contains expressions that require evaluation and applies
+ * the appropriate evaluation strategy.
+ *
+ * The enhanced extractor handles:
+ * - Arithmetic expressions: addition, subtraction, multiplication, division, modulo
+ * - Nested expressions with proper operator precedence
+ * - Binary operations with recursive operand evaluation
+ * - Fallback to basic extraction for simple values
+ * - Error handling and recovery for malformed expressions
+ *
+ * @param node - The Tree-sitter node to extract value from
+ * @param errorHandler - Optional error handler for logging and error collection
+ * @returns The extracted and potentially evaluated value
+ *
+ * @example Evaluating arithmetic expressions
+ * ```typescript
+ * import { extractValueEnhanced } from './value-extractor';
+ *
+ * // For OpenSCAD code: "10 + 5"
+ * const result = extractValueEnhanced(additive_expression_node, errorHandler);
+ * // Returns: 15
+ *
+ * // For OpenSCAD code: "2 * 3 + 4"
+ * const complex = extractValueEnhanced(complex_expression_node, errorHandler);
+ * // Returns: 10 (with proper precedence: (2 * 3) + 4)
+ * ```
+ *
+ * @example Fallback to basic extraction
+ * ```typescript
+ * // For simple values, falls back to basic extraction
+ * const number = extractValueEnhanced(number_node); // Returns: 42
+ * const string = extractValueEnhanced(string_node); // Returns: "hello"
+ * const vector = extractValueEnhanced(array_node);  // Returns: [1, 2, 3]
+ * ```
+ *
+ * @example Error handling
+ * ```typescript
+ * const errorHandler = new SimpleErrorHandler();
+ * const result = extractValueEnhanced(malformed_expression, errorHandler);
+ *
+ * if (errorHandler.getErrors().length > 0) {
+ *   console.log('Expression evaluation errors:', errorHandler.getErrors());
+ * }
+ * ```
+ *
+ * @since 0.1.0
+ * @category Value Extraction
  */
 export function extractValueEnhanced(node: TSNode, errorHandler?: ErrorHandler): ast.ParameterValue {
   console.log(
@@ -140,7 +269,62 @@ export function extractValueEnhanced(node: TSNode, errorHandler?: ErrorHandler):
 }
 
 /**
- * Extract a value from a node (original implementation)
+ * Extracts values from Tree-sitter CST nodes and converts them to typed ParameterValue objects.
+ *
+ * This is the core value extraction function that handles the conversion of Tree-sitter
+ * syntax nodes into typed values suitable for AST generation. It supports all OpenSCAD
+ * primitive types and handles various expression hierarchies through recursive extraction.
+ *
+ * Supported value types:
+ * - Numbers: integers and floating-point values
+ * - Strings: quoted string literals with proper unescaping
+ * - Booleans: true/false literals and identifiers
+ * - Vectors: array literals like [1, 2, 3]
+ * - Variables: identifier references
+ * - Expressions: nested expression hierarchies
+ *
+ * The function handles Tree-sitter's expression hierarchy by recursively unwrapping
+ * expression nodes until it reaches concrete values. It also provides fallback
+ * mechanisms for complex expressions that may require evaluation.
+ *
+ * @param node - The Tree-sitter node to extract value from
+ * @returns The extracted value as a ParameterValue, or undefined if extraction fails
+ *
+ * @example Extracting primitive values
+ * ```typescript
+ * import { extractValue } from './value-extractor';
+ *
+ * // Extract number
+ * const num = extractValue(numberNode); // Returns: 42
+ *
+ * // Extract string
+ * const str = extractValue(stringNode); // Returns: "hello world"
+ *
+ * // Extract boolean
+ * const bool = extractValue(booleanNode); // Returns: true
+ * ```
+ *
+ * @example Extracting complex values
+ * ```typescript
+ * // Extract vector
+ * const vector = extractValue(arrayLiteralNode); // Returns: [1, 2, 3]
+ *
+ * // Extract variable reference
+ * const variable = extractValue(identifierNode);
+ * // Returns: { type: 'expression', expressionType: 'variable', name: 'myVar' }
+ * ```
+ *
+ * @example Handling expression hierarchies
+ * ```typescript
+ * // Tree-sitter creates nested expression nodes like:
+ * // expression -> conditional_expression -> logical_or_expression -> ... -> number
+ *
+ * const value = extractValue(expressionNode);
+ * // Automatically unwraps the hierarchy to extract the final value
+ * ```
+ *
+ * @since 0.1.0
+ * @category Value Extraction
  */
 export function extractValue(node: TSNode): ast.ParameterValue {
   console.log(
