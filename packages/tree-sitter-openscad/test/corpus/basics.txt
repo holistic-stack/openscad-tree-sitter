@@ -10,27 +10,26 @@ true || false;
 
 (source_file
   (statement
-    (expression
+    (expression_statement
       (binary_expression
-        left: (expression (number))
-        operator: (operator)
-        right: (expression
-          (binary_expression
-            left: (expression (number))
-            operator: (operator)
-            right: (expression (number)))))))
+        left: (number)
+        operator: "+"
+        right: (binary_expression
+          left: (number)
+          operator: "*"
+          right: (number)))))
   (statement
-    (expression
+    (expression_statement
       (binary_expression
-        left: (expression (boolean))
-        operator: (operator)
-        right: (expression (boolean)))))
+        left: (boolean)
+        operator: "||"
+        right: (boolean))))
   (statement
-    (expression
+    (expression_statement
       (binary_expression
-        left: (expression (string))
-        operator: (operator)
-        right: (expression (string))))))
+        left: (string)
+        operator: "=="
+        right: (string)))))
 
 ==================
 Module Definition
