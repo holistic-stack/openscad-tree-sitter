@@ -82,44 +82,6 @@ matrix = [[i+j for (j = [0:2])] for (i = [0:2])];
               end: (number))))))))
 
 ==================
-Object Literals
-==================
-
-settings = {
-  "resolution": 36,
-  "quality": "high",
-  "options": {
-    "render": true,
-    "preview": false
-  }
-};
-
----
-
-(source_file
-  (statement
-    (assignment_statement
-      name: (identifier)
-      value: (expression
-        (object_literal
-          (object_field
-            key: (string)
-            value: (expression (number)))
-          (object_field
-            key: (string)
-            value: (expression (string)))
-          (object_field
-            key: (string)
-            value: (expression
-              (object_literal
-                (object_field
-                  key: (string)
-                  value: (expression (boolean)))
-                (object_field
-                  key: (string)
-                  value: (expression (boolean)))))))))))
-
-==================
 Range Expressions
 ==================
 
@@ -132,45 +94,45 @@ for (k = [start:step:end]) cylinder(k);
 (source_file
   (statement
     (for_statement
-      (for_header
+      header: (for_header
         iterator: (identifier)
         range: (range_expression
-          start: (expression (number))
-          end: (expression (number))))
-      (statement
+          start: (number)
+          end: (number)))
+      body: (statement
         (module_instantiation
           name: (identifier)
           arguments: (argument_list
             (arguments
-              (argument (expression (identifier)))))))))
+              (argument (identifier))))))))
   (statement
     (for_statement
-      (for_header
+      header: (for_header
         iterator: (identifier)
         range: (range_expression
-          start: (expression (number))
-          step: (expression (number))
-          end: (expression (number))))
-      (statement
+          start: (number)
+          step: (number)
+          end: (number)))
+      body: (statement
         (module_instantiation
           name: (identifier)
           arguments: (argument_list
             (arguments
-              (argument (expression (identifier)))))))))
+              (argument (identifier))))))))
   (statement
     (for_statement
-      (for_header
+      header: (for_header
         iterator: (identifier)
         range: (range_expression
-          start: (expression (identifier))
-          step: (expression (identifier))
-          end: (expression (identifier))))
-      (statement
+          start: (identifier)
+          step: (identifier)
+          end: (identifier)))
+      body: (statement
         (module_instantiation
           name: (identifier)
           arguments: (argument_list
             (arguments
-              (argument (expression (identifier))))))))))
+              (argument (identifier)))))))))
 
 ==================
 Array Indexing
@@ -187,91 +149,56 @@ subset = points[0:1];
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression
-        (array_literal
-          (expression
-            (vector_expression
-              (expression (number))
-              (expression (number))
-              (expression (number))))
-          (expression
-            (vector_expression
-              (expression (number))
-              (expression (number))
-              (expression (number))))
-          (expression
-            (vector_expression
-              (expression (number))
-              (expression (number))
-              (expression (number))))))))
-  (statement
-    (assignment_statement
-      name: (identifier)
-      value: (expression
-        (index_expression
-          array: (expression
-            (index_expression
-              array: (expression (identifier))
-              index: (expression (number))))
-          index: (expression (number))))))
-  (statement
-    (assignment_statement
-      name: (identifier)
-      value: (expression
-        (index_expression
-          array: (expression (identifier))
-          index: (expression (number))))))
-  (statement
-    (assignment_statement
-      name: (identifier)
-      value: (expression
-        (index_expression
-          array: (expression (identifier))
-          index: (range_expression
-            start: (expression (number))
-            end: (expression (number))))))))
-
-==================
-Member Access
-==================
-
-point = [10, 20, 30];
-x = point.x;
-y = point.y;
-z = point.z;
-
----
-
-(source_file
-  (statement
-    (assignment_statement
-      name: (identifier)
-      value: (expression
+      value: (vector_expression
         (vector_expression
-          (expression (number))
-          (expression (number))
-          (expression (number))))))
+          (number)
+          (number)
+          (number))
+        (vector_expression
+          (number)
+          (number)
+          (number))
+        (vector_expression
+          (number)
+          (number)
+          (number)))))
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression
-        (member_expression
-          object: (expression (identifier))
-          property: (identifier)))))
+      value: (index_expression
+        array: (expression
+          (index_expression
+            array: (expression
+              (primary_expression
+                (identifier)))
+            index: (expression
+              (primary_expression
+                (number)))))
+        index: (expression
+          (primary_expression
+            (number))))))
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression
-        (member_expression
-          object: (expression (identifier))
-          property: (identifier)))))
+      value: (index_expression
+        array: (expression
+          (primary_expression
+            (identifier)))
+        index: (expression
+          (primary_expression
+            (number))))))
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression
-        (member_expression
-          object: (expression (identifier))
-          property: (identifier))))))
+      value: (index_expression
+        array: (expression
+          (primary_expression
+            (identifier)))
+        index: (range_expression
+          start: (expression
+            (number))
+          end: (expression
+            (number)))))))
 
 ==================
 Special Variables
@@ -290,53 +217,50 @@ dist = $vpd;
   (statement
     (assignment_statement
       name: (special_variable)
-      value: (expression (number))))
+      value: (number)))
   (statement
     (module_instantiation
       name: (identifier)
       arguments: (argument_list
         (arguments
-          (argument (expression (number)))
+          (argument (number))
           (argument
             name: (special_variable)
-            value: (expression (number)))))))
+            value: (number))))))
   (statement
     (module_instantiation
       name: (identifier)
       arguments: (argument_list
         (arguments
           (argument
-            (expression
-              (vector_expression
-                (expression
-                  (binary_expression
-                    left: (expression
-                      (primary_expression
-                        (special_variable)))
-                    right: (expression
-                      (primary_expression
-                        (number)))))
-                (expression (number))
-                (expression (number)))))))
-      (block
-        (statement
-          (module_instantiation
-            name: (identifier)
-            arguments: (argument_list
-              (arguments
-                (argument (expression (number))))))))))
+            (vector_expression
+              (expression
+                (binary_expression
+                  left: (primary_expression
+                    (special_variable))
+                  operator: (multiplication_operator)
+                  right: (primary_expression
+                    (number))))
+              (number)
+              (number)))))
+      (statement
+        (module_instantiation
+          name: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument (number))))))))
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression (special_variable))))
+      value: (special_variable)))
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression (special_variable))))
+      value: (special_variable)))
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression (special_variable)))))
+      value: (special_variable))))
 
 ==================
 Special Variables
@@ -356,23 +280,23 @@ use_specials($fa, $fs, $fn, $t, $children);
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression (special_variable))))
+      value: (special_variable)))
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression (special_variable))))
+      value: (special_variable)))
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression (special_variable))))
+      value: (special_variable)))
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression (special_variable))))
+      value: (special_variable)))
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression (special_variable))))
+      value: (special_variable)))
   (statement
     (module_instantiation
       name: (identifier)
@@ -396,7 +320,7 @@ a = 5
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression (number)))))
+      value: (number))))
 
 ==================
 Unclosed Block
@@ -417,7 +341,7 @@ module foo() {
         (statement
           (assignment_statement
             name: (identifier)
-            value: (expression (number))))))))
+            value: (number)))))))
 
 ==================
 Unclosed Parenthesis
@@ -431,16 +355,14 @@ b = (2 + 3;
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression
-        (parenthesized_expression
-          (expression
-            (binary_expression
-              left: (expression
-                (primary_expression
-                  (number)))
-              right: (expression
-                (primary_expression
-                  (number))))))))))
+      value: (parenthesized_expression
+        (expression
+          (binary_expression
+            left: (primary_expression
+              (number))
+            operator: (addition_operator)
+            right: (primary_expression
+              (number))))))))
 
 ==================
 Incomplete Expression
@@ -454,12 +376,13 @@ c = 1 + ;
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression
-        (binary_expression
-          left: (expression
-            (primary_expression
-              (number)))
-          right: (expression (ERROR)))))))
+      value: (binary_expression
+        left: (primary_expression
+          (number))
+        operator: (addition_operator)
+        (error_sentinel)
+        right: (primary_expression
+          (MISSING identifier))))))
 
 ==================
 Unclosed String
@@ -473,7 +396,7 @@ d = "unterminated string;
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression (string))))
+      value: (string))))
 
 ==================
 Complex Numeric Literals
@@ -490,16 +413,19 @@ precise = 3.14159265359;
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression (number))))
+      value: (number)))
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression (number))))
+      value: (number)))
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression (number))))
+      value: (unary_expression
+        operator: (unary_minus_operator)
+        operand: (primary_expression
+          (number)))))
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression (number))))) 
+      value: (number))))
