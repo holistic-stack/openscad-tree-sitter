@@ -147,7 +147,15 @@ module.exports = grammar({
     // Conflict for instantiation statements vs module instantiation with body (tree-sitter best practice)
     [$._instantiation_statements, $._module_instantiation_with_body],
     // Conflict for control flow statements vs if statement (tree-sitter best practice)
-    [$._control_flow_statements, $.if_statement]
+    [$._control_flow_statements, $.if_statement],
+    // Conflict for binary operand vs primary expression (state count reduction)
+    [$._binary_operand, $.primary_expression],
+    // Conflict for assignment value vs binary operand vs primary expression (state count reduction)
+    [$._assignment_value, $._binary_operand, $.primary_expression],
+    // Conflict for assignment value vs binary operand (state count reduction)
+    [$._assignment_value, $._binary_operand],
+    // Conflict for function value vs binary operand vs primary expression (state count reduction)
+    [$._function_value, $._binary_operand, $.primary_expression]
   ],
 
   rules: {
@@ -765,56 +773,67 @@ module.exports = grammar({
 
 
 
-    // Simplified binary expression with direct primitive access and reliable field capture
+    // Optimized binary expression following tree-sitter best practices for state count reduction
     binary_expression: $ => choice(
       // Logical OR (lowest precedence)
       prec.left(1, seq(
-        field('left', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression, $.expression)),
+        field('left', $._binary_operand),
         field('operator', '||'),
-        field('right', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression, $.expression))
+        field('right', $._binary_operand)
       )),
       // Logical AND
       prec.left(2, seq(
-        field('left', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression, $.expression)),
+        field('left', $._binary_operand),
         field('operator', '&&'),
-        field('right', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression, $.expression))
+        field('right', $._binary_operand)
       )),
       // Equality
       prec.left(3, seq(
-        field('left', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression, $.expression)),
+        field('left', $._binary_operand),
         field('operator', choice('==', '!=')),
-        field('right', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression, $.expression))
+        field('right', $._binary_operand)
       )),
       // Relational
       prec.left(4, seq(
-        field('left', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression, $.expression)),
+        field('left', $._binary_operand),
         field('operator', choice('<', '<=', '>', '>=')),
-        field('right', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression, $.expression))
+        field('right', $._binary_operand)
       )),
       // Additive
       prec.left(5, seq(
-        field('left', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression, $.expression)),
+        field('left', $._binary_operand),
         field('operator', choice('+', '-')),
-        field('right', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression, $.expression))
+        field('right', $._binary_operand)
       )),
       // Multiplicative
       prec.left(6, seq(
-        field('left', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression, $.expression)),
+        field('left', $._binary_operand),
         field('operator', choice('*', '/', '%')),
-        field('right', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression, $.expression))
+        field('right', $._binary_operand)
       )),
       // Exponentiation (right associative)
       prec.right(7, seq(
-        field('left', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression, $.expression)),
+        field('left', $._binary_operand),
         field('operator', '^'),
-        field('right', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression, $.expression))
+        field('right', $._binary_operand)
       ))
     ),
 
-    // Simplified unary expression with direct primitive access and reliable field capture
+    // Binary operand helper rule for state count reduction
+    _binary_operand: $ => choice(
+      $.number,
+      $.string,
+      $.boolean,
+      $.identifier,
+      $.special_variable,
+      $.vector_expression,
+      $.expression
+    ),
+
+    // Optimized unary expression using helper rule for state count reduction
     unary_expression: $ => prec.right(8, seq(
       field('operator', choice('!', '-')),
-      field('operand', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression, $.expression))
+      field('operand', $._binary_operand)
     )),
 
     // Function call expression - reduced precedence to allow module_instantiation to take priority
