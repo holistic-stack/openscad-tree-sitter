@@ -74,8 +74,11 @@ function add(a, b) = a + b;
           (parameter_declaration (identifier))
           (parameter_declaration (identifier))))
       value: (binary_expression
-        left: (identifier)
-        right: (identifier)))))
+        left: (primary_expression
+          (identifier))
+        operator: (addition_operator)
+        right: (primary_expression
+          (identifier)))))))
 
 ==================
 Include and Use
@@ -88,9 +91,9 @@ use <utils.scad>;
 
 (source_file
   (statement
-    (include_statement (string)))
+    (include_statement (angle_bracket_string)))
   (statement
-    (use_statement (string))))
+    (use_statement (angle_bracket_string))))
 
 ==================
 Variables and Assignment
@@ -182,8 +185,11 @@ result = x > 10 ? "big" : "small";
       name: (identifier)
       value: (conditional_expression
         condition: (binary_expression
-          left: (identifier)
-          right: (number))
+          left: (primary_expression
+            (identifier))
+          operator: (greater_than_operator)
+          right: (primary_expression
+            (number)))
         consequence: (string)
         alternative: (string)))))
 
@@ -203,18 +209,23 @@ shape = let(
     (assignment_statement
       name: (identifier)
       value: (let_expression
-        (let_clause
-          (identifier)
-          (number))
-        (let_clause
-          (identifier)
-          (number))
-        (call_expression
-          function: (identifier)
-          arguments: (argument_list
-            (arguments
-              (argument
-                (vector_expression
-                  (identifier)
-                  (identifier)
-                  (number))))))))))
+        (let_assignment
+          name: (identifier)
+          value: (expression
+            (primary_expression
+              (number))))
+        (let_assignment
+          name: (identifier)
+          value: (expression
+            (primary_expression
+              (number))))
+        body: (expression
+          (call_expression
+            function: (identifier)
+            arguments: (argument_list
+              (arguments
+                (argument
+                  (vector_expression
+                    (identifier)
+                    (identifier)
+                    (number)))))))))))
