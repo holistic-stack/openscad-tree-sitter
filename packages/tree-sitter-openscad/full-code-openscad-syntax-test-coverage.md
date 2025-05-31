@@ -1143,6 +1143,34 @@ I have successfully created comprehensive test coverage for the OpenSCAD tree-si
 
 **Next Target**: Continue targeting 50% coverage milestone (53/105 tests, need +9 more tests)
 
+## TDD Cycle 45: Fix Range Expression in Array Indexing (COMPLETED)
+
+**Target**: Add range expression support to index_expression for array slicing syntax
+
+**Strategy**: Modify index_expression rule to accept both range_expression and expression in the index field
+
+**Results**: ✅ **STRUCTURAL IMPROVEMENT SUCCESS**
+- Fixed range expression parsing in array indexing contexts
+- Test improvement: 0 tests (44/105 tests, 42% coverage - no change in count)
+- Structural improvement: Range expressions like `arr[0:2]` now correctly parsed as range_expression with start/end fields
+- Remaining issues: Expression wrapping inconsistencies (test corpus inconsistency category)
+
+**Specific Achievements**:
+- Modified index_expression rule to use `choice($.range_expression, $.expression)` for index field
+- Fixed "Array Indexing" test range expression parsing: `arr[0:2]` now produces `index: (range_expression start: ... end: ...)`
+- Maintained grammar stability with no regressions
+- Enabled proper array slicing syntax support in OpenSCAD
+
+**Technical Details**:
+- Changed index_expression from `field('index', $.expression)` to `field('index', choice($.range_expression, $.expression))`
+- Range expressions in indexing contexts now parse correctly: `[0:2]` → `(range_expression start: (expression (number)) end: (expression (number)))`
+- Remaining test failures are due to expression wrapping inconsistencies (one of the five identified categories)
+- Grammar generates correct structure for array slicing operations
+
+**Key Insight**: Array indexing should support both single expressions and range expressions for proper OpenSCAD array slicing functionality.
+
+**Next Target**: Continue targeting 50% coverage milestone (53/105 tests, need +9 more tests)
+
 ## 🚨 HIGH PRIORITY: Grammar Optimization and Simplification Task Plan
 
 ### **CRITICAL ISSUE IDENTIFIED**: Grammar Over-Engineering

@@ -917,11 +917,14 @@ module.exports = grammar({
       field('arguments', $.argument_list)
     )),
 
-    // Array index expression
+    // Array index expression - support both single expressions and range expressions
     index_expression: $ => prec.left(10, seq(
       field('array', $.expression),
       '[',
-      field('index', $.expression),
+      field('index', choice(
+        $.range_expression,
+        $.expression
+      )),
       choice(
         ']',
         token.immediate(prec(-1, /[;,){}]/))
