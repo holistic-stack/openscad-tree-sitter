@@ -18,8 +18,8 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": [
-          "npx tree-sitter generate",
-          "npx tree-sitter build --wasm",
+          "env-cmd -e plain tree-sitter generate",
+          "env-cmd -e plain tree-sitter build --wasm",
           "npx node-gyp rebuild"
         ],
         "cwd": "{projectRoot}",
@@ -38,8 +38,8 @@
       "executor": "nx:run-commands",
       "options": {
         "commands": [
-          "npx tree-sitter generate",
-          "npx tree-sitter build --wasm"
+          "env-cmd -e plain tree-sitter generate",
+          "env-cmd -e plain tree-sitter build --wasm"
         ],
         "cwd": "{projectRoot}",
         "parallel": false
@@ -73,9 +73,23 @@
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npx tree-sitter test",
+        "command": "env-cmd -e plain tree-sitter test",
         "cwd": "{projectRoot}"
       },
+      "cache": false,
+      "dependsOn": ["generate-grammar"]
+    },
+    "generate-grammar": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "env-cmd -e plain tree-sitter generate",
+        "cwd": "{projectRoot}"
+      },
+      "outputs": [
+        "{projectRoot}/src/parser.c",
+        "{projectRoot}/src/grammar.json",
+        "{projectRoot}/src/node-types.json"
+      ],
       "cache": false
     },
     "parse": {
@@ -92,6 +106,19 @@
         "command": "npx tree-sitter playground",
         "cwd": "{projectRoot}"
       },
+      "cache": false
+    },
+    "generate-grammar": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "env-cmd -e plain tree-sitter generate",
+        "cwd": "{projectRoot}"
+      },
+      "outputs": [
+        "{projectRoot}/src/parser.c",
+        "{projectRoot}/src/grammar.json",
+        "{projectRoot}/src/node-types.json"
+      ],
       "cache": false
     },
     "lint": {
