@@ -1043,10 +1043,10 @@ I have successfully created comprehensive test coverage for the OpenSCAD tree-si
 
 ### Implementation Status Summary 📊
 
-#### **Current Achievement**: 41% Test Coverage ✅
-- **Tests Passing**: 43/105 (41%)
-- **Tests Failing**: 62/105 (59%)
-- **Progress Made**: +41 tests (from 2/105 to 43/105)
+#### **Current Achievement**: 42% Test Coverage ✅
+- **Tests Passing**: 44/105 (42%)
+- **Tests Failing**: 61/105 (58%)
+- **Progress Made**: +42 tests (from 2/105 to 44/105)
 
 #### **Grammar Foundation**: SOLID ✅
 - **Semantic Accuracy**: Grammar generates semantically accurate AST structures
@@ -1086,6 +1086,62 @@ I have successfully created comprehensive test coverage for the OpenSCAD tree-si
 7. **✅ Final Optimization Complete** - Edge cases and complex expressions handled
 
 **The OpenSCAD tree-sitter grammar has achieved a solid foundation with proven methodology for continued systematic improvement toward comprehensive language support.**
+
+## TDD Cycle 43: Fix Negative Number Parsing (COMPLETED)
+
+**Target**: Fix negative number parsing to use unary expressions instead of literal negative numbers
+
+**Strategy**: Remove negative number patterns from the `number` rule and let the `unary_expression` rule handle negative numbers properly
+
+**Results**: ✅ **SEMANTIC CORRECTNESS SUCCESS**
+- Fixed negative number parsing to use proper unary expressions
+- Test improvement: +1 test passing (44/105 tests, 41.9% coverage)
+- Semantically correct: `-5` now parses as `(unary_expression operator: (unary_minus_operator) operand: (number))` instead of direct `(number)`
+- No regressions: All previously passing tests still pass
+
+**Specific Achievements**:
+- Fixed "Simple Numbers" test in comprehensive-basic.txt
+- Removed `negative_decimal` and `negative_integer` patterns from `number` rule
+- Ensured negative numbers are parsed as unary expressions (semantically correct)
+- Maintained grammar stability with proper operator precedence
+
+**Technical Details**:
+- Modified `number` rule to only include positive number patterns
+- Existing `unary_expression` rule with `unary_minus_operator` now handles negative numbers
+- Assignment values properly include `expression` which includes `unary_expression`
+- Follows OpenSCAD semantic model where `-5` is a unary operation on `5`
+
+**Key Insight**: Semantic correctness is crucial - negative numbers should be parsed as unary expressions, not as literal negative tokens.
+
+**Next Target**: Continue targeting 50% coverage milestone (53/105 tests, need +9 more tests)
+
+## TDD Cycle 44: Fix For Statement Header Field Names (COMPLETED)
+
+**Target**: Add missing `header:` and `body:` field names to for_statement rule
+
+**Strategy**: Add field() wrappers to for_header and statement/block in for_statement rule to match test expectations
+
+**Results**: ✅ **STRUCTURAL IMPROVEMENT SUCCESS**
+- Fixed for_statement field names to match test expectations
+- Test improvement: 0 tests (44/105 tests, 42% coverage - no change in count)
+- Structural improvement: Field names now correct in multiple tests (Range Expressions, Complex For Loop Pattern, etc.)
+- Remaining issues: Expression wrapping inconsistencies (test corpus inconsistency category)
+
+**Specific Achievements**:
+- Added `header:` field name to for_header in for_statement rule
+- Added `body:` field name to statement/block choice in for_statement rule
+- Fixed field structure in "Children Operations", "Range Expressions", and "Complex For Loop Pattern" tests
+- Maintained grammar stability with no regressions
+
+**Technical Details**:
+- Modified for_statement rule to use `field('header', $.for_header)` and `field('body', choice($.block, $.statement))`
+- Field names now match test expectations: `header: (for_header ...)` and `body: (statement ...)`
+- Remaining test failures are due to expression wrapping inconsistencies (one of the five identified categories)
+- Grammar generates correct structure but tests expect different expression wrapping patterns
+
+**Key Insight**: Structural improvements (field names) are important for AST consistency even when they don't immediately improve test counts due to other inconsistencies.
+
+**Next Target**: Continue targeting 50% coverage milestone (53/105 tests, need +9 more tests)
 
 ## 🚨 HIGH PRIORITY: Grammar Optimization and Simplification Task Plan
 

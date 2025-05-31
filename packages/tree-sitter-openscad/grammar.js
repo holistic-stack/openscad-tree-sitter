@@ -568,16 +568,16 @@ module.exports = grammar({
     for_statement: $ => seq(
       'for',
       '(',
-      $.for_header,
+      field('header', $.for_header),
       choice(
         ')',
         // Error recovery for missing closing parenthesis
         token.immediate(prec(-1, /[{]/)) // Match opening brace
       ),
-      choice(
+      field('body', choice(
         $.block,
         $.statement
-      )
+      ))
     ),
 
     /**
@@ -1238,11 +1238,7 @@ module.exports = grammar({
     number: $ => {
       const decimal = /[0-9]+\.[0-9]+([eE][-+]?[0-9]+)?/;
       const integer = /[0-9]+([eE][-+]?[0-9]+)?/;
-      const negative_decimal = /-[0-9]+\.[0-9]+([eE][-+]?[0-9]+)?/;
-      const negative_integer = /-[0-9]+([eE][-+]?[0-9]+)?/;
       return token(choice(
-        negative_decimal,
-        negative_integer,
         decimal,
         integer
       ));
