@@ -112,7 +112,16 @@ module.exports = grammar({
     $._binary_operators,
     $._simple_expressions,
     $._complex_expressions,
-    $._access_expressions
+    $._access_expressions,
+    $._closing_paren_recovery,
+    $._closing_bracket_recovery,
+    $._closing_brace_recovery,
+    $._closing_paren_statement_recovery,
+    $._closing_paren_list_recovery,
+    $._parameter_recovery,
+    $._parameter_value_recovery,
+    $._comma_or_closing_paren,
+    $._block_missing_brace_recovery
   ],
 
   rules: {
@@ -183,6 +192,55 @@ module.exports = grammar({
       $.call_expression,
       $.index_expression,
       $.member_expression
+    ),
+
+    // Closing delimiter recovery helpers for better error handling
+    _closing_paren_recovery: $ => choice(
+      ')',
+      token.immediate(prec(-1, /[;{]/))
+    ),
+
+    _closing_bracket_recovery: $ => choice(
+      ']',
+      token.immediate(prec(-1, /[;,){}]/))
+    ),
+
+    _closing_brace_recovery: $ => choice(
+      '}',
+      token.immediate(prec(-1, /[^\s;]/))
+    ),
+
+    _closing_paren_statement_recovery: $ => choice(
+      ')',
+      token.immediate(prec(-1, /[;]/))
+    ),
+
+    _closing_paren_list_recovery: $ => choice(
+      ')',
+      token.immediate(prec(-1, /[;,\[\]{}]/))
+    ),
+
+    // Enhanced parameter list error recovery helpers
+    _parameter_recovery: $ => choice(
+      $._identifier_or_special,
+      token.immediate(prec(-1, /[,)]/))
+    ),
+
+    _parameter_value_recovery: $ => choice(
+      $._value,
+      token.immediate(prec(-1, /[,)]/))
+    ),
+
+    _comma_or_closing_paren: $ => choice(
+      ',',
+      ')',
+      token.immediate(prec(-1, /[;{]/))
+    ),
+
+    // Enhanced block statement error recovery helpers
+    _block_missing_brace_recovery: $ => choice(
+      '}',
+      token.immediate(prec(-2, /[^}]+/))
     ),
 
     _value: $ => choice(
@@ -299,19 +357,23 @@ module.exports = grammar({
     parameter_list: $ => seq(
       '(',
       optional($.parameter_declarations),
-      choice(')', token.immediate(prec(-1, /[;{]/)))
+      $._closing_paren_recovery
     ),
 
     parameter_declarations: $ => seq(
       $.parameter_declaration,
-      repeat(seq(',', $.parameter_declaration)),
+      repeat(seq(
+        choice(',', token.immediate(prec(-1, /[^)]/))),
+        $.parameter_declaration
+      )),
       optional(',')
     ),
 
     parameter_declaration: $ => choice(
       $._identifier_or_special,
-      seq($.identifier, '=', $._value),
-      seq($.special_variable, '=', $._value)
+      seq($.identifier, '=', $._parameter_value_recovery),
+      seq($.special_variable, '=', $._parameter_value_recovery),
+      $._parameter_recovery
     ),
 
     assignment_statement: $ => seq(
@@ -325,7 +387,7 @@ module.exports = grammar({
       'assign',
       '(',
       optional(commaSep1($.assign_assignment)),
-      choice(')', token.immediate(prec(-1, /[{]/))),
+      $._closing_paren_recovery,
       choice($.block, $.statement)
     )),
 
@@ -340,7 +402,10 @@ module.exports = grammar({
     block: $ => seq(
       '{',
       repeat($.statement),
-      choice('}', token.immediate(prec(-1, /[^\s;]/)))
+      choice(
+        $._closing_brace_recovery,
+        $._block_missing_brace_recovery
+      )
     ),
 
     _module_instantiation_with_body: $ => seq(
@@ -365,7 +430,7 @@ module.exports = grammar({
     argument_list: $ => seq(
       '(',
       optional($.arguments),
-      choice(')', token.immediate(prec(-1, /[;{]/)))
+      $._closing_paren_recovery
     ),
 
     arguments: $ => seq(
@@ -381,7 +446,7 @@ module.exports = grammar({
 
     module_child: $ => seq(
       'children',
-      optional(seq('(', optional($.expression), choice(')', token.immediate(prec(-1, /[;]/))))),
+      optional(seq('(', optional($.expression), $._closing_paren_statement_recovery)),
       optional(';')
     ),
 
@@ -391,7 +456,7 @@ module.exports = grammar({
       'if',
       '(',
       field('condition', $.expression),
-      choice(')', token.immediate(prec(-1, /[{]/))),
+      $._closing_paren_recovery,
       field('consequence', choice($.block, $.statement)),
       optional(seq('else', field('alternative', choice($.if_statement, $.block, $.statement))))
     ),
@@ -400,7 +465,7 @@ module.exports = grammar({
       'for',
       '(',
       field('header', $.for_header),
-      choice(')', token.immediate(prec(-1, /[{]/))),
+      $._closing_paren_recovery,
       field('body', choice($.block, $.statement))
     ),
 
@@ -416,7 +481,7 @@ module.exports = grammar({
         seq(field('start', $._range_value), ':', field('end', $._range_value)),
         seq(field('start', $._range_value), ':', field('step', $._range_value), ':', field('end', $._range_value))
       ),
-      choice(']', token.immediate(prec(-1, /[;,){}]/)))
+      $._closing_bracket_recovery
     ),
 
     _range_value: $ => choice(
@@ -430,7 +495,7 @@ module.exports = grammar({
       'echo',
       '(',
       optional($.arguments),
-      choice(')', token.immediate(prec(-1, /[;]/))),
+      $._closing_paren_statement_recovery,
       optional(';')
     )),
 
@@ -439,7 +504,7 @@ module.exports = grammar({
       '(',
       $.expression,
       optional(seq(',', $.expression)),
-      choice(')', token.immediate(prec(-1, /[;]/))),
+      $._closing_paren_statement_recovery,
       optional(';')
     ),
 
@@ -494,7 +559,7 @@ module.exports = grammar({
       field('array', $.expression),
       '[',
       field('index', $.expression),
-      choice(']', token.immediate(prec(-1, /[;,){}]/)))
+      $._closing_bracket_recovery
     )),
 
     member_expression: $ => prec.left('call_member_index', seq(
@@ -527,7 +592,7 @@ module.exports = grammar({
 
     vector_expression: $ => prec(10, seq('[',
       optional(commaSep1($._vector_element)),
-      choice(']', token.immediate(prec(-1, /[;,){}]/)))
+      $._closing_bracket_recovery
     )),
 
     _vector_element: $ => choice(
@@ -543,12 +608,12 @@ module.exports = grammar({
     parenthesized_expression: $ => seq(
       '(',
       $.expression,
-      choice(')', token.immediate(prec(-1, /[;,{}\[]/)))
+      $._closing_paren_list_recovery
     ),
 
     array_literal: $ => seq('[',
       optional(commaSep1($.expression)),
-      choice(']', token.immediate(prec(-1, /[;,){}]/)))
+      $._closing_bracket_recovery
     ),
 
     list_comprehension: $ => prec(3, seq(
@@ -557,7 +622,7 @@ module.exports = grammar({
         seq(field('element', $.expression), field('for_clause', $.list_comprehension_for), optional(field('if_clause', $.list_comprehension_if))),
         seq(field('for_clause', $.list_comprehension_for_block), optional(field('if_clause', $.list_comprehension_if_block)), field('element', $.expression))
       ),
-      choice(']', token.immediate(prec(-1, /[;,){}]/)))
+      $._closing_bracket_recovery
     )),
 
     list_comprehension_for: $ => prec(1, seq(
@@ -566,14 +631,14 @@ module.exports = grammar({
       field('iterator', $._identifier_or_special),
       '=',
       field('range', choice($.range_expression, $.expression)),
-      choice(')', token.immediate(prec(-1, /[;,\[\]{}]/)))
+      $._closing_paren_list_recovery
     )),
 
     list_comprehension_if: $ => prec(1, seq(
       'if',
       '(',
       field('condition', $.expression),
-      choice(')', token.immediate(prec(-1, /[;,\[\]{}]/)))
+      $._closing_paren_list_recovery
     )),
 
     list_comprehension_for_block: $ => prec(4, seq(
@@ -582,20 +647,20 @@ module.exports = grammar({
       field('iterator', $._identifier_or_special),
       '=',
       field('range', choice($.range_expression, $.expression)),
-      choice(')', token.immediate(prec(-1, /[;,\[\]{}]/)))
+      $._closing_paren_list_recovery
     )),
 
     list_comprehension_if_block: $ => prec(4, seq(
       'if',
       '(',
       field('condition', $.expression),
-      choice(')', token.immediate(prec(-1, /[;,\[\]{}]/)))
+      $._closing_paren_list_recovery
     )),
 
     object_literal: $ => prec(1, seq(
       '{',
       optional(seq(commaSep1($.object_field), optional(','))),
-      choice('}', token.immediate(prec(-1, /[;,)\[]/)))
+      $._closing_brace_recovery
     )),
 
     object_field: $ => seq(
@@ -620,7 +685,7 @@ module.exports = grammar({
       'let',
       '(',
       commaSep1($.let_assignment),
-      choice(')', token.immediate(prec(-1, /[;,{}\[]/))),
+      $._closing_paren_list_recovery,
       field('body', $.expression)
     )),
 
