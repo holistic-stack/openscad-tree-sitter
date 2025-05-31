@@ -74,14 +74,18 @@ module.exports = grammar({
 
     // range_expression vs array_literal conflict is needed for handling ambiguous bracket syntax
     // [0:5] could be parsed as either a range_expression or array_literal
-    [$.range_expression, $.array_literal],
+    // [$.range_expression, $.array_literal], // REMOVED based on plan_grammar_review.md.
+    //                                       // NOTE: `tree-sitter generate` still flags this as an "unnecessary conflict"
+    //                                       // even when commented out here, indicating an inherent ambiguity it detects.
 
     // primary_expression and object_field conflict is needed for handling string literals
     // that could be either a string value or an object key
     [$.primary_expression, $.object_field],
 
     // array_literal and list_comprehension_for conflict is needed for handling list comprehensions
-     [$.array_literal, $.list_comprehension_for],
+    // [$.array_literal, $.list_comprehension_for], // REMOVED based on plan_grammar_review.md.
+    //                                             // NOTE: `tree-sitter generate` still flags this as an "unnecessary conflict"
+    //                                             // even when commented out here, indicating an inherent ambiguity it detects.
 
     // Declare a conflict between a module_instantiation_with_body
     // and an expression. This is the core of our issue:
@@ -100,23 +104,23 @@ module.exports = grammar({
     [$.statement, $.for_statement],
 
     // Reduced conflicts - from original grammar, may or may not be needed now
-    [$.binary_expression, $.let_expression],
-    [$._vector_element, $.array_literal],
-    [$.module_instantiation, $.call_expression], // Critical conflict - KEEP (this is a pair)
-    [$.call_expression, $.let_expression],
+    // [$.binary_expression, $.let_expression], // REMOVED (2024-07): No longer flagged by `tree-sitter generate` after review.
+    // [$._vector_element, $.array_literal], // REMOVED (2024-07): No longer flagged by `tree-sitter generate` after review.
+    // [$.module_instantiation, $.call_expression], // REMOVED (2024-07): No longer flagged by `tree-sitter generate` after review (original comment "Critical conflict - KEEP" noted).
+    // [$.call_expression, $.let_expression], // REMOVED (2024-07): No longer flagged by `tree-sitter generate` after review.
 
     // Conflicts between statement-specific expressions and regular expressions - from original
-    [$.unary_expression, $.primary_expression],
-    [$.binary_expression, $.primary_expression],
+    // [$.unary_expression, $.primary_expression], // REMOVED (2024-07): No longer flagged by `tree-sitter generate` after review.
+    // [$.binary_expression, $.primary_expression], // REMOVED (2024-07): No longer flagged by `tree-sitter generate` after review.
 
     // Conflict for simple literals in object_field vs primary_expression - from original
     // [$.object_field, $.primary_expression], // Duplicate of [primary_expression, object_field] above, removed
     // Conflict for binary expressions in object_field vs expression - from original
     [$.object_field, $.expression],
     // Conflict for simple literals in call_expression vs primary_expression - from original
-    [$.call_expression, $.primary_expression],
+    // [$.call_expression, $.primary_expression], // REMOVED (2024-07): No longer flagged by `tree-sitter generate` after review.
     // Conflict for binary expressions in call_expression vs expression - from original
-    [$.call_expression, $.expression],
+    // [$.call_expression, $.expression], // REMOVED (2024-07): No longer flagged by `tree-sitter generate` after review (was equivalent to [$.expression, $.call_expression]).
 
     // [$._instantiation_statements, $._module_instantiation_with_body], // REMOVED as unnecessary (2024-07-XX based on previous warnings)
     [$._control_flow_statements, $.if_statement],
@@ -247,20 +251,8 @@ module.exports = grammar({
       optional(';')
     ),
 
-    _function_binary_expression: $ => choice(
-      prec.left(1, seq(field('left', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression)), field('operator', '||'), field('right', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression)))),
-      prec.left(2, seq(field('left', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression)), field('operator', '&&'), field('right', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression)))),
-      prec.left(3, seq(field('left', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression)), field('operator', choice('==', '!=')), field('right', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression)))),
-      prec.left(4, seq(field('left', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression)), field('operator', choice('<', '<=', '>', '>=')), field('right', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression)))),
-      prec.left(5, seq(field('left', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression)), field('operator', choice('+', '-')), field('right', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression)))),
-      prec.left(6, seq(field('left', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression)), field('operator', choice('*', '/', '%')), field('right', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression)))),
-      prec.right(7, seq(field('left', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression)), field('operator', '^'), field('right', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression))))
-    ),
-
-    _function_unary_expression: $ => prec.right(8, seq(
-      field('operator', choice('!', '-')),
-      field('operand', choice($.number, $.string, $.boolean, $.identifier, $.special_variable, $.vector_expression))
-    )),
+    // _function_binary_expression rule removed as per subtask instructions
+    // _function_unary_expression rule removed as per subtask instructions
 
     parameter_list: $ => seq(
       '(',
@@ -296,6 +288,8 @@ module.exports = grammar({
       choice($.block, $.statement)
     )),
 
+    // Uses $.expression for value to avoid conflicts that arise when using $._value,
+    // due to ambiguity between $._literal and $.primary_expression within $._value for simple cases.
     assign_assignment: $ => seq(
       field('name', choice($.identifier, $.special_variable)),
       '=',
@@ -573,15 +567,17 @@ module.exports = grammar({
     object_field: $ => seq(
       field('key', $.string),
       ':',
+      // `prec.dynamic` was changed to `prec` here (2024-07) to prefer static precedence.
+      // This change did not introduce new unresolved conflicts.
       field('value', choice(
-        prec.dynamic(10, $.number),
-        prec.dynamic(10, $.string),
-        prec.dynamic(10, $.boolean),
-        prec.dynamic(10, $.identifier),
-        prec.dynamic(10, $.special_variable),
-        prec.dynamic(10, $.vector_expression),
-        prec.dynamic(10, $.binary_expression),
-        prec.dynamic(10, $.unary_expression),
+        prec(10, $.number),
+        prec(10, $.string),
+        prec(10, $.boolean),
+        prec(10, $.identifier),
+        prec(10, $.special_variable),
+        prec(10, $.vector_expression),
+        prec(10, $.binary_expression),
+        prec(10, $.unary_expression),
         prec(1, $.expression)
       ))
     ),
