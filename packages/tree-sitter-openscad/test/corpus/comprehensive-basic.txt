@@ -125,13 +125,11 @@ result6 = 2 ^ 3;
   (statement
     (assignment_statement
       name: (identifier)
-      value: (number)))
-  (statement
-    (expression_statement
-      (expression
-        (unary_expression
-          operator: (unary_minus_operator)
-          operand: (number)))))
+      value: (expression
+        (binary_expression
+          left: (number)
+          operator: (subtraction_operator)
+          right: (number)))))
   (statement
     (assignment_statement
       name: (identifier)
@@ -557,32 +555,31 @@ difference() {
     (module_instantiation
       name: (identifier)
       arguments: (argument_list)
-      (statement
-        (block
-          (statement
-            (module_instantiation
-              name: (identifier)
-              arguments: (argument_list
-                (arguments
-                  (argument
-                    (number))))))
-          (statement
-            (module_instantiation
-              name: (identifier)
-              arguments: (argument_list
-                (arguments
-                  (argument
-                    (vector_expression
-                      (number)
-                      (number)
-                      (number)))))
-              (statement
-                (module_instantiation
-                  name: (identifier)
-                  arguments: (argument_list
-                    (arguments
-                      (argument
-                        (number)))))))))))))))
+      (block
+        (statement
+          (module_instantiation
+            name: (identifier)
+            arguments: (argument_list
+              (arguments
+                (argument
+                  (number))))))
+        (statement
+          (module_instantiation
+            name: (identifier)
+            arguments: (argument_list
+              (arguments
+                (argument
+                  (vector_expression
+                    (number)
+                    (number)
+                    (number)))))
+            (statement
+              (module_instantiation
+                name: (identifier)
+                arguments: (argument_list
+                  (arguments
+                    (argument
+                      (number))))))))))))
 
 ==================
 Simple Module Definition

@@ -155,7 +155,11 @@ module.exports = grammar({
     // Conflict for assignment value vs binary operand (state count reduction)
     [$._assignment_value, $._binary_operand],
     // Conflict for function value vs binary operand vs primary expression (state count reduction)
-    [$._function_value, $._binary_operand, $.primary_expression]
+    [$._function_value, $._binary_operand, $.primary_expression],
+    // Conflict for binary operand vs conditional expression (precedence optimization)
+    [$._binary_operand, $.conditional_expression],
+    // Conflict for function value vs binary operand (precedence optimization)
+    [$._function_value, $._binary_operand]
   ],
 
   rules: {
@@ -433,7 +437,14 @@ module.exports = grammar({
       field('arguments', $.argument_list),
       choice(
         $.block,
-        $.statement // A full statement, which will handle its own termination and provide proper statement wrapping
+        // Allow specific statement types but exclude blocks to avoid double wrapping
+        $._declaration_statements,
+        $._import_statements,
+        $._assignment_statements,
+        $._control_flow_statements,
+        $._action_statements,
+        $._instantiation_statements,
+        $.expression_statement
       )
     ),
 
@@ -854,15 +865,15 @@ module.exports = grammar({
       ))
     ),
 
-    // Binary operand helper rule for state count reduction
+    // Binary operand helper rule for state count reduction with direct primitive access
     _binary_operand: $ => choice(
-      $.number,
-      $.string,
-      $.boolean,
-      $.identifier,
-      $.special_variable,
-      $.vector_expression,
-      $.expression
+      prec(10, $.number),
+      prec(10, $.string),
+      prec(10, $.boolean),
+      prec(10, $.identifier),
+      prec(10, $.special_variable),
+      prec(10, $.vector_expression),
+      prec(1, $.expression)
     ),
 
     // Optimized unary expression with explicit operator tokens for tree-sitter ^0.22.4 field capture
@@ -907,8 +918,8 @@ module.exports = grammar({
       )
     )),
 
-    // Member access expression
-    member_expression: $ => prec.left(10, seq(
+    // Member access expression - higher precedence than binary operands
+    member_expression: $ => prec.left(11, seq(
       field('object', choice(
         // Simple literals can be parsed directly without expression wrapper (higher precedence)
         prec.dynamic(10, $.number),
