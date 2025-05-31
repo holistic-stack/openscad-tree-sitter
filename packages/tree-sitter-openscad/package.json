@@ -62,7 +62,7 @@
   "author": "OpenSCAD Community",
   "license": "MIT",
   "engines": {
-    "node": ">=22.0.0",
+    "node": ">=18.0.0",
     "pnpm": ">=10.0.0"
   },
   "optionalDependencies": {
