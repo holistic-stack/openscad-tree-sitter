@@ -1,24 +1,20 @@
 ;; Scopes
 [
-  (chunk)
+  (source_file)
   (module_definition)
   (function_definition)
   (for_statement)
   (if_statement)
   (block)
-  (do_statement)
-  (while_statement)
-  (repeat_statement)
 ] @local.scope
 
 ;; Definitions
 ;; Variables
 (assignment_statement
-  (variable_list
-    (identifier) @local.definition.var))
+  name: (identifier) @local.definition.var)
 
 ;; Parameters
-(parameters
+(parameter_declaration
   (identifier) @local.definition.parameter)
 
 ;; Function definitions
@@ -29,12 +25,8 @@
   name: (identifier) @local.definition.function)
 
 ;; For loop variables
-(for_numeric_clause
-  name: (identifier) @local.definition.var)
-
-(for_generic_clause
-  (variable_list
-    (identifier) @local.definition.var))
+(for_header
+  iterator: (identifier) @local.definition.var)
 
 ;; References
 (identifier) @local.reference

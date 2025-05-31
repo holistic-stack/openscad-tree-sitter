@@ -29,5 +29,5 @@
   (_)) @definition.parameter
 
 ;; Let variable declarations
-(let_clause
-  (identifier) @name) @definition.variable 
+((let_assignment
+  name: (identifier) @name) @definition.variable)

@@ -26,9 +26,9 @@
 (module_instantiation
   (block "{" @indent))
 
-; Special case for module instantiation with a child
+; Special case for module instantiation with a statement
 (module_instantiation
-  (module_child "children" @indent))
+  (statement) @indent)
 
 ; Special case for module instantiation with a semicolon
 (module_instantiation
@@ -50,6 +50,6 @@
 (for_statement
   (block "{" @indent))
 
-; Special case for else clause
-(else_clause
+; Special case for if statement with else
+(if_statement
   "else" @indent)

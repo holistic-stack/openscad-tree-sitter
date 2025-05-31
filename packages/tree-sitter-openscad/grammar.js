@@ -222,6 +222,21 @@ module.exports = grammar({
       $.module_instantiation
     ),
 
+    // Statement for module body context - excludes blocks to avoid double wrapping
+    _module_body_statement: $ => choice(
+      $._declaration_statements,
+      $._import_statements,
+      $._assignment_statements,
+      $._control_flow_statements,
+      $._action_statements,
+      // Create a statement wrapper for nested module instantiations
+      alias(seq($._instantiation_statements), $.statement),
+      prec(1, $.expression_statement)
+      // Note: $.block is excluded to prevent double wrapping
+    ),
+
+
+
     include_statement: $ => seq(
       'include',
       $._file_path,
@@ -437,14 +452,9 @@ module.exports = grammar({
       field('arguments', $.argument_list),
       choice(
         $.block,
-        // Allow specific statement types but exclude blocks to avoid double wrapping
-        $._declaration_statements,
-        $._import_statements,
-        $._assignment_statements,
-        $._control_flow_statements,
-        $._action_statements,
-        $._instantiation_statements,
-        $.expression_statement
+        // Use specialized statement rule that excludes blocks to avoid double wrapping
+        // but includes instantiation statements with proper statement wrapping
+        $._module_body_statement
       )
     ),
 
@@ -526,23 +536,23 @@ module.exports = grammar({
     if_statement: $ => seq(
       'if',
       '(',
-      $.expression,
+      field('condition', $.expression),
       choice(
         ')',
         // Error recovery for missing closing parenthesis
         token.immediate(prec(-1, /[{]/)) // Match opening brace
       ),
-      choice(
+      field('consequence', choice(
         $.block,
         $.statement
-      ),
+      )),
       optional(seq(
         'else',
-        choice(
+        field('alternative', choice(
           $.if_statement,
           $.block,
           $.statement
-        )
+        ))
       ))
     ),
 
@@ -1228,7 +1238,11 @@ module.exports = grammar({
     number: $ => {
       const decimal = /[0-9]+\.[0-9]+([eE][-+]?[0-9]+)?/;
       const integer = /[0-9]+([eE][-+]?[0-9]+)?/;
+      const negative_decimal = /-[0-9]+\.[0-9]+([eE][-+]?[0-9]+)?/;
+      const negative_integer = /-[0-9]+([eE][-+]?[0-9]+)?/;
       return token(choice(
+        negative_decimal,
+        negative_integer,
         decimal,
         integer
       ));

@@ -31,6 +31,6 @@
 ; Special case for if statement with else clause
 ((if_statement
   consequence: (block) @fold
-  alternative: (else_clause)
+  alternative: (block)
   (#set! fold.adjustToEndOfPreviousRow true)
 ))
