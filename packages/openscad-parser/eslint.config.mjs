@@ -134,7 +134,7 @@ export default [
 
   // Configuration files
   {
-    files: ['vite.config.ts', 'vitest.config.ts', 'eslint.config.js'],
+    files: ['vite.config.ts', 'vitest.config.ts', 'eslint.config.mjs'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       'no-console': 'off',

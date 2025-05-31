@@ -20,7 +20,7 @@ export default [
       'coverage/**',
       '*.d.ts',
       'vite.config.ts.timestamp-*',
-      'eslint.config.js', // Ignoring itself
+      'eslint.config.mjs', // Ignoring itself
     ],
   },
 
@@ -110,7 +110,7 @@ export default [
 
   // Configuration files
   {
-    files: ['vite.config.ts', 'vitest.config.ts'], // Removed eslint.config.js from here
+    files: ['vite.config.ts', 'vitest.config.ts'], // Removed eslint.config.mjs from here
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       'no-console': 'off',

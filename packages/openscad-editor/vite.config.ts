@@ -7,7 +7,10 @@ import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
-import monacoEditorPlugin from 'vite-plugin-monaco-editor';
+// @ts-ignore
+import monacoEditorPluginModule from 'vite-plugin-monaco-editor';
+// @ts-ignore
+const monacoEditorPlugin = monacoEditorPluginModule.default || monacoEditorPluginModule;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

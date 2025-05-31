@@ -11,7 +11,8 @@
         "cwd": "{projectRoot}"
       },
       "outputs": ["{projectRoot}/tree-sitter-openscad.wasm"],
-      "cache": false
+      "cache": false,
+      "dependsOn": []
     },
     "build:native": {
       "executor": "nx:run-commands",

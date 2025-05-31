@@ -4,7 +4,6 @@
   "sourceRoot": "packages/openscad-demo/src",
   "projectType": "application",
   "tags": ["type:application", "scope:demo", "platform:web", "framework:react"],
-  "implicitDependencies": ["tree-sitter-openscad"],
   "// targets": "to see all targets run: nx show project openscad-demo --web",
   "targets": {
     "dev": {
@@ -24,7 +23,7 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "dist/packages/openscad-demo"
+        "outputPath": "{projectRoot}/dist"
       },
       "configurations": {
         "development": {

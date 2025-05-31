@@ -1236,9 +1236,25 @@ I have successfully created comprehensive test coverage for the OpenSCAD tree-si
 
 ## 🚨 HIGH PRIORITY: Grammar Optimization and Simplification Task Plan
 
+### **COMPREHENSIVE IMPLEMENTATION PLAN AVAILABLE**
+
+**📋 DETAILED PLAN**: See `packages/tree-sitter-openscad/plan_grammar_review.md` for complete multi-phase optimization plan with specific tasks, subtasks, timelines, and implementation guidance.
+
 ### **CRITICAL ISSUE IDENTIFIED**: Grammar Over-Engineering
 
 Based on comprehensive analysis comparing the OpenSCAD grammar against tree-sitter best practices, **URGENT optimization is required** to address fundamental performance and maintainability issues.
+
+**OPTIMIZATION TARGETS**:
+- **Conflicts**: Reduce from 162 to <20 declared conflicts
+- **Test Coverage**: Achieve >80% with valid OpenSCAD syntax only
+- **Grammar Complexity**: Reduce by 30-40% through simplification
+- **Build Time**: Improve grammar generation time by 50%
+
+**IMPLEMENTATION PHASES**:
+1. **Phase 1**: Grammar Architecture Simplification (3-4 weeks)
+2. **Phase 2**: Test Corpus Validation and Cleanup (2-3 weeks)
+3. **Phase 3**: Modern Tree-Sitter Pattern Implementation (2-3 weeks)
+4. **Phase 4**: Validation and Documentation (1-2 weeks)
 
 ### **Priority 1: CRITICAL Grammar Simplification** ⚠️
 

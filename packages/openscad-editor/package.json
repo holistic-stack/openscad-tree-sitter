@@ -2,6 +2,7 @@
   "name": "@openscad/editor",
   "version": "0.1.0",
   "private": false,
+  "type": "module",
   "publishConfig": {
     "access": "public"
   },

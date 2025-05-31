@@ -9,7 +9,7 @@
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "dist/packages/openscad-parser",
+        "outputPath": "{projectRoot}/dist",
         "configFile": "packages/openscad-parser/vite.config.ts"
       },
       "configurations": {

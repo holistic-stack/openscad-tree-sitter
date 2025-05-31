@@ -3,13 +3,24 @@
   "defaultBase": "main",
   "targetDefaults": {
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "dependencies"
+        }
+      ],
       "cache": true,
       "inputs": ["production", "^production"],
-      "outputs": ["{projectRoot}/dist", "{projectRoot}/build"]
+      "outputs": ["{projectRoot}/dist"]
     },
     "test": {
-      "dependsOn": ["build"],
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "self",
+          "dependencies": false
+        }
+      ],
       "cache": true,
       "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"],
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"]
@@ -18,16 +29,30 @@
       "cache": false
     },
     "dev": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "dependencies"
+        }
+      ],
       "cache": false
     },
     "serve": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "dependencies"
+        }
+      ],
       "cache": false
     },
     "lint": {
       "cache": true,
-      "inputs": ["default", "{workspaceRoot}/.eslintrc.json", "{workspaceRoot}/eslint.config.js"],
+      "inputs": [
+        "default",
+        "{workspaceRoot}/.eslintrc.json",
+        "{workspaceRoot}/eslint.config.mjs"
+      ],
       "outputs": ["{options.outputFile}"]
     },
     "lint:fix": {
@@ -101,13 +126,13 @@
       "!{projectRoot}/src/test-setup.[jt]s",
       "!{projectRoot}/test-setup.[jt]s",
       "!{projectRoot}/.eslintrc.json",
-      "!{projectRoot}/eslint.config.js",
+      "!{projectRoot}/eslint.config.mjs",
       "!{projectRoot}/**/*.stories.@(js|jsx|ts|tsx|mdx)"
     ],
     "sharedGlobals": [
       "{workspaceRoot}/babel.config.json",
       "{workspaceRoot}/.eslintrc.json",
-      "{workspaceRoot}/eslint.config.js"
+      "{workspaceRoot}/eslint.config.mjs"
     ]
   },
   "release": {
@@ -119,14 +144,6 @@
     "@nx/react": {
       "library": {
         "unitTestRunner": "vitest"
-      }
-    }
-  },
-  "tasksRunnerOptions": {
-    "default": {
-      "runner": "nx/tasks-runners/default",
-      "options": {
-        "cacheableOperations": ["build", "lint", "test", "e2e", "typecheck"]
       }
     }
   }

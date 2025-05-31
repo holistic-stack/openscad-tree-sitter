@@ -4,14 +4,13 @@
   "sourceRoot": "packages/openscad-editor/src",
   "projectType": "library",
   "tags": ["type:library", "scope:editor", "platform:web", "framework:react"],
-  "implicitDependencies": ["tree-sitter-openscad"],
   "targets": {
     "build": {
       "executor": "@nx/vite:build",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "outputPath": "dist/packages/openscad-editor",
+        "outputPath": "{projectRoot}/dist",
         "main": "packages/openscad-editor/src/index.ts",
         "tsConfig": "packages/openscad-editor/tsconfig.lib.json",
         "assets": [
