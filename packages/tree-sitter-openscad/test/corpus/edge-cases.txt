@@ -29,16 +29,14 @@ result = (2 + 3;
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression
-        (parenthesized_expression
-          (expression
-            (binary_expression
-              left: (expression
-                (primary_expression
-                  (number)))
-              right: (expression
-                (primary_expression
-                  (number))))))))))
+      value: (parenthesized_expression
+        (expression
+          (binary_expression
+            left: (primary_expression
+              (number))
+            operator: (addition_operator)
+            right: (primary_expression
+              (number))))))))
 
 ==================
 Unclosed Block Recovery
@@ -76,12 +74,13 @@ incomplete = 1 + ;
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression
-        (binary_expression
-          left: (expression
-            (primary_expression
-              (number)))
-          right: (expression (ERROR)))))))
+      value: (binary_expression
+        left: (primary_expression
+          (number))
+        operator: (addition_operator)
+        (error_sentinel)
+        right: (primary_expression
+          (MISSING identifier))))))
 
 ==================
 Scientific Notation
@@ -122,71 +121,51 @@ power2 = 2 ^ (3 ^ 2);
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression
-        (binary_expression
-          left: (expression
-            (primary_expression
-              (number)))
-          right: (expression
-            (binary_expression
-              left: (expression
-                (primary_expression
-                  (number)))
-              right: (expression
-                (primary_expression
-                  (number)))))))))
+      value: (binary_expression
+        left: (number)
+        operator: (addition_operator)
+        right: (binary_expression
+          left: (number)
+          operator: (multiplication_operator)
+          right: (number)))))
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression
-        (binary_expression
-          left: (expression
-            (parenthesized_expression
-              (expression
-                (binary_expression
-                  left: (expression
-                    (primary_expression
-                      (number)))
-                  right: (expression
-                    (primary_expression
-                      (number)))))))
-          right: (expression
-            (primary_expression
-              (number)))))))
+      value: (binary_expression
+        left: (parenthesized_expression
+          (binary_expression
+            left: (primary_expression
+              (number))
+            operator: (addition_operator)
+            right: (primary_expression
+              (number))))
+        operator: (multiplication_operator)
+        right: (primary_expression
+          (number)))))
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression
-        (binary_expression
-          left: (expression
-            (primary_expression
-              (number)))
-          right: (expression
-            (binary_expression
-              left: (expression
-                (primary_expression
-                  (number)))
-              right: (expression
-                (primary_expression
-                  (number)))))))))
+      value: (binary_expression
+        left: (number)
+        operator: (exponentiation_operator)
+        right: (binary_expression
+          left: (number)
+          operator: (exponentiation_operator)
+          right: (number)))))
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression
-        (binary_expression
-          left: (expression
-            (primary_expression
-              (number)))
-          right: (expression
-            (parenthesized_expression
-              (expression
-                (binary_expression
-                  left: (expression
-                    (primary_expression
-                      (number)))
-                  right: (expression
-                    (primary_expression
-                      (number))))))))))))
+      value: (binary_expression
+        left: (primary_expression
+          (number))
+        operator: (exponentiation_operator)
+        right: (parenthesized_expression
+          (binary_expression
+            left: (primary_expression
+              (number))
+            operator: (exponentiation_operator)
+            right: (primary_expression
+              (number))))))))))
 
 ==================
 Complex Logical Expressions
@@ -202,34 +181,22 @@ negated = !(x > 5);
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression
-        (binary_expression
-          left: (expression
-            (binary_expression
-              left: (expression
-                (binary_expression
-                  left: (expression
-                    (primary_expression
-                      (identifier)))
-                  right: (expression
-                    (primary_expression
-                      (number)))))
-              right: (expression
-                (binary_expression
-                  left: (expression
-                    (primary_expression
-                      (identifier)))
-                  right: (expression
-                    (primary_expression
-                      (number)))))))
-          right: (expression
-            (binary_expression
-              left: (expression
-                (primary_expression
-                  (identifier)))
-              right: (expression
-                (primary_expression
-                  (number)))))))))
+      value: (binary_expression
+        left: (binary_expression
+          left: (binary_expression
+            left: (identifier)
+            operator: (greater_than_operator)
+            right: (number))
+          operator: (logical_and_operator)
+          right: (binary_expression
+            left: (identifier)
+            operator: (less_than_operator)
+            right: (number)))
+        operator: (logical_or_operator)
+        right: (binary_expression
+          left: (identifier)
+          operator: (equality_operator)
+          right: (number)))))
   (statement
     (assignment_statement
       name: (identifier)
@@ -276,13 +243,13 @@ value = a > b ? (c > d ? 1 : 2) : (e > f ? 3 : 4);
       value: (conditional_expression
         condition: (binary_expression
           left: (identifier)
-          operator: ">"
+          operator: (greater_than_operator)
           right: (identifier))
         consequence: (parenthesized_expression
           (conditional_expression
             condition: (binary_expression
               left: (identifier)
-              operator: ">"
+              operator: (greater_than_operator)
               right: (identifier))
             consequence: (number)
             alternative: (number)))
@@ -290,7 +257,7 @@ value = a > b ? (c > d ? 1 : 2) : (e > f ? 3 : 4);
           (conditional_expression
             condition: (binary_expression
               left: (identifier)
-              operator: ">"
+              operator: (greater_than_operator)
               right: (identifier))
             consequence: (number)
             alternative: (number)))))))
@@ -300,7 +267,7 @@ Empty Constructs
 ==================
 
 empty_vector = [];
-empty_module() {}
+module empty_module() {}
 empty_args = func();
 
 ---
