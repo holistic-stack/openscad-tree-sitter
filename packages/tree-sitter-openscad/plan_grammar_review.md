@@ -183,7 +183,69 @@ This directly led to the removal of the 7 conflicts identified as "Related to `_
 The total number of declared conflicts in `grammar.js` was reduced from 40 to 16.
 Grammar generation is successful. Tests run with 74 failures (no change from previous step), indicating the removed structures were likely for handling syntax not actually permitted as standalone statements in OpenSCAD or are now correctly handled by more specific statement rules.
 #### [ ] Subtask 2.3: Eliminate precedence-based conflicts (Effort: 12 hours)
+#### Progress on Precedence-Based Conflict Elimination (Subtask 2.3)
+
+- **Named Precedences Introduced:** Successfully refactored `binary_expression` and `unary_expression` to use named precedences (e.g., `logical_or`, `unary_exp`). Other expression types like `call_expression`, `member_expression`, `index_expression`, and `conditional_expression` were also updated to use relevant named precedences.
+- **Operand Restriction Strategy:** A significant conflict involving unary operators with index/call expressions (e.g., `!foo[0]` or `!foo()`) was resolved. The key changes included:
+    - Establishing a clear precedence order where `unary_exp` is higher than `call_member_index`. This means `!(X())` or `!(X[Y])` (unary op applied to result of call/index) is preferred over `(!X)()` or `(!X)[Y]` (call/index where the function/array is a unary op).
+    - Restricting the `function` field of `call_expression` to specific callable forms (like `identifier`, `member_expression`, `parenthesized_expression`) rather than general `$.expression`.
+    - Introducing an `_operand_restricted` helper rule: `_operand_restricted: $ => choice($.primary_expression, $.parenthesized_expression)`. This rule serves as the direct operand for `unary_expression` and `binary_expression`. This prevents direct recursion to the full `$.expression` for operands, forcing more complex structures to be either parenthesized or formed via the natural precedence resolution within `$.expression` choices.
+    - Removing `let_expression` and `conditional_expression` from `primary_expression` and instead including them directly in a (previously attempted, then simplified) version of `_operand_restricted` if they need to be direct operands without parentheses. The current simpler `_operand_restricted` means complex expressions like `let` or `conditional` must be parenthesized if they are to be direct operands of unary/binary operators.
+    - Simplifying `index_expression`'s `index` field to be `$.expression` (as `range_expression` is covered by `$.expression` via `primary_expression`).
+- **Conflict Reduction:** This structural change, combined with the precedence settings, eliminated the targeted complex conflicts. For instance, the persistent `'if' '(' '!' expression • '[' …` conflict was resolved. Conflicts related to `let_expression` followed by other operators (e.g., `(let(...)expr)[idx]`, `(let(...)expr).prop`, `(let(...)expr) ? a : b`) were also addressed by adding specific entries to the `conflicts` array (`[$.index_expression, $.let_expression]`, etc.), ensuring that the higher precedence of the outer operation (index, member) or the defined precedence of `let` vs `conditional` correctly guides parsing.
+- **Next Steps (Post-Build Environment Fix):** The parser generation step (before a Docker environment error halted the build in the last attempt of the previous subtask) issued "Warning: unnecessary conflicts" for several pre-existing items in the `conflicts` array, such as those related to `_module_instantiation_with_body` and `statement` interactions. This indicates these can likely be removed after fixing the build environment, further cleaning the grammar.
+---
+**Update on Operand Strategy (Let/Conditional Expressions):**
+Further refinement of the operand strategy for `unary_expression` and `binary_expression` was undertaken to address conflicts when `let_expression` or `conditional_expression` are used as operands, particularly when followed by operators like `<`, etc. (e.g., `(let(...) result) < 5`).
+
+- **`_operand_restricted` Refinement:** The `_operand_restricted` rule was updated to directly include `$.let_expression` and `$.conditional_expression`.
+  ```javascript
+  _operand_restricted: $. => choice(
+    $.primary_expression,
+    $.parenthesized_expression,
+    prec('call_member_index', $.call_expression),
+    prec('call_member_index', $.member_expression),
+    prec('call_member_index', $.index_expression),
+    $.let_expression,        // Carries its own precedence
+    $.conditional_expression // Carries its own precedence
+  ),
+  ```
+- **`primary_expression` Adjustment:** Consequently, `$.let_expression` and `$.conditional_expression` were removed from the choices within `$.primary_expression` to prevent ambiguity, as they are now more explicitly handled as potentially direct operands or via their own precedence levels within the main `$.expression` choices.
+- **Conflict Resolution:** This change successfully resolved the targeted conflicts (e.g., `'if' '(' 'let' '(' let_assignment ')' primary_expression • '<' …`), leading to a `tree-sitter generate` step with no unresolved conflicts.
+- **"Unnecessary Conflict" Warning:** The build (before an external Docker error) reported `[$.expression, $._operand_restricted]` as an unnecessary conflict, suggesting this explicit declaration (added in a previous iteration) can now be removed due to the robustness of the current structure. Other previously noted unnecessary conflicts related to module instantiations also remain candidates for removal.
 #### [ ] Subtask 2.4: Optimize remaining essential conflicts (Effort: 8 hours)
+---
+**Subtask 2.4: Optimize remaining essential conflicts - Initial Findings:**
+Following the successful structural changes in Subtask 2.3 that resolved major operator precedence conflicts, attention turned to the `conflicts` array itself.
+
+- **Removal of 6 Previously "Unnecessary" Conflicts:** An attempt was made to remove a batch of 6 conflicts that were flagged as "unnecessary" by `tree-sitter generate` *before* the final structure of `_operand_restricted` was achieved. These included:
+    - `[$._module_instantiation_with_body, $.expression]`
+    - `[$.statement]` (standalone)
+    - `[$.statement, $._module_instantiation_with_body]`
+    - `[$._instantiation_statements, $._module_instantiation_with_body]`
+    - `[$.module_instantiation]` (standalone)
+    - `[$.range_expression]` (standalone)
+- **Identification of `[$.expression, $._operand_restricted]` as Necessary:**
+    - When the above 6 conflicts *and* `[$.expression, $._operand_restricted]` were removed, a critical conflict (`'if' '(' '!' call_expression • '[' …`) reappeared.
+    - However, when the 6 conflicts were removed *but `[$.expression, $._operand_restricted]` was kept*, the `tree-sitter generate` step passed successfully (ignoring external build errors).
+    - This strongly indicates that `[$.expression, $._operand_restricted]` is a necessary explicit conflict with the current grammar structure. It allows the parser to correctly handle ambiguities where a piece of code could be interpreted as a more restricted operand or as part of a broader expression structure. The "unnecessary" warning for it earlier was likely contingent on the presence of the other 6 conflicts.
+- **New "Unnecessary Conflicts" List:** After these changes, `tree-sitter generate` (in the successful run where `[$.expression, $._operand_restricted]` was kept) produced a new, different list of "Warning: unnecessary conflicts". This new list needs to be reviewed and addressed.
+---
+**Update - New List of Unnecessary Conflicts (Subtask 2.4):**
+After confirming `[$.expression, $._operand_restricted]` as a necessary conflict and removing 6 other conflicts, a `tree-sitter generate` run (Turn 21) produced a new list of "Warning: unnecessary conflicts". These are now the candidates for removal:
+
+- `[$.unary_expression, $.primary_expression]`
+- `[$.module_instantiation, $.call_expression]`
+- `[$.expression, $.call_expression]`
+- `[$.binary_expression, $.primary_expression]`
+- `[$.call_expression, $.primary_expression]`
+- `[$._vector_element, $.array_literal]`
+- `[$.call_expression, $.let_expression]`
+- `[$.array_literal, $.list_comprehension_for]`
+- `[$.range_expression, $.array_literal]`
+- `[$.binary_expression, $.let_expression]`
+
+The next step is to attempt to remove these from the `grammar.js` conflicts array.
 #### [ ] Subtask 2.5: Document conflict reduction rationale (Effort: 4 hours)
 #### [ ] Subtask 2.6: Validate grammar generation and test results (Effort: 8 hours)
 
