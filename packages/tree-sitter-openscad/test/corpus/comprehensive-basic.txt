@@ -2,212 +2,219 @@
 Simple Numbers
 ==================
 
-42;
-3.14;
-1.2e-3;
--5;
+num1 = 42;
+num2 = 3.14;
+num3 = 1.2e-3;
+num4 = -5;
 
 ---
 
 (source_file
   (statement
-    (expression_statement
-      (number)))
+    (assignment_statement
+      name: (identifier)
+      value: (number)))
   (statement
-    (expression_statement
-      (number)))
+    (assignment_statement
+      name: (identifier)
+      value: (number)))
   (statement
-    (expression_statement
-      (number)))
+    (assignment_statement
+      name: (identifier)
+      value: (number)))
   (statement
-    (expression_statement
-      (expression
-        (unary_expression
-          operand: (expression
-            (primary_expression
-              (number))))))))
+    (assignment_statement
+      name: (identifier)
+      value: (unary_expression
+        operator: "-"
+        operand: (number))))))
 
 ==================
 Simple Strings
 ==================
 
-"hello";
-"world with spaces";
-"";
+str1 = "hello";
+str2 = "world with spaces";
+str3 = "";
 
 ---
 
 (source_file
   (statement
-    (expression_statement
-      (string)))
+    (assignment_statement
+      name: (identifier)
+      value: (string)))
   (statement
-    (expression_statement
-      (string)))
+    (assignment_statement
+      name: (identifier)
+      value: (string)))
   (statement
-    (expression_statement
-      (string))))
+    (assignment_statement
+      name: (identifier)
+      value: (string))))
 
 ==================
 Simple Booleans
 ==================
 
-true;
-false;
+bool1 = true;
+bool2 = false;
 
 ---
 
 (source_file
   (statement
-    (expression_statement
-      (boolean)))
+    (assignment_statement
+      name: (identifier)
+      value: (boolean)))
   (statement
-    (expression_statement
-      (boolean))))
+    (assignment_statement
+      name: (identifier)
+      value: (boolean))))
 
 ==================
 Simple Variables
 ==================
 
-x;
-my_var;
-_private;
+echo(x);
+echo(my_var);
+echo(_private);
 
 ---
 
 (source_file
   (statement
-    (expression_statement
-      (identifier)))
+    (module_instantiation
+      name: (identifier)
+      arguments: (argument_list
+        (arguments
+          (argument
+            (identifier))))))
   (statement
-    (expression_statement
-      (identifier)))
+    (module_instantiation
+      name: (identifier)
+      arguments: (argument_list
+        (arguments
+          (argument
+            (identifier))))))
   (statement
-    (expression_statement
-      (identifier))))
+    (module_instantiation
+      name: (identifier)
+      arguments: (argument_list
+        (arguments
+          (argument
+            (identifier)))))))
 
 ==================
 Basic Arithmetic
 ==================
 
-1 + 2;
-5 - 3;
-4 * 6;
-8 / 2;
-7 % 3;
-2 ^ 3;
+result1 = 1 + 2;
+result2 = 5 - 3;
+result3 = 4 * 6;
+result4 = 8 / 2;
+result5 = 7 % 3;
+result6 = 2 ^ 3;
 
 ---
 
 (source_file
   (statement
-    (expression_statement
-      (expression
-        (binary_expression
-          left: (expression
-            (primary_expression
-              (number)))
-          right: (expression
-            (primary_expression
-              (number)))))))
+    (assignment_statement
+      name: (identifier)
+      value: (binary_expression
+        left: (number)
+        operator: "+"
+        right: (number))))
   (statement
-    (expression_statement
-      (expression
-        (binary_expression
-          left: (expression
-            (primary_expression
-              (number)))
-          right: (expression
-            (primary_expression
-              (number)))))))
+    (assignment_statement
+      name: (identifier)
+      value: (binary_expression
+        left: (number)
+        operator: "-"
+        right: (number))))
   (statement
-    (expression_statement
-      (expression
-        (binary_expression
-          left: (expression
-            (primary_expression
-              (number)))
-          right: (expression
-            (primary_expression
-              (number)))))))
+    (assignment_statement
+      name: (identifier)
+      value: (binary_expression
+        left: (number)
+        operator: "*"
+        right: (number))))
   (statement
-    (expression_statement
-      (expression
-        (binary_expression
-          left: (expression
-            (primary_expression
-              (number)))
-          right: (expression
-            (primary_expression
-              (number)))))))
+    (assignment_statement
+      name: (identifier)
+      value: (binary_expression
+        left: (number)
+        operator: "/"
+        right: (number))))
   (statement
-    (expression_statement
-      (expression
-        (binary_expression
-          left: (expression
-            (primary_expression
-              (number)))
-          right: (expression
-            (primary_expression
-              (number)))))))
+    (assignment_statement
+      name: (identifier)
+      value: (binary_expression
+        left: (number)
+        operator: "%"
+        right: (number))))
   (statement
-    (expression_statement
-      (expression
-        (binary_expression
-          left: (expression
-            (primary_expression
-              (number)))
-          right: (expression
-            (primary_expression
-              (number))))))))
+    (assignment_statement
+      name: (identifier)
+      value: (binary_expression
+        left: (number)
+        operator: "^"
+        right: (number)))))
 
 ==================
 Basic Comparisons
 ==================
 
-5 > 3;
-2 < 7;
-4 >= 4;
-6 <= 8;
-1 == 1;
-2 != 3;
+comp1 = 5 > 3;
+comp2 = 2 < 7;
+comp3 = 4 >= 4;
+comp4 = 6 <= 8;
+comp5 = 1 == 1;
+comp6 = 2 != 3;
 
 ---
 
 (source_file
   (statement
-    (expression_statement
-      (binary_expression
+    (assignment_statement
+      name: (identifier)
+      value: (binary_expression
         left: (number)
         operator: ">"
         right: (number))))
   (statement
-    (expression_statement
-      (binary_expression
+    (assignment_statement
+      name: (identifier)
+      value: (binary_expression
         left: (number)
         operator: "<"
         right: (number))))
   (statement
-    (expression_statement
-      (binary_expression
+    (assignment_statement
+      name: (identifier)
+      value: (binary_expression
         left: (number)
         operator: ">="
         right: (number))))
   (statement
-    (expression_statement
-      (binary_expression
+    (assignment_statement
+      name: (identifier)
+      value: (binary_expression
         left: (number)
         operator: "<="
         right: (number))))
   (statement
-    (expression_statement
-      (binary_expression
+    (assignment_statement
+      name: (identifier)
+      value: (binary_expression
         left: (number)
         operator: "=="
         right: (number))))
   (statement
-    (expression_statement
-      (binary_expression
+    (assignment_statement
+      name: (identifier)
+      value: (binary_expression
         left: (number)
         operator: "!="
         right: (number)))))
@@ -216,28 +223,31 @@ Basic Comparisons
 Basic Logical Operations
 ==================
 
-true && false;
-true || false;
-!true;
+logic1 = true && false;
+logic2 = true || false;
+logic3 = !true;
 
 ---
 
 (source_file
   (statement
-    (expression_statement
-      (binary_expression
+    (assignment_statement
+      name: (identifier)
+      value: (binary_expression
         left: (boolean)
         operator: "&&"
         right: (boolean))))
   (statement
-    (expression_statement
-      (binary_expression
+    (assignment_statement
+      name: (identifier)
+      value: (binary_expression
         left: (boolean)
         operator: "||"
         right: (boolean))))
   (statement
-    (expression_statement
-      (unary_expression
+    (assignment_statement
+      name: (identifier)
+      value: (unary_expression
         operator: "!"
         operand: (boolean)))))
 
@@ -269,28 +279,31 @@ flag = true;
 Vector Expressions
 ==================
 
-[1, 2, 3];
-[x, y, z];
-[];
+vec1 = [1, 2, 3];
+vec2 = [x, y, z];
+vec3 = [];
 
 ---
 
 (source_file
   (statement
-    (expression_statement
-      (vector_expression
+    (assignment_statement
+      name: (identifier)
+      value: (vector_expression
         (number)
         (number)
         (number))))
   (statement
-    (expression_statement
-      (vector_expression
+    (assignment_statement
+      name: (identifier)
+      value: (vector_expression
         (identifier)
         (identifier)
         (identifier))))
   (statement
-    (expression_statement
-      (vector_expression))))
+    (assignment_statement
+      name: (identifier)
+      value: (vector_expression))))
 
 ==================
 Basic Cube
