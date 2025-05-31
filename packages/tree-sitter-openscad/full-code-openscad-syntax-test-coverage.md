@@ -1258,7 +1258,92 @@ This suggests that the conflict resolution mechanism in tree-sitter is not worki
 
 **IMPACT**: This solution successfully resolves the core parsing ambiguity between module instantiation and function calls in OpenSCAD, enabling correct AST generation for the most critical OpenSCAD constructs.
 
-**Next Steps**: The remaining structural issues are separate optimization tasks that don't affect the fundamental parsing correctness. The grammar now correctly distinguishes between module instantiation and function calls based on context.
+**TDD Cycle 9: Fix Simple Expression Wrapper Structure** 🔄
+**Strategy**: Modify `_statement_expression` to provide direct access to simple literals instead of wrapping them in `primary_expression`.
+
+**Progress Made**:
+- [x] Added direct access to simple literals in `_statement_expression` (number, string, boolean, identifier, etc.)
+- [x] Added necessary conflicts to resolve grammar ambiguities
+- [x] Grammar generates successfully
+- [ ] **ISSUE**: Parser still chooses `primary_expression(number)` instead of `number` directly
+
+**Analysis**: The conflicts allow both paths, but the parser still prefers `primary_expression`. The issue is that both `_statement_expression` and `primary_expression` are available in statement context, and the parser is choosing `primary_expression`.
+
+**Root Cause**: The conflict resolution is not forcing the parser to choose the direct access path. Need to either:
+1. Give higher precedence to direct access in `_statement_expression`
+2. Remove `primary_expression` from statement context entirely
+3. Modify the expression hierarchy to match test expectations
+
+**TDD Cycle 10: Force Direct Access with Higher Precedence** 🔄
+**Strategy**: Use precedence to force the parser to choose direct access to literals over `primary_expression` in statement context.
+
+**Progress Made**:
+- [x] Added high precedence (10) to direct access literals in `_statement_expression`
+- [x] Tried multiple approaches: conflicts, precedence, custom expression wrappers
+- [x] Grammar generates successfully for all approaches
+- [ ] **PERSISTENT ISSUE**: Parser consistently chooses `primary_expression(number)` over `number` directly
+
+**Critical Analysis**: Despite all attempts with precedence, conflicts, and custom expression hierarchies, the parser consistently chooses `primary_expression` over direct access to literals. This suggests a fundamental structural issue.
+
+**Key Findings**:
+1. **Module instantiation conflict is RESOLVED** - This core functionality works correctly
+2. **Expression wrapper structure is the remaining issue** - Tests expect specific AST structure
+3. **Parser behavior is consistent** - Always chooses `primary_expression` path despite precedence
+4. **Multiple approaches failed** - Precedence, conflicts, custom wrappers all produce same result
+
+**Root Cause Hypothesis**: The issue might be that `primary_expression` is being accessed through a different path in the grammar that I haven't identified, or there's a fundamental limitation in how tree-sitter resolves these types of conflicts.
+
+**Alternative Approach Needed**: Since precedence and conflicts aren't working, need to investigate:
+1. Whether the test expectations are correct
+2. If there's another path to `primary_expression` in the grammar
+3. If a completely different grammar structure is needed
+
+**TDD Cycle 11: Fix Parser Generation Issue** 🔄
+**Strategy**: Discovered that tests were using pre-built WASM file instead of modified grammar.js. Regenerate parser from current grammar to test actual changes.
+
+**CRITICAL DISCOVERY** 🚨:
+- **Root Cause Found**: Tests were using pre-built WASM file, NOT the modified grammar.js
+- **Evidence**: Test output shows "Grammar package uses pre-built WASM file. Use build:native or build:wasm for local development."
+- **Impact**: All previous changes to grammar.js had NO EFFECT on test results
+- **Solution**: Regenerate WASM file from modified grammar.js using `pnpm build:grammar:wasm`
+
+**Progress Made**:
+- [x] Identified why precedence and conflict approaches appeared to fail
+- [x] Confirmed that grammar.js modifications were not being tested
+- [ ] **Next**: Regenerate parser and test actual effect of modifications
+
+**BREAKTHROUGH SUCCESS** 🎉🎉🎉:
+- [x] **MAJOR IMPROVEMENT**: 10/17 tests now PASSING in comprehensive-basic.txt (vs 5/17 before)
+- [x] **Simple literals FIXED**: Tests 72, 73, 74 (Simple Strings, Booleans, Variables) now show correct `expression_statement(number)` structure
+- [x] **Vector expressions FIXED**: Test 79 now passing
+- [x] **Module instantiation PRESERVED**: Tests 80, 81, 82 still working correctly
+- [x] **Direct access approach WORKING**: Parser now chooses direct literals over primary_expression for simple cases
+
+**REMAINING ISSUES** (much more specific now):
+1. **Unary expressions**: Need `expression` wrapper - `expression_statement(expression(unary_expression(...)))`
+2. **Binary expressions**: Need `expression` wrapper - `expression_statement(expression(binary_expression(...)))`
+3. **Module transformations**: Need `statement` wrapper - `statement(module_instantiation(...))`
+4. **Function definitions**: Missing proper structure in function values
+
+**TDD Cycle 12: Fix Complex Expression Wrappers** 🔄
+**Strategy**: Now that simple literals work, fix complex expressions (binary, unary) to have proper `expression` wrapper structure.
+
+**Progress Made**:
+- [x] Created `_statement_only_expression` to provide expression wrapper for complex expressions
+- [x] Added multiple conflicts to resolve grammar ambiguities
+- [x] Grammar generates and builds successfully
+- [ ] **REGRESSION**: Now 8/17 tests passing (vs 10/17 before)
+
+**Analysis**: The `_statement_only_expression` approach caused regression. Parser now chooses `primary_expression(string)` instead of `string` directly for simple literals.
+
+**Root Cause**: The conflicts allow both paths, but parser prefers `primary_expression` path. The `_statement_only_expression` approach is not providing the correct structure.
+
+**Key Insight**: The issue is that I'm trying to create a parallel expression hierarchy, but the parser is still choosing the wrapped version. Need a different approach that forces direct access for simple literals while providing proper expression wrapper for complex expressions.
+
+**TDD Cycle 13: Simplify Approach - Remove Statement-Only Expression** 🔄
+**Strategy**: Revert the `_statement_only_expression` approach and try a simpler method that focuses on fixing the specific issues without creating parallel hierarchies.
+
+**Current Status**: 8/17 tests passing - need to recover the progress and find a better approach.
 
 ### **Priority 4: Advanced Tree-Sitter Semantic Enhancements** 🎨
 

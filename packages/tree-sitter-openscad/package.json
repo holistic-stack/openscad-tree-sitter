@@ -25,7 +25,7 @@
   "types": "bindings/node/index.d.ts",
   "browser": "bindings/web/index.js",
   "scripts": {
-    "build": "node scripts/echo-prebuilt-message.js",
+    "build": "env-cmd -e plain npx tree-sitter generate",
     "build:native": "env-cmd -e plain npx tree-sitter generate && env-cmd -e plain npx tree-sitter build --wasm && env-cmd -e plain npx node-gyp rebuild",
     "build:node": "env-cmd -e plain npx node-gyp rebuild",
     "build:wasm": "env-cmd -e plain npx tree-sitter generate && env-cmd -e plain npx tree-sitter build --wasm",

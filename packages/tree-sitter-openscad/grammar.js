@@ -106,6 +106,21 @@ module.exports = grammar({
     [$._statement_unary_expression, $.unary_expression, $.primary_expression],
     [$._statement_binary_expression, $.binary_expression, $.primary_expression],
     [$._statement_conditional_expression, $.conditional_expression, $.primary_expression],
+
+    // Conflict between statement expression and primary expression for shared literals
+    [$._statement_expression, $.primary_expression],
+
+    // Complex conflict involving statement expressions, unary expressions, and primary expressions
+    [$._statement_expression, $._statement_unary_expression, $.unary_expression, $.primary_expression],
+
+    // Complex conflict involving statement expressions, binary expressions, and primary expressions
+    [$._statement_expression, $._statement_binary_expression, $.binary_expression, $.primary_expression],
+
+    // Complex conflict involving statement expressions, conditional expressions, and primary expressions
+    [$._statement_expression, $._statement_conditional_expression, $.conditional_expression, $.primary_expression],
+
+    // Conflict between expression_statement and primary_expression for shared literals
+    [$.expression_statement, $.primary_expression],
     // Conflict for simple literals in function_value vs primary_expression
     [$._function_value, $.primary_expression],
     // Conflict for simple literals in parameter_default_value vs primary_expression
@@ -556,8 +571,29 @@ module.exports = grammar({
     ),
 
     expression_statement: $ => seq(
-      $._statement_expression,
+      choice(
+        // Direct access to simple literals (no expression wrapper) - higher precedence
+        prec(10, $.number),
+        prec(10, $.string),
+        prec(10, $.boolean),
+        prec(10, $.identifier),
+        prec(10, $.special_variable),
+        prec(10, $.vector_expression),
+        // Complex expressions wrapped in expression node (excluding call_expression)
+        prec(1, $._statement_expression_wrapper)
+      ),
       ';'
+    ),
+
+    // Wrapper for complex expressions in statement context - provides expression node wrapper
+    _statement_expression_wrapper: $ => choice(
+      // Complex expressions that need expression wrapper (excluding call_expression)
+      $.conditional_expression,
+      $.binary_expression,
+      $.unary_expression,
+      $.index_expression,
+      $.member_expression,
+      $.parenthesized_expression
     ),
 
     // Statement expression - excludes call_expression to avoid conflict with module_instantiation
@@ -568,7 +604,19 @@ module.exports = grammar({
       $.index_expression,
       $.member_expression,
       $._statement_parenthesized_expression,
-      $.primary_expression
+      // Direct access to simple literals with higher precedence to force selection over primary_expression
+      prec(10, $.special_variable),
+      prec(10, $.identifier),
+      prec(10, $.number),
+      prec(10, $.string),
+      prec(10, $.boolean),
+      prec(10, $.undef),
+      prec(10, $.range_expression),
+      prec(10, $.vector_expression),
+      prec(10, $.array_literal),
+      prec(10, $.list_comprehension),
+      prec(10, $.object_literal),
+      prec(10, $.let_expression)
     ),
 
     // Statement parenthesized expression - excludes call_expression
