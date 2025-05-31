@@ -103,7 +103,8 @@ module.exports = grammar({
 
   inline: $ => [
     $._literal,
-    $._value
+    $._value,
+    $._identifier_or_special
   ],
 
   rules: {
@@ -113,6 +114,11 @@ module.exports = grammar({
       $.number,
       $.string,
       $.boolean,
+      $.identifier,
+      $.special_variable
+    ),
+
+    _identifier_or_special: $ => choice(
       $.identifier,
       $.special_variable
     ),
@@ -241,14 +247,13 @@ module.exports = grammar({
     ),
 
     parameter_declaration: $ => choice(
-      $.identifier,
-      $.special_variable,
+      $._identifier_or_special,
       seq($.identifier, '=', $._value),
       seq($.special_variable, '=', $._value)
     ),
 
     assignment_statement: $ => seq(
-      field('name', choice($.special_variable, $.identifier)),
+      field('name', $._identifier_or_special),
       '=',
       field('value', $._value),
       optional(';')
@@ -265,7 +270,7 @@ module.exports = grammar({
     // Uses $.expression for value to avoid conflicts that arise when using $._value,
     // due to ambiguity between $._literal and $.primary_expression within $._value for simple cases.
     assign_assignment: $ => seq(
-      field('name', choice($.identifier, $.special_variable)),
+      field('name', $._identifier_or_special),
       '=',
       field('value', $.expression)
     ),
@@ -309,8 +314,7 @@ module.exports = grammar({
 
     argument: $ => choice(
       $._value,
-      seq(field('name', $.special_variable), '=', field('value', $._value)),
-      seq(field('name', $.identifier), '=', field('value', $._value))
+      seq(field('name', $._identifier_or_special), '=', field('value', $._value))
     ),
 
     module_child: $ => seq(
@@ -339,7 +343,7 @@ module.exports = grammar({
     ),
 
     for_header: $ => prec(3, seq(
-      field('iterator', choice($.identifier, $.special_variable)),
+      field('iterator', $._identifier_or_special),
       '=',
       field('range', choice(prec(3, $.range_expression), $.expression))
     )),
@@ -422,8 +426,7 @@ module.exports = grammar({
 
     call_expression: $ => prec('call_member_index', seq(
       field('function', choice(
-        $.identifier,
-        $.special_variable,
+        $._identifier_or_special,
         $.member_expression,
         $.parenthesized_expression
       )),
@@ -503,7 +506,7 @@ module.exports = grammar({
     list_comprehension_for: $ => prec(1, seq(
       'for',
       '(',
-      field('iterator', choice($.identifier, $.special_variable)),
+      field('iterator', $._identifier_or_special),
       '=',
       field('range', choice($.range_expression, $.expression)),
       choice(')', token.immediate(prec(-1, /[;,\[\]{}]/)))
@@ -519,7 +522,7 @@ module.exports = grammar({
     list_comprehension_for_block: $ => prec(4, seq(
       'for',
       '(',
-      field('iterator', choice($.identifier, $.special_variable)),
+      field('iterator', $._identifier_or_special),
       '=',
       field('range', choice($.range_expression, $.expression)),
       choice(')', token.immediate(prec(-1, /[;,\[\]{}]/)))
@@ -565,7 +568,7 @@ module.exports = grammar({
     )),
 
     let_assignment: $ => seq(
-      field('name', choice($.identifier, $.special_variable)),
+      field('name', $._identifier_or_special),
       '=',
       field('value', $.expression)
     ),
