@@ -610,7 +610,7 @@ module.exports = grammar({
       prec(1, $.expression)
     ),
 
-    echo_statement: $ => seq(
+    echo_statement: $ => prec(20, seq(
       'echo',
       '(',
       optional($.arguments),
@@ -620,7 +620,7 @@ module.exports = grammar({
         token.immediate(prec(-1, /[;]/)) // Match semicolon
       ),
       optional(';') // Make semicolon optional for error recovery
-    ),
+    )),
 
     assert_statement: $ => seq(
       'assert',
@@ -773,48 +773,83 @@ module.exports = grammar({
 
 
 
-    // Optimized binary expression following tree-sitter best practices for state count reduction
+    // Optimized binary expression with explicit operator tokens for tree-sitter ^0.22.4 field capture
     binary_expression: $ => choice(
       // Logical OR (lowest precedence)
       prec.left(1, seq(
         field('left', $._binary_operand),
-        field('operator', '||'),
+        field('operator', alias('||', $.logical_or_operator)),
         field('right', $._binary_operand)
       )),
       // Logical AND
       prec.left(2, seq(
         field('left', $._binary_operand),
-        field('operator', '&&'),
+        field('operator', alias('&&', $.logical_and_operator)),
         field('right', $._binary_operand)
       )),
-      // Equality
+      // Equality - separate rules for each operator to ensure field capture
       prec.left(3, seq(
         field('left', $._binary_operand),
-        field('operator', choice('==', '!=')),
+        field('operator', alias('==', $.equality_operator)),
         field('right', $._binary_operand)
       )),
-      // Relational
+      prec.left(3, seq(
+        field('left', $._binary_operand),
+        field('operator', alias('!=', $.inequality_operator)),
+        field('right', $._binary_operand)
+      )),
+      // Relational - separate rules for each operator to ensure field capture
       prec.left(4, seq(
         field('left', $._binary_operand),
-        field('operator', choice('<', '<=', '>', '>=')),
+        field('operator', alias('<', $.less_than_operator)),
         field('right', $._binary_operand)
       )),
-      // Additive
+      prec.left(4, seq(
+        field('left', $._binary_operand),
+        field('operator', alias('<=', $.less_equal_operator)),
+        field('right', $._binary_operand)
+      )),
+      prec.left(4, seq(
+        field('left', $._binary_operand),
+        field('operator', alias('>', $.greater_than_operator)),
+        field('right', $._binary_operand)
+      )),
+      prec.left(4, seq(
+        field('left', $._binary_operand),
+        field('operator', alias('>=', $.greater_equal_operator)),
+        field('right', $._binary_operand)
+      )),
+      // Additive - separate rules for each operator to ensure field capture
       prec.left(5, seq(
         field('left', $._binary_operand),
-        field('operator', choice('+', '-')),
+        field('operator', alias('+', $.addition_operator)),
         field('right', $._binary_operand)
       )),
-      // Multiplicative
+      prec.left(5, seq(
+        field('left', $._binary_operand),
+        field('operator', alias('-', $.subtraction_operator)),
+        field('right', $._binary_operand)
+      )),
+      // Multiplicative - separate rules for each operator to ensure field capture
       prec.left(6, seq(
         field('left', $._binary_operand),
-        field('operator', choice('*', '/', '%')),
+        field('operator', alias('*', $.multiplication_operator)),
+        field('right', $._binary_operand)
+      )),
+      prec.left(6, seq(
+        field('left', $._binary_operand),
+        field('operator', alias('/', $.division_operator)),
+        field('right', $._binary_operand)
+      )),
+      prec.left(6, seq(
+        field('left', $._binary_operand),
+        field('operator', alias('%', $.modulo_operator)),
         field('right', $._binary_operand)
       )),
       // Exponentiation (right associative)
       prec.right(7, seq(
         field('left', $._binary_operand),
-        field('operator', '^'),
+        field('operator', alias('^', $.exponentiation_operator)),
         field('right', $._binary_operand)
       ))
     ),
@@ -830,11 +865,17 @@ module.exports = grammar({
       $.expression
     ),
 
-    // Optimized unary expression using helper rule for state count reduction
-    unary_expression: $ => prec.right(8, seq(
-      field('operator', choice('!', '-')),
-      field('operand', $._binary_operand)
-    )),
+    // Optimized unary expression with explicit operator tokens for tree-sitter ^0.22.4 field capture
+    unary_expression: $ => choice(
+      prec.right(8, seq(
+        field('operator', alias('!', $.logical_not_operator)),
+        field('operand', $._binary_operand)
+      )),
+      prec.right(8, seq(
+        field('operator', alias('-', $.unary_minus_operator)),
+        field('operand', $._binary_operand)
+      ))
+    ),
 
     // Function call expression - reduced precedence to allow module_instantiation to take priority
     call_expression: $ => prec.left(5, seq(
@@ -1190,6 +1231,24 @@ module.exports = grammar({
     undef: $ => 'undef',
 
     identifier: $ => /[\p{L}_][\p{L}\p{N}_]*/u,
+
+    // Operator tokens for tree-sitter ^0.22.4 field capture compatibility
+    logical_or_operator: $ => '||',
+    logical_and_operator: $ => '&&',
+    equality_operator: $ => '==',
+    inequality_operator: $ => '!=',
+    less_than_operator: $ => '<',
+    less_equal_operator: $ => '<=',
+    greater_than_operator: $ => '>',
+    greater_equal_operator: $ => '>=',
+    addition_operator: $ => '+',
+    subtraction_operator: $ => '-',
+    multiplication_operator: $ => '*',
+    division_operator: $ => '/',
+    modulo_operator: $ => '%',
+    exponentiation_operator: $ => '^',
+    logical_not_operator: $ => '!',
+    unary_minus_operator: $ => '-'
   }
 });
 
