@@ -104,7 +104,15 @@ module.exports = grammar({
   inline: $ => [
     $._literal,
     $._value,
-    $._identifier_or_special
+    $._identifier_or_special,
+    $._comparison_operators,
+    $._arithmetic_operators,
+    $._logical_operators,
+    $._unary_operators,
+    $._binary_operators,
+    $._simple_expressions,
+    $._complex_expressions,
+    $._access_expressions
   ],
 
   rules: {
@@ -121,6 +129,60 @@ module.exports = grammar({
     _identifier_or_special: $ => choice(
       $.identifier,
       $.special_variable
+    ),
+
+    // Operator helper rules for better organization and performance
+    _comparison_operators: $ => choice(
+      $.equality_operator,
+      $.inequality_operator,
+      $.less_than_operator,
+      $.less_equal_operator,
+      $.greater_than_operator,
+      $.greater_equal_operator
+    ),
+
+    _arithmetic_operators: $ => choice(
+      $.addition_operator,
+      $.subtraction_operator,
+      $.multiplication_operator,
+      $.division_operator,
+      $.modulo_operator,
+      $.exponentiation_operator
+    ),
+
+    _logical_operators: $ => choice(
+      $.logical_or_operator,
+      $.logical_and_operator
+    ),
+
+    _unary_operators: $ => choice(
+      $.logical_not_operator,
+      $.unary_minus_operator
+    ),
+
+    _binary_operators: $ => choice(
+      $._comparison_operators,
+      $._arithmetic_operators,
+      $._logical_operators
+    ),
+
+    // Expression group helpers for better organization and performance
+    _simple_expressions: $ => choice(
+      $.primary_expression,
+      $.parenthesized_expression
+    ),
+
+    _complex_expressions: $ => choice(
+      $.conditional_expression,
+      $.binary_expression,
+      $.unary_expression,
+      $.let_expression
+    ),
+
+    _access_expressions: $ => choice(
+      $.call_expression,
+      $.index_expression,
+      $.member_expression
     ),
 
     _value: $ => choice(
@@ -382,14 +444,9 @@ module.exports = grammar({
     ),
 
     expression: $ => choice(
-      $.conditional_expression,
-      $.binary_expression,
-      $.unary_expression,
-      $.call_expression,
-      $.index_expression,
-      $.member_expression,
-      $.parenthesized_expression,
-      $.primary_expression
+      $._complex_expressions,
+      $._access_expressions,
+      $._simple_expressions
     ),
 
     binary_expression: $ => choice(
