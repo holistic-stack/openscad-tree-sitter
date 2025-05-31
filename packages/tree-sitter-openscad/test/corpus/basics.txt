@@ -1,53 +1,34 @@
 ==================
-Basic Expressions
+Basic Expression Assignments
 ==================
 
-1 + 2 * 3;
-true || false;
-"hello" == "world";
+result1 = 1 + 2 * 3;
+result2 = true || false;
+result3 = "hello" == "world";
 
 ---
 
 (source_file
   (statement
-    (expression_statement
-      (expression
-        (binary_expression
-          left: (expression
-            (primary_expression
-              (number)))
-
-          right: (expression
-            (binary_expression
-              left: (expression
-                (primary_expression
-                  (number)))
-
-              right: (expression
-                (primary_expression
-                  (number)))))))))
+    (assignment_statement
+      name: (identifier)
+      value: (binary_expression
+        left: (number)
+        right: (binary_expression
+          left: (number)
+          right: (number)))))
   (statement
-    (expression_statement
-      (expression
-        (binary_expression
-          left: (expression
-            (primary_expression
-              (boolean)))
-
-          right: (expression
-            (primary_expression
-              (boolean)))))))
+    (assignment_statement
+      name: (identifier)
+      value: (binary_expression
+        left: (boolean)
+        right: (boolean))))
   (statement
-    (expression_statement
-      (expression
-        (binary_expression
-          left: (expression
-            (primary_expression
-              (string)))
-
-          right: (expression
-            (primary_expression
-              (string))))))))
+    (assignment_statement
+      name: (identifier)
+      value: (binary_expression
+        left: (string)
+        right: (string)))))
 
 ==================
 Module Definition
@@ -67,14 +48,14 @@ module cube_wrap(size = 10) {
         (parameter_declarations
           (parameter_declaration
             (identifier)
-            (expression (number)))))
+            (number))))
       body: (block
         (statement
           (module_instantiation
             name: (identifier)
             arguments: (argument_list
               (arguments
-                (argument (expression (identifier)))))))))))
+                (argument (identifier))))))))))
 
 ==================
 Function Definition
@@ -92,14 +73,9 @@ function add(a, b) = a + b;
         (parameter_declarations
           (parameter_declaration (identifier))
           (parameter_declaration (identifier))))
-      value: (expression
-        (binary_expression
-          left: (expression
-            (primary_expression
-              (identifier)))
-          right: (expression
-            (primary_expression
-              (identifier))))))))
+      value: (binary_expression
+        left: (identifier)
+        right: (identifier)))))
 
 ==================
 Include and Use
@@ -130,32 +106,21 @@ volume = 3.14 * r * r * h;
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression (number))))
+      value: (number)))
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression (number))))
+      value: (number)))
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression
-        (binary_expression
-          left: (expression
-            (binary_expression
-              left: (expression
-                (binary_expression
-                  left: (expression
-                    (primary_expression
-                      (number)))
-                  right: (expression
-                    (primary_expression
-                      (identifier)))))
-              right: (expression
-                (primary_expression
-                  (identifier)))))
-          right: (expression
-            (primary_expression
-              (identifier))))))))
+      value: (binary_expression
+        left: (binary_expression
+          left: (binary_expression
+            left: (number)
+            right: (identifier))
+          right: (identifier))
+        right: (identifier)))))
 
 ==================
 Module Instantiation
@@ -176,10 +141,10 @@ translate([10, 0, 0]) {
       arguments: (argument_list
         (arguments
           (argument
-            (expression (vector_expression
-              (expression (number))
-              (expression (number))
-              (expression (number)))))))
+            (vector_expression
+              (number)
+              (number)
+              (number)))))
       (block
         (statement
           (module_instantiation
@@ -187,7 +152,7 @@ translate([10, 0, 0]) {
             arguments: (argument_list
               (arguments
                 (argument
-                  (expression (number))))))))))
+                  (number)))))))))
   (statement
     (module_instantiation
       (modifier)
@@ -196,7 +161,7 @@ translate([10, 0, 0]) {
         (arguments
           (argument
             name: (identifier)
-            value: (expression (number))))))))
+            value: (number)))))))
 
 ==================
 Conditional Expression
@@ -211,22 +176,16 @@ result = x > 10 ? "big" : "small";
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression (number))))
+      value: (number)))
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression
-        (conditional_expression
-          condition: (expression
-            (binary_expression
-              left: (expression
-                (primary_expression
-                  (identifier)))
-              right: (expression
-                (primary_expression
-                  (number)))))
-          consequence: (expression (string))
-          alternative: (expression (string)))))))
+      value: (conditional_expression
+        condition: (binary_expression
+          left: (identifier)
+          right: (number))
+        consequence: (string)
+        alternative: (string)))))
 
 ==================
 Let Expression
@@ -243,22 +202,19 @@ shape = let(
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression
-        (let_expression
-          (let_clause
-            (identifier)
-            (expression (number)))
-          (let_clause
-            (identifier)
-            (expression (number)))
-          (expression
-            (call_expression
-              function: (identifier)
-              arguments: (argument_list
-                (arguments
-                  (argument
-                    (expression
-                      (vector_expression
-                        (expression (identifier))
-                        (expression (identifier))
-                        (expression (number)))))))))))))) 
+      value: (let_expression
+        (let_clause
+          (identifier)
+          (number))
+        (let_clause
+          (identifier)
+          (number))
+        (call_expression
+          function: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument
+                (vector_expression
+                  (identifier)
+                  (identifier)
+                  (number))))))))))

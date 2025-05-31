@@ -55,6 +55,8 @@ module.exports = grammar({
    * The remaining conflicts are necessary for handling ambiguous syntax in OpenSCAD.
    */
   conflicts: $ => [
+    // Essential conflicts that handle genuine ambiguities in OpenSCAD syntax
+
     // Statement vs if_statement conflict is needed because an if_statement can be a statement
     // but also needs special handling for the else clause
     [$.statement, $.if_statement],
@@ -65,73 +67,38 @@ module.exports = grammar({
     // module_child conflict is needed for proper handling of the children() syntax
     [$.module_child],
 
-    // module_instantiation conflict is needed for handling blocks after module calls
-    // This also implies module_instantiation is a defined rule.
-    // [$.module_instantiation], // REMOVED as unnecessary (2024-07-XX based on previous warnings)
-
-    // range_expression conflict is needed for handling nested range expressions
-    // [$.range_expression], // REMOVED as unnecessary (2024-07-XX based on previous warnings)
-
-    // range_expression vs array_literal conflict is needed for handling ambiguous bracket syntax
-    // [0:5] could be parsed as either a range_expression or array_literal
-    // [$.range_expression, $.array_literal], // REMOVED based on plan_grammar_review.md.
-    //                                       // NOTE: `tree-sitter generate` still flags this as an "unnecessary conflict"
-    //                                       // even when commented out here, indicating an inherent ambiguity it detects.
-
     // primary_expression and object_field conflict is needed for handling string literals
     // that could be either a string value or an object key
     [$.primary_expression, $.object_field],
 
-    // array_literal and list_comprehension_for conflict is needed for handling list comprehensions
-    // [$.array_literal, $.list_comprehension_for], // REMOVED based on plan_grammar_review.md.
-    //                                             // NOTE: `tree-sitter generate` still flags this as an "unnecessary conflict"
-    //                                             // even when commented out here, indicating an inherent ambiguity it detects.
-
-    // Declare a conflict between a module_instantiation_with_body
-    // and an expression. This is the core of our issue:
-    // `translate()` could be an expression, or it could be the start
-    // of `translate() cube();`
-    // [$._module_instantiation_with_body, $.expression], // REMOVED as unnecessary (2024-07-XX based on previous warnings)
-
-    // Added to resolve conflict: `module_instantiation block • next_statement_token`
-    // This allows `statement` to be ambiguous with itself in this specific sequence.
-    // [$.statement], // REMOVED as unnecessary (2024-07-XX based on previous warnings)
-
-    // Added to resolve: accessor_expression argument_list block • next_token
-    // [$.statement, $._module_instantiation_with_body], // REMOVED as unnecessary (2024-07-XX based on previous warnings)
-
     // Added to resolve: for (for_header) block • next_token
     [$.statement, $.for_statement],
 
-    // Reduced conflicts - from original grammar, may or may not be needed now
-    // [$.binary_expression, $.let_expression], // REMOVED (2024-07): No longer flagged by `tree-sitter generate` after review.
-    // [$._vector_element, $.array_literal], // REMOVED (2024-07): No longer flagged by `tree-sitter generate` after review.
-    // [$.module_instantiation, $.call_expression], // REMOVED (2024-07): No longer flagged by `tree-sitter generate` after review (original comment "Critical conflict - KEEP" noted).
-    // [$.call_expression, $.let_expression], // REMOVED (2024-07): No longer flagged by `tree-sitter generate` after review.
-
-    // Conflicts between statement-specific expressions and regular expressions - from original
-    // [$.unary_expression, $.primary_expression], // REMOVED (2024-07): No longer flagged by `tree-sitter generate` after review.
-    // [$.binary_expression, $.primary_expression], // REMOVED (2024-07): No longer flagged by `tree-sitter generate` after review.
-
-    // Conflict for simple literals in object_field vs primary_expression - from original
-    // [$.object_field, $.primary_expression], // Duplicate of [primary_expression, object_field] above, removed
     // Conflict for binary expressions in object_field vs expression - from original
     [$.object_field, $.expression],
-    // Conflict for simple literals in call_expression vs primary_expression - from original
-    // [$.call_expression, $.primary_expression], // REMOVED (2024-07): No longer flagged by `tree-sitter generate` after review.
-    // Conflict for binary expressions in call_expression vs expression - from original
-    // [$.call_expression, $.expression], // REMOVED (2024-07): No longer flagged by `tree-sitter generate` after review (was equivalent to [$.expression, $.call_expression]).
 
-    // [$._instantiation_statements, $._module_instantiation_with_body], // REMOVED as unnecessary (2024-07-XX based on previous warnings)
+    // Control flow statements conflict
     [$._control_flow_statements, $.if_statement],
+
+    // New conflicts from Task 1 unification (necessary for unified _value rule)
     [$.function_definition, $.primary_expression],
     [$.assignment_statement, $.primary_expression],
     [$.parameter_declaration, $.primary_expression],
     [$.argument, $.primary_expression],
+
+    // Let expression conflicts (necessary for proper precedence handling)
     [$.index_expression, $.let_expression],
     [$.member_expression, $.let_expression],
     [$.conditional_expression, $.let_expression],
-    [$.expression, $._operand_restricted] // KEEPING this one as per subtask hypothesis
+
+    // Essential conflict for operand restriction strategy (identified as necessary in Subtask 2.4)
+    [$.expression, $._operand_restricted],
+
+    // Conflict for assignment_statement and _operand_restricted (needed for _value rule changes)
+    [$.assignment_statement, $._operand_restricted],
+
+    // Conflict for function_definition and _operand_restricted (needed for _value rule changes)
+    [$.function_definition, $._operand_restricted]
   ],
 
   inline: $ => [
@@ -153,7 +120,14 @@ module.exports = grammar({
     _value: $ => choice(
       $._literal,
       $.vector_expression,
-      $.primary_expression
+      $.binary_expression,
+      $.unary_expression,
+      $.conditional_expression,
+      $.call_expression,
+      $.index_expression,
+      $.member_expression,
+      $.parenthesized_expression,
+      $.let_expression
     ),
 
     comment: $ => choice(
