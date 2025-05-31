@@ -6,7 +6,7 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "build": "env-cmd -e plain nx run-many --target=build --all",
-    "build:grammar": "cd packages/tree-sitter-openscad && node scripts/echo-prebuilt-message.js",
+    "build:grammar": "env-cmd -e plain nx build tree-sitter-openscad",
     "build:grammar:native": "env-cmd -e plain nx build:native tree-sitter-openscad",
     "build:grammar:wasm": "env-cmd -e plain nx build:wasm tree-sitter-openscad",
     "build:parser": "env-cmd -e plain nx build openscad-parser",
