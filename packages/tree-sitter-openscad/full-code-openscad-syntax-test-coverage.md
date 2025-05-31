@@ -1171,6 +1171,51 @@ I have successfully created comprehensive test coverage for the OpenSCAD tree-si
 
 **Next Target**: Continue targeting 50% coverage milestone (53/105 tests, need +9 more tests)
 
+## TDD Cycle 46: Module Definition vs Module Instantiation Disambiguation (SKIPPED)
+
+**Target**: Fix `empty_module() {}` being parsed as module_instantiation instead of module_definition
+
+**Analysis**: ❌ **SKIPPED - TEST CORPUS INCONSISTENCY**
+- Test case: `empty_module() {}` in "Empty Constructs" test
+- Issue: Test expects this to be parsed as module_definition, but OpenSCAD language specification requires `module` keyword for module definitions
+- Research findings: OpenSCAD module definitions always require `module name(...) { ... }` syntax according to official documentation
+- Conclusion: This is a test corpus inconsistency (module definition syntax category) and should be avoided per methodology
+
+**Key Insight**: The test expects invalid OpenSCAD syntax to be parsed as a module definition, but `identifier() {}` without the `module` keyword should be parsed as a module instantiation according to OpenSCAD language specification.
+
+**Recommendation**: Focus on grammar optimization and simplification rather than individual test fixes that involve test corpus inconsistencies.
+
+**Next Target**: Continue targeting 50% coverage milestone (53/105 tests, need +8 more tests)
+
+## TDD Cycle 47: Fix String Literal Parsing with Escaped Quotes (COMPLETED)
+
+**Target**: Fix string parsing with escaped quotes causing error_sentinel tokens
+
+**Strategy**: Update string rule regex to handle escape sequences properly
+
+**Results**: ✅ **SUCCESS**
+- Test improvement: +1 test (45/105 tests, 43% coverage)
+- Fixed test: "String Edge Cases" in edge-cases.txt
+- Specific fix: String `"string with \"quotes\""` now parses correctly as single string token
+- No regressions: All previously passing tests still pass
+
+**Specific Achievements**:
+- Modified string rule regex from `/[^"]*/` to `/(?:[^"\\]|\\.)*/` to handle escape sequences
+- Fixed parsing of strings containing escaped quotes: `"string with \"quotes\""`
+- Eliminated error_sentinel tokens in string parsing
+- Added proper precedence to avoid grammar conflicts
+- Maintained support for both double and single quoted strings
+
+**Technical Details**:
+- Updated regex pattern: `(?:[^"\\]|\\.*)*` matches either non-quote/non-backslash characters OR escape sequences
+- Added precedence levels: complete strings (prec 2) vs error recovery (prec 1)
+- Removed single-quote error recovery to avoid conflicts
+- Grammar generates correctly without conflicts
+
+**Key Insight**: String literals with escape sequences are a fundamental language feature that requires proper regex patterns to handle backslash escaping correctly.
+
+**Next Target**: Continue targeting 50% coverage milestone (53/105 tests, need +8 more tests)
+
 ## 🚨 HIGH PRIORITY: Grammar Optimization and Simplification Task Plan
 
 ### **CRITICAL ISSUE IDENTIFIED**: Grammar Over-Engineering

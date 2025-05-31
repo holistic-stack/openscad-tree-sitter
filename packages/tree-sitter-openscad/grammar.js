@@ -1228,14 +1228,12 @@ module.exports = grammar({
     special_variable: $ => token(/\$[\p{L}_][\p{L}\p{N}_]*/u),
 
     string: $ => choice(
-      // Double-quoted strings with proper termination
-      seq('"', optional(token.immediate(/[^"]*/)), '"'),
-      // Single-quoted strings with proper termination
-      seq('\'', optional(token.immediate(/[^']*/)), '\''),
-      // Error recovery for unterminated double-quoted strings
-      seq('"', token.immediate(/[^"\n]*/)),
-      // Error recovery for unterminated single-quoted strings
-      seq('\'', token.immediate(/[^'\n]*/)),
+      // Double-quoted strings with escape sequence support (higher precedence)
+      prec(2, seq('"', optional(token.immediate(/(?:[^"\\]|\\.)*/)), '"')),
+      // Single-quoted strings with escape sequence support (higher precedence)
+      prec(2, seq('\'', optional(token.immediate(/(?:[^'\\]|\\.)*/)), '\'')),
+      // Error recovery for unterminated double-quoted strings (lower precedence)
+      prec(1, seq('"', token.immediate(/(?:[^"\\]|\\.)*/)))
     ),
 
     number: $ => {
