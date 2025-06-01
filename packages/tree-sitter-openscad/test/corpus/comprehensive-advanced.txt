@@ -222,13 +222,13 @@ result = let(x = 5, y = 10) x + y;
     (assignment_statement
       name: (identifier)
       value: (let_expression
-        (let_clause
-          (identifier)
-          (number))
-        (let_clause
-          (identifier)
-          (number))
-        (binary_expression
+        (let_assignment
+          name: (identifier)
+          value: (number))
+        (let_assignment
+          name: (identifier)
+          value: (number))
+        body: (binary_expression
           left: (identifier)
           operator: (addition_operator)
           right: (identifier))))))

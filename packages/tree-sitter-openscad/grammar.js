@@ -37,6 +37,8 @@ module.exports = grammar({
     [$.vector_expression, $.list_comprehension],
     [$.range_expression_non_recursive],
     [$._value, $._non_list_comprehension_value],
+    [$.bare_range_expression],
+    [$.bare_range_expression_non_recursive],
   ],
 
   rules: {
@@ -261,7 +263,9 @@ module.exports = grammar({
       $.identifier,
       $.special_variable,
 
-      // Complex expressions - direct access
+      // Complex expressions - direct access (prioritize bracketed ranges over vectors)
+      $.bracketed_range_expression,  // Higher priority for [start:end] syntax
+      $.bare_range_expression,
       $.vector_expression,
       $.binary_expression,
       $.unary_expression,
@@ -270,7 +274,32 @@ module.exports = grammar({
       $.index_expression,
       $.member_expression,
       $.let_expression,
-      $.range_expression,
+      $.list_comprehension,
+      $.parenthesized_expression
+    ),
+
+    // Vector element rule - excludes bare ranges to prevent parsing conflicts
+    // Used specifically in vector_expression to avoid [start:end-offset] being parsed as vector
+    _vector_element: ($) => choice(
+      // Literals - direct access
+      $.number,
+      $.string,
+      $.boolean,
+      $.undef,
+      $.identifier,
+      $.special_variable,
+
+      // Complex expressions - direct access (excluding bare_range_expression)
+      $.vector_expression,
+      $.binary_expression,
+      $.unary_expression,
+      $.conditional_expression,
+      $.call_expression,
+      $.index_expression,
+      $.member_expression,
+      $.let_expression,
+      $.bracketed_range_expression,  // Allow bracketed ranges like [0:10]
+      // $.bare_range_expression,    // Exclude bare ranges like 0:10
       $.list_comprehension,
       $.parenthesized_expression
     ),
@@ -287,16 +316,16 @@ module.exports = grammar({
       $.identifier,
       $.special_variable,
 
-      // Non-recursive expressions - maintain distinct names to prevent conflicts
-      $.vector_expression_non_recursive,
-      $.binary_expression_non_recursive,
-      $.unary_expression_non_recursive,
-      $.conditional_expression_non_recursive,
-      $.call_expression_non_recursive,
-      $.index_expression_non_recursive,
-      $.member_expression_non_recursive,
-      $.range_expression_non_recursive,
-      $.parenthesized_expression_non_recursive
+      // Non-recursive expressions - aliased to regular node names for consistent AST output
+      alias($.vector_expression_non_recursive, $.vector_expression),
+      alias($.binary_expression_non_recursive, $.binary_expression),
+      alias($.unary_expression_non_recursive, $.unary_expression),
+      alias($.conditional_expression_non_recursive, $.conditional_expression),
+      alias($.call_expression_non_recursive, $.call_expression),
+      alias($.index_expression_non_recursive, $.index_expression),
+      alias($.member_expression_non_recursive, $.member_expression),
+      alias($.range_expression_non_recursive, $.range_expression),
+      alias($.parenthesized_expression_non_recursive, $.parenthesized_expression)
     ),
 
     binary_expression: ($) =>
@@ -510,9 +539,9 @@ module.exports = grammar({
         field('value', $._value)
       ),
 
-    range_expression: ($) =>
+    // Bracketed range expressions [start:end] or [start:step:end] - highest precedence
+    bracketed_range_expression: ($) =>
       choice(
-        // Bracketed range expressions [start:end] or [start:step:end] - dynamic precedence
         prec.dynamic(100, seq(
           '[',
           field('start', $._value),
@@ -528,8 +557,12 @@ module.exports = grammar({
           ':',
           field('end', $._value),
           ']'
-        )),
-        // Bare range expressions (for use in other contexts)
+        ))
+      ),
+
+    // Bare range expressions (for use in other contexts like for loops)
+    bare_range_expression: ($) =>
+      choice(
         prec.left(5, seq(
           field('start', $._value),
           ':',
@@ -544,9 +577,16 @@ module.exports = grammar({
         ))
       ),
 
+    // Legacy range_expression for backward compatibility
+    range_expression: ($) =>
+      choice(
+        $.bracketed_range_expression,
+        $.bare_range_expression
+      ),
+
     vector_expression: ($) => prec(1, seq(
       '[',
-      commaSep($._value),
+      commaSep($._vector_element),
       choice(
         ']',
         // Error recovery for missing closing bracket
@@ -754,9 +794,9 @@ module.exports = grammar({
         field('property', $.identifier)
       )),
 
-    range_expression_non_recursive: ($) =>
+    // Bracketed range expressions [start:end] or [start:step:end] - non-recursive version
+    bracketed_range_expression_non_recursive: ($) =>
       choice(
-        // Bracketed range expressions [start:end] or [start:step:end] - dynamic precedence
         prec.dynamic(100, seq(
           '[',
           field('start', $._non_list_comprehension_value),
@@ -772,8 +812,12 @@ module.exports = grammar({
           ':',
           field('end', $._non_list_comprehension_value),
           ']'
-        )),
-        // Bare range expressions (for use in other contexts)
+        ))
+      ),
+
+    // Bare range expressions (for use in other contexts like for loops) - non-recursive version
+    bare_range_expression_non_recursive: ($) =>
+      choice(
         prec.left(5, seq(
           field('start', $._non_list_comprehension_value),
           ':',
@@ -786,6 +830,13 @@ module.exports = grammar({
           ':',
           field('end', $._non_list_comprehension_value)
         ))
+      ),
+
+    // Legacy range_expression_non_recursive for backward compatibility
+    range_expression_non_recursive: ($) =>
+      choice(
+        alias($.bracketed_range_expression_non_recursive, $.range_expression),
+        alias($.bare_range_expression_non_recursive, $.range_expression)
       ),
 
     parenthesized_expression_non_recursive: ($) =>
