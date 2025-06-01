@@ -14,20 +14,24 @@ result3 = "hello" == "world";
       name: (identifier)
       value: (binary_expression
         left: (number)
+        operator: (addition_operator)
         right: (binary_expression
           left: (number)
+          operator: (multiplication_operator)
           right: (number)))))
   (statement
     (assignment_statement
       name: (identifier)
       value: (binary_expression
         left: (boolean)
+        operator: (logical_or_operator)
         right: (boolean))))
   (statement
     (assignment_statement
       name: (identifier)
       value: (binary_expression
         left: (string)
+        operator: (equality_operator)
         right: (string)))))
 
 ==================
@@ -74,11 +78,9 @@ function add(a, b) = a + b;
           (parameter_declaration (identifier))
           (parameter_declaration (identifier))))
       value: (binary_expression
-        left: (primary_expression
-          (identifier))
+        left: (identifier)
         operator: (addition_operator)
-        right: (primary_expression
-          (identifier)))))))
+        right: (identifier)))))
 
 ==================
 Include and Use
@@ -121,8 +123,11 @@ volume = 3.14 * r * r * h;
         left: (binary_expression
           left: (binary_expression
             left: (number)
+            operator: (multiplication_operator)
             right: (identifier))
+          operator: (multiplication_operator)
           right: (identifier))
+        operator: (multiplication_operator)
         right: (identifier)))))
 
 ==================
@@ -185,11 +190,9 @@ result = x > 10 ? "big" : "small";
       name: (identifier)
       value: (conditional_expression
         condition: (binary_expression
-          left: (primary_expression
-            (identifier))
+          left: (identifier)
           operator: (greater_than_operator)
-          right: (primary_expression
-            (number)))
+          right: (number))
         consequence: (string)
         alternative: (string)))))
 
@@ -211,21 +214,16 @@ shape = let(
       value: (let_expression
         (let_assignment
           name: (identifier)
-          value: (expression
-            (primary_expression
-              (number))))
+          value: (number))
         (let_assignment
           name: (identifier)
-          value: (expression
-            (primary_expression
-              (number))))
-        body: (expression
-          (call_expression
-            function: (identifier)
-            arguments: (argument_list
-              (arguments
-                (argument
-                  (vector_expression
-                    (identifier)
-                    (identifier)
-                    (number)))))))))))
+          value: (number))
+        body: (call_expression
+          function: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument
+                (vector_expression
+                  (identifier)
+                  (identifier)
+                  (number))))))))))

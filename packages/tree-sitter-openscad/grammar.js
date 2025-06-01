@@ -35,6 +35,7 @@ module.exports = grammar({
     [$.member_expression, $.let_expression],
     [$.range_expression],
     [$._value, $.primary_expression],
+    [$.expression, $._value],
   ],
 
   rules: {
@@ -182,7 +183,7 @@ module.exports = grammar({
     // Arguments list for function calls
     arguments: ($) => commaSep1($.argument),
 
-    // Primary expressions for binary expression operands (only basic literals)
+    // Primary expressions for the most basic literals and identifiers
     primary_expression: ($) =>
       choice(
         $.identifier,
@@ -191,30 +192,48 @@ module.exports = grammar({
         $.string,
         $.boolean,
         $.undef,
-        $.vector_expression
+        $.vector_expression,
+        $.parenthesized_expression
       ),
 
-    // Unified value rule that can be any expression or literal
-    _value: ($) =>
+    // Expression rule that includes all expression types
+    expression: ($) =>
       choice(
-        $.identifier,
-        $.special_variable,
-        $.number,
-        $.string,
-        $.boolean,
-        $.undef,
-        $.vector_expression,
-        $.list_comprehension,
+        $.primary_expression,
         $.binary_expression,
         $.unary_expression,
         $.conditional_expression,
         $.call_expression,
         $.index_expression,
         $.member_expression,
-        $.parenthesized_expression,
         $.let_expression,
-        $.range_expression
+        $.range_expression,
+        $.list_comprehension
       ),
+
+    // Unified value rule with direct access strategy (no expression wrapping)
+    _value: ($) => choice(
+      // Literals - direct access
+      $.number,
+      $.string,
+      $.boolean,
+      $.undef,
+      $.identifier,
+      $.special_variable,
+
+      // Complex expressions - direct access
+      $.vector_expression,
+      $.binary_expression,
+      $.unary_expression,
+      $.conditional_expression,
+      $.call_expression,
+      $.index_expression,
+      $.member_expression,
+      $.let_expression,
+      $.range_expression,
+      $.list_comprehension,
+      $.parenthesized_expression
+    ),
 
     binary_expression: ($) =>
       choice(
@@ -222,17 +241,17 @@ module.exports = grammar({
         prec.left(
           1,
           seq(
-            field('left', $.primary_expression),
+            field('left', $._value),
             field('operator', alias('||', $.logical_or_operator)),
-            field('right', $.primary_expression)
+            field('right', $._value)
           )
         ),
         prec.left(
           2,
           seq(
-            field('left', $.primary_expression),
+            field('left', $._value),
             field('operator', alias('&&', $.logical_and_operator)),
-            field('right', $.primary_expression)
+            field('right', $._value)
           )
         ),
 
@@ -240,17 +259,17 @@ module.exports = grammar({
         prec.left(
           3,
           seq(
-            field('left', $.primary_expression),
+            field('left', $._value),
             field('operator', alias('==', $.equality_operator)),
-            field('right', $.primary_expression)
+            field('right', $._value)
           )
         ),
         prec.left(
           3,
           seq(
-            field('left', $.primary_expression),
+            field('left', $._value),
             field('operator', alias('!=', $.inequality_operator)),
-            field('right', $.primary_expression)
+            field('right', $._value)
           )
         ),
 
@@ -258,33 +277,33 @@ module.exports = grammar({
         prec.left(
           4,
           seq(
-            field('left', $.primary_expression),
+            field('left', $._value),
             field('operator', alias('<', $.less_than_operator)),
-            field('right', $.primary_expression)
+            field('right', $._value)
           )
         ),
         prec.left(
           4,
           seq(
-            field('left', $.primary_expression),
+            field('left', $._value),
             field('operator', alias('<=', $.less_equal_operator)),
-            field('right', $.primary_expression)
+            field('right', $._value)
           )
         ),
         prec.left(
           4,
           seq(
-            field('left', $.primary_expression),
+            field('left', $._value),
             field('operator', alias('>', $.greater_than_operator)),
-            field('right', $.primary_expression)
+            field('right', $._value)
           )
         ),
         prec.left(
           4,
           seq(
-            field('left', $.primary_expression),
+            field('left', $._value),
             field('operator', alias('>=', $.greater_equal_operator)),
-            field('right', $.primary_expression)
+            field('right', $._value)
           )
         ),
 
@@ -292,17 +311,17 @@ module.exports = grammar({
         prec.left(
           5,
           seq(
-            field('left', $.primary_expression),
+            field('left', $._value),
             field('operator', alias('+', $.addition_operator)),
-            field('right', $.primary_expression)
+            field('right', $._value)
           )
         ),
         prec.left(
           5,
           seq(
-            field('left', $.primary_expression),
+            field('left', $._value),
             field('operator', alias('-', $.subtraction_operator)),
-            field('right', $.primary_expression)
+            field('right', $._value)
           )
         ),
 
@@ -310,25 +329,25 @@ module.exports = grammar({
         prec.left(
           6,
           seq(
-            field('left', $.primary_expression),
+            field('left', $._value),
             field('operator', alias('*', $.multiplication_operator)),
-            field('right', $.primary_expression)
+            field('right', $._value)
           )
         ),
         prec.left(
           6,
           seq(
-            field('left', $.primary_expression),
+            field('left', $._value),
             field('operator', alias('/', $.division_operator)),
-            field('right', $.primary_expression)
+            field('right', $._value)
           )
         ),
         prec.left(
           6,
           seq(
-            field('left', $.primary_expression),
+            field('left', $._value),
             field('operator', alias('%', $.modulo_operator)),
-            field('right', $.primary_expression)
+            field('right', $._value)
           )
         ),
 
@@ -336,9 +355,9 @@ module.exports = grammar({
         prec.right(
           7,
           seq(
-            field('left', $.primary_expression),
+            field('left', $._value),
             field('operator', alias('^', $.exponentiation_operator)),
-            field('right', $.primary_expression)
+            field('right', $._value)
           )
         )
       ),
@@ -349,21 +368,21 @@ module.exports = grammar({
           8,
           seq(
             field('operator', alias('!', $.logical_not_operator)),
-            field('operand', $.primary_expression)
+            field('operand', $._value)
           )
         ),
         prec.right(
           8,
           seq(
             field('operator', alias('-', $.unary_minus_operator)),
-            field('operand', $.primary_expression)
+            field('operand', $._value)
           )
         )
       ),
 
     conditional_expression: ($) =>
       prec.right(
-        10,
+        0,
         seq(
           field('condition', $._value),
           '?',
@@ -399,10 +418,10 @@ module.exports = grammar({
     let_expression: ($) =>
       prec.right(
         15,
-        seq('let', '(', commaSep1($.let_clause), ')', field('body', $._value))
+        seq('let', '(', commaSep1($.let_assignment), ')', field('body', $._value))
       ),
 
-    let_clause: ($) =>
+    let_assignment: ($) =>
       seq(field('name', $.identifier), '=', field('value', $._value)),
 
     range_expression: ($) =>
