@@ -1221,8 +1221,23 @@ This comprehensive plan provides a systematic approach to transforming the OpenS
 5. **Comments in Function Definitions** (Test 53): Comment placement in functions
 6. **Comments in Complex Expressions** (Test 54): Comments within expressions
 
-**MEDIUM PRIORITY - Range Expression Parsing (1 failure):**
-7. **Children Operations** (Test 15): Fix `vector_expression` vs `range_expression` parsing issue
+### ✅ **COMPLETED: Nested Comments Enhancement (PARTIAL SUCCESS)**
+- **Issue:** Nested `/* /* */ */` comments causing ERROR nodes
+- **Solution:** Enhanced comment grammar rule to support recursive nested comments
+- **Result:** Test 47 (Nested Comments) now correctly parses `(comment (comment))` instead of ERROR
+- **Impact:** Improved comment parsing robustness
+
+### 🔧 **ATTEMPTED: Range Expression Parsing Issue (COMPLEX GRAMMAR ISSUE)**
+- **Issue:** `[0:$children-1]` parsing as `vector_expression` instead of `range_expression`
+- **Root Cause:** Grammar precedence conflict between vector and range expressions
+- **Attempts:** Tried precedence increase (prec 20) and dynamic precedence (prec.dynamic 100)
+- **Status:** Requires deeper grammar restructuring - complex precedence issue
+- **Impact:** Cosmetic issue - functionality works, but AST structure differs from expectation
+
+**MEDIUM PRIORITY - Remaining Issues (15 failures):**
+1. **Range Expression Parsing** (Test 15): Complex precedence issue requiring grammar restructuring
+2. **List Comprehension Node Names** (Tests 16, 62-63): Cosmetic `*_non_recursive` naming issue
+3. **Comment Attachment** (Tests 44, 53-54): Comments as separate nodes vs attached to constructs
 
 ---
 

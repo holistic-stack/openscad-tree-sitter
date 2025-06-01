@@ -508,15 +508,15 @@ module.exports = grammar({
 
     range_expression: ($) =>
       choice(
-        // Bracketed range expressions [start:end] or [start:step:end] - highest precedence
-        prec(20, seq(
+        // Bracketed range expressions [start:end] or [start:step:end] - dynamic precedence
+        prec.dynamic(100, seq(
           '[',
           field('start', $._value),
           ':',
           field('end', $._value),
           ']'
         )),
-        prec(20, seq(
+        prec.dynamic(100, seq(
           '[',
           field('start', $._value),
           ':',
@@ -736,15 +736,15 @@ module.exports = grammar({
 
     range_expression_non_recursive: ($) =>
       choice(
-        // Bracketed range expressions [start:end] or [start:step:end] - highest precedence
-        prec(20, seq(
+        // Bracketed range expressions [start:end] or [start:step:end] - dynamic precedence
+        prec.dynamic(100, seq(
           '[',
           field('start', $._non_list_comprehension_value),
           ':',
           field('end', $._non_list_comprehension_value),
           ']'
         )),
-        prec(20, seq(
+        prec.dynamic(100, seq(
           '[',
           field('start', $._non_list_comprehension_value),
           ':',
