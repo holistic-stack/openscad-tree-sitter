@@ -30,13 +30,10 @@ result = (2 + 3;
     (assignment_statement
       name: (identifier)
       value: (parenthesized_expression
-        (expression
-          (binary_expression
-            left: (primary_expression
-              (number))
-            operator: (addition_operator)
-            right: (primary_expression
-              (number))))))))
+        (binary_expression
+          left: (number)
+          operator: (addition_operator)
+          right: (number))))))
 
 ==================
 Unclosed Block Recovery
@@ -75,12 +72,9 @@ incomplete = 1 + ;
     (assignment_statement
       name: (identifier)
       value: (binary_expression
-        left: (primary_expression
-          (number))
+        left: (number)
         operator: (addition_operator)
-        (error_sentinel)
-        right: (primary_expression
-          (MISSING identifier))))))
+        right: (MISSING identifier)))))
 
 ==================
 Scientific Notation
@@ -134,14 +128,11 @@ power2 = 2 ^ (3 ^ 2);
       value: (binary_expression
         left: (parenthesized_expression
           (binary_expression
-            left: (primary_expression
-              (number))
+            left: (number)
             operator: (addition_operator)
-            right: (primary_expression
-              (number))))
+            right: (number)))
         operator: (multiplication_operator)
-        right: (primary_expression
-          (number)))))
+        right: (number))))
   (statement
     (assignment_statement
       name: (identifier)
@@ -156,16 +147,13 @@ power2 = 2 ^ (3 ^ 2);
     (assignment_statement
       name: (identifier)
       value: (binary_expression
-        left: (primary_expression
-          (number))
+        left: (number)
         operator: (exponentiation_operator)
         right: (parenthesized_expression
           (binary_expression
-            left: (primary_expression
-              (number))
+            left: (number)
             operator: (exponentiation_operator)
-            right: (primary_expression
-              (number))))))))))
+            right: (number)))))))
 
 ==================
 Complex Logical Expressions
@@ -205,27 +193,27 @@ negated = !(x > 5);
           (binary_expression
             left: (binary_expression
               left: (identifier)
-              operator: ">"
+              operator: (greater_than_operator)
               right: (number))
-            operator: "&&"
+            operator: (logical_and_operator)
             right: (binary_expression
               left: (identifier)
-              operator: "<"
+              operator: (less_than_operator)
               right: (number))))
-        operator: "||"
+        operator: (logical_or_operator)
         right: (binary_expression
           left: (identifier)
-          operator: "=="
+          operator: (equality_operator)
           right: (number)))))
   (statement
     (assignment_statement
       name: (identifier)
       value: (unary_expression
-        operator: "!"
+        operator: (logical_not_operator)
         operand: (parenthesized_expression
           (binary_expression
             left: (identifier)
-            operator: ">"
+            operator: (greater_than_operator)
             right: (number)))))))
 
 ==================

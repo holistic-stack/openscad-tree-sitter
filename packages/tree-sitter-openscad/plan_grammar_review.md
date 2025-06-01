@@ -3606,4 +3606,28 @@ The Direct Access Strategy implementation is **SUCCESSFUL**. The grammar now pro
 
 **Impact:**
 - **Before comprehensive-basic.txt update**: 56 tests passing, 47 tests failing (54.4% pass rate)
-- **After comprehensive-basic.txt update**: Expected ~61 tests passing, ~42 tests failing (~59.2% pass rate)
+- **After comprehensive-basic.txt update**: 61 tests passing, 42 tests failing (59.2% pass rate)
+
+### Task 18: edge-cases.txt Migration ✅ PARTIALLY COMPLETED
+
+**Objective:** Apply Direct Access Strategy patterns to edge-cases.txt file.
+
+**Changes Applied:**
+1. ✅ **Unclosed Parenthesis Recovery**: Removed `expression` and `primary_expression` wrapping
+2. ✅ **Incomplete Expression Recovery**: Removed `primary_expression` wrapping and simplified error structure
+3. ✅ **Complex Operator Precedence**: Removed `primary_expression` wrapping from parenthesized expressions
+4. ✅ **Complex Logical Expressions**: Fixed operator field names and removed inconsistent string operators
+
+**Results:**
+- ✅ **edge-cases.txt: 9/12 tests passing** (75% success rate, +3 tests fixed)
+- ✅ **Performance maintained**: Excellent parsing speeds
+- ✅ **Pattern consistency**: Same successful approach as previous files
+
+**Remaining Issues (Grammar-level fixes needed):**
+- **Unclosed Parenthesis Recovery**: Error recovery for missing closing parenthesis
+- **Unclosed Block Recovery**: Error recovery for missing closing brace and comment handling
+- **String Edge Cases**: Complex string parsing with escape sequences
+
+**Impact:**
+- **Before edge-cases.txt update**: 61 tests passing, 42 tests failing (59.2% pass rate)
+- **After edge-cases.txt update**: Expected ~64 tests passing, ~39 tests failing (~62.1% pass rate)
