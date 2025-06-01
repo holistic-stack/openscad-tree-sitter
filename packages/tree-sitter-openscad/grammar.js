@@ -4,13 +4,10 @@
  *
  * CHANGELOG:
  * ----------
- * 2024-07-XX - Optimized grammar to remove unnecessary conflicts
- *            - Fixed precedence issues between expressions and module instantiations
- *            - Improved error recovery for various syntax errors
- *            - Enhanced support for list comprehensions and object literals
- *            - Added proper precedence handling for let expressions
- *            - Fixed conflicts between modifiers and unary expressions
- *            - Added comprehensive comments for better maintainability
+ * 2025-05-XX - Fixed grammar generation panic issues
+ *            - Created working minimal grammar as foundation
+ *            - Incrementally building features without panic-inducing patterns
+ *            - Avoided undefined externals and complex error recovery
  */
 
 // Helper function for comma-separated lists
@@ -25,629 +22,417 @@ function commaSep(rule) {
 
 module.exports = grammar({
   name: 'openscad',
-  inline: $ => [
-    $._literal,
-    $._value,
-    $._binary_operand,
-    $._statement_group,
-    $._expression_base
-  ],
-  supertypes: $ => [
-    $.statement,
-    $.expression,
-    $._literal,
-    $._declaration,
-    $._control_flow
-  ],
-  externals: $ => [
-    $.string_content,
-    $.comment_content,
-    $.multiline_string
-  ],
-  precedences: $ => [
-    ['literal', 'unary', 'multiplicative', 'additive', 'relational', 'equality', 'logical_and', 'logical_or']
-  ],
-  word: $ => $.identifier,
-  extras: $ => [
-    /\s/,
-    $.comment
-  ],
-  conflicts: $ => [
+
+  word: ($) => $.identifier,
+  extras: ($) => [/\s/, $.comment],
+
+  conflicts: ($) => [
     [$.module_instantiation, $.call_expression],
-    [$.range_expression, $.array_literal],
-    [$.if_statement]
+    [$.if_statement],
+    [$.statement],
+    [$.conditional_expression, $.range_expression],
+    [$.index_expression, $.let_expression],
+    [$.member_expression, $.let_expression],
+    [$.range_expression],
+    [$._value, $.primary_expression],
   ],
+
   rules: {
-    source_file: $ => repeat($.statement), // Reverted prec.right
-    expression: $ => choice(
-      $._simple_expressions,
-      $._complex_expressions
-    ),
-    _literal: $ => choice(
-      $.number,
-      $.string,
-      $.boolean,
-      $.identifier,
-      $.special_variable
-    ),
-    // Primary expression for direct literal access and other atomic constructs
-    primary_expression: $ => choice(
-      $._literal,
-      $.undef,
-      $.range_expression,
-      $.vector_expression,
-      $.array_literal,
-      $.list_comprehension,
-      $.object_literal
-    ),
-    _identifier_or_special: $ => choice(
-      $.identifier,
-      $.special_variable
-    ),
+    source_file: ($) => repeat($.statement),
 
-    // Operator helper rules for better organization and performance
-    _comparison_operators: $ => choice(
-      $.equality_operator,
-      $.inequality_operator,
-      $.less_than_operator,
-      $.less_equal_operator,
-      $.greater_than_operator,
-      $.greater_equal_operator
-    ),
-
-    _arithmetic_operators: $ => choice(
-      $.addition_operator,
-      $.subtraction_operator,
-      $.multiplication_operator,
-      $.division_operator,
-      $.modulo_operator,
-      $.exponentiation_operator
-    ),
-
-    _logical_operators: $ => choice(
-      $.logical_or_operator,
-      $.logical_and_operator
-    ),
-
-    _unary_operators: $ => choice(
-      $.logical_not_operator,
-      $.unary_minus_operator
-    ),
-
-    _binary_operators: $ => choice(
-      $._comparison_operators,
-      $._arithmetic_operators,
-      $._logical_operators
-    ),
-
-    // Expression group helpers for better organization and performance
-    _simple_expressions: $ => choice(
-      $.primary_expression,
-      $.parenthesized_expression
-    ),
-
-    _complex_expressions: $ => choice(
-      $.conditional_expression,
-      $.binary_expression,
-      $.unary_expression,
-      $.let_expression,
-      $.call_expression,
-      $.index_expression,
-      $.member_expression
-    ),
-
-    // Operand restriction helper for unary and binary expressions
-    _operand_restricted: $ => choice(
-      $.primary_expression,
-      $.parenthesized_expression
-    ),
-
-    // Closing delimiter recovery helpers for better error handling
-    _closing_paren_recovery: $ => choice(
-      ')',
-      token.immediate(prec(-1, /[;{]/))
-    ),
-
-    _closing_bracket_recovery: $ => choice(
-      ']',
-      token.immediate(prec(-1, /[;,){}]/))
-    ),
-
-    _closing_brace_recovery: $ => choice( // Re-added rule definition
-      '}',
-      token.immediate(prec(-1, /[^\s;]/))
-    ),
-
-    _closing_paren_statement_recovery: $ => choice(
-      ')',
-      token.immediate(prec(-1, /[;]/))
-    ),
-
-    _closing_paren_list_recovery: $ => choice(
-      ')',
-      token.immediate(prec(-1, /[;,\[\]{}]/))
-    ),
-
-    // Enhanced parameter list error recovery helpers
-    _parameter_recovery: $ => choice(
-      $._identifier_or_special,
-      token.immediate(prec(-1, /[,)]/))
-    ),
-
-    _parameter_value_recovery: $ => choice(
-      $._value,
-      token.immediate(prec(-1, /[,)]/))
-    ),
-
-    _comma_or_closing_paren: $ => choice(
-      ',',
-      ')',
-      token.immediate(prec(-1, /[;{]/))
-    ),
-
-    // Removed: _block_missing_brace_recovery rule definition
-
-    _value: $ => choice(
-      $._literal,
-      $.vector_expression,
-      $.binary_expression,
-      $.unary_expression,
-      $.conditional_expression,
-      $.call_expression,
-      $.index_expression,
-      $.member_expression,
-      $.parenthesized_expression,
-      $.let_expression
-    ),
-
-    comment: $ => choice(
-      seq('//', /.*/, /\r?\n/),
-      seq('/*', /([^*]|\*[^\/])*\*\//)
-    ),
-
-    error_sentinel: $ => token(prec(-1, /[^\s]+/)),
-    _error_recovery: $ => token(prec(-1, /[^;{}()\[\]\s]+/)),
-
-    statement: $ => choice( // Reverted prec.right
-      $._declaration_statements,
-      $._import_statements,
-      $._assignment_statements,
-      $._control_flow_statements,
-      $._action_statements,
-      prec(10, $._instantiation_statements),
-      $.block
-    ),
-
-    _declaration_statements: $ => choice(
-      $.module_definition,
-      $.function_definition
-    ),
-
-    _import_statements: $ => choice(
-      $.include_statement,
-      $.use_statement
-    ),
-
-    _assignment_statements: $ => choice(
-      $.assignment_statement,
-      $.assign_statement
-    ),
-
-    _control_flow_statements: $ => choice(
-      $.if_statement,
-      $.for_statement
-    ),
-
-    _action_statements: $ => choice(
-      $.echo_statement,
-      $.assert_statement
-    ),
-
-    _instantiation_statements: $ => choice(
-      $.module_instantiation
-    ),
-
-    _module_body_statement: $ => choice(
-      $._declaration_statements,
-      $._import_statements,
-      $._assignment_statements,
-      $._control_flow_statements,
-      $._action_statements,
-      alias(seq($._instantiation_statements), $.statement)
-    ),
-
-    include_statement: $ => seq(
-      'include',
-      $._file_path,
-      optional(';')
-    ),
-
-    use_statement: $ => seq(
-      'use',
-      $._file_path,
-      optional(';')
-    ),
-
-    _file_path: $ => choice(
-      $.string,
-      $.angle_bracket_string
-    ),
-
-    angle_bracket_string: $ => seq(
-      '<',
-      token.immediate(/[^>]*/),
-      '>'
-    ),
-
-    module_definition: $ => seq(
-      'module',
-      field('name', $.identifier),
-      field('parameters', $.parameter_list),
-      field('body', $.block)
-    ),
-
-    // function_definition uses $._value helper for unified direct primitive access
-    function_definition: $ => seq(
-      'function',
-      field('name', $.identifier),
-      field('parameters', $.parameter_list),
-      '=',
-      field('value', $._value),
-      optional(';')
-    ),
-
-    // _function_binary_expression rule removed as per subtask instructions
-    // _function_unary_expression rule removed as per subtask instructions
-
-    parameter_list: $ => seq(
-      '(',
-      optional($.parameter_declarations),
-      $._closing_paren_recovery
-    ),
-
-    parameter_declarations: $ => seq(
-      $.parameter_declaration,
-      repeat(seq(
-        choice(',', token.immediate(prec(-1, /[^)]/))),
-        $.parameter_declaration
-      )),
-      optional(',')
-    ),
-
-    parameter_declaration: $ => choice(
-      // Default value first: identifier = value or special = value
-      seq($.identifier, '=', $._value),
-      seq($.special_variable, '=', $._value),
-      // Simple parameter name without default
-      $._identifier_or_special,
-      // Recovery fallback
-      $._parameter_recovery
-    ),
-
-    assignment_statement: $ => seq(
-      field('name', $._identifier_or_special),
-      '=',
-      field('value', $._value),
-      optional(';')
-    ),
-
-    assign_statement: $ => prec(2, seq(
-      'assign',
-      '(',
-      optional(commaSep1($.assign_assignment)),
-      $._closing_paren_recovery,
-      choice($.block, $.statement)
-    )),
-
-    // assign_assignment uses $._value for direct primitive access and unified value rule.
-    assign_assignment: $ => seq(
-      field('name', $._identifier_or_special),
-      '=',
-      field('value', $._value)
-    ),
-
-    block: $ => seq( // Reverted to original
-      '{',
-      repeat($.statement),
-      $._closing_brace_recovery
-    ),
-
-    _module_instantiation_with_body: $ => seq(
-      optional($.modifier),
-      field('name', $.identifier),
-      field('arguments', $.argument_list),
-      choice($.block, $._module_body_statement)
-    ),
-
-    _module_instantiation_simple: $ => seq(
-      optional($.modifier),
-      field('name', $.identifier),
-      field('arguments', $.argument_list),
-      ';'
-    ),
-
-    module_instantiation: $ => choice(
-      prec(15, $._module_instantiation_with_body),
-      prec(15, $._module_instantiation_simple)
-    ),
-
-    argument_list: $ => seq(
-      '(',
-      optional($.arguments),
-      $._closing_paren_recovery
-    ),
-
-    arguments: $ => seq(
-      $.argument,
-      repeat(seq(',', $.argument)),
-      optional(',')
-    ),
-
-    argument: $ => choice(
-      $._value,
-      seq(field('name', $._identifier_or_special), '=', field('value', $._value))
-    ),
-
-    module_child: $ => seq(
-      'children',
-      optional(seq('(', optional($.expression), $._closing_paren_statement_recovery)),
-      optional(';')
-    ),
-
-    modifier: $ => prec(10, choice('#', '!', '%', '*')),
-
-    if_statement: $ => seq(
-      'if',
-      '(',
-      field('condition', $.expression),
-      $._closing_paren_recovery,
-      field('consequence', choice($.block, $.statement)),
-      optional(seq('else', field('alternative', choice($.if_statement, $.block, $.statement))))
-    ),
-
-    for_statement: $ => seq(
-      'for',
-      '(',
-      field('header', $.for_header),
-      $._closing_paren_recovery,
-      field('body', choice($.block, $.statement))
-    ),
-
-    for_header: $ => prec(3, seq(
-      field('iterator', $._identifier_or_special),
-      '=',
-      field('range', choice(prec(3, $.range_expression), $.expression))
-    )),
-
-    range_expression: $ => prec.left('relational', seq(
-      field('start', $._operand_restricted),
-      ':',
-      field('end', $._operand_restricted),
-      optional(seq(':', field('step', $._operand_restricted)))
-    )),
-
-    _range_value: $ => choice(
-      prec(5, $.number),
-      prec(5, $.identifier),
-      prec(5, $.special_variable),
-      prec(1, $.expression)
-    ),
-
-    echo_statement: $ => seq(
-      'echo',
-      '(',
-      optional(commaSep1($.expression)),
-      $._closing_paren_recovery,
-      optional(';')
-    ),
-
-    assert_statement: $ => seq(
-      'assert',
-      '(',
-      commaSep1($.expression),
-      $._closing_paren_recovery,
-      optional(';')
-    ),
-
-    // Conditional (ternary) expression
-    conditional_expression: $ => prec.right('conditional_exp_ternary', seq(
-      field('condition', $.expression),
-      '?',
-      field('consequence', $.expression),
-      ':',
-      field('alternative', $.expression)
-    )),
-
-    binary_expression: $ => choice(
-      prec.left('logical_or', seq(field('left', $._operand_restricted), field('operator', alias('||', $.logical_or_operator)), field('right', $._operand_restricted))),
-      prec.left('logical_and', seq(field('left', $._operand_restricted), field('operator', alias('&&', $.logical_and_operator)), field('right', $._operand_restricted))),
-      prec.left('equality', seq(field('left', $._operand_restricted), field('operator', alias('==', $.equality_operator)), field('right', $._operand_restricted))),
-      prec.left('equality', seq(field('left', $._operand_restricted), field('operator', alias('!=', $.inequality_operator)), field('right', $._operand_restricted))),
-      prec.left('relational', seq(field('left', $._operand_restricted), field('operator', alias('<', $.less_than_operator)), field('right', $._operand_restricted))),
-      prec.left('relational', seq(field('left', $._operand_restricted), field('operator', alias('<=', $.less_equal_operator)), field('right', $._operand_restricted))),
-      prec.left('relational', seq(field('left', $._operand_restricted), field('operator', alias('>', $.greater_than_operator)), field('right', $._operand_restricted))),
-      prec.left('relational', seq(field('left', $._operand_restricted), field('operator', alias('>=', $.greater_equal_operator)), field('right', $._operand_restricted))),
-      prec.left('additive', seq(field('left', $._operand_restricted), field('operator', alias('+', $.addition_operator)), field('right', $._operand_restricted))),
-      prec.left('additive', seq(field('left', $._operand_restricted), field('operator', alias('-', $.subtraction_operator)), field('right', $._operand_restricted))),
-      prec.left('multiplicative', seq(field('left', $._operand_restricted), field('operator', alias('*', $.multiplication_operator)), field('right', $._operand_restricted))),
-      prec.left('multiplicative', seq(field('left', $._operand_restricted), field('operator', alias('/', $.division_operator)), field('right', $._operand_restricted))),
-      prec.left('multiplicative', seq(field('left', $._operand_restricted), field('operator', alias('%', $.modulo_operator)), field('right', $._operand_restricted))),
-      prec.right('exponentiation', seq(field('left', $._operand_restricted), field('operator', alias('^', $.exponentiation_operator)), field('right', $._operand_restricted)))
-    ),
-
-    unary_expression: $ => choice(
-      prec.right('unary_exp', seq(field('operator', alias('!', $.logical_not_operator)), field('operand', $._operand_restricted))),
-      prec.right('unary_exp', seq(field('operator', alias('-', $.unary_minus_operator)), field('operand', $._operand_restricted)))
-    ),
-
-    call_expression: $ => prec('call_member_index', seq(
-      field('function', choice(
-        $._identifier_or_special,
-        $.member_expression,
-        $.parenthesized_expression
-      )),
-      field('arguments', $.argument_list)
-    )),
-
-    index_expression: $ => prec.left('call_member_index', seq(
-      field('array', $.expression),
-      '[',
-      field('index', $.expression),
-      $._closing_bracket_recovery
-    )),
-
-    member_expression: $ => prec.left('call_member_index', seq(
-      field('object', $.expression),
-      '.',
-      field('property', $.identifier)
-    )),
-
-    vector_expression: $ => prec(10, seq('[',
-      optional(commaSep1($._vector_element)),
-      $._closing_bracket_recovery
-    )),
-
-    _vector_element: $ => choice(
-      prec(5, $.number),
-      prec(5, $.string),
-      prec(5, $.boolean),
-      prec(5, $.identifier),
-      prec(5, $.special_variable),
-      prec(4, $.vector_expression),
-      prec(1, $.expression)
-    ),
-
-    parenthesized_expression: $ => seq(
-      '(',
-      $.expression,
-      $._closing_paren_list_recovery
-    ),
-
-    array_literal: $ => seq('[',
-      optional(commaSep1($.expression)),
-      $._closing_bracket_recovery
-    ),
-
-    list_comprehension: $ => prec(3, seq(
-      '[',
+    statement: ($) =>
       choice(
-        seq(field('element', $.expression), field('for_clause', $.list_comprehension_for), optional(field('if_clause', $.list_comprehension_if))),
-        seq(field('for_clause', $.list_comprehension_for_block), optional(field('if_clause', $.list_comprehension_if_block)), field('element', $.expression))
+        $.assignment_statement,
+        $.module_definition,
+        $.function_definition,
+        $.module_instantiation,
+        $.include_statement,
+        $.use_statement,
+        $.if_statement,
+        $.for_statement,
+        $.echo_statement,
+        $.assert_statement,
+        $.block
       ),
-      $._closing_bracket_recovery
-    )),
 
-    list_comprehension_for: $ => prec(1, seq(
-      'for',
-      '(',
-      field('iterator', $._identifier_or_special),
-      '=',
-      field('range', choice($.range_expression, $.expression)),
-      $._closing_paren_list_recovery
-    )),
+    // Basic statements
+    assignment_statement: ($) =>
+      seq(
+        field('name', $.identifier),
+        '=',
+        field('value', $._value),
+        optional(';')
+      ),
 
-    list_comprehension_if: $ => prec(1, seq(
-      'if',
-      '(',
-      field('condition', $.expression),
-      $._closing_paren_list_recovery
-    )),
+    module_definition: ($) =>
+      seq(
+        'module',
+        field('name', $.identifier),
+        field('parameters', $.parameter_list),
+        field('body', $.block)
+      ),
 
-    list_comprehension_for_block: $ => prec(4, seq(
-      'for',
-      '(',
-      field('iterator', $._identifier_or_special),
-      '=',
-      field('range', choice($.range_expression, $.expression)),
-      $._closing_paren_list_recovery
-    )),
+    function_definition: ($) =>
+      seq(
+        'function',
+        field('name', $.identifier),
+        field('parameters', $.parameter_list),
+        '=',
+        field('value', $._value),
+        optional(';')
+      ),
 
-    list_comprehension_if_block: $ => prec(4, seq(
-      'if',
-      '(',
-      field('condition', $.expression),
-      $._closing_paren_list_recovery
-    )),
+    parameter_list: ($) => seq('(', optional($.parameter_declarations), ')'),
 
-    object_literal: $ => prec(1, seq(
-      '{',
-      optional(seq(commaSep1($.object_field), optional(','))),
-      $._closing_brace_recovery // Reverted to original
-    )),
+    parameter_declarations: ($) => commaSep1($.parameter_declaration),
 
-    object_field: $ => seq(
-      field('key', $.string),
-      ':',
-      // `prec.dynamic` was changed to `prec` here (2024-07) to prefer static precedence.
-      // This change did not introduce new unresolved conflicts.
-      field('value', choice(
-        prec(10, $.number),
-        prec(10, $.string),
-        prec(10, $.boolean),
-        prec(10, $.identifier),
-        prec(10, $.special_variable),
-        prec(10, $.vector_expression),
-        prec(10, $.binary_expression),
-        prec(10, $.unary_expression),
-        prec(1, $.expression)
-      ))
-    ),
+    parameter_declaration: ($) =>
+      choice($.identifier, seq($.identifier, '=', $._value)),
 
-    let_expression: $ => prec(6, seq(
-      'let',
-      '(',
-      commaSep1($.let_assignment),
-      $._closing_paren_list_recovery,
-      field('body', $.expression)
-    )),
+    block: ($) => seq('{', repeat($.statement), '}'),
 
-    let_assignment: $ => seq(
-      field('name', $._identifier_or_special),
-      '=',
-      field('value', $.expression)
-    ),
+    // Module instantiation with precedence
+    module_instantiation: ($) =>
+      choice(
+        prec(2, $.module_instantiation_simple),
+        prec(2, $.module_instantiation_with_body)
+      ),
 
-    special_variable: $ => token(/\$[A-Za-z_][A-Za-z0-9_]*/),
+    module_instantiation_simple: ($) =>
+      seq(
+        optional($.modifier),
+        field('name', $.identifier),
+        field('arguments', $.argument_list),
+        ';'
+      ),
 
-    string: $ => choice(
-      prec(2, seq('"', optional(token.immediate(/(?:[^"\\]|\\.)*/)), '"')),
-      prec(2, seq('\'', optional(token.immediate(/(?:[^'\\]|\\.)*/)), '\'')),
-      prec(1, seq('"', token.immediate(/(?:[^"\\]|\\.)*/)))
-    ),
+    module_instantiation_with_body: ($) =>
+      seq(
+        optional($.modifier),
+        field('name', $.identifier),
+        field('arguments', $.argument_list),
+        $.block
+      ),
 
-    number: $ => {
+    modifier: ($) => choice('#', '!', '%', '*'),
+
+    argument_list: ($) => seq('(', optional($.arguments), ')'),
+
+    argument: ($) =>
+      choice(
+        $._value,
+        seq(field('name', $.identifier), '=', field('value', $._value))
+      ),
+
+    // Import statements
+    include_statement: ($) =>
+      seq('include', choice($.string, $.angle_bracket_string), optional(';')),
+    use_statement: ($) =>
+      seq('use', choice($.string, $.angle_bracket_string), optional(';')),
+
+    // Control flow
+    if_statement: ($) =>
+      prec.right(
+        1,
+        seq(
+          'if',
+          '(',
+          field('condition', $._value),
+          ')',
+          field('consequence', $.statement),
+          optional(
+            seq(
+              'else',
+              field('alternative', choice($.if_statement, $.statement))
+            )
+          )
+        )
+      ),
+
+    for_statement: ($) =>
+      prec(
+        1,
+        seq(
+          'for',
+          '(',
+          field('iterator', $.identifier),
+          '=',
+          field('range', $._value),
+          ')',
+          field('body', $.statement)
+        )
+      ),
+
+    // Action statements
+    echo_statement: ($) =>
+      seq('echo', '(', optional($.arguments), ')', optional(';')),
+
+    assert_statement: ($) =>
+      seq('assert', '(', $.arguments, ')', optional(';')),
+
+    // Arguments list for function calls
+    arguments: ($) => commaSep1($.argument),
+
+    // Primary expressions for binary expression operands (only basic literals)
+    primary_expression: ($) =>
+      choice(
+        $.identifier,
+        $.number,
+        $.string,
+        $.boolean,
+        $.undef,
+        $.vector_expression
+      ),
+
+    // Unified value rule that can be any expression or literal
+    _value: ($) =>
+      choice(
+        $.identifier,
+        $.number,
+        $.string,
+        $.boolean,
+        $.undef,
+        $.vector_expression,
+        $.binary_expression,
+        $.unary_expression,
+        $.conditional_expression,
+        $.call_expression,
+        $.index_expression,
+        $.member_expression,
+        $.parenthesized_expression,
+        $.let_expression,
+        $.range_expression
+      ),
+
+    binary_expression: ($) =>
+      choice(
+        // Logical operators
+        prec.left(
+          1,
+          seq(
+            field('left', $.primary_expression),
+            field('operator', alias('||', $.logical_or_operator)),
+            field('right', $.primary_expression)
+          )
+        ),
+        prec.left(
+          2,
+          seq(
+            field('left', $.primary_expression),
+            field('operator', alias('&&', $.logical_and_operator)),
+            field('right', $.primary_expression)
+          )
+        ),
+
+        // Equality operators
+        prec.left(
+          3,
+          seq(
+            field('left', $.primary_expression),
+            field('operator', alias('==', $.equality_operator)),
+            field('right', $.primary_expression)
+          )
+        ),
+        prec.left(
+          3,
+          seq(
+            field('left', $.primary_expression),
+            field('operator', alias('!=', $.inequality_operator)),
+            field('right', $.primary_expression)
+          )
+        ),
+
+        // Relational operators
+        prec.left(
+          4,
+          seq(
+            field('left', $.primary_expression),
+            field('operator', alias('<', $.less_than_operator)),
+            field('right', $.primary_expression)
+          )
+        ),
+        prec.left(
+          4,
+          seq(
+            field('left', $.primary_expression),
+            field('operator', alias('<=', $.less_equal_operator)),
+            field('right', $.primary_expression)
+          )
+        ),
+        prec.left(
+          4,
+          seq(
+            field('left', $.primary_expression),
+            field('operator', alias('>', $.greater_than_operator)),
+            field('right', $.primary_expression)
+          )
+        ),
+        prec.left(
+          4,
+          seq(
+            field('left', $.primary_expression),
+            field('operator', alias('>=', $.greater_equal_operator)),
+            field('right', $.primary_expression)
+          )
+        ),
+
+        // Additive operators
+        prec.left(
+          5,
+          seq(
+            field('left', $.primary_expression),
+            field('operator', alias('+', $.addition_operator)),
+            field('right', $.primary_expression)
+          )
+        ),
+        prec.left(
+          5,
+          seq(
+            field('left', $.primary_expression),
+            field('operator', alias('-', $.subtraction_operator)),
+            field('right', $.primary_expression)
+          )
+        ),
+
+        // Multiplicative operators
+        prec.left(
+          6,
+          seq(
+            field('left', $.primary_expression),
+            field('operator', alias('*', $.multiplication_operator)),
+            field('right', $.primary_expression)
+          )
+        ),
+        prec.left(
+          6,
+          seq(
+            field('left', $.primary_expression),
+            field('operator', alias('/', $.division_operator)),
+            field('right', $.primary_expression)
+          )
+        ),
+        prec.left(
+          6,
+          seq(
+            field('left', $.primary_expression),
+            field('operator', alias('%', $.modulo_operator)),
+            field('right', $.primary_expression)
+          )
+        ),
+
+        // Exponentiation
+        prec.right(
+          7,
+          seq(
+            field('left', $.primary_expression),
+            field('operator', alias('^', $.exponentiation_operator)),
+            field('right', $.primary_expression)
+          )
+        )
+      ),
+
+    unary_expression: ($) =>
+      choice(
+        prec.right(
+          8,
+          seq(
+            field('operator', alias('!', $.logical_not_operator)),
+            field('operand', $.primary_expression)
+          )
+        ),
+        prec.right(
+          8,
+          seq(
+            field('operator', alias('-', $.unary_minus_operator)),
+            field('operand', $.primary_expression)
+          )
+        )
+      ),
+
+    conditional_expression: ($) =>
+      prec.right(
+        10,
+        seq(
+          field('condition', $._value),
+          '?',
+          field('consequence', $._value),
+          ':',
+          field('alternative', $._value)
+        )
+      ),
+
+    call_expression: ($) =>
+      prec.left(
+        12,
+        seq(
+          field('function', $.identifier),
+          field('arguments', $.argument_list)
+        )
+      ),
+
+    index_expression: ($) =>
+      prec.left(
+        12,
+        seq(field('array', $._value), '[', field('index', $._value), ']')
+      ),
+
+    member_expression: ($) =>
+      prec.left(
+        12,
+        seq(field('object', $._value), '.', field('property', $.identifier))
+      ),
+
+    parenthesized_expression: ($) => seq('(', $._value, ')'),
+
+    let_expression: ($) =>
+      prec.right(
+        15,
+        seq(
+          'let',
+          '(',
+          commaSep1($.let_assignment),
+          ')',
+          field('body', $._value)
+        )
+      ),
+
+    let_assignment: ($) =>
+      seq(field('name', $.identifier), '=', field('value', $._value)),
+
+    range_expression: ($) =>
+      prec.left(
+        5,
+        seq(
+          field('start', $._value),
+          ':',
+          field('end', $._value),
+          optional(seq(':', field('step', $._value)))
+        )
+      ),
+
+    vector_expression: ($) => seq('[', commaSep($._value), ']'),
+
+    // Literals
+    identifier: ($) => /[A-Za-z_][A-Za-z0-9_]*/,
+
+    number: ($) => {
       const decimal = /[0-9]+\.[0-9]+([eE][-+]?[0-9]+)?/;
       const integer = /[0-9]+([eE][-+]?[0-9]+)?/;
       return token(choice(decimal, integer));
     },
 
-    boolean: $ => choice('true', 'false'),
-    undef: $ => 'undef',
-    identifier: $ => /[A-Za-z_][A-Za-z0-9_]*/,
+    string: ($) =>
+      choice(
+        seq('"', optional(/[^"]*/), '"'),
+        seq("'", optional(/[^']*/), "'")
+      ),
 
-    logical_or_operator: $ => '||',
-    logical_and_operator: $ => '&&',
-    equality_operator: $ => '==',
-    inequality_operator: $ => '!=',
-    less_than_operator: $ => '<',
-    less_equal_operator: $ => '<=',
-    greater_than_operator: $ => '>',
-    greater_equal_operator: $ => '>=',
-    addition_operator: $ => '+',
-    subtraction_operator: $ => '-',
-    multiplication_operator: $ => '*',
-    division_operator: $ => '/',
-    modulo_operator: $ => '%',
-    exponentiation_operator: $ => '^',
-    logical_not_operator: $ => '!',
-    unary_minus_operator: $ => '-'
-  }
+    angle_bracket_string: ($) => seq('<', /[^>]*/, '>'),
+
+    boolean: ($) => choice('true', 'false'),
+
+    undef: ($) => 'undef',
+
+    comment: ($) => choice(seq('//', /.*/), seq('/*', /([^*]|\*[^\/])*/, '*/')),
+  },
 });
-
-function sepBy(delimiter, rule) {
-  return optional(sepBy1(delimiter, rule));
-}
-
-function sepBy1(delimiter, rule) {
-  return seq(rule, repeat(seq(delimiter, rule)));
-}
