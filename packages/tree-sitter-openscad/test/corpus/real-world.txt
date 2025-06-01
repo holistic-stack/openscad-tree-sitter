@@ -66,28 +66,28 @@ module box(size=[10,10,10], wall=2, center=false) {
                                 left: (member_expression
                                   object: (identifier)
                                   property: (identifier))
-                                operator: "-"
+                                operator: (subtraction_operator)
                                 right: (binary_expression
                                   left: (number)
-                                  operator: "*"
+                                  operator: (multiplication_operator)
                                   right: (identifier)))
                               (binary_expression
                                 left: (member_expression
                                   object: (identifier)
                                   property: (identifier))
-                                operator: "-"
+                                operator: (subtraction_operator)
                                 right: (binary_expression
                                   left: (number)
-                                  operator: "*"
+                                  operator: (multiplication_operator)
                                   right: (identifier)))
                               (binary_expression
                                 left: (member_expression
                                   object: (identifier)
                                   property: (identifier))
-                                operator: "-"
+                                operator: (subtraction_operator)
                                 right: (identifier))))
                           (argument
-                            (identifier)))))))))))))
+                            (identifier)))))))))))
 
 ==================
 Recursive Function
@@ -108,12 +108,12 @@ function factorial(n) = n <= 1 ? 1 : n * factorial(n-1);
       value: (conditional_expression
         condition: (binary_expression
           left: (identifier)
-          operator: "<="
+          operator: (less_equal_operator)
           right: (number))
         consequence: (number)
         alternative: (binary_expression
           left: (identifier)
-          operator: "*"
+          operator: (multiplication_operator)
           right: (call_expression
             function: (identifier)
             arguments: (argument_list
@@ -121,7 +121,7 @@ function factorial(n) = n <= 1 ? 1 : n * factorial(n-1);
                 (argument
                   (binary_expression
                     left: (identifier)
-                    operator: "-"
+                    operator: (subtraction_operator)
                     right: (number)))))))))))
 
 ==================
@@ -148,7 +148,7 @@ rotate([0, 0, $t * 360]) {
               (number)
               (binary_expression
                 left: (special_variable)
-                operator: "*"
+                operator: (multiplication_operator)
                 right: (number))))))
       (block
         (statement
@@ -192,22 +192,22 @@ for (i = [0:5]) {
 (source_file
   (statement
     (for_statement
-      (for_header
-        iterator: (identifier)
-        range: (range_expression
+      iterator: (identifier)
+      range: (vector_expression
+        (range_expression
           start: (number)
           end: (number)))
-      (block
-        (statement
-          (for_statement
-            (for_header
+      (statement
+        (block
+          (statement
+            (for_statement
               iterator: (identifier)
-              range: (range_expression
-                start: (number)
-                end: (number)))
-            (block
-              (statement
-                (module_instantiation
+              range: (vector_expression
+                (range_expression
+                  start: (number)
+                  end: (number)))
+                  (statement
+                    (module_instantiation
                   name: (identifier)
                   arguments: (argument_list
                     (arguments
@@ -215,11 +215,11 @@ for (i = [0:5]) {
                         (vector_expression
                           (binary_expression
                             left: (identifier)
-                            operator: "*"
+                            operator: (multiplication_operator)
                             right: (number))
                           (binary_expression
                             left: (identifier)
-                            operator: "*"
+                            operator: (multiplication_operator)
                             right: (number))
                           (number)))))
                   (block
@@ -235,9 +235,9 @@ for (i = [0:5]) {
                                 (binary_expression
                                   left: (binary_expression
                                     left: (identifier)
-                                    operator: "*"
+                                    operator: (multiplication_operator)
                                     right: (identifier))
-                                  operator: "*"
+                                  operator: (multiplication_operator)
                                   right: (number))))))
                         (block
                           (statement
@@ -284,7 +284,7 @@ module conditional_shape(type="cube", size=10) {
           (if_statement
             condition: (binary_expression
               left: (identifier)
-              operator: "=="
+              operator: (equality_operator)
               right: (string))
             consequence: (block
               (statement
@@ -297,7 +297,7 @@ module conditional_shape(type="cube", size=10) {
             alternative: (if_statement
               condition: (binary_expression
                 left: (identifier)
-                operator: "=="
+                operator: (equality_operator)
                 right: (string))
               consequence: (block
                 (statement
@@ -308,7 +308,7 @@ module conditional_shape(type="cube", size=10) {
                         (argument
                           (binary_expression
                             left: (identifier)
-                            operator: "/"
+                            operator: (division_operator)
                             right: (number))))))))
               alternative: (block
                 (statement
@@ -323,7 +323,7 @@ module conditional_shape(type="cube", size=10) {
                           name: (identifier)
                           value: (binary_expression
                             left: (identifier)
-                            operator: "/"
+                            operator: (division_operator)
                             right: (number)))))))))))))))
 
 ==================
