@@ -287,15 +287,14 @@ module my_module() {
                       (number))))))))
         (statement
           (for_statement
-            header: (for_header
-              iterator: (identifier)
-              range: (range_expression
-                start: (number)
-                end: (binary_expression
-                  left: (special_variable)
-                  operator: (subtraction_operator)
-                  right: (number)))))
-            body: (statement
+            iterator: (identifier)
+            range: (range_expression
+              start: (number)
+              end: (binary_expression
+                left: (special_variable)
+                operator: (subtraction_operator)
+                right: (number)))
+            (statement
               (module_instantiation
                 name: (identifier)
                 arguments: (argument_list

@@ -15,14 +15,11 @@
 (module_instantiation
   (block) @fold)
 
-; Array literals
-(array_literal) @fold
+; Vector expressions (OpenSCAD arrays)
+(vector_expression) @fold
 
 ; List comprehensions
 (list_comprehension) @fold
-
-; Object literals
-(object_literal) @fold
 
 ; Comments
 ((comment) @fold

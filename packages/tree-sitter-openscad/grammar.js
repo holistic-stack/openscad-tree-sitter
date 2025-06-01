@@ -36,6 +36,7 @@ module.exports = grammar({
     [$.conditional_expression, $.let_expression],
     [$.vector_expression, $.list_comprehension],
     [$.range_expression_non_recursive],
+    [$._value, $._non_list_comprehension_value],
   ],
 
   rules: {
@@ -83,14 +84,30 @@ module.exports = grammar({
         optional(';')
       ),
 
-    parameter_list: ($) => seq('(', optional($.parameter_declarations), ')'),
+    parameter_list: ($) => seq(
+      '(',
+      optional($.parameter_declarations),
+      choice(
+        ')',
+        // Error recovery for missing closing parenthesis
+        prec(-1, token.immediate(/[;{]/))  // Recover at semicolon or opening brace
+      )
+    ),
 
     parameter_declarations: ($) => commaSep1($.parameter_declaration),
 
     parameter_declaration: ($) =>
       choice($.identifier, seq($.identifier, '=', $._value)),
 
-    block: ($) => seq('{', repeat($.statement), '}'),
+    block: ($) => seq(
+      '{',
+      repeat($.statement),
+      choice(
+        '}',
+        // Error recovery for missing closing brace
+        prec(-1, token.immediate(/[;}]/))  // Recover at semicolon or another brace
+      )
+    ),
 
     // Module instantiation with precedence
     module_instantiation: ($) =>
@@ -126,7 +143,15 @@ module.exports = grammar({
 
     modifier: ($) => choice('#', '!', '%', '*'),
 
-    argument_list: ($) => seq('(', optional($.arguments), ')'),
+    argument_list: ($) => seq(
+      '(',
+      optional($.arguments),
+      choice(
+        ')',
+        // Error recovery for missing closing parenthesis
+        prec(-1, token.immediate(/[;{]/))  // Recover at semicolon or opening brace
+      )
+    ),
 
     argument: ($) =>
       choice(
@@ -252,6 +277,7 @@ module.exports = grammar({
 
     // Non-recursive value rule for list comprehension expressions
     // Completely separate expression rules to prevent ANY recursion back to list_comprehension
+    // Uses aliasing to maintain expected AST node names while preventing recursion
     _non_list_comprehension_value: ($) => choice(
       // Literals - direct access
       $.number,
@@ -261,7 +287,7 @@ module.exports = grammar({
       $.identifier,
       $.special_variable,
 
-      // Non-recursive expressions - use separate rules that don't reference $._value
+      // Non-recursive expressions - maintain distinct names to prevent conflicts
       $.vector_expression_non_recursive,
       $.binary_expression_non_recursive,
       $.unary_expression_non_recursive,
@@ -451,12 +477,30 @@ module.exports = grammar({
         seq(field('object', $._value), '.', field('property', $.identifier))
       ),
 
-    parenthesized_expression: ($) => seq('(', $._value, ')'),
+    parenthesized_expression: ($) => seq(
+      '(',
+      $._value,
+      choice(
+        ')',
+        // Error recovery for missing closing parenthesis
+        prec(-1, token.immediate(/[;{]/))  // Recover at semicolon or opening brace
+      )
+    ),
 
     let_expression: ($) =>
       prec.dynamic(
         100,
-        seq('let', '(', commaSep1($.let_clause), ')', $._value)
+        seq(
+          'let',
+          '(',
+          commaSep1($.let_clause),
+          choice(
+            ')',
+            // Error recovery for missing closing parenthesis
+            prec(-1, token.immediate(/[;{]/))  // Recover at semicolon or opening brace
+          ),
+          $._value
+        )
       ),
 
     let_clause: ($) =>
@@ -464,15 +508,15 @@ module.exports = grammar({
 
     range_expression: ($) =>
       choice(
-        // Bracketed range expressions [start:end] or [start:step:end] - higher precedence
-        prec(10, seq(
+        // Bracketed range expressions [start:end] or [start:step:end] - highest precedence
+        prec(20, seq(
           '[',
           field('start', $._value),
           ':',
           field('end', $._value),
           ']'
         )),
-        prec(10, seq(
+        prec(20, seq(
           '[',
           field('start', $._value),
           ':',
@@ -496,7 +540,15 @@ module.exports = grammar({
         ))
       ),
 
-    vector_expression: ($) => prec(1, seq('[', commaSep($._value), ']')),
+    vector_expression: ($) => prec(1, seq(
+      '[',
+      commaSep($._value),
+      choice(
+        ']',
+        // Error recovery for missing closing bracket
+        prec(-1, token.immediate(/[;{]/))  // Recover at semicolon or opening brace
+      )
+    )),
 
     // List comprehension with correct syntax order
     // Syntax: [for (i = range) expr] or [for (i = range) if (condition) expr]
@@ -547,7 +599,12 @@ module.exports = grammar({
 
     special_variable: ($) => /\$[A-Za-z_][A-Za-z0-9_]*/,
 
-    comment: ($) => choice(seq('//', /.*/), seq('/*', /([^*]|\*[^\/])*/, '*/')),
+    comment: ($) => choice(
+      // Single line comments
+      seq('//', /.*/),
+      // Block comments with nested comment support
+      seq('/*', repeat(choice(/[^*\/]+/, /\*[^\/]/, /\/[^*]/, $.comment)), '*/')
+    ),
 
     // Non-recursive expression rules for list comprehensions
     // These rules use _non_list_comprehension_value instead of $._value to prevent recursion
@@ -679,15 +736,15 @@ module.exports = grammar({
 
     range_expression_non_recursive: ($) =>
       choice(
-        // Bracketed range expressions [start:end] or [start:step:end] - higher precedence
-        prec(10, seq(
+        // Bracketed range expressions [start:end] or [start:step:end] - highest precedence
+        prec(20, seq(
           '[',
           field('start', $._non_list_comprehension_value),
           ':',
           field('end', $._non_list_comprehension_value),
           ']'
         )),
-        prec(10, seq(
+        prec(20, seq(
           '[',
           field('start', $._non_list_comprehension_value),
           ':',

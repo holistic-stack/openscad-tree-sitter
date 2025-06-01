@@ -24,8 +24,8 @@
 (module_definition
   name: (identifier) @local.definition.function)
 
-;; For loop variables
-(for_header
+;; For loop variables (flat structure)
+(for_statement
   iterator: (identifier) @local.definition.var)
 
 ;; References

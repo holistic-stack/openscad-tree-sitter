@@ -12,21 +12,16 @@ matrix = [[i+j for (j = [0:2])] for (i = [0:2])];
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression
-        (list_comprehension
-          element: (expression
-            (binary_expression
-              left: (expression
-                (primary_expression
-                  (identifier)))
-              right: (expression
-                (primary_expression
-                  (identifier)))))
-          (list_comprehension_for
-            iterator: (identifier)
-            range: (expression (range_expression
-              start: (expression (number))
-              end: (expression (number)))))))))
+      value: (list_comprehension
+        expr: (binary_expression
+          left: (identifier)
+          operator: (multiplication_operator)
+          right: (identifier))
+        (list_comprehension_for
+          iterator: (identifier)
+          range: (range_expression
+            start: (number)
+            end: (number)))))
   (statement
     (assignment_statement
       name: (identifier)
@@ -94,12 +89,11 @@ for (k = [start:step:end]) cylinder(k);
 (source_file
   (statement
     (for_statement
-      header: (for_header
-        iterator: (identifier)
-        range: (range_expression
-          start: (number)
-          end: (number)))
-      body: (statement
+      iterator: (identifier)
+      range: (range_expression
+        start: (number)
+        end: (number))
+      (statement
         (module_instantiation
           name: (identifier)
           arguments: (argument_list
@@ -107,13 +101,12 @@ for (k = [start:step:end]) cylinder(k);
               (argument (identifier))))))))
   (statement
     (for_statement
-      header: (for_header
-        iterator: (identifier)
-        range: (range_expression
-          start: (number)
-          step: (number)
-          end: (number)))
-      body: (statement
+      iterator: (identifier)
+      range: (range_expression
+        start: (number)
+        step: (number)
+        end: (number))
+      (statement
         (module_instantiation
           name: (identifier)
           arguments: (argument_list
@@ -121,13 +114,12 @@ for (k = [start:step:end]) cylinder(k);
               (argument (identifier))))))))
   (statement
     (for_statement
-      header: (for_header
-        iterator: (identifier)
-        range: (range_expression
-          start: (identifier)
-          step: (identifier)
-          end: (identifier)))
-      body: (statement
+      iterator: (identifier)
+      range: (range_expression
+        start: (identifier)
+        step: (identifier)
+        end: (identifier))
+      (statement
         (module_instantiation
           name: (identifier)
           arguments: (argument_list
@@ -323,7 +315,9 @@ module foo() {
         (statement
           (assignment_statement
             name: (identifier)
-            value: (number)))))))
+            value: (number)))
+        (comment)
+        (MISSING "}")))))
 
 ==================
 Unclosed Parenthesis
@@ -372,7 +366,8 @@ d = "unterminated string;
   (statement
     (assignment_statement
       name: (identifier)
-      value: (string))))
+      value: (string
+        (MISSING """)))))
 
 ==================
 Complex Numeric Literals

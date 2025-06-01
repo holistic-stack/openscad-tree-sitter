@@ -193,19 +193,17 @@ for (i = [0:5]) {
   (statement
     (for_statement
       iterator: (identifier)
-      range: (vector_expression
-        (range_expression
-          start: (number)
-          end: (number)))
+      range: (range_expression
+        start: (number)
+        end: (number))
       (statement
         (block
           (statement
             (for_statement
               iterator: (identifier)
-              range: (vector_expression
-                (range_expression
-                  start: (number)
-                  end: (number)))
+              range: (range_expression
+                start: (number)
+                end: (number))
                   (statement
                     (module_instantiation
                   name: (identifier)
