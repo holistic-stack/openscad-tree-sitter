@@ -67,15 +67,8 @@ module.exports = grammar({
     // module_child conflict is needed for proper handling of the children() syntax
     [$.module_child],
 
-    // primary_expression and object_field conflict is needed for handling string literals
-    // that could be either a string value or an object key
-    [$.primary_expression, $.object_field],
-
     // Added to resolve: for (for_header) block • next_token
     [$.statement, $.for_statement],
-
-    // Conflict for binary expressions in object_field vs expression - from original
-    [$.object_field, $.expression],
 
     // Control flow statements conflict
     [$._control_flow_statements, $.if_statement],
@@ -83,8 +76,6 @@ module.exports = grammar({
     // New conflicts from Task 1 unification (necessary for unified _value rule)
     [$.function_definition, $.primary_expression],
     [$.assignment_statement, $.primary_expression],
-    [$.parameter_declaration, $.primary_expression],
-    [$.argument, $.primary_expression],
 
     // Let expression conflicts (necessary for proper precedence handling)
     [$.index_expression, $.let_expression],
@@ -112,7 +103,6 @@ module.exports = grammar({
     $._binary_operators,
     $._simple_expressions,
     $._complex_expressions,
-    $._access_expressions,
     $._closing_paren_recovery,
     $._closing_bracket_recovery,
     $._closing_brace_recovery, // Re-added for block error recovery
@@ -185,10 +175,7 @@ module.exports = grammar({
       $.conditional_expression,
       $.binary_expression,
       $.unary_expression,
-      $.let_expression
-    ),
-
-    _access_expressions: $ => choice(
+      $.let_expression,
       $.call_expression,
       $.index_expression,
       $.member_expression
@@ -338,6 +325,7 @@ module.exports = grammar({
       field('body', $.block)
     ),
 
+    // function_definition uses $._value helper for unified direct primitive access
     function_definition: $ => seq(
       'function',
       field('name', $.identifier),
@@ -366,9 +354,12 @@ module.exports = grammar({
     ),
 
     parameter_declaration: $ => choice(
+      // Default value first: identifier = value or special = value
+      seq($.identifier, '=', $._value),
+      seq($.special_variable, '=', $._value),
+      // Simple parameter name without default
       $._identifier_or_special,
-      seq($.identifier, '=', $._parameter_value_recovery),
-      seq($.special_variable, '=', $._parameter_value_recovery),
+      // Recovery fallback
       $._parameter_recovery
     ),
 
@@ -387,8 +378,7 @@ module.exports = grammar({
       choice($.block, $.statement)
     )),
 
-    // Uses $.expression for value to avoid conflicts that arise when using $._value,
-    // due to ambiguity between $._literal and $.primary_expression within $._value for simple cases.
+    // assign_assignment uses $._value for direct primitive access and unified value rule.
     assign_assignment: $ => seq(
       field('name', $._identifier_or_special),
       '=',
@@ -503,7 +493,6 @@ module.exports = grammar({
 
     expression: $ => choice(
       $._complex_expressions,
-      $._access_expressions,
       $._simple_expressions
     ),
 
