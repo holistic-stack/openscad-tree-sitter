@@ -40,6 +40,7 @@ module.exports = grammar({
     [$._value, $._range_element],
     [$.bare_range_expression],
     [$.bare_range_expression_non_recursive],
+    [$.bare_range_expression_non_recursive, $.range_expression_non_recursive],
   ],
 
   rules: {
@@ -87,30 +88,32 @@ module.exports = grammar({
         optional(';')
       ),
 
-    parameter_list: ($) => seq(
-      '(',
-      optional($.parameter_declarations),
-      choice(
-        ')',
-        // Error recovery for missing closing parenthesis
-        prec(-1, token.immediate(/[;{]/))  // Recover at semicolon or opening brace
-      )
-    ),
+    parameter_list: ($) =>
+      seq(
+        '(',
+        optional($.parameter_declarations),
+        choice(
+          ')',
+          // Error recovery for missing closing parenthesis
+          prec(-1, token.immediate(/[;{]/)) // Recover at semicolon or opening brace
+        )
+      ),
 
     parameter_declarations: ($) => commaSep1($.parameter_declaration),
 
     parameter_declaration: ($) =>
       choice($.identifier, seq($.identifier, '=', $._value)),
 
-    block: ($) => seq(
-      '{',
-      repeat($.statement),
-      choice(
-        '}',
-        // Error recovery for missing closing brace
-        prec(-1, token.immediate(/[;}]/))  // Recover at semicolon or another brace
-      )
-    ),
+    block: ($) =>
+      seq(
+        '{',
+        repeat($.statement),
+        choice(
+          '}',
+          // Error recovery for missing closing brace
+          prec(-1, token.immediate(/[;}]/)) // Recover at semicolon or another brace
+        )
+      ),
 
     // Module instantiation with precedence
     module_instantiation: ($) =>
@@ -146,15 +149,16 @@ module.exports = grammar({
 
     modifier: ($) => choice('#', '!', '%', '*'),
 
-    argument_list: ($) => seq(
-      '(',
-      optional($.arguments),
-      choice(
-        ')',
-        // Error recovery for missing closing parenthesis
-        prec(-1, token.immediate(/[;{]/))  // Recover at semicolon or opening brace
-      )
-    ),
+    argument_list: ($) =>
+      seq(
+        '(',
+        optional($.arguments),
+        choice(
+          ')',
+          // Error recovery for missing closing parenthesis
+          prec(-1, token.immediate(/[;{]/)) // Recover at semicolon or opening brace
+        )
+      ),
 
     argument: ($) =>
       choice(
@@ -189,15 +193,18 @@ module.exports = grammar({
       ),
 
     for_statement: ($) =>
-      prec(1, seq(
-        'for',
-        '(',
-        field('iterator', $.identifier),
-        '=',
-        field('range', $._value),
-        ')',
-        choice($.block, $.statement)
-      )),
+      prec(
+        1,
+        seq(
+          'for',
+          '(',
+          field('iterator', $.identifier),
+          '=',
+          field('range', $._value),
+          ')',
+          choice($.block, $.statement)
+        )
+      ),
 
     // Action statements
     echo_statement: ($) =>
@@ -214,13 +221,7 @@ module.exports = grammar({
           ')',
           optional(';')
         ),
-        seq(
-          'assert',
-          '(',
-          field('condition', $._value),
-          ')',
-          optional(';')
-        )
+        seq('assert', '(', field('condition', $._value), ')', optional(';'))
       ),
 
     // Arguments list for function calls
@@ -255,78 +256,90 @@ module.exports = grammar({
       ),
 
     // Unified value rule with direct access strategy (no expression wrapping)
-    _value: ($) => choice(
-      // Literals - direct access
-      $.number,
-      $.string,
-      $.boolean,
-      $.undef,
-      $.identifier,
-      $.special_variable,
+    _value: ($) =>
+      choice(
+        // Literals - direct access
+        $.number,
+        $.string,
+        $.boolean,
+        $.undef,
+        $.identifier,
+        $.special_variable,
 
-      // Complex expressions - direct access (prioritize ranges over vectors)
-      prec.dynamic(10, $.range_expression),  // High priority for [start:end] syntax
-      $.vector_expression,
-      $.binary_expression,
-      $.unary_expression,
-      $.conditional_expression,
-      $.call_expression,
-      $.index_expression,
-      $.member_expression,
-      $.let_expression,
-      $.list_comprehension,
-      $.parenthesized_expression
-    ),
+        // Complex expressions - direct access (prioritize ranges over vectors)
+        prec.dynamic(10, $.range_expression), // High priority for [start:end] syntax
+        $.vector_expression,
+        $.binary_expression,
+        $.unary_expression,
+        $.conditional_expression,
+        $.call_expression,
+        $.index_expression,
+        $.member_expression,
+        $.let_expression,
+        $.list_comprehension,
+        $.parenthesized_expression
+      ),
 
     // Vector element rule - excludes ranges to prevent parsing conflicts
     // Used specifically in vector_expression to avoid [start:end] being parsed as vector
-    _vector_element: ($) => choice(
-      // Literals - direct access
-      $.number,
-      $.string,
-      $.boolean,
-      $.undef,
-      $.identifier,
-      $.special_variable,
+    _vector_element: ($) =>
+      choice(
+        // Literals - direct access
+        $.number,
+        $.string,
+        $.boolean,
+        $.undef,
+        $.identifier,
+        $.special_variable,
 
-      // Complex expressions - direct access (excluding range expressions)
-      $.vector_expression,
-      $.binary_expression,
-      $.unary_expression,
-      $.conditional_expression,
-      $.call_expression,
-      $.index_expression,
-      $.member_expression,
-      $.let_expression,
-      // Removed range expressions to prevent ambiguity with [start:end] syntax
-      $.list_comprehension,
-      $.parenthesized_expression
-    ),
+        // Complex expressions - direct access (excluding range expressions)
+        $.vector_expression,
+        $.binary_expression,
+        $.unary_expression,
+        $.conditional_expression,
+        $.call_expression,
+        $.index_expression,
+        $.member_expression,
+        $.let_expression,
+        // Removed range expressions to prevent ambiguity with [start:end] syntax
+        $.list_comprehension,
+        $.parenthesized_expression
+      ),
 
     // Non-recursive value rule for list comprehension expressions
     // Completely separate expression rules to prevent ANY recursion back to list_comprehension
     // Uses aliasing to maintain expected AST node names while preventing recursion
-    _non_list_comprehension_value: ($) => choice(
-      // Literals - direct access
-      $.number,
-      $.string,
-      $.boolean,
-      $.undef,
-      $.identifier,
-      $.special_variable,
+    _non_list_comprehension_value: ($) =>
+      choice(
+        // Literals - direct access
+        $.number,
+        $.string,
+        $.boolean,
+        $.undef,
+        $.identifier,
+        $.special_variable,
 
-      // Non-recursive expressions - aliased to regular node names for consistent AST output
-      // Range expression has highest priority to prevent [start:end] being parsed as vector
-      prec.dynamic(1000, alias($.range_expression_non_recursive, $.range_expression)),
-      prec(-10, alias($.vector_expression_non_recursive, $.vector_expression)),
-      alias($.binary_expression_non_recursive, $.binary_expression),
-      alias($.unary_expression_non_recursive, $.unary_expression),
-      alias($.conditional_expression_non_recursive, $.conditional_expression),
-      alias($.call_expression_non_recursive, $.call_expression),
-      alias($.index_expression_non_recursive, $.index_expression),
-      alias($.member_expression_non_recursive, $.member_expression),
-      alias($.parenthesized_expression_non_recursive, $.parenthesized_expression)
-    ),
+        // Non-recursive expressions - aliased to regular node names for consistent AST output
+        // Range expressions with absolute priority to prevent [start:end] being parsed as vector
+        prec.dynamic(
+          2000,
+          alias($.range_expression_non_recursive, $.range_expression)
+        ),
+        prec(
+          -100,
+          alias($.vector_expression_non_recursive, $.vector_expression)
+        ),
+        alias($.binary_expression_non_recursive, $.binary_expression),
+        alias($.unary_expression_non_recursive, $.unary_expression),
+        alias($.conditional_expression_non_recursive, $.conditional_expression),
+        alias($.call_expression_non_recursive, $.call_expression),
+        alias($.index_expression_non_recursive, $.index_expression),
+        alias($.member_expression_non_recursive, $.member_expression),
+        alias(
+          $.parenthesized_expression_non_recursive,
+          $.parenthesized_expression
+        )
+      ),
 
     binary_expression: ($) =>
       choice(
@@ -506,15 +519,16 @@ module.exports = grammar({
         seq(field('object', $._value), '.', field('property', $.identifier))
       ),
 
-    parenthesized_expression: ($) => seq(
-      '(',
-      $._value,
-      choice(
-        ')',
-        // Error recovery for missing closing parenthesis
-        prec(-1, token.immediate(/[;{]/))  // Recover at semicolon or opening brace
-      )
-    ),
+    parenthesized_expression: ($) =>
+      seq(
+        '(',
+        $._value,
+        choice(
+          ')',
+          // Error recovery for missing closing parenthesis
+          prec(-1, token.immediate(/[;{]/)) // Recover at semicolon or opening brace
+        )
+      ),
 
     let_expression: ($) =>
       prec.dynamic(
@@ -526,136 +540,171 @@ module.exports = grammar({
           choice(
             ')',
             // Error recovery for missing closing parenthesis
-            prec(-1, token.immediate(/[;{]/))  // Recover at semicolon or opening brace
+            prec(-1, token.immediate(/[;{]/)) // Recover at semicolon or opening brace
           ),
           field('body', $._value)
         )
       ),
 
     let_assignment: ($) =>
-      seq(
-        field('name', $.identifier),
-        '=',
-        field('value', $._value)
-      ),
+      seq(field('name', $.identifier), '=', field('value', $._value)),
 
     // Range element rule - excludes range expressions to prevent circular dependency
-    _range_element: ($) => choice(
-      // Literals - direct access
-      $.number,
-      $.string,
-      $.boolean,
-      $.undef,
-      $.identifier,
-      $.special_variable,
+    _range_element: ($) =>
+      choice(
+        // Literals - direct access
+        $.number,
+        $.string,
+        $.boolean,
+        $.undef,
+        $.identifier,
+        $.special_variable,
 
-      // Complex expressions - direct access (excluding range expressions)
-      $.vector_expression,
-      $.binary_expression,
-      $.unary_expression,
-      $.conditional_expression,
-      $.call_expression,
-      $.index_expression,
-      $.member_expression,
-      $.let_expression,
-      $.list_comprehension,
-      $.parenthesized_expression
-    ),
+        // Complex expressions - direct access (excluding range expressions)
+        $.vector_expression,
+        $.binary_expression,
+        $.unary_expression,
+        $.conditional_expression,
+        $.call_expression,
+        $.index_expression,
+        $.member_expression,
+        $.let_expression,
+        $.list_comprehension,
+        $.parenthesized_expression
+      ),
 
     // Range expression with direct field access - highest precedence for [start:end] syntax
     range_expression: ($) =>
       choice(
         // Bracketed range expressions [start:end] or [start:step:end]
-        prec.dynamic(200, seq(
-          '[',
-          field('start', $._range_element),
-          ':',
-          field('end', $._range_element),
-          ']'
-        )),
-        prec.dynamic(200, seq(
-          '[',
-          field('start', $._range_element),
-          ':',
-          field('step', $._range_element),
-          ':',
-          field('end', $._range_element),
-          ']'
-        )),
+        prec.dynamic(
+          200,
+          seq(
+            '[',
+            field('start', $._range_element),
+            ':',
+            field('end', $._range_element),
+            ']'
+          )
+        ),
+        prec.dynamic(
+          200,
+          seq(
+            '[',
+            field('start', $._range_element),
+            ':',
+            field('step', $._range_element),
+            ':',
+            field('end', $._range_element),
+            ']'
+          )
+        ),
         // Bare range expressions start:end or start:step:end (for use in other contexts)
-        prec.left(5, seq(
-          field('start', $._range_element),
-          ':',
-          field('end', $._range_element)
-        )),
-        prec.left(5, seq(
-          field('start', $._range_element),
-          ':',
-          field('step', $._range_element),
-          ':',
-          field('end', $._range_element)
-        ))
+        prec.left(
+          5,
+          seq(
+            field('start', $._range_element),
+            ':',
+            field('end', $._range_element)
+          )
+        ),
+        prec.left(
+          5,
+          seq(
+            field('start', $._range_element),
+            ':',
+            field('step', $._range_element),
+            ':',
+            field('end', $._range_element)
+          )
+        )
       ),
 
     // Hidden bracketed range expressions for backward compatibility
     bracketed_range_expression: ($) =>
       choice(
-        prec.dynamic(200, seq(
-          '[',
-          field('start', $._range_element),
-          ':',
-          field('end', $._range_element),
-          ']'
-        )),
-        prec.dynamic(200, seq(
-          '[',
-          field('start', $._range_element),
-          ':',
-          field('step', $._range_element),
-          ':',
-          field('end', $._range_element),
-          ']'
-        ))
+        prec.dynamic(
+          200,
+          seq(
+            '[',
+            field('start', $._range_element),
+            ':',
+            field('end', $._range_element),
+            ']'
+          )
+        ),
+        prec.dynamic(
+          200,
+          seq(
+            '[',
+            field('start', $._range_element),
+            ':',
+            field('step', $._range_element),
+            ':',
+            field('end', $._range_element),
+            ']'
+          )
+        )
       ),
 
     // Hidden bare range expressions for backward compatibility
     bare_range_expression: ($) =>
       choice(
-        prec.left(5, seq(
-          field('start', $._range_element),
-          ':',
-          field('end', $._range_element)
-        )),
-        prec.left(5, seq(
-          field('start', $._range_element),
-          ':',
-          field('step', $._range_element),
-          ':',
-          field('end', $._range_element)
-        ))
+        prec.left(
+          5,
+          seq(
+            field('start', $._range_element),
+            ':',
+            field('end', $._range_element)
+          )
+        ),
+        prec.left(
+          5,
+          seq(
+            field('start', $._range_element),
+            ':',
+            field('step', $._range_element),
+            ':',
+            field('end', $._range_element)
+          )
+        )
       ),
 
-    vector_expression: ($) => prec(1, seq(
-      '[',
-      commaSep($._vector_element),
-      choice(
-        ']',
-        // Error recovery for missing closing bracket
-        prec(-1, token.immediate(/[;{]/))  // Recover at semicolon or opening brace
-      )
-    )),
+    vector_expression: ($) =>
+      prec(
+        1,
+        seq(
+          '[',
+          commaSep($._vector_element),
+          choice(
+            ']',
+            // Error recovery for missing closing bracket
+            prec(-1, token.immediate(/[;{]/)) // Recover at semicolon or opening brace
+          )
+        )
+      ),
 
     // List comprehension with correct syntax order
     // Syntax: [for (i = range) expr] or [for (i = range) if (condition) expr]
     // Uses non-recursive value rule to prevent recursion in expr field
     list_comprehension: ($) =>
-      prec.dynamic(100, seq(
-        '[',
-        $.list_comprehension_for,
-        optional(seq('if', '(', field('condition', $._non_list_comprehension_value), ')')),
-        field('expr', $._non_list_comprehension_value),
-        ']'
-      )),
+      prec.dynamic(
+        100,
+        seq(
+          '[',
+          $.list_comprehension_for,
+          optional(
+            seq(
+              'if',
+              '(',
+              field('condition', $._non_list_comprehension_value),
+              ')'
+            )
+          ),
+          field('expr', $._non_list_comprehension_value),
+          ']'
+        )
+      ),
 
     list_comprehension_for: ($) =>
       seq(
@@ -666,10 +715,6 @@ module.exports = grammar({
         field('range', $._non_list_comprehension_value),
         ')'
       ),
-
-
-
-
 
     // Literals
     identifier: ($) => /[A-Za-z_][A-Za-z0-9_]*/,
@@ -685,19 +730,23 @@ module.exports = grammar({
         // Double-quoted strings with escape sequence support
         seq(
           '"',
-          repeat(choice(
-            /[^"\\]+/,  // Regular characters (not quote or backslash)
-            /\\./       // Escape sequences (backslash followed by any character)
-          )),
+          repeat(
+            choice(
+              /[^"\\]+/, // Regular characters (not quote or backslash)
+              /\\./ // Escape sequences (backslash followed by any character)
+            )
+          ),
           '"'
         ),
         // Single-quoted strings with escape sequence support
         seq(
           "'",
-          repeat(choice(
-            /[^'\\]+/,  // Regular characters (not quote or backslash)
-            /\\./       // Escape sequences (backslash followed by any character)
-          )),
+          repeat(
+            choice(
+              /[^'\\]+/, // Regular characters (not quote or backslash)
+              /\\./ // Escape sequences (backslash followed by any character)
+            )
+          ),
           "'"
         )
       ),
@@ -710,212 +759,371 @@ module.exports = grammar({
 
     special_variable: ($) => /\$[A-Za-z_][A-Za-z0-9_]*/,
 
-    comment: ($) => choice(
-      // Single line comments
-      seq('//', /.*/),
-      // Block comments with nested comment support
-      seq('/*', repeat(choice(/[^*\/]+/, /\*[^\/]/, /\/[^*]/, $.comment)), '*/')
-    ),
+    comment: ($) =>
+      choice(
+        // Single line comments
+        seq('//', /.*/),
+        // Block comments with nested comment support
+        seq(
+          '/*',
+          repeat(choice(/[^*\/]+/, /\*[^\/]/, /\/[^*]/, $.comment)),
+          '*/'
+        )
+      ),
 
     // Non-recursive expression rules for list comprehensions
     // These rules use _non_list_comprehension_value instead of $._value to prevent recursion
 
+    // Vector element rule that excludes bracketed range expressions to prevent [1:5] being parsed as vector
+    _vector_element_non_recursive: ($) =>
+      choice(
+        // Literals - direct access
+        $.number,
+        $.string,
+        $.boolean,
+        $.undef,
+        $.identifier,
+        $.special_variable,
+
+        // Expressions that don't conflict with bracketed ranges
+        alias($.binary_expression_non_recursive, $.binary_expression),
+        alias($.unary_expression_non_recursive, $.unary_expression),
+        alias($.conditional_expression_non_recursive, $.conditional_expression),
+        alias($.call_expression_non_recursive, $.call_expression),
+        alias($.index_expression_non_recursive, $.index_expression),
+        alias($.member_expression_non_recursive, $.member_expression),
+        alias(
+          $.parenthesized_expression_non_recursive,
+          $.parenthesized_expression
+        ),
+
+        // Only bare range expressions, not bracketed ones - prevents [1:5] ambiguity
+        alias($.bare_range_expression_non_recursive, $.range_expression)
+      ),
+
     vector_expression_non_recursive: ($) =>
-      prec(1, seq('[', commaSep($._non_list_comprehension_value), ']')),
+      choice(
+        // Multiple elements - any elements allowed
+        prec(
+          1,
+          seq(
+            '[',
+            $._vector_element_non_recursive,
+            ',',
+            commaSep($._vector_element_non_recursive),
+            ']'
+          )
+        ),
+        // Single element - but NOT a bracketed range to prevent [1:5] being parsed as vector
+        prec(
+          -50,
+          seq(
+            '[',
+            choice(
+              $.number,
+              $.string,
+              $.boolean,
+              $.undef,
+              $.identifier,
+              $.special_variable,
+              alias($.binary_expression_non_recursive, $.binary_expression),
+              alias($.unary_expression_non_recursive, $.unary_expression),
+              alias(
+                $.conditional_expression_non_recursive,
+                $.conditional_expression
+              ),
+              alias($.call_expression_non_recursive, $.call_expression),
+              alias($.index_expression_non_recursive, $.index_expression),
+              alias($.member_expression_non_recursive, $.member_expression),
+              alias(
+                $.parenthesized_expression_non_recursive,
+                $.parenthesized_expression
+              ),
+              // Only bare ranges, not bracketed ones
+              alias($.bare_range_expression_non_recursive, $.range_expression)
+            ),
+            ']'
+          )
+        )
+      ),
 
     binary_expression_non_recursive: ($) =>
       choice(
         // Logical operators
-        prec.left(1, seq(
-          field('left', $._non_list_comprehension_value),
-          field('operator', alias('||', $.logical_or_operator)),
-          field('right', $._non_list_comprehension_value)
-        )),
-        prec.left(2, seq(
-          field('left', $._non_list_comprehension_value),
-          field('operator', alias('&&', $.logical_and_operator)),
-          field('right', $._non_list_comprehension_value)
-        )),
+        prec.left(
+          1,
+          seq(
+            field('left', $._non_list_comprehension_value),
+            field('operator', alias('||', $.logical_or_operator)),
+            field('right', $._non_list_comprehension_value)
+          )
+        ),
+        prec.left(
+          2,
+          seq(
+            field('left', $._non_list_comprehension_value),
+            field('operator', alias('&&', $.logical_and_operator)),
+            field('right', $._non_list_comprehension_value)
+          )
+        ),
         // Equality operators
-        prec.left(3, seq(
-          field('left', $._non_list_comprehension_value),
-          field('operator', alias('==', $.equality_operator)),
-          field('right', $._non_list_comprehension_value)
-        )),
-        prec.left(3, seq(
-          field('left', $._non_list_comprehension_value),
-          field('operator', alias('!=', $.inequality_operator)),
-          field('right', $._non_list_comprehension_value)
-        )),
+        prec.left(
+          3,
+          seq(
+            field('left', $._non_list_comprehension_value),
+            field('operator', alias('==', $.equality_operator)),
+            field('right', $._non_list_comprehension_value)
+          )
+        ),
+        prec.left(
+          3,
+          seq(
+            field('left', $._non_list_comprehension_value),
+            field('operator', alias('!=', $.inequality_operator)),
+            field('right', $._non_list_comprehension_value)
+          )
+        ),
         // Relational operators
-        prec.left(4, seq(
-          field('left', $._non_list_comprehension_value),
-          field('operator', alias('<', $.less_than_operator)),
-          field('right', $._non_list_comprehension_value)
-        )),
-        prec.left(4, seq(
-          field('left', $._non_list_comprehension_value),
-          field('operator', alias('<=', $.less_equal_operator)),
-          field('right', $._non_list_comprehension_value)
-        )),
-        prec.left(4, seq(
-          field('left', $._non_list_comprehension_value),
-          field('operator', alias('>', $.greater_than_operator)),
-          field('right', $._non_list_comprehension_value)
-        )),
-        prec.left(4, seq(
-          field('left', $._non_list_comprehension_value),
-          field('operator', alias('>=', $.greater_equal_operator)),
-          field('right', $._non_list_comprehension_value)
-        )),
+        prec.left(
+          4,
+          seq(
+            field('left', $._non_list_comprehension_value),
+            field('operator', alias('<', $.less_than_operator)),
+            field('right', $._non_list_comprehension_value)
+          )
+        ),
+        prec.left(
+          4,
+          seq(
+            field('left', $._non_list_comprehension_value),
+            field('operator', alias('<=', $.less_equal_operator)),
+            field('right', $._non_list_comprehension_value)
+          )
+        ),
+        prec.left(
+          4,
+          seq(
+            field('left', $._non_list_comprehension_value),
+            field('operator', alias('>', $.greater_than_operator)),
+            field('right', $._non_list_comprehension_value)
+          )
+        ),
+        prec.left(
+          4,
+          seq(
+            field('left', $._non_list_comprehension_value),
+            field('operator', alias('>=', $.greater_equal_operator)),
+            field('right', $._non_list_comprehension_value)
+          )
+        ),
         // Additive operators
-        prec.left(5, seq(
-          field('left', $._non_list_comprehension_value),
-          field('operator', alias('+', $.addition_operator)),
-          field('right', $._non_list_comprehension_value)
-        )),
-        prec.left(5, seq(
-          field('left', $._non_list_comprehension_value),
-          field('operator', alias('-', $.subtraction_operator)),
-          field('right', $._non_list_comprehension_value)
-        )),
+        prec.left(
+          5,
+          seq(
+            field('left', $._non_list_comprehension_value),
+            field('operator', alias('+', $.addition_operator)),
+            field('right', $._non_list_comprehension_value)
+          )
+        ),
+        prec.left(
+          5,
+          seq(
+            field('left', $._non_list_comprehension_value),
+            field('operator', alias('-', $.subtraction_operator)),
+            field('right', $._non_list_comprehension_value)
+          )
+        ),
         // Multiplicative operators
-        prec.left(6, seq(
-          field('left', $._non_list_comprehension_value),
-          field('operator', alias('*', $.multiplication_operator)),
-          field('right', $._non_list_comprehension_value)
-        )),
-        prec.left(6, seq(
-          field('left', $._non_list_comprehension_value),
-          field('operator', alias('/', $.division_operator)),
-          field('right', $._non_list_comprehension_value)
-        )),
-        prec.left(6, seq(
-          field('left', $._non_list_comprehension_value),
-          field('operator', alias('%', $.modulo_operator)),
-          field('right', $._non_list_comprehension_value)
-        )),
+        prec.left(
+          6,
+          seq(
+            field('left', $._non_list_comprehension_value),
+            field('operator', alias('*', $.multiplication_operator)),
+            field('right', $._non_list_comprehension_value)
+          )
+        ),
+        prec.left(
+          6,
+          seq(
+            field('left', $._non_list_comprehension_value),
+            field('operator', alias('/', $.division_operator)),
+            field('right', $._non_list_comprehension_value)
+          )
+        ),
+        prec.left(
+          6,
+          seq(
+            field('left', $._non_list_comprehension_value),
+            field('operator', alias('%', $.modulo_operator)),
+            field('right', $._non_list_comprehension_value)
+          )
+        ),
         // Exponentiation
-        prec.right(7, seq(
-          field('left', $._non_list_comprehension_value),
-          field('operator', alias('^', $.exponentiation_operator)),
-          field('right', $._non_list_comprehension_value)
-        ))
+        prec.right(
+          7,
+          seq(
+            field('left', $._non_list_comprehension_value),
+            field('operator', alias('^', $.exponentiation_operator)),
+            field('right', $._non_list_comprehension_value)
+          )
+        )
       ),
 
     unary_expression_non_recursive: ($) =>
       choice(
-        prec.right(8, seq(
-          field('operator', alias('!', $.logical_not_operator)),
-          field('operand', $._non_list_comprehension_value)
-        )),
-        prec.right(8, seq(
-          field('operator', alias('-', $.unary_minus_operator)),
-          field('operand', $._non_list_comprehension_value)
-        ))
+        prec.right(
+          8,
+          seq(
+            field('operator', alias('!', $.logical_not_operator)),
+            field('operand', $._non_list_comprehension_value)
+          )
+        ),
+        prec.right(
+          8,
+          seq(
+            field('operator', alias('-', $.unary_minus_operator)),
+            field('operand', $._non_list_comprehension_value)
+          )
+        )
       ),
 
     conditional_expression_non_recursive: ($) =>
-      prec.right(0, seq(
-        field('condition', $._non_list_comprehension_value),
-        '?',
-        field('consequence', $._non_list_comprehension_value),
-        ':',
-        field('alternative', $._non_list_comprehension_value)
-      )),
+      prec.right(
+        0,
+        seq(
+          field('condition', $._non_list_comprehension_value),
+          '?',
+          field('consequence', $._non_list_comprehension_value),
+          ':',
+          field('alternative', $._non_list_comprehension_value)
+        )
+      ),
 
     call_expression_non_recursive: ($) =>
-      prec.left(12, seq(
-        field('function', $.identifier),
-        field('arguments', $.argument_list)
-      )),
+      prec.left(
+        12,
+        seq(
+          field('function', $.identifier),
+          field('arguments', $.argument_list)
+        )
+      ),
 
     index_expression_non_recursive: ($) =>
-      prec.left(12, seq(
-        field('array', $._non_list_comprehension_value),
-        '[',
-        field('index', $._non_list_comprehension_value),
-        ']'
-      )),
+      prec.left(
+        12,
+        seq(
+          field('array', $._non_list_comprehension_value),
+          '[',
+          field('index', $._non_list_comprehension_value),
+          ']'
+        )
+      ),
 
     member_expression_non_recursive: ($) =>
-      prec.left(12, seq(
-        field('object', $._non_list_comprehension_value),
-        '.',
-        field('property', $.identifier)
-      )),
+      prec.left(
+        12,
+        seq(
+          field('object', $._non_list_comprehension_value),
+          '.',
+          field('property', $.identifier)
+        )
+      ),
 
     // Bracketed range expressions [start:end] or [start:step:end] - non-recursive version
     bracketed_range_expression_non_recursive: ($) =>
       choice(
-        prec.dynamic(100, seq(
-          '[',
-          field('start', $._non_list_comprehension_value),
-          ':',
-          field('end', $._non_list_comprehension_value),
-          ']'
-        )),
-        prec.dynamic(100, seq(
-          '[',
-          field('start', $._non_list_comprehension_value),
-          ':',
-          field('step', $._non_list_comprehension_value),
-          ':',
-          field('end', $._non_list_comprehension_value),
-          ']'
-        ))
+        prec.dynamic(
+          100,
+          seq(
+            '[',
+            field('start', $._non_list_comprehension_value),
+            ':',
+            field('end', $._non_list_comprehension_value),
+            ']'
+          )
+        ),
+        prec.dynamic(
+          100,
+          seq(
+            '[',
+            field('start', $._non_list_comprehension_value),
+            ':',
+            field('step', $._non_list_comprehension_value),
+            ':',
+            field('end', $._non_list_comprehension_value),
+            ']'
+          )
+        )
       ),
 
     // Bare range expressions (for use in other contexts like for loops) - non-recursive version
     bare_range_expression_non_recursive: ($) =>
       choice(
-        prec.left(5, seq(
-          field('start', $._non_list_comprehension_value),
-          ':',
-          field('end', $._non_list_comprehension_value)
-        )),
-        prec.left(5, seq(
-          field('start', $._non_list_comprehension_value),
-          ':',
-          field('step', $._non_list_comprehension_value),
-          ':',
-          field('end', $._non_list_comprehension_value)
-        ))
+        prec.left(
+          5,
+          seq(
+            field('start', $._non_list_comprehension_value),
+            ':',
+            field('end', $._non_list_comprehension_value)
+          )
+        ),
+        prec.left(
+          5,
+          seq(
+            field('start', $._non_list_comprehension_value),
+            ':',
+            field('step', $._non_list_comprehension_value),
+            ':',
+            field('end', $._non_list_comprehension_value)
+          )
+        )
       ),
 
     // Range expression non-recursive with direct field access
     range_expression_non_recursive: ($) =>
       choice(
         // Bracketed range expressions [start:end] or [start:step:end]
-        prec.dynamic(200, seq(
-          '[',
-          field('start', $._non_list_comprehension_value),
-          ':',
-          field('end', $._non_list_comprehension_value),
-          ']'
-        )),
-        prec.dynamic(200, seq(
-          '[',
-          field('start', $._non_list_comprehension_value),
-          ':',
-          field('step', $._non_list_comprehension_value),
-          ':',
-          field('end', $._non_list_comprehension_value),
-          ']'
-        )),
+        prec.dynamic(
+          200,
+          seq(
+            '[',
+            field('start', $._non_list_comprehension_value),
+            ':',
+            field('end', $._non_list_comprehension_value),
+            ']'
+          )
+        ),
+        prec.dynamic(
+          200,
+          seq(
+            '[',
+            field('start', $._non_list_comprehension_value),
+            ':',
+            field('step', $._non_list_comprehension_value),
+            ':',
+            field('end', $._non_list_comprehension_value),
+            ']'
+          )
+        ),
         // Bare range expressions start:end or start:step:end
-        prec.left(5, seq(
-          field('start', $._non_list_comprehension_value),
-          ':',
-          field('end', $._non_list_comprehension_value)
-        )),
-        prec.left(5, seq(
-          field('start', $._non_list_comprehension_value),
-          ':',
-          field('step', $._non_list_comprehension_value),
-          ':',
-          field('end', $._non_list_comprehension_value)
-        ))
+        prec.left(
+          5,
+          seq(
+            field('start', $._non_list_comprehension_value),
+            ':',
+            field('end', $._non_list_comprehension_value)
+          )
+        ),
+        prec.left(
+          5,
+          seq(
+            field('start', $._non_list_comprehension_value),
+            ':',
+            field('step', $._non_list_comprehension_value),
+            ':',
+            field('end', $._non_list_comprehension_value)
+          )
+        )
       ),
 
     parenthesized_expression_non_recursive: ($) =>
