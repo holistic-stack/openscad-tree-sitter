@@ -667,7 +667,7 @@ module.exports = grammar({
       field('value', $.expression)
     ),
 
-    special_variable: $ => token(/\$[\p{L}_][\p{L}\p{N}_]*/u),
+    special_variable: $ => token(/\$[A-Za-z_][A-Za-z0-9_]*/),
 
     string: $ => choice(
       prec(2, seq('"', optional(token.immediate(/(?:[^"\\]|\\.)*/)), '"')),
@@ -683,7 +683,7 @@ module.exports = grammar({
 
     boolean: $ => choice('true', 'false'),
     undef: $ => 'undef',
-    identifier: $ => /[\p{L}_][\p{L}\p{N}_]*/u,
+    identifier: $ => /[A-Za-z_][A-Za-z0-9_]*/,
 
     logical_or_operator: $ => '||',
     logical_and_operator: $ => '&&',
