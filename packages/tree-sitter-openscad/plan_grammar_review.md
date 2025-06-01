@@ -1391,4 +1391,17 @@ assignment_statement: $ => seq(
 +  - Parser performance stable; all test parsing tasks complete without regressions
 - [x] **Validation Gate**: State count <2000, parse speed improved
 
-```
+### [x] Task 11: Enhanced Implementation Guide Execution (Effort: 4 hours) - COMPLETED May 2025
+
+**Reasoning:** Simplified `grammar.js` by applying tree-sitter ^0.22.4 best practices: inline helper rules, supertypes, externals, named precedences, cleaned `extras`, and minimal conflicts to avoid unnecessary parse ambiguities and robustly reject invalid standalone syntax.
+
+#### [x] Subtask 11.1: Update `grammar.js` configuration (Effort: 2 hours)
+- Added `inline`, `supertypes`, `externals`, and `precedences` keys.
+- Simplified `extras` to whitespace and comments only.
+- Reduced `conflicts` to three essential conflicts.
+
+#### [x] Subtask 11.2: Validate grammar build (Effort: 1 hour)
+- Executed `pnpm build:grammar`: **success**, no errors.
+
+#### [x] Subtask 11.3: Validate corpus tests (Effort: 1 hour)
+- Executed `pnpm test:grammar`: **success**, all tests executed without unexpected failures.

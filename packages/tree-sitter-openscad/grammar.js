@@ -25,97 +25,37 @@ function commaSep(rule) {
 
 module.exports = grammar({
   name: 'openscad',
-
-  precedences: $ => [
-    ['conditional_exp_ternary'],
-    ['logical_or'],
-    ['logical_and'],
-    ['equality'],
-    ['relational'],
-    ['additive'],
-    ['multiplicative'],
-    ['exponentiation'],
-    // ['call_member_index'] moved below unary_exp
-    ['unary_exp'],         // Unary operators have higher precedence
-    ['call_member_index'], // Precedence for call, member, index operations
-  ],
-
-  word: $ => $.identifier,
-
-  extras: $ => [
-    /\s/,
-    $.comment,
-    $.error_sentinel, // Add error sentinel for better recovery
-  ],
-
-  /**
-   * Conflicts section
-   *
-   * We've removed most unnecessary conflicts by using proper precedence rules.
-   * The remaining conflicts are necessary for handling ambiguous syntax in OpenSCAD.
-   */
-  conflicts: $ => [
-    // Essential conflicts that handle genuine ambiguities in OpenSCAD syntax
-
-    // Statement vs if_statement conflict is needed because an if_statement can be a statement
-    // but also needs special handling for the else clause
-    [$.statement, $.if_statement],
-
-    // if_statement self-conflict is needed for nested if-else statements
-    [$.if_statement],
-
-    // module_child conflict is needed for proper handling of the children() syntax
-    [$.module_child],
-
-    // Added to resolve: for (for_header) block • next_token
-    [$.statement, $.for_statement],
-
-    // Control flow statements conflict
-    [$._control_flow_statements, $.if_statement],
-
-    // New conflicts from Task 1 unification (necessary for unified _value rule)
-    [$.function_definition, $.primary_expression],
-    [$.assignment_statement, $.primary_expression],
-
-    // Let expression conflicts (necessary for proper precedence handling)
-    [$.index_expression, $.let_expression],
-    [$.member_expression, $.let_expression],
-    [$.conditional_expression, $.let_expression],
-
-    // Essential conflict for operand restriction strategy (identified as necessary in Subtask 2.4)
-    [$.expression, $._operand_restricted],
-
-    // Conflict for assignment_statement and _operand_restricted (needed for _value rule changes)
-    [$.assignment_statement, $._operand_restricted],
-
-    // Conflict for function_definition and _operand_restricted (needed for _value rule changes)
-    [$.function_definition, $._operand_restricted]
-  ],
-
   inline: $ => [
     $._literal,
     $._value,
-    $._identifier_or_special,
-    $._comparison_operators,
-    $._arithmetic_operators,
-    $._logical_operators,
-    $._unary_operators,
-    $._binary_operators,
-    $._simple_expressions,
-    $._complex_expressions,
-    $._closing_paren_recovery,
-    $._closing_bracket_recovery,
-    $._closing_brace_recovery, // Re-added for block error recovery
-    $._closing_paren_statement_recovery,
-    $._closing_paren_list_recovery,
-    $._parameter_recovery,
-    $._parameter_value_recovery,
-    $._comma_or_closing_paren,
-    // Removed: $._block_missing_brace_recovery
+    $._binary_operand,
+    $._statement_group,
+    $._expression_base
   ],
   supertypes: $ => [
     $.statement,
-    $.expression
+    $.expression,
+    $._literal,
+    $._declaration,
+    $._control_flow
+  ],
+  externals: $ => [
+    $.string_content,
+    $.comment_content,
+    $.multiline_string
+  ],
+  precedences: $ => [
+    ['literal', 'unary', 'multiplicative', 'additive', 'relational', 'equality', 'logical_and', 'logical_or']
+  ],
+  word: $ => $.identifier,
+  extras: $ => [
+    /\s/,
+    $.comment
+  ],
+  conflicts: $ => [
+    [$.module_instantiation, $.call_expression],
+    [$.range_expression, $.array_literal],
+    [$.if_statement]
   ],
   rules: {
     source_file: $ => repeat($.statement), // Reverted prec.right
