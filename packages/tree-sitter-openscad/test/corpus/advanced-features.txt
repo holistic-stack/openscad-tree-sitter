@@ -241,7 +241,7 @@ render() difference() {
                     arguments: (argument_list
                       (arguments
                         (argument
-                          (number)))))))))))))
+                          (number)))))))))))
 
 ==================
 Children Operations
@@ -291,14 +291,10 @@ module my_module() {
               iterator: (identifier)
               range: (range_expression
                 start: (number)
-                end: (expression
-                  (binary_expression
-                    left: (expression
-                      (primary_expression
-                        (special_variable)))
-                    right: (expression
-                      (primary_expression
-                        (number))))))))
+                end: (binary_expression
+                  left: (special_variable)
+                  operator: (subtraction_operator)
+                  right: (number)))))
             body: (statement
               (module_instantiation
                 name: (identifier)
@@ -306,14 +302,10 @@ module my_module() {
                   (arguments
                     (argument
                       (vector_expression
-                        (expression
-                          (binary_expression
-                            left: (expression
-                              (primary_expression
-                                (identifier)))
-                            right: (expression
-                              (primary_expression
-                                (number)))))
+                        (binary_expression
+                          left: (identifier)
+                          operator: (multiplication_operator)
+                          right: (number))
                         (number)
                         (number)))))
                 (statement

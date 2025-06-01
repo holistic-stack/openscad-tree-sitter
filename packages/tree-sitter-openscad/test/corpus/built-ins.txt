@@ -87,6 +87,7 @@ exponential = exp(1);
               (unary_expression
                 operator: (unary_minus_operator)
                 operand: (number))))))))
+  (comment)
   (statement
     (assignment_statement
       name: (identifier)

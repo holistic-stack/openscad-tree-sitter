@@ -28,14 +28,10 @@ module.exports = grammar({
 
   conflicts: ($) => [
     [$.module_instantiation, $.call_expression],
-    [$.if_statement],
-    [$.statement],
     [$.conditional_expression, $.range_expression],
     [$.index_expression, $.let_expression],
     [$.member_expression, $.let_expression],
     [$.range_expression],
-    [$._value, $.primary_expression],
-    [$.expression, $._value],
   ],
 
   rules: {
@@ -150,35 +146,50 @@ module.exports = grammar({
           '(',
           field('condition', $._value),
           ')',
-          field('consequence', $.statement),
+          field('consequence', choice($.block, $.statement)),
           optional(
             seq(
               'else',
-              field('alternative', choice($.if_statement, $.statement))
+              field('alternative', choice($.if_statement, $.block, $.statement))
             )
           )
         )
       ),
 
     for_statement: ($) =>
-      prec(1, seq(field('header', $.for_header), field('body', $.statement))),
-
-    for_header: ($) =>
-      seq(
+      prec(1, seq(
         'for',
         '(',
         field('iterator', $.identifier),
         '=',
         field('range', $._value),
-        ')'
-      ),
+        ')',
+        $.statement
+      )),
 
     // Action statements
     echo_statement: ($) =>
       seq('echo', '(', optional($.arguments), ')', optional(';')),
 
     assert_statement: ($) =>
-      seq('assert', '(', $.arguments, ')', optional(';')),
+      choice(
+        seq(
+          'assert',
+          '(',
+          field('condition', $._value),
+          ',',
+          field('message', $._value),
+          ')',
+          optional(';')
+        ),
+        seq(
+          'assert',
+          '(',
+          field('condition', $._value),
+          ')',
+          optional(';')
+        )
+      ),
 
     // Arguments list for function calls
     arguments: ($) => commaSep1($.argument),
@@ -418,20 +429,28 @@ module.exports = grammar({
     let_expression: ($) =>
       prec.right(
         15,
-        seq('let', '(', commaSep1($.let_assignment), ')', field('body', $._value))
+        seq('let', '(', commaSep1($.let_clause), ')', $._value)
       ),
 
-    let_assignment: ($) =>
-      seq(field('name', $.identifier), '=', field('value', $._value)),
+    let_clause: ($) =>
+      seq($.identifier, '=', $._value),
 
     range_expression: ($) =>
       prec.left(
         5,
-        seq(
-          field('start', $._value),
-          ':',
-          field('end', $._value),
-          optional(seq(':', field('step', $._value)))
+        choice(
+          seq(
+            field('start', $._value),
+            ':',
+            field('end', $._value)
+          ),
+          seq(
+            field('start', $._value),
+            ':',
+            field('step', $._value),
+            ':',
+            field('end', $._value)
+          )
         )
       ),
 
@@ -440,9 +459,9 @@ module.exports = grammar({
     list_comprehension: ($) =>
       seq(
         '[',
-        field('expr', $._value),
-        $.list_comprehension_for,
-        optional($.list_comprehension_if),
+        field('element', $._value),
+        field('for_clause', $.list_comprehension_for),
+        optional(field('if_clause', $.list_comprehension_if)),
         ']'
       ),
 
