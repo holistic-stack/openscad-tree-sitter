@@ -58,7 +58,7 @@ module.exports = grammar({
     // Basic statements
     assignment_statement: ($) =>
       seq(
-        field('name', $.identifier),
+        field('name', choice($.identifier, $.special_variable)),
         '=',
         field('value', $._value),
         optional(';')
@@ -94,24 +94,33 @@ module.exports = grammar({
     // Module instantiation with precedence
     module_instantiation: ($) =>
       choice(
-        prec(2, $.module_instantiation_simple),
-        prec(2, $.module_instantiation_with_body)
-      ),
-
-    module_instantiation_simple: ($) =>
-      seq(
-        optional($.modifier),
-        field('name', $.identifier),
-        field('arguments', $.argument_list),
-        ';'
-      ),
-
-    module_instantiation_with_body: ($) =>
-      seq(
-        optional($.modifier),
-        field('name', $.identifier),
-        field('arguments', $.argument_list),
-        $.block
+        prec(
+          2,
+          seq(
+            optional($.modifier),
+            field('name', $.identifier),
+            field('arguments', $.argument_list),
+            ';'
+          )
+        ),
+        prec(
+          2,
+          seq(
+            optional($.modifier),
+            field('name', $.identifier),
+            field('arguments', $.argument_list),
+            $.block
+          )
+        ),
+        prec(
+          1,
+          seq(
+            optional($.modifier),
+            field('name', $.identifier),
+            field('arguments', $.argument_list),
+            $.statement
+          )
+        )
       ),
 
     modifier: ($) => choice('#', '!', '%', '*'),
@@ -121,7 +130,8 @@ module.exports = grammar({
     argument: ($) =>
       choice(
         $._value,
-        seq(field('name', $.identifier), '=', field('value', $._value))
+        seq(field('name', $.identifier), '=', field('value', $._value)),
+        seq(field('name', $.special_variable), '=', field('value', $._value))
       ),
 
     // Import statements
@@ -150,17 +160,16 @@ module.exports = grammar({
       ),
 
     for_statement: ($) =>
-      prec(
-        1,
-        seq(
-          'for',
-          '(',
-          field('iterator', $.identifier),
-          '=',
-          field('range', $._value),
-          ')',
-          field('body', $.statement)
-        )
+      prec(1, seq(field('header', $.for_header), field('body', $.statement))),
+
+    for_header: ($) =>
+      seq(
+        'for',
+        '(',
+        field('iterator', $.identifier),
+        '=',
+        field('range', $._value),
+        ')'
       ),
 
     // Action statements
@@ -177,6 +186,7 @@ module.exports = grammar({
     primary_expression: ($) =>
       choice(
         $.identifier,
+        $.special_variable,
         $.number,
         $.string,
         $.boolean,
@@ -188,11 +198,13 @@ module.exports = grammar({
     _value: ($) =>
       choice(
         $.identifier,
+        $.special_variable,
         $.number,
         $.string,
         $.boolean,
         $.undef,
         $.vector_expression,
+        $.list_comprehension,
         $.binary_expression,
         $.unary_expression,
         $.conditional_expression,
@@ -387,16 +399,10 @@ module.exports = grammar({
     let_expression: ($) =>
       prec.right(
         15,
-        seq(
-          'let',
-          '(',
-          commaSep1($.let_assignment),
-          ')',
-          field('body', $._value)
-        )
+        seq('let', '(', commaSep1($.let_clause), ')', field('body', $._value))
       ),
 
-    let_assignment: ($) =>
+    let_clause: ($) =>
       seq(field('name', $.identifier), '=', field('value', $._value)),
 
     range_expression: ($) =>
@@ -411,6 +417,28 @@ module.exports = grammar({
       ),
 
     vector_expression: ($) => seq('[', commaSep($._value), ']'),
+
+    list_comprehension: ($) =>
+      seq(
+        '[',
+        field('expr', $._value),
+        $.list_comprehension_for,
+        optional($.list_comprehension_if),
+        ']'
+      ),
+
+    list_comprehension_for: ($) =>
+      seq(
+        'for',
+        '(',
+        field('iterator', $.identifier),
+        '=',
+        field('range', $._value),
+        ')'
+      ),
+
+    list_comprehension_if: ($) =>
+      seq('if', '(', field('condition', $._value), ')'),
 
     // Literals
     identifier: ($) => /[A-Za-z_][A-Za-z0-9_]*/,
@@ -432,6 +460,8 @@ module.exports = grammar({
     boolean: ($) => choice('true', 'false'),
 
     undef: ($) => 'undef',
+
+    special_variable: ($) => /\$[A-Za-z_][A-Za-z0-9_]*/,
 
     comment: ($) => choice(seq('//', /.*/), seq('/*', /([^*]|\*[^\/])*/, '*/')),
   },
