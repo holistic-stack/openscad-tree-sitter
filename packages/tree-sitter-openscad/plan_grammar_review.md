@@ -3582,6 +3582,28 @@ The Direct Access Strategy implementation is **SUCCESSFUL**. The grammar now pro
 - ✅ **Pattern established**: Clear methodology for updating remaining corpus files
 
 **Next Steps:**
-1. Apply same patterns to other corpus files (comprehensive-basic.txt, advanced.txt, etc.)
-2. Update query files to fix `array_literal` reference
-3. Achieve >80% overall test coverage with updated corpus
+1. ✅ **Apply same patterns to comprehensive-basic.txt** - COMPLETED (17/17 tests passing)
+2. 🔄 **Continue with other corpus files** - IN PROGRESS (advanced.txt, comprehensive-advanced.txt, etc.)
+3. 🔄 **Update query files to fix `array_literal` reference** - PENDING
+4. 🔄 **Achieve >80% overall test coverage** - IN PROGRESS
+
+### Task 17: comprehensive-basic.txt Migration ✅ COMPLETED
+
+**Objective:** Apply Direct Access Strategy patterns to comprehensive-basic.txt file.
+
+**Changes Applied:**
+1. ✅ **Simple Numbers**: Removed `primary_expression` wrapping from unary expression operand
+2. ✅ **Basic Arithmetic**: Removed `primary_expression` wrapping from all binary expression operands (6 expressions)
+3. ✅ **Basic Comparisons**: Removed `primary_expression` wrapping from all comparison operands (6 expressions)
+4. ✅ **Basic Logical Operations**: Removed `primary_expression` wrapping from logical operands (3 expressions)
+5. ✅ **Simple Function Definition**: Removed `primary_expression` wrapping from function body operands (2 functions)
+
+**Results:**
+- ✅ **comprehensive-basic.txt: 17/17 tests passing** (100% success rate)
+- ✅ **Performance: 2910 bytes/ms** (excellent parsing speed)
+- ✅ **Pattern consistency**: Same successful approach as basics.txt
+- ✅ **+5 additional tests now passing** (from previous 12/17 to 17/17)
+
+**Impact:**
+- **Before comprehensive-basic.txt update**: 56 tests passing, 47 tests failing (54.4% pass rate)
+- **After comprehensive-basic.txt update**: Expected ~61 tests passing, ~42 tests failing (~59.2% pass rate)

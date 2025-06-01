@@ -27,8 +27,7 @@ num4 = -5;
       name: (identifier)
       value: (unary_expression
         operator: (unary_minus_operator)
-        operand: (primary_expression
-          (number))))))
+        operand: (number)))))
 
 ==================
 Simple Strings
@@ -118,56 +117,44 @@ result6 = 2 ^ 3;
     (assignment_statement
       name: (identifier)
       value: (binary_expression
-        left: (primary_expression
-          (number))
+        left: (number)
         operator: (addition_operator)
-        right: (primary_expression
-          (number)))))
+        right: (number))))
   (statement
     (assignment_statement
       name: (identifier)
       value: (binary_expression
-        left: (primary_expression
-          (number))
+        left: (number)
         operator: (subtraction_operator)
-        right: (primary_expression
-          (number)))))
+        right: (number))))
   (statement
     (assignment_statement
       name: (identifier)
       value: (binary_expression
-        left: (primary_expression
-          (number))
+        left: (number)
         operator: (multiplication_operator)
-        right: (primary_expression
-          (number)))))
+        right: (number))))
   (statement
     (assignment_statement
       name: (identifier)
       value: (binary_expression
-        left: (primary_expression
-          (number))
+        left: (number)
         operator: (division_operator)
-        right: (primary_expression
-          (number)))))
+        right: (number))))
   (statement
     (assignment_statement
       name: (identifier)
       value: (binary_expression
-        left: (primary_expression
-          (number))
+        left: (number)
         operator: (modulo_operator)
-        right: (primary_expression
-          (number)))))
+        right: (number))))
   (statement
     (assignment_statement
       name: (identifier)
       value: (binary_expression
-        left: (primary_expression
-          (number))
+        left: (number)
         operator: (exponentiation_operator)
-        right: (primary_expression
-          (number))))))
+        right: (number)))))
 
 ==================
 Basic Comparisons
@@ -187,56 +174,44 @@ comp6 = 2 != 3;
     (assignment_statement
       name: (identifier)
       value: (binary_expression
-        left: (primary_expression
-          (number))
+        left: (number)
         operator: (greater_than_operator)
-        right: (primary_expression
-          (number)))))
+        right: (number))))
   (statement
     (assignment_statement
       name: (identifier)
       value: (binary_expression
-        left: (primary_expression
-          (number))
+        left: (number)
         operator: (less_than_operator)
-        right: (primary_expression
-          (number)))))
+        right: (number))))
   (statement
     (assignment_statement
       name: (identifier)
       value: (binary_expression
-        left: (primary_expression
-          (number))
+        left: (number)
         operator: (greater_equal_operator)
-        right: (primary_expression
-          (number)))))
+        right: (number))))
   (statement
     (assignment_statement
       name: (identifier)
       value: (binary_expression
-        left: (primary_expression
-          (number))
+        left: (number)
         operator: (less_equal_operator)
-        right: (primary_expression
-          (number)))))
+        right: (number))))
   (statement
     (assignment_statement
       name: (identifier)
       value: (binary_expression
-        left: (primary_expression
-          (number))
+        left: (number)
         operator: (equality_operator)
-        right: (primary_expression
-          (number)))))
+        right: (number))))
   (statement
     (assignment_statement
       name: (identifier)
       value: (binary_expression
-        left: (primary_expression
-          (number))
+        left: (number)
         operator: (inequality_operator)
-        right: (primary_expression
-          (number))))))
+        right: (number)))))
 
 ==================
 Basic Logical Operations
@@ -253,27 +228,22 @@ logic3 = !true;
     (assignment_statement
       name: (identifier)
       value: (binary_expression
-        left: (primary_expression
-          (boolean))
+        left: (boolean)
         operator: (logical_and_operator)
-        right: (primary_expression
-          (boolean)))))
+        right: (boolean))))
   (statement
     (assignment_statement
       name: (identifier)
       value: (binary_expression
-        left: (primary_expression
-          (boolean))
+        left: (boolean)
         operator: (logical_or_operator)
-        right: (primary_expression
-          (boolean)))))
+        right: (boolean))))
   (statement
     (assignment_statement
       name: (identifier)
       value: (unary_expression
         operator: (logical_not_operator)
-        operand: (primary_expression
-          (boolean))))))
+        operand: (boolean)))))
 
 ==================
 Simple Assignment
@@ -657,11 +627,9 @@ function add(a, b) = a + b;
           (parameter_declaration
             (identifier))))
       value: (binary_expression
-        left: (primary_expression
-          (identifier))
+        left: (identifier)
         operator: (multiplication_operator)
-        right: (primary_expression
-          (number)))))
+        right: (number))))
   (statement
     (function_definition
       name: (identifier)
@@ -672,11 +640,9 @@ function add(a, b) = a + b;
           (parameter_declaration
             (identifier))))
       value: (binary_expression
-        left: (primary_expression
-          (identifier))
+        left: (identifier)
         operator: (addition_operator)
-        right: (primary_expression
-          (identifier))))))
+        right: (identifier)))))
 
 ==================
 Include and Use Statements
