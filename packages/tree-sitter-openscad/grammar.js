@@ -37,6 +37,7 @@ module.exports = grammar({
     [$.vector_expression, $.list_comprehension],
     [$.range_expression_non_recursive],
     [$._value, $._non_list_comprehension_value],
+    [$._value, $._range_element],
     [$.bare_range_expression],
     [$.bare_range_expression_non_recursive],
   ],
@@ -263,9 +264,8 @@ module.exports = grammar({
       $.identifier,
       $.special_variable,
 
-      // Complex expressions - direct access (prioritize bracketed ranges over vectors)
-      $.bracketed_range_expression,  // Higher priority for [start:end] syntax
-      $.bare_range_expression,
+      // Complex expressions - direct access (prioritize ranges over vectors)
+      prec.dynamic(10, $.range_expression),  // High priority for [start:end] syntax
       $.vector_expression,
       $.binary_expression,
       $.unary_expression,
@@ -278,8 +278,8 @@ module.exports = grammar({
       $.parenthesized_expression
     ),
 
-    // Vector element rule - excludes bare ranges to prevent parsing conflicts
-    // Used specifically in vector_expression to avoid [start:end-offset] being parsed as vector
+    // Vector element rule - excludes ranges to prevent parsing conflicts
+    // Used specifically in vector_expression to avoid [start:end] being parsed as vector
     _vector_element: ($) => choice(
       // Literals - direct access
       $.number,
@@ -289,7 +289,7 @@ module.exports = grammar({
       $.identifier,
       $.special_variable,
 
-      // Complex expressions - direct access (excluding bare_range_expression)
+      // Complex expressions - direct access (excluding range expressions)
       $.vector_expression,
       $.binary_expression,
       $.unary_expression,
@@ -298,8 +298,7 @@ module.exports = grammar({
       $.index_expression,
       $.member_expression,
       $.let_expression,
-      $.bracketed_range_expression,  // Allow bracketed ranges like [0:10]
-      // $.bare_range_expression,    // Exclude bare ranges like 0:10
+      // Removed range expressions to prevent ambiguity with [start:end] syntax
       $.list_comprehension,
       $.parenthesized_expression
     ),
@@ -317,14 +316,15 @@ module.exports = grammar({
       $.special_variable,
 
       // Non-recursive expressions - aliased to regular node names for consistent AST output
-      alias($.vector_expression_non_recursive, $.vector_expression),
+      // Range expression has highest priority to prevent [start:end] being parsed as vector
+      prec.dynamic(1000, alias($.range_expression_non_recursive, $.range_expression)),
+      prec(-10, alias($.vector_expression_non_recursive, $.vector_expression)),
       alias($.binary_expression_non_recursive, $.binary_expression),
       alias($.unary_expression_non_recursive, $.unary_expression),
       alias($.conditional_expression_non_recursive, $.conditional_expression),
       alias($.call_expression_non_recursive, $.call_expression),
       alias($.index_expression_non_recursive, $.index_expression),
       alias($.member_expression_non_recursive, $.member_expression),
-      alias($.range_expression_non_recursive, $.range_expression),
       alias($.parenthesized_expression_non_recursive, $.parenthesized_expression)
     ),
 
@@ -539,49 +539,100 @@ module.exports = grammar({
         field('value', $._value)
       ),
 
-    // Bracketed range expressions [start:end] or [start:step:end] - highest precedence
-    bracketed_range_expression: ($) =>
+    // Range element rule - excludes range expressions to prevent circular dependency
+    _range_element: ($) => choice(
+      // Literals - direct access
+      $.number,
+      $.string,
+      $.boolean,
+      $.undef,
+      $.identifier,
+      $.special_variable,
+
+      // Complex expressions - direct access (excluding range expressions)
+      $.vector_expression,
+      $.binary_expression,
+      $.unary_expression,
+      $.conditional_expression,
+      $.call_expression,
+      $.index_expression,
+      $.member_expression,
+      $.let_expression,
+      $.list_comprehension,
+      $.parenthesized_expression
+    ),
+
+    // Range expression with direct field access - highest precedence for [start:end] syntax
+    range_expression: ($) =>
       choice(
-        prec.dynamic(100, seq(
+        // Bracketed range expressions [start:end] or [start:step:end]
+        prec.dynamic(200, seq(
           '[',
-          field('start', $._value),
+          field('start', $._range_element),
           ':',
-          field('end', $._value),
+          field('end', $._range_element),
           ']'
         )),
-        prec.dynamic(100, seq(
+        prec.dynamic(200, seq(
           '[',
-          field('start', $._value),
+          field('start', $._range_element),
           ':',
-          field('step', $._value),
+          field('step', $._range_element),
           ':',
-          field('end', $._value),
+          field('end', $._range_element),
+          ']'
+        )),
+        // Bare range expressions start:end or start:step:end (for use in other contexts)
+        prec.left(5, seq(
+          field('start', $._range_element),
+          ':',
+          field('end', $._range_element)
+        )),
+        prec.left(5, seq(
+          field('start', $._range_element),
+          ':',
+          field('step', $._range_element),
+          ':',
+          field('end', $._range_element)
+        ))
+      ),
+
+    // Hidden bracketed range expressions for backward compatibility
+    bracketed_range_expression: ($) =>
+      choice(
+        prec.dynamic(200, seq(
+          '[',
+          field('start', $._range_element),
+          ':',
+          field('end', $._range_element),
+          ']'
+        )),
+        prec.dynamic(200, seq(
+          '[',
+          field('start', $._range_element),
+          ':',
+          field('step', $._range_element),
+          ':',
+          field('end', $._range_element),
           ']'
         ))
       ),
 
-    // Bare range expressions (for use in other contexts like for loops)
+    // Hidden bare range expressions for backward compatibility
     bare_range_expression: ($) =>
       choice(
         prec.left(5, seq(
-          field('start', $._value),
+          field('start', $._range_element),
           ':',
-          field('end', $._value)
+          field('end', $._range_element)
         )),
         prec.left(5, seq(
-          field('start', $._value),
+          field('start', $._range_element),
           ':',
-          field('step', $._value),
+          field('step', $._range_element),
           ':',
-          field('end', $._value)
+          field('end', $._range_element)
         ))
-      ),
-
-    // Legacy range_expression for backward compatibility
-    range_expression: ($) =>
-      choice(
-        $.bracketed_range_expression,
-        $.bare_range_expression
       ),
 
     vector_expression: ($) => prec(1, seq(
@@ -832,11 +883,39 @@ module.exports = grammar({
         ))
       ),
 
-    // Legacy range_expression_non_recursive for backward compatibility
+    // Range expression non-recursive with direct field access
     range_expression_non_recursive: ($) =>
       choice(
-        alias($.bracketed_range_expression_non_recursive, $.range_expression),
-        alias($.bare_range_expression_non_recursive, $.range_expression)
+        // Bracketed range expressions [start:end] or [start:step:end]
+        prec.dynamic(200, seq(
+          '[',
+          field('start', $._non_list_comprehension_value),
+          ':',
+          field('end', $._non_list_comprehension_value),
+          ']'
+        )),
+        prec.dynamic(200, seq(
+          '[',
+          field('start', $._non_list_comprehension_value),
+          ':',
+          field('step', $._non_list_comprehension_value),
+          ':',
+          field('end', $._non_list_comprehension_value),
+          ']'
+        )),
+        // Bare range expressions start:end or start:step:end
+        prec.left(5, seq(
+          field('start', $._non_list_comprehension_value),
+          ':',
+          field('end', $._non_list_comprehension_value)
+        )),
+        prec.left(5, seq(
+          field('start', $._non_list_comprehension_value),
+          ':',
+          field('step', $._non_list_comprehension_value),
+          ':',
+          field('end', $._non_list_comprehension_value)
+        ))
       ),
 
     parenthesized_expression_non_recursive: ($) =>
