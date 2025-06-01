@@ -1,0 +1,570 @@
+# GUIDELINES: OpenSCAD Tree-Sitter Parser Monorepo
+
+## IMPORTANT AND NEVER SKIP:
+- ALWAYS START WITH Planning and Refining phases;
+- ALWAYS FOLLOW [Development Workflow](#development-workflow), [Documentation Best Practices](#documentation-best-practices) and [Mandatory Workflows](#mandatory-workflows);
+- ALWAYS FOLLOW Context Management documents docs/current-context.md, docs/TODO.md and docs/PROGRESS.md;
+
+## IMPORTANT: AI Assistant Instructions
+
+You are the SuperCoder AI assistant for the blink-cad project. Always:
+1. **Follow the Development Workflow** - Never skip steps
+2. **Track progress** - State your current step: "I am on step X, doing Y"
+3. **Maintain context** - Update context documents at each step
+4. **Document code** - Follow documentation standards
+
+
+## Table of Contents
+
+1. [Brief Overview](#brief-overview)
+2. [Development Workflow](#development-workflow)
+3. [Nx Monorepo Structure](#nx-monorepo-structure)
+4. [Testing Guidelines](#testing-guidelines)
+5. [Script Commands](#script-commands)
+6. [Coding Best Practices](#coding-best-practices)
+7. [Documentation Best Practices](#documentation-best-practices)
+8. [Mandatory Workflows](#mandatory-workflows)
+9. [Project Context](#project-context)
+
+## Brief Overview
+
+This project is an Nx monorepo with PNPM workspaces containing packages for parsing and working with OpenSCAD files using Tree-sitter. The repository consists of two main packages:
+
+- **packages/tree-sitter-openscad**: Tree-sitter grammar for OpenSCAD
+- **packages/openscad-parser**: TypeScript parser for OpenSCAD using the tree-sitter grammar
+
+## Development Workflow
+
+This project follows an incremental development workflow with a strong emphasis on Test-Driven Development (TDD) and automated documentation. The process is broken down into distinct stages to ensure short, incremental changes, thorough testing, and up-to-date documentation.
+
+- Include concrete examples of each OpenSCAD syntax variation in test coverage documentation.
+- **All commands use plain text output by default** - no need for `:plain` suffixes.
+- Use `pnpm test` to run all tests across the monorepo (plain text output).
+- Use `pnpm test:grammar` or `pnpm test:parser` to run tests for specific packages (plain text output).
+- Use `nx test tree-sitter-openscad` or `nx test openscad-parser` for more granular control.
+- To run a specific test file, use:
+  ```bash
+  pnpm test:parser:file --testFile "path/to/test/file.test.ts"
+  ```
+- To run a specific test within a file, use the `-t` flag:
+  ```bash
+  pnpm test:parser:file --testFile "path/to/test/file.test.ts" -t "test name pattern"
+  ```
+- ALWAYS USE TDD, DRY and SRP files principles approach:
+
+ALWAYS USE DRY and KISS rules and algoritm improvements, split the code in smaller and manageable code, reason multiple options of improvements;
+use SRP of solid for any function and utils, use TDD approach;
+search in the web for more context;
+do not use __tests__ folder, use:
+EACH SRP file must have its own folder and the its tests should be in the same folder, e.g. of file structure:
+
+```jsx
+new-srp-file/
+├── new-srp-file-with-single-small-test-files-example/
+│   ├── new-srp-file.ts
+│   └── new-srp-file.test.ts
+└── new-srp-file-with-muilple-small-test-files-example/
+    ├── new-srp-file.ts
+    ├── new-srp-file-[siminalar-scenario1].test.ts
+    ├── new-srp-file-[siminalar-scenario2].test.ts
+    ├── ...
+    └── new-srp-file-[siminalar-scenarioX].test.ts
+```
+
+## Nx Monorepo Structure
+
+This project is structured as an Nx monorepo with PNPM workspaces. The key configuration files are:
+
+- **nx.json**: Defines task dependencies and Nx configuration
+- **package.json**: Root package with scripts for the entire monorepo
+- **pnpm-workspace.yaml**: Defines the PNPM workspace structure
+- **packages/*/project.json**: Project-specific configuration for Nx
+
+### Project Organization
+
+```
+openscad-tree-sitter/
+├── packages/
+│   ├── tree-sitter-openscad/   # Tree-sitter grammar package
+│   │   ├── bindings/           # Language bindings
+│   │   ├── examples/           # Example OpenSCAD files
+│   │   ├── grammar.js          # The grammar definition
+│   │   ├── queries/            # Tree-sitter queries
+│   │   ├── src/                # Source code
+│   │   ├── test/               # Tests for the grammar
+│   │   └── project.json        # Nx project configuration
+│   │
+│   └── openscad-parser/        # TypeScript parser package
+│       ├── src/                # Source code
+│       │   └── lib/            # Library code
+│       ├── test/               # Tests for the parser
+│       └── project.json        # Nx project configuration
+│
+├── nx.json                     # Nx configuration
+└── pnpm-workspace.yaml         # PNPM workspace configuration
+```
+
+### Context Management
+
+Maintain these context documents throughout development:
+
+- **docs/PROGRESS.md**: Contains previous completed task information, key decisions, and implementation details
+- **docs/current-context.md**: Contains current task information, key decisions, and implementation details
+- **docs/TODO.md**: Lists all tasks/subtasks with pending status or in progress, links to documentation, dependencies, code samples, and priorities
+
+```mermaid
+graph TD
+    A[Planning] --> B[Refining]
+    B --> C[Development with TDD]
+    C --> D[Testing]
+    D -- Issues Found --> C
+    D -- No Issues --> E[Documentation]
+    E --> F[Code Review]
+    F -- Changes Needed --> C
+    F -- Approved --> G[Delivering]
+```
+
+### Development Process
+
+#### Planning Phase
+
+1. **Project Documentation Review**: Review existing documentation and gather context
+2. **Requirements Gathering**: Document functional/non-functional requirements and constraints
+3. **Problem Analysis**: Break down the problem and identify dependencies
+4. **Solution Exploration**: Brainstorm multiple approaches (2-3 alternatives)
+5. **Approach Evaluation**: Create a decision matrix, conduct 50/50 analysis of top approaches
+6. **High-Level Design**: Create architecture diagram, define components, document decisions;
+
+#### Refining Phase
+
+1. **Module Design**: Define module purpose, boundaries, interfaces, and dependencies
+2. **Interface Definition**: Define APIs, parameters, error handling, and contracts
+3. **Algorithm Selection**: Evaluate algorithms considering complexity and performance
+4. **Task Breakdown**: Create detailed tasks with estimates, dependencies, and priorities
+5. **Document the refined tasks**:
+    - tasks/subtasks with pending status or in progress, links to documentation, dependencies, code samples, and priorities must be documented in docs/TODO.md;
+
+#### Development with TDD
+
+Follow this cycle for each task:
+
+1. **Understand Task**: Review requirements and context
+    - Read docs/TODO.md for context;
+    - Read docs/current-context.md for context and keep it updated each TDD cicle for future context;
+2. **Write Failing Test**: Create test that verifies expected behavior
+3. **Run Test to Verify Failure**: Confirm test fails for expected reason
+4. **Implement Minimal Code**: Write just enough code to make test pass
+5. **Run Tests**: Verify new test passes and existing tests still pass
+6. **Refactor Code**: Improve implementation while maintaining behavior
+7. **Run Tests Again**: Ensure refactoring didn't break anything
+8. **Document Code**: Add JSDoc comments with descriptions and examples
+9. **Next Task**: Update context documents and move to next task
+
+## Testing Guidelines
+
+### Test Organization
+
+Tests should be organized according to the Single Responsibility Principle (SRP):
+
+- Each file should have its own test file(s) in the same directory
+- Test files should be named with the `.test.ts` extension
+- For complex components, multiple test files can be used to test different aspects
+
+```
+packages/
+├── tree-sitter-openscad/
+│   ├── test/
+│   │   ├── corpus/            # Grammar test corpus
+│   │   └── nodejs/            # Node.js binding tests
+│
+└── openscad-parser/
+    └── src/
+        └── lib/
+            ├── feature/
+            │   ├── feature.ts
+            │   └── feature.test.ts
+            └── complex-feature/
+                ├── complex-feature.ts
+                ├── complex-feature-scenario1.test.ts
+                └── complex-feature-scenario2.test.ts
+```
+
+### Test Types
+
+1. **Unit Tests**: Test individual components in isolation (aim for >80% coverage)
+   - Use `pnpm test` to run all tests (plain text output)
+   - Use `pnpm test:grammar` or `pnpm test:parser` for specific packages (plain text output)
+   - Use `pnpm test:parser:file --testFile=src/lib/feature/feature.test.ts` for specific files (plain text output)
+
+2. **Integration Tests**: Test component interactions and API contracts
+   - Focus on testing interactions between different modules
+   - Test the parser with real OpenSCAD code examples
+
+3. **Grammar Tests**: Test the tree-sitter grammar with corpus files
+   - Use the tree-sitter test corpus format
+   - Include examples of all OpenSCAD syntax variations
+
+4. **Performance Tests**: Measure parsing performance
+   - Test with large OpenSCAD files
+   - Benchmark parsing time and memory usage
+
+### Test Commands
+
+The primary way to run tests is through the PNPM scripts defined in the root `package.json`. **All test commands use plain text output by default**:
+
+- **`pnpm test`**: Runs all tests across all packages in the monorepo (plain text output). This is the most comprehensive way to ensure everything is working.
+  ```bash
+  pnpm test
+  ```
+
+- **Package-Specific Tests**: To run tests for a single package (plain text output):
+  ```bash
+  pnpm test:grammar   # For tree-sitter-openscad
+  pnpm test:parser    # For openscad-parser
+  pnpm test:editor    # For openscad-editor
+  pnpm test:demo      # For openscad-demo
+  ```
+  *Example*: `pnpm test:parser`
+
+- **Testing Specific Files or Patterns (for Vitest-based packages)**:
+  Use the `:file` suffixed scripts for `openscad-parser`, `openscad-editor`, and `openscad-demo`. The path provided to `--testFile` is relative to the package's root directory. All use plain text output.
+  ```bash
+  # Test a single file in openscad-parser
+  pnpm test:parser:file --testFile src/lib/ast-utils.test.ts
+
+  # Test all files in a specific directory within openscad-editor
+  pnpm test:editor:file --testFile src/components/specific-ui/
+
+  # Test files matching a pattern in openscad-demo
+  pnpm test:demo:file --testFile "**/integration.*.test.tsx"
+  ```
+
+- **Watch Mode**: For continuous testing during development (interactive mode):
+  ```bash
+  pnpm test:watch # Runs tests for all packages in watch mode
+  ```
+  You can also run watch mode for specific packages if their `project.json` defines a `test:watch` target (e.g., `nx test:watch openscad-parser`).
+
+- **Coverage Reports**: To generate test coverage (plain text output):
+  ```bash
+  pnpm test:coverage # Generates coverage for all packages
+  ```
+
+Refer to the "Script Commands" section for a more exhaustive list of available scripts and their usage.
+
+## Script Commands
+
+This project uses PNPM and Nx for managing builds, tests, and development workflows. Key scripts are defined in the root `package.json`.
+
+### Common Monorepo Commands
+
+These commands operate on all packages within the monorepo and **use plain text output by default**:
+
+- **`pnpm build`**: Builds all packages (plain text output).
+  - *When to use*: After pulling changes, before committing, or when you need a fresh build of the entire workspace.
+  - *Example*: `pnpm build`
+
+- **`pnpm test`**: Runs tests for all packages (plain text output).
+  - *When to use*: Before committing changes, during CI, or to ensure all packages are functioning correctly.
+  - *Example*: `pnpm test`
+
+- **`pnpm lint`**: Lints all packages (plain text output).
+  - *When to use*: To check for code style and quality issues across the entire codebase.
+  - *Example*: `pnpm lint`
+
+- **`pnpm lint:fix`**: Attempts to automatically fix linting issues in all packages (plain text output).
+  - *When to use*: After running `pnpm lint` to automatically correct any fixable issues.
+  - *Example*: `pnpm lint:fix`
+
+- **`pnpm typecheck`**: Performs type checking for all applicable packages (plain text output).
+  - *When to use*: To ensure type safety across the TypeScript projects.
+  - *Example*: `pnpm typecheck`
+
+- **`pnpm dev`**: Runs all packages in development/watch mode (interactive mode).
+  - *When to use*: When actively developing multiple packages simultaneously and you want them to rebuild on changes.
+  - *Example*: `pnpm dev`
+
+- **`pnpm test:watch`**: Runs tests in watch mode for all packages (interactive mode).
+  - *When to use*: During active development and TDD to get immediate feedback on test results.
+  - *Example*: `pnpm test:watch`
+
+- **`pnpm test:coverage`**: Generates test coverage reports for all packages (plain text output).
+  - *When to use*: To assess the extent of test coverage and identify untested code paths.
+  - *Example*: `pnpm test:coverage`
+
+### Package-Specific Commands
+
+These commands target individual packages. Replace `<package-name>` with the actual package name (e.g., `tree-sitter-openscad`, `openscad-parser`, `openscad-editor`, `openscad-demo`).
+
+**Build:**
+- **`pnpm build:grammar`**: Uses pre-built WASM file for `tree-sitter-openscad` (no native compilation).
+- **`pnpm build:grammar:native`**: Builds `tree-sitter-openscad` with native compilation (requires C++ toolchain).
+- **`pnpm build:grammar:wasm`**: Builds only WASM file for `tree-sitter-openscad` (requires tree-sitter CLI).
+- **`pnpm build:parser`**: Builds the `openscad-parser` TypeScript package.
+- **`pnpm build:editor`**: Builds the `openscad-editor` React component package.
+- **`pnpm build:demo`**: Builds the `openscad-demo` application.
+  - *When to use*: When you only need to build a specific package.
+  - *Example*: `pnpm build:parser`
+  - *Note*: Use `build:grammar:native` only for grammar development requiring native toolchain setup.
+
+**Test:**
+- **`pnpm test:grammar`**: Tests `tree-sitter-openscad`.
+- **`pnpm test:parser`**: Tests `openscad-parser`.
+- **`pnpm test:editor`**: Tests `openscad-editor`.
+- **`pnpm test:demo`**: Tests `openscad-demo`.
+  - *When to use*: When you want to run tests for a single package.
+  - *Example*: `pnpm test:editor`
+
+**Test Specific File or Pattern:**
+For packages using Vitest (`openscad-parser`, `openscad-editor`, `openscad-demo`), you can test specific files or patterns.
+- **`pnpm test:parser:file --testFile <path/to/file.test.ts>`**: Tests a specific file in `openscad-parser`.
+- **`pnpm test:editor:file --testFile <path/to/file.test.ts>`**: Tests a specific file in `openscad-editor`.
+- **`pnpm test:demo:file --testFile <path/to/file.test.ts>`**: Tests a specific file in `openscad-demo`.
+  - *Important*: The `<path/to/file.test.ts>` should be relative to the root of the *specific package*.
+  - *When to use*: When focusing on a particular module or test suite within a package.
+  - *Example*: `pnpm test:parser:file --testFile src/lib/some-module.test.ts`
+  - *Example (testing all files in a directory)*: `pnpm test:parser:file --testFile src/lib/ast-nodes/`
+  - *Example (testing files matching a pattern)*: `pnpm test:parser:file --testFile "**/my-feature.*.test.ts"`
+
+**Lint:**
+- **`pnpm lint:grammar`**: Lints `tree-sitter-openscad`.
+- **`pnpm lint:parser`**: Lints `openscad-parser`.
+- **`pnpm lint:editor`**: Lints `openscad-editor`.
+- **`pnpm lint:demo`**: Lints `openscad-demo`.
+  - *When to use*: To check code style for a specific package.
+  - *Example*: `pnpm lint:parser`
+
+**Development/Watch Mode:**
+- **`pnpm dev:parser`**: Runs `openscad-parser` in development/watch mode.
+- **`pnpm dev:editor`**: Runs `openscad-editor` in development/watch mode.
+- **`pnpm dev:demo`**: Runs `openscad-demo` in development/watch mode (starts the demo app).
+  - *When to use*: When actively developing a specific package and want it to rebuild/rerun on changes.
+  - *Example*: `pnpm dev:demo`
+
+**Type Check:**
+- **`pnpm check:parser`**: Performs type checking for `openscad-parser`.
+  - *When to use*: To ensure type safety in a specific TypeScript package.
+  - *Example*: `pnpm check:parser`
+
+### Utility Commands
+
+- **`pnpm serve:demo`**: Builds and serves the `openscad-demo` application.
+  - *When to use*: To view the live demo application in a browser.
+  - *Example*: `pnpm serve:demo`
+
+- **`pnpm graph`**: Opens a web interface to view the project's dependency graph using Nx.
+  - *When to use*: To understand the relationships and dependencies between packages.
+  - *Example*: `pnpm graph`
+
+- **`pnpm clean`**: Removes all `node_modules` directories and build artifacts (`dist` folders) from the monorepo.
+  - *When to use*: To perform a clean build or resolve caching issues.
+  - *Example*: `pnpm clean`
+
+- **`pnpm reset`**: Runs `pnpm clean` and then reinstalls all dependencies using `pnpm install`.
+  - *When to use*: For a complete reset of the development environment.
+  - *Example*: `pnpm reset`
+
+- **`pnpm parse`**: Parse an OpenSCAD file using tree-sitter (plain text output).
+- **`pnpm playground`**: Launch tree-sitter playground for the grammar (plain text output).
+
+### Script Output Configuration
+
+**Important**: All nx scripts and build/test/lint commands now use `env-cmd -e plain` by default for consistent plain text output.
+
+#### Plain Text Output (Default)
+All build, test, lint, and typecheck commands use plain text output by default:
+- ✅ Clean, linear output without loading animations
+- ✅ Perfect for CI/CD environments and IDE integration
+- ✅ Consistent across all packages and commands
+- ✅ No need to remember `:plain` suffixes
+
+#### Interactive Mode
+Development and watch commands remain interactive for better development experience:
+- `dev`, `test:watch`, `serve` commands
+- Provides real-time feedback and user interaction
+- Better for active development workflows
+
+#### Usage Examples
+
+**Development Workflow:**
+```bash
+# Build with plain text output (default)
+pnpm build:parser
+
+# Test with plain text output (default)
+pnpm test:parser
+
+# Lint with plain text output (default)
+pnpm lint:parser
+
+# Development with interactive mode
+pnpm dev:parser
+```
+
+**CI/CD Workflow:**
+```bash
+# All commands use plain text output by default
+pnpm build
+pnpm test
+pnpm lint
+pnpm typecheck
+```
+
+## Coding Best Practices
+
+### General Principles
+- Implement changes incrementally with files under 500 lines
+- Follow TDD with small changes and avoid mocks in tests
+- No `any` types in TypeScript; use kebab-case for filenames
+- Apply Single Responsibility Principle (SRP)
+- Prioritize readability over clever code
+
+### TypeScript Best Practices
+- Use strict mode and explicit type annotations
+- Leverage advanced types (unions, intersections, generics)
+- Prefer interfaces for APIs and readonly for immutable data
+- Use type guards instead of type assertions
+- Utilize utility types and discriminated unions
+
+### Functional Programming
+- Write pure functions without side effects
+- Enforce immutability and use higher-order functions
+- Compose functions and use declarative programming
+- Handle nullable values with option/maybe types
+- Use Either/Result types for error handling
+
+### Error Handling
+- Use structured error handling with specific types
+- Provide meaningful error messages with context
+- Handle edge cases explicitly and validate input data
+- Use try/catch blocks only when necessary
+
+### Performance
+- Optimize for readability first, then performance
+- Profile to identify actual bottlenecks
+- Use appropriate data structures and memoization
+- Minimize DOM manipulations and optimize 3D operations
+
+## Documentation Best Practices
+- Add JSDoc comments to all code elements with descriptions and examples
+- Use `@example` tag and `@file` tag for module descriptions
+- Document why code works a certain way, not just what it does
+- Include architectural decisions, limitations, and edge cases
+- Use diagrams for complex relationships and "before/after" sections
+- Keep documentation close to code and provide thorough examples
+
+## Code Review Guidelines
+- Check adherence to standards, test coverage, and documentation
+- Look for security vulnerabilities and performance issues
+- Verify proper typing, error handling, and functional principles
+- Identify refactoring opportunities for better code quality
+- Provide constructive feedback focused on code, not developer
+
+## Continuous Integration
+- Ensure all code passes tests, linting, and type checking
+- Use feature branches and maintain clean commit history
+- Tag releases with semantic versioning
+- Implement feature flags for gradual rollout
+- Have monitoring and rollback strategies
+
+## Tree-Sitter Grammar Development
+
+### Pre-built vs Native Compilation
+
+**For most users and CI/CD**: The `tree-sitter-openscad` package ships with a pre-built WASM file that works out-of-the-box without requiring any native compilation toolchain.
+
+**For grammar developers**: If you need to modify the grammar or rebuild the parser from source, you'll need to install the native compilation toolchain.
+
+### Native Build Prerequisites
+
+#### Windows
+- **Visual Studio Build Tools** or **Visual Studio Community** with C++ development tools
+- **Python 3.x** (required by node-gyp)
+- **Node.js** (latest LTS version)
+- **PNPM** (v10.10.0 or later)
+
+#### macOS
+- **Xcode Command Line Tools**: `xcode-select --install`
+- **Python 3.x** (usually pre-installed)
+- **Node.js** (latest LTS version)
+- **PNPM** (v10.10.0 or later)
+
+#### Linux (Ubuntu/Debian)
+```bash
+sudo apt-get update
+sudo apt-get install build-essential python3 python3-dev
+```
+
+#### Linux (CentOS/RHEL/Fedora)
+```bash
+sudo yum groupinstall "Development Tools"
+sudo yum install python3 python3-devel
+```
+
+### Grammar Development Commands
+- **`pnpm build:grammar`**: Build grammar (requires tree-sitter CLI)
+- **`pnpm build:grammar:wasm`**: Build only WASM file (requires tree-sitter CLI)
+- **`pnpm build:grammar:native`**: Build native + WASM (requires full C++ toolchain)
+- **`pnpm test:grammar`**: Test grammar changes
+- **`pnpm parse examples/test.scad`**: Parse and visualize OpenSCAD files
+
+
+## Mandatory Workflows
+
+These workflows must never be skipped:
+
+### TDD Workflow
+1. **Understand Requirements**: Define goals and identify edge cases
+2. **Write Failing Test**: Create test for expected behavior
+3. **Verify Failure**: Confirm test fails for expected reason
+4. **Write Minimal Code**: Just enough to make test pass
+5. **Verify Pass**: Confirm implementation works
+6. **Refactor**: Improve code while maintaining behavior
+7. **Test Again**: Ensure refactoring didn't break anything
+8. **Document**: Add JSDoc comments with examples
+9. **Commit**: Include implementation and tests together
+
+### Monorepo Workflow
+1. **Identify Package**: Determine which package your change affects
+2. **Build Dependencies**: Ensure dependencies are built first (handled by Nx)
+3. **Make Changes**: Make your changes to the appropriate package
+4. **Run Tests**: Use package-specific test commands
+5. **Check Dependencies**: Ensure your changes don't break dependent packages
+6. **Update Documentation**: Update relevant documentation
+7. **Commit**: Include all related changes in a single commit
+
+### Refactoring Workflow
+1. **Identify Need**: Code smells, performance issues, technical debt
+2. **Write Tests**: Ensure adequate coverage before changes
+3. **Establish Baseline**: Verify all tests pass initially
+4. **Make Small Changes**: Focus on one improvement at a time
+5. **Run Tests**: Verify changes don't break functionality
+6. **Document**: Update documentation to reflect changes
+7. **Commit**: Use "REFACTOR:" prefix in commit message
+
+### Documentation Workflow
+1. **Identify Need**: New code, unclear docs, missing examples
+2. **Update JSDoc**: Add/update comments with examples
+3. **Update Module Docs**: Document purpose and architecture
+6. **Commit**: Use "DOCS:" prefix in commit message
+
+### Debugging Workflow
+1. **Reproduce Issue**: Create reliable reproduction steps
+2. **Isolate Problem**: Narrow down problematic code
+3. **Analyze Root Cause**: Determine why issue occurs
+4. **Create Failing Test**: Write test that reproduces issue
+5. **Fix Issue**: Implement minimal fix following TDD
+6. **Verify Fix**: Confirm test passes and issue is resolved
+7. **Document**: Explain issue and solution
+8. **Commit**: Use "FIX:" prefix in commit message
+
+### Tree-Sitter Grammar Debugging Workflow
+1. **Identify Syntax Issue**: Find problematic OpenSCAD syntax
+2. **Create Test Case**: Add a minimal example to the test corpus
+3. **Run Grammar Tests**: Use `pnpm test:grammar` to verify failure
+4. **Analyze Grammar**: Review grammar.js rules related to the issue
+5. **Modify Grammar**: Update grammar.js to handle the syntax correctly
+6. **Generate Parser**: Run `pnpm build:grammar:wasm` to rebuild the parser
+7. **Test Changes**: Run `pnpm test:grammar` to verify fix
+8. **Visualize Parse Tree**: Use `pnpm parse examples/test-case.scad` to inspect
+9. **Document Changes**: Update grammar documentation

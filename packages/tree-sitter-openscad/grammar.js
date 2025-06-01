@@ -115,17 +115,17 @@ module.exports = grammar({
     $._access_expressions,
     $._closing_paren_recovery,
     $._closing_bracket_recovery,
-    $._closing_brace_recovery,
+    $._closing_brace_recovery, // Re-added for block error recovery
     $._closing_paren_statement_recovery,
     $._closing_paren_list_recovery,
     $._parameter_recovery,
     $._parameter_value_recovery,
     $._comma_or_closing_paren,
-    $._block_missing_brace_recovery
+    // Removed: $._block_missing_brace_recovery
   ],
 
   rules: {
-    source_file: $ => repeat($.statement),
+    source_file: $ => repeat($.statement), // Reverted prec.right
 
     _literal: $ => choice(
       $.number,
@@ -205,7 +205,7 @@ module.exports = grammar({
       token.immediate(prec(-1, /[;,){}]/))
     ),
 
-    _closing_brace_recovery: $ => choice(
+    _closing_brace_recovery: $ => choice( // Re-added rule definition
       '}',
       token.immediate(prec(-1, /[^\s;]/))
     ),
@@ -237,11 +237,7 @@ module.exports = grammar({
       token.immediate(prec(-1, /[;{]/))
     ),
 
-    // Enhanced block statement error recovery helpers
-    _block_missing_brace_recovery: $ => choice(
-      '}',
-      token.immediate(prec(-2, /[^}]+/))
-    ),
+    // Removed: _block_missing_brace_recovery rule definition
 
     _value: $ => choice(
       $._literal,
@@ -264,7 +260,7 @@ module.exports = grammar({
     error_sentinel: $ => token(prec(-1, /[^\s]+/)),
     _error_recovery: $ => token(prec(-1, /[^;{}()\[\]\s]+/)),
 
-    statement: $ => choice(
+    statement: $ => choice( // Reverted prec.right
       $._declaration_statements,
       $._import_statements,
       $._assignment_statements,
@@ -396,16 +392,13 @@ module.exports = grammar({
     assign_assignment: $ => seq(
       field('name', $._identifier_or_special),
       '=',
-      field('value', $.expression)
+      field('value', $._value)
     ),
 
-    block: $ => seq(
+    block: $ => seq( // Reverted to original
       '{',
       repeat($.statement),
-      choice(
-        $._closing_brace_recovery,
-        $._block_missing_brace_recovery
-      )
+      $._closing_brace_recovery
     ),
 
     _module_instantiation_with_body: $ => seq(
@@ -660,7 +653,7 @@ module.exports = grammar({
     object_literal: $ => prec(1, seq(
       '{',
       optional(seq(commaSep1($.object_field), optional(','))),
-      $._closing_brace_recovery
+      $._closing_brace_recovery // Reverted to original
     )),
 
     object_field: $ => seq(

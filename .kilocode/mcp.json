@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "brave-search": {
+      "command": "C:\\Users\\luciano\\AppData\\Roaming\\npm\\mcp-server-brave-search.cmd",
+      "args": [],
+      "env": {
+        "BRAVE_API_KEY": "BSAH8polXnJcjkuqahyESIvJ8buDlCU"
+      }
+    },
+    "server-filesystem": {
+      "command": "C:\\Users\\luciano\\AppData\\Roaming\\npm\\mcp-server-filesystem.cmd",
+      "args": [
+        "C:\\Users\\luciano\\git\\openscad-tree-sitter-p1",
+        "C:\\Users\\luciano\\git\\openscad-tree-sitter"
+      ],
+      "env": {}
+    }
+  }
+}

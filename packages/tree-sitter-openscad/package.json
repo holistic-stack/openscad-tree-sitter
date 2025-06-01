@@ -31,7 +31,7 @@
     "build:wasm": "env-cmd -e plain tree-sitter generate && env-cmd -e plain tree-sitter build --wasm",
     "install": "node scripts/echo-install-message.js",
     "prebuildify": "env-cmd -e plain prebuildify --napi --strip",
-    "test": "env-cmd -e plain tree-sitter test",
+    "test": "env-cmd -e plain tree-sitter test test/corpus",
     "parse": "env-cmd -e plain tree-sitter parse",
     "playground": "env-cmd -e plain tree-sitter playground",
     "lint": "echo 'No linting configured for grammar package'"
