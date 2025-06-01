@@ -166,39 +166,24 @@ subset = points[0:1];
     (assignment_statement
       name: (identifier)
       value: (index_expression
-        array: (expression
-          (index_expression
-            array: (expression
-              (primary_expression
-                (identifier)))
-            index: (expression
-              (primary_expression
-                (number)))))
-        index: (expression
-          (primary_expression
-            (number))))))
+        array: (index_expression
+          array: (identifier)
+          index: (number))
+        index: (number))))
   (statement
     (assignment_statement
       name: (identifier)
       value: (index_expression
-        array: (expression
-          (primary_expression
-            (identifier)))
-        index: (expression
-          (primary_expression
-            (number))))))
+        array: (identifier)
+        index: (number))))
   (statement
     (assignment_statement
       name: (identifier)
       value: (index_expression
-        array: (expression
-          (primary_expression
-            (identifier)))
+        array: (identifier)
         index: (range_expression
-          start: (expression
-            (number))
-          end: (expression
-            (number)))))))
+          start: (number)
+          end: (number))))))
 
 ==================
 Special Variables
@@ -234,13 +219,10 @@ dist = $vpd;
         (arguments
           (argument
             (vector_expression
-              (expression
-                (binary_expression
-                  left: (primary_expression
-                    (special_variable))
-                  operator: (multiplication_operator)
-                  right: (primary_expression
-                    (number))))
+              (binary_expression
+                left: (special_variable)
+                operator: (multiplication_operator)
+                right: (number))
               (number)
               (number)))))
       (statement
@@ -356,13 +338,10 @@ b = (2 + 3;
     (assignment_statement
       name: (identifier)
       value: (parenthesized_expression
-        (expression
-          (binary_expression
-            left: (primary_expression
-              (number))
-            operator: (addition_operator)
-            right: (primary_expression
-              (number))))))))
+        (binary_expression
+          left: (number)
+          operator: (addition_operator)
+          right: (number))))))
 
 ==================
 Incomplete Expression
@@ -377,12 +356,9 @@ c = 1 + ;
     (assignment_statement
       name: (identifier)
       value: (binary_expression
-        left: (primary_expression
-          (number))
+        left: (number)
         operator: (addition_operator)
-        (error_sentinel)
-        right: (primary_expression
-          (MISSING identifier))))))
+        right: (MISSING identifier)))))
 
 ==================
 Unclosed String
@@ -423,8 +399,7 @@ precise = 3.14159265359;
       name: (identifier)
       value: (unary_expression
         operator: (unary_minus_operator)
-        operand: (primary_expression
-          (number)))))
+        operand: (number))))
   (statement
     (assignment_statement
       name: (identifier)
