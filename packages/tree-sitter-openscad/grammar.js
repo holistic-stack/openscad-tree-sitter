@@ -493,18 +493,22 @@ module.exports = grammar({
         seq(
           'let',
           '(',
-          commaSep1($.let_clause),
+          commaSep1($.let_assignment),
           choice(
             ')',
             // Error recovery for missing closing parenthesis
             prec(-1, token.immediate(/[;{]/))  // Recover at semicolon or opening brace
           ),
-          $._value
+          field('body', $._value)
         )
       ),
 
-    let_clause: ($) =>
-      seq($.identifier, '=', $._value),
+    let_assignment: ($) =>
+      seq(
+        field('name', $.identifier),
+        '=',
+        field('value', $._value)
+      ),
 
     range_expression: ($) =>
       choice(
@@ -587,8 +591,24 @@ module.exports = grammar({
 
     string: ($) =>
       choice(
-        seq('"', optional(/[^"]*/), '"'),
-        seq("'", optional(/[^']*/), "'")
+        // Double-quoted strings with escape sequence support
+        seq(
+          '"',
+          repeat(choice(
+            /[^"\\]+/,  // Regular characters (not quote or backslash)
+            /\\./       // Escape sequences (backslash followed by any character)
+          )),
+          '"'
+        ),
+        // Single-quoted strings with escape sequence support
+        seq(
+          "'",
+          repeat(choice(
+            /[^'\\]+/,  // Regular characters (not quote or backslash)
+            /\\./       // Escape sequences (backslash followed by any character)
+          )),
+          "'"
+        )
       ),
 
     angle_bracket_string: ($) => seq('<', /[^>]*/, '>'),
