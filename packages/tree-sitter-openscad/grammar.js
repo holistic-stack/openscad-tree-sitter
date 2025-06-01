@@ -113,10 +113,16 @@ module.exports = grammar({
     $._comma_or_closing_paren,
     // Removed: $._block_missing_brace_recovery
   ],
-
+  supertypes: $ => [
+    $.statement,
+    $.expression
+  ],
   rules: {
     source_file: $ => repeat($.statement), // Reverted prec.right
-
+    expression: $ => choice(
+      $._simple_expressions,
+      $._complex_expressions
+    ),
     _literal: $ => choice(
       $.number,
       $.string,
@@ -124,7 +130,16 @@ module.exports = grammar({
       $.identifier,
       $.special_variable
     ),
-
+    // Primary expression for direct literal access and other atomic constructs
+    primary_expression: $ => choice(
+      $._literal,
+      $.undef,
+      $.range_expression,
+      $.vector_expression,
+      $.array_literal,
+      $.list_comprehension,
+      $.object_literal
+    ),
     _identifier_or_special: $ => choice(
       $.identifier,
       $.special_variable
@@ -179,6 +194,12 @@ module.exports = grammar({
       $.call_expression,
       $.index_expression,
       $.member_expression
+    ),
+
+    // Operand restriction helper for unary and binary expressions
+    _operand_restricted: $ => choice(
+      $.primary_expression,
+      $.parenthesized_expression
     ),
 
     // Closing delimiter recovery helpers for better error handling
@@ -458,14 +479,12 @@ module.exports = grammar({
       field('range', choice(prec(3, $.range_expression), $.expression))
     )),
 
-    range_expression: $ => seq(
-      '[',
-      choice(
-        seq(field('start', $._range_value), ':', field('end', $._range_value)),
-        seq(field('start', $._range_value), ':', field('step', $._range_value), ':', field('end', $._range_value))
-      ),
-      $._closing_bracket_recovery
-    ),
+    range_expression: $ => prec.left('relational', seq(
+      field('start', $._operand_restricted),
+      ':',
+      field('end', $._operand_restricted),
+      optional(seq(':', field('step', $._operand_restricted)))
+    )),
 
     _range_value: $ => choice(
       prec(5, $.number),
@@ -474,27 +493,30 @@ module.exports = grammar({
       prec(1, $.expression)
     ),
 
-    echo_statement: $ => prec(20, seq(
+    echo_statement: $ => seq(
       'echo',
       '(',
-      optional($.arguments),
-      $._closing_paren_statement_recovery,
+      optional(commaSep1($.expression)),
+      $._closing_paren_recovery,
       optional(';')
-    )),
+    ),
 
     assert_statement: $ => seq(
       'assert',
       '(',
-      $.expression,
-      optional(seq(',', $.expression)),
-      $._closing_paren_statement_recovery,
+      commaSep1($.expression),
+      $._closing_paren_recovery,
       optional(';')
     ),
 
-    expression: $ => choice(
-      $._complex_expressions,
-      $._simple_expressions
-    ),
+    // Conditional (ternary) expression
+    conditional_expression: $ => prec.right('conditional_exp_ternary', seq(
+      field('condition', $.expression),
+      '?',
+      field('consequence', $.expression),
+      ':',
+      field('alternative', $.expression)
+    )),
 
     binary_expression: $ => choice(
       prec.left('logical_or', seq(field('left', $._operand_restricted), field('operator', alias('||', $.logical_or_operator)), field('right', $._operand_restricted))),
@@ -511,16 +533,6 @@ module.exports = grammar({
       prec.left('multiplicative', seq(field('left', $._operand_restricted), field('operator', alias('/', $.division_operator)), field('right', $._operand_restricted))),
       prec.left('multiplicative', seq(field('left', $._operand_restricted), field('operator', alias('%', $.modulo_operator)), field('right', $._operand_restricted))),
       prec.right('exponentiation', seq(field('left', $._operand_restricted), field('operator', alias('^', $.exponentiation_operator)), field('right', $._operand_restricted)))
-    ),
-
-    _operand_restricted: $ => choice(
-      $.primary_expression,
-      $.parenthesized_expression,
-      prec('call_member_index', $.call_expression),
-      prec('call_member_index', $.member_expression),
-      prec('call_member_index', $.index_expression),
-      $.let_expression,
-      $.conditional_expression
     ),
 
     unary_expression: $ => choice(
@@ -549,28 +561,6 @@ module.exports = grammar({
       '.',
       field('property', $.identifier)
     )),
-
-    conditional_expression: $ => prec.right('conditional_exp_ternary', seq(
-      field('condition', $.expression),
-      '?',
-      field('consequence', $.expression),
-      ':',
-      field('alternative', $.expression)
-    )),
-
-    primary_expression: $ => choice(
-      $.special_variable,
-      $.identifier,
-      $.number,
-      $.string,
-      $.boolean,
-      $.undef,
-      $.range_expression,
-      $.vector_expression,
-      $.array_literal,
-      $.list_comprehension,
-      $.object_literal
-    ),
 
     vector_expression: $ => prec(10, seq('[',
       optional(commaSep1($._vector_element)),
