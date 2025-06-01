@@ -215,14 +215,10 @@ z = x + y;
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression
-        (binary_expression
-          left: (expression
-            (primary_expression
-              (identifier)))
-          right: (expression
-            (primary_expression
-              (identifier))))))))
+      value: (binary_expression
+        left: (identifier)
+        operator: (addition_operator)
+        right: (identifier)))))
 
 ==================
 Comments in Function Definitions
@@ -242,41 +238,25 @@ function factorial(n) = // Recursive factorial
           (parameter_declaration
             (identifier))))
       (comment)
-      value: (expression
-        (conditional_expression
-          condition: (expression
-            (binary_expression
-              left: (expression
-                (primary_expression
-                  (identifier)))
-              right: (expression
-                (primary_expression
-                  (number)))))
-          consequence: (expression
-            (primary_expression
-              (number)))
-          alternative: (expression
-            (binary_expression
-              left: (expression
-                (primary_expression
-                  (identifier)))
-              right: (expression
-                (call_expression
-                  function: (expression
-                    (primary_expression
-                      (identifier)))
-                  arguments: (argument_list
-                    (arguments
-                      (argument
-                        (expression
-                          (binary_expression
-                            left: (expression
-                              (primary_expression
-                                (identifier)))
-                            right: (expression
-                              (primary_expression
-                                (number)))))))))))
-      (comment)))
+      value: (conditional_expression
+        condition: (binary_expression
+          left: (identifier)
+          operator: (less_equal_operator)
+          right: (number))
+        consequence: (number)
+        alternative: (binary_expression
+          left: (identifier)
+          operator: (multiplication_operator)
+          right: (call_expression
+            function: (identifier)
+            arguments: (argument_list
+              (arguments
+                (argument
+                  (binary_expression
+                    left: (identifier)
+                    operator: (subtraction_operator)
+                    right: (number)))))))
+          (comment))
 
 ==================
 Comments in Complex Expressions
@@ -291,30 +271,20 @@ result = (x + y) * // First part
   (statement
     (assignment_statement
       name: (identifier)
-      value: (expression
-        (binary_expression
-          left: (expression
-            (parenthesized_expression
-              (expression
-                (binary_expression
-                  left: (expression
-                    (primary_expression
-                      (identifier)))
-                  right: (expression
-                    (primary_expression
-                      (identifier)))))))
-          (comment)
-          right: (expression
-            (parenthesized_expression
-              (expression
-                (binary_expression
-                  left: (expression
-                    (primary_expression
-                      (identifier)))
-                  right: (expression
-                    (primary_expression
-                      (identifier)))))))
-          (comment))))))
+      value: (binary_expression
+        left: (parenthesized_expression
+          (binary_expression
+            left: (identifier)
+            operator: (addition_operator)
+            right: (identifier)))
+        operator: (multiplication_operator)
+        (comment)
+        right: (parenthesized_expression
+          (binary_expression
+            left: (identifier)
+            operator: (subtraction_operator)
+            right: (identifier))))
+          (comment))))
 
 ==================
 Documentation Comments

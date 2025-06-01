@@ -85,9 +85,8 @@ exponential = exp(1);
           (arguments
             (argument
               (unary_expression
-                operand: (expression
-                  (primary_expression
-                    (number))))))))))
+                operator: (unary_minus_operator)
+                operand: (number))))))))
   (statement
     (assignment_statement
       name: (identifier)
@@ -144,9 +143,8 @@ exponential = exp(1);
           (arguments
             (argument
               (unary_expression
-                operand: (expression
-                  (primary_expression
-                    (number))))))))))
+                operator: (unary_minus_operator)
+                operand: (number))))))))
   (statement
     (assignment_statement
       name: (identifier)
@@ -434,31 +432,22 @@ assert(is_num(value), str("Expected number, got: ", value));
 (source_file
   (statement
     (assert_statement
-      condition: (expression
-        (binary_expression
-          left: (expression
-            (primary_expression
-              (identifier)))
-          right: (expression
-            (primary_expression
-              (number)))))
+      condition: (binary_expression
+        left: (identifier)
+        operator: (greater_than_operator)
+        right: (number))
       message: (string)))
   (statement
     (assert_statement
-      condition: (expression
-        (binary_expression
-          left: (expression
-            (call_expression
-              function: (expression
-                (primary_expression
-                  (identifier)))
-              arguments: (argument_list
-                (arguments
-                  (argument
-                    (identifier))))))
-          right: (expression
-            (primary_expression
-              (number)))))))
+      condition: (binary_expression
+        left: (call_expression
+          function: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument
+                (identifier)))))
+        operator: (equality_operator)
+        right: (number))))
   (statement
     (assert_statement
       condition: (call_expression

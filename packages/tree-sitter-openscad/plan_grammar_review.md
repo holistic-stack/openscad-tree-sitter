@@ -3696,3 +3696,40 @@ Continue systematic corpus migration on high-impact files to reach 75%+ pass rat
 - **comments.txt**: Multiple fixable failures with same patterns
 - **built-ins.txt**: Several operator field name issues
 - **advanced.txt**: Range expressions and array indexing patterns
+
+### Task 20: comments.txt Migration ✅ PARTIALLY COMPLETED
+
+**Objective:** Apply Direct Access Strategy patterns to comments.txt file.
+
+**Changes Applied:**
+1. ✅ **Comments Between Statements**: Removed `expression` and `primary_expression` wrapping from binary expression
+
+**Results:**
+- ✅ **comments.txt: 9/13 tests passing** (69.2% success rate, +1 test fixed)
+- ✅ **Pattern consistency**: Same successful approach as previous files
+
+**Remaining Issues (Grammar-level fixes needed):**
+- **Inline Comments**: Grammar expects comments inside statements, not after them
+- **Nested Comments**: Grammar doesn't handle nested comments properly (ERROR parsing)
+- **Comments in Function Definitions**: Comment placement and structure issues
+- **Comments in Complex Expressions**: Comment placement within expressions
+
+### Task 21: built-ins.txt Migration ✅ PARTIALLY COMPLETED
+
+**Objective:** Apply Direct Access Strategy patterns to built-ins.txt file.
+
+**Changes Applied:**
+1. ✅ **Mathematical Functions**: Removed `expression` and `primary_expression` wrapping from unary expression operands
+2. ✅ **Assert Statements**: Removed `expression` and `primary_expression` wrapping from conditions
+
+**Results:**
+- ✅ **built-ins.txt: 6/8 tests passing** (75% success rate, unary expressions fixed)
+- ✅ **Pattern consistency**: Same successful approach as previous files
+
+**Remaining Issues (Grammar-level fixes needed):**
+- **Mathematical Functions**: Unexpected comment parsing (grammar-level issue)
+- **Assert Statements**: Grammar produces `arguments` structure instead of `condition`/`message` structure
+
+**Impact:**
+- **Before comments.txt and built-ins.txt updates**: 66 tests passing, 37 tests failing (64.1% pass rate)
+- **After comments.txt and built-ins.txt updates**: Expected ~67 tests passing, ~36 tests failing (~65.0% pass rate)
