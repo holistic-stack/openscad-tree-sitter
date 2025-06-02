@@ -13,15 +13,23 @@
 **Use Desktop Commander MCP for all file operations and terminal commands:**
 
 ```bash
-# Essential commands
-execute_command({ "command": "pnpm build" })
-execute_command({ "command": "pnpm test" })
+# IMPORTANT: Always prepend Set-Location to commands
+execute_command({ "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; pnpm build" })
+execute_command({ "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; pnpm test" })
+execute_command({ "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx test tree-sitter-openscad" })
+
+# File operations (no Set-Location needed)
 read_file({ "path": "src/file.ts" })
 write_file({ "path": "src/file.ts", "content": "..." })
 edit_block({ "edits": "file.ts\n<<<<<<< SEARCH\nold code\n=======\nnew code\n>>>>>>> REPLACE" })
 search_files({ "pattern": "*.ts" })
 search_code({ "pattern": "function name", "path": "src/" })
 ```
+
+**CRITICAL: Desktop Commander Working Directory**
+⚠️ **ALWAYS prepend** `Set-Location "C:\Users\luciano\git\openscad-tree-sitter";` to ANY command
+⚠️ Desktop Commander does NOT start in the project directory
+⚠️ **Example:** `Set-Location "C:\Users\luciano\git\openscad-tree-sitter"; nx test tree-sitter-openscad`
 
 **Key tools:**
 - `execute_command` - Run terminal commands
@@ -33,6 +41,60 @@ search_code({ "pattern": "function name", "path": "src/" })
 - `list_directory` - List directory contents
 - `create_directory` - Create directories
 </mcp_instructions>
+
+## FALLBACK: @modelcontextprotocol/server-filesystem
+
+<filesystem_fallback>
+**If Desktop Commander MCP fails, use the official filesystem server:**
+
+```bash
+# Install and use filesystem server
+npx @modelcontextprotocol/server-filesystem /path/to/workspace
+
+# Available tools:
+read_file({ "path": "src/file.ts" })
+write_file({ "path": "src/file.ts", "content": "..." })
+create_directory({ "path": "src/new-folder" })
+list_directory({ "path": "src/" })
+move_file({ "source": "old.ts", "destination": "new.ts" })
+search_files({ "pattern": "*.ts", "path": "src/" })
+get_file_info({ "path": "src/file.ts" })
+```
+
+**When to use:**
+- Desktop Commander is unavailable or not working
+- Need secure file operations with access controls
+- Working in restricted environments
+- Require standardized MCP filesystem operations
+</filesystem_fallback>
+
+## FINAL FALLBACK: When Both MCP Tools Fail
+
+<final_fallback>
+**If BOTH Desktop Commander MCP AND Filesystem Server fail:**
+
+⚠️ **DO NOT RETRY** - Stop attempting to use MCP file tools
+⚠️ **DO NOT REPEAT** - Avoid calling the same failed tools again
+
+**Instead, inform the user:**
+```
+Both MCP file operation tools have failed:
+1. Desktop Commander MCP - [error details]
+2. @modelcontextprotocol/server-filesystem - [error details]
+
+I cannot perform file operations directly. Please:
+- Check your MCP server configuration
+- Verify tool permissions and access
+- Manually perform the required file operations
+- Or provide file contents directly in the chat
+```
+
+**Alternative approaches:**
+- Ask user to copy/paste file contents
+- Request manual file operations
+- Suggest using IDE or text editor directly
+- Recommend checking MCP server setup
+</final_fallback>
 
 ## CRITICAL REQUIREMENTS - NEVER SKIP:
 
