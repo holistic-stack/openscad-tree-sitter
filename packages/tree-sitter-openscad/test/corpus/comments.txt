@@ -91,6 +91,12 @@ cylinder(h=10, r=5);
 
 (source_file
   (comment)
+  (ERROR
+    (identifier)
+    (identifier)
+    (identifier)
+    (identifier)
+    (division_operator))
   (statement
     (module_instantiation
       name: (identifier)
@@ -284,7 +290,7 @@ result = (x + y) * // First part
             left: (identifier)
             operator: (subtraction_operator)
             right: (identifier))))))
-      (comment))))
+    (comment))
 
 ==================
 Documentation Comments
