@@ -655,6 +655,44 @@ value = assert(x > 0, "x must be positive") x * 2;
           right: (number))))))
 
 ==================
+Trailing Commas in Vectors
+==================
+
+simple_trailing = [1, 2, 3,];
+nested_trailing = [[1, 2,], [3, 4,],];
+mixed_trailing = [1, [2, 3,], 4,];
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (vector_expression
+        (number)
+        (number)
+        (number))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (vector_expression
+        (vector_expression
+          (number)
+          (number))
+        (vector_expression
+          (number)
+          (number)))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (vector_expression
+        (number)
+        (vector_expression
+          (number)
+          (number))
+        (number)))))
+
+==================
 Decimal Numbers Starting with Dot
 ==================
 

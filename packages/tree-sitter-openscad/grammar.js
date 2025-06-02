@@ -36,9 +36,9 @@
  * 2024-XX-XX - Initial grammar foundation and incremental feature building
  */
 
-// Helper function for comma-separated lists
+// Helper function for comma-separated lists with optional trailing comma
 function commaSep1(rule) {
-  return seq(rule, repeat(seq(',', rule)));
+  return seq(rule, repeat(seq(',', rule)), optional(','));
 }
 
 // Helper function for optional comma-separated lists
