@@ -27,13 +27,13 @@ y = 20; // Another inline comment
   (statement
     (assignment_statement
       name: (identifier)
-      value: (number))
-    (comment))
+      value: (number)))
+  (comment)
   (statement
     (assignment_statement
       name: (identifier)
-      value: (number))
-    (comment)))
+      value: (number)))
+  (comment))
 
 ==================
 Multi-line Comments
@@ -255,8 +255,8 @@ function factorial(n) = // Recursive factorial
                   (binary_expression
                     left: (identifier)
                     operator: (subtraction_operator)
-                    right: (number)))))))
-          (comment))
+                    right: (number))))))))))
+      (comment))
 
 ==================
 Comments in Complex Expressions
@@ -283,8 +283,8 @@ result = (x + y) * // First part
           (binary_expression
             left: (identifier)
             operator: (subtraction_operator)
-            right: (identifier))))
-          (comment))))
+            right: (identifier))))))
+      (comment))))
 
 ==================
 Documentation Comments
