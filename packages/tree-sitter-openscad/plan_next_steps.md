@@ -2186,3 +2186,1720 @@ console.log('\n' + checklist.join('\n'));
 - User engagement and feature adoption rates
 
 This comprehensive risk assessment provides a solid foundation for implementing web tree-sitter with the OpenSCAD grammar while minimizing potential issues and ensuring production readiness.
+
+---
+
+### Priority 2 (P2): Advanced Editor Integration and Developer Experience
+
+#### Task 2.1: VS Code Extension Development
+
+##### 2.1.a: Core Extension Architecture
+
+**Implementation Timeline**: 3-4 weeks
+**Difficulty**: Medium-High
+**Dependencies**: P1 tasks completion
+
+```typescript
+// src/extension.ts
+import * as vscode from 'vscode';
+import { OpenSCADLanguageClient } from './languageClient';
+import { OpenSCADWebViewProvider } from './webviewProvider';
+import { OpenSCADTreeDataProvider } from './treeProvider';
+
+export class OpenSCADExtension {
+    private languageClient: OpenSCADLanguageClient;
+    private webviewProvider: OpenSCADWebViewProvider;
+    private treeProvider: OpenSCADTreeDataProvider;
+    private context: vscode.ExtensionContext;
+
+    constructor(context: vscode.ExtensionContext) {
+        this.context = context;
+    }
+
+    async activate(): Promise<void> {
+        // Initialize language client with web tree-sitter
+        this.languageClient = new OpenSCADLanguageClient(this.context);
+        await this.languageClient.start();
+
+        // Register webview provider for 3D preview
+        this.webviewProvider = new OpenSCADWebViewProvider(this.context);
+        this.context.subscriptions.push(
+            vscode.window.registerWebviewViewProvider(
+                'openscadPreview',
+                this.webviewProvider
+            )
+        );
+
+        // Register tree data provider for outline view
+        this.treeProvider = new OpenSCADTreeDataProvider();
+        this.context.subscriptions.push(
+            vscode.window.createTreeView('openscadOutline', {
+                treeDataProvider: this.treeProvider
+            })
+        );
+
+        // Register commands
+        this.registerCommands();
+
+        // Setup event handlers
+        this.setupEventHandlers();
+    }
+
+    private registerCommands(): void {
+        const commands = [
+            vscode.commands.registerCommand('openscad.parse', this.parseCurrentFile.bind(this)),
+            vscode.commands.registerCommand('openscad.preview', this.showPreview.bind(this)),
+            vscode.commands.registerCommand('openscad.format', this.formatDocument.bind(this)),
+            vscode.commands.registerCommand('openscad.refactor.extractModule', this.extractModule.bind(this)),
+            vscode.commands.registerCommand('openscad.analyze.complexity', this.analyzeComplexity.bind(this))
+        ];
+
+        this.context.subscriptions.push(...commands);
+    }
+
+    private setupEventHandlers(): void {
+        // Document change events
+        vscode.workspace.onDidChangeTextDocument(async (event) => {
+            if (event.document.languageId === 'openscad') {
+                await this.languageClient.updateDocument(event.document);
+                this.treeProvider.refresh(event.document);
+            }
+        });
+
+        // Active editor change events
+        vscode.window.onDidChangeActiveTextEditor((editor) => {
+            if (editor?.document.languageId === 'openscad') {
+                this.webviewProvider.updatePreview(editor.document);
+            }
+        });
+    }
+
+    private async parseCurrentFile(): Promise<void> {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor || editor.document.languageId !== 'openscad') {
+            vscode.window.showErrorMessage('No OpenSCAD file is currently open');
+            return;
+        }
+
+        try {
+            const parseResult = await this.languageClient.parseDocument(editor.document);
+            vscode.window.showInformationMessage(`Parsed successfully: ${parseResult.nodeCount} nodes`);
+        } catch (error) {
+            vscode.window.showErrorMessage(`Parse error: ${error.message}`);
+        }
+    }
+
+    deactivate(): void {
+        this.languageClient?.stop();
+    }
+}
+```
+
+##### 2.1.b: Language Client Integration
+
+```typescript
+// src/languageClient.ts
+import * as vscode from 'vscode';
+import Parser from 'web-tree-sitter';
+
+export class OpenSCADLanguageClient {
+    private parser: Parser;
+    private language: Parser.Language;
+    private diagnosticCollection: vscode.DiagnosticCollection;
+
+    constructor(private context: vscode.ExtensionContext) {
+        this.diagnosticCollection = vscode.languages.createDiagnosticCollection('openscad');
+        this.context.subscriptions.push(this.diagnosticCollection);
+    }
+
+    async start(): Promise<void> {
+        // Initialize web tree-sitter
+        await Parser.init();
+        this.parser = new Parser();
+        
+        // Load OpenSCAD language
+        const wasmPath = vscode.Uri.joinPath(
+            this.context.extensionUri,
+            'dist',
+            'tree-sitter-openscad.wasm'
+        );
+        
+        this.language = await Parser.Language.load(wasmPath.fsPath);
+        this.parser.setLanguage(this.language);
+
+        // Register language features
+        this.registerLanguageFeatures();
+    }
+
+    private registerLanguageFeatures(): void {
+        // Completion provider
+        this.context.subscriptions.push(
+            vscode.languages.registerCompletionItemProvider(
+                'openscad',
+                new OpenSCADCompletionProvider(this.parser, this.language),
+                '.'
+            )
+        );
+
+        // Hover provider
+        this.context.subscriptions.push(
+            vscode.languages.registerHoverProvider(
+                'openscad',
+                new OpenSCADHoverProvider(this.parser, this.language)
+            )
+        );
+
+        // Definition provider
+        this.context.subscriptions.push(
+            vscode.languages.registerDefinitionProvider(
+                'openscad',
+                new OpenSCADDefinitionProvider(this.parser, this.language)
+            )
+        );
+
+        // Document symbol provider
+        this.context.subscriptions.push(
+            vscode.languages.registerDocumentSymbolProvider(
+                'openscad',
+                new OpenSCADSymbolProvider(this.parser, this.language)
+            )
+        );
+    }
+
+    async updateDocument(document: vscode.TextDocument): Promise<void> {
+        const tree = this.parser.parse(document.getText());
+        const diagnostics = this.generateDiagnostics(tree, document);
+        this.diagnosticCollection.set(document.uri, diagnostics);
+    }
+
+    async parseDocument(document: vscode.TextDocument): Promise<{ tree: Parser.Tree; nodeCount: number }> {
+        const tree = this.parser.parse(document.getText());
+        return {
+            tree,
+            nodeCount: this.countNodes(tree.rootNode)
+        };
+    }
+
+    private countNodes(node: Parser.SyntaxNode): number {
+        let count = 1;
+        for (const child of node.children) {
+            count += this.countNodes(child);
+        }
+        return count;
+    }
+
+    stop(): void {
+        this.diagnosticCollection.clear();
+    }
+}
+```
+
+#### Task 2.2: Syntax Highlighting and Theme Support
+
+##### 2.2.a: TextMate Grammar Enhancement
+
+**Implementation Timeline**: 2-3 weeks
+**Difficulty**: Medium
+
+```json
+{
+  "name": "OpenSCAD",
+  "scopeName": "source.openscad",
+  "fileTypes": ["scad"],
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#functions"
+    },
+    {
+      "include": "#modules"
+    },
+    {
+      "include": "#variables"
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#punctuation"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.openscad",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.openscad",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.openscad",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.openscad",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.openscad",
+          "match": "\\b(if|else|for|intersection_for|let|assign)\\b"
+        },
+        {
+          "name": "keyword.other.openscad",
+          "match": "\\b(module|function|include|use)\\b"
+        },
+        {
+          "name": "keyword.operator.logical.openscad",
+          "match": "\\b(and|or|not)\\b|&&|\\|\\||!"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "entity.name.function.builtin.openscad",
+          "match": "\\b(abs|acos|asin|atan|atan2|ceil|cos|cross|exp|floor|ln|log|max|min|norm|pow|rands|round|sign|sin|sqrt|tan)\\b"
+        },
+        {
+          "name": "entity.name.function.geometric.openscad",
+          "match": "\\b(cube|sphere|cylinder|polyhedron|square|circle|polygon|text)\\b"
+        },
+        {
+          "name": "entity.name.function.transformation.openscad",
+          "match": "\\b(translate|rotate|scale|resize|mirror|multmatrix|color|hull|minkowski)\\b"
+        },
+        {
+          "name": "entity.name.function.boolean.openscad",
+          "match": "\\b(union|difference|intersection)\\b"
+        }
+      ]
+    },
+    "modules": {
+      "patterns": [
+        {
+          "name": "entity.name.function.user-defined.openscad",
+          "match": "\\b([a-zA-Z_][a-zA-Z0-9_]*)\\s*(?=\\()"
+        }
+      ]
+    },
+    "variables": {
+      "patterns": [
+        {
+          "name": "variable.parameter.openscad",
+          "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\s*(?==)"
+        },
+        {
+          "name": "variable.other.openscad",
+          "match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.float.openscad",
+          "match": "\\b\\d+\\.\\d*([eE][+-]?\\d+)?\\b"
+        },
+        {
+          "name": "constant.numeric.integer.openscad",
+          "match": "\\b\\d+\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.arithmetic.openscad",
+          "match": "\\+|\\-|\\*|\\/|%|\\^"
+        },
+        {
+          "name": "keyword.operator.comparison.openscad",
+          "match": "==|!=|<|>|<=|>="
+        },
+        {
+          "name": "keyword.operator.assignment.openscad",
+          "match": "="
+        }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "name": "punctuation.definition.parameters.begin.openscad",
+          "match": "\\("
+        },
+        {
+          "name": "punctuation.definition.parameters.end.openscad",
+          "match": "\\)"
+        },
+        {
+          "name": "punctuation.definition.block.begin.openscad",
+          "match": "\\{"
+        },
+        {
+          "name": "punctuation.definition.block.end.openscad",
+          "match": "\\}"
+        },
+        {
+          "name": "punctuation.separator.comma.openscad",
+          "match": ","
+        },
+        {
+          "name": "punctuation.terminator.statement.openscad",
+          "match": ";"
+        }
+      ]
+    }
+  }
+}
+```
+
+##### 2.2.b: Semantic Token Provider
+
+```typescript
+// src/semanticTokenProvider.ts
+import * as vscode from 'vscode';
+import Parser from 'web-tree-sitter';
+
+export class OpenSCADSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
+    private parser: Parser;
+    private language: Parser.Language;
+
+    constructor(parser: Parser, language: Parser.Language) {
+        this.parser = parser;
+        this.language = language;
+    }
+
+    async provideDocumentSemanticTokens(
+        document: vscode.TextDocument,
+        token: vscode.CancellationToken
+    ): Promise<vscode.SemanticTokens> {
+        const tree = this.parser.parse(document.getText());
+        const builder = new vscode.SemanticTokensBuilder();
+
+        this.traverse(tree.rootNode, builder, document);
+
+        return builder.build();
+    }
+
+    private traverse(node: Parser.SyntaxNode, builder: vscode.SemanticTokensBuilder, document: vscode.TextDocument): void {
+        // Map node types to semantic token types
+        const tokenTypeMap: Record<string, string> = {
+            'module_definition': 'function',
+            'function_definition': 'function',
+            'function_call': 'function',
+            'module_call': 'function',
+            'variable_assignment': 'variable',
+            'identifier': 'variable',
+            'number': 'number',
+            'string': 'string',
+            'comment': 'comment',
+            'boolean_operator': 'operator',
+            'arithmetic_operator': 'operator',
+            'comparison_operator': 'operator'
+        };
+
+        const tokenType = tokenTypeMap[node.type];
+        if (tokenType) {
+            const startPos = document.positionAt(node.startIndex);
+            const length = node.endIndex - node.startIndex;
+            builder.push(startPos.line, startPos.character, length, this.getTokenTypeIndex(tokenType));
+        }
+
+        for (const child of node.children) {
+            this.traverse(child, builder, document);
+        }
+    }
+
+    private getTokenTypeIndex(tokenType: string): number {
+        const legend = [
+            'namespace', 'type', 'class', 'enum', 'interface', 'struct', 'typeParameter',
+            'parameter', 'variable', 'property', 'enumMember', 'event', 'function',
+            'method', 'macro', 'keyword', 'modifier', 'comment', 'string', 'number',
+            'regexp', 'operator'
+        ];
+        return legend.indexOf(tokenType) || 0;
+    }
+}
+```
+
+#### Task 2.3: Code Formatting and Linting Integration
+
+##### 2.3.a: OpenSCAD Formatter Implementation
+
+**Implementation Timeline**: 2-3 weeks
+**Difficulty**: Medium-High
+
+```typescript
+// src/formatter.ts
+import Parser from 'web-tree-sitter';
+
+export interface FormattingOptions {
+    tabSize: number;
+    insertSpaces: boolean;
+    trimTrailingWhitespace: boolean;
+    insertFinalNewline: boolean;
+    maxLineLength: number;
+}
+
+export class OpenSCADFormatter {
+    private parser: Parser;
+    private language: Parser.Language;
+
+    constructor(parser: Parser, language: Parser.Language) {
+        this.parser = parser;
+        this.language = language;
+    }
+
+    formatDocument(text: string, options: FormattingOptions): string {
+        const tree = this.parser.parse(text);
+        const formatted = this.formatNode(tree.rootNode, 0, options);
+        
+        if (options.trimTrailingWhitespace) {
+            return this.trimTrailingWhitespace(formatted);
+        }
+        
+        return formatted;
+    }
+
+    private formatNode(node: Parser.SyntaxNode, indentLevel: number, options: FormattingOptions): string {
+        const indent = this.getIndent(indentLevel, options);
+        let result = '';
+
+        switch (node.type) {
+            case 'source_file':
+                return this.formatSourceFile(node, indentLevel, options);
+            
+            case 'module_definition':
+                return this.formatModuleDefinition(node, indentLevel, options);
+            
+            case 'function_definition':
+                return this.formatFunctionDefinition(node, indentLevel, options);
+            
+            case 'module_call':
+                return this.formatModuleCall(node, indentLevel, options);
+            
+            case 'block_statement':
+                return this.formatBlockStatement(node, indentLevel, options);
+            
+            case 'assignment_statement':
+                return this.formatAssignmentStatement(node, indentLevel, options);
+            
+            case 'expression_statement':
+                return this.formatExpressionStatement(node, indentLevel, options);
+            
+            default:
+                // Default formatting for unspecified node types
+                return this.formatGenericNode(node, indentLevel, options);
+        }
+    }
+
+    private formatSourceFile(node: Parser.SyntaxNode, indentLevel: number, options: FormattingOptions): string {
+        const parts: string[] = [];
+        
+        for (const child of node.children) {
+            const formatted = this.formatNode(child, indentLevel, options);
+            if (formatted.trim()) {
+                parts.push(formatted);
+            }
+        }
+        
+        let result = parts.join('\n\n');
+        
+        if (options.insertFinalNewline && !result.endsWith('\n')) {
+            result += '\n';
+        }
+        
+        return result;
+    }
+
+    private formatModuleDefinition(node: Parser.SyntaxNode, indentLevel: number, options: FormattingOptions): string {
+        const indent = this.getIndent(indentLevel, options);
+        let result = indent + 'module ';
+        
+        // Format module name and parameters
+        const nameNode = node.childForFieldName('name');
+        if (nameNode) {
+            result += nameNode.text;
+        }
+        
+        const parametersNode = node.childForFieldName('parameters');
+        if (parametersNode) {
+            result += this.formatParameters(parametersNode, options);
+        }
+        
+        result += ' ';
+        
+        // Format module body
+        const bodyNode = node.childForFieldName('body');
+        if (bodyNode) {
+            result += this.formatNode(bodyNode, indentLevel, options);
+        }
+        
+        return result;
+    }
+
+    private formatBlockStatement(node: Parser.SyntaxNode, indentLevel: number, options: FormattingOptions): string {
+        const indent = this.getIndent(indentLevel, options);
+        let result = '{\n';
+        
+        for (const child of node.children) {
+            if (child.type !== '{' && child.type !== '}') {
+                const formatted = this.formatNode(child, indentLevel + 1, options);
+                if (formatted.trim()) {
+                    result += formatted + '\n';
+                }
+            }
+        }
+        
+        result += indent + '}';
+        return result;
+    }
+
+    private formatParameters(node: Parser.SyntaxNode, options: FormattingOptions): string {
+        if (node.children.length === 0) {
+            return '()';
+        }
+        
+        let result = '(';
+        const parameters: string[] = [];
+        
+        for (const child of node.children) {
+            if (child.type === 'parameter') {
+                parameters.push(child.text.trim());
+            }
+        }
+        
+        if (parameters.length > 3 || parameters.join(', ').length > options.maxLineLength - 20) {
+            // Multi-line parameter formatting
+            result += '\n';
+            for (let i = 0; i < parameters.length; i++) {
+                result += '    ' + parameters[i];
+                if (i < parameters.length - 1) {
+                    result += ',';
+                }
+                result += '\n';
+            }
+            result += ')';
+        } else {
+            // Single-line parameter formatting
+            result += parameters.join(', ') + ')';
+        }
+        
+        return result;
+    }
+
+    private getIndent(level: number, options: FormattingOptions): string {
+        const unit = options.insertSpaces ? ' '.repeat(options.tabSize) : '\t';
+        return unit.repeat(level);
+    }
+
+    private trimTrailingWhitespace(text: string): string {
+        return text.replace(/[ \t]+$/gm, '');
+    }
+}
+```
+
+---
+
+### Priority 3 (P3): Advanced Development Tools and Ecosystem
+
+#### Task 3.1: Build System Integration and Optimization
+
+##### 3.1.a: Webpack/Vite Integration for Web Tree-sitter
+
+**Implementation Timeline**: 2-3 weeks
+**Difficulty**: Medium
+
+```typescript
+// webpack.config.js
+const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
+module.exports = {
+    entry: './src/index.ts',
+    mode: 'production',
+    target: 'web',
+    module: {
+        rules: [
+            {
+                test: /\.tsx?$/,
+                use: 'ts-loader',
+                exclude: /node_modules/,
+            },
+            {
+                test: /\.wasm$/,
+                type: 'asset/resource',
+            },
+        ],
+    },
+    resolve: {
+        extensions: ['.tsx', '.ts', '.js'],
+        fallback: {
+            "path": require.resolve("path-browserify"),
+            "fs": false,
+        }
+    },
+    output: {
+        filename: 'bundle.js',
+        path: path.resolve(__dirname, 'dist'),
+        library: 'OpenSCADParser',
+        libraryTarget: 'umd',
+    },
+    plugins: [
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: 'node_modules/tree-sitter-openscad/dist/tree-sitter-openscad.wasm',
+                    to: 'tree-sitter-openscad.wasm'
+                }
+            ]
+        })
+    ],
+    experiments: {
+        asyncWebAssembly: true,
+    }
+};
+```
+
+```typescript
+// vite.config.ts
+import { defineConfig } from 'vite';
+import { resolve } from 'path';
+
+export default defineConfig({
+    build: {
+        lib: {
+            entry: resolve(__dirname, 'src/index.ts'),
+            name: 'OpenSCADParser',
+            fileName: 'openscad-parser',
+            formats: ['es', 'umd']
+        },
+        rollupOptions: {
+            external: ['web-tree-sitter'],
+            output: {
+                globals: {
+                    'web-tree-sitter': 'TreeSitter'
+                }
+            }
+        }
+    },
+    assetsInclude: ['**/*.wasm'],
+    worker: {
+        format: 'es'
+    },
+    optimizeDeps: {
+        exclude: ['web-tree-sitter']
+    }
+});
+```
+
+##### 3.1.b: Performance Optimization and Bundle Analysis
+
+```typescript
+// src/performance/bundleAnalyzer.ts
+export interface BundleMetrics {
+    totalSize: number;
+    wasmSize: number;
+    jsSize: number;
+    compressionRatio: number;
+    loadTime: number;
+    parseTime: number;
+    memoryUsage: number;
+}
+
+export class PerformanceBenchmark {
+    private metrics: BundleMetrics[] = [];
+
+    async measureBundlePerformance(): Promise<BundleMetrics> {
+        const startTime = performance.now();
+        
+        // Measure WASM loading
+        const wasmStartTime = performance.now();
+        const wasmResponse = await fetch('./tree-sitter-openscad.wasm');
+        const wasmBuffer = await wasmResponse.arrayBuffer();
+        const wasmLoadTime = performance.now() - wasmStartTime;
+        
+        // Measure JS bundle loading
+        const jsStartTime = performance.now();
+        const { default: Parser } = await import('web-tree-sitter');
+        const jsLoadTime = performance.now() - jsStartTime;
+        
+        // Measure memory usage
+        const initialMemory = (performance as any).memory?.usedJSHeapSize || 0;
+        
+        // Initialize parser
+        await Parser.init();
+        const parser = new Parser();
+        const language = await Parser.Language.load(wasmBuffer);
+        parser.setLanguage(language);
+        
+        const finalMemory = (performance as any).memory?.usedJSHeapSize || 0;
+        const memoryUsed = finalMemory - initialMemory;
+        
+        // Measure parse time with sample code
+        const sampleCode = 'cube([10, 10, 10]);';
+        const parseStartTime = performance.now();
+        parser.parse(sampleCode);
+        const parseTime = performance.now() - parseStartTime;
+        
+        const totalTime = performance.now() - startTime;
+        
+        const metrics: BundleMetrics = {
+            totalSize: wasmBuffer.byteLength,
+            wasmSize: wasmBuffer.byteLength,
+            jsSize: 0, // Would need to be measured differently
+            compressionRatio: 1.0, // Would need original size comparison
+            loadTime: totalTime,
+            parseTime: parseTime,
+            memoryUsage: memoryUsed
+        };
+        
+        this.metrics.push(metrics);
+        return metrics;
+    }
+
+    generateReport(): string {
+        const latest = this.metrics[this.metrics.length - 1];
+        return `
+Performance Report:
+==================
+Total Bundle Size: ${(latest.totalSize / 1024).toFixed(2)} KB
+WASM Size: ${(latest.wasmSize / 1024).toFixed(2)} KB
+Load Time: ${latest.loadTime.toFixed(2)} ms
+Parse Time: ${latest.parseTime.toFixed(2)} ms
+Memory Usage: ${(latest.memoryUsage / 1024).toFixed(2)} KB
+
+Recommendations:
+${this.generateRecommendations(latest)}
+        `;
+    }
+
+    private generateRecommendations(metrics: BundleMetrics): string {
+        const recommendations: string[] = [];
+        
+        if (metrics.loadTime > 100) {
+            recommendations.push('- Consider lazy loading WASM file');
+        }
+        
+        if (metrics.memoryUsage > 10 * 1024 * 1024) { // 10MB
+            recommendations.push('- Memory usage is high, consider parser pooling');
+        }
+        
+        if (metrics.parseTime > 10) {
+            recommendations.push('- Parse time is slow for simple code, check grammar efficiency');
+        }
+        
+        return recommendations.join('\n') || '- Performance is optimal';
+    }
+}
+```
+
+#### Task 3.2: Documentation Generation and API Documentation
+
+##### 3.2.a: Automated Documentation Generation
+
+**Implementation Timeline**: 2-3 weeks
+**Difficulty**: Medium
+
+```typescript
+// src/docs/generator.ts
+import Parser from 'web-tree-sitter';
+
+export interface APIDocumentation {
+    modules: ModuleDoc[];
+    functions: FunctionDoc[];
+    variables: VariableDoc[];
+    types: TypeDoc[];
+}
+
+export interface ModuleDoc {
+    name: string;
+    description: string;
+    parameters: ParameterDoc[];
+    examples: ExampleDoc[];
+    location: LocationInfo;
+}
+
+export interface FunctionDoc {
+    name: string;
+    description: string;
+    parameters: ParameterDoc[];
+    returnType: string;
+    examples: ExampleDoc[];
+    location: LocationInfo;
+}
+
+export interface ParameterDoc {
+    name: string;
+    type: string;
+    description: string;
+    defaultValue?: string;
+    required: boolean;
+}
+
+export interface ExampleDoc {
+    code: string;
+    description: string;
+    output?: string;
+}
+
+export interface LocationInfo {
+    file: string;
+    line: number;
+    column: number;
+}
+
+export class OpenSCADDocGenerator {
+    private parser: Parser;
+    private language: Parser.Language;
+
+    constructor(parser: Parser, language: Parser.Language) {
+        this.parser = parser;
+        this.language = language;
+    }
+
+    generateDocumentation(sourceFiles: Map<string, string>): APIDocumentation {
+        const documentation: APIDocumentation = {
+            modules: [],
+            functions: [],
+            variables: [],
+            types: []
+        };
+
+        for (const [filename, content] of sourceFiles) {
+            const tree = this.parser.parse(content);
+            this.extractDocumentation(tree.rootNode, filename, documentation);
+        }
+
+        return documentation;
+    }
+
+    private extractDocumentation(node: Parser.SyntaxNode, filename: string, docs: APIDocumentation): void {
+        switch (node.type) {
+            case 'module_definition':
+                docs.modules.push(this.extractModuleDoc(node, filename));
+                break;
+            
+            case 'function_definition':
+                docs.functions.push(this.extractFunctionDoc(node, filename));
+                break;
+            
+            case 'variable_assignment':
+                docs.variables.push(this.extractVariableDoc(node, filename));
+                break;
+        }
+
+        for (const child of node.children) {
+            this.extractDocumentation(child, filename, docs);
+        }
+    }
+
+    private extractModuleDoc(node: Parser.SyntaxNode, filename: string): ModuleDoc {
+        const nameNode = node.childForFieldName('name');
+        const parametersNode = node.childForFieldName('parameters');
+        
+        return {
+            name: nameNode?.text || 'unknown',
+            description: this.extractComment(node) || '',
+            parameters: this.extractParameters(parametersNode),
+            examples: this.extractExamples(node),
+            location: {
+                file: filename,
+                line: node.startPosition.row + 1,
+                column: node.startPosition.column + 1
+            }
+        };
+    }
+
+    private extractComment(node: Parser.SyntaxNode): string | null {
+        // Look for preceding comment
+        let current = node.previousSibling;
+        while (current && current.type === 'comment') {
+            const comment = current.text.trim();
+            if (comment.startsWith('//') || comment.startsWith('/*')) {
+                return this.cleanComment(comment);
+            }
+            current = current.previousSibling;
+        }
+        return null;
+    }
+
+    private cleanComment(comment: string): string {
+        return comment
+            .replace(/^\/\*+\s*/, '')
+            .replace(/\s*\*+\/$/, '')
+            .replace(/^\/\/\s*/, '')
+            .trim();
+    }
+
+    generateMarkdown(docs: APIDocumentation): string {
+        let markdown = '# OpenSCAD API Documentation\n\n';
+        
+        // Generate table of contents
+        markdown += '## Table of Contents\n\n';
+        markdown += '- [Modules](#modules)\n';
+        markdown += '- [Functions](#functions)\n';
+        markdown += '- [Variables](#variables)\n\n';
+        
+        // Generate modules section
+        if (docs.modules.length > 0) {
+            markdown += '## Modules\n\n';
+            for (const module of docs.modules) {
+                markdown += `### ${module.name}\n\n`;
+                if (module.description) {
+                    markdown += `${module.description}\n\n`;
+                }
+                
+                if (module.parameters.length > 0) {
+                    markdown += '**Parameters:**\n\n';
+                    for (const param of module.parameters) {
+                        markdown += `- \`${param.name}\` (${param.type})`;
+                        if (param.required) {
+                            markdown += ' *required*';
+                        }
+                        if (param.defaultValue) {
+                            markdown += ` - default: \`${param.defaultValue}\``;
+                        }
+                        if (param.description) {
+                            markdown += `: ${param.description}`;
+                        }
+                        markdown += '\n';
+                    }
+                    markdown += '\n';
+                }
+                
+                if (module.examples.length > 0) {
+                    markdown += '**Examples:**\n\n';
+                    for (const example of module.examples) {
+                        if (example.description) {
+                            markdown += `${example.description}\n\n`;
+                        }
+                        markdown += '```openscad\n';
+                        markdown += `${example.code}\n`;
+                        markdown += '```\n\n';
+                    }
+                }
+                
+                markdown += `*Location: ${module.location.file}:${module.location.line}*\n\n`;
+            }
+        }
+        
+        return markdown;
+    }
+
+    exportToJSON(docs: APIDocumentation): string {
+        return JSON.stringify(docs, null, 2);
+    }
+
+    exportToHTML(docs: APIDocumentation): string {
+        const markdown = this.generateMarkdown(docs);
+        // Would need markdown-to-HTML converter
+        return `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OpenSCAD API Documentation</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .module { border: 1px solid #e1e4e8; border-radius: 6px; padding: 16px; margin-bottom: 16px; }
+        .parameter { background: #f6f8fa; padding: 8px; margin: 4px 0; border-radius: 3px; }
+        code { background: #f6f8fa; padding: 2px 4px; border-radius: 3px; }
+        pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        ${this.markdownToHTML(markdown)}
+    </div>
+</body>
+</html>
+        `;
+    }
+
+    private markdownToHTML(markdown: string): string {
+        // Basic markdown to HTML conversion - would use proper library in production
+        return markdown
+            .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+            .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+            .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/`(.*?)`/g, '<code>$1</code>')
+            .replace(/```openscad\n([\s\S]*?)\n```/g, '<pre><code>$1</code></pre>');
+    }
+}
+```
+
+#### Task 3.3: Testing Infrastructure and Quality Assurance
+
+##### 3.3.a: Comprehensive Test Suite Enhancement
+
+**Implementation Timeline**: 3-4 weeks  
+**Difficulty**: Medium-High
+
+```typescript
+// test/integration/fullWorkflow.test.ts
+import { OpenSCADParser } from '../../src/parser';
+import { OpenSCADFormatter } from '../../src/formatter';
+import { OpenSCADComplexityAnalyzer } from '../../src/analyzer';
+
+describe('Full Workflow Integration Tests', () => {
+    let parser: OpenSCADParser;
+    let formatter: OpenSCADFormatter;
+    let analyzer: OpenSCADComplexityAnalyzer;
+
+    beforeAll(async () => {
+        parser = new OpenSCADParser();
+        await parser.init();
+        formatter = new OpenSCADFormatter(parser.getParser(), parser.getLanguage());
+        analyzer = new OpenSCADComplexityAnalyzer(parser.getParser(), parser.getLanguage());
+    });
+
+    describe('Complex OpenSCAD Projects', () => {
+        test('should handle large modular project', async () => {
+            const projectFiles = await loadTestProject('complex-modular');
+            
+            for (const [filename, content] of projectFiles) {
+                // Parse each file
+                const parseResult = await parser.parseDocument(content);
+                expect(parseResult.errors).toHaveLength(0);
+                
+                // Format each file
+                const formatted = formatter.formatDocument(content, {
+                    tabSize: 4,
+                    insertSpaces: true,
+                    trimTrailingWhitespace: true,
+                    insertFinalNewline: true,
+                    maxLineLength: 100
+                });
+                expect(formatted).toBeDefined();
+                
+                // Analyze complexity
+                const complexity = await analyzer.analyzeComplexity(content);
+                expect(complexity.overallScore).toBeLessThan(20); // Maintainable threshold
+            }
+        });
+
+        test('should maintain performance under load', async () => {
+            const largeFile = generateLargeOpenSCADFile(10000); // 10k lines
+            
+            const startTime = performance.now();
+            const parseResult = await parser.parseDocument(largeFile);
+            const parseTime = performance.now() - startTime;
+            
+            expect(parseTime).toBeLessThan(1000); // Less than 1 second
+            expect(parseResult.errors).toHaveLength(0);
+        });
+    });
+
+    describe('Error Recovery and Resilience', () => {
+        test('should gracefully handle malformed syntax', async () => {
+            const malformedCode = `
+                module broken_module(
+                    cube([10, 10, 10]); // Missing closing parenthesis
+                }
+                
+                translate([5, 5, 5]) {
+                    sphere(r=5
+                } // Missing closing parenthesis
+            `;
+            
+            const parseResult = await parser.parseDocument(malformedCode);
+            expect(parseResult.tree).toBeDefined();
+            expect(parseResult.errors.length).toBeGreaterThan(0);
+            
+            // Should still be able to extract some meaningful information
+            const modules = await parser.extractModules(malformedCode);
+            expect(modules.length).toBeGreaterThan(0);
+        });
+    });
+});
+
+function generateLargeOpenSCADFile(lines: number): string {
+    const content: string[] = [];
+    
+    for (let i = 0; i < lines; i++) {
+        if (i % 100 === 0) {
+            content.push(`module test_module_${i}() {`);
+        } else if (i % 100 === 99) {
+            content.push(`}`);
+        } else {
+            content.push(`    cube([${i % 10}, ${(i + 1) % 10}, ${(i + 2) % 10}]);`);
+        }
+    }
+    
+    return content.join('\n');
+}
+```
+
+---
+
+### Priority 4 (P4): Advanced Features and Ecosystem Integration
+
+#### Task 4.1: Advanced Code Analysis and Refactoring Tools
+
+##### 4.1.a: Dependency Analysis and Module Graph Generation
+
+**Implementation Timeline**: 3-4 weeks
+**Difficulty**: High
+
+```typescript
+// src/analysis/dependencyAnalyzer.ts
+export interface DependencyGraph {
+    nodes: DependencyNode[];
+    edges: DependencyEdge[];
+    circularDependencies: CircularDependency[];
+    unresolvedDependencies: UnresolvedDependency[];
+}
+
+export interface DependencyNode {
+    id: string;
+    type: 'module' | 'function' | 'file';
+    name: string;
+    filePath: string;
+    location: SourceLocation;
+    exports: string[];
+    complexity: number;
+}
+
+export interface DependencyEdge {
+    from: string;
+    to: string;
+    type: 'include' | 'use' | 'call' | 'reference';
+    strength: number; // How critical this dependency is
+}
+
+export interface CircularDependency {
+    cycle: string[];
+    severity: 'warning' | 'error';
+    suggestions: string[];
+}
+
+export class OpenSCADDependencyAnalyzer {
+    private parser: Parser;
+    private language: Parser.Language;
+    private projectFiles: Map<string, string> = new Map();
+
+    constructor(parser: Parser, language: Parser.Language) {
+        this.parser = parser;
+        this.language = language;
+    }
+
+    async analyzeProject(projectPath: string): Promise<DependencyGraph> {
+        // Load all OpenSCAD files in project
+        await this.loadProjectFiles(projectPath);
+        
+        const nodes: DependencyNode[] = [];
+        const edges: DependencyEdge[] = [];
+        
+        // Analyze each file
+        for (const [filePath, content] of this.projectFiles) {
+            const fileNodes = await this.analyzeFile(filePath, content);
+            const fileEdges = await this.extractDependencies(filePath, content);
+            
+            nodes.push(...fileNodes);
+            edges.push(...fileEdges);
+        }
+        
+        // Detect circular dependencies
+        const circularDependencies = this.detectCircularDependencies(edges);
+        
+        // Find unresolved dependencies
+        const unresolvedDependencies = this.findUnresolvedDependencies(nodes, edges);
+        
+        return {
+            nodes,
+            edges,
+            circularDependencies,
+            unresolvedDependencies
+        };
+    }
+
+    private detectCircularDependencies(edges: DependencyEdge[]): CircularDependency[] {
+        const graph = new Map<string, string[]>();
+        
+        // Build adjacency list
+        for (const edge of edges) {
+            if (!graph.has(edge.from)) {
+                graph.set(edge.from, []);
+            }
+            graph.get(edge.from)!.push(edge.to);
+        }
+        
+        const visited = new Set<string>();
+        const recursionStack = new Set<string>();
+        const cycles: CircularDependency[] = [];
+        
+        const dfs = (node: string, path: string[]): void => {
+            visited.add(node);
+            recursionStack.add(node);
+            path.push(node);
+            
+            const neighbors = graph.get(node) || [];
+            for (const neighbor of neighbors) {
+                if (!visited.has(neighbor)) {
+                    dfs(neighbor, [...path]);
+                } else if (recursionStack.has(neighbor)) {
+                    // Found cycle
+                    const cycleStart = path.indexOf(neighbor);
+                    const cycle = path.slice(cycleStart);
+                    cycles.push({
+                        cycle,
+                        severity: this.determineCycleSeverity(cycle),
+                        suggestions: this.generateCycleSuggestions(cycle)
+                    });
+                }
+            }
+            
+            recursionStack.delete(node);
+        };
+        
+        for (const node of graph.keys()) {
+            if (!visited.has(node)) {
+                dfs(node, []);
+            }
+        }
+        
+        return cycles;
+    }
+
+    generateVisualization(graph: DependencyGraph): string {
+        // Generate DOT format for Graphviz
+        let dot = 'digraph DependencyGraph {\n';
+        dot += '  rankdir=TB;\n';
+        dot += '  node [shape=box, style=rounded];\n\n';
+        
+        // Add nodes
+        for (const node of graph.nodes) {
+            const color = this.getNodeColor(node);
+            dot += `  "${node.id}" [label="${node.name}", fillcolor="${color}", style=filled];\n`;
+        }
+        
+        dot += '\n';
+        
+        // Add edges
+        for (const edge of graph.edges) {
+            const style = this.getEdgeStyle(edge);
+            dot += `  "${edge.from}" -> "${edge.to}" [${style}];\n`;
+        }
+        
+        // Highlight circular dependencies
+        for (const cycle of graph.circularDependencies) {
+            for (let i = 0; i < cycle.cycle.length; i++) {
+                const from = cycle.cycle[i];
+                const to = cycle.cycle[(i + 1) % cycle.cycle.length];
+                dot += `  "${from}" -> "${to}" [color=red, style=bold];\n`;
+            }
+        }
+        
+        dot += '}';
+        return dot;
+    }
+}
+```
+
+##### 4.1.b: Automated Refactoring Tools
+
+```typescript
+// src/refactoring/refactoringEngine.ts
+export interface RefactoringOperation {
+    type: RefactoringType;
+    description: string;
+    location: SourceLocation;
+    changes: TextChange[];
+    validation: ValidationResult;
+}
+
+export enum RefactoringType {
+    EXTRACT_MODULE = 'extract_module',
+    INLINE_MODULE = 'inline_module',
+    RENAME_SYMBOL = 'rename_symbol',
+    MOVE_MODULE = 'move_module',
+    SPLIT_FILE = 'split_file',
+    MERGE_FILES = 'merge_files',
+    EXTRACT_PARAMETER = 'extract_parameter',
+    REMOVE_DEAD_CODE = 'remove_dead_code'
+}
+
+export class OpenSCADRefactoringEngine {
+    private parser: Parser;
+    private language: Parser.Language;
+
+    constructor(parser: Parser, language: Parser.Language) {
+        this.parser = parser;
+        this.language = language;
+    }
+
+    async extractModule(
+        code: string,
+        selection: SourceRange,
+        moduleName: string
+    ): Promise<RefactoringOperation> {
+        const tree = this.parser.parse(code);
+        const selectedNodes = this.findNodesInRange(tree.rootNode, selection);
+        
+        // Analyze dependencies and parameters
+        const dependencies = this.analyzeDependencies(selectedNodes);
+        const parameters = this.extractParameters(dependencies);
+        
+        // Generate new module definition
+        const moduleDefinition = this.generateModuleDefinition(
+            moduleName,
+            parameters,
+            selectedNodes
+        );
+        
+        // Generate module call
+        const moduleCall = this.generateModuleCall(moduleName, parameters);
+        
+        const changes: TextChange[] = [
+            {
+                range: { start: 0, end: 0 },
+                newText: moduleDefinition + '\n\n',
+                type: 'insert'
+            },
+            {
+                range: selection,
+                newText: moduleCall,
+                type: 'replace'
+            }
+        ];
+        
+        return {
+            type: RefactoringType.EXTRACT_MODULE,
+            description: `Extract selected code into module '${moduleName}'`,
+            location: { line: selection.start.line, column: selection.start.column },
+            changes,
+            validation: await this.validateRefactoring(code, changes)
+        };
+    }
+
+    async renameSymbol(
+        code: string,
+        symbolLocation: SourceLocation,
+        newName: string
+    ): Promise<RefactoringOperation> {
+        const tree = this.parser.parse(code);
+        const symbolNode = this.findSymbolAtLocation(tree.rootNode, symbolLocation);
+        
+        if (!symbolNode) {
+            throw new Error('No symbol found at specified location');
+        }
+        
+        // Find all references to this symbol
+        const references = this.findAllReferences(tree.rootNode, symbolNode.text);
+        
+        const changes: TextChange[] = references.map(ref => ({
+            range: {
+                start: { line: ref.startPosition.row, column: ref.startPosition.column },
+                end: { line: ref.endPosition.row, column: ref.endPosition.column }
+            },
+            newText: newName,
+            type: 'replace'
+        }));
+        
+        return {
+            type: RefactoringType.RENAME_SYMBOL,
+            description: `Rename '${symbolNode.text}' to '${newName}'`,
+            location: symbolLocation,
+            changes,
+            validation: await this.validateRefactoring(code, changes)
+        };
+    }
+
+    async removeDeadCode(code: string): Promise<RefactoringOperation> {
+        const tree = this.parser.parse(code);
+        const deadCodeNodes = this.findDeadCode(tree.rootNode);
+        
+        const changes: TextChange[] = deadCodeNodes.map(node => ({
+            range: {
+                start: { line: node.startPosition.row, column: node.startPosition.column },
+                end: { line: node.endPosition.row, column: node.endPosition.column }
+            },
+            newText: '',
+            type: 'delete'
+        }));
+        
+        return {
+            type: RefactoringType.REMOVE_DEAD_CODE,
+            description: `Remove ${deadCodeNodes.length} dead code blocks`,
+            location: { line: 0, column: 0 },
+            changes,
+            validation: await this.validateRefactoring(code, changes)
+        };
+    }
+
+    private async validateRefactoring(
+        originalCode: string,
+        changes: TextChange[]
+    ): Promise<ValidationResult> {
+        const modifiedCode = this.applyChanges(originalCode, changes);
+        
+        try {
+            const newTree = this.parser.parse(modifiedCode);
+            const errors = this.findSyntaxErrors(newTree);
+            
+            return {
+                isValid: errors.length === 0,
+                errors,
+                warnings: [],
+                suggestions: []
+            };
+        } catch (error) {
+            return {
+                isValid: false,
+                errors: [error.message],
+                warnings: [],
+                suggestions: ['Review the refactoring manually']
+            };
+        }
+    }
+}
+```
+
+#### Task 4.2: Integration with Popular Development Tools
+
+##### 4.2.a: GitHub Actions and CI/CD Integration
+
+**Implementation Timeline**: 2-3 weeks
+**Difficulty**: Medium
+
+```yaml
+# .github/workflows/openscad-analysis.yml
+name: OpenSCAD Code Analysis
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install OpenSCAD Tree-sitter
+      run: npm install openscad-tree-sitter
+    
+    - name: Analyze OpenSCAD files
+      run: |
+        node scripts/analyze-openscad.js
+    
+    - name: Generate complexity report
+      run: |
+        node scripts/complexity-report.js > complexity-report.md
+    
+    - name: Upload complexity report
+      uses: actions/upload-artifact@v3
+      with:
+        name: complexity-report
+        path: complexity-report.md
+    
+    - name: Comment PR with analysis
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const report = fs.readFileSync('complexity-report.md', 'utf8');
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `## OpenSCAD Code Analysis Report\n\n${report}`
+          });
+```
+
+```javascript
+// scripts/analyze-openscad.js
+const Parser = require('web-tree-sitter');
+const fs = require('fs');
+const path = require('path');
+const glob = require('glob');
+
+async function analyzeProject() {
+    // Initialize parser
+    await Parser.init();
+    const parser = new Parser();
+    const language = await Parser.Language.load('tree-sitter-openscad.wasm');
+    parser.setLanguage(language);
+    
+    // Find all OpenSCAD files
+    const files = glob.sync('**/*.scad', { ignore: 'node_modules/**' });
+    
+    let totalLines = 0;
+    let totalModules = 0;
+    let totalFunctions = 0;
+    let errors = [];
+    
+    for (const file of files) {
+        const content = fs.readFileSync(file, 'utf8');
+        const tree = parser.parse(content);
+        
+        // Count metrics
+        const metrics = analyzeFile(tree, file);
+        totalLines += metrics.lines;
+        totalModules += metrics.modules;
+        totalFunctions += metrics.functions;
+        errors.push(...metrics.errors);
+    }
+    
+    // Output results
+    console.log(`Analyzed ${files.length} OpenSCAD files`);
+    console.log(`Total lines: ${totalLines}`);
+    console.log(`Total modules: ${totalModules}`);
+    console.log(`Total functions: ${totalFunctions}`);
+    console.log(`Errors found: ${errors.length}`);
+    
+    if (errors.length > 0) {
+        console.log('\nErrors:');
+        errors.forEach(error => {
+            console.log(`  ${error.file}:${error.line} - ${error.message}`);
+        });
+        process.exit(1);
+    }
+}
+
+function analyzeFile(tree, filename) {
+    const metrics = {
+        lines: tree.rootNode.endPosition.row + 1,
+        modules: 0,
+        functions: 0,
+        errors: []
+    };
+    
+    function traverse(node) {
+        if (node.type === 'module_definition') {
+            metrics.modules++;
+        } else if (node.type === 'function_definition') {
+            metrics.functions++;
+        } else if (node.type === 'ERROR') {
+            metrics.errors.push({
+                file: filename,
+                line: node.startPosition.row + 1,
+                message: 'Syntax error'
+            });
+        }
+        
+        for (const child of node.children) {
+            traverse(child);
+        }
+    }
+    
+    traverse(tree.rootNode);
+    return metrics;
+}
+
+analyzeProject().catch(console.error);
+```
+
+---
+
+## 📅 Implementation Timeline and Milestones
+
+### Phase 1: Foundation (Weeks 1-6)
+- **Week 1-2**: Complete Priority 1 Task 1.1 (Advanced Query Files)
+- **Week 3-4**: Complete Priority 1 Task 1.2 (LSP Implementation)  
+- **Week 5-6**: Complete testing framework integration and basic performance optimization
+
+**Milestone 1**: Core web tree-sitter integration functional with basic LSP support
+
+### Phase 2: Editor Integration (Weeks 7-12)
+- **Week 7-9**: Complete Priority 2 Task 2.1 (VS Code Extension)
+- **Week 10-11**: Complete Priority 2 Task 2.2 (Syntax Highlighting)
+- **Week 12**: Complete Priority 2 Task 2.3 (Code Formatting)
+
+**Milestone 2**: Full VS Code extension with syntax highlighting and formatting
+
+### Phase 3: Advanced Tools (Weeks 13-18)
+- **Week 13-15**: Complete Priority 3 Task 3.1 (Build System Integration)
+- **Week 16-17**: Complete Priority 3 Task 3.2 (Documentation Generation)
+- **Week 18**: Complete Priority 3 Task 3.3 (Enhanced Testing)
+
+**Milestone 3**: Complete development toolchain with documentation and testing
+
+### Phase 4: Ecosystem Integration (Weeks 19-24)
+- **Week 19-22**: Complete Priority 4 Task 4.1 (Advanced Analysis Tools)
+- **Week 23-24**: Complete Priority 4 Task 4.2 (CI/CD Integration)
+
+**Milestone 4**: Full ecosystem integration with advanced analysis capabilities
+
+---
+
+## 🎯 Success Criteria and KPIs
+
+### Technical Metrics
+- **Parse Performance**: <10ms for 1000-line files, <100ms for 10k-line files
+- **Memory Usage**: <50MB typical, <200MB for large files
+- **Error Rate**: <0.1% for valid OpenSCAD syntax
+- **Browser Compatibility**: >95% success across Chrome, Firefox, Safari, Edge
+- **VS Code Extension**: >4.0 rating with >10k downloads in first 6 months
+
+### Quality Metrics  
+- **Test Coverage**: >90% code coverage across all packages
+- **Documentation Coverage**: >95% of public APIs documented
+- **Performance Regression**: <5% performance degradation per release
+- **Bug Reports**: <10 critical bugs per month after stable release
+
+### Adoption Metrics
+- **Community Engagement**: >100 GitHub stars in first 3 months
+- **Developer Adoption**: >50 projects using the parser in first 6 months  
+- **Contribution**: >10 external contributors in first year
+- **Integration**: Used in >3 major OpenSCAD-related projects
+
+---
+
+## 🔚 Conclusion
+
+This comprehensive strategic development roadmap provides a clear path for evolving the OpenSCAD Tree-sitter Grammar project from its current foundation into a robust, production-ready ecosystem that serves the entire OpenSCAD development community.
+
+The plan emphasizes incremental development, thorough testing, and community-driven enhancement while maintaining high performance and reliability standards. By following this roadmap, the project will establish itself as the definitive parsing solution for OpenSCAD, enabling advanced development tools and improving the overall developer experience in the OpenSCAD ecosystem.
+
+**Key Success Factors:**
+1. **Iterative Development**: Short cycles with frequent validation
+2. **Performance Focus**: Continuous monitoring and optimization  
+3. **Community Engagement**: Regular feedback and contribution opportunities
+4. **Quality Assurance**: Comprehensive testing at every stage
+5. **Documentation Excellence**: Clear, comprehensive, and up-to-date documentation
+
+The roadmap is designed to be adaptable, allowing for priority adjustments based on community feedback and emerging requirements while maintaining the core vision of creating the most comprehensive and reliable OpenSCAD parsing solution available.
