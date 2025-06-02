@@ -1,12 +1,5 @@
 # GUIDELINES: OpenSCAD Tree-Sitter Parser Monorepo
 
-## IMPORTANT AND NEVER SKIP:
-- ALWAYS use desktop commander mcp to:
-
-    - mcp2_execute_command: Execute a terminal command with timeout. Command will continue running in background if it doesn't complete within timeout.
-
-
-
 - ALWAYS START WITH Planning and Refining phases;
 - ALWAYS FOLLOW [Development Workflow](#development-workflow), [Documentation Best Practices](#documentation-best-practices) and [Mandatory Workflows](#mandatory-workflows);
 - ALWAYS FOLLOW Context Management documents docs/current-context.md, docs/TODO.md and docs/PROGRESS.md;
