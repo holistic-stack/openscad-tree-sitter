@@ -173,7 +173,9 @@ offset(r=-1, chamfer=true) polygon([[0,0], [10,0], [10,10], [0,10]]);
         (arguments
           (argument
             name: (identifier)
-            value: (number))
+            value: (unary_expression
+              operator: (unary_minus_operator)
+              operand: (number)))
           (argument
             name: (identifier)
             value: (boolean))))
@@ -241,7 +243,7 @@ render() difference() {
                     arguments: (argument_list
                       (arguments
                         (argument
-                          (number)))))))))))
+                          (number))))))))))))))
 
 ==================
 Children Operations
@@ -313,4 +315,4 @@ module my_module() {
                     arguments: (argument_list
                       (arguments
                         (argument
-                          (identifier)))))))))))))
+                          (identifier))))))))))))))

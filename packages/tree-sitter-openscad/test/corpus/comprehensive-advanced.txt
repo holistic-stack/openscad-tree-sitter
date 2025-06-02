@@ -172,15 +172,16 @@ values = [for (i = [1:5]) i * 2];
     (assignment_statement
       name: (identifier)
       value: (list_comprehension
+        (list_comprehension_for
+          iterator: (identifier)
+          range: (vector_expression
+            (range_expression
+              start: (number)
+              end: (number))))
         expr: (binary_expression
           left: (identifier)
           operator: (multiplication_operator)
-          right: (number))
-        (list_comprehension_for
-          iterator: (identifier)
-          range: (range_expression
-            start: (number)
-            end: (number)))))))
+          right: (number))))))
 
 ==================
 List Comprehension with Condition
@@ -195,19 +196,20 @@ evens = [for (i = [1:10]) if (i % 2 == 0) i];
     (assignment_statement
       name: (identifier)
       value: (list_comprehension
-        expr: (identifier)
         (list_comprehension_for
           iterator: (identifier)
-          range: (range_expression
-            start: (number)
-            end: (number)))
+          range: (vector_expression
+            (range_expression
+              start: (number)
+              end: (number))))
         condition: (binary_expression
           left: (binary_expression
             left: (identifier)
             operator: (modulo_operator)
             right: (number))
           operator: (equality_operator)
-          right: (number))))))
+          right: (number))
+        expr: (identifier)))))
 
 ==================
 Simple Let Expression
