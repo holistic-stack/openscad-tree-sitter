@@ -789,12 +789,9 @@ module.exports = grammar({
       choice(
         // Single line comments
         seq('//', /.*/),
-        // Block comments with nested comment support
-        seq(
-          '/*',
-          repeat(choice(/[^*\/]+/, /\*[^\/]/, /\/[^*]/, $.comment)),
-          '*/'
-        )
+        // Block comments - simplified non-nested approach
+        // Uses a more straightforward pattern that avoids nested comment parsing
+        seq('/*', /([^*]|\*[^/])*/, '*/')
       ),
 
     // Non-recursive expression rules for list comprehensions
