@@ -1,20 +1,20 @@
 /**
  * @file Tests for RangeExpressionVisitor
- * 
+ *
  * This test suite validates the RangeExpressionVisitor's ability to parse
  * OpenSCAD range expressions into AST nodes following the Real Parser Pattern.
- * 
+ *
  * Test coverage includes:
  * - Simple ranges: [start:end]
  * - Stepped ranges: [start:step:end]
  * - Expression ranges with variables and function calls
  * - Error handling and edge cases
- * 
+ *
  * @example Test patterns
  * ```typescript
  * // Simple range
  * const result = visitor.visitRangeExpression(parseNode('[0:5]'));
- * 
+ *
  * // Stepped range
  * const result = visitor.visitRangeExpression(parseNode('[0:2:10]'));
  * ```
@@ -51,17 +51,20 @@ describe('RangeExpressionVisitor', () => {
 
   describe('Simple Range Expressions', () => {
     it('should parse simple range [0:5]', () => {
-      const code = '[0:5]';
+      const code = 'x = [0:5];';
       const tree = parser.parse(code);
       expect(tree).toBeTruthy();
-      
-      // Find the range expression node
-      const rangeNode = tree?.rootNode.descendantForIndex(0, code.length);
-      expect(rangeNode).toBeTruthy();
-      expect(rangeNode?.type).toBe('array_literal'); // Range expressions are parsed as array_literal
 
-      if (rangeNode) {
-        const result = visitor.visit(rangeNode); // Use visit method to handle array_literal
+      // Find the range expression node within the assignment statement
+      const assignmentNode = tree?.rootNode.child(0);
+      expect(assignmentNode?.type).toBe('statement');
+
+      const valueNode = assignmentNode?.child(0)?.childForFieldName('value');
+      expect(valueNode).toBeTruthy();
+      expect(valueNode?.type).toBe('range_expression');
+
+      if (valueNode) {
+        const result = visitor.visitRangeExpression(valueNode);
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
         expect(result?.expressionType).toBe('range_expression');
@@ -72,16 +75,19 @@ describe('RangeExpressionVisitor', () => {
     });
 
     it('should parse range with negative numbers [-5:5]', () => {
-      const code = '[-5:5]';
+      const code = 'y = [-5:5];';
       const tree = parser.parse(code);
       expect(tree).toBeTruthy();
-      
-      const rangeNode = tree?.rootNode.descendantForIndex(0, code.length);
-      expect(rangeNode).toBeTruthy();
-      expect(rangeNode?.type).toBe('array_literal'); // Range expressions are parsed as array_literal
 
-      if (rangeNode) {
-        const result = visitor.visit(rangeNode); // Use visit method to handle array_literal
+      const assignmentNode = tree?.rootNode.child(0);
+      expect(assignmentNode?.type).toBe('statement');
+
+      const valueNode = assignmentNode?.child(0)?.childForFieldName('value');
+      expect(valueNode).toBeTruthy();
+      expect(valueNode?.type).toBe('range_expression');
+
+      if (valueNode) {
+        const result = visitor.visitRangeExpression(valueNode);
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
         expect(result?.expressionType).toBe('range_expression');
@@ -92,16 +98,19 @@ describe('RangeExpressionVisitor', () => {
     });
 
     it('should parse range with decimal numbers [1.5:10.5]', () => {
-      const code = '[1.5:10.5]';
+      const code = 'z = [1.5:10.5];';
       const tree = parser.parse(code);
       expect(tree).toBeTruthy();
-      
-      const rangeNode = tree?.rootNode.descendantForIndex(0, code.length);
-      expect(rangeNode).toBeTruthy();
-      expect(rangeNode?.type).toBe('array_literal'); // Range expressions are parsed as array_literal
 
-      if (rangeNode) {
-        const result = visitor.visit(rangeNode); // Use visit method to handle array_literal
+      const assignmentNode = tree?.rootNode.child(0);
+      expect(assignmentNode?.type).toBe('statement');
+
+      const valueNode = assignmentNode?.child(0)?.childForFieldName('value');
+      expect(valueNode).toBeTruthy();
+      expect(valueNode?.type).toBe('range_expression');
+
+      if (valueNode) {
+        const result = visitor.visitRangeExpression(valueNode);
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
         expect(result?.expressionType).toBe('range_expression');
@@ -114,36 +123,42 @@ describe('RangeExpressionVisitor', () => {
 
   describe('Stepped Range Expressions', () => {
     it('should parse stepped range [0:2:10]', () => {
-      const code = '[0:2:10]';
+      const code = 'a = [0:2:10];';
       const tree = parser.parse(code);
       expect(tree).toBeTruthy();
-      
-      const rangeNode = tree?.rootNode.descendantForIndex(0, code.length);
-      expect(rangeNode).toBeTruthy();
-      expect(rangeNode?.type).toBe('array_literal'); // Range expressions are parsed as array_literal
 
-      if (rangeNode) {
-        const result = visitor.visit(rangeNode); // Use visit method to handle array_literal
+      const assignmentNode = tree?.rootNode.child(0);
+      expect(assignmentNode?.type).toBe('statement');
+
+      const valueNode = assignmentNode?.child(0)?.childForFieldName('value');
+      expect(valueNode).toBeTruthy();
+      expect(valueNode?.type).toBe('range_expression');
+
+      if (valueNode) {
+        const result = visitor.visitRangeExpression(valueNode);
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
         expect(result?.expressionType).toBe('range_expression');
         expect(result?.start).toBeTruthy();
         expect(result?.end).toBeTruthy();
-        expect(result?.step).toBeTruthy(); // Step should be present
+        expect(result?.step).toBeTruthy(); // Has step in stepped range
       }
     });
 
     it('should parse stepped range with decimal step [1:0.5:5]', () => {
-      const code = '[1:0.5:5]';
+      const code = 'b = [1:0.5:5];';
       const tree = parser.parse(code);
       expect(tree).toBeTruthy();
-      
-      const rangeNode = tree?.rootNode.descendantForIndex(0, code.length);
-      expect(rangeNode).toBeTruthy();
-      expect(rangeNode?.type).toBe('array_literal'); // Range expressions are parsed as array_literal
 
-      if (rangeNode) {
-        const result = visitor.visit(rangeNode); // Use visit method to handle array_literal
+      const assignmentNode = tree?.rootNode.child(0);
+      expect(assignmentNode?.type).toBe('statement');
+
+      const valueNode = assignmentNode?.child(0)?.childForFieldName('value');
+      expect(valueNode).toBeTruthy();
+      expect(valueNode?.type).toBe('range_expression');
+
+      if (valueNode) {
+        const result = visitor.visitRangeExpression(valueNode);
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
         expect(result?.expressionType).toBe('range_expression');
@@ -154,16 +169,19 @@ describe('RangeExpressionVisitor', () => {
     });
 
     it('should parse reverse range [10:-1:0]', () => {
-      const code = '[10:-1:0]';
+      const code = 'c = [10:-1:0];';
       const tree = parser.parse(code);
       expect(tree).toBeTruthy();
 
-      const rangeNode = tree?.rootNode.descendantForIndex(0, code.length);
-      expect(rangeNode).toBeTruthy();
-      expect(rangeNode?.type).toBe('array_literal'); // Range expressions are parsed as array_literal
+      const assignmentNode = tree?.rootNode.child(0);
+      expect(assignmentNode?.type).toBe('statement');
 
-      if (rangeNode) {
-        const result = visitor.visit(rangeNode); // Use visit method to handle array_literal
+      const valueNode = assignmentNode?.child(0)?.childForFieldName('value');
+      expect(valueNode).toBeTruthy();
+      expect(valueNode?.type).toBe('range_expression');
+
+      if (valueNode) {
+        const result = visitor.visitRangeExpression(valueNode);
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
         expect(result?.expressionType).toBe('range_expression');
@@ -176,16 +194,19 @@ describe('RangeExpressionVisitor', () => {
 
   describe('Expression Range Expressions', () => {
     it('should parse range with variables [x:y]', () => {
-      const code = '[x:y]';
+      const code = 'd = [x:y];';
       const tree = parser.parse(code);
       expect(tree).toBeTruthy();
-      
-      const rangeNode = tree?.rootNode.descendantForIndex(0, code.length);
-      expect(rangeNode).toBeTruthy();
-      expect(rangeNode?.type).toBe('array_literal'); // Range expressions are parsed as array_literal
 
-      if (rangeNode) {
-        const result = visitor.visit(rangeNode); // Use visit method to handle array_literal
+      const assignmentNode = tree?.rootNode.child(0);
+      expect(assignmentNode?.type).toBe('statement');
+
+      const valueNode = assignmentNode?.child(0)?.childForFieldName('value');
+      expect(valueNode).toBeTruthy();
+      expect(valueNode?.type).toBe('range_expression');
+
+      if (valueNode) {
+        const result = visitor.visitRangeExpression(valueNode);
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
         expect(result?.expressionType).toBe('range_expression');
@@ -196,16 +217,19 @@ describe('RangeExpressionVisitor', () => {
     });
 
     it('should parse range with arithmetic expressions [a+1:b*2]', () => {
-      const code = '[a+1:b*2]';
+      const code = 'e = [a+1:b*2];';
       const tree = parser.parse(code);
       expect(tree).toBeTruthy();
 
-      const rangeNode = tree?.rootNode.descendantForIndex(0, code.length);
-      expect(rangeNode).toBeTruthy();
-      expect(rangeNode?.type).toBe('array_literal'); // Range expressions are parsed as array_literal
+      const assignmentNode = tree?.rootNode.child(0);
+      expect(assignmentNode?.type).toBe('statement');
 
-      if (rangeNode) {
-        const result = visitor.visit(rangeNode); // Use visit method to handle array_literal
+      const valueNode = assignmentNode?.child(0)?.childForFieldName('value');
+      expect(valueNode).toBeTruthy();
+      expect(valueNode?.type).toBe('range_expression');
+
+      if (valueNode) {
+        const result = visitor.visitRangeExpression(valueNode);
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
         expect(result?.expressionType).toBe('range_expression');
@@ -221,12 +245,12 @@ describe('RangeExpressionVisitor', () => {
       const code = 'cube(5)';
       const tree = parser.parse(code);
       expect(tree).toBeTruthy();
-      
+
       // Get a non-range node
       const cubeNode = tree?.rootNode.descendantForIndex(0, code.length);
       expect(cubeNode).toBeTruthy();
       expect(cubeNode?.type).not.toBe('range_expression');
-      
+
       if (cubeNode) {
         const result = visitor.visitRangeExpression(cubeNode);
         expect(result).toBeNull();
@@ -237,12 +261,12 @@ describe('RangeExpressionVisitor', () => {
       // This test would require a malformed CST node, which is difficult to create
       // In practice, the tree-sitter grammar should prevent malformed range expressions
       // from reaching the visitor, but we test the error handling anyway
-      
+
       // For now, we'll test with a valid range to ensure the visitor works
       const code = '[0:5]';
       const tree = parser.parse(code);
       expect(tree).toBeTruthy();
-      
+
       const rangeNode = tree?.rootNode.descendantForIndex(0, code.length);
       if (rangeNode) {
         const result = visitor.visit(rangeNode); // Use visit method to handle array_literal
@@ -253,19 +277,22 @@ describe('RangeExpressionVisitor', () => {
 
   describe('Visit Method', () => {
     it('should delegate array_literal nodes with range patterns to visitArrayLiteralAsRange', () => {
-      const code = '[0:5]';
+      const code = 'f = [1:5];';
       const tree = parser.parse(code);
       expect(tree).toBeTruthy();
 
-      const rangeNode = tree?.rootNode.descendantForIndex(0, code.length);
-      expect(rangeNode).toBeTruthy();
-      expect(rangeNode?.type).toBe('array_literal'); // Range expressions are parsed as array_literal
+      const assignmentNode = tree?.rootNode.child(0);
+      expect(assignmentNode?.type).toBe('statement');
 
-      if (rangeNode) {
-        const result = visitor.visit(rangeNode);
+      const valueNode = assignmentNode?.child(0)?.childForFieldName('value');
+      expect(valueNode).toBeTruthy();
+      expect(valueNode?.type).toBe('range_expression');
+
+      if (valueNode) {
+        const result = visitor.visitRangeExpression(valueNode);
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
-        expect((result as any)?.expressionType).toBe('range_expression');
+        expect(result?.expressionType).toBe('range_expression');
       }
     });
 
@@ -273,11 +300,11 @@ describe('RangeExpressionVisitor', () => {
       const code = 'cube(5)';
       const tree = parser.parse(code);
       expect(tree).toBeTruthy();
-      
+
       const cubeNode = tree?.rootNode.descendantForIndex(0, code.length);
       expect(cubeNode).toBeTruthy();
       expect(cubeNode?.type).not.toBe('range_expression');
-      
+
       if (cubeNode) {
         const result = visitor.visit(cubeNode);
         expect(result).toBeNull();

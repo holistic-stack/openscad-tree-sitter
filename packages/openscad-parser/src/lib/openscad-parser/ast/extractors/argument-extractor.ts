@@ -32,7 +32,10 @@
 
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types.js';
-import { extractValue as extractParameterValue, extractValueEnhanced } from './value-extractor.js';
+import {
+  extractValue as extractParameterValue,
+  extractValueEnhanced,
+} from './value-extractor.js';
 import { ErrorHandler } from '../../error-handling/index.js';
 
 /**
@@ -120,7 +123,11 @@ function convertValueToParameterValue(value: ast.Value): ast.ParameterValue {
     // Fallback for complex value.value types or if unhandled
     // This might occur if a 'vector' ast.Value.value (which is Value[]) reaches here.
     // Consider logging a warning or throwing an error for unhandled ast.Value subtypes.
-    console.warn(`[convertValueToParameterValue] Unhandled ast.Value subtype or value for default literal: ${value.type}, value: ${JSON.stringify(value.value)}`);
+    console.warn(
+      `[convertValueToParameterValue] Unhandled ast.Value subtype or value for default literal: ${
+        value.type
+      }, value: ${JSON.stringify(value.value)}`
+    );
     // Defaulting to empty string, but this is likely not correct for all cases.
   }
 
@@ -217,7 +224,10 @@ function convertNodeToParameterValue(
  * @since 0.1.0
  * @category Extractors
  */
-export function extractArguments(argsNode: TSNode, errorHandler?: ErrorHandler): ast.Parameter[] {
+export function extractArguments(
+  argsNode: TSNode,
+  errorHandler?: ErrorHandler
+): ast.Parameter[] {
   console.log(
     `[extractArguments] Processing arguments node: type=${argsNode.type}, text=${argsNode.text}`
   );
@@ -247,7 +257,9 @@ export function extractArguments(argsNode: TSNode, errorHandler?: ErrorHandler):
         const param = extractArgument(child, errorHandler);
         if (param) {
           console.log(
-            `[extractArguments] Extracted parameter from argument: ${JSON.stringify(param)}`
+            `[extractArguments] Extracted parameter from argument: ${JSON.stringify(
+              param
+            )}`
           );
           args.push(param);
         }
@@ -259,7 +271,9 @@ export function extractArguments(argsNode: TSNode, errorHandler?: ErrorHandler):
         const param = extractArgument(child, errorHandler);
         if (param) {
           console.log(
-            `[extractArguments] Extracted parameter from named_argument: ${JSON.stringify(param)}`
+            `[extractArguments] Extracted parameter from named_argument: ${JSON.stringify(
+              param
+            )}`
           );
           args.push(param);
         }
@@ -282,7 +296,9 @@ export function extractArguments(argsNode: TSNode, errorHandler?: ErrorHandler):
               const param = extractArgument(argChild, errorHandler);
               if (param) {
                 console.log(
-                  `[extractArguments] Extracted named parameter: ${JSON.stringify(param)}`
+                  `[extractArguments] Extracted named parameter: ${JSON.stringify(
+                    param
+                  )}`
                 );
                 args.push(param);
               }
@@ -294,11 +310,18 @@ export function extractArguments(argsNode: TSNode, errorHandler?: ErrorHandler):
           if (value !== undefined) {
             args.push({ value }); // Positional argument
             console.log(
-              `[extractArguments] Extracted arguments node as positional argument: ${JSON.stringify({ value })}`
+              `[extractArguments] Extracted arguments node as positional argument: ${JSON.stringify(
+                { value }
+              )}`
             );
           }
         }
-      } else if (child.type === 'number' || child.type === 'string_literal' || child.type === 'array_expression' || child.type === 'identifier') {
+      } else if (
+        child.type === 'number' ||
+        child.type === 'string_literal' ||
+        child.type === 'array_expression' ||
+        child.type === 'identifier'
+      ) {
         // Handle direct value nodes (positional arguments)
         console.log(
           `[extractArguments] Processing direct value: type=${child.type}, text=${child.text}`
@@ -307,14 +330,18 @@ export function extractArguments(argsNode: TSNode, errorHandler?: ErrorHandler):
         if (value !== undefined) {
           args.push({ value }); // Positional argument
           console.log(
-            `[extractArguments] Extracted direct value as positional argument: ${JSON.stringify({ value })}`
+            `[extractArguments] Extracted direct value as positional argument: ${JSON.stringify(
+              { value }
+            )}`
           );
         }
       }
     }
 
     console.log(
-      `[extractArguments] Extracted ${args.length} arguments from argument_list: ${JSON.stringify(args)}`
+      `[extractArguments] Extracted ${
+        args.length
+      } arguments from argument_list: ${JSON.stringify(args)}`
     );
     return args;
   }
@@ -362,7 +389,11 @@ export function extractArguments(argsNode: TSNode, errorHandler?: ErrorHandler):
       }
 
       // Only treat as direct expression if no argument children were found AND no arguments were extracted
-      if (!hasArgumentChildren && !extractedAnyArguments && argNode.namedChildCount > 0) {
+      if (
+        !hasArgumentChildren &&
+        !extractedAnyArguments &&
+        argNode.namedChildCount > 0
+      ) {
         console.log(
           `[extractArguments] No argument children found and no arguments extracted, treating arguments node as direct expression`
         );
@@ -370,7 +401,9 @@ export function extractArguments(argsNode: TSNode, errorHandler?: ErrorHandler):
         if (value !== undefined) {
           args.push({ value }); // Positional argument
           console.log(
-            `[extractArguments] Extracted arguments node as positional argument: ${JSON.stringify({ value })}`
+            `[extractArguments] Extracted arguments node as positional argument: ${JSON.stringify(
+              { value }
+            )}`
           );
         }
       }
@@ -461,8 +494,13 @@ export function extractArguments(argsNode: TSNode, errorHandler?: ErrorHandler):
  * @param errorHandler Optional error handler for enhanced expression evaluation
  * @returns A parameter object or null if the argument is invalid
  */
-function extractArgument(argNode: TSNode, errorHandler?: ErrorHandler): ast.Parameter | null {
-  console.log(`[extractArgument] Processing argument node: type=${argNode.type}, text=${argNode.text}`);
+function extractArgument(
+  argNode: TSNode,
+  errorHandler?: ErrorHandler
+): ast.Parameter | null {
+  console.log(
+    `[extractArgument] Processing argument node: type=${argNode.type}, text=${argNode.text}`
+  );
 
   // Handle named_argument nodes directly
   if (argNode.type === 'named_argument') {
@@ -476,11 +514,18 @@ function extractArgument(argNode: TSNode, errorHandler?: ErrorHandler): ast.Para
       const child = argNode.child(i);
       if (!child) continue;
 
-      console.log(`[extractArgument] named_argument child ${i}: type=${child.type}, text=${child.text}`);
+      console.log(
+        `[extractArgument] named_argument child ${i}: type=${child.type}, text=${child.text}`
+      );
 
       if (child.type === 'identifier' && !identifierNode) {
         identifierNode = child;
-      } else if (child.type !== '=' && child.type !== 'equals' && child.type !== 'identifier' && !valueNode) {
+      } else if (
+        child.type !== '=' &&
+        child.type !== 'equals' &&
+        child.type !== 'identifier' &&
+        !valueNode
+      ) {
         valueNode = child;
       }
     }
@@ -489,7 +534,11 @@ function extractArgument(argNode: TSNode, errorHandler?: ErrorHandler): ast.Para
       const name = identifierNode.text;
       const value = convertNodeToParameterValue(valueNode, errorHandler);
       if (value !== undefined) {
-        console.log(`[extractArgument] Extracted named parameter: ${name} = ${JSON.stringify(value)}`);
+        console.log(
+          `[extractArgument] Extracted named parameter: ${name} = ${JSON.stringify(
+            value
+          )}`
+        );
         return { name, value };
       }
     }
@@ -674,6 +723,7 @@ export function extractValue(valueNode: TSNode): ast.Value | null {
 
     case 'vector_literal': // Fallthrough
     case 'array_literal':
+    case 'vector_expression': // Add support for vector_expression
       return extractVectorLiteral(valueNode);
 
     case 'range_literal':

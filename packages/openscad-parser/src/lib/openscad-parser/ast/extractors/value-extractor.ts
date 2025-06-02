@@ -97,12 +97,14 @@ function isComplexExpression(node: TSNode): boolean {
     'logical_and_expression',
     'equality_expression',
     'relational_expression',
-    'binary_expression'
+    'binary_expression',
   ]);
 
   // Check if it's a complex type with multiple children (actual expression)
   if (complexTypes.has(node.type) && node.childCount > 1) {
-    console.log(`[isComplexExpression] Detected complex expression: ${node.type} with ${node.childCount} children`);
+    console.log(
+      `[isComplexExpression] Detected complex expression: ${node.type} with ${node.childCount} children`
+    );
     return true;
   }
 
@@ -112,7 +114,9 @@ function isComplexExpression(node: TSNode): boolean {
     for (let i = 0; i < node.childCount; i++) {
       const child = node.child(i);
       if (child && isComplexExpression(child)) {
-        console.log(`[isComplexExpression] Found complex child in ${node.type}: ${child.type}`);
+        console.log(
+          `[isComplexExpression] Found complex child in ${node.type}: ${child.type}`
+        );
         return true;
       }
     }
@@ -174,7 +178,10 @@ function isComplexExpression(node: TSNode): boolean {
  * @since 0.1.0
  * @category Value Extraction
  */
-export function extractValueEnhanced(node: TSNode, errorHandler?: ErrorHandler): ast.ParameterValue {
+export function extractValueEnhanced(
+  node: TSNode,
+  errorHandler?: ErrorHandler
+): ast.ParameterValue {
   console.log(
     `[extractValueEnhanced] Attempting to extract from node: type='${
       node.type
@@ -183,83 +190,117 @@ export function extractValueEnhanced(node: TSNode, errorHandler?: ErrorHandler):
 
   // Check if this is a complex expression that needs evaluation
   if (isComplexExpression(node) && errorHandler) {
-    console.log(`[extractValueEnhanced] Detected complex expression: ${node.type}`);
+    console.log(
+      `[extractValueEnhanced] Detected complex expression: ${node.type}`
+    );
 
     try {
       // Simplified direct evaluation approach for binary expressions
       const evaluateBinaryExpression = (node: TSNode): number | undefined => {
-        console.log(`[evaluateBinaryExpression] Evaluating binary expression: ${node.type} - "${node.text}"`);
-        
+        console.log(
+          `[evaluateBinaryExpression] Evaluating binary expression: ${node.type} - "${node.text}"`
+        );
+
         // Get left, operator, and right nodes - using a simplified approach
         // This focuses on the most common structure in tree-sitter grammar
         const leftNode = node.child(0);
         const operatorNode = node.child(1);
         const rightNode = node.child(2);
-        
-        console.log(`[evaluateBinaryExpression] Found nodes: left=${leftNode?.text}, op=${operatorNode?.text}, right=${rightNode?.text}`);
-        
+
+        console.log(
+          `[evaluateBinaryExpression] Found nodes: left=${leftNode?.text}, op=${operatorNode?.text}, right=${rightNode?.text}`
+        );
+
         if (!leftNode || !operatorNode || !rightNode) {
-          console.warn(`[evaluateBinaryExpression] Could not find all parts of the binary expression`);
+          console.warn(
+            `[evaluateBinaryExpression] Could not find all parts of the binary expression`
+          );
           return undefined;
         }
-        
+
         // Recursively evaluate operands
         let leftValue: number | undefined;
         let rightValue: number | undefined;
-        
+
         // Handle nested expressions
         if (isComplexExpression(leftNode)) {
           leftValue = evaluateBinaryExpression(leftNode);
         } else {
           const extractedLeft = extractValueEnhanced(leftNode, errorHandler);
-          leftValue = typeof extractedLeft === 'number' ? extractedLeft : undefined;
+          leftValue =
+            typeof extractedLeft === 'number' ? extractedLeft : undefined;
         }
-        
+
         if (isComplexExpression(rightNode)) {
           rightValue = evaluateBinaryExpression(rightNode);
         } else {
           const extractedRight = extractValueEnhanced(rightNode, errorHandler);
-          rightValue = typeof extractedRight === 'number' ? extractedRight : undefined;
+          rightValue =
+            typeof extractedRight === 'number' ? extractedRight : undefined;
         }
-        
-        console.log(`[evaluateBinaryExpression] Evaluated operands: left=${leftValue}, right=${rightValue}`);
-        
+
+        console.log(
+          `[evaluateBinaryExpression] Evaluated operands: left=${leftValue}, right=${rightValue}`
+        );
+
         if (leftValue === undefined || rightValue === undefined) {
-          console.warn(`[evaluateBinaryExpression] Could not evaluate operands`);
+          console.warn(
+            `[evaluateBinaryExpression] Could not evaluate operands`
+          );
           return undefined;
         }
-        
+
         // Perform the operation
         let result: number;
         switch (operatorNode.text) {
-          case '+': result = leftValue + rightValue; break;
-          case '-': result = leftValue - rightValue; break;
-          case '*': result = leftValue * rightValue; break;
-          case '/': result = leftValue / rightValue; break;
-          case '%': result = leftValue % rightValue; break;
+          case '+':
+            result = leftValue + rightValue;
+            break;
+          case '-':
+            result = leftValue - rightValue;
+            break;
+          case '*':
+            result = leftValue * rightValue;
+            break;
+          case '/':
+            result = leftValue / rightValue;
+            break;
+          case '%':
+            result = leftValue % rightValue;
+            break;
           default:
-            console.warn(`[evaluateBinaryExpression] Unsupported operator: ${operatorNode.text}`);
+            console.warn(
+              `[evaluateBinaryExpression] Unsupported operator: ${operatorNode.text}`
+            );
             return undefined;
         }
-        
-        console.log(`[evaluateBinaryExpression] Result: ${leftValue} ${operatorNode.text} ${rightValue} = ${result}`);
+
+        console.log(
+          `[evaluateBinaryExpression] Result: ${leftValue} ${operatorNode.text} ${rightValue} = ${result}`
+        );
         return result;
       };
-      
+
       // Handle different expression types
-      if (node.type === 'binary_expression' || 
-          node.type === 'additive_expression' || 
-          node.type === 'multiplicative_expression') {
+      if (
+        node.type === 'binary_expression' ||
+        node.type === 'additive_expression' ||
+        node.type === 'multiplicative_expression'
+      ) {
         const result = evaluateBinaryExpression(node);
         if (result !== undefined) {
           return result;
         }
       }
-      
-      console.warn(`[extractValueEnhanced] Could not evaluate expression directly`);
+
+      console.warn(
+        `[extractValueEnhanced] Could not evaluate expression directly`
+      );
       // Fall back to simple extraction
     } catch (error) {
-      console.warn(`[extractValueEnhanced] Expression evaluation failed: ${error}`);
+      console.warn(
+        `[extractValueEnhanced] Expression evaluation failed: ${error}`
+      );
       // Fall back to simple extraction
     }
   }
@@ -342,7 +383,9 @@ export function extractValue(node: TSNode): ast.ParameterValue {
       );
       // Unwrap the expression and extract from its first child
       const firstChild = node.child(0);
-      return node.childCount > 0 && firstChild ? extractValue(firstChild) : undefined;
+      return node.childCount > 0 && firstChild
+        ? extractValue(firstChild)
+        : undefined;
     }
     case 'number': {
       const numValue = parseFloat(node.text);
@@ -376,6 +419,14 @@ export function extractValue(node: TSNode): ast.ParameterValue {
     case 'array_expression':
       console.log(
         `[extractValue] Calling extractVector for array_expression: ${node.text.substring(
+          0,
+          20
+        )}`
+      ); // DEBUG
+      return extractVector(node);
+    case 'vector_expression':
+      console.log(
+        `[extractValue] Calling extractVector for vector_expression: ${node.text.substring(
           0,
           20
         )}`
@@ -540,7 +591,10 @@ export function extractValue(node: TSNode): ast.ParameterValue {
       }
 
       console.warn(
-        `[extractValue] Unhandled ${node.type}: '${node.text.substring(0, 30)}' - consider using extractValueEnhanced`
+        `[extractValue] Unhandled ${node.type}: '${node.text.substring(
+          0,
+          30
+        )}' - consider using extractValueEnhanced`
       );
       return undefined;
     }
@@ -675,7 +729,13 @@ export function extractValue(node: TSNode): ast.ParameterValue {
       // For positional arguments, look for the actual expression inside
       for (let i = 0; i < node.childCount; i++) {
         const child = node.child(i);
-        if (child && child.type !== ',' && child.type !== '(' && child.type !== ')' && child.type !== '=') {
+        if (
+          child &&
+          child.type !== ',' &&
+          child.type !== '(' &&
+          child.type !== ')' &&
+          child.type !== '='
+        ) {
           console.log(
             `[extractValue] Found expression child in argument: type='${child.type}', text='${child.text}'`
           );
@@ -696,7 +756,12 @@ export function extractValue(node: TSNode): ast.ParameterValue {
       // Arguments node is a container - look for the actual expression inside
       for (let i = 0; i < node.childCount; i++) {
         const child = node.child(i);
-        if (child && child.type !== ',' && child.type !== '(' && child.type !== ')') {
+        if (
+          child &&
+          child.type !== ',' &&
+          child.type !== '(' &&
+          child.type !== ')'
+        ) {
           console.log(
             `[extractValue] Found expression child in arguments: type='${child.type}', text='${child.text}'`
           );

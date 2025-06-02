@@ -1,10 +1,10 @@
 /**
  * @file EchoStatementVisitor - Visitor for parsing OpenSCAD echo statements
- * 
+ *
  * This visitor is responsible for parsing OpenSCAD echo statements and converting
  * them into structured AST nodes. Echo statements are used for debugging and
  * output in OpenSCAD scripts.
- * 
+ *
  * @author OpenSCAD Parser Team
  * @since 0.1.0
  */
@@ -17,29 +17,29 @@ import { findDescendantOfType } from '../../utils/node-utils';
 
 /**
  * Visitor class for parsing OpenSCAD echo statements
- * 
+ *
  * The EchoStatementVisitor handles the parsing of echo statements which follow
  * the pattern: `echo(arg1, arg2, ...);`
- * 
+ *
  * Echo statements can contain:
  * - String literals: `echo("Hello World");`
  * - Variables: `echo(x);`
  * - Multiple arguments: `echo("Value:", x, y);`
  * - Complex expressions: `echo(x + y, sin(45));`
  * - Empty arguments: `echo();`
- * 
+ *
  * @example Basic usage
  * ```typescript
  * const visitor = new EchoStatementVisitor(sourceCode, errorHandler);
  * const echoNode = visitor.visitEchoStatement(cstNode);
  * ```
- * 
+ *
  * @since 0.1.0
  */
 export class EchoStatementVisitor extends BaseASTVisitor {
   /**
    * Creates a new EchoStatementVisitor instance
-   * 
+   *
    * @param sourceCode The source code being parsed
    * @param errorHandler The error handler for reporting parsing errors
    */
@@ -73,12 +73,19 @@ export class EchoStatementVisitor extends BaseASTVisitor {
    * @override
    */
   override visitEchoStatement(node: TSNode): EchoStatementNode | null {
-    console.log(`[EchoStatementVisitor.visitEchoStatement] Processing echo statement: ${node.text.substring(0, 50)}`);
+    console.log(
+      `[EchoStatementVisitor.visitEchoStatement] Processing echo statement: ${node.text.substring(
+        0,
+        50
+      )}`
+    );
 
     try {
       // Validate that this is actually an echo_statement node
       if (node.type !== 'echo_statement') {
-        console.warn(`[EchoStatementVisitor.visitEchoStatement] Expected echo_statement, got ${node.type}`);
+        console.warn(
+          `[EchoStatementVisitor.visitEchoStatement] Expected echo_statement, got ${node.type}`
+        );
         return null;
       }
 
@@ -87,7 +94,9 @@ export class EchoStatementVisitor extends BaseASTVisitor {
       const echoArguments: ExpressionNode[] = [];
 
       if (argumentsNode) {
-        console.log(`[EchoStatementVisitor.visitEchoStatement] Found arguments node with ${argumentsNode.childCount} children`);
+        console.log(
+          `[EchoStatementVisitor.visitEchoStatement] Found arguments node with ${argumentsNode.childCount} children`
+        );
 
         // Process each argument in the arguments list
         for (let i = 0; i < argumentsNode.childCount; i++) {
@@ -115,24 +124,31 @@ export class EchoStatementVisitor extends BaseASTVisitor {
           if (expressionNode) {
             echoArguments.push(expressionNode);
           } else {
-            console.warn(`[EchoStatementVisitor.visitEchoStatement] Failed to process argument: ${child.type} -> ${expressionToProcess.type}`);
+            console.warn(
+              `[EchoStatementVisitor.visitEchoStatement] Failed to process argument: ${child.type} -> ${expressionToProcess.type}`
+            );
           }
         }
       } else {
-        console.log(`[EchoStatementVisitor.visitEchoStatement] No arguments node found - empty echo statement`);
+        console.log(
+          `[EchoStatementVisitor.visitEchoStatement] No arguments node found - empty echo statement`
+        );
       }
 
       // Create the echo statement AST node
       const echoStatementNode: EchoStatementNode = {
         type: 'echo',
-        arguments: echoArguments
+        arguments: echoArguments,
       };
 
-      console.log(`[EchoStatementVisitor.visitEchoStatement] Successfully created echo statement AST node with ${echoArguments.length} arguments`);
+      console.log(
+        `[EchoStatementVisitor.visitEchoStatement] Successfully created echo statement AST node with ${echoArguments.length} arguments`
+      );
       return echoStatementNode;
-
     } catch (error) {
-      console.error(`[EchoStatementVisitor.visitEchoStatement] Error processing echo statement: ${error}`);
+      console.error(
+        `[EchoStatementVisitor.visitEchoStatement] Error processing echo statement: ${error}`
+      );
       return null;
     }
   }
@@ -153,12 +169,55 @@ export class EchoStatementVisitor extends BaseASTVisitor {
       // First, try to drill down to the actual content
       const actualNode = this.drillDownToActualExpression(node);
 
+      // Handle basic node types directly (from new grammar structure)
+      switch (actualNode.type) {
+        case 'string':
+          // Remove quotes from string literals
+          const stringValue = actualNode.text.slice(1, -1);
+          return {
+            type: 'expression',
+            expressionType: 'literal',
+            value: stringValue,
+            dataType: 'string',
+          } as ExpressionNode;
+
+        case 'number':
+          const numberValue = parseFloat(actualNode.text);
+          return {
+            type: 'expression',
+            expressionType: 'literal',
+            value: numberValue,
+            dataType: 'number',
+          } as ExpressionNode;
+
+        case 'boolean':
+          const booleanValue = actualNode.text === 'true';
+          return {
+            type: 'expression',
+            expressionType: 'literal',
+            value: booleanValue,
+            dataType: 'boolean',
+          } as ExpressionNode;
+
+        case 'identifier':
+          return {
+            type: 'expression',
+            expressionType: 'variable',
+            name: actualNode.text,
+          } as ExpressionNode;
+
+        case 'binary_expression':
+          // Handle binary expressions (arithmetic, logical, etc.)
+          return this.processBinaryExpression(actualNode);
+      }
+
       // Handle different expression types directly
       if (actualNode.type === 'accessor_expression') {
-
         // Check if this contains an array_literal child
-        const arrayLiteralChild = Array.from({ length: actualNode.childCount }, (_, i) => actualNode.child(i))
-          .find(child => child?.type === 'array_literal');
+        const arrayLiteralChild = Array.from(
+          { length: actualNode.childCount },
+          (_, i) => actualNode.child(i)
+        ).find(child => child?.type === 'array_literal');
 
         if (arrayLiteralChild) {
           // This is an array literal wrapped in accessor_expression, process it directly
@@ -166,8 +225,10 @@ export class EchoStatementVisitor extends BaseASTVisitor {
         }
 
         // Check if this is a function call (has argument_list child)
-        const hasArgumentList = Array.from({ length: actualNode.childCount }, (_, i) => actualNode.child(i))
-          .some(child => child?.type === 'argument_list');
+        const hasArgumentList = Array.from(
+          { length: actualNode.childCount },
+          (_, i) => actualNode.child(i)
+        ).some(child => child?.type === 'argument_list');
 
         if (hasArgumentList) {
           // This is a function call, process it as such
@@ -198,7 +259,7 @@ export class EchoStatementVisitor extends BaseASTVisitor {
               type: 'expression',
               expressionType: 'literal',
               value: text === 'true',
-              dataType: 'boolean'
+              dataType: 'boolean',
             } as ExpressionNode;
           }
 
@@ -207,7 +268,7 @@ export class EchoStatementVisitor extends BaseASTVisitor {
             return {
               type: 'expression',
               expressionType: 'variable',
-              name: text
+              name: text,
             } as ExpressionNode;
           }
           // Otherwise process as primary expression
@@ -250,7 +311,9 @@ export class EchoStatementVisitor extends BaseASTVisitor {
 
       return null;
     } catch (error) {
-      console.warn(`[EchoStatementVisitor.processExpression] Failed to process expression ${node.type}: ${error}`);
+      console.warn(
+        `[EchoStatementVisitor.processExpression] Failed to process expression ${node.type}: ${error}`
+      );
       return null;
     }
   }
@@ -316,7 +379,7 @@ export class EchoStatementVisitor extends BaseASTVisitor {
       operator: operator,
       left: left,
       right: right,
-      text: node.text
+      text: node.text,
     } as ExpressionNode;
   }
 
@@ -335,7 +398,7 @@ export class EchoStatementVisitor extends BaseASTVisitor {
       expressionType: 'function_call',
       functionName: this.extractFunctionName(node),
       arguments: this.extractCallArguments(node),
-      text: node.text
+      text: node.text,
     } as ExpressionNode;
   }
 
@@ -353,7 +416,7 @@ export class EchoStatementVisitor extends BaseASTVisitor {
       type: 'expression',
       expressionType: 'vector_expression',
       elements: this.extractVectorElements(node),
-      text: node.text
+      text: node.text,
     } as ExpressionNode;
   }
 
@@ -365,7 +428,9 @@ export class EchoStatementVisitor extends BaseASTVisitor {
    *
    * @private
    */
-  private processAccessorExpressionAsFunction(node: TSNode): ExpressionNode | null {
+  private processAccessorExpressionAsFunction(
+    node: TSNode
+  ): ExpressionNode | null {
     // Extract function name from the first child (before argument_list)
     let functionName = 'unknown';
     let argumentList: TSNode | null = null;
@@ -388,7 +453,12 @@ export class EchoStatementVisitor extends BaseASTVisitor {
       // Process arguments within the argument_list
       for (let i = 0; i < argumentList.childCount; i++) {
         const argChild = argumentList.child(i);
-        if (argChild && argChild.type !== '(' && argChild.type !== ')' && argChild.type !== ',') {
+        if (
+          argChild &&
+          argChild.type !== '(' &&
+          argChild.type !== ')' &&
+          argChild.type !== ','
+        ) {
           const processedArg = this.processExpression(argChild);
           if (processedArg) {
             args.push(processedArg);
@@ -402,7 +472,7 @@ export class EchoStatementVisitor extends BaseASTVisitor {
       expressionType: 'function_call',
       name: functionName,
       arguments: args,
-      text: node.text
+      text: node.text,
     } as ExpressionNode;
   }
 
@@ -421,7 +491,12 @@ export class EchoStatementVisitor extends BaseASTVisitor {
     // Process all children, skipping brackets and commas
     for (let i = 0; i < node.childCount; i++) {
       const child = node.child(i);
-      if (child && child.type !== '[' && child.type !== ']' && child.type !== ',') {
+      if (
+        child &&
+        child.type !== '[' &&
+        child.type !== ']' &&
+        child.type !== ','
+      ) {
         const processedElement = this.processExpression(child);
         if (processedElement) {
           elements.push(processedElement);
@@ -433,7 +508,7 @@ export class EchoStatementVisitor extends BaseASTVisitor {
       type: 'expression',
       expressionType: 'array',
       items: elements,
-      text: node.text
+      text: node.text,
     } as ExpressionNode;
   }
 
@@ -454,7 +529,7 @@ export class EchoStatementVisitor extends BaseASTVisitor {
       'vector_expression',
       'array_literal',
       'binary_expression',
-      'unary_expression'
+      'unary_expression',
     ];
 
     return complexExpressionTypes.includes(nodeType);
@@ -483,7 +558,7 @@ export class EchoStatementVisitor extends BaseASTVisitor {
       'additive_expression',
       'multiplicative_expression',
       'exponentiation_expression',
-      'unary_expression'
+      'unary_expression',
     ];
 
     // If this is a wrapper type with a single child, drill down
@@ -503,7 +578,12 @@ export class EchoStatementVisitor extends BaseASTVisitor {
     if (node.type === 'expression' && node.childCount > 1) {
       for (let i = 0; i < node.childCount; i++) {
         const child = node.child(i);
-        if (child && child.type !== '(' && child.type !== ')' && child.type !== ',') {
+        if (
+          child &&
+          child.type !== '(' &&
+          child.type !== ')' &&
+          child.type !== ','
+        ) {
           return this.drillDownToActualExpression(child);
         }
       }
@@ -530,7 +610,7 @@ export class EchoStatementVisitor extends BaseASTVisitor {
         type: 'expression',
         expressionType: 'literal',
         value: text.slice(1, -1), // Remove quotes
-        dataType: 'string'
+        dataType: 'string',
       } as ExpressionNode;
     }
 
@@ -541,7 +621,7 @@ export class EchoStatementVisitor extends BaseASTVisitor {
         type: 'expression',
         expressionType: 'literal',
         value: value,
-        dataType: 'number'
+        dataType: 'number',
       } as ExpressionNode;
     }
 
@@ -551,7 +631,7 @@ export class EchoStatementVisitor extends BaseASTVisitor {
         type: 'expression',
         expressionType: 'literal',
         value: text === 'true',
-        dataType: 'boolean'
+        dataType: 'boolean',
       } as ExpressionNode;
     }
 
@@ -560,7 +640,7 @@ export class EchoStatementVisitor extends BaseASTVisitor {
       return {
         type: 'expression',
         expressionType: 'variable',
-        name: text
+        name: text,
       } as ExpressionNode;
     }
 
