@@ -712,7 +712,7 @@ module.exports = grammar({
 
     // List comprehension with correct syntax order
     // Syntax: [for (i = range) expr] or [for (i = range) if (condition) expr]
-    // Uses non-recursive value rule to prevent recursion in expr field
+    // Allows nested list comprehensions with controlled recursion
     list_comprehension: ($) =>
       prec.dynamic(
         100,
@@ -727,10 +727,14 @@ module.exports = grammar({
               ')'
             )
           ),
-          field('expr', $._non_list_comprehension_value),
+          field('expr', $._list_comprehension_expr),
           ']'
         )
       ),
+
+    // Expression rule for list comprehension that allows nesting
+    _list_comprehension_expr: ($) =>
+      choice($._non_list_comprehension_value, $.list_comprehension),
 
     list_comprehension_for: ($) =>
       seq(

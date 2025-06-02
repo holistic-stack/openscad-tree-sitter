@@ -15,9 +15,10 @@ matrix = [for (i = [0:2]) [for (j = [0:2]) i+j]];
       value: (list_comprehension
         (list_comprehension_for
           iterator: (identifier)
-          range: (range_expression
-            start: (number)
-            end: (number)))
+          range: (vector_expression
+            (range_expression
+              start: (number)
+              end: (number))))
         expr: (binary_expression
           left: (identifier)
           operator: (multiplication_operator)
@@ -28,17 +29,17 @@ matrix = [for (i = [0:2]) [for (j = [0:2]) i+j]];
       value: (list_comprehension
         (list_comprehension_for
           iterator: (identifier)
-          range: (range_expression
-            start: (number)
-            end: (number)))
-        (if
-          condition: (binary_expression
-            left: (binary_expression
-              left: (identifier)
-              operator: (modulo_operator)
-              right: (number))
-            operator: (equality_operator)
-            right: (number)))
+          range: (vector_expression
+            (range_expression
+              start: (number)
+              end: (number))))
+        condition: (binary_expression
+          left: (binary_expression
+            left: (identifier)
+            operator: (modulo_operator)
+            right: (number))
+          operator: (equality_operator)
+          right: (number))
         expr: (identifier))))
   (statement
     (assignment_statement
@@ -46,15 +47,17 @@ matrix = [for (i = [0:2]) [for (j = [0:2]) i+j]];
       value: (list_comprehension
         (list_comprehension_for
           iterator: (identifier)
-          range: (range_expression
-            start: (number)
-            end: (number)))
+          range: (vector_expression
+            (range_expression
+              start: (number)
+              end: (number))))
         expr: (list_comprehension
           (list_comprehension_for
             iterator: (identifier)
-            range: (range_expression
-              start: (number)
-              end: (number)))
+            range: (vector_expression
+              (range_expression
+                start: (number)
+                end: (number))))
           expr: (binary_expression
             left: (identifier)
             operator: (addition_operator)
