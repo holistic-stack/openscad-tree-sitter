@@ -54,7 +54,7 @@ module.exports = grammar({
 
   conflicts: ($) => [
     // Essential conflicts that cannot be resolved through grammar changes
-    [$.range_expression, $.vector_expression], // Fundamental [1:5] ambiguity
+    // Removed [$.range_expression, $.vector_expression] - tree-sitter indicates this is unnecessary
     [$._value, $._range_element], // Conflict between value and range element contexts
     [$.conditional_expression, $.let_expression], // Conflict in conditional contexts
     [$.range_expression], // Internal range expression conflicts
