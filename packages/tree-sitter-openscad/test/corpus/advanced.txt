@@ -2,9 +2,9 @@
 List Comprehensions
 ==================
 
-values = [i * i for (i = [1:5])];
-evens = [x for (x = [1:20]) if (x % 2 == 0)];
-matrix = [[i+j for (j = [0:2])] for (i = [0:2])];
+values = [for (i = [1:5]) i * i];
+evens = [for (x = [1:20]) if (x % 2 == 0) x];
+matrix = [for (i = [0:2]) [for (j = [0:2]) i+j]];
 
 ---
 
@@ -13,68 +13,52 @@ matrix = [[i+j for (j = [0:2])] for (i = [0:2])];
     (assignment_statement
       name: (identifier)
       value: (list_comprehension
-        expr: (binary_expression
-          left: (identifier)
-          operator: (multiplication_operator)
-          right: (identifier))
         (list_comprehension_for
           iterator: (identifier)
           range: (range_expression
             start: (number)
-            end: (number)))))
-    (statement
-      (assignment_statement
-        name: (identifier)
-        value: (expression
-          (list_comprehension
-            element: (expression
-              (primary_expression
-                (identifier)))
-            for_clause: (list_comprehension_for
-              iterator: (identifier)
-              range: (range_expression
-                start: (number)
-                end: (number)))
-            if_clause: (list_comprehension_if
-              condition: (expression
-                (binary_expression
-                  left: (expression
-                    (binary_expression
-                      left: (expression
-                        (primary_expression
-                          (identifier)))
-                      right: (expression
-                        (primary_expression
-                          (number)))))
-                  right: (expression
-                    (primary_expression
-                      (number))))))))))
-    (statement
-      (assignment_statement
-        name: (identifier)
-        value: (expression
-          (list_comprehension
-            element: (expression
-              (primary_expression
-                (list_comprehension
-                  element: (expression
-                    (binary_expression
-                      left: (expression
-                        (primary_expression
-                          (identifier)))
-                      right: (expression
-                        (primary_expression
-                          (identifier)))))
-                  for_clause: (list_comprehension_for
-                    iterator: (identifier)
-                    range: (range_expression
-                      start: (number)
-                      end: (number))))))
-            for_clause: (list_comprehension_for
-              iterator: (identifier)
-              range: (range_expression
-                start: (number)
-                end: (number))))))))
+            end: (number)))
+        expr: (binary_expression
+          left: (identifier)
+          operator: (multiplication_operator)
+          right: (identifier)))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (list_comprehension
+        (list_comprehension_for
+          iterator: (identifier)
+          range: (range_expression
+            start: (number)
+            end: (number)))
+        (if
+          condition: (binary_expression
+            left: (binary_expression
+              left: (identifier)
+              operator: (modulo_operator)
+              right: (number))
+            operator: (equality_operator)
+            right: (number)))
+        expr: (identifier))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (list_comprehension
+        (list_comprehension_for
+          iterator: (identifier)
+          range: (range_expression
+            start: (number)
+            end: (number)))
+        expr: (list_comprehension
+          (list_comprehension_for
+            iterator: (identifier)
+            range: (range_expression
+              start: (number)
+              end: (number)))
+          expr: (binary_expression
+            left: (identifier)
+            operator: (addition_operator)
+            right: (identifier)))))))
 
 ==================
 Range Expressions

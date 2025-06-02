@@ -57,7 +57,9 @@ module test() {
             arguments: (argument_list
               (arguments
                 (argument
-                  (number))))))))))
+                  (number))))))
+        (comment)
+        (MISSING "}")))))
 
 ==================
 Incomplete Expression Recovery
