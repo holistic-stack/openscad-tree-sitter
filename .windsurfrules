@@ -7,6 +7,33 @@
 **Success Criteria**: Produce code that is pure, composable, immutable, and follows functional programming best practices while maintaining high performance and reliability
 </context>
 
+## DESKTOP COMMANDER MCP - REQUIRED TOOL
+
+<mcp_instructions>
+**Use Desktop Commander MCP for all file operations and terminal commands:**
+
+```bash
+# Essential commands
+execute_command({ "command": "pnpm build" })
+execute_command({ "command": "pnpm test" })
+read_file({ "path": "src/file.ts" })
+write_file({ "path": "src/file.ts", "content": "..." })
+edit_block({ "edits": "file.ts\n<<<<<<< SEARCH\nold code\n=======\nnew code\n>>>>>>> REPLACE" })
+search_files({ "pattern": "*.ts" })
+search_code({ "pattern": "function name", "path": "src/" })
+```
+
+**Key tools:**
+- `execute_command` - Run terminal commands
+- `read_file` - Read file contents
+- `write_file` - Write files
+- `edit_block` - Make targeted edits
+- `search_files` - Find files by name
+- `search_code` - Search code patterns
+- `list_directory` - List directory contents
+- `create_directory` - Create directories
+</mcp_instructions>
+
 ## CRITICAL REQUIREMENTS - NEVER SKIP:
 
 <instructions>
