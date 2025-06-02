@@ -29,7 +29,6 @@
 
 ;; Special values
 (undef) @constant.builtin
-"undef" @constant.builtin
 
 ;; Literals and Data Types
 ;; ============================================================================

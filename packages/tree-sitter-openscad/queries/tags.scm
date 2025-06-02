@@ -40,17 +40,17 @@
 ;; Module parameter declarations
 (module_definition
   parameters: (parameter_list
-    (parameter_declaration
-      (identifier) @name
-      default_value: (_)? @default) @definition.parameter))
+    (parameter_declarations
+      (parameter_declaration
+        (identifier) @name) @definition.parameter)))
   (#set! "kind" "parameter")
 
 ;; Function parameter declarations
 (function_definition
   parameters: (parameter_list
-    (parameter_declaration
-      (identifier) @name
-      default_value: (_)? @default) @definition.parameter))
+    (parameter_declarations
+      (parameter_declaration
+        (identifier) @name) @definition.parameter)))
   (#set! "kind" "parameter")
 
 ;; Local Variable Definitions
@@ -196,7 +196,7 @@
 
 ;; Array/vector index access
 (index_expression
-  object: (identifier) @object
+  array: (identifier) @object
   index: (_) @index) @reference.index
   (#set! "kind" "index_access")
 

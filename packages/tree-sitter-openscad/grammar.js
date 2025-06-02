@@ -53,20 +53,13 @@ module.exports = grammar({
   extras: ($) => [/\s/, $.comment],
 
   conflicts: ($) => [
-    [$.module_instantiation, $.call_expression],
-    [$.conditional_expression, $.range_expression],
-    [$.index_expression, $.let_expression],
-    [$.member_expression, $.let_expression],
-    [$.range_expression],
-    [$.range_expression, $.vector_expression],
-    [$.conditional_expression, $.let_expression],
-    [$.vector_expression, $.list_comprehension],
-    [$.range_expression_non_recursive],
-    [$._value, $._non_list_comprehension_value],
-    [$._value, $._range_element],
-    [$.bare_range_expression],
-    [$.bare_range_expression_non_recursive],
-    [$.bare_range_expression_non_recursive, $.range_expression_non_recursive],
+    // Essential conflicts that cannot be resolved through grammar changes
+    [$.range_expression, $.vector_expression], // Fundamental [1:5] ambiguity
+    [$._value, $._range_element], // Conflict between value and range element contexts
+    [$.conditional_expression, $.let_expression], // Conflict in conditional contexts
+    [$.range_expression], // Internal range expression conflicts
+    [$.range_expression_non_recursive], // Internal non-recursive range expression conflicts
+    [$.bare_range_expression_non_recursive, $.range_expression_non_recursive], // Bare vs full range conflicts
   ],
 
   rules: {

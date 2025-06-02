@@ -45,14 +45,16 @@
 ;; Module parameter declarations
 (module_definition
   parameters: (parameter_list
-    (parameter_declaration
-      (identifier) @local.definition.parameter)))
+    (parameter_declarations
+      (parameter_declaration
+        (identifier) @local.definition.parameter))))
 
 ;; Function parameter declarations
 (function_definition
   parameters: (parameter_list
-    (parameter_declaration
-      (identifier) @local.definition.parameter)))
+    (parameter_declarations
+      (parameter_declaration
+        (identifier) @local.definition.parameter))))
 
 ;; Function definitions (the function name itself)
 (function_definition
@@ -99,7 +101,7 @@
 
 ;; Index expression references (for array access)
 (index_expression
-  object: (identifier) @local.reference)
+  array: (identifier) @local.reference)
 
 ;; Argument name references in function/module calls
 (argument
@@ -116,7 +118,10 @@
 
 ;; For loop body scope
 (for_statement
-  body: (_) @local.scope)
+  (block) @local.scope)
+
+(for_statement
+  (statement) @local.scope)
 
 ;; Module instantiation with block creates a scope for children
 (module_instantiation
@@ -125,18 +130,24 @@
 ;; Nested function definitions (functions defined within modules)
 (module_definition
   body: (block
-    (function_definition) @local.scope))
+    (statement
+      (function_definition) @local.scope)))
 
 ;; Parameter Default Values
 ;; ============================================================================
 
 ;; Parameter default values can reference other parameters or global variables
+;; Note: parameter_declaration doesn't use field names, so we match the structure directly
 (parameter_declaration
-  default_value: (identifier) @local.reference)
+  (identifier)
+  "="
+  (identifier) @local.reference)
 
 ;; Complex parameter default values with expressions
 (parameter_declaration
-  default_value: (binary_expression
+  (identifier)
+  "="
+  (binary_expression
     left: (identifier) @local.reference
     right: (identifier) @local.reference))
 
@@ -150,7 +161,7 @@
 
 ;; Echo statement variable references
 (call_expression
-  function: (identifier)
+  function: (identifier) @function
   arguments: (argument_list
     (arguments
       (argument
