@@ -2,53 +2,105 @@
 
 This document outlines the remaining tasks and future enhancements for the OpenSCAD parser.
 
-## 🎯 **CURRENT PRIORITY: Parser Implementation Updates (HIGH PRIORITY - 8-12 hours)**
+## 🎯 **CURRENT PRIORITY: Parser Implementation Updates (HIGH PRIORITY - 12-16 hours)**
 
-### Priority 1: Parser Compatibility Validation (URGENT - 2-4 hours)
+### Priority 1: Critical Expression System Fixes (URGENT - 4-6 hours)
 
-**Objective**: Update parser implementation to work with the new grammar structure and ensure compatibility
+**Objective**: Fix expression visitors to work with new unified `binary_expression` node type
 
-**Status**: 🔄 READY TO START - Grammar foundation complete, parser updates needed
-**Dependencies**: ✅ Grammar refactoring completed (100% test coverage)
-**Estimated Effort**: 2-4 hours
+**Status**: 🔄 READY TO START - Comprehensive analysis completed, detailed plan available
+**Dependencies**: ✅ Grammar refactoring completed (100% test coverage), ✅ Compatibility analysis completed
+**Detailed Plan**: See `packages/openscad-parser/reviewed_plan.md` for step-by-step implementation
+**Estimated Effort**: 4-6 hours
+
+**Root Cause**: Grammar unification changed expression node types from hierarchy (`additive_expression`, `multiplicative_expression`) to unified `binary_expression`
 
 **Tasks**:
-- [ ] **Run Parser Tests**: Execute `pnpm test:parser` to identify breaking changes from grammar updates
-- [ ] **AST Node Interface Updates**: Review and update AST interfaces to match new grammar field names
-- [ ] **Visitor Implementation Updates**: Fix any visitor implementations that rely on old grammar structure
-- [ ] **Expression Hierarchy Validation**: Ensure expression visitors work with unified `_value` rule
-- [ ] **Error Recovery Testing**: Verify error recovery works with new grammar structure
+- [ ] **Update Expression Visitor Dispatch Logic**: Remove old expression hierarchy types, keep only `binary_expression`
+- [ ] **Update Binary Expression Creation Logic**: Simplify createExpressionNode() method for unified structure
+- [ ] **Test Expression Visitor Updates**: Validate binary expressions like "1 + 2" work correctly
+
+**Key Files**:
+- `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor.ts` (lines ~334-353, ~405-460)
+- Expression visitor test files
 
 **Testing Commands**:
 ```bash
-# Test parser with new grammar
-pnpm test:parser
-
-# Test specific visitor areas
-pnpm test:parser:file --testFile "src/lib/openscad-parser/ast/visitors/"
-
-# Test with real OpenSCAD files
-pnpm parse examples/basic-shapes.scad
+# Test expression visitor functionality
+pnpm test:parser:file --testFile "src/lib/openscad-parser/ast/visitors/expression-visitor.test.ts"
 ```
 
-**Expected Issues**:
-- Field name changes in grammar may break visitor implementations
-- Expression hierarchy changes may require visitor updates
-- New grammar patterns may need AST node updates
+**Expected Result**: Binary expressions should parse correctly with new unified node type
 
-### Priority 2: List Comprehension Integration (MEDIUM PRIORITY - 1-2 hours)
+### Priority 2: Function Call and Accessor Expression Fixes (HIGH PRIORITY - 2-3 hours)
 
-**Objective**: Ensure list comprehension visitors work with new nested support from grammar
+**Objective**: Fix function call visitor to work with new grammar structure (no more `accessor_expression`)
 
 **Status**: 🔄 READY TO START
-**Dependencies**: ✅ Grammar nested list comprehension support completed
-**Estimated Effort**: 1-2 hours
+**Dependencies**: ✅ Priority 1 (Expression System) completed
+**Estimated Effort**: 2-3 hours
+
+**Root Cause**: Function call visitor expects `accessor_expression` nodes but they're not found in new grammar
 
 **Tasks**:
-- [ ] **Test List Comprehension Visitors**: Verify existing list comprehension visitors work with new grammar
-- [ ] **Complex Scenario Testing**: Test complex list comprehension scenarios with new grammar
-- [ ] **Range Expression Integration**: Validate range expression integration within list comprehensions
-- [ ] **Nested Structure Support**: Ensure nested list comprehensions work correctly
+- [ ] **Analyze Function Call Grammar Structure**: Examine test corpus for new function call patterns
+- [ ] **Update Function Call Visitor**: Modify to work with `call_expression` instead of `accessor_expression`
+- [ ] **Fix Accessor Expression Handling**: Update field access patterns for new grammar
+- [ ] **Test Function Call Updates**: Validate function calls work correctly
+
+**Key Files**:
+- `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor/function-call-visitor.ts`
+- Function call visitor test files
+
+**Testing Commands**:
+```bash
+pnpm test:parser:file --testFile "src/lib/openscad-parser/ast/visitors/expression-visitor/function-call-visitor.test.ts"
+```
+
+### Priority 3: Range Expression Parsing Fixes (HIGH PRIORITY - 3-4 hours)
+
+**Objective**: Fix range expressions that are currently parsing as `ERROR` instead of valid syntax
+
+**Status**: 🔄 READY TO START
+**Dependencies**: ✅ Priority 1 and 2 completed
+**Estimated Effort**: 3-4 hours
+
+**Root Cause**: Grammar changes affected range expression parsing rules - `[0:5]` now parses as `ERROR`
+
+**Tasks**:
+- [ ] **Analyze Range Expression Grammar**: Examine test corpus for new range expression structure
+- [ ] **Rewrite Range Expression Visitor**: Update to match new grammar patterns with proper field names
+- [ ] **Update Hybrid Approach**: Ensure range expressions work within various contexts
+- [ ] **Test Range Expression Updates**: Validate various range patterns work
+
+**Key Files**:
+- `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/`
+- Range expression test files
+
+**Testing Commands**:
+```bash
+pnpm test:parser:file --testFile "src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/"
+```
+
+### Priority 4: List Comprehension Integration (MEDIUM PRIORITY - 2-3 hours)
+
+**Objective**: Fix list comprehension visitor that currently returns `null` for all test cases
+
+**Status**: 🔄 READY TO START
+**Dependencies**: ✅ Priority 1, 2, and 3 completed
+**Estimated Effort**: 2-3 hours
+
+**Root Cause**: Grammar changes affected list comprehension node structure and field names
+
+**Tasks**:
+- [ ] **Analyze List Comprehension Grammar**: Examine test corpus for new nested structure
+- [ ] **Update List Comprehension Visitor**: Modify to work with new `list_comprehension_for` structure
+- [ ] **Test Complex Scenarios**: Validate nested list comprehensions, conditions, let expressions
+- [ ] **Integration Testing**: Ensure list comprehensions work with updated range expressions
+
+**Key Files**:
+- `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor/list-comprehension-visitor/`
+- List comprehension test files
 
 **Test Cases**:
 ```typescript
