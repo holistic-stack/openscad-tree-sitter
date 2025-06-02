@@ -547,6 +547,13 @@ module.exports = grammar({
             field('operator', alias('-', $.unary_minus_operator)),
             field('operand', $._value)
           )
+        ),
+        prec.right(
+          8,
+          seq(
+            field('operator', alias('+', $.unary_plus_operator)),
+            field('operand', $._value)
+          )
         )
       ),
 
@@ -807,7 +814,7 @@ module.exports = grammar({
     identifier: ($) => /[A-Za-z_][A-Za-z0-9_]*/,
 
     number: ($) => {
-      const decimal = /[0-9]+\.[0-9]+([eE][-+]?[0-9]+)?/;
+      const decimal = /([0-9]+\.[0-9]*|\.[0-9]+)([eE][-+]?[0-9]+)?/;
       const integer = /[0-9]+([eE][-+]?[0-9]+)?/;
       return token(choice(decimal, integer));
     },
@@ -1067,6 +1074,13 @@ module.exports = grammar({
           8,
           seq(
             field('operator', alias('-', $.unary_minus_operator)),
+            field('operand', $._non_list_comprehension_value)
+          )
+        ),
+        prec.right(
+          8,
+          seq(
+            field('operator', alias('+', $.unary_plus_operator)),
             field('operand', $._non_list_comprehension_value)
           )
         )

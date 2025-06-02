@@ -1,0 +1,1145 @@
+{
+  "timestamp": "2025-06-02T14:13:12.884Z",
+  "grammarOptimization": "range/vector conflicts eliminated",
+  "summary": {
+    "totalFiles": 53,
+    "successfulParses": 38,
+    "failedParses": 15,
+    "totalBytes": 97329,
+    "totalParseTime": 25653.852499999994,
+    "averageSpeed": 3.793933094454333,
+    "successRate": "71.70"
+  },
+  "files": [
+    {
+      "fileName": "CSG-modules.scad",
+      "filePath": "examples\\real-world\\CSG-modules.scad",
+      "fileSize": 2592,
+      "success": false,
+      "parseTime": 0,
+      "speed": 0,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [
+        "Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\CSG-modules.scad\""
+      ],
+      "languageFeatures": [
+        "module_definition",
+        "if_statement",
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "special_variables",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "CSG.scad",
+      "filePath": "examples\\real-world\\CSG.scad",
+      "fileSize": 806,
+      "success": true,
+      "parseTime": 671.2553,
+      "speed": 1.2007353982903375,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "GEB.scad",
+      "filePath": "examples\\real-world\\GEB.scad",
+      "fileSize": 1862,
+      "success": false,
+      "parseTime": 0,
+      "speed": 0,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [
+        "Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\GEB.scad\""
+      ],
+      "languageFeatures": [
+        "module_definition",
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "extrusions",
+        "special_variables",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "LetterBlock.scad",
+      "filePath": "examples\\real-world\\LetterBlock.scad",
+      "fileSize": 1243,
+      "success": true,
+      "parseTime": 682.7338,
+      "speed": 1.820621741592404,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "extrusions",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "animation.scad",
+      "filePath": "examples\\real-world\\animation.scad",
+      "fileSize": 3344,
+      "success": false,
+      "parseTime": 0,
+      "speed": 0,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [
+        "Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\animation.scad\""
+      ],
+      "languageFeatures": [
+        "module_definition",
+        "function_definition",
+        "for_loop",
+        "list_comprehension",
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "extrusions",
+        "special_variables",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "architectural_model.scad",
+      "filePath": "examples\\real-world\\architectural_model.scad",
+      "fileSize": 7010,
+      "success": true,
+      "parseTime": 651.7584,
+      "speed": 10.75551922307407,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "function_definition",
+        "for_loop",
+        "if_statement",
+        "list_comprehension",
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "special_variables",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "assert.scad",
+      "filePath": "examples\\real-world\\assert.scad",
+      "fileSize": 1149,
+      "success": true,
+      "parseTime": 668.496,
+      "speed": 1.7187836576434266,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "function_definition",
+        "for_loop",
+        "transformations",
+        "primitives",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "candleStand.scad",
+      "filePath": "examples\\real-world\\candleStand.scad",
+      "fileSize": 2948,
+      "success": true,
+      "parseTime": 669.5678,
+      "speed": 4.402840160473667,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "for_loop",
+        "if_statement",
+        "range_expression",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "extrusions",
+        "special_variables",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "children.scad",
+      "filePath": "examples\\real-world\\children.scad",
+      "fileSize": 1595,
+      "success": true,
+      "parseTime": 661.9343,
+      "speed": 2.409604699439204,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "for_loop",
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "extrusions",
+        "special_variables",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "children_indexed.scad",
+      "filePath": "examples\\real-world\\children_indexed.scad",
+      "fileSize": 1949,
+      "success": true,
+      "parseTime": 657.1965,
+      "speed": 2.9656274797568156,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "for_loop",
+        "if_statement",
+        "transformations",
+        "primitives",
+        "extrusions",
+        "special_variables",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "echo.scad",
+      "filePath": "examples\\real-world\\echo.scad",
+      "fileSize": 1771,
+      "success": true,
+      "parseTime": 676.1992,
+      "speed": 2.6190507175991926,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "function_definition",
+        "let_expression",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example001.scad",
+      "filePath": "examples\\real-world\\example001.scad",
+      "fileSize": 972,
+      "success": true,
+      "parseTime": 657.4378,
+      "speed": 1.478466860287011,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "function_definition",
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example002.scad",
+      "filePath": "examples\\real-world\\example002.scad",
+      "fileSize": 1018,
+      "success": true,
+      "parseTime": 661.9706,
+      "speed": 1.537832646948369,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example003.scad",
+      "filePath": "examples\\real-world\\example003.scad",
+      "fileSize": 938,
+      "success": true,
+      "parseTime": 657.3505,
+      "speed": 1.4269404221948565,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "vector_expression",
+        "boolean_operations",
+        "primitives",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example004.scad",
+      "filePath": "examples\\real-world\\example004.scad",
+      "fileSize": 647,
+      "success": true,
+      "parseTime": 668.4075,
+      "speed": 0.9679723821171964,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "boolean_operations",
+        "primitives",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example005.scad",
+      "filePath": "examples\\real-world\\example005.scad",
+      "fileSize": 1031,
+      "success": true,
+      "parseTime": 665.0665,
+      "speed": 1.5502209177578483,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "for_loop",
+        "range_expression",
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example006.scad",
+      "filePath": "examples\\real-world\\example006.scad",
+      "fileSize": 1845,
+      "success": false,
+      "parseTime": 0,
+      "speed": 0,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [
+        "Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\example006.scad\""
+      ],
+      "languageFeatures": [
+        "module_definition",
+        "for_loop",
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example007.scad",
+      "filePath": "examples\\real-world\\example007.scad",
+      "fileSize": 1775,
+      "success": true,
+      "parseTime": 661.0837,
+      "speed": 2.684985274935685,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "for_loop",
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "extrusions",
+        "special_variables",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example008.scad",
+      "filePath": "examples\\real-world\\example008.scad",
+      "fileSize": 1410,
+      "success": true,
+      "parseTime": 666.126,
+      "speed": 2.1167166572089964,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "extrusions",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example009.scad",
+      "filePath": "examples\\real-world\\example009.scad",
+      "fileSize": 1543,
+      "success": false,
+      "parseTime": 0,
+      "speed": 0,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [
+        "Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\example009.scad\""
+      ],
+      "languageFeatures": [
+        "for_loop",
+        "boolean_operations",
+        "transformations",
+        "extrusions",
+        "special_variables",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example010.scad",
+      "filePath": "examples\\real-world\\example010.scad",
+      "fileSize": 848,
+      "success": true,
+      "parseTime": 663.1858,
+      "speed": 1.2786763528410892,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example011.scad",
+      "filePath": "examples\\real-world\\example011.scad",
+      "fileSize": 758,
+      "success": true,
+      "parseTime": 657.2019,
+      "speed": 1.1533746326661563,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "vector_expression",
+        "primitives",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example012.scad",
+      "filePath": "examples\\real-world\\example012.scad",
+      "fileSize": 741,
+      "success": false,
+      "parseTime": 0,
+      "speed": 0,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [
+        "Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\example012.scad\""
+      ],
+      "languageFeatures": [
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example013.scad",
+      "filePath": "examples\\real-world\\example013.scad",
+      "fileSize": 901,
+      "success": true,
+      "parseTime": 664.0077,
+      "speed": 1.356911975568958,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "extrusions",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example014.scad",
+      "filePath": "examples\\real-world\\example014.scad",
+      "fileSize": 694,
+      "success": true,
+      "parseTime": 674.6435,
+      "speed": 1.0286914496322872,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "for_loop",
+        "vector_expression",
+        "transformations",
+        "primitives",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example015.scad",
+      "filePath": "examples\\real-world\\example015.scad",
+      "fileSize": 1055,
+      "success": true,
+      "parseTime": 686.4245,
+      "speed": 1.5369498029280715,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "extrusions",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example016.scad",
+      "filePath": "examples\\real-world\\example016.scad",
+      "fileSize": 1180,
+      "success": true,
+      "parseTime": 666.0376,
+      "speed": 1.7716717494627932,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "for_loop",
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example017.scad",
+      "filePath": "examples\\real-world\\example017.scad",
+      "fileSize": 4941,
+      "success": true,
+      "parseTime": 681.7536,
+      "speed": 7.247486481919568,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "for_loop",
+        "if_statement",
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "extrusions",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example018.scad",
+      "filePath": "examples\\real-world\\example018.scad",
+      "fileSize": 1017,
+      "success": true,
+      "parseTime": 673.9266,
+      "speed": 1.5090664176187734,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "for_loop",
+        "range_expression",
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "special_variables",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example019.scad",
+      "filePath": "examples\\real-world\\example019.scad",
+      "fileSize": 780,
+      "success": false,
+      "parseTime": 0,
+      "speed": 0,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [
+        "Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\example019.scad\""
+      ],
+      "languageFeatures": [
+        "function_definition",
+        "for_loop",
+        "transformations",
+        "primitives",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example020.scad",
+      "filePath": "examples\\real-world\\example020.scad",
+      "fileSize": 2801,
+      "success": false,
+      "parseTime": 0,
+      "speed": 0,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [
+        "Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\example020.scad\""
+      ],
+      "languageFeatures": [
+        "module_definition",
+        "for_loop",
+        "if_statement",
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "extrusions",
+        "special_variables",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example021.scad",
+      "filePath": "examples\\real-world\\example021.scad",
+      "fileSize": 1329,
+      "success": false,
+      "parseTime": 0,
+      "speed": 0,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [
+        "Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\example021.scad\""
+      ],
+      "languageFeatures": [
+        "module_definition",
+        "for_loop",
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "extrusions",
+        "special_variables",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example022.scad",
+      "filePath": "examples\\real-world\\example022.scad",
+      "fileSize": 1802,
+      "success": false,
+      "parseTime": 0,
+      "speed": 0,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [
+        "Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\example022.scad\""
+      ],
+      "languageFeatures": [
+        "module_definition",
+        "for_loop",
+        "if_statement",
+        "range_expression",
+        "vector_expression",
+        "transformations",
+        "primitives",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "example023.scad",
+      "filePath": "examples\\real-world\\example023.scad",
+      "fileSize": 1259,
+      "success": true,
+      "parseTime": 686.7984,
+      "speed": 1.8331434668455837,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "for_loop",
+        "vector_expression",
+        "transformations",
+        "extrusions",
+        "comments",
+        "include_use"
+      ]
+    },
+    {
+      "fileName": "example024.scad",
+      "filePath": "examples\\real-world\\example024.scad",
+      "fileSize": 1199,
+      "success": false,
+      "parseTime": 0,
+      "speed": 0,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [
+        "Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\example024.scad\""
+      ],
+      "languageFeatures": [
+        "module_definition",
+        "for_loop",
+        "if_statement",
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "functions.scad",
+      "filePath": "examples\\real-world\\functions.scad",
+      "fileSize": 1248,
+      "success": true,
+      "parseTime": 748.3538,
+      "speed": 1.6676604034081206,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "function_definition",
+        "for_loop",
+        "transformations",
+        "primitives",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "hull.scad",
+      "filePath": "examples\\real-world\\hull.scad",
+      "fileSize": 902,
+      "success": false,
+      "parseTime": 0,
+      "speed": 0,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [
+        "Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\hull.scad\""
+      ],
+      "languageFeatures": [
+        "vector_expression",
+        "transformations",
+        "primitives",
+        "special_variables",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "linear_extrude.scad",
+      "filePath": "examples\\real-world\\linear_extrude.scad",
+      "fileSize": 1310,
+      "success": true,
+      "parseTime": 672.3098,
+      "speed": 1.9485064772222567,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "vector_expression",
+        "transformations",
+        "extrusions",
+        "special_variables",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "list_comprehensions.scad",
+      "filePath": "examples\\real-world\\list_comprehensions.scad",
+      "fileSize": 1795,
+      "success": true,
+      "parseTime": 682.9087,
+      "speed": 2.6284626334384087,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "function_definition",
+        "for_loop",
+        "let_expression",
+        "list_comprehension",
+        "vector_expression",
+        "transformations",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "logo.scad",
+      "filePath": "examples\\real-world\\logo.scad",
+      "fileSize": 1279,
+      "success": false,
+      "parseTime": 0,
+      "speed": 0,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [
+        "Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\logo.scad\""
+      ],
+      "languageFeatures": [
+        "module_definition",
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "special_variables",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "logo_and_text.scad",
+      "filePath": "examples\\real-world\\logo_and_text.scad",
+      "fileSize": 1598,
+      "success": false,
+      "parseTime": 0,
+      "speed": 0,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [
+        "Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\logo_and_text.scad\""
+      ],
+      "languageFeatures": [
+        "module_definition",
+        "vector_expression",
+        "transformations",
+        "extrusions",
+        "special_variables",
+        "comments",
+        "include_use"
+      ]
+    },
+    {
+      "fileName": "mathematical_surfaces.scad",
+      "filePath": "examples\\real-world\\mathematical_surfaces.scad",
+      "fileSize": 7643,
+      "success": true,
+      "parseTime": 700.5996,
+      "speed": 10.90922689650408,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "function_definition",
+        "for_loop",
+        "if_statement",
+        "let_expression",
+        "vector_expression",
+        "transformations",
+        "primitives",
+        "special_variables",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "mechanical_gearbox.scad",
+      "filePath": "examples\\real-world\\mechanical_gearbox.scad",
+      "fileSize": 6741,
+      "success": true,
+      "parseTime": 691.4795,
+      "speed": 9.748662107842677,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "function_definition",
+        "for_loop",
+        "if_statement",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "special_variables",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "module_recursion.scad",
+      "filePath": "examples\\real-world\\module_recursion.scad",
+      "fileSize": 2190,
+      "success": true,
+      "parseTime": 678.5991,
+      "speed": 3.2272368177322956,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "function_definition",
+        "if_statement",
+        "vector_expression",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "offset.scad",
+      "filePath": "examples\\real-world\\offset.scad",
+      "fileSize": 1087,
+      "success": true,
+      "parseTime": 669.134,
+      "speed": 1.6244877707604157,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "extrusions",
+        "special_variables",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "polygon_areas.scad",
+      "filePath": "examples\\real-world\\polygon_areas.scad",
+      "fileSize": 1805,
+      "success": false,
+      "parseTime": 0,
+      "speed": 0,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [
+        "Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\polygon_areas.scad\""
+      ],
+      "languageFeatures": [
+        "module_definition",
+        "function_definition",
+        "for_loop",
+        "let_expression",
+        "list_comprehension",
+        "vector_expression",
+        "transformations",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "projection.scad",
+      "filePath": "examples\\real-world\\projection.scad",
+      "fileSize": 2076,
+      "success": true,
+      "parseTime": 668.2231,
+      "speed": 3.106746833505157,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "extrusions",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "recursion.scad",
+      "filePath": "examples\\real-world\\recursion.scad",
+      "fileSize": 1156,
+      "success": true,
+      "parseTime": 771.457,
+      "speed": 1.4984632973710783,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "function_definition",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "roof.scad",
+      "filePath": "examples\\real-world\\roof.scad",
+      "fileSize": 1346,
+      "success": true,
+      "parseTime": 670.818,
+      "speed": 2.0065054903118282,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "vector_expression",
+        "transformations",
+        "special_variables",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "rotate_extrude.scad",
+      "filePath": "examples\\real-world\\rotate_extrude.scad",
+      "fileSize": 1875,
+      "success": true,
+      "parseTime": 659.1465,
+      "speed": 2.844587659951164,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "vector_expression",
+        "transformations",
+        "extrusions",
+        "special_variables",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "sign.scad",
+      "filePath": "examples\\real-world\\sign.scad",
+      "fileSize": 1769,
+      "success": true,
+      "parseTime": 664.1663,
+      "speed": 2.6634895507345075,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "range_expression",
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "extrusions",
+        "special_variables",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "surface_image.scad",
+      "filePath": "examples\\real-world\\surface_image.scad",
+      "fileSize": 970,
+      "success": true,
+      "parseTime": 674.3066,
+      "speed": 1.4385147646486034,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "for_loop",
+        "vector_expression",
+        "transformations",
+        "extrusions",
+        "comments"
+      ]
+    },
+    {
+      "fileName": "text_on_cube.scad",
+      "filePath": "examples\\real-world\\text_on_cube.scad",
+      "fileSize": 1786,
+      "success": true,
+      "parseTime": 671.787,
+      "speed": 2.6585807703929967,
+      "hasErrors": false,
+      "syntaxValid": true,
+      "errors": [],
+      "languageFeatures": [
+        "module_definition",
+        "vector_expression",
+        "boolean_operations",
+        "transformations",
+        "primitives",
+        "extrusions",
+        "special_variables",
+        "comments"
+      ]
+    }
+  ],
+  "errors": [
+    "CSG-modules.scad: Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\CSG-modules.scad\"",
+    "GEB.scad: Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\GEB.scad\"",
+    "animation.scad: Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\animation.scad\"",
+    "example006.scad: Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\example006.scad\"",
+    "example009.scad: Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\example009.scad\"",
+    "example012.scad: Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\example012.scad\"",
+    "example019.scad: Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\example019.scad\"",
+    "example020.scad: Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\example020.scad\"",
+    "example021.scad: Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\example021.scad\"",
+    "example022.scad: Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\example022.scad\"",
+    "example024.scad: Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\example024.scad\"",
+    "hull.scad: Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\hull.scad\"",
+    "logo.scad: Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\logo.scad\"",
+    "logo_and_text.scad: Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\logo_and_text.scad\"",
+    "polygon_areas.scad: Parse error: Command failed: npx tree-sitter parse \"examples\\real-world\\polygon_areas.scad\""
+  ],
+  "languageFeatures": [
+    "boolean_operations",
+    "comments",
+    "extrusions",
+    "for_loop",
+    "function_definition",
+    "if_statement",
+    "include_use",
+    "let_expression",
+    "list_comprehension",
+    "module_definition",
+    "primitives",
+    "range_expression",
+    "special_variables",
+    "transformations",
+    "vector_expression"
+  ],
+  "performanceMetrics": {
+    "fastest": {
+      "fileName": "mathematical_surfaces.scad",
+      "speed": 10.90922689650408,
+      "fileSize": 7643
+    },
+    "slowest": {
+      "fileName": "example004.scad",
+      "speed": 0.9679723821171964,
+      "fileSize": 647
+    },
+    "largest": {
+      "fileName": "mathematical_surfaces.scad",
+      "fileSize": 7643,
+      "speed": 10.90922689650408
+    },
+    "smallest": {
+      "fileName": "example004.scad",
+      "fileSize": 647,
+      "speed": 0.9679723821171964
+    }
+  }
+}

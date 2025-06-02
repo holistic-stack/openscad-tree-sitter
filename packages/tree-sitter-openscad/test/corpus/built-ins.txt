@@ -655,6 +655,81 @@ value = assert(x > 0, "x must be positive") x * 2;
           right: (number))))))
 
 ==================
+Decimal Numbers Starting with Dot
+==================
+
+fs_value = .1;
+fn_value = .01;
+mixed_vector = [.5, 1.0, .25];
+calculation = .1 + .2;
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (number)))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (number)))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (vector_expression
+        (number)
+        (number)
+        (number))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (binary_expression
+        left: (number)
+        operator: (addition_operator)
+        right: (number)))))
+
+==================
+Unary Plus Operator
+==================
+
+positive_value = +42;
+positive_vector = [+10, +20, +30];
+nested_positive = +(+5);
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (unary_expression
+        operator: (unary_plus_operator)
+        operand: (number))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (vector_expression
+        (unary_expression
+          operator: (unary_plus_operator)
+          operand: (number))
+        (unary_expression
+          operator: (unary_plus_operator)
+          operand: (number))
+        (unary_expression
+          operator: (unary_plus_operator)
+          operand: (number)))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (unary_expression
+        operator: (unary_plus_operator)
+        operand: (parenthesized_expression
+          (unary_expression
+            operator: (unary_plus_operator)
+            operand: (number)))))))
+
+==================
 Single Statement Module Definitions
 ==================
 
