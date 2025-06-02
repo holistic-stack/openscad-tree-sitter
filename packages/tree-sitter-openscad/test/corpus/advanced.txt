@@ -64,6 +64,131 @@ matrix = [for (i = [0:2]) [for (j = [0:2]) i+j]];
             right: (identifier)))))))
 
 ==================
+Multiple Variable List Comprehensions
+==================
+
+polygon_points = [for (i=[0:n-1], a=i*360/n) [cos(a), sin(a)]];
+complex_calc = [for (i=[0:5], x=i*2, y=x+1) [x, y, x*y]];
+radial_pattern = [for (i=[0:num-1], a=i*360/num, r=radii[i]) [r*cos(a), r*sin(a)]];
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (list_comprehension
+        (list_comprehension_for
+          (list_comprehension_assignment
+            iterator: (identifier)
+            range: (vector_expression
+              (binary_expression
+                left: (range_expression
+                  start: (number)
+                  end: (identifier))
+                operator: (subtraction_operator)
+                right: (number))))
+          (list_comprehension_assignment
+            iterator: (identifier)
+            range: (binary_expression
+              left: (binary_expression
+                left: (identifier)
+                operator: (multiplication_operator)
+                right: (number))
+              operator: (division_operator)
+              right: (identifier)))
+        expr: (vector_expression
+          (call_expression
+            function: (identifier)
+            arguments: (argument_list
+              (arguments
+                (argument
+                  (identifier)))))
+          (call_expression
+            function: (identifier)
+            arguments: (argument_list
+              (arguments
+                (argument
+                  (identifier)))))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (list_comprehension
+        (list_comprehension_for
+          (list_comprehension_assignment
+            iterator: (identifier)
+            range: (vector_expression
+              (range_expression
+                start: (number)
+                end: (number))))
+          (list_comprehension_assignment
+            iterator: (identifier)
+            range: (binary_expression
+              left: (identifier)
+              operator: (multiplication_operator)
+              right: (number)))
+          (list_comprehension_assignment
+            iterator: (identifier)
+            range: (binary_expression
+              left: (identifier)
+              operator: (addition_operator)
+              right: (number)))
+        expr: (vector_expression
+          (identifier)
+          (identifier)
+          (binary_expression
+            left: (identifier)
+            operator: (multiplication_operator)
+            right: (identifier))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (list_comprehension
+        (list_comprehension_for
+          (list_comprehension_assignment
+            iterator: (identifier)
+            range: (vector_expression
+              (binary_expression
+                left: (range_expression
+                  start: (number)
+                  end: (identifier))
+                operator: (subtraction_operator)
+                right: (number))))
+          (list_comprehension_assignment
+            iterator: (identifier)
+            range: (binary_expression
+              left: (binary_expression
+                left: (identifier)
+                operator: (multiplication_operator)
+                right: (number))
+              operator: (division_operator)
+              right: (identifier)))
+          (list_comprehension_assignment
+            iterator: (identifier)
+            range: (index_expression
+              array: (identifier)
+              index: (identifier)))
+        expr: (vector_expression
+          (binary_expression
+            left: (identifier)
+            operator: (multiplication_operator)
+            right: (call_expression
+              function: (identifier)
+              arguments: (argument_list
+                (arguments
+                  (argument
+                    (identifier))))))
+          (binary_expression
+            left: (identifier)
+            operator: (multiplication_operator)
+            right: (call_expression
+              function: (identifier)
+              arguments: (argument_list
+                (arguments
+                  (argument
+                    (identifier))))))))))))
+
+==================
 Range Expressions
 ==================
 

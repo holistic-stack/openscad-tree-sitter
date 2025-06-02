@@ -539,6 +539,178 @@ is_function_result = is_function(my_function);
               (identifier))))))))
 
 ==================
+Echo Expressions
+==================
+
+function debug_calc(x) = echo("calculating", x) x * 2;
+result = echo("debug") 42;
+value = let(y = 10) echo("intermediate", y) y + 5;
+
+---
+
+(source_file
+  (statement
+    (function_definition
+      name: (identifier)
+      parameters: (parameter_list
+        (parameter_declarations
+          (parameter_declaration
+            (identifier))))
+      value: (echo_expression
+        arguments: (arguments
+          (argument
+            (string))
+          (argument
+            (identifier)))
+        expression: (binary_expression
+          left: (identifier)
+          operator: (multiplication_operator)
+          right: (number)))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (echo_expression
+        arguments: (arguments
+          (argument
+            (string)))
+        expression: (number))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (let_expression
+        (let_assignment
+          name: (identifier)
+          value: (number))
+        body: (echo_expression
+          arguments: (arguments
+            (argument
+              (string))
+            (argument
+              (identifier)))
+          expression: (binary_expression
+            left: (identifier)
+            operator: (addition_operator)
+            right: (number)))))))
+
+==================
+Assert Expressions
+==================
+
+function safe_divide(a, b) = assert(b != 0, "Division by zero") a / b;
+function positive_sqrt(x) = assert(x >= 0) sqrt(x);
+value = assert(x > 0, "x must be positive") x * 2;
+
+---
+
+(source_file
+  (statement
+    (function_definition
+      name: (identifier)
+      parameters: (parameter_list
+        (parameter_declarations
+          (parameter_declaration
+            (identifier))
+          (parameter_declaration
+            (identifier))))
+      value: (assert_expression
+        condition: (binary_expression
+          left: (identifier)
+          operator: (inequality_operator)
+          right: (number))
+        message: (string)
+        expression: (binary_expression
+          left: (identifier)
+          operator: (division_operator)
+          right: (identifier)))))
+  (statement
+    (function_definition
+      name: (identifier)
+      parameters: (parameter_list
+        (parameter_declarations
+          (parameter_declaration
+            (identifier))))
+      value: (assert_expression
+        condition: (binary_expression
+          left: (identifier)
+          operator: (greater_equal_operator)
+          right: (number))
+        expression: (call_expression
+          function: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument
+                (identifier))))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (assert_expression
+        condition: (binary_expression
+          left: (identifier)
+          operator: (greater_than_operator)
+          right: (number))
+        message: (string)
+        expression: (binary_expression
+          left: (identifier)
+          operator: (multiplication_operator)
+          right: (number))))))
+
+==================
+Single Statement Module Definitions
+==================
+
+module holeA() rotate([0,90,0]) holeObject();
+module holeB() rotate([90,0,0]) holeObject();
+module holeC() holeObject();
+
+---
+
+(source_file
+  (statement
+    (module_definition
+      name: (identifier)
+      parameters: (parameter_list)
+      body: (statement
+        (module_instantiation
+          name: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument
+                (vector_expression
+                  (number)
+                  (number)
+                  (number)))))
+          (statement
+            (module_instantiation
+              name: (identifier)
+              arguments: (argument_list)))))))
+  (statement
+    (module_definition
+      name: (identifier)
+      parameters: (parameter_list)
+      body: (statement
+        (module_instantiation
+          name: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument
+                (vector_expression
+                  (number)
+                  (number)
+                  (number)))))
+          (statement
+            (module_instantiation
+              name: (identifier)
+              arguments: (argument_list)))))))
+  (statement
+    (module_definition
+      name: (identifier)
+      parameters: (parameter_list)
+      body: (statement
+        (module_instantiation
+          name: (identifier)
+          arguments: (argument_list))))))
+
+==================
 Random and Search Functions
 ==================
 

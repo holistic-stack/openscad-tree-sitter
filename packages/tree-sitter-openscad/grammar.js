@@ -94,7 +94,10 @@ module.exports = grammar({
         'module',
         field('name', $.identifier),
         field('parameters', $.parameter_list),
-        field('body', $.block)
+        field('body', choice(
+          prec(1, $.block), // Higher precedence for block bodies
+          prec(0, $.statement) // Lower precedence for single statement bodies
+        ))
       ),
 
     function_definition: ($) =>
@@ -243,6 +246,44 @@ module.exports = grammar({
         seq('assert', '(', field('condition', $._value), ')', optional(';'))
       ),
 
+    // Expression context functions (OpenSCAD 2019.05+)
+    // Echo expression: echo(args...) expression - returns expression value after printing
+    echo_expression: ($) =>
+      prec.right(
+        0, // Lower precedence to capture the full expression
+        seq(
+          'echo',
+          '(',
+          field('arguments', optional($.arguments)),
+          ')',
+          field('expression', $._value)
+        )
+      ),
+
+    // Assert expression: assert(condition, message) expression - returns expression if assertion passes
+    assert_expression: ($) =>
+      prec.right(
+        0, // Lower precedence to capture the full expression
+        choice(
+          seq(
+            'assert',
+            '(',
+            field('condition', $._value),
+            ',',
+            field('message', $._value),
+            ')',
+            field('expression', $._value)
+          ),
+          seq(
+            'assert',
+            '(',
+            field('condition', $._value),
+            ')',
+            field('expression', $._value)
+          )
+        )
+      ),
+
     // Arguments list for function calls
     arguments: ($) => commaSep1($.argument),
 
@@ -296,7 +337,11 @@ module.exports = grammar({
         $.member_expression,
         $.let_expression,
         $.list_comprehension,
-        $.parenthesized_expression
+        $.parenthesized_expression,
+
+        // Expression context functions (OpenSCAD 2019.05+)
+        prec(11, $.echo_expression), // High precedence for echo expressions
+        prec(11, $.assert_expression) // High precedence for assert expressions
       ),
 
     // Vector element rule - excludes ranges to prevent parsing conflicts
@@ -733,10 +778,29 @@ module.exports = grammar({
       seq(
         'for',
         '(',
+        choice(
+          // Single variable assignment (backward compatibility)
+          seq(
+            field('iterator', $.identifier),
+            '=',
+            field('range', $._non_list_comprehension_value)
+          ),
+          // Multiple variable assignments (OpenSCAD standard feature)
+          // Only matches when there are commas (2+ assignments)
+          seq(
+            $.list_comprehension_assignment,
+            repeat1(seq(',', $.list_comprehension_assignment))
+          )
+        ),
+        ')'
+      ),
+
+    // Single variable assignment in list comprehension
+    list_comprehension_assignment: ($) =>
+      seq(
         field('iterator', $.identifier),
         '=',
-        field('range', $._non_list_comprehension_value),
-        ')'
+        field('range', $._non_list_comprehension_value)
       ),
 
     // Literals

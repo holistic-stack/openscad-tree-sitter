@@ -116,7 +116,8 @@
   },
   "dependencies": {
     "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react-dom": "19.0.0",
+    "tree-sitter": "0.22.4"
   },
   "nx": {
     "includedScripts": []
