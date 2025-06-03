@@ -57,11 +57,12 @@
     "jsdom": "^26.1.0",
     "node-fetch": "^3.3.2",
     "prettier": "^2.8.8",
+    "ts-node": "10.9.2",
     "typescript": "^5.8.3",
     "vite": "^6.0.0",
     "vite-plugin-dts": "^3.9.1",
+    "vite-tsconfig-paths": "^4.3.2",
     "vitest": "^3.1.4",
-    "vitest-fetch-mock": "^0.4.5",
-    "vite-tsconfig-paths": "^4.3.2"
+    "vitest-fetch-mock": "^0.4.5"
   }
 }

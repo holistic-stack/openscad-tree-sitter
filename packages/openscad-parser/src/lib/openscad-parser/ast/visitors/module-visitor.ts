@@ -319,7 +319,7 @@ export class ModuleVisitor extends BaseASTVisitor {
         return {
           type: 'module_instantiation',
           name: moduleName,
-          arguments: args,
+          args,
           children,
           location: getLocation(node),
         };

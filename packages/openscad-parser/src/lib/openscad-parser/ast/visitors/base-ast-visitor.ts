@@ -343,6 +343,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
       } else {
         // Positional argument
         return {
+          name: '', // Positional arguments have an empty name
           value: convertExtractedValueToParameterValue(
             arg as ExtractedParameter
           ),
@@ -938,6 +939,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
       } else {
         // Positional argument
         return {
+          name: '', // Positional arguments have an empty name
           value: convertExtractedValueToParameterValue(arg),
         };
       }
@@ -1032,6 +1034,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
         } else {
           // Positional argument
           return {
+            name: '', // Positional arguments have an empty name
             value: convertExtractedValueToParameterValue(arg),
           };
         }

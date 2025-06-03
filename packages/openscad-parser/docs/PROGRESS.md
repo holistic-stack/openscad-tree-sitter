@@ -11,6 +11,11 @@
 ### Key Findings
 - **Grammar Changes**: Tree-sitter-openscad grammar completely refactored
   - Expression hierarchy unified under `binary_expression`
+- [x] **2.1**: Analyzed new function call grammar structure
+  - **Action**: Examined `built-ins.txt` and confirmed `call_expression` structure.
+  - **Files**: `packages/tree-sitter-openscad/test/corpus/*.txt`
+  - **Goal**: Understood new node structure and field names: `(call_expression function: (identifier) arguments: (argument_list (arguments (argument ...))))`
+
   - Function calls changed from `accessor_expression` to `call_expression`
   - Argument structure now: `argument_list` → `arguments` → `argument`
   - Range expressions have new structure with explicit `start`/`end` fields
@@ -44,6 +49,32 @@
 - **Documentation Updates**: Keep context documents current
 
 ## Priority 1 Implementation (2024-12-19)
+
+### ? Priority 2.2: Function Call Visitor and Type Unification
+- **Objective**: Resolve TypeScript type incompatibilities and lint errors by unifying CST node types to use `SyntaxNode` (aliased as `TSNode`) from `web-tree-sitter`, correcting `Parameter` interface violations, and updating visitor and utility files.
+
+- **Files Modified**:
+  - `packages/openscad-parser/src/lib/openscad-parser/ast/ast-types.ts`
+  - `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor.ts`
+  - `packages/openscad-parser/src/lib/openscad-parser/cst/query-utils.ts`
+
+- **Changes Made**:
+  - **`ast-types.ts`**: Renamed `arguments` property to `args` in `ExpressionNode`, `EchoStatementNode`, and `ModuleInstantiationNode` for consistency with `FunctionCallNode`.
+  - **`expression-visitor.ts`**: 
+    - Changed `functionCall.arguments` to `functionCall.args`.
+    - Changed `functionCall.name` to `functionCall.functionName`.
+    - Added type assertion `as ast.FunctionCallNode` to the result of `this.functionCallVisitor.visitFunctionCall(node)` to ensure correct type narrowing.
+  - **`query-utils.ts`**: 
+    - Changed `import { Parser, Query, Tree, Node, type QueryMatch } from 'web-tree-sitter';` to `import { Parser, Query, Tree, Node as TSNode, type QueryMatch } from 'web-tree-sitter';`.
+    - Replaced all direct usages of `Node` with `TSNode` throughout the file.
+
+- **Impact**: 
+  - Resolved `Property 'arguments' does not exist` errors.
+  - Resolved `Property 'name' does not exist` errors on `FunctionCallNode`.
+  - Resolved `Argument of type 'SyntaxNode' is not assignable to parameter of type 'Node'.` errors.
+  - Resolved `Cannot find name 'Node'.` errors in `query-utils.ts`.
+
+- **Test Result**: Linting passed with 0 errors (only warnings remaining). Type checking and tests will be run next.
 
 ### ✅ Priority 1.1: Expression Visitor Dispatch Logic
 - **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor.ts`

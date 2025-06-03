@@ -1,16 +1,16 @@
-import { Parser, Query, Tree, Node, type QueryMatch } from 'web-tree-sitter';
+import { Parser, Query, Tree, Node as TSNode, type QueryMatch } from 'web-tree-sitter';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 
 // Type definitions for OpenSCAD specific nodes
 // Type alias for tree-sitter Node
-type OpenSCADNode = Node;
+type OpenSCADNode = TSNode;
 
 export interface QueryResult {
   patternIndex: number;
   captures: Array<{
     name: string;
-    node: Node;
+    node: TSNode;
     text: string;
     start: { row: number; column: number };
     end: { row: number; column: number };
@@ -45,7 +45,7 @@ export class QueryManager {
   /**
    * Get the root node of the parsed tree
    */
-  public getRootNode(): Node | null {
+  public getRootNode(): TSNode | null {
     return this.tree?.rootNode || null;
   }
 
@@ -85,7 +85,7 @@ export class QueryManager {
   /**
    * Execute a query on a specific node
    */
-  public queryNode(queryName: string, node: Node): QueryResult[] {
+  public queryNode(queryName: string, node: TSNode): QueryResult[] {
     const query = this.queryCache.get(queryName);
     if (!query) {
       throw new Error(
@@ -100,7 +100,7 @@ export class QueryManager {
   /**
    * Find all module definitions in the current tree
    */
-  public async findModuleDefinitions(): Promise<Node[]> {
+  public async findModuleDefinitions(): Promise<TSNode[]> {
     await this.loadQuery('highlights');
     const results = this.queryTree('highlights');
     return results
@@ -114,7 +114,7 @@ export class QueryManager {
   /**
    * Find all function definitions in the current tree
    */
-  public async findFunctionDefinitions(): Promise<Node[]> {
+  public async findFunctionDefinitions(): Promise<TSNode[]> {
     await this.loadQuery('highlights');
     const results = this.queryTree('highlights');
     return results
@@ -162,15 +162,15 @@ export class QueryManager {
   /**
    * Find all nodes of a specific type in the current tree
    */
-  public findAllNodesOfType(type: string | string[]): Node[] {
+  public findAllNodesOfType(type: string | string[]): TSNode[] {
     if (!this.tree) {
       throw new Error('No tree parsed. Call parse() first.');
     }
 
     const types = Array.isArray(type) ? type : [type];
-    const nodes: Node[] = [];
+    const nodes: TSNode[] = [];
 
-    const visit = (node: Node): void => {
+    const visit = (node: TSNode): void => {
       if (types.includes(node.type)) {
         nodes.push(node);
       }
@@ -190,14 +190,14 @@ export class QueryManager {
   /**
    * Find the first node of a specific type in the current tree
    */
-  public findFirstNodeOfType(type: string | string[]): Node | null {
+  public findFirstNodeOfType(type: string | string[]): TSNode | null {
     if (!this.tree) {
       throw new Error('No tree parsed. Call parse() first.');
     }
 
     const types = Array.isArray(type) ? type : [type];
 
-    const find = (node: Node): Node | null => {
+    const find = (node: TSNode): TSNode | null => {
       if (types.includes(node.type)) {
         return node;
       }
@@ -220,7 +220,7 @@ export class QueryManager {
    * Check if a node has an ancestor of a specific type
    */
   public hasAncestorOfType(
-    node: Node,
+    node: TSNode,
     ancestorType: string | string[]
   ): boolean {
     const types = Array.isArray(ancestorType) ? ancestorType : [ancestorType];
@@ -239,7 +239,7 @@ export class QueryManager {
   /**
    * Get the text of a node, including any trailing semicolon if present
    */
-  public getNodeTextWithSemicolon(node: Node, source: string): string {
+  public getNodeTextWithSemicolon(node: TSNode, source: string): string {
     let text = node.text;
 
     // Check if there's a semicolon immediately after the node
@@ -253,14 +253,14 @@ export class QueryManager {
   /**
    * Get the full text of the node including all its children
    */
-  public getNodeFullText(node: Node, source: string): string {
+  public getNodeFullText(node: TSNode, source: string): string {
     return source.slice(node.startIndex, node.endIndex);
   }
 
   /**
    * Get the location of a node in the source code
    */
-  public getNodeLocation(node: Node): {
+  public getNodeLocation(node: TSNode): {
     start: { line: number; column: number; index: number };
     end: { line: number; column: number; index: number };
   } {
@@ -284,9 +284,9 @@ export class QueryManager {
   private processQueryMatch(match: QueryMatch, _query: Query): QueryResult {
     const captures = match.captures.map((capture, index) => {
       // Use the index as a fallback name if we can't determine the capture name
-      const name = `capture_${index}`;
+
       return {
-        name,
+        name: `capture_${index}`, // Use the index as a fallback name if we can't determine the capture name
         node: capture.node,
         text: capture.node.text,
         start: capture.node.startPosition,
@@ -307,14 +307,14 @@ export class QueryManager {
     results: QueryResult[],
     name: string | string[]
   ): Array<{
-    node: Node;
+    node: TSNode;
     text: string;
     start: { row: number; column: number };
     end: { row: number; column: number };
   }> {
     const names = Array.isArray(name) ? name : [name];
     const captures: Array<{
-      node: Node;
+      node: TSNode;
       text: string;
       start: { row: number; column: number };
       end: { row: number; column: number };

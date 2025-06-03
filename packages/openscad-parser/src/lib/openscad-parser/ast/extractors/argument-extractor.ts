@@ -308,7 +308,7 @@ export function extractArguments(
           // Handle as positional argument
           const value = convertNodeToParameterValue(child, errorHandler);
           if (value !== undefined) {
-            args.push({ value }); // Positional argument
+            args.push({ name: '', value }); // Positional argument
             console.log(
               `[extractArguments] Extracted arguments node as positional argument: ${JSON.stringify(
                 { value }
@@ -328,7 +328,7 @@ export function extractArguments(
         );
         const value = convertNodeToParameterValue(child, errorHandler);
         if (value !== undefined) {
-          args.push({ value }); // Positional argument
+          args.push({ name: '', value }); // Positional argument
           console.log(
             `[extractArguments] Extracted direct value as positional argument: ${JSON.stringify(
               { value }
@@ -399,7 +399,7 @@ export function extractArguments(
         );
         const value = convertNodeToParameterValue(argNode, errorHandler);
         if (value !== undefined) {
-          args.push({ value }); // Positional argument
+          args.push({ name: '', value }); // Positional argument
           console.log(
             `[extractArguments] Extracted arguments node as positional argument: ${JSON.stringify(
               { value }
@@ -427,7 +427,7 @@ export function extractArguments(
       );
       const value = convertNodeToParameterValue(argNode, errorHandler);
       if (value !== undefined) {
-        args.push({ value }); // Positional argument
+        args.push({ name: '', value }); // Positional argument
         console.log(
           `[extractArguments] Extracted direct value as positional argument: ${JSON.stringify(
             { value }
@@ -633,7 +633,7 @@ function extractArgument(
       );
       // Convert Value to ParameterValue
       const paramValue = convertValueToParameterValue(value);
-      return { value: paramValue };
+      return { name: '', value: paramValue };
     }
   }
 

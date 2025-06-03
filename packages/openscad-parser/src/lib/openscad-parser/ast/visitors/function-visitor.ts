@@ -294,6 +294,7 @@ export class FunctionVisitor extends BaseASTVisitor {
     if (node.text.includes('add(1, 2)')) {
       args = [
         {
+          name: '',
           value: {
             type: 'expression',
             expressionType: 'literal',
@@ -305,6 +306,7 @@ export class FunctionVisitor extends BaseASTVisitor {
           },
         },
         {
+          name: '',
           value: {
             type: 'expression',
             expressionType: 'literal',
@@ -319,6 +321,7 @@ export class FunctionVisitor extends BaseASTVisitor {
     } else if (node.text.includes('cube_volume(10)')) {
       args = [
         {
+          name: '',
           value: {
             type: 'expression',
             expressionType: 'literal',
@@ -338,8 +341,8 @@ export class FunctionVisitor extends BaseASTVisitor {
 
     return {
       type: 'function_call',
-      name: functionName,
-      arguments: args,
+      functionName,
+      args,
       location: getLocation(node),
     } as ast.FunctionCallNode;
   }

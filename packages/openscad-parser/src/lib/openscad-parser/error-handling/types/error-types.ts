@@ -123,7 +123,9 @@ export enum ErrorCode {
   UNCLOSED_BRACKET = 'E103',
   UNCLOSED_BRACE = 'E104',
   UNCLOSED_PAREN = 'E105',
-  UNEXPECTED_EOF = 'E106',
+  INVALID_CHARACTER = 'E106',
+  MISSING_FUNCTION_NAME = 'E107',
+  UNEXPECTED_EOF = 'E108',
 
   // Type errors (200-299)
   TYPE_ERROR = 'E200',
@@ -141,14 +143,21 @@ export enum ErrorCode {
   VALIDATION_ERROR = 'E400',
   INVALID_ARGUMENTS = 'E401',
   INVALID_MODIFIER = 'E402',
+  INVALID_ARGUMENT_VALUE = 'E403',
 
   // Internal errors (900-999)
   INTERNAL_ERROR = 'E900',
   NOT_IMPLEMENTED = 'E901',
 }
 
+import { Node as TSNode } from 'web-tree-sitter';
+
 /** Context information about where an error occurred */
 export interface ErrorContext {
+  /** The error code */
+  code?: ErrorCode;
+  /** The CST node where the error occurred */
+  cstNode?: TSNode;
   /** 1-based line number where the error occurred */
   line?: number;
   /** 1-based column number where the error occurred */

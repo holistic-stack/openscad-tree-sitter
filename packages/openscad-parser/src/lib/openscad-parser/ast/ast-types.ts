@@ -262,7 +262,7 @@ export type ParameterValue =
  * Represents a parameter with an optional name
  */
 export interface Parameter {
-  name?: string;
+  name: string | undefined;
   value: ParameterValue;
 }
 
@@ -299,7 +299,7 @@ export interface ExpressionNode extends BaseNode {
   elseBranch?: ExpressionNode;
   items?: ExpressionNode[];
   operand?: ExpressionNode;
-  arguments?: Parameter[];
+  args?: Parameter[];
 }
 
 /**
@@ -323,8 +323,8 @@ export interface VariableNode extends ExpressionNode {
  */
 export interface FunctionCallNode extends BaseNode {
   type: 'function_call';
-  name: string;
-  arguments: Parameter[];
+  functionName: string;
+  args: Parameter[];
 }
 
 /**
@@ -678,7 +678,7 @@ export interface AssertStatementNode extends BaseNode {
 export interface EchoStatementNode extends BaseNode {
   type: 'echo';
   /** The arguments/expressions to output */
-  arguments: ExpressionNode[];
+  args: ExpressionNode[];
 }
 
 /**
@@ -810,7 +810,7 @@ export interface ModuleParameter {
 export interface ModuleInstantiationNode extends BaseNode {
   type: 'module_instantiation';
   name: string;
-  arguments: Parameter[];
+  args: Parameter[];
   children: ASTNode[];
 }
 

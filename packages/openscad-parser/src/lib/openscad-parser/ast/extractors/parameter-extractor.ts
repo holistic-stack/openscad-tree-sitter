@@ -218,8 +218,8 @@ export function extractNumberParameter(param: ast.Parameter, errorHandler?: Erro
         const binaryExpr = param.value as ast.BinaryExpressionNode;
         
         // Get the left and right operand values
-        const leftValue = extractNumberParameter({ value: binaryExpr.left }, errorHandler);
-        const rightValue = extractNumberParameter({ value: binaryExpr.right }, errorHandler);
+        const leftValue = extractNumberParameter({ name: '', value: binaryExpr.left }, errorHandler);
+        const rightValue = extractNumberParameter({ name: '', value: binaryExpr.right }, errorHandler);
         
         console.log(`[extractNumberParameter] Binary expression operands: left=${leftValue}, right=${rightValue}, op=${binaryExpr.operator}`);
         

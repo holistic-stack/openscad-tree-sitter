@@ -38,7 +38,8 @@
   - **Files**: `packages/tree-sitter-openscad/test/corpus/*.txt`
   - **Goal**: Understand new node structure and field names
 
-- [ ] **2.2**: Update function call visitor
+- [x] **2.2**: Update function call visitor (In Progress)
+  - **Problem**: `extractFunctionCallDetails` incorrectly parses arguments. The `arguments` field of `call_expression` is directly the `argument_list` node. The `argument_list` node then contains the `arguments` node, which finally contains the `argument` nodes. The previous change incorrectly assumed an extra `arguments` wrapper. Correct structure: `call_expression` -> `arguments` (which is `argument_list`) -> `arguments` -> `argument`.
   - **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor/function-call-visitor.ts`
   - **Change**: Handle `call_expression` instead of `accessor_expression`
   - **Test**: `nx test openscad-parser --testFile=**/function-call-visitor.test.ts`

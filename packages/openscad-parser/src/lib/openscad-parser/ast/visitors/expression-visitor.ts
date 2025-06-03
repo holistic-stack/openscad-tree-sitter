@@ -324,9 +324,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
    */
   public dispatchSpecificExpression(node: TSNode): ast.ExpressionNode | null {
     this.errorHandler.logInfo(`[ExpressionVisitor.dispatchSpecificExpression] Dispatching node type: ${node.type}`);
-      'ExpressionVisitor.dispatchSpecificExpression',
-      node
-    );
+
 
     // Check for binary expression types first
     // Note: Grammar refactoring unified all binary expressions under 'binary_expression'
@@ -374,7 +372,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
       case 'range_expression':
         return this.rangeExpressionVisitor.visitRangeExpression(node);
       case 'module_instantiation':
-        const result = this.functionCallVisitor.visit(node);
+        const result = this.functionCallVisitor.visit(node) as ast.ExpressionNode | null;
         this.errorHandler.logInfo(`[ExpressionVisitor.dispatchSpecificExpression] module_instantiation result: ${result ? 'not null' : 'null'}`);
         return result;
       case 'let_expression':
@@ -616,14 +614,14 @@ export class ExpressionVisitor extends BaseASTVisitor {
       }
       case 'function_call': {
         // Convert function call to expression node for expression contexts
-        const functionCall = this.functionCallVisitor.visitFunctionCall(node);
+        const functionCall = this.functionCallVisitor.visitFunctionCall(node) as ast.FunctionCallNode;
         if (functionCall) {
           // Create an expression wrapper for the function call
           return {
             type: 'expression',
             expressionType: 'function_call',
-            name: functionCall.name,
-            arguments: functionCall.arguments,
+            functionName: functionCall.functionName,
+            args: functionCall.args,
             location: functionCall.location,
           } as ast.ExpressionNode;
         }

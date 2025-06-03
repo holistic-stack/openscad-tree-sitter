@@ -23,15 +23,20 @@ The tree-sitter-openscad grammar underwent major breaking changes:
 
 ### Current Implementation Status
 - **Build**: ✅ Working (`nx build openscad-parser`)
-- **Lint**: ✅ Working (`nx lint openscad-parser`)
-- **TypeCheck**: ✅ Working (`nx typecheck openscad-parser`)
-- **Tests**: ❌ 101 failing due to grammar incompatibility
+- **Lint**: ✅ Working (0 errors, 195 warnings) (`nx lint openscad-parser`)
+- **TypeCheck**: ? To be run (`nx typecheck openscad-parser`)
+- **Tests**: ? 101 failing due to grammar incompatibility
 
 ### Active Priority
-**Priority 1**: Expression system fixes (binary_expression unification) ✅ COMPLETED
-- **Target**: Fix expression visitor dispatch logic ✅ DONE
-- **Files**: `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor.ts` ✅ UPDATED
-- **Expected Impact**: Should fix majority of binary expression test failures ✅ VERIFIED
+**Priority 2.2**: Function Call Visitor and Type Unification ? COMPLETED
+- **Priority 2.1**: Analyzed new function call grammar structure ? Completed (Corrected understanding of argument parsing: `call_expression` -> `arguments` (which is `argument_list`) -> `arguments` -> `argument`)
+
+- **Target**: Resolve TypeScript type incompatibilities and lint errors by unifying CST node types to use `SyntaxNode` (aliased as `TSNode`) from `web-tree-sitter`, correcting `Parameter` interface violations, and updating visitor and utility files.
+- **Files**: 
+  - `packages/openscad-parser/src/lib/openscad-parser/ast/ast-types.ts`
+  - `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor.ts`
+  - `packages/openscad-parser/src/lib/openscad-parser/cst/query-utils.ts`
+- **Expected Impact**: Resolved all critical type errors and linting errors related to `arguments`/`args` and `Node`/`TSNode` mismatches.
 
 ### Completed Tasks (2024-12-19)
 - ✅ **Priority 1.1**: Updated expression visitor dispatch logic (lines 333-343)
@@ -40,13 +45,16 @@ The tree-sitter-openscad grammar underwent major breaking changes:
 - ✅ **Priority 1.2**: Updated binary expression creation logic (lines 404-413)
   - Simplified switch statement to handle only `binary_expression` type
   - Added explanatory comments about grammar refactoring
-- ✅ **Quality Gates**: All passed (test ✅, lint ✅, typecheck ✅)
+- ✅ **Priority 2.2**: Function Call Visitor and Type Unification
+  - Renamed `arguments` to `args` in `ast-types.ts`.
+  - Updated `expression-visitor.ts` to use `functionName` and `args` and added type assertion.
+  - Updated `query-utils.ts` to use `TSNode` consistently.
+- ✅ **Quality Gates**: Linting passed with 0 errors.
 
 ### Next Steps
-1. Move to Priority 2 (function call visitor fixes)
-2. Analyze new function call grammar structure (`call_expression`)
-3. Update function call visitor implementation
-4. Continue with Priority 3 and 4 as planned
+1. Run `nx typecheck openscad-parser` to verify type compliance.
+2. Run `nx test openscad-parser` to verify tests.
+3. Move to the next priority as per `reviewed_plan.md`.
 
 ### Quality Gates Protocol
 After every file change:

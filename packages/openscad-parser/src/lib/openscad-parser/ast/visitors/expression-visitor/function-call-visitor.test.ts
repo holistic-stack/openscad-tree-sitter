@@ -37,7 +37,7 @@ describe('FunctionCallVisitor', () => {
       // Find the module_instantiation node (function call in new grammar)
       const moduleInstNode = findDescendantOfType(
         tree!.rootNode,
-        'module_instantiation'
+        'call_expression'
       );
       expect(moduleInstNode).not.toBeNull();
 
@@ -48,8 +48,9 @@ describe('FunctionCallVisitor', () => {
       // Verify the result
       expect(result).not.toBeNull();
       expect(result?.type).toBe('function_call');
-      expect(result?.name).toBe('foo');
-      expect(result?.arguments).toHaveLength(0);
+      const functionCallResult = result as ast.FunctionCallNode;
+      expect(functionCallResult.name).toBe('foo');
+      expect(functionCallResult.arguments).toHaveLength(0);
     });
 
     it('should handle function calls with positional arguments', async () => {
@@ -64,7 +65,7 @@ describe('FunctionCallVisitor', () => {
       // Find the module_instantiation node (function call in new grammar)
       const moduleInstNode = findDescendantOfType(
         tree!.rootNode,
-        'module_instantiation'
+        'call_expression'
       );
       expect(moduleInstNode).not.toBeNull();
 
@@ -75,21 +76,22 @@ describe('FunctionCallVisitor', () => {
       // Verify the result
       expect(result).not.toBeNull();
       expect(result?.type).toBe('function_call');
-      expect(result?.name).toBe('bar');
-      expect(result?.arguments).toHaveLength(3);
+      const functionCallResult = result as ast.FunctionCallNode;
+      expect(functionCallResult.name).toBe('bar');
+      expect(functionCallResult.arguments).toHaveLength(3);
 
       // Check the arguments
-      expect(result?.arguments[0]?.name).toBeUndefined();
-      expect((result?.arguments[0]?.value as ast.ExpressionNode)?.type).toBe('expression');
-      expect((result?.arguments[0]?.value as ast.LiteralNode)?.value).toBe(1);
+      expect(functionCallResult.arguments[0]?.name).toBeUndefined();
+      expect((functionCallResult.arguments[0]?.value as ast.ExpressionNode)?.type).toBe('expression');
+      expect((functionCallResult.arguments[0]?.value as ast.LiteralNode)?.value).toBe(1);
 
-      expect(result?.arguments[1]?.name).toBeUndefined();
-      expect((result?.arguments[1]?.value as ast.ExpressionNode)?.type).toBe('expression');
-      expect((result?.arguments[1]?.value as ast.LiteralNode)?.value).toBe(2);
+      expect(functionCallResult.arguments[1]?.name).toBeUndefined();
+      expect((functionCallResult.arguments[1]?.value as ast.ExpressionNode)?.type).toBe('expression');
+      expect((functionCallResult.arguments[1]?.value as ast.LiteralNode)?.value).toBe(2);
 
-      expect(result?.arguments[2]?.name).toBeUndefined();
-      expect((result?.arguments[2]?.value as ast.ExpressionNode)?.type).toBe('expression');
-      expect((result?.arguments[2]?.value as ast.LiteralNode)?.value).toBe(3);
+      expect(functionCallResult.arguments[2]?.name).toBeUndefined();
+      expect((functionCallResult.arguments[2]?.value as ast.ExpressionNode)?.type).toBe('expression');
+      expect((functionCallResult.arguments[2]?.value as ast.LiteralNode)?.value).toBe(3);
     });
 
     it('should handle function calls with named arguments', async () => {
@@ -104,7 +106,7 @@ describe('FunctionCallVisitor', () => {
       // Find the module_instantiation node (function call in new grammar)
       const moduleInstNode = findDescendantOfType(
         tree!.rootNode,
-        'module_instantiation'
+        'call_expression'
       );
       expect(moduleInstNode).not.toBeNull();
 
@@ -115,17 +117,18 @@ describe('FunctionCallVisitor', () => {
       // Verify the result
       expect(result).not.toBeNull();
       expect(result?.type).toBe('function_call');
-      expect(result?.name).toBe('baz');
-      expect(result?.arguments).toHaveLength(2);
+      const functionCallResult = result as ast.FunctionCallNode;
+      expect(functionCallResult.name).toBe('baz');
+      expect(functionCallResult.arguments).toHaveLength(2);
 
       // Check the arguments
-      expect(result?.arguments[0]?.name).toBe('x');
-      expect((result?.arguments[0]?.value as ast.ExpressionNode)?.type).toBe('expression');
-      expect((result?.arguments[0]?.value as ast.LiteralNode)?.value).toBe(10);
+      expect(functionCallResult.arguments[0]?.name).toBe('x');
+      expect((functionCallResult.arguments[0]?.value as ast.ExpressionNode)?.type).toBe('expression');
+      expect((functionCallResult.arguments[0]?.value as ast.LiteralNode)?.value).toBe(10);
 
-      expect(result?.arguments[1]?.name).toBe('y');
-      expect((result?.arguments[1]?.value as ast.ExpressionNode)?.type).toBe('expression');
-      expect((result?.arguments[1]?.value as ast.LiteralNode)?.value).toBe(20);
+      expect(functionCallResult.arguments[1]?.name).toBe('y');
+      expect((functionCallResult.arguments[1]?.value as ast.ExpressionNode)?.type).toBe('expression');
+      expect((functionCallResult.arguments[1]?.value as ast.LiteralNode)?.value).toBe(20);
     });
 
     it('should handle function calls with mixed arguments', async () => {
@@ -140,7 +143,7 @@ describe('FunctionCallVisitor', () => {
       // Find the module_instantiation node (function call in new grammar)
       const moduleInstNode = findDescendantOfType(
         tree!.rootNode,
-        'module_instantiation'
+        'call_expression'
       );
       expect(moduleInstNode).not.toBeNull();
 
@@ -151,21 +154,22 @@ describe('FunctionCallVisitor', () => {
       // Verify the result
       expect(result).not.toBeNull();
       expect(result?.type).toBe('function_call');
-      expect(result?.name).toBe('qux');
-      expect(result?.arguments).toHaveLength(3);
+      const functionCallResult = result as ast.FunctionCallNode;
+      expect(functionCallResult.name).toBe('qux');
+      expect(functionCallResult.arguments).toHaveLength(3);
 
       // Check the arguments
-      expect(result?.arguments[0]?.name).toBeUndefined();
-      expect((result?.arguments[0]?.value as ast.ExpressionNode)?.type).toBe('expression');
-      expect((result?.arguments[0]?.value as ast.LiteralNode)?.value).toBe(1);
+      expect(functionCallResult.arguments[0]?.name).toBeUndefined();
+      expect((functionCallResult.arguments[0]?.value as ast.ExpressionNode)?.type).toBe('expression');
+      expect((functionCallResult.arguments[0]?.value as ast.LiteralNode)?.value).toBe(1);
 
-      expect(result?.arguments[1]?.name).toBe('y');
-      expect((result?.arguments[1]?.value as ast.ExpressionNode)?.type).toBe('expression');
-      expect((result?.arguments[1]?.value as ast.LiteralNode)?.value).toBe(20);
+      expect(functionCallResult.arguments[1]?.name).toBe('y');
+      expect((functionCallResult.arguments[1]?.value as ast.ExpressionNode)?.type).toBe('expression');
+      expect((functionCallResult.arguments[1]?.value as ast.LiteralNode)?.value).toBe(20);
 
-      expect(result?.arguments[2]?.name).toBeUndefined();
-      expect((result?.arguments[2]?.value as ast.ExpressionNode)?.type).toBe('expression');
-      expect((result?.arguments[2]?.value as ast.LiteralNode)?.value).toBe(
+      expect(functionCallResult.arguments[2]?.name).toBeUndefined();
+      expect((functionCallResult.arguments[2]?.value as ast.ExpressionNode)?.type).toBe('expression');
+      expect((functionCallResult.arguments[2]?.value as ast.LiteralNode)?.value).toBe(
         'hello'
       );
     });
@@ -182,7 +186,7 @@ describe('FunctionCallVisitor', () => {
       // Find the module_instantiation node (function call in new grammar)
       const moduleInstNode = findDescendantOfType(
         tree!.rootNode,
-        'module_instantiation'
+        'call_expression'
       );
       expect(moduleInstNode).not.toBeNull();
 
@@ -219,11 +223,12 @@ describe('FunctionCallVisitor', () => {
       // Verify the result
       expect(result).not.toBeNull();
       expect(result?.type).toBe('function_call');
-      expect(result?.name).toBe('outer');
-      expect(result?.arguments).toHaveLength(1);
+      const functionCallResult = result as ast.FunctionCallNode;
+      expect(functionCallResult.name).toBe('outer');
+      expect(functionCallResult.arguments).toHaveLength(1);
 
       // Check the nested function call
-      const innerCall = result?.arguments[0].value as ast.ExpressionNode;
+      const innerCall = functionCallResult.arguments[0] as ast.ExpressionNode;
       expect(innerCall.expressionType).toBe('function_call');
       expect(innerCall.name).toBe('inner');
     });

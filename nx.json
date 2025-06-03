@@ -14,15 +14,14 @@
       "outputs": ["{projectRoot}/dist"]
     },
     "test": {
-      "dependsOn": [
-        {
-          "target": "build",
-          "projects": "self",
-          "dependencies": false
-        }
-      ],
       "cache": true,
-      "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"],
+      "inputs": [
+        "default",
+        "^production",
+        "{workspaceRoot}/vitest.config.ts",
+        "{projectRoot}/vite.config.ts",
+        "{projectRoot}/vitest.config.ts"
+      ],
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"]
     },
     "test:watch": {

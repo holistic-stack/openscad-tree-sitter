@@ -36,17 +36,17 @@
     },
     "test": {
       "executor": "@nx/vite:test",
-      "outputs": ["{options.reportsDirectory}"],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "reportsDirectory": "../../coverage/packages/openscad-parser",
-        "configFile": "packages/openscad-parser/vite.config.ts"
+        "configFile": "packages/openscad-parser/vite.config.ts",
+        "reportsDirectory": "{workspaceRoot}/coverage/{projectRoot}"
       },
       "configurations": {
         "watch": {
           "watch": true
         },
         "coverage": {
-          "coverage": true
+          "reportsDirectory": "{workspaceRoot}/coverage/{projectRoot}"
         }
       }
     },
