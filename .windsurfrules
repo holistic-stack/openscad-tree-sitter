@@ -14,9 +14,10 @@
 
 ```bash
 # IMPORTANT: Always prepend Set-Location to commands
-execute_command({ "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; pnpm build" })
-execute_command({ "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; pnpm test" })
+execute_command({ "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx run-many --target=build --all" })
+execute_command({ "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx run-many --target=test --all" })
 execute_command({ "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx test tree-sitter-openscad" })
+execute_command({ "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx test openscad-parser" })
 
 # File operations (no Set-Location needed)
 read_file({ "path": "src/file.ts" })
@@ -1245,9 +1246,9 @@ packages/
 ### Test Types
 
 1. **Unit Tests**: Test individual components in isolation (aim for >80% coverage)
-   - Use `pnpm test` to run all tests (plain text output)
-   - Use `pnpm test:grammar` or `pnpm test:parser` for specific packages (plain text output)
-   - Use `pnpm test:parser:file --testFile=src/lib/feature/feature.test.ts` for specific files (plain text output)
+   - Use `nx test <package-name>` to run tests for specific packages
+   - Use `nx test openscad-parser --testFile=src/lib/feature/feature.test.ts` for specific files
+   - Use `nx test tree-sitter-openscad --file-name=advanced.txt` for grammar corpus files
 
 2. **Integration Tests**: Test component interactions and API contracts
    - Focus on testing interactions between different modules
@@ -1294,29 +1295,29 @@ Refer to the "Script Commands" section for a more exhaustive list of available s
 
 ```bash
 # Build and test everything
-pnpm build && pnpm test
+nx run-many --target=build --all && nx run-many --target=test --all
 
 # Development workflow
-pnpm dev                    # Start all packages in watch mode
-pnpm test:watch            # Run tests in watch mode
+nx run-many --target=dev --all     # Start all packages in watch mode
+nx run-many --target=test --all --watch  # Run tests in watch mode
 
 # Package-specific development
-pnpm build:parser && pnpm test:parser
-pnpm dev:demo              # Start demo application
+nx build openscad-parser && nx test openscad-parser
+nx dev openscad-demo               # Start demo application
 ```
 </essential_commands>
 
 ### Monorepo Commands
 
 <monorepo_commands>
-**Commands that operate across all packages (plain text output by default):**
+**Commands that operate across all packages:**
 
-- **`pnpm build`** - Build all packages
-- **`pnpm test`** - Run all tests
-- **`pnpm lint`** - Lint all packages
-- **`pnpm typecheck`** - Type check all TypeScript packages
-- **`pnpm dev`** - Start all packages in development mode (interactive)
-- **`pnpm test:coverage`** - Generate coverage reports
+- **`nx run-many --target=build --all`** - Build all packages
+- **`nx run-many --target=test --all`** - Run all tests
+- **`nx run-many --target=lint --all`** - Lint all packages
+- **`nx run-many --target=typecheck --all`** - Type check all TypeScript packages
+- **`nx run-many --target=dev --all`** - Start all packages in development mode
+- **`nx run-many --target=test --all --coverage`** - Generate coverage reports
 </monorepo_commands>
 
 ### Package-Specific Commands
@@ -1371,12 +1372,12 @@ nx lint openscad-demo                           # Lint code
 **Additional commands for specific tasks:**
 
 ```bash
-pnpm serve:demo            # Serve demo application
-pnpm graph                 # View dependency graph
-pnpm clean                 # Remove build artifacts
-pnpm reset                 # Clean and reinstall dependencies
-pnpm parse                 # Parse OpenSCAD files
-pnpm playground            # Launch tree-sitter playground
+nx serve openscad-demo                          # Serve demo application
+nx graph                                        # View dependency graph
+nx run-many --target=clean --all               # Remove build artifacts
+nx reset                                        # Clean and reinstall dependencies
+nx parse tree-sitter-openscad -- examples/file.scad    # Parse OpenSCAD files
+nx playground tree-sitter-openscad             # Launch tree-sitter playground
 ```
 </utility_commands>
 

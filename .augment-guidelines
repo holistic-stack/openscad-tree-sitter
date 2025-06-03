@@ -1160,9 +1160,9 @@ packages/
 ### Test Types
 
 1. **Unit Tests**: Test individual components in isolation (aim for >80% coverage)
-   - Use `pnpm test` to run all tests (plain text output)
-   - Use `pnpm test:grammar` or `pnpm test:parser` for specific packages (plain text output)
-   - Use `pnpm test:parser:file --testFile=src/lib/feature/feature.test.ts` for specific files (plain text output)
+   - Use `nx test <package-name>` to run tests for specific packages
+   - Use `nx test openscad-parser --testFile=src/lib/feature/feature.test.ts` for specific files
+   - Use `nx test tree-sitter-openscad --file-name=advanced.txt` for grammar corpus files
 
 2. **Integration Tests**: Test component interactions and API contracts
    - Focus on testing interactions between different modules
@@ -1178,45 +1178,20 @@ packages/
 
 ### Test Commands
 
-The primary way to run tests is through the PNPM scripts defined in the root `package.json`. **All test commands use plain text output by default**:
+**Use Nx commands directly for testing:**
 
-- **`pnpm test`**: Runs all tests across all packages in the monorepo (plain text output). This is the most comprehensive way to ensure everything is working.
-  ```bash
-  pnpm test
-  ```
+- **`nx test <package-name>`**: Run tests for specific package
+- **`nx test <package-name> --testFile=path`**: Test specific file
+- **`nx test <package-name> --coverage`**: Run with coverage
+- **`nx test <package-name> --watch`**: Run in watch mode
 
-- **Package-Specific Tests**: To run tests for a single package (plain text output):
-  ```bash
-  pnpm test:grammar   # For tree-sitter-openscad
-  pnpm test:parser    # For openscad-parser
-  pnpm test:editor    # For openscad-editor
-  pnpm test:demo      # For openscad-demo
-  ```
-  *Example*: `pnpm test:parser`
-
-- **Testing Specific Files or Patterns (for Vitest-based packages)**:
-  Use the `:file` suffixed scripts for `openscad-parser`, `openscad-editor`, and `openscad-demo`. The path provided to `--testFile` is relative to the package's root directory. All use plain text output.
-  ```bash
-  # Test a single file in openscad-parser
-  pnpm test:parser:file --testFile src/lib/ast-utils.test.ts
-
-  # Test all files in a specific directory within openscad-editor
-  pnpm test:editor:file --testFile src/components/specific-ui/
-
-  # Test files matching a pattern in openscad-demo
-  pnpm test:demo:file --testFile "**/integration.*.test.tsx"
-  ```
-
-- **Watch Mode**: For continuous testing during development (interactive mode):
-  ```bash
-  pnpm test:watch # Runs tests for all packages in watch mode
-  ```
-  You can also run watch mode for specific packages if their `project.json` defines a `test:watch` target (e.g., `nx test:watch openscad-parser`).
-
-- **Coverage Reports**: To generate test coverage (plain text output):
-  ```bash
-  pnpm test:coverage # Generates coverage for all packages
-  ```
+**Examples:**
+```bash
+nx test openscad-parser                         # Test parser package
+nx test tree-sitter-openscad --file-name=advanced.txt  # Test specific corpus
+nx test openscad-editor --coverage              # Test with coverage
+nx test openscad-parser --testFile=src/lib/ast-utils.test.ts  # Test specific file
+```
 
 Refer to the "Script Commands" section for a more exhaustive list of available scripts and their usage.
 
@@ -1235,29 +1210,29 @@ Refer to the "Script Commands" section for a more exhaustive list of available s
 
 ```bash
 # Build and test everything
-pnpm build && pnpm test
+nx run-many --target=build --all && nx run-many --target=test --all
 
 # Development workflow
-pnpm dev                    # Start all packages in watch mode
-pnpm test:watch            # Run tests in watch mode
+nx run-many --target=dev --all     # Start all packages in watch mode
+nx run-many --target=test --all --watch  # Run tests in watch mode
 
 # Package-specific development
-pnpm build:parser && pnpm test:parser
-pnpm dev:demo              # Start demo application
+nx build openscad-parser && nx test openscad-parser
+nx dev openscad-demo               # Start demo application
 ```
 </essential_commands>
 
 ### Monorepo Commands
 
 <monorepo_commands>
-**Commands that operate across all packages (plain text output by default):**
+**Commands that operate across all packages:**
 
-- **`pnpm build`** - Build all packages
-- **`pnpm test`** - Run all tests
-- **`pnpm lint`** - Lint all packages
-- **`pnpm typecheck`** - Type check all TypeScript packages
-- **`pnpm dev`** - Start all packages in development mode (interactive)
-- **`pnpm test:coverage`** - Generate coverage reports
+- **`nx run-many --target=build --all`** - Build all packages
+- **`nx run-many --target=test --all`** - Run all tests
+- **`nx run-many --target=lint --all`** - Lint all packages
+- **`nx run-many --target=typecheck --all`** - Type check all TypeScript packages
+- **`nx run-many --target=dev --all`** - Start all packages in development mode
+- **`nx run-many --target=test --all --coverage`** - Generate coverage reports
 </monorepo_commands>
 
 ### Package-Specific Commands
@@ -1422,10 +1397,15 @@ sudo yum install python3 python3-devel
 
 ### Grammar Development Commands
 
-- **`pnpm build:grammar:wasm`**: Build only WASM file (requires tree-sitter CLI)
-- **`pnpm build:grammar:native`**: Build native + WASM (requires full C++ toolchain)
-- **`pnpm test:grammar`**: Test grammar changes
-- **`pnpm parse examples/test.scad`**: Parse and visualize OpenSCAD files
+**Use Nx commands for grammar development:**
+```bash
+nx generate-grammar tree-sitter-openscad        # Generate grammar
+nx build:wasm tree-sitter-openscad             # Build WASM file
+nx build:native tree-sitter-openscad           # Build native + WASM
+nx test tree-sitter-openscad                   # Test grammar changes
+nx parse tree-sitter-openscad -- examples/test.scad    # Parse and visualize files
+nx playground tree-sitter-openscad             # Launch playground
+```
 
 
 ## Mandatory Workflows
@@ -1480,10 +1460,10 @@ These workflows must never be skipped:
 ### Tree-Sitter Grammar Debugging Workflow
 1. **Identify Syntax Issue**: Find problematic OpenSCAD syntax
 2. **Create Test Case**: Add a minimal example to the test corpus
-3. **Run Grammar Tests**: Use `pnpm test:grammar` to verify failure
+3. **Run Grammar Tests**: Use `nx test tree-sitter-openscad` to verify failure
 4. **Analyze Grammar**: Review grammar.js rules related to the issue
 5. **Modify Grammar**: Update grammar.js to handle the syntax correctly
-6. **Generate Parser**: Run `pnpm build:grammar:wasm` to rebuild the parser
-7. **Test Changes**: Run `pnpm test:grammar` to verify fix
-8. **Visualize Parse Tree**: Use `pnpm parse examples/test-case.scad` to inspect
+6. **Generate Parser**: Run `nx generate-grammar tree-sitter-openscad` to rebuild the parser
+7. **Test Changes**: Run `nx test tree-sitter-openscad` to verify fix
+8. **Visualize Parse Tree**: Use `nx parse tree-sitter-openscad -- examples/test-case.scad` to inspect
 9. **Document Changes**: Update grammar documentation
