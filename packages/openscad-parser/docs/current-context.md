@@ -44,24 +44,49 @@ From the latest test logs:
 - `qux(1, y = 20, "hello")`: ✅ Mixed arguments with string values working
 - `outer(inner(10))`: ✅ Nested calls handled (as string placeholders)
 
-### Remaining Issue: Test Expectations Mismatch
+### ✅ MAJOR SUCCESS: Test Expectations Fixed!
 
-The core issue is that tests expect values wrapped in `ExpressionNode` objects:
-```typescript
-// Test expects:
-{ name: undefined, value: { type: 'expression', expressionType: 'literal', value: 1 } }
+**BREAKTHROUGH ACHIEVED**: Modified `convertValueToParameterValue` function to wrap raw values in `ExpressionNode` objects, resolving the test expectations mismatch.
 
-// Current implementation returns:
-{ name: undefined, value: 1 }
+**Results**: 4/5 tests now passing! 🎉
+
+- ✅ Simple function calls: `foo()`
+- ✅ Positional arguments: `bar(1, 2, 3)` - All 3 arguments extracted correctly
+- ✅ Named arguments: `baz(x = 10, y = 20)` - Both named arguments working
+- ✅ Mixed arguments: `qux(1, y = 20, "hello")` - All 3 mixed arguments working
+
+### Remaining Issue: Nested Function Calls (Lower Priority)
+
+Only 1/5 tests failing: **nested function calls** test expects `expressionType: 'function_call'` but getting `expressionType: 'literal'` with string representation.
+
+This is a **separate concern** requiring proper function call expression parsing, beyond the scope of current priority.
+
+### ✅ Priority 3.1 Analysis Complete: Range Expression Grammar Issue Identified
+
+**Status**: ANALYSIS COMPLETED - Issue identified as grammar-level, not visitor-level
+
+**Findings**:
+- ✅ Range expression visitor working correctly (10/12 tests passing)
+- ✅ All basic range patterns working: `[0:5]`, `[x:y]`, `[a+1:b*2]`, `[0:2:10]`
+- ❌ Grammar parsing issue: `[10:-1:0]` parsed incorrectly by tree-sitter
+- ❌ Test expectation issue: Standalone `[0:5]` creates ERROR node
+
+**Root Cause**: Tree-sitter grammar parses `[10:-1:0]` as:
+```
+range_expression(start: 10, end: unary_expression(-range_expression(1:0)))
+```
+Instead of:
+```
+range_expression(start: 10, step: -1, end: 0)
 ```
 
-This is a **design decision**: Should we return raw values (simpler) or wrapped expression nodes (structured)?
+**Decision**: Grammar issue is outside scope of visitor fixes. Visitor implementation is correct.
 
 ### Next Steps
 
-1. **Decision**: Choose between raw values vs wrapped expression nodes
-2. **Implementation**: Either update tests to expect raw values OR modify argument extractor to wrap values
-3. **Consistency**: Ensure the chosen approach is consistent across all visitors
+1. **Complete Priority 3.1**: Document findings and move to PROGRESS.md
+2. **Move to Priority 4**: List Comprehension Integration
+3. **Future**: Address grammar-level negative step parsing (separate grammar task)
 
 ### Files Modified
 

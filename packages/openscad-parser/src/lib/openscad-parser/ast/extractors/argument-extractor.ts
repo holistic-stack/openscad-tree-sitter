@@ -45,11 +45,23 @@ import { ErrorHandler } from '../../error-handling/index.js';
  */
 function convertValueToParameterValue(value: ast.Value): ast.ParameterValue {
   if (value.type === 'number') {
-    return parseFloat(value.value as string);
+    return {
+      type: 'expression',
+      expressionType: 'literal',
+      value: parseFloat(value.value as string),
+    } as ast.LiteralNode;
   } else if (value.type === 'boolean') {
-    return value.value === 'true';
+    return {
+      type: 'expression',
+      expressionType: 'literal',
+      value: value.value === 'true',
+    } as ast.LiteralNode;
   } else if (value.type === 'string') {
-    return value.value as string;
+    return {
+      type: 'expression',
+      expressionType: 'literal',
+      value: value.value as string,
+    } as ast.LiteralNode;
   } else if (value.type === 'identifier') {
     // For identifiers, we might want to create a VariableNode or IdentifierNode
     // For now, returning as string to match previous behavior, but this might need refinement
