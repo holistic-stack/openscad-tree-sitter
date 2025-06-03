@@ -9,6 +9,35 @@
 
 
 
+## DESKTOP COMMANDER MCP - REQUIRED TOOL
+
+<mcp_usage>
+**Use Desktop Commander MCP for all terminal commands:**
+
+**Terminal Commands:**
+```bash
+# Execute terminal commands (always use Set-Location first)
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx test tree-sitter-openscad",
+  "timeout": 30
+})
+
+# Read output from long-running commands
+read_output({ "sessionId": "session_id_from_execute_command" })
+
+# List active terminal sessions
+list_sessions({})
+
+# Force terminate if needed
+force_terminate({ "sessionId": "session_id" })
+```
+
+**CRITICAL: Working Directory**
+⚠️ **ALWAYS prepend** `Set-Location "C:\Users\luciano\git\openscad-tree-sitter";` to ANY terminal command
+⚠️ Desktop Commander does NOT start in the project directory
+⚠️ **Example:** `Set-Location "C:\Users\luciano\git\openscad-tree-sitter"; nx test tree-sitter-openscad`
+</mcp_usage>
+
 ## CRITICAL REQUIREMENTS - NEVER SKIP:
 
 <instructions>
@@ -17,6 +46,7 @@
 2. **ALWAYS FOLLOW** the structured workflows: [Development Workflow](#development-workflow), [Documentation Best Practices](#documentation-best-practices), and [Mandatory Workflows](#mandatory-workflows)
 3. **ALWAYS MAINTAIN** context documents: packages/*/docs/current-context.md, packages/*/docs/TODO.md, and packages/*/docs/PROGRESS.md
 4. **ALWAYS APPLY** functional programming principles as outlined in [Functional Programming Guidelines](#functional-programming-guidelines)
+5. **ALWAYS USE** Desktop Commander MCP for terminal commands
 </instructions>
 
 ## AI Assistant Role & Responsibilities
@@ -1199,113 +1229,327 @@ Refer to the "Script Commands" section for a more exhaustive list of available s
 ## Script Commands
 
 <commands_context>
-**Purpose**: Provide clear, actionable commands for development workflows
-**Integration**: Commands are organized by workflow type and use consistent output formatting
-**Success Criteria**: Developers can quickly find and execute the right command for their task
+**Purpose**: Execute development workflows using Desktop Commander MCP
+**Integration**: All commands must be executed through Desktop Commander MCP with proper working directory
+**Success Criteria**: Reliable command execution with proper output handling and session management
 </commands_context>
 
-### Essential Commands
+### Essential Commands via Desktop Commander MCP
 
 <essential_commands>
-**Most commonly used commands for daily development:**
+**Most commonly used commands for daily development (execute via Desktop Commander MCP):**
 
 ```bash
 # Build and test everything
-nx run-many --target=build --all && nx run-many --target=test --all
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx run-many --target=build --all && nx run-many --target=test --all",
+  "timeout": 120
+})
 
-# Development workflow
-nx run-many --target=dev --all     # Start all packages in watch mode
-nx run-many --target=test --all --watch  # Run tests in watch mode
+# Development workflow (long-running commands)
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx run-many --target=dev --all",
+  "timeout": 10
+})
+# Then use read_output({ "sessionId": "session_id" }) to monitor
 
 # Package-specific development
-nx build openscad-parser && nx test openscad-parser
-nx dev openscad-demo               # Start demo application
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx build openscad-parser && nx test openscad-parser",
+  "timeout": 60
+})
+
+# Start demo application (long-running)
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx dev openscad-demo",
+  "timeout": 10
+})
+# Then use read_output({ "sessionId": "session_id" }) to check status
 ```
 </essential_commands>
 
-### Monorepo Commands
+### Monorepo Commands via Desktop Commander MCP
 
 <monorepo_commands>
-**Commands that operate across all packages:**
+**Commands that operate across all packages (execute via Desktop Commander MCP):**
 
-- **`nx run-many --target=build --all`** - Build all packages
-- **`nx run-many --target=test --all`** - Run all tests
-- **`nx run-many --target=lint --all`** - Lint all packages
-- **`nx run-many --target=typecheck --all`** - Type check all TypeScript packages
-- **`nx run-many --target=dev --all`** - Start all packages in development mode
-- **`nx run-many --target=test --all --coverage`** - Generate coverage reports
+```bash
+# Build all packages
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx run-many --target=build --all",
+  "timeout": 120
+})
+
+# Run all tests
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx run-many --target=test --all",
+  "timeout": 180
+})
+
+# Lint all packages
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx run-many --target=lint --all",
+  "timeout": 60
+})
+
+# Type check all TypeScript packages
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx run-many --target=typecheck --all",
+  "timeout": 90
+})
+
+# Start all packages in development mode (long-running)
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx run-many --target=dev --all",
+  "timeout": 10
+})
+# Use read_output({ "sessionId": "session_id" }) to monitor
+
+# Generate coverage reports
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx run-many --target=test --all --coverage",
+  "timeout": 240
+})
+```
 </monorepo_commands>
 
-### Package-Specific Commands
+### Package-Specific Commands via Desktop Commander MCP
 
 <package_commands>
-**Commands for individual packages:**
-
-**Current Nx commands for individual packages:**
+**Commands for individual packages (execute via Desktop Commander MCP):**
 
 **Tree-sitter Grammar (tree-sitter-openscad):**
 ```bash
-nx generate-grammar tree-sitter-openscad        # Generate grammar
-nx build:native tree-sitter-openscad           # Build native bindings
-nx build:wasm tree-sitter-openscad             # Build WebAssembly
-nx test tree-sitter-openscad                   # Run all tests
-nx test tree-sitter-openscad --file-name=advanced.txt  # Test specific corpus
-nx parse tree-sitter-openscad -- examples/file.scad    # Parse file
-nx playground tree-sitter-openscad             # Launch playground
+# Generate grammar
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx generate-grammar tree-sitter-openscad",
+  "timeout": 60
+})
+
+# Build native bindings
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx build:native tree-sitter-openscad",
+  "timeout": 120
+})
+
+# Build WebAssembly
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx build:wasm tree-sitter-openscad",
+  "timeout": 90
+})
+
+# Run all tests
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx test tree-sitter-openscad",
+  "timeout": 60
+})
+
+# Test specific corpus file
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx test tree-sitter-openscad --file-name=advanced.txt",
+  "timeout": 30
+})
+
+# Parse specific file
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx parse tree-sitter-openscad -- examples/file.scad",
+  "timeout": 30
+})
+
+# Launch playground (long-running)
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx playground tree-sitter-openscad",
+  "timeout": 10
+})
+# Use read_output({ "sessionId": "session_id" }) to monitor
 ```
 
 **Parser Package (openscad-parser):**
 ```bash
-nx build openscad-parser                        # Build package
-nx test openscad-parser                         # Run all tests
-nx test openscad-parser --testFile=path/to/test.ts     # Test specific file
-nx test openscad-parser --coverage              # Run with coverage
-nx lint openscad-parser                         # Lint code
-nx typecheck openscad-parser                    # Type checking
+# Build package
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx build openscad-parser",
+  "timeout": 60
+})
+
+# Run all tests
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx test openscad-parser",
+  "timeout": 60
+})
+
+# Test specific file
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx test openscad-parser --testFile=path/to/test.ts",
+  "timeout": 30
+})
+
+# Run with coverage
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx test openscad-parser --coverage",
+  "timeout": 90
+})
+
+# Lint code
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx lint openscad-parser",
+  "timeout": 30
+})
+
+# Type checking
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx typecheck openscad-parser",
+  "timeout": 45
+})
 ```
 
 **Editor Package (openscad-editor):**
 ```bash
-nx build openscad-editor                        # Build package
-nx dev openscad-editor                          # Start development server
-nx test openscad-editor                         # Run all tests
-nx lint openscad-editor                         # Lint code
+# Build package
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx build openscad-editor",
+  "timeout": 60
+})
+
+# Start development server (long-running)
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx dev openscad-editor",
+  "timeout": 10
+})
+# Use read_output({ "sessionId": "session_id" }) to monitor
+
+# Run all tests
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx test openscad-editor",
+  "timeout": 60
+})
+
+# Lint code
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx lint openscad-editor",
+  "timeout": 30
+})
 ```
 
 **Demo Package (openscad-demo):**
 ```bash
-nx build openscad-demo                          # Build application
-nx dev openscad-demo                            # Start development server
-nx serve openscad-demo                          # Preview production build
-nx test openscad-demo                           # Run all tests
-nx lint openscad-demo                           # Lint code
+# Build application
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx build openscad-demo",
+  "timeout": 90
+})
+
+# Start development server (long-running)
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx dev openscad-demo",
+  "timeout": 10
+})
+# Use read_output({ "sessionId": "session_id" }) to monitor
+
+# Preview production build (long-running)
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx serve openscad-demo",
+  "timeout": 10
+})
+# Use read_output({ "sessionId": "session_id" }) to monitor
+
+# Run all tests
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx test openscad-demo",
+  "timeout": 60
+})
+
+# Lint code
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx lint openscad-demo",
+  "timeout": 30
+})
 ```
 </package_commands>
 
-### Utility Commands
+### Utility Commands via Desktop Commander MCP
 
 <utility_commands>
-**Additional commands for specific tasks:**
+**Additional commands for specific tasks (execute via Desktop Commander MCP):**
 
 ```bash
-nx serve openscad-demo                          # Serve demo application
-nx graph                                        # View dependency graph
-nx run-many --target=clean --all               # Remove build artifacts
-nx reset                                        # Clean and reinstall dependencies
-nx parse tree-sitter-openscad -- examples/file.scad    # Parse OpenSCAD files
-nx playground tree-sitter-openscad             # Launch tree-sitter playground
+# Serve demo application (long-running)
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx serve openscad-demo",
+  "timeout": 10
+})
+# Use read_output({ "sessionId": "session_id" }) to monitor
+
+# View dependency graph
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx graph",
+  "timeout": 30
+})
+
+# Remove build artifacts
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx run-many --target=clean --all",
+  "timeout": 60
+})
+
+# Clean and reinstall dependencies
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx reset",
+  "timeout": 120
+})
+
+# Parse OpenSCAD files
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx parse tree-sitter-openscad -- examples/file.scad",
+  "timeout": 30
+})
+
+# Launch tree-sitter playground (long-running)
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx playground tree-sitter-openscad",
+  "timeout": 10
+})
+# Use read_output({ "sessionId": "session_id" }) to monitor
 ```
 </utility_commands>
 
-### Command Output
+### Handling Long-Running Commands
 
-<output_configuration>
-**All commands use plain text output by default for consistency:**
-- Build, test, lint, and typecheck commands use plain text
-- Development commands (`dev`, `test:watch`) remain interactive
-- Perfect for CI/CD and IDE integration
-- No need to remember output format flags
-</output_configuration>
+<long_running_commands>
+**For commands that may take a while or run continuously:**
+
+1. **Start with short timeout** (10-30 seconds) to get initial output
+2. **Use read_output** to get additional output from the session
+3. **Monitor session status** with list_sessions
+4. **Terminate if needed** with force_terminate
+
+**Example workflow:**
+```bash
+# 1. Start long-running command with short timeout
+execute_command({
+  "command": "Set-Location \"C:\\Users\\luciano\\git\\openscad-tree-sitter\"; nx dev openscad-demo",
+  "timeout": 10
+})
+# Returns: { "sessionId": "abc123", "output": "Starting dev server..." }
+
+# 2. Read additional output
+read_output({ "sessionId": "abc123" })
+# Returns: { "output": "Server running on http://localhost:4200" }
+
+# 3. Check session status
+list_sessions({})
+# Returns: [{ "sessionId": "abc123", "command": "nx dev openscad-demo", "status": "running" }]
+
+# 4. Terminate if needed
+force_terminate({ "sessionId": "abc123" })
+```
+
+**Recommended timeouts:**
+- Build commands: 60-120 seconds
+- Test commands: 60-180 seconds
+- Development servers: 10 seconds (then use read_output)
+- Quick operations: 30 seconds
+</long_running_commands>
 
 ## Coding Best Practices
 
