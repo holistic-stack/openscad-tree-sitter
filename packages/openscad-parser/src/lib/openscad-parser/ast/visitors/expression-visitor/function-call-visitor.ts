@@ -28,24 +28,37 @@ interface FunctionCallParameter {
 export class FunctionCallVisitor extends BaseASTVisitor {
   /**
    * Create a new FunctionCallVisitor
-   * @param parentVisitor The parent expression visitor (optional for backward compatibility)
+   * @param parentVisitorOrSource The parent expression visitor or source code (for backward compatibility)
    * @param errorHandler The error handler instance
    */
   constructor(
-    private parentVisitor: { visitExpression(node: TSNode): ast.ExpressionNode | null } | null,
+    parentVisitorOrSource: { visitExpression(node: TSNode): ast.ExpressionNode | null } | string | null,
     protected override errorHandler: ErrorHandler
   ) {
     super('', errorHandler); // Source is not needed for this visitor
+
+    // Handle backward compatibility: if first parameter is a string, it's the old constructor signature
+    if (typeof parentVisitorOrSource === 'string') {
+      this.parentVisitor = null;
+    } else {
+      this.parentVisitor = parentVisitorOrSource;
+    }
   }
 
+  private parentVisitor: { visitExpression(node: TSNode): ast.ExpressionNode | null } | null;
+
   /**
-   * Visit a node that could be a function call or accessor expression
+   * Visit a node that could be a function call or module instantiation
    * @param node The node to visit
    * @returns The AST node or null if the node cannot be processed
    */
   visit(node: TSNode): ast.ASTNode | null {
-    if (node.type === 'function_call') {
-      return this.visitFunctionCall(node);
+    // Note: Grammar refactoring changed function calls to module_instantiation
+    if (node.type === 'module_instantiation') {
+      return this.visitModuleInstantiation(node);
+    } else if (node.type === 'function_call') {
+      // Legacy support - redirect to module_instantiation handler
+      return this.visitModuleInstantiation(node);
     } else if (node.type === 'accessor_expression') {
       return this.visitAccessorExpression(node);
     } else {
@@ -59,69 +72,61 @@ export class FunctionCallVisitor extends BaseASTVisitor {
   }
 
   /**
-   * Visit a function call node
-   * @param node The function call node to visit
+   * Visit a module instantiation node (new grammar structure for function calls)
+   * @param node The module instantiation node to visit
    * @returns The function call AST node or null if the node cannot be processed
    */
-  visitFunctionCall(node: TSNode): ast.FunctionCallNode | null {
-    console.log(
-      `[FunctionCallVisitor.visitFunctionCall] Processing function call: ${node.text.substring(
+  override visitModuleInstantiation(node: TSNode): ast.FunctionCallNode | null {
+    this.errorHandler.logInfo(
+      `[FunctionCallVisitor.visitModuleInstantiation] Processing module instantiation: ${node.text.substring(
         0,
         50
-      )}`
+      )}`,
+      'FunctionCallVisitor.visitModuleInstantiation',
+      node
     );
 
-    // Extract function name
-    const functionNameNode = this.extractFunctionNameNode(node);
+    // Extract function name from the 'name' field
+    const functionNameNode = node.childForFieldName('name');
     if (!functionNameNode) {
-      console.log(
-        `[FunctionCallVisitor.visitFunctionCall] No function name found`
+      this.errorHandler.logWarning(
+        `[FunctionCallVisitor.visitModuleInstantiation] No function name found`,
+        'FunctionCallVisitor.visitModuleInstantiation',
+        node
       );
       return null;
     }
 
-    let functionName = functionNameNode.text;
-
-    // WORKAROUND: Fix truncated function names due to Tree-sitter memory management issues
-    const truncatedNameMap: { [key: string]: string } = {
-      'sphe': 'sphere',
-      'cyli': 'cylinder',
-      'tran': 'translate',
-      'unio': 'union',
-      'diff': 'difference',
-      'inte': 'intersection',
-      'rota': 'rotate',
-      'scal': 'scale',
-      'mirr': 'mirror',
-      'colo': 'color',
-      'mult': 'multmatrix'
-    };
-
-    if (functionName && truncatedNameMap[functionName]) {
-      const correctedName = truncatedNameMap[functionName];
-      if (correctedName) {
-        console.log(
-          `[FunctionCallVisitor.visitFunctionCall] WORKAROUND: Detected truncated function name "${functionName}", correcting to "${correctedName}"`
-        );
-        functionName = correctedName;
-      }
-    }
-
-    console.log(
-      `[FunctionCallVisitor.visitFunctionCall] Function name: ${functionName}`
+    const functionName = functionNameNode.text;
+    this.errorHandler.logInfo(
+      `[FunctionCallVisitor.visitModuleInstantiation] Function name: ${functionName}`,
+      'FunctionCallVisitor.visitModuleInstantiation',
+      node
     );
 
-    // Extract arguments
-    const args = this.extractFunctionArguments(node);
+    // Extract arguments from the 'arguments' field
+    const args = this.extractModuleInstantiationArguments(node);
     if (!args) {
-      console.log(
-        `[FunctionCallVisitor.visitFunctionCall] Failed to extract arguments`
+      this.errorHandler.logWarning(
+        `[FunctionCallVisitor.visitModuleInstantiation] Failed to extract arguments`,
+        'FunctionCallVisitor.visitModuleInstantiation',
+        node
       );
       return null;
     }
 
     // Create function call node
     return this.createFunctionCallNode(node, functionName, args);
+  }
+
+  /**
+   * Visit a function call node (legacy support)
+   * @param node The function call node to visit
+   * @returns The function call AST node or null if the node cannot be processed
+   */
+  visitFunctionCall(node: TSNode): ast.FunctionCallNode | null {
+    // Delegate to the new module instantiation handler
+    return this.visitModuleInstantiation(node);
   }
 
   /**
@@ -264,7 +269,210 @@ export class FunctionCallVisitor extends BaseASTVisitor {
   }
 
   /**
-   * Extract function arguments from a function call node
+   * Extract function arguments from a module instantiation node (new grammar)
+   * @param node The module instantiation node
+   * @returns Array of extracted parameters or null if extraction fails
+   */
+  private extractModuleInstantiationArguments(
+    node: TSNode
+  ): FunctionCallParameter[] | null {
+    // Find the argument_list node
+    const argumentListNode = node.childForFieldName('arguments');
+    if (!argumentListNode) {
+      this.errorHandler.logInfo(
+        `[FunctionCallVisitor.extractModuleInstantiationArguments] No argument_list found, returning empty array`,
+        'FunctionCallVisitor.extractModuleInstantiationArguments',
+        node
+      );
+      return [];
+    }
+
+    // Find the arguments node within the argument_list
+    const argumentsNode = findDescendantOfType(argumentListNode, 'arguments');
+    if (!argumentsNode) {
+      this.errorHandler.logInfo(
+        `[FunctionCallVisitor.extractModuleInstantiationArguments] No arguments found, returning empty array`,
+        'FunctionCallVisitor.extractModuleInstantiationArguments',
+        node
+      );
+      return [];
+    }
+
+    // Extract individual arguments
+    const args: FunctionCallParameter[] = [];
+    for (let i = 0; i < argumentsNode.namedChildCount; i++) {
+      const argNode = argumentsNode.namedChild(i);
+      if (!argNode || argNode.type !== 'argument') continue;
+
+      // Check if this is a named argument (has both name and value fields)
+      const nameNode = argNode.childForFieldName('name');
+      const valueNode = argNode.childForFieldName('value');
+
+      if (nameNode && valueNode) {
+        // This is a named argument: argument name: (identifier) value: (number)
+        const name = nameNode.text;
+        const value = this.extractArgumentValue(valueNode);
+        args.push({ name, value });
+        this.errorHandler.logInfo(
+          `[FunctionCallVisitor.extractModuleInstantiationArguments] Named argument: ${name} = ${JSON.stringify(value)}`,
+          'FunctionCallVisitor.extractModuleInstantiationArguments',
+          argNode
+        );
+      } else if (!nameNode && argNode.namedChildCount > 0) {
+        // This is a positional argument: argument (number) or argument (vector_expression)
+        const valueNode = argNode.namedChild(0);
+        if (valueNode) {
+          const value = this.extractArgumentValue(valueNode);
+          args.push({ value });
+          this.errorHandler.logInfo(
+            `[FunctionCallVisitor.extractModuleInstantiationArguments] Positional argument: ${JSON.stringify(value)}`,
+            'FunctionCallVisitor.extractModuleInstantiationArguments',
+            argNode
+          );
+        }
+      } else {
+        this.errorHandler.logWarning(
+          `[FunctionCallVisitor.extractModuleInstantiationArguments] Unhandled argument structure: ${argNode.text}`,
+          'FunctionCallVisitor.extractModuleInstantiationArguments',
+          argNode
+        );
+      }
+    }
+
+    return args;
+  }
+
+  /**
+   * Extract the value from an argument node
+   * @param valueNode The value node to extract from
+   * @returns The extracted value as a literal expression or the node text
+   */
+  private extractArgumentValue(valueNode: TSNode): ast.ExpressionNode | number | string | boolean {
+    this.errorHandler.logInfo(
+      `[FunctionCallVisitor.extractArgumentValue] Processing value node: type="${valueNode.type}", text="${valueNode.text}"`,
+      'FunctionCallVisitor.extractArgumentValue',
+      valueNode
+    );
+
+    // Handle different value types based on the new grammar
+    switch (valueNode.type) {
+      case 'number':
+        const numValue = parseFloat(valueNode.text);
+        this.errorHandler.logInfo(
+          `[FunctionCallVisitor.extractArgumentValue] Parsed number: ${numValue}`,
+          'FunctionCallVisitor.extractArgumentValue',
+          valueNode
+        );
+        return {
+          type: 'expression',
+          expressionType: 'literal',
+          value: numValue,
+          location: getLocation(valueNode),
+        } as ast.LiteralNode;
+      case 'string':
+        const strValue = valueNode.text.slice(1, -1); // Remove quotes
+        return {
+          type: 'expression',
+          expressionType: 'literal',
+          value: strValue,
+          location: getLocation(valueNode),
+        } as ast.LiteralNode;
+      case 'true':
+        return {
+          type: 'expression',
+          expressionType: 'literal',
+          value: true,
+          location: getLocation(valueNode),
+        } as ast.LiteralNode;
+      case 'false':
+        return {
+          type: 'expression',
+          expressionType: 'literal',
+          value: false,
+          location: getLocation(valueNode),
+        } as ast.LiteralNode;
+      case 'vector_expression':
+        // For vectors, create a literal expression node
+        return {
+          type: 'expression',
+          expressionType: 'literal',
+          value: valueNode.text, // For now, store as text
+          location: getLocation(valueNode),
+        } as ast.LiteralNode;
+      case 'call_expression':
+        // Handle nested function calls recursively
+        // Note: call_expression is the old grammar type, but we might still encounter it
+        this.errorHandler.logInfo(
+          `[FunctionCallVisitor.extractArgumentValue] Processing nested call_expression: "${valueNode.text}"`,
+          'FunctionCallVisitor.extractArgumentValue',
+          valueNode
+        );
+
+        // Try to use the createExpressionNode method (which may be mocked in tests)
+        const nestedResult = this.createExpressionNode(valueNode);
+        if (nestedResult) {
+          return nestedResult;
+        }
+
+        // Delegate to parent visitor if available
+        if (this.parentVisitor) {
+          const parentResult = this.parentVisitor.visitExpression(valueNode);
+          if (parentResult) {
+            return parentResult;
+          }
+        }
+
+        // Fallback: create a literal representation
+        return {
+          type: 'expression',
+          expressionType: 'literal',
+          value: valueNode.text,
+          location: getLocation(valueNode),
+        } as ast.LiteralNode;
+      case 'module_instantiation':
+        // Handle nested module instantiations (new grammar)
+        this.errorHandler.logInfo(
+          `[FunctionCallVisitor.extractArgumentValue] Processing nested module_instantiation: "${valueNode.text}"`,
+          'FunctionCallVisitor.extractArgumentValue',
+          valueNode
+        );
+        // Recursively process the nested module instantiation
+        const nestedFunctionCall = this.visitModuleInstantiation(valueNode);
+        if (nestedFunctionCall) {
+          // Convert FunctionCallNode to ExpressionNode with function_call type
+          return {
+            type: 'expression',
+            expressionType: 'function_call',
+            name: nestedFunctionCall.name,
+            arguments: nestedFunctionCall.arguments,
+            location: nestedFunctionCall.location,
+          } as ast.ExpressionNode;
+        }
+        // Fallback: create a literal representation
+        return {
+          type: 'expression',
+          expressionType: 'literal',
+          value: valueNode.text,
+          location: getLocation(valueNode),
+        } as ast.LiteralNode;
+      default:
+        // For other types, create a literal expression node
+        this.errorHandler.logInfo(
+          `[FunctionCallVisitor.extractArgumentValue] Unknown type "${valueNode.type}", creating literal with text: "${valueNode.text}"`,
+          'FunctionCallVisitor.extractArgumentValue',
+          valueNode
+        );
+        return {
+          type: 'expression',
+          expressionType: 'literal',
+          value: valueNode.text,
+          location: getLocation(valueNode),
+        } as ast.LiteralNode;
+    }
+  }
+
+  /**
+   * Extract function arguments from a function call node (legacy support)
    * @param node The function call node
    * @returns Array of extracted parameters or null if extraction fails
    */

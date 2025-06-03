@@ -34,16 +34,16 @@ describe('FunctionCallVisitor', () => {
       const tree = parser.parse(code);
       expect(tree).not.toBeNull();
 
-      // Find the accessor_expression node (function call)
-      const accessorExprNode = findDescendantOfType(
+      // Find the module_instantiation node (function call in new grammar)
+      const moduleInstNode = findDescendantOfType(
         tree!.rootNode,
-        'accessor_expression'
+        'module_instantiation'
       );
-      expect(accessorExprNode).not.toBeNull();
+      expect(moduleInstNode).not.toBeNull();
 
       // Create visitor and process the node
       const visitor = new FunctionCallVisitor(code, errorHandler);
-      const result = visitor.visitFunctionCall(accessorExprNode!);
+      const result = visitor.visit(moduleInstNode!);
 
       // Verify the result
       expect(result).not.toBeNull();
@@ -61,16 +61,16 @@ describe('FunctionCallVisitor', () => {
       const tree = parser.parse(code);
       expect(tree).not.toBeNull();
 
-      // Find the accessor_expression node (function call)
-      const accessorExprNode = findDescendantOfType(
+      // Find the module_instantiation node (function call in new grammar)
+      const moduleInstNode = findDescendantOfType(
         tree!.rootNode,
-        'accessor_expression'
+        'module_instantiation'
       );
-      expect(accessorExprNode).not.toBeNull();
+      expect(moduleInstNode).not.toBeNull();
 
       // Create visitor and process the node
       const visitor = new FunctionCallVisitor(code, errorHandler);
-      const result = visitor.visitFunctionCall(accessorExprNode!);
+      const result = visitor.visit(moduleInstNode!);
 
       // Verify the result
       expect(result).not.toBeNull();
@@ -101,16 +101,16 @@ describe('FunctionCallVisitor', () => {
       const tree = parser.parse(code);
       expect(tree).not.toBeNull();
 
-      // Find the accessor_expression node (function call)
-      const accessorExprNode = findDescendantOfType(
+      // Find the module_instantiation node (function call in new grammar)
+      const moduleInstNode = findDescendantOfType(
         tree!.rootNode,
-        'accessor_expression'
+        'module_instantiation'
       );
-      expect(accessorExprNode).not.toBeNull();
+      expect(moduleInstNode).not.toBeNull();
 
       // Create visitor and process the node
       const visitor = new FunctionCallVisitor(code, errorHandler);
-      const result = visitor.visitFunctionCall(accessorExprNode!);
+      const result = visitor.visit(moduleInstNode!);
 
       // Verify the result
       expect(result).not.toBeNull();
@@ -137,16 +137,16 @@ describe('FunctionCallVisitor', () => {
       const tree = parser.parse(code);
       expect(tree).not.toBeNull();
 
-      // Find the accessor_expression node (function call)
-      const accessorExprNode = findDescendantOfType(
+      // Find the module_instantiation node (function call in new grammar)
+      const moduleInstNode = findDescendantOfType(
         tree!.rootNode,
-        'accessor_expression'
+        'module_instantiation'
       );
-      expect(accessorExprNode).not.toBeNull();
+      expect(moduleInstNode).not.toBeNull();
 
       // Create visitor and process the node
       const visitor = new FunctionCallVisitor(code, errorHandler);
-      const result = visitor.visitFunctionCall(accessorExprNode!);
+      const result = visitor.visit(moduleInstNode!);
 
       // Verify the result
       expect(result).not.toBeNull();
@@ -179,12 +179,12 @@ describe('FunctionCallVisitor', () => {
       const tree = parser.parse(code);
       expect(tree).not.toBeNull();
 
-      // Find the accessor_expression node (function call)
-      const accessorExprNode = findDescendantOfType(
+      // Find the module_instantiation node (function call in new grammar)
+      const moduleInstNode = findDescendantOfType(
         tree!.rootNode,
-        'accessor_expression'
+        'module_instantiation'
       );
-      expect(accessorExprNode).not.toBeNull();
+      expect(moduleInstNode).not.toBeNull();
 
       // Create visitor and process the node
       const visitor = new FunctionCallVisitor(code, errorHandler);
@@ -214,7 +214,7 @@ describe('FunctionCallVisitor', () => {
         }
       );
 
-      const result = visitor.visitFunctionCall(accessorExprNode!);
+      const result = visitor.visit(moduleInstNode!);
 
       // Verify the result
       expect(result).not.toBeNull();

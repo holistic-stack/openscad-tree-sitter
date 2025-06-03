@@ -16,14 +16,17 @@ nx build openscad-parser --configuration=development
 # Run all tests
 nx test openscad-parser
 
-# Test with watch mode
-nx test openscad-parser --watch
+# Test with watch mode (updated syntax)
+nx test openscad-parser:watch
 
 # Test specific file
 nx test openscad-parser --testFile=path/to/test.ts
 
-# Run tests with coverage
-nx test openscad-parser --coverage
+# Run tests with coverage (updated syntax)
+nx test openscad-parser:coverage
+
+# Note: Currently 101 tests failing due to grammar breaking changes
+# See packages/openscad-parser/reviewed_plan.md for details
 ```
 
 ## Lint Commands

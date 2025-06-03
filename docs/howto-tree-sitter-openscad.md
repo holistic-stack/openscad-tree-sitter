@@ -27,6 +27,9 @@ nx test tree-sitter-openscad --file-name=advanced.txt
 nx test tree-sitter-openscad --file-name=examples/example.scad
 nx test tree-sitter-openscad --file-name=test/corpus/modules.txt
 nx test tree-sitter-openscad --file-name=test/corpus/functions.txt
+
+# Run tests with additional arguments
+nx test tree-sitter-openscad -- --verbose
 ```
 
 ## Parse Commands
@@ -39,6 +42,9 @@ nx parse tree-sitter-openscad
 nx parse tree-sitter-openscad -- examples/real-world/example020.scad
 nx parse tree-sitter-openscad -- examples/basic/cube.scad
 nx parse tree-sitter-openscad -- examples/advanced/modules.scad
+
+# Parse with debug information
+nx parse tree-sitter-openscad -- --debug examples/cube.scad
 
 # Parse all real-world examples
 nx parse:all tree-sitter-openscad

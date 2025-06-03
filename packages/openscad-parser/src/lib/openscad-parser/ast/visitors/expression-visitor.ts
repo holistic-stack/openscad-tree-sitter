@@ -331,15 +331,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
     );
 
     // Check for binary expression types first
+    // Note: Grammar refactoring unified all binary expressions under 'binary_expression'
     const binaryExpressionTypes = [
       'binary_expression',
-      'additive_expression',
-      'multiplicative_expression',
-      'exponentiation_expression',
-      'logical_or_expression',
-      'logical_and_expression',
-      'equality_expression',
-      'relational_expression',
     ];
 
     if (binaryExpressionTypes.includes(node.type)) {
@@ -403,14 +397,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
     // Handle specific expression types
     switch (node.type) {
-      case 'binary_expression':
-      case 'logical_or_expression':
-      case 'logical_and_expression':
-      case 'equality_expression':
-      case 'relational_expression':
-      case 'additive_expression':
-      case 'multiplicative_expression':
-      case 'exponentiation_expression': {
+      case 'binary_expression': {
+        // Note: Grammar refactoring unified all binary expressions under 'binary_expression'
         // Process binary expression directly
         const leftNode = node.namedChild(0);
         const rightNode = node.namedChild(2);

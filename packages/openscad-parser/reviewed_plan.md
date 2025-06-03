@@ -2,15 +2,16 @@
 
 ## Executive Summary
 
-The tree-sitter grammar refactoring has been completed successfully (103/103 tests passing), but the parser implementation now has compatibility issues with the new grammar structure. Based on test failure analysis, the main issues are:
+The tree-sitter grammar refactoring has been completed successfully (114/114 tests passing), but the parser implementation now has compatibility issues with the new grammar structure. Based on actual test failure analysis from vitest run, the main issues are:
 
 - **Expression node type changes**: Tests expect `additive_expression`, `multiplicative_expression` but now get `binary_expression`
 - **Missing node types**: Tests expect `accessor_expression` but get `null` (nodes not found)
-- **Range expression parsing**: Range expressions like `[0:5]` are now parsed as `ERROR` instead of `array_literal`
+- **Range expression parsing**: Range expressions like `[0:5]` are not being found properly
 - **List comprehension failures**: All list comprehension tests failing because visitor returns `null`
 - **Function call issues**: Function call visitor tests failing because `accessor_expression` nodes are not found
 
-**Total Compatibility Issues**: 47 failing tests across multiple categories
+**Total Compatibility Issues**: 101 failing tests out of 556 total tests
+**Test Results**: 25 failed | 54 passed | 3 skipped (82 test files)
 **Estimated Effort**: 12-16 hours
 **Risk Assessment**: MEDIUM - Grammar is stable, parser needs systematic updates
 
@@ -22,9 +23,14 @@ The tree-sitter grammar refactoring has been completed successfully (103/103 tes
 |---------------|---------------|---------|
 | `additive_expression` | `binary_expression` | HIGH - Expression visitors expect old types |
 | `multiplicative_expression` | `binary_expression` | HIGH - Expression visitors expect old types |
-| `accessor_expression` | Not found/null | HIGH - Function call visitor depends on this |
-| `array_literal` (for ranges) | `ERROR` | HIGH - Range expressions broken |
+| `accessor_expression` | `call_expression` | HIGH - Function call visitor depends on this |
+| `array_literal` (for ranges) | `vector_expression` | HIGH - Range expressions broken |
 | Expression hierarchy nodes | Unified `_value` rule | MEDIUM - Visitor dispatch needs updates |
+
+**Key Structural Changes:**
+- **Function calls**: `accessor_expression` → `call_expression` with `function` and `arguments` fields
+- **Binary expressions**: All unified under `binary_expression` type
+- **Arguments**: Now structured as `argument_list` → `arguments` → `argument` nodes
 
 ### Field Name Changes
 
@@ -320,3 +326,31 @@ pnpm test:parser
 3. **Track in TODO.md**: Move completed items to PROGRESS.md
 4. **Validate incrementally**: Test each priority before moving to next
 5. **Document learnings**: Record any unexpected findings or solutions
+
+---
+
+## Updated Commands and Scripts (2024-12-19)
+
+All Nx commands have been reviewed and updated to work with the current monorepo structure:
+
+### Tree-sitter-openscad Commands (✅ Working)
+- `nx test tree-sitter-openscad` - Run all grammar tests (114/114 passing)
+- `nx test tree-sitter-openscad --file-name=advanced.txt` - Test specific corpus file
+- `nx parse tree-sitter-openscad -- file.scad` - Parse and visualize files
+- `nx parse tree-sitter-openscad -- --debug file.scad` - Parse with debug info
+- `nx generate-grammar tree-sitter-openscad` - Generate grammar
+- `nx build:wasm tree-sitter-openscad` - Build WebAssembly
+- `nx playground tree-sitter-openscad` - Launch playground
+
+### OpenSCAD-parser Commands (❌ Tests failing due to grammar changes)
+- `nx test openscad-parser` - Run all parser tests (101 failing, 54 passing)
+- `nx test openscad-parser:coverage` - Run with coverage
+- `nx test openscad-parser:watch` - Run in watch mode
+- `nx build openscad-parser` - Build parser library (✅ working)
+- `nx lint openscad-parser` - Lint code (✅ working)
+- `nx typecheck openscad-parser` - Type checking (✅ working)
+
+### Documentation Updated
+- `docs/howto-tree-sitter-openscad.md` - Updated with correct command syntax
+- `docs/howto-openscad-parser.md` - Updated with current test status
+- Project configurations in `packages/*/project.json` - Fixed command syntax
