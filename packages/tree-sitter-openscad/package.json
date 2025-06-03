@@ -27,7 +27,7 @@
   "scripts": {
     "install": "node scripts/echo-install-message.js",
     "parse": "tree-sitter parse",
-    "parse:all": "node test-real-world-cli.js",
+    "parse:all": "node scripts/test-real-world-cli.js",
     "playground": "tree-sitter playground"
   },
   "keywords": [

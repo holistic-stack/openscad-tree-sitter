@@ -29,12 +29,12 @@ try {
   } catch (e) {
     try {
       // Try the node bindings
-      OpenSCAD = require('./bindings/node');
+      OpenSCAD = require('../bindings/node');
       console.log('✓ Loaded OpenSCAD grammar from bindings/node');
     } catch (e2) {
       try {
         // Try loading from the current directory
-        OpenSCAD = require('./src/index.js');
+        OpenSCAD = require('../src');
         console.log('✓ Loaded OpenSCAD grammar from src/index.js');
       } catch (e3) {
         console.error('Failed to load OpenSCAD grammar. Please build the grammar first:');
