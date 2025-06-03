@@ -98,4 +98,36 @@ describe('UnaryExpressionVisitor', () => {
     });
     expect(errorHandler.getErrors()).toHaveLength(0);
   });
+
+  it('should parse a negation of a function call', async () => {
+    const code = 'x = -sin(90);'; // Example: -sin(90)
+    const tsNode = await getExpressionNode(parser, code);
+    expect(tsNode).not.toBeNull();
+    if (!tsNode) return;
+
+    const astNode = visitor.visit(tsNode);
+
+    expect(astNode).toEqual({
+      type: 'expression',
+      expressionType: 'unary_expression',
+      operator: '-',
+      operand: {
+        type: 'expression',
+        expressionType: 'module_instantiation',
+        moduleName: 'sin',
+        args: [
+          {
+            type: 'expression',
+            expressionType: 'number',
+            value: 90,
+            location: expect.anything(),
+          },
+        ],
+        location: expect.anything(),
+      },
+      prefix: true,
+      location: expect.anything(),
+    });
+    expect(errorHandler.getErrors()).toHaveLength(0);
+  });
 });

@@ -322,10 +322,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @param node The expression node to dispatch
    * @returns The expression AST node or null if the node cannot be processed
    */
-  dispatchSpecificExpression(node: TSNode): ast.ExpressionNode | null {
-    this.safeLog(
-      'info',
-      `[ExpressionVisitor.dispatchSpecificExpression] Dispatching node type: ${node.type}`,
+  public dispatchSpecificExpression(node: TSNode): ast.ExpressionNode | null {
+    this.errorHandler.logInfo(`[ExpressionVisitor.dispatchSpecificExpression] Dispatching node type: ${node.type}`);
       'ExpressionVisitor.dispatchSpecificExpression',
       node
     );
@@ -375,6 +373,10 @@ export class ExpressionVisitor extends BaseASTVisitor {
         return this.listComprehensionVisitor.visitListComprehension(node);
       case 'range_expression':
         return this.rangeExpressionVisitor.visitRangeExpression(node);
+      case 'module_instantiation':
+        const result = this.functionCallVisitor.visit(node);
+        this.errorHandler.logInfo(`[ExpressionVisitor.dispatchSpecificExpression] module_instantiation result: ${result ? 'not null' : 'null'}`);
+        return result;
       case 'let_expression':
         return this.visitLetExpression(node);
       default:
@@ -959,19 +961,19 @@ export class ExpressionVisitor extends BaseASTVisitor {
       );
     }
 
-    // Check for function call
-    const functionCallNode = findDescendantOfType(node, 'function_call');
-    if (functionCallNode) {
+    // Check for module instantiation (function call)
+    const moduleInstantiationNode = findDescendantOfType(node, 'module_instantiation');
+    if (moduleInstantiationNode) {
       this.safeLog(
         'info',
-        `[ExpressionVisitor.visitExpression] Found function call: ${functionCallNode.text.substring(
+        `[ExpressionVisitor.visitExpression] Found module instantiation (function call): ${moduleInstantiationNode.text.substring(
           0,
           30
         )}`,
         'ExpressionVisitor.visitExpression',
-        functionCallNode
+        moduleInstantiationNode
       );
-      return this.createExpressionNode(functionCallNode);
+      return this.createExpressionNode(moduleInstantiationNode);
     }
 
     // Check for identifier (variable reference)
@@ -1450,8 +1452,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
   ): ast.ASTNode | null {
     // Expression visitor doesn't handle function definitions, only function calls
     // Function calls are handled by the FunctionCallVisitor
-    if (node.type === 'function_call') {
-      return this.functionCallVisitor.visitFunctionCall(node);
+    if (node.type === 'module_instantiation') {
+      return this.functionCallVisitor.visit(node);
     }
     return null;
   }

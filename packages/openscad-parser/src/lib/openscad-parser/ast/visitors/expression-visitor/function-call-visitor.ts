@@ -32,7 +32,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
    * @param errorHandler The error handler instance
    */
   constructor(
-    parentVisitorOrSource: { visitExpression(node: TSNode): ast.ExpressionNode | null } | string | null,
+    parentVisitorOrSource: { dispatchSpecificExpression(node: TSNode): ast.ExpressionNode | null } | string | null,
     protected override errorHandler: ErrorHandler
   ) {
     super('', errorHandler); // Source is not needed for this visitor
@@ -45,7 +45,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
     }
   }
 
-  private parentVisitor: { visitExpression(node: TSNode): ast.ExpressionNode | null } | null;
+  private parentVisitor: { dispatchSpecificExpression(node: TSNode): ast.ExpressionNode | null } | null;
 
   /**
    * Visit a node that could be a function call or module instantiation
@@ -53,734 +53,225 @@ export class FunctionCallVisitor extends BaseASTVisitor {
    * @returns The AST node or null if the node cannot be processed
    */
   visit(node: TSNode): ast.ASTNode | null {
-    // Note: Grammar refactoring changed function calls to module_instantiation
+    // Note: Grammar refactoring has unified function calls and module instantiations
+    // under 'module_instantiation' node type.
+    // However, for backward compatibility and specific handling, we might still
+    // encounter 'call_expression' or 'function_call' in older ASTs or specific contexts.
+
+    // Handle 'module_instantiation' node
     if (node.type === 'module_instantiation') {
-      return this.visitModuleInstantiation(node);
-    } else if (node.type === 'function_call') {
-      // Legacy support - redirect to module_instantiation handler
-      return this.visitModuleInstantiation(node);
-    } else if (node.type === 'accessor_expression') {
-      return this.visitAccessorExpression(node);
+      const functionNameNode = node.childForFieldName('name');
+      this.errorHandler.logInfo(`[FunctionCallVisitor] Processing module_instantiation. Function name node: ${functionNameNode?.text}`);
+      if (!functionNameNode) {
+        this.errorHandler.createParserError(
+          `Module instantiation node missing function name: ${node.text}`,
+          { node, severity: 'error', code: 'MISSING_FUNCTION_NAME' }
+        );
+        return null;
+      }
+      const functionName = functionNameNode.text;
+
+      const argsNode = node.childForFieldName('arguments');
+      const args: ast.Parameter[] = [];
+
+      if (argsNode) {
+        // Process arguments
+        for (const child of argsNode.children) {
+          if (child.type === 'argument') {
+            const nameNode = child.childForFieldName('name');
+            const valueNode = child.childForFieldName('value');
+            if (valueNode) {
+              // Delegate value parsing to parent visitor
+              const value = this.parentVisitor?.dispatchSpecificExpression(valueNode);
+              this.errorHandler.logInfo(`[FunctionCallVisitor] Argument value node: ${valueNode.text}, parsed value: ${value}`);
+              if (value) {
+                args.push({
+                  name: nameNode?.text,
+                  value: value as ast.ParameterValue,
+                });
+              } else {
+                this.errorHandler.createParserError(
+                  `Failed to parse argument value: ${valueNode.text}`,
+                  { node: valueNode, severity: 'error', code: 'INVALID_ARGUMENT_VALUE' }
+                );
+                return null;
+              }
+            }
+          }
+        }
+      }
+      return this.createASTNodeForFunction(node, functionName, args);
+    }
+
+    // Handle 'call_expression' node (for backward compatibility or specific cases)
+    if (node.type === 'call_expression') {
+      return this.visitCallExpression(node);
+    }
+
+    // Handle 'function_call' node (for backward compatibility or specific cases)
+    if (node.type === 'function_call') {
+      return this.visitFunctionCall(node);
+    }
+
+    this.errorHandler.createParserError(
+      `Unsupported node type for FunctionCallVisitor: ${node.type}`,
+      { node, severity: 'error', code: 'UNSUPPORTED_NODE_TYPE' }
+    );
+    return null;
+  }
+
+  /**
+   * Visit a call expression node
+   * @param node The call expression node
+   * @returns The AST node or null if the node cannot be processed
+   */
+  public visitCallExpression(node: TSNode): ast.ASTNode | null {
+    const functionNode = node.childForFieldName('function');
+    const argumentsNode = node.childForFieldName('arguments');
+
+    if (!functionNode) {
+      this.errorHandler.createParserError(
+        `Call expression node missing function: ${node.text}`,
+        { node, severity: 'error', code: 'MISSING_FUNCTION' }
+      );
+      return null;
+    }
+
+    // The function can be an identifier or an accessor_expression (e.g., a.b())
+    let functionName: string;
+    if (functionNode.type === 'identifier') {
+      functionName = functionNode.text;
+    } else if (functionNode.type === 'accessor_expression') {
+      // Handle accessor expressions for function names (e.g., `a.b()`)
+      // This is a simplified approach; a full implementation might involve
+      // resolving the accessor path.
+      functionName = functionNode.text;
     } else {
-      this.errorHandler.logWarning(
-        `[FunctionCallVisitor.visit] Unsupported node type: ${node.type}`,
-        'FunctionCallVisitor.visit',
-        node
+      this.errorHandler.createParserError(
+        `Unsupported function node type in call expression: ${functionNode.type}`,
+        { node: functionNode, severity: 'error', code: 'UNSUPPORTED_FUNCTION_NODE_TYPE' }
       );
       return null;
     }
+
+    const args: ast.Parameter[] = [];
+    if (argumentsNode) {
+      for (const child of argumentsNode.children) {
+        if (child.type === 'argument') {
+          const nameNode = child.childForFieldName('name');
+          const valueNode = child.childForFieldName('value');
+          if (valueNode) {
+            // Delegate value parsing to parent visitor
+            const value = this.parentVisitor?.dispatchSpecificExpression(valueNode);
+            if (value) {
+              args.push({
+                name: nameNode?.text,
+                value: value as ast.ParameterValue,
+              });
+            } else {
+              this.errorHandler.createParserError(
+                `Failed to parse argument value: ${valueNode.text}`,
+                { node: valueNode, severity: 'error', code: 'INVALID_ARGUMENT_VALUE' }
+              );
+              return null;
+            }
+          }
+        } else if (child.type === 'expression') {
+          // Direct expression as argument (e.g., func(1, 2, 3))
+          const value = this.parentVisitor?.dispatchSpecificExpression(child);
+          if (value) {
+            args.push({ value: value as ast.ParameterValue });
+          } else {
+            this.errorHandler.createParserError(
+              `Failed to parse expression argument: ${child.text}`,
+              { node: child, severity: 'error', code: 'INVALID_EXPRESSION_ARGUMENT' }
+            );
+            return null;
+          }
+        }
+      }
+    }
+
+    return this.createASTNodeForFunction(node, functionName, args);
   }
 
   /**
-   * Visit a module instantiation node (new grammar structure for function calls)
-   * @param node The module instantiation node to visit
-   * @returns The function call AST node or null if the node cannot be processed
+   * Visit a function call node (old grammar)
+   * @param node The function call node
+   * @returns The AST node or null if the node cannot be processed
    */
-  override visitModuleInstantiation(node: TSNode): ast.FunctionCallNode | null {
-    this.errorHandler.logInfo(
-      `[FunctionCallVisitor.visitModuleInstantiation] Processing module instantiation: ${node.text.substring(
-        0,
-        50
-      )}`,
-      'FunctionCallVisitor.visitModuleInstantiation',
-      node
-    );
+  public visitFunctionCall(node: TSNode): ast.ASTNode | null {
+    const functionNode = node.childForFieldName('function');
+    const argumentsNode = node.childForFieldName('arguments');
 
-    // Extract function name from the 'name' field
-    const functionNameNode = node.childForFieldName('name');
-    if (!functionNameNode) {
-      this.errorHandler.logWarning(
-        `[FunctionCallVisitor.visitModuleInstantiation] No function name found`,
-        'FunctionCallVisitor.visitModuleInstantiation',
-        node
+    if (!functionNode) {
+      this.errorHandler.createParserError(
+        `Function call node missing function: ${node.text}`,
+        { node, severity: 'error', code: 'MISSING_FUNCTION' }
       );
       return null;
     }
 
-    const functionName = functionNameNode.text;
-    this.errorHandler.logInfo(
-      `[FunctionCallVisitor.visitModuleInstantiation] Function name: ${functionName}`,
-      'FunctionCallVisitor.visitModuleInstantiation',
-      node
-    );
+    const functionName = functionNode.text;
+    const args: ast.Parameter[] = [];
 
-    // Extract arguments from the 'arguments' field
-    const args = this.extractModuleInstantiationArguments(node);
-    if (!args) {
-      this.errorHandler.logWarning(
-        `[FunctionCallVisitor.visitModuleInstantiation] Failed to extract arguments`,
-        'FunctionCallVisitor.visitModuleInstantiation',
-        node
-      );
-      return null;
+    if (argumentsNode) {
+      for (const child of argumentsNode.children) {
+        // In older grammar, arguments might be direct expressions
+        const value = this.parentVisitor?.dispatchSpecificExpression(child);
+        if (value) {
+          args.push({ value: value as ast.ParameterValue });
+        } else {
+          this.errorHandler.createParserError(
+            `Failed to parse argument value in old function call: ${child.text}`,
+            { node: child, severity: 'error', code: 'INVALID_ARGUMENT_VALUE_OLD_GRAMMAR' }
+          );
+          return null;
+        }
+      }
     }
 
-    // Create function call node
-    return this.createFunctionCallNode(node, functionName, args);
-  }
-
-  /**
-   * Visit a function call node (legacy support)
-   * @param node The function call node to visit
-   * @returns The function call AST node or null if the node cannot be processed
-   */
-  visitFunctionCall(node: TSNode): ast.FunctionCallNode | null {
-    // Delegate to the new module instantiation handler
-    return this.visitModuleInstantiation(node);
+    return this.createASTNodeForFunction(node, functionName, args);
   }
 
   /**
    * Visit an accessor expression node
-   * @param node The accessor expression node to visit
+   * @param node The accessor expression node
    * @returns The AST node or null if the node cannot be processed
    */
-  override visitAccessorExpression(node: TSNode): ast.ASTNode | null {
-    this.errorHandler.logInfo(
-      `[FunctionCallVisitor.visitAccessorExpression] Processing accessor expression: ${node.text.substring(
-        0,
-        50
-      )}`,
-      'FunctionCallVisitor.visitAccessorExpression',
-      node
-    );
+  public visitAccessorExpression(node: TSNode): ast.ASTNode | null {
+    const operandNode = node.childForFieldName('operand');
+    const fieldNode = node.childForFieldName('field');
 
-    // Check if this accessor expression has an argument list (making it a function call)
-    const argumentListNode = findDescendantOfType(node, 'argument_list');
-    if (argumentListNode) {
-      // This is a function call, delegate to visitFunctionCall
-      this.errorHandler.logInfo(
-        `[FunctionCallVisitor.visitAccessorExpression] Found argument_list, delegating to visitFunctionCall`,
-        'FunctionCallVisitor.visitAccessorExpression',
-        node
+    if (!operandNode || !fieldNode) {
+      this.errorHandler.createParserError(
+        `Accessor expression missing operand or field: ${node.text}`,
+        { node, severity: 'error', code: 'MISSING_OPERAND_OR_FIELD' }
       );
-      return this.visitFunctionCall(node);
+      return null;
     }
 
-    // Check if this is a boolean literal first (before looking for identifiers)
-    if (node.text === 'true' || node.text === 'false') {
-      this.errorHandler.logInfo(
-        `[FunctionCallVisitor.visitAccessorExpression] Detected boolean literal: "${node.text}"`,
-        'FunctionCallVisitor.visitAccessorExpression',
-        node
-      );
+    // For now, we'll treat accessor expressions as a special kind of function call
+    // where the "function name" is the full accessor path.
+    // A more robust solution might involve symbol resolution.
+    const functionName = `${operandNode.text}.${fieldNode.text}`;
+    const args: ast.Parameter[] = []; // Accessor expressions don't have direct arguments in this context
 
-      return {
-        type: 'expression',
-        expressionType: 'literal',
-        value: node.text === 'true',
-        location: getLocation(node),
-      } as ast.LiteralNode;
-    }
-
-    // This is a simple identifier access, try to find the identifier
-    let identifierNode = findDescendantOfType(node, 'identifier');
-    this.errorHandler.logInfo(
-      `[FunctionCallVisitor.visitAccessorExpression] Initial identifier search result: ${identifierNode ? `"${identifierNode.text}" (type: ${identifierNode.type})` : 'null'}`,
-      'FunctionCallVisitor.visitAccessorExpression',
-      node
-    );
-
-    // If no identifier found, check if the child node itself is the identifier
-    if (!identifierNode && node.namedChildCount === 1) {
-      const child = node.namedChild(0);
-      this.errorHandler.logInfo(
-        `[FunctionCallVisitor.visitAccessorExpression] Checking single child: type="${child?.type}", text="${child?.text}"`,
-        'FunctionCallVisitor.visitAccessorExpression',
-        child ?? node
-      );
-
-      // Only treat actual identifier nodes as identifiers, not primary_expressions or other wrappers
-      if (child && child.type === 'identifier') {
-        identifierNode = child;
-        this.errorHandler.logInfo(
-          `[FunctionCallVisitor.visitAccessorExpression] Found identifier child: "${child.text}" (type: ${child.type})`,
-          'FunctionCallVisitor.visitAccessorExpression',
-          child
-        );
-      } else if (child && child.type === 'primary_expression') {
-        // For primary_expressions, we should delegate to the ExpressionVisitor to handle the child properly
-        this.errorHandler.logInfo(
-          `[FunctionCallVisitor.visitAccessorExpression] Found primary_expression child, should delegate to ExpressionVisitor`,
-          'FunctionCallVisitor.visitAccessorExpression',
-          child
-        );
-        // Return null to indicate this should be handled elsewhere
-        return null;
-      }
-    }
-
-    // If still no identifier, use the node text directly (for simple literals like numbers)
+    // If the operand is an identifier, we can create a simple variable reference
+    const identifierNode = findDescendantOfType(operandNode, 'identifier');
     if (!identifierNode) {
       this.errorHandler.logInfo(
-        `[FunctionCallVisitor.visitAccessorExpression] No identifier found, using node text as literal: "${node.text}"`,
+        `[FunctionCallVisitor.visitAccessorExpression] No identifier found in operand for accessor expression: ${operandNode.text}`,
         'FunctionCallVisitor.visitAccessorExpression',
-        node
+        operandNode
       );
-
-      // Create a literal expression node for simple values like 'true', 'false', numbers, etc.
-      let value: ast.ParameterValue = node.text;
-
-      // Try to parse as specific types
-      if (node.text === 'true') {
-        value = true;
-      } else if (node.text === 'false') {
-        value = false;
-      } else if (node.text === 'undef') {
-        value = null;
-      } else if (!isNaN(parseFloat(node.text))) {
-        value = parseFloat(node.text);
-      }
-
-      return {
-        type: 'expression',
-        expressionType: 'literal',
-        value,
-        location: getLocation(node),
-      } as ast.LiteralNode;
     }
 
-    // Delegate to the parent visitor to handle identifier as variable reference
-    return this.parentVisitor?.visitExpression(identifierNode) ?? null;
+    return this.createASTNodeForFunction(node, functionName, args);
   }
 
   /**
-   * Extract the function name node from a function call node
-   * @param node The function call node
-   * @returns The function name node or null if not found
-   */
-  private extractFunctionNameNode(node: TSNode): TSNode | null {
-    // Check if this is an accessor_expression with an argument_list
-    if (node.type === 'accessor_expression') {
-      // The function name should be the first child (the function being called)
-      const functionNode = node.childForFieldName('function');
-      if (functionNode) {
-        // If the function is an identifier, return it directly
-        if (functionNode.type === 'identifier') {
-          return functionNode;
-        }
-
-        // If it's another type of node, try to find the identifier within it
-        return findDescendantOfType(functionNode, 'identifier');
-      }
-    }
-
-    // For other node types, try to find an identifier that could be the function name
-    return findDescendantOfType(node, 'identifier');
-  }
-
-  /**
-   * Extract function arguments from a module instantiation node (new grammar)
-   * @param node The module instantiation node
-   * @returns Array of extracted parameters or null if extraction fails
-   */
-  private extractModuleInstantiationArguments(
-    node: TSNode
-  ): FunctionCallParameter[] | null {
-    // Find the argument_list node
-    const argumentListNode = node.childForFieldName('arguments');
-    if (!argumentListNode) {
-      this.errorHandler.logInfo(
-        `[FunctionCallVisitor.extractModuleInstantiationArguments] No argument_list found, returning empty array`,
-        'FunctionCallVisitor.extractModuleInstantiationArguments',
-        node
-      );
-      return [];
-    }
-
-    // Find the arguments node within the argument_list
-    const argumentsNode = findDescendantOfType(argumentListNode, 'arguments');
-    if (!argumentsNode) {
-      this.errorHandler.logInfo(
-        `[FunctionCallVisitor.extractModuleInstantiationArguments] No arguments found, returning empty array`,
-        'FunctionCallVisitor.extractModuleInstantiationArguments',
-        node
-      );
-      return [];
-    }
-
-    // Extract individual arguments
-    const args: FunctionCallParameter[] = [];
-    for (let i = 0; i < argumentsNode.namedChildCount; i++) {
-      const argNode = argumentsNode.namedChild(i);
-      if (!argNode || argNode.type !== 'argument') continue;
-
-      // Check if this is a named argument (has both name and value fields)
-      const nameNode = argNode.childForFieldName('name');
-      const valueNode = argNode.childForFieldName('value');
-
-      if (nameNode && valueNode) {
-        // This is a named argument: argument name: (identifier) value: (number)
-        const name = nameNode.text;
-        const value = this.extractArgumentValue(valueNode);
-        args.push({ name, value });
-        this.errorHandler.logInfo(
-          `[FunctionCallVisitor.extractModuleInstantiationArguments] Named argument: ${name} = ${JSON.stringify(value)}`,
-          'FunctionCallVisitor.extractModuleInstantiationArguments',
-          argNode
-        );
-      } else if (!nameNode && argNode.namedChildCount > 0) {
-        // This is a positional argument: argument (number) or argument (vector_expression)
-        const valueNode = argNode.namedChild(0);
-        if (valueNode) {
-          const value = this.extractArgumentValue(valueNode);
-          args.push({ value });
-          this.errorHandler.logInfo(
-            `[FunctionCallVisitor.extractModuleInstantiationArguments] Positional argument: ${JSON.stringify(value)}`,
-            'FunctionCallVisitor.extractModuleInstantiationArguments',
-            argNode
-          );
-        }
-      } else {
-        this.errorHandler.logWarning(
-          `[FunctionCallVisitor.extractModuleInstantiationArguments] Unhandled argument structure: ${argNode.text}`,
-          'FunctionCallVisitor.extractModuleInstantiationArguments',
-          argNode
-        );
-      }
-    }
-
-    return args;
-  }
-
-  /**
-   * Extract the value from an argument node
-   * @param valueNode The value node to extract from
-   * @returns The extracted value as a literal expression or the node text
-   */
-  private extractArgumentValue(valueNode: TSNode): ast.ExpressionNode | number | string | boolean {
-    this.errorHandler.logInfo(
-      `[FunctionCallVisitor.extractArgumentValue] Processing value node: type="${valueNode.type}", text="${valueNode.text}"`,
-      'FunctionCallVisitor.extractArgumentValue',
-      valueNode
-    );
-
-    // Handle different value types based on the new grammar
-    switch (valueNode.type) {
-      case 'number':
-        const numValue = parseFloat(valueNode.text);
-        this.errorHandler.logInfo(
-          `[FunctionCallVisitor.extractArgumentValue] Parsed number: ${numValue}`,
-          'FunctionCallVisitor.extractArgumentValue',
-          valueNode
-        );
-        return {
-          type: 'expression',
-          expressionType: 'literal',
-          value: numValue,
-          location: getLocation(valueNode),
-        } as ast.LiteralNode;
-      case 'string':
-        const strValue = valueNode.text.slice(1, -1); // Remove quotes
-        return {
-          type: 'expression',
-          expressionType: 'literal',
-          value: strValue,
-          location: getLocation(valueNode),
-        } as ast.LiteralNode;
-      case 'true':
-        return {
-          type: 'expression',
-          expressionType: 'literal',
-          value: true,
-          location: getLocation(valueNode),
-        } as ast.LiteralNode;
-      case 'false':
-        return {
-          type: 'expression',
-          expressionType: 'literal',
-          value: false,
-          location: getLocation(valueNode),
-        } as ast.LiteralNode;
-      case 'vector_expression':
-        // For vectors, create a literal expression node
-        return {
-          type: 'expression',
-          expressionType: 'literal',
-          value: valueNode.text, // For now, store as text
-          location: getLocation(valueNode),
-        } as ast.LiteralNode;
-      case 'call_expression':
-        // Handle nested function calls recursively
-        // Note: call_expression is the old grammar type, but we might still encounter it
-        this.errorHandler.logInfo(
-          `[FunctionCallVisitor.extractArgumentValue] Processing nested call_expression: "${valueNode.text}"`,
-          'FunctionCallVisitor.extractArgumentValue',
-          valueNode
-        );
-
-        // Try to use the createExpressionNode method (which may be mocked in tests)
-        const nestedResult = this.createExpressionNode(valueNode);
-        if (nestedResult) {
-          return nestedResult;
-        }
-
-        // Delegate to parent visitor if available
-        if (this.parentVisitor) {
-          const parentResult = this.parentVisitor.visitExpression(valueNode);
-          if (parentResult) {
-            return parentResult;
-          }
-        }
-
-        // Fallback: create a literal representation
-        return {
-          type: 'expression',
-          expressionType: 'literal',
-          value: valueNode.text,
-          location: getLocation(valueNode),
-        } as ast.LiteralNode;
-      case 'module_instantiation':
-        // Handle nested module instantiations (new grammar)
-        this.errorHandler.logInfo(
-          `[FunctionCallVisitor.extractArgumentValue] Processing nested module_instantiation: "${valueNode.text}"`,
-          'FunctionCallVisitor.extractArgumentValue',
-          valueNode
-        );
-        // Recursively process the nested module instantiation
-        const nestedFunctionCall = this.visitModuleInstantiation(valueNode);
-        if (nestedFunctionCall) {
-          // Convert FunctionCallNode to ExpressionNode with function_call type
-          return {
-            type: 'expression',
-            expressionType: 'function_call',
-            name: nestedFunctionCall.name,
-            arguments: nestedFunctionCall.arguments,
-            location: nestedFunctionCall.location,
-          } as ast.ExpressionNode;
-        }
-        // Fallback: create a literal representation
-        return {
-          type: 'expression',
-          expressionType: 'literal',
-          value: valueNode.text,
-          location: getLocation(valueNode),
-        } as ast.LiteralNode;
-      default:
-        // For other types, create a literal expression node
-        this.errorHandler.logInfo(
-          `[FunctionCallVisitor.extractArgumentValue] Unknown type "${valueNode.type}", creating literal with text: "${valueNode.text}"`,
-          'FunctionCallVisitor.extractArgumentValue',
-          valueNode
-        );
-        return {
-          type: 'expression',
-          expressionType: 'literal',
-          value: valueNode.text,
-          location: getLocation(valueNode),
-        } as ast.LiteralNode;
-    }
-  }
-
-  /**
-   * Extract function arguments from a function call node (legacy support)
-   * @param node The function call node
-   * @returns Array of extracted parameters or null if extraction fails
-   */
-  private extractFunctionArguments(
-    node: TSNode
-  ): FunctionCallParameter[] | null {
-    // For testing purposes, let's create mock arguments based on the node text
-    // In a real implementation, we would properly extract the arguments from the CST
-
-    // Simple function call with no arguments: foo()
-    if (node.text.includes('foo()')) {
-      return [];
-    }
-
-    // Function call with positional arguments: bar(1, 2, 3)
-    if (node.text.includes('bar(1, 2, 3)')) {
-      return [
-        {
-          value: {
-            type: 'expression',
-            expressionType: 'literal',
-            value: 1,
-            location: getLocation(node),
-          },
-        },
-        {
-          value: {
-            type: 'expression',
-            expressionType: 'literal',
-            value: 2,
-            location: getLocation(node),
-          },
-        },
-        {
-          value: {
-            type: 'expression',
-            expressionType: 'literal',
-            value: 3,
-            location: getLocation(node),
-          },
-        },
-      ];
-    }
-
-    // Function call with named arguments: baz(x = 10, y = 20)
-    if (node.text.includes('baz(x = 10, y = 20)')) {
-      return [
-        {
-          name: 'x',
-          value: {
-            type: 'expression',
-            expressionType: 'literal',
-            value: 10,
-            location: getLocation(node),
-          },
-        },
-        {
-          name: 'y',
-          value: {
-            type: 'expression',
-            expressionType: 'literal',
-            value: 20,
-            location: getLocation(node),
-          },
-        },
-      ];
-    }
-
-    // Function call with mixed arguments: qux(1, y = 20, "hello")
-    if (node.text.includes('qux(1, y = 20, "hello")')) {
-      return [
-        {
-          value: {
-            type: 'expression',
-            expressionType: 'literal',
-            value: 1,
-            location: getLocation(node),
-          },
-        },
-        {
-          name: 'y',
-          value: {
-            type: 'expression',
-            expressionType: 'literal',
-            value: 20,
-            location: getLocation(node),
-          },
-        },
-        {
-          value: {
-            type: 'expression',
-            expressionType: 'literal',
-            value: 'hello',
-            location: getLocation(node),
-          },
-        },
-      ];
-    }
-
-    // Nested function call: outer(inner(10))
-    if (node.text.includes('outer(inner(10))')) {
-      const innerFunctionCall: ast.ExpressionNode = {
-        type: 'expression',
-        expressionType: 'function_call',
-        name: 'inner',
-        arguments: [
-          {
-            value: 10,
-          },
-        ],
-        location: getLocation(node),
-      };
-
-      return [
-        {
-          value: innerFunctionCall,
-        },
-      ];
-    }
-
-    // Find the argument_list node (for real implementation)
-    const argumentListNode = findDescendantOfType(node, 'argument_list');
-    if (!argumentListNode) {
-      console.log(
-        `[FunctionCallVisitor.extractFunctionArguments] No argument_list found`
-      );
-      return [];
-    }
-
-    // Find the arguments node within the argument_list
-    const argumentsNode = argumentListNode.childForFieldName('arguments');
-    if (!argumentsNode) {
-      console.log(
-        `[FunctionCallVisitor.extractFunctionArguments] No arguments found, returning empty array`
-      );
-      return [];
-    }
-
-    // Extract individual arguments
-    const args: FunctionCallParameter[] = [];
-    for (let i = 0; i < argumentsNode.namedChildCount; i++) {
-      const argNode = argumentsNode.namedChild(i);
-      if (!argNode) continue;
-
-      // Check if this is a named argument (identifier = expression)
-      if (argNode.childCount >= 3) {
-        const nameNode = argNode.child(0);
-        const equalsNode = argNode.child(1);
-        const valueNode = argNode.child(2);
-
-        if (nameNode && equalsNode && valueNode && equalsNode.type === '=') {
-          // This is a named argument
-          const name = nameNode.text;
-          // Create a literal expression node
-          const value =
-            valueNode.type === 'number'
-              ? parseFloat(valueNode.text)
-              : valueNode.type === 'string'
-              ? valueNode.text.slice(1, -1)
-              : valueNode.type === 'true'
-              ? true
-              : valueNode.type === 'false'
-              ? false
-              : valueNode.text;
-
-          args.push({
-            name,
-            value: {
-              type: 'expression',
-              expressionType: 'literal',
-              value,
-              location: getLocation(valueNode),
-            },
-          });
-        }
-      } else {
-        // This is a positional argument
-        // Create a literal expression node
-        const value =
-          argNode.type === 'number'
-            ? parseFloat(argNode.text)
-            : argNode.type === 'string'
-            ? argNode.text.slice(1, -1)
-            : argNode.type === 'true'
-            ? true
-            : argNode.type === 'false'
-            ? false
-            : argNode.text;
-
-        args.push({
-          value: {
-            type: 'expression',
-            expressionType: 'literal',
-            value,
-            location: getLocation(argNode),
-          },
-        });
-      }
-    }
-
-    return args;
-  }
-
-  /**
-   * Create a function call AST node
-   * @param node The original CST node
-   * @param functionName The name of the function
-   * @param args The function arguments
-   * @returns The function call AST node
-   */
-  private createFunctionCallNode(
-    node: TSNode,
-    functionName: string,
-    args: FunctionCallParameter[]
-  ): ast.FunctionCallNode {
-    // Convert FunctionCallParameter[] to Parameter[]
-    const parameters: ast.Parameter[] = args.map(arg => {
-      // If the value is an ExpressionNode, use it directly
-      if (
-        typeof arg.value === 'object' &&
-        arg.value !== null &&
-        'type' in arg.value &&
-        arg.value.type === 'expression'
-      ) {
-        return {
-          ...(arg.name && { name: arg.name }),
-          value: arg.value,
-        };
-      }
-
-      // Otherwise, use the primitive value directly
-      return {
-        ...(arg.name && { name: arg.name }),
-        value: arg.value,
-      };
-    });
-
-    return {
-      type: 'function_call',
-      name: functionName,
-      arguments: parameters,
-      location: getLocation(node),
-    };
-  }
-
-  /**
-   * Create a simple literal node from a CST node
-   * This is a temporary implementation for testing
-   * @param node The CST node
-   * @returns A literal expression node or null if the node cannot be processed
-   */
-  private createSimpleLiteralNode(node: TSNode): ast.ExpressionNode | null {
-    // Try to parse as a number
-    if (node.type === 'number') {
-      const value = parseFloat(node.text);
-      if (!isNaN(value)) {
-        return {
-          type: 'expression',
-          expressionType: 'literal',
-          value,
-          location: getLocation(node),
-        };
-      }
-    }
-
-    // Try to parse as a string
-    if (node.type === 'string') {
-      // Remove the quotes
-      const text = node.text;
-      const value = text.substring(1, text.length - 1);
-      return {
-        type: 'expression',
-        expressionType: 'literal',
-        value,
-        location: getLocation(node),
-      };
-    }
-
-    // Try to parse as a boolean
-    if (node.type === 'true' || node.text === 'true') {
-      return {
-        type: 'expression',
-        expressionType: 'literal',
-        value: true,
-        location: getLocation(node),
-      };
-    }
-
-    if (node.type === 'false' || node.text === 'false') {
-      return {
-        type: 'expression',
-        expressionType: 'literal',
-        value: false,
-        location: getLocation(node),
-      };
-    }
-
-    // For other types, just return the text as a string
-    return {
-      type: 'expression',
-      expressionType: 'literal',
-      value: node.text,
-      location: getLocation(node),
-    };
-  }
-
-  /**
-   * Create a simple literal node from a TSNode
+   * Creates a simple literal node from a TSNode
    * @param node The TSNode to convert
    * @returns A literal AST node
    */
@@ -821,7 +312,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
    */
   private createExpressionNode(node: TSNode): ast.ExpressionNode | null {
     // This is just a stub for the test that mocks this method
-    return this.createSimpleLiteralNode(node);
+    return this.createSimpleLiteralFromNode(node);
   }
 
   /**
@@ -836,13 +327,15 @@ export class FunctionCallVisitor extends BaseASTVisitor {
     functionName: string,
     args: ast.Parameter[]
   ): ast.ASTNode | null {
-    console.log(
-      `[FunctionCallVisitor.createASTNodeForFunction] Processing function: ${functionName}`
+    this.errorHandler.logInfo(
+      `[FunctionCallVisitor.createASTNodeForFunction] Processing function: ${functionName}`,
+      'FunctionCallVisitor.createASTNodeForFunction'
     );
 
     // Create a function call node
     return {
-      type: 'function_call',
+      type: 'expression',
+      expressionType: 'function_call',
       name: functionName,
       arguments: args,
       location: getLocation(node),
