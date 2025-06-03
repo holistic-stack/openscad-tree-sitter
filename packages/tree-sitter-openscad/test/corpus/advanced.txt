@@ -64,12 +64,12 @@ matrix = [for (i = [0:2]) [for (j = [0:2]) i+j]];
             right: (identifier)))))))
 
 ==================
-Multiple Variable List Comprehensions (DISABLED - Grammar works, test expectation needs update)
+Multiple Variable List Comprehensions
 ==================
 
-// polygon_points = [for (i=[0:n-1], a=i*360/n) [cos(a), sin(a)]];
-// complex_calc = [for (i=[0:5], x=i*2, y=x+1) [x, y, x*y]];
-// radial_pattern = [for (i=[0:num-1], a=i*360/num, r=radii[i]) [r*cos(a), r*sin(a)]];
+polygon_points = [for (i=[0:n-1], a=i*360/n) [cos(a), sin(a)]];
+complex_calc = [for (i=[0:5], x=i*2, y=x+1) [x, y, x*y]];
+radial_pattern = [for (i=[0:num-1], a=i*360/num, r=radii[i]) [r*cos(a), r*sin(a)]];
 
 ---
 
@@ -96,7 +96,7 @@ Multiple Variable List Comprehensions (DISABLED - Grammar works, test expectatio
                 operator: (multiplication_operator)
                 right: (number))
               operator: (division_operator)
-              right: (identifier)))
+              right: (identifier))))
         expr: (vector_expression
           (call_expression
             function: (identifier)
@@ -132,7 +132,7 @@ Multiple Variable List Comprehensions (DISABLED - Grammar works, test expectatio
             range: (binary_expression
               left: (identifier)
               operator: (addition_operator)
-              right: (number)))
+              right: (number))))
         expr: (vector_expression
           (identifier)
           (identifier)
@@ -167,20 +167,26 @@ Multiple Variable List Comprehensions (DISABLED - Grammar works, test expectatio
             iterator: (identifier)
             range: (index_expression
               array: (identifier)
-              index: (identifier)))
+              index: (identifier))))
         expr: (vector_expression
-          (call_expression
-            function: (identifier)
-            arguments: (argument_list
-              (arguments
-                (argument
-                  (identifier)))))
-          (call_expression
-            function: (identifier)
-            arguments: (argument_list
-              (arguments
-                (argument
-                  (identifier))))))))))))
+          (binary_expression
+            left: (identifier)
+            operator: (multiplication_operator)
+            right: (call_expression
+              function: (identifier)
+              arguments: (argument_list
+                (arguments
+                  (argument
+                    (identifier))))))
+          (binary_expression
+            left: (identifier)
+            operator: (multiplication_operator)
+            right: (call_expression
+              function: (identifier)
+              arguments: (argument_list
+                (arguments
+                  (argument
+                    (identifier)))))))))))
 
 ==================
 Range Expressions

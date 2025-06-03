@@ -214,18 +214,44 @@ module.exports = grammar({
         )
       ),
 
+    // For statement with support for multiple variable assignments
+    // Syntax: for (var = range) statement
+    //     or: for (var1 = range1, var2 = range2, ...) statement
+    // Reference: OpenSCAD User Manual - Conditional and Iterator Functions
     for_statement: ($) =>
       prec(
         1,
         seq(
           'for',
           '(',
-          field('iterator', $.identifier),
-          '=',
-          field('range', $._value),
+          choice(
+            // Single variable assignment (backward compatibility)
+            // Example: for (i = [0:10]) cube(i);
+            seq(
+              field('iterator', $.identifier),
+              '=',
+              field('range', $._value)
+            ),
+            // Multiple variable assignments (OpenSCAD standard feature)
+            // Example: for (x = [1,2,3], y = [4,5,6]) translate([x,y]) cube(1);
+            // Only matches when there are commas (2+ assignments)
+            seq(
+              $.for_assignment,
+              repeat1(seq(',', $.for_assignment))
+            )
+          ),
           ')',
           choice($.block, $.statement)
         )
+      ),
+
+    // Single variable assignment in for statement
+    // Used for multiple variable assignment syntax: var = range
+    for_assignment: ($) =>
+      seq(
+        field('iterator', $.identifier),
+        '=',
+        field('range', $._value)
       ),
 
     // Action statements
