@@ -521,3 +521,121 @@ precise = 3.14159265359;
     (assignment_statement
       name: (identifier)
       value: (number))))
+
+==================
+Special Variables as Module Parameters
+==================
+
+module Logo(size=50, $fn=100) {
+    sphere(d=size);
+}
+
+Logo(25, $fn=64);
+
+---
+
+(source_file
+  (statement
+    (module_definition
+      name: (identifier)
+      parameters: (parameter_list
+        (parameter_declarations
+          (parameter_declaration
+            (identifier)
+            (number))
+          (parameter_declaration
+            (special_variable)
+            (number))))
+      body: (block
+        (statement
+          (module_instantiation
+            name: (identifier)
+            arguments: (argument_list
+              (arguments
+                (argument
+                  name: (identifier)
+                  value: (identifier)))))))))
+  (statement
+    (module_instantiation
+      name: (identifier)
+      arguments: (argument_list
+        (arguments
+          (argument
+            (number))
+          (argument
+            name: (special_variable)
+            value: (number)))))))
+
+==================
+Exponent Operator
+==================
+
+result = 2^3;
+power = base^exponent;
+complex = (x + 1)^(y - 2);
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (binary_expression
+        left: (number)
+        operator: (exponentiation_operator)
+        right: (number))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (binary_expression
+        left: (identifier)
+        operator: (exponentiation_operator)
+        right: (identifier))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (binary_expression
+        left: (parenthesized_expression
+          (binary_expression
+            left: (identifier)
+            operator: (addition_operator)
+            right: (number)))
+        operator: (exponentiation_operator)
+        right: (parenthesized_expression
+          (binary_expression
+            left: (identifier)
+            operator: (subtraction_operator)
+            right: (number)))))))
+
+==================
+Function Literals
+==================
+
+func = function (x) x * x;
+echo(func(5));
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (function_literal
+        parameters: (parameter_list
+          (parameter_declarations
+            (parameter_declaration
+              (identifier))))
+        body: (binary_expression
+          left: (identifier)
+          operator: (multiplication_operator)
+          right: (identifier)))))
+  (statement
+    (echo_statement
+      (arguments
+        (argument
+          (call_expression
+            function: (identifier)
+            arguments: (argument_list
+              (arguments
+                (argument
+                  (number))))))))))

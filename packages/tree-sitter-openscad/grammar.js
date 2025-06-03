@@ -82,11 +82,14 @@ module.exports = grammar({
 
     // Basic statements
     assignment_statement: ($) =>
-      seq(
-        field('name', choice($.identifier, $.special_variable)),
-        '=',
-        field('value', $._value),
-        optional(';')
+      prec(
+        3,
+        seq(
+          field('name', choice($.identifier, $.special_variable)),
+          '=',
+          field('value', $._value),
+          optional(';')
+        )
       ),
 
     module_definition: ($) =>
@@ -122,9 +125,6 @@ module.exports = grammar({
       ),
 
     parameter_declarations: ($) => commaSep1($.parameter_declaration),
-
-    parameter_declaration: ($) =>
-      choice($.identifier, seq($.identifier, '=', $._value)),
 
     block: ($) =>
       seq(
@@ -254,6 +254,20 @@ module.exports = grammar({
         field('range', $._value)
       ),
 
+    // Parameter declaration in module/function definitions
+    // Supports both regular identifiers and special variables (e.g., $fn, $fa, $fs)
+    // Syntax: identifier [= default_value] | special_variable [= default_value]
+    // Reference: OpenSCAD User Manual - Special Variables as Module Parameters
+    parameter_declaration: ($) =>
+      choice(
+        // Regular identifier parameter: name or name = default_value
+        $.identifier,
+        seq($.identifier, '=', $._value),
+        // Special variable parameter: $name or $name = default_value
+        $.special_variable,
+        seq($.special_variable, '=', $._value)
+      ),
+
     // Action statements
     echo_statement: ($) =>
       seq('echo', '(', optional($.arguments), ')', optional(';')),
@@ -363,6 +377,7 @@ module.exports = grammar({
         $.member_expression,
         $.let_expression,
         $.list_comprehension,
+        $.function_literal,
         $.parenthesized_expression,
 
         // Expression context functions (OpenSCAD 2019.05+)
@@ -428,7 +443,8 @@ module.exports = grammar({
         alias(
           $.parenthesized_expression_non_recursive,
           $.parenthesized_expression
-        )
+        ),
+        alias($.function_literal_non_recursive, $.function_literal)
       ),
 
     binary_expression: ($) =>
@@ -646,6 +662,20 @@ module.exports = grammar({
     let_assignment: ($) =>
       seq(field('name', $.identifier), '=', field('value', $._value)),
 
+    // Function literals (anonymous functions) - Added in OpenSCAD 2021.01
+    // Syntax: function (param1, param2, ...) expression
+    // Reference: OpenSCAD User Manual - Function Literals
+    // Lower precedence to prevent consuming too much
+    function_literal: ($) =>
+      prec.right(
+        0,
+        seq(
+          'function',
+          field('parameters', $.parameter_list),
+          field('body', $._value)
+        )
+      ),
+
     // Range element rule - excludes range expressions to prevent circular dependency
     _range_element: ($) =>
       choice(
@@ -667,6 +697,7 @@ module.exports = grammar({
         $.member_expression,
         $.let_expression,
         $.list_comprehension,
+        $.function_literal,
         $.parenthesized_expression
       ),
 
@@ -1253,5 +1284,16 @@ module.exports = grammar({
 
     parenthesized_expression_non_recursive: ($) =>
       seq('(', $._non_list_comprehension_value, ')'),
+
+    // Function literal non-recursive version for list comprehensions
+    function_literal_non_recursive: ($) =>
+      prec.right(
+        0,
+        seq(
+          'function',
+          field('parameters', $.parameter_list),
+          field('body', $._non_list_comprehension_value)
+        )
+      ),
   },
 });
