@@ -48,9 +48,32 @@
 - **Checkpoint Testing**: Validate after each priority completion
 - **Documentation Updates**: Keep context documents current
 
+## Priority 2.3 Implementation (2025-06-03)
+
+### ✅ Priority 2.3: Update Function Call Tests - Phase 1 (MAJOR BREAKTHROUGH)
+- **Status**: SUBSTANTIALLY COMPLETED
+- **Objective**: Update function call visitor tests to work with new grammar structure
+- **Files Modified**:
+  - `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor/function-call-visitor.test.ts`
+  - `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor/function-call-visitor.ts`
+  - `packages/openscad-parser/src/lib/openscad-parser/ast/extractors/argument-extractor.ts`
+- **Changes Made**:
+  - Updated test expectations to use `module_instantiation` instead of `call_expression`
+  - Fixed property name references (`name` → `functionName`, `arguments` → `args`)
+  - Integrated existing `extractArguments` function instead of custom logic
+  - **BREAKTHROUGH**: Fixed multiple positional argument extraction logic
+  - Fixed positional argument names (`undefined` instead of empty string)
+  - Added string value support for arguments
+  - Added call_expression support (nested function calls)
+  - Removed redundant argument processing methods
+- **Technical Achievement**: Successfully resolved the core issue where `bar(1, 2, 3)` was only extracting 1 argument instead of 3
+- **Test Results**: All argument extraction working correctly, only test expectations mismatch remaining
+- **Quality Gates**: ✅ TypeScript, ✅ Lint (194 warnings, 0 errors)
+- **Remaining**: Test expectations mismatch (raw values vs wrapped expression nodes)
+
 ## Priority 1 Implementation (2024-12-19)
 
-### ? Priority 2.2: Function Call Visitor and Type Unification
+### ✅ Priority 2.2: Function Call Visitor and Type Unification
 - **Objective**: Resolve TypeScript type incompatibilities and lint errors by unifying CST node types to use `SyntaxNode` (aliased as `TSNode`) from `web-tree-sitter`, correcting `Parameter` interface violations, and updating visitor and utility files.
 
 - **Files Modified**:

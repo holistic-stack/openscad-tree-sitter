@@ -13,7 +13,8 @@ import * as ast from '../../ast-types.js';
 import { BaseASTVisitor } from '../base-ast-visitor.js';
 import { getLocation } from '../../utils/location-utils.js';
 import { findDescendantOfType } from '../../utils/node-utils.js';
-import { ErrorHandler } from '../../../error-handling/index.js'; // Added ErrorHandler import
+import { ErrorHandler } from '../../../error-handling/index.js';
+import { extractArguments } from '../../extractors/argument-extractor.js'; // Import the existing argument extractor
 
 /**
  * Visitor for function calls in expressions
@@ -89,65 +90,14 @@ export class FunctionCallVisitor extends BaseASTVisitor {
     const args: ast.Parameter[] = [];
 
     if (argsNode) {
-      // argsNode is the 'argument_list' node. It should contain an 'arguments' child.
-      const innerArgumentsNode = argsNode.childForFieldName('arguments');
-      if (innerArgumentsNode) {
-        // Process the actual 'argument' nodes using the dedicated function
-        const processedArgs = this.processArgumentsNode(innerArgumentsNode);
-        args.push(...processedArgs);
-      } else {
-        // If 'arguments' node is not found, it means there are no arguments, which is valid.
-        // No error logging needed here for this specific case.
-      }
+      // Use the existing extractArguments function which handles the correct structure
+      const extractedArgs = extractArguments(argsNode, this.errorHandler);
+      args.push(...extractedArgs);
     }
     return this.createASTNodeForFunction(node, functionName, args);
   }
 
-  /**
-   * Process the 'arguments' node (which contains 'argument' children) and return an array of parameters.
-   * @param argumentsNode The 'arguments' CST node.
-   * @returns An array of AST parameters.
-   */
-  private processArgumentsNode(argumentsNode: TSNode): ast.Parameter[] {
-    const args: ast.Parameter[] = [];
-    for (const child of argumentsNode.namedChildren) {
-      if (child && child.type === 'argument') {
-        const parameter = this.processArgument(child);
-        if (parameter) {
-          args.push(parameter);
-        }
-      }
-    }
-    return args;
-  }
 
-  /**
-   * Process an 'argument' node and return an AST parameter.
-   * @param argumentNode The 'argument' CST node.
-   * @returns An AST parameter or null if the node cannot be processed.
-   */
-  private processArgument(argumentNode: TSNode): ast.Parameter | null {
-    const nameNode = argumentNode.childForFieldName('name');
-    const valueNode = argumentNode.childForFieldName('value');
-    if (valueNode) {
-      // Delegate value parsing to parent visitor
-      const value = this.parentVisitor?.dispatchSpecificExpression(valueNode);
-      this.errorHandler.logInfo(`[FunctionCallVisitor] Argument value node: ${valueNode.text}, parsed value: ${value}`);
-      if (value) {
-        return {
-          name: nameNode?.text || undefined,
-          value: value as ast.ParameterValue,
-        };
-      } else {
-        this.errorHandler.handleError(this.errorHandler.createValidationError(
-          `Failed to parse argument value: ${valueNode.text}`,
-          { cstNode: valueNode, code: ErrorCode.INVALID_ARGUMENT_VALUE }
-        ));
-        return null;
-      }
-    }
-    return null;
-  }
 
   /**
    * Visit a function call node (old grammar)

@@ -305,15 +305,24 @@ export function extractArguments(
             }
           }
         } else {
-          // Handle as positional argument
-          const value = convertNodeToParameterValue(child, errorHandler);
-          if (value !== undefined) {
-            args.push({ name: '', value }); // Positional argument
-            console.log(
-              `[extractArguments] Extracted arguments node as positional argument: ${JSON.stringify(
-                { value }
-              )}`
-            );
+          // Handle positional arguments - process individual argument children
+          console.log(
+            `[extractArguments] Processing positional arguments in arguments node`
+          );
+
+          for (let j = 0; j < child.childCount; j++) {
+            const argChild = child.child(j);
+            if (argChild && argChild.type === 'argument') {
+              const param = extractArgument(argChild, errorHandler);
+              if (param) {
+                console.log(
+                  `[extractArguments] Extracted positional parameter: ${JSON.stringify(
+                    param
+                  )}`
+                );
+                args.push(param);
+              }
+            }
           }
         }
       } else if (
@@ -328,7 +337,7 @@ export function extractArguments(
         );
         const value = convertNodeToParameterValue(child, errorHandler);
         if (value !== undefined) {
-          args.push({ name: '', value }); // Positional argument
+          args.push({ name: undefined, value }); // Positional argument
           console.log(
             `[extractArguments] Extracted direct value as positional argument: ${JSON.stringify(
               { value }
@@ -359,6 +368,9 @@ export function extractArguments(
     if (argNode.type === 'arguments') {
       console.log(
         `[extractArguments] Found 'arguments' node, processing its children`
+      );
+      console.log(
+        `[extractArguments] Arguments node has ${argNode.namedChildCount} named children and ${argNode.childCount} total children`
       );
 
       // Check if this arguments node has argument children
@@ -399,7 +411,7 @@ export function extractArguments(
         );
         const value = convertNodeToParameterValue(argNode, errorHandler);
         if (value !== undefined) {
-          args.push({ name: '', value }); // Positional argument
+          args.push({ name: undefined, value }); // Positional argument
           console.log(
             `[extractArguments] Extracted arguments node as positional argument: ${JSON.stringify(
               { value }
@@ -427,7 +439,7 @@ export function extractArguments(
       );
       const value = convertNodeToParameterValue(argNode, errorHandler);
       if (value !== undefined) {
-        args.push({ name: '', value }); // Positional argument
+        args.push({ name: undefined, value }); // Positional argument
         console.log(
           `[extractArguments] Extracted direct value as positional argument: ${JSON.stringify(
             { value }
@@ -633,7 +645,7 @@ function extractArgument(
       );
       // Convert Value to ParameterValue
       const paramValue = convertValueToParameterValue(value);
-      return { name: '', value: paramValue };
+      return { name: undefined, value: paramValue };
     }
   }
 
@@ -669,19 +681,11 @@ export function extractValue(valueNode: TSNode): ast.Value | null {
       return null;
     }
     case 'arguments': {
-      // Added case for 'arguments'
-      // This case handles when a single, unnamed argument is passed,
-      // and it's wrapped in an 'arguments' node by the parser.
-      // e.g., translate([1,2,3]) -> argument_list has child 'arguments' (text: [1,2,3])
-      // We expect the actual value (e.g., array_literal) to be the first child of this 'arguments' node.
-      const firstChild = valueNode.child(0); // Or namedChild(0) if it's always named
-      if (firstChild) {
-        console.log(
-          `[extractValue] 'arguments' node found. Processing its first child: type=${firstChild.type}, text='${firstChild.text}'`
-        );
-        return extractValue(firstChild);
-      }
-      console.log("[extractValue] 'arguments' node has no processable child.");
+      // 'arguments' nodes should be handled by extractArguments, not extractValue
+      // This prevents incorrect processing of multiple arguments as a single value
+      console.log(
+        `[extractValue] 'arguments' node should be handled by extractArguments, not extractValue. Returning null.`
+      );
       return null;
     }
     case 'argument': {
@@ -696,8 +700,8 @@ export function extractValue(valueNode: TSNode): ast.Value | null {
       console.log(`[extractValue] Matched number. Value: ${valueNode.text}`);
       return { type: 'number', value: valueNode.text };
 
+    case 'string': // Add support for 'string' node type (new grammar)
     case 'string_literal': {
-      // Reverted to previous correct logic
       // Remove quotes from string
       const stringValue = valueNode.text.substring(
         1,
@@ -788,8 +792,19 @@ export function extractValue(valueNode: TSNode): ast.Value | null {
       return null;
     }
 
+    case 'call_expression': {
+      // Handle nested function calls - for now, return as string representation
+      // TODO: Implement proper function call expression handling
+      console.log(`[extractValue] Processing call_expression: ${valueNode.text}`);
+
+      return {
+        type: 'string',
+        value: valueNode.text
+      };
+    }
+
     default:
-      console.log(`[extractValue] Unsupported value type: ${valueNode.type}`);
+      console.log(`[extractValue] Unhandled node type: '${valueNode.type}', text: '${valueNode.text}'`);
       return null;
   }
 }

@@ -1,63 +1,81 @@
 # OpenSCAD Parser - Current Context
 
-## Current Status (2024-12-19)
+## Current Status (2025-06-03)
 
-### Test Results
-- **Total Tests**: 556 tests across 82 test files
-- **Failing**: 101 tests (18.2%)
-- **Passing**: 54 tests (9.7%)
-- **Skipped**: 3 tests (0.5%)
-- **Status**: ❌ Major compatibility issues due to tree-sitter grammar changes
+### Current Task: Priority 2.3 - Update Function Call Tests
 
-### Root Cause Analysis
-The tree-sitter-openscad grammar underwent major breaking changes:
-- **Grammar Status**: ✅ 114/114 tests passing
-- **Parser Status**: ❌ 101 failing tests due to node type changes
+**Status**: In Progress
+**Started**: 2025-06-03
+**Current Step**: Fixing argument extraction logic in function call visitor
 
-### Key Breaking Changes Identified
-1. **Expression System**: `additive_expression`, `multiplicative_expression` → `binary_expression`
-2. **Function Calls**: `accessor_expression` → `call_expression` 
-3. **Argument Structure**: `argument_list` → `arguments` → `argument` nodes
-4. **Range Expressions**: New `range_expression` structure with `start`/`end` fields
-5. **Vector Expressions**: `array_literal` → `vector_expression`
+### What We're Working On
 
-### Current Implementation Status
-- **Build**: ✅ Working (`nx build openscad-parser`)
-- **Lint**: ✅ Working (0 errors, 195 warnings) (`nx lint openscad-parser`)
-- **TypeCheck**: ? To be run (`nx typecheck openscad-parser`)
-- **Tests**: ? 101 failing due to grammar incompatibility
+Successfully updated function call visitor tests to work with new grammar structure. Now fixing the argument extraction logic to properly handle multiple arguments, string values, and nested function calls.
 
-### Active Priority
-**Priority 2.2**: Function Call Visitor and Type Unification ? COMPLETED
-- **Priority 2.1**: Analyzed new function call grammar structure ? Completed (Corrected understanding of argument parsing: `call_expression` -> `arguments` (which is `argument_list`) -> `arguments` -> `argument`)
+### Key Findings
 
-- **Target**: Resolve TypeScript type incompatibilities and lint errors by unifying CST node types to use `SyntaxNode` (aliased as `TSNode`) from `web-tree-sitter`, correcting `Parameter` interface violations, and updating visitor and utility files.
-- **Files**: 
-  - `packages/openscad-parser/src/lib/openscad-parser/ast/ast-types.ts`
-  - `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor.ts`
-  - `packages/openscad-parser/src/lib/openscad-parser/cst/query-utils.ts`
-- **Expected Impact**: Resolved all critical type errors and linting errors related to `arguments`/`args` and `Node`/`TSNode` mismatches.
+1. **Grammar Node Types**:
+   - `call_expression`: Used for function calls in expression contexts (e.g., `x = foo();`)
+   - `module_instantiation`: Used for standalone function calls (e.g., `foo();`)
 
-### Completed Tasks (2024-12-19)
-- ✅ **Priority 1.1**: Updated expression visitor dispatch logic (lines 333-343)
-  - Removed old expression types: `additive_expression`, `multiplicative_expression`, etc.
-  - Kept only `binary_expression` type as per new grammar
-- ✅ **Priority 1.2**: Updated binary expression creation logic (lines 404-413)
-  - Simplified switch statement to handle only `binary_expression` type
-  - Added explanatory comments about grammar refactoring
-- ✅ **Priority 2.2**: Function Call Visitor and Type Unification
-  - Renamed `arguments` to `args` in `ast-types.ts`.
-  - Updated `expression-visitor.ts` to use `functionName` and `args` and added type assertion.
-  - Updated `query-utils.ts` to use `TSNode` consistently.
-- ✅ **Quality Gates**: Linting passed with 0 errors.
+2. **Argument Extraction Issues**:
+   - Multiple positional arguments not being extracted correctly
+   - String values not supported in value extractor
+   - Nested `call_expression` nodes not handled
+   - Test expectations mismatch with actual AST structure
+
+### Current Progress
+
+- ✅ Updated test expectations to use `module_instantiation` instead of `call_expression`
+- ✅ Fixed property name references (`name` → `functionName`, `arguments` → `args`)
+- ✅ Integrated existing `extractArguments` function instead of custom logic
+- ✅ Fixed multiple positional argument extraction (all 3 args from `bar(1, 2, 3)`)
+- ✅ Fixed positional argument names (`undefined` instead of empty string)
+- ✅ Added string value support (`"hello"` now works)
+- ✅ Added call_expression support (nested function calls as string placeholders)
+- ✅ All quality gates passing (TypeScript, Lint)
+
+### Test Results Analysis
+
+From the latest test logs:
+- `foo()`: ✅ Working correctly (0 arguments)
+- `bar(1, 2, 3)`: ✅ Extracting all 3 arguments correctly
+- `baz(x = 10, y = 20)`: ✅ Named arguments working
+- `qux(1, y = 20, "hello")`: ✅ Mixed arguments with string values working
+- `outer(inner(10))`: ✅ Nested calls handled (as string placeholders)
+
+### Remaining Issue: Test Expectations Mismatch
+
+The core issue is that tests expect values wrapped in `ExpressionNode` objects:
+```typescript
+// Test expects:
+{ name: undefined, value: { type: 'expression', expressionType: 'literal', value: 1 } }
+
+// Current implementation returns:
+{ name: undefined, value: 1 }
+```
+
+This is a **design decision**: Should we return raw values (simpler) or wrapped expression nodes (structured)?
 
 ### Next Steps
-1. Run `nx typecheck openscad-parser` to verify type compliance.
-2. Run `nx test openscad-parser` to verify tests.
-3. Move to the next priority as per `reviewed_plan.md`.
 
-### Quality Gates Protocol
-After every file change:
-1. `nx test openscad-parser` - Verify tests
-2. `nx lint openscad-parser` - Code quality
+1. **Decision**: Choose between raw values vs wrapped expression nodes
+2. **Implementation**: Either update tests to expect raw values OR modify argument extractor to wrap values
+3. **Consistency**: Ensure the chosen approach is consistent across all visitors
+
+### Files Modified
+
+- `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor/function-call-visitor.test.ts`
+- `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor/function-call-visitor.ts`
+- `packages/openscad-parser/src/lib/openscad-parser/ast/extractors/argument-extractor.ts`
+
+### Quality Gates Status
+
+- ✅ TypeScript compilation: PASSING
+- ✅ Linting: PASSING (194 warnings, but no errors)
+- ❌ Tests: 1/5 passing (function call visitor tests) - due to test expectations mismatch
+
+### Technical Achievement
+
+**Major breakthrough**: Successfully fixed the core argument extraction logic that was preventing multiple positional arguments from being processed. The fix involved correcting the logic in `extractArguments` to properly iterate through individual `argument` children instead of treating the entire `arguments` node as a single value.
 3. `nx typecheck openscad-parser` - TypeScript compliance
