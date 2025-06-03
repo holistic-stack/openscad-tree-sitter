@@ -98,20 +98,43 @@ export class ListComprehensionVisitor extends BaseASTVisitor {
       `[ListComprehensionVisitor.visitListComprehension] Processing list comprehension: ${node.text.substring(0, 50)}`
     );
 
-    // Check if this is actually a list comprehension node
-    if (node.type !== 'list_comprehension') {
-      this.errorHandler.logWarning(
-        `[ListComprehensionVisitor.visitListComprehension] Expected list_comprehension node, got: ${node.type}`
+    try {
+      // First try to parse as OpenSCAD-style: [for (i = range) expr] or [for (i = range) if (condition) expr]
+      const openScadStyle = this.parseOpenScadStyle(node);
+      if (openScadStyle) {
+        return openScadStyle;
+      }
+
+      // Then try to parse as traditional Python-style: [expr for (i = range) if (condition)?]
+      const pythonStyle = this.parsePythonStyle(node);
+      if (pythonStyle) {
+        return pythonStyle;
+      }
+
+      this.errorHandler.logError(
+        `[ListComprehensionVisitor.visitListComprehension] Unable to parse list comprehension: ${node.text}`
+      );
+      return null;
+    } catch (error) {
+      this.errorHandler.logError(
+        `[ListComprehensionVisitor.visitListComprehension] Error processing list comprehension: ${error}`
       );
       return null;
     }
+  }
 
+  /**
+   * Parse OpenSCAD-style list comprehension: [for (i = range) expr] or [for (i = range) if (condition) expr]
+   */
+  private parseOpenScadStyle(node: TSNode): ast.ListComprehensionExpressionNode | null {
     try {
-      // Extract the for clause (required)
-      const forClause = node.childForFieldName('for_clause');
-      if (!forClause) {
-        this.errorHandler.logError(
-          `[ListComprehensionVisitor.visitListComprehension] No for_clause found in list comprehension`
+      const forClause = node.descendantsOfType('for_clause')[0];
+      const expression = node.descendantsOfType('_value')[0];
+      const condition = node.descendantsOfType('condition')[0] || null;
+
+      if (!forClause || !expression) {
+        this.errorHandler.logDebug(
+          '[ListComprehensionVisitor.parseOpenScadStyle] Missing for_clause or expression in OpenSCAD-style list comprehension'
         );
         return null;
       }
@@ -119,64 +142,75 @@ export class ListComprehensionVisitor extends BaseASTVisitor {
       // Extract variable and range from for clause
       const { variable, range } = this.extractForClause(forClause);
       if (!variable || !range) {
-        this.errorHandler.logError(
-          `[ListComprehensionVisitor.visitListComprehension] Failed to extract variable or range from for clause`
+        this.errorHandler.logWarning(
+          `[ListComprehensionVisitor.parseOpenScadStyle] Failed to extract variable or range from for clause: ${forClause.text}`
         );
         return null;
       }
 
-      // Extract the element expression (required)
-      const elementNode = node.childForFieldName('element');
-      if (!elementNode) {
-        this.errorHandler.logError(
-          `[ListComprehensionVisitor.visitListComprehension] No element expression found in list comprehension`
+      // Parse the expression
+      const expr = this.parentVisitor.dispatchSpecificExpression(expression);
+      if (!expr) {
+        this.errorHandler.logWarning(
+          `[ListComprehensionVisitor.parseOpenScadStyle] Failed to parse expression: ${expression.text}`
         );
         return null;
       }
 
-      const expression = this.parentVisitor.dispatchSpecificExpression(elementNode);
-      if (!expression) {
-        this.errorHandler.logError(
-          `[ListComprehensionVisitor.visitListComprehension] Failed to process element expression`
-        );
-        return null;
-      }
-
-      // Extract optional if clause (condition)
-      let condition: ast.ExpressionNode | undefined;
-      const ifClause = node.childForFieldName('if_clause');
-      if (ifClause) {
-        const conditionNode = ifClause.childForFieldName('condition');
-        if (conditionNode) {
-          const conditionExpr = this.parentVisitor.dispatchSpecificExpression(conditionNode);
-          if (conditionExpr) {
-            condition = conditionExpr;
-          }
+      // Parse condition if present
+      let conditionExpr: ast.ExpressionNode | undefined;
+      if (condition) {
+        const parsedCondition = this.parentVisitor.dispatchSpecificExpression(condition);
+        if (parsedCondition) {
+          conditionExpr = parsedCondition;
+        } else {
+          this.errorHandler.logWarning(
+            `[ListComprehensionVisitor.parseOpenScadStyle] Failed to parse condition: ${condition.text}`
+          );
+          return null;
         }
       }
 
-      // Create the list comprehension AST node
-      const result: ast.ListComprehensionExpressionNode = {
+      // Create the base node without the condition first
+      const nodeWithoutCondition: Omit<ast.ListComprehensionExpressionNode, 'condition'> = {
         type: 'expression',
         expressionType: 'list_comprehension_expression',
         variable,
         range,
-        expression,
-        ...(condition && { condition }),
+        expression: expr,
         location: getLocation(node),
       };
 
-      this.errorHandler.logInfo(
-        `[ListComprehensionVisitor.visitListComprehension] Successfully created list comprehension AST node`
-      );
-
-      return result;
+      // Only add the condition if it exists
+      return conditionExpr 
+        ? { ...nodeWithoutCondition, condition: conditionExpr }
+        : nodeWithoutCondition;
     } catch (error) {
       this.errorHandler.logError(
-        `[ListComprehensionVisitor.visitListComprehension] Error processing list comprehension: ${error}`
+        `[ListComprehensionVisitor.parseOpenScadStyle] Error parsing OpenSCAD-style list comprehension: ${error}`
       );
       return null;
     }
+  }
+
+  /**
+   * Parse traditional Python-style list comprehension: [expr for (i = range) if (condition)?]
+   * This is a fallback for when the OpenSCAD-style parsing fails.
+   * 
+   * Note: This implementation is currently limited because we don't have direct access to the parser.
+   * A more complete solution would require either:
+   * 1. Updating the grammar to support Python-style comprehensions natively
+   * 2. Exposing the parser instance from the parent visitor
+   */
+  private parsePythonStyle(node: TSNode): ast.ListComprehensionExpressionNode | null {
+    this.errorHandler.logWarning(
+      `[ListComprehensionVisitor.parsePythonStyle] Python-style list comprehensions are not fully supported. ` +
+      `Consider using OpenSCAD-style: [for (i = range) expr]`
+    );
+    
+    // For now, we'll just return null to indicate we can't handle this format
+    // This will cause the parser to report a more appropriate error
+    return null;
   }
 
   /**
@@ -187,16 +221,39 @@ export class ListComprehensionVisitor extends BaseASTVisitor {
    */
   private extractForClause(forClause: TSNode): { variable: string | null; range: ast.ExpressionNode | null } {
     try {
-      // Extract iterator (variable name)
-      const iteratorNode = forClause.childForFieldName('iterator');
-      const variable = iteratorNode?.text || null;
+      // In the new grammar, the for clause has a variable_declaration child
+      const varDecl = forClause.childForFieldName('variable_declaration');
+      if (!varDecl) {
+        this.errorHandler.logError(
+          `[ListComprehensionVisitor.extractForClause] No variable_declaration found in for clause`
+        );
+        return { variable: null, range: null };
+      }
 
-      // Extract range expression
-      const rangeNode = forClause.childForFieldName('range');
+      // Extract variable name (first child of variable_declaration)
+      const variableNode = varDecl.namedChildren[0];
+      const variable = variableNode?.text || null;
+
+      if (!variable) {
+        this.errorHandler.logError(
+          `[ListComprehensionVisitor.extractForClause] Failed to extract variable name from for clause`
+        );
+        return { variable: null, range: null };
+      }
+
+      // Extract range expression (second child of variable_declaration)
+      const rangeNode = varDecl.namedChildren[1];
       let range: ast.ExpressionNode | null = null;
 
       if (rangeNode) {
         range = this.parentVisitor.dispatchSpecificExpression(rangeNode);
+      }
+
+      if (!range) {
+        this.errorHandler.logError(
+          `[ListComprehensionVisitor.extractForClause] Failed to extract range expression from for clause`
+        );
+        return { variable: null, range: null };
       }
 
       return { variable, range };

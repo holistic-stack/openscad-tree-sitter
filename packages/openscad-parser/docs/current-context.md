@@ -2,15 +2,18 @@
 
 ## Current Status (2025-06-03)
 
-### Current Task: Priority 2.3 - Update Function Call Tests
+### Current Task: Priority 4.2 - Update List Comprehension Visitor
 
-**Status**: In Progress
+**Status**: IN PROGRESS
 **Started**: 2025-06-03
-**Current Step**: Fixing argument extraction logic in function call visitor
+**Current Step**: Implementing list comprehension visitor for OpenSCAD-style syntax
 
 ### What We're Working On
 
-Successfully updated function call visitor tests to work with new grammar structure. Now fixing the argument extraction logic to properly handle multiple arguments, string values, and nested function calls.
+Implementing the list comprehension visitor to handle OpenSCAD-style syntax with proper type safety and error handling. The implementation focuses on supporting:
+- Basic list comprehensions: `[for (i = range) expr]`
+- Conditional list comprehensions: `[for (i = range) if (condition) expr]`
+- Nested list comprehensions (basic support)
 
 ### Key Findings
 
@@ -84,9 +87,8 @@ range_expression(start: 10, step: -1, end: 0)
 
 ### Next Steps
 
-1. **Complete Priority 3.1**: Document findings and move to PROGRESS.md
-2. **Move to Priority 4**: List Comprehension Integration
-3. **Future**: Address grammar-level negative step parsing (separate grammar task)
+1. **Move to Priority 4.2**: Update list comprehension visitor
+2. **Future**: Address grammar-level negative step parsing (separate grammar task)
 
 ### Files Modified
 

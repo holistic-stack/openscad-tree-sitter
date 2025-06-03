@@ -303,6 +303,14 @@ export interface ExpressionNode extends BaseNode {
 }
 
 /**
+ * Represents an identifier expression, e.g., a variable name.
+ */
+export interface IdentifierExpressionNode extends ExpressionNode {
+  expressionType: 'identifier';
+  text: string;
+}
+
+/**
  * Represents a literal value (number, string, boolean)
  */
 export interface LiteralNode extends ExpressionNode {

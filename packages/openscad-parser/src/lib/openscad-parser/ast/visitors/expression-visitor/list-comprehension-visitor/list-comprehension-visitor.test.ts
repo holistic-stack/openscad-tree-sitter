@@ -26,6 +26,7 @@ import { EnhancedOpenscadParser } from '../../../../enhanced-parser.js';
 import { ErrorHandler } from '../../../../error-handling/index.js';
 import { ListComprehensionVisitor } from './list-comprehension-visitor.js';
 import { ExpressionVisitor } from '../../expression-visitor.js';
+import { IdentifierExpressionNode } from '../../../ast-types.js';
 
 describe('ListComprehensionVisitor', () => {
   let parser: EnhancedOpenscadParser;
@@ -65,6 +66,13 @@ describe('ListComprehensionVisitor', () => {
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
         expect(result?.expressionType).toBe('list_comprehension_expression');
+        expect(result?.variable).toBe('x');
+        expect(result?.range).toBeTruthy();
+        expect(result?.range?.expressionType).toBe('range_expression');
+        if (result?.expression && result.expression.expressionType === 'identifier_expression') {
+          expect((result.expression as IdentifierExpressionNode).text).toBe('x');
+        }
+        expect(result?.condition).toBeUndefined();
       }
     });
 
@@ -81,6 +89,12 @@ describe('ListComprehensionVisitor', () => {
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
         expect(result?.expressionType).toBe('list_comprehension_expression');
+        expect(result?.variable).toBe('x');
+        expect(result?.range).toBeTruthy();
+        expect(result?.range?.expressionType).toBe('range_expression');
+        expect(result?.expression).toBeTruthy();
+        expect(result?.expression?.expressionType).toBe('binary_expression');
+        expect(result?.condition).toBeUndefined();
       }
     });
 
@@ -97,8 +111,15 @@ describe('ListComprehensionVisitor', () => {
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
         expect(result?.expressionType).toBe('list_comprehension_expression');
-        // Should have a condition
-        expect((result as any)?.condition).toBeTruthy();
+        expect(result?.variable).toBe('x');
+        expect(result?.range).toBeTruthy();
+        expect(result?.range?.expressionType).toBe('range_expression');
+        expect(result?.expression).toBeTruthy();
+        if (result?.expression && result.expression.expressionType === 'identifier_expression') {
+          expect((result.expression as IdentifierExpressionNode).text).toBe('x');
+        }
+        expect(result?.condition).toBeTruthy();
+        expect(result?.condition?.expressionType).toBe('binary_expression');
       }
     });
   });
@@ -117,10 +138,18 @@ describe('ListComprehensionVisitor', () => {
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
         expect(result?.expressionType).toBe('list_comprehension_expression');
+        expect(result?.variable).toBe('x');
+        expect(result?.range).toBeTruthy();
+        expect(result?.range?.expressionType).toBe('range_expression');
+        expect(result?.expression).toBeTruthy();
+        if (result?.expression && result.expression.expressionType === 'identifier_expression') {
+          expect((result.expression as IdentifierExpressionNode).text).toBe('x');
+        }
+        expect(result?.condition).toBeUndefined();
       }
     });
 
-    it('should parse OpenSCAD conditional list comprehension [for (x = [1:10]) if (x % 2 == 0) x]', () => {
+    it('should parse OpenSCAD list comprehension with condition [for (x = [1:10]) if (x % 2 == 0) x]', () => {
       const code = '[for (x = [1:10]) if (x % 2 == 0) x]';
       const tree = parser.parse(code);
       expect(tree).toBeTruthy();
@@ -133,8 +162,15 @@ describe('ListComprehensionVisitor', () => {
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
         expect(result?.expressionType).toBe('list_comprehension_expression');
-        // Should have a condition
-        expect((result as any)?.condition).toBeTruthy();
+        expect(result?.variable).toBe('x');
+        expect(result?.range).toBeTruthy();
+        expect(result?.range?.expressionType).toBe('range_expression');
+        expect(result?.expression).toBeTruthy();
+        if (result?.expression && result.expression.expressionType === 'identifier_expression') {
+          expect((result.expression as IdentifierExpressionNode).text).toBe('x');
+        }
+        expect(result?.condition).toBeTruthy();
+        expect(result?.condition?.expressionType).toBe('binary_expression');
       }
     });
   });
@@ -153,12 +189,18 @@ describe('ListComprehensionVisitor', () => {
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
         expect(result?.expressionType).toBe('list_comprehension_expression');
+        expect(result?.variable).toBe('i');
+        expect(result?.range).toBeTruthy();
+        expect(result?.range?.expressionType).toBe('range_expression');
+        expect(result?.expression).toBeTruthy();
+        expect(result?.expression?.expressionType).toBe('array_expression');
+        expect(result?.condition).toBeUndefined();
       }
     });
 
-    it('should parse list comprehension with let expression (basic test)', () => {
-      // Basic test for let expressions without function calls - this should work with current implementation
-      const code = '[for (i = [0:5]) let(angle = i * 36) [angle, angle]]';
+    it('should parse list comprehension with let expression [for (i = [0:2]) let(x = i*2) x]', () => {
+      const code = '[for (i = [0:2]) let(x = i*2) x]';
+
       const tree = parser.parse(code);
       expect(tree).toBeTruthy();
 
@@ -170,6 +212,12 @@ describe('ListComprehensionVisitor', () => {
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
         expect(result?.expressionType).toBe('list_comprehension_expression');
+        expect(result?.variable).toBe('i');
+        expect(result?.range).toBeTruthy();
+        expect(result?.range?.expressionType).toBe('range_expression');
+        expect(result?.expression).toBeTruthy();
+        expect(result?.expression?.expressionType).toBe('let_expression');
+        expect(result?.condition).toBeUndefined();
       }
     });
   });
@@ -189,9 +237,12 @@ describe('ListComprehensionVisitor', () => {
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
         expect(result?.expressionType).toBe('list_comprehension_expression');
-        // Should handle let expressions in the element
+        expect(result?.variable).toBe('i');
+        expect(result?.range).toBeTruthy();
+        expect(result?.range?.expressionType).toBe('range_expression');
         expect(result?.expression).toBeTruthy();
-        expect((result?.expression as any)?.expressionType).toBe('let_expression');
+        expect(result?.expression?.expressionType).toBe('let_expression');
+        expect(result?.condition).toBeUndefined();
       }
     });
 
@@ -209,9 +260,12 @@ describe('ListComprehensionVisitor', () => {
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
         expect(result?.expressionType).toBe('list_comprehension_expression');
-        // Should handle let expressions with multiple assignments
+        expect(result?.variable).toBe('a');
+        expect(result?.range).toBeTruthy();
+        expect(result?.range?.expressionType).toBe('range_expression');
         expect(result?.expression).toBeTruthy();
-        expect((result?.expression as any)?.expressionType).toBe('let_expression');
+        expect(result?.expression?.expressionType).toBe('let_expression');
+        expect(result?.condition).toBeUndefined();
       }
     });
   });

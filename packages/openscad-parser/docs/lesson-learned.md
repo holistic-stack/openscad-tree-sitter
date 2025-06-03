@@ -1,5 +1,33 @@
 # Lessons Learned - OpenSCAD Parser
 
+## 2025-06-03: List Comprehension Visitor Implementation
+
+### Problem
+Implementing the list comprehension visitor required handling both OpenSCAD-style and traditional Python-style syntax while maintaining type safety and proper error handling.
+
+### Solution Approach
+1. **Modular Design**: Created a dedicated `extractForClause` method to handle the common pattern of extracting variable and range from for clauses.
+2. **Syntax Support**: Implemented OpenSCAD-style syntax first (`[for (i=range) if (condition) expr]`) as it's the primary target.
+3. **Type Safety**: Used TypeScript's type system to ensure type safety throughout the visitor implementation.
+4. **Error Handling**: Added comprehensive error handling with clear error messages for debugging.
+
+### Key Insights
+- **Tree-sitter Node Traversal**: Learned to use `descendantsOfType` for reliable node traversal.
+- **TypeScript Patterns**: Gained experience with TypeScript's type system for complex AST structures.
+- **Error Handling**: Implemented a robust error handling strategy that provides meaningful feedback.
+
+### Impact
+- Successfully implemented OpenSCAD-style list comprehension parsing.
+- Established patterns for handling complex AST structures.
+- Improved codebase maintainability with clear separation of concerns.
+
+### Prevention
+- Always analyze the grammar structure before implementing visitors.
+- Use TypeScript's type system to catch potential issues at compile time.
+- Implement comprehensive error handling to make debugging easier.
+
+---
+
 ## 2025-06-03: Function Call Argument Extraction Breakthrough
 
 ### Problem
