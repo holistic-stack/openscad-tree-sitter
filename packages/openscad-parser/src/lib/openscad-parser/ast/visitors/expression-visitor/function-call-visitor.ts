@@ -14,6 +14,7 @@ import { BaseASTVisitor } from '../base-ast-visitor.js';
 import { getLocation } from '../../utils/location-utils.js';
 import { findDescendantOfType } from '../../utils/node-utils.js';
 import { ErrorHandler } from '../../../error-handling/index.js';
+import type { IParentExpressionVisitor } from './i-parent-expression-visitor.js';
 import { extractArguments } from '../../extractors/argument-extractor.js'; // Import the existing argument extractor
 
 /**
@@ -26,7 +27,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
    * @param errorHandler The error handler instance
    */
   constructor(
-    parentVisitorOrSource: { dispatchSpecificExpression(node: TSNode): ast.ExpressionNode | null } | string | null,
+    parentVisitorOrSource: IParentExpressionVisitor | string | null,
     protected override errorHandler: ErrorHandler
   ) {
     super('', errorHandler); // Source is not needed for this visitor
@@ -39,7 +40,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
     }
   }
 
-  private parentVisitor: { dispatchSpecificExpression(node: TSNode): ast.ExpressionNode | null } | null;
+  private parentVisitor: IParentExpressionVisitor | null;
 
   /**
    * Visit a node that could be a function call or module instantiation

@@ -336,12 +336,21 @@ describe('RangeExpressionVisitor', () => {
 
       if (valueNode) {
         const result = visitor.visitRangeExpression(valueNode);
-        expect(result).toBeTruthy();
-        expect(result?.type).toBe('expression');
-        expect(result?.expressionType).toBe('range_expression');
-        expect(result?.start).toBeTruthy();
-        expect(result?.end).toBeTruthy();
-        expect(result?.step).toBeUndefined();
+        expect(result).toBeTruthy(); // Ensures result is not null/undefined
+
+        if (isRangeExpressionNode(result)) {
+          expect(result.type).toBe('expression');
+          expect(result.expressionType).toBe('range_expression');
+          expect(result.start).toBeTruthy();
+          expect(result.end).toBeTruthy();
+          expect(result.step).toBeUndefined();
+        } else {
+          fail(
+            `Expected a RangeExpressionNode. Got: ${
+              result?.type === 'error' ? result.message : JSON.stringify(result)
+            }`,
+          );
+        }
       }
     });
 
@@ -359,12 +368,21 @@ describe('RangeExpressionVisitor', () => {
 
       if (valueNode) {
         const result = visitor.visitRangeExpression(valueNode);
-        expect(result).toBeTruthy();
-        expect(result?.type).toBe('expression');
-        expect(result?.expressionType).toBe('range_expression');
-        expect(result?.start).toBeTruthy();
-        expect(result?.end).toBeTruthy();
-        expect(result?.step).toBeUndefined();
+        expect(result).toBeTruthy(); // Ensures result is not null/undefined
+
+        if (isRangeExpressionNode(result)) {
+          expect(result.type).toBe('expression');
+          expect(result.expressionType).toBe('range_expression');
+          expect(result.start).toBeTruthy();
+          expect(result.end).toBeTruthy();
+          expect(result.step).toBeUndefined();
+        } else {
+          fail(
+            `Expected a RangeExpressionNode. Got: ${
+              result?.type === 'error' ? result.message : JSON.stringify(result)
+            }`,
+          );
+        }
       }
     });
 
@@ -372,8 +390,9 @@ describe('RangeExpressionVisitor', () => {
       const code = 'x = [ (1+) : 5];'; // "(1+)" should parse to an ErrorNode by BinaryExpressionVisitor
       const tree = parser.parse(code);
       expect(tree).toBeTruthy();
+      if (!tree) return; // Ensures tree is narrowed for TypeScript, expect handles test failure
 
-      const assignmentNode = tree.rootNode.child(0); // Known to be non-null due to expect(tree).toBeTruthy()
+      const assignmentNode = tree.rootNode.child(0);
       const valueNode = assignmentNode?.child(0)?.childForFieldName('value');
       expect(valueNode).toBeTruthy();
       expect(valueNode?.type).toBe('range_expression');
@@ -397,6 +416,8 @@ describe('RangeExpressionVisitor', () => {
     it('visitRangeExpression should return ErrorNode for non-range_expression CST node', () => {
       const code = 'a = cube(5);'; // cube(5) is not a range_expression
       const tree = parser.parse(code);
+      expect(tree).toBeTruthy(); // Ensure tree is not null for the test
+      if (!tree) return; // Add explicit null check for TypeScript
       const assignmentExpr = tree.rootNode.child(0)?.child(0);
       const cubeCallNode = assignmentExpr?.childForFieldName('value'); // This will be a call_expression
       
@@ -408,24 +429,12 @@ describe('RangeExpressionVisitor', () => {
         expect(result).toBeTruthy();
         expect(result?.type).toBe('error');
         const errorNode = result as ast.ErrorNode;
-
-  testCases.forEach(tc => {
-    /**
-     * Regression test: Ensures that passing a non-range node (e.g., cubeCallNode)
-     * to RangeExpressionVisitor.visit returns an ErrorNode with the correct errorCode.
-     * Fixed a syntax error caused by an extraneous closing brace in June 2025.
-     */
-    it(`should return ErrorNode for ${tc.code} with errorCode ${tc.errorCode}`, () => {
-      const code = tc.code;
-      const tree = parser.parse(code);
-        const result = visitor.visit(cubeCallNode);
-        expect(result).toBeTruthy();
-        expect(result?.type).toBe('error');
-        const errorNode = result as ast.ErrorNode;
-        expect(errorNode.errorCode).toBe('UNEXPECTED_NODE_TYPE_FOR_RANGE_VISITOR');
-        expect(errorNode.message).toContain("Expected 'range_expression', but received 'call_expression'");
-    });
-  });
+        expect(errorNode.errorCode).toBe('INVALID_NODE_TYPE_FOR_RANGE_EXPRESSION_VISIT');
+        expect(errorNode.message).toContain(
+          `RangeExpressionVisitor.visitRangeExpression: Expected 'range_expression', but received '${cubeCallNode.type}'`
+        );
+      } // closes if (cubeCallNode)
+    }); // closes it('visitRangeExpression should return ErrorNode for non-range_expression CST node', () => {
 
   describe('Malformed Range Syntax Error Handling', () => {
     const testCases = [

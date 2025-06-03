@@ -1,13 +1,16 @@
 # OpenSCAD Parser - Current Context
 
-## Current Status (2025-06-04)
+## Current Status (2025-06-05)
 
-### Current Task: Refactor `RangeExpressionVisitor` Tests - Type Safety
+### Current Task: Refine `RangeExpressionVisitor` Implementation - Error Messaging
 
-**Status**: COMPLETED (for type safety refactoring within `range-expression-visitor.test.ts`)
+**Status**: COMPLETED (for error message enhancement in `RangeExpressionVisitor`)
 **Focus**: Incrementally refactor `range-expression-visitor.test.ts` for type safety and address lint/type errors.
 
-**Recent Activity (2025-06-04)**:
+**Recent Activity (2025-06-05)**:
+- **`RangeExpressionVisitor` Error Message Enhancement**: Updated `RangeExpressionVisitor.visitRangeExpression` to include the message from the underlying `cause` error when sub-expressions (start, step, end) fail to parse. This provides more detailed diagnostic information.
+
+**Previous Activity (2025-06-04)**:
 - **Type Safety Refactoring Completed**: All relevant test blocks in `range-expression-visitor.test.ts` have been successfully refactored to use the `isRangeExpressionNode` type guard. This resolves unsafe property access on the `RangeExpressionNode | ErrorNode` union type.
 - **Error Handling**: Appropriate `fail()` calls with detailed messages (using `errorNode.cstNodeText`) are now in place for unexpected `ErrorNode` results in tests.
 - **`fail` Lint Issue**: The `Cannot find name 'fail'` lint errors (e.g., `ts/d0316f30`) persist in `range-expression-visitor.test.ts`. This is confirmed to be an ESLint configuration issue where Vitest globals are not recognized. This is a project-level issue, not a code issue within this specific file's refactoring scope.
@@ -101,13 +104,13 @@ range_expression(start: 10, step: -1, end: 0)
 - `packages/openscad-parser/src/lib/openscad-parser/ast/extractors/argument-extractor.ts`
 - `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor/list-comprehension-visitor/list-comprehension-visitor.ts`
 
-### Quality Gates Status (as of 2025-06-04 - Post `RangeExpressionVisitor` Test Refactor)
+### Quality Gates Status (as of 2025-06-05 - Post `RangeExpressionVisitor` Error Message Enhancement)
 
 - ❌ **Lint (`nx lint openscad-parser`)**: FAILING.
-  - **Still 1 Error, 195 Warnings (Overall)**. The errors in `range-expression-visitor.test.ts` are now solely the `Cannot find name 'fail'` issue (e.g., `ts/d0316f30`, `ts/74cf44fa`, etc.), due to ESLint configuration not recognizing Vitest globals. Unsafe property access lint errors within this file have been resolved.
-  - Other warnings are pre-existing across various files.
-- ❌ **Type Check (`nx typecheck openscad-parser`)**: FAILING. Numerous pre-existing errors (e.g., `TS2322: Type 'ExpressionNode | ErrorNode | null' is not assignable to type 'ExpressionNode | null'`) across multiple files. The refactoring of `range-expression-visitor.test.ts` has resolved type errors related to unsafe property access within that specific file.
-- ❌ **Tests (`nx test openscad-parser`)**: FAILING (32 failed files, 116 failed tests). These are predominantly pre-existing issues unrelated to the `range-expression-visitor.test.ts` refactoring. The tests within `range-expression-visitor.test.ts` are passing (or failing due to legitimate error conditions being tested, or skipped for known grammar issues).
+  - **1 Error, 204 Warnings (Overall)**. The error remains the `Cannot find name 'fail'` issue in test files due to ESLint configuration not recognizing Vitest globals. The number of warnings has slightly increased due to pre-existing issues identified by the linter across the codebase.
+  - Unsafe property access lint errors within `range-expression-visitor.test.ts` were previously resolved.
+- ❌ **Type Check (`nx typecheck openscad-parser`)**: FAILING. Numerous pre-existing TypeScript errors (e.g., `TS2322: Type 'ExpressionNode | ErrorNode' is not assignable to type 'ExpressionNode | null'`, `TS2339: Property 'functionCallVisitor' does not exist on type 'ExpressionVisitor'`). These are widespread issues related to `ErrorNode` handling and other type inconsistencies, not introduced by the recent `RangeExpressionVisitor` error message enhancement.
+- ❌ **Tests (`nx test openscad-parser`)**: FAILING (32 failed files, 118 failed tests). These are predominantly pre-existing issues (e.g., `ParserError: Failed to parse operand in unary expression: dispatchSpecificExpression returned null.` in `unary-expression-visitor.test.ts`). The `RangeExpressionVisitor` specific tests continue to pass regarding its own logic; the overall test failures are unrelated to the recent error message enhancement.
 
 ### Technical Achievement
 

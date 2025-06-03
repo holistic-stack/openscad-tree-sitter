@@ -199,14 +199,14 @@ export interface ASTVisitor {
    * @param node The let expression node to visit
    * @returns The let AST node or null if the node cannot be processed
    */
-  visitLetExpression(node: TSNode): ast.LetNode | ast.LetExpressionNode | null;
+  visitLetExpression(node: TSNode): ast.LetNode | ast.LetExpressionNode | ast.ErrorNode | null;
 
   /**
    * Visit a conditional expression node
    * @param node The conditional expression node to visit
    * @returns The expression AST node or null if the node cannot be processed
    */
-  visitConditionalExpression(node: TSNode): ast.ExpressionNode | null;
+  visitConditionalExpression(node: TSNode): ast.ExpressionNode | ast.ErrorNode | null;
 
   /**
    * Visit an assignment statement node

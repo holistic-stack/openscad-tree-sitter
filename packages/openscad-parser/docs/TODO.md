@@ -61,14 +61,14 @@
   - **Result**: Grammar structure for valid ranges (e.g., `[0:5]`, `[0:2:10]`) is understood. The visitor handles these correctly. The previously failing test for `[0:5]` now passes.
   - **Identified Issue (Grammar)**: Tree-sitter grammar incorrectly parses negative steps like `[10:-1:0]`. (Deferred to grammar-level fix).
 
-- [ ] **3.2**: Refactor and Enhance `RangeExpressionVisitor` (Implementation) 
+- [~] **3.2**: Refactor and Enhance `RangeExpressionVisitor` (Implementation) - *Error message enhancement completed, core refactoring for grammar alignment previously verified.*
   - **Objective**: 
     - Align `RangeExpressionVisitor` (the implementation in `range-expression-visitor.ts`) with the current Tree-sitter grammar for `range_expression` (explicit child fields: `start`, `step`, `end`).
     - Implement robust error handling within the visitor to return `ErrorNode` instances for malformed or incomplete range expressions.
   - **File**: `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.ts`
   - **Key Changes Needed**:
     1.  **Explicit Field Usage**: Ensure the visitor directly and robustly accesses `start`, `step` (if present), and `end` child nodes from the `range_expression` CST node, as defined by the grammar.
-    2.  **Improved Error Handling**: For scenarios where these expected child nodes are missing, of an incorrect type, or the range expression is otherwise structurally invalid according to the grammar, the visitor should not return `null` silently. Instead, it should generate and return a meaningful AST `ErrorNode` (or a similar standardized error representation within the AST) that captures information about the parsing failure.
+    2.  **Improved Error Handling**: For scenarios where these expected child nodes are missing, of an incorrect type, or the range expression is otherwise structurally invalid according to the grammar, the visitor should not return `null` silently. Instead, it should generate and return a meaningful AST `ErrorNode` (or a similar standardized error representation within the AST) that captures information about the parsing failure. ✅ (Error message content enhanced 2025-06-05 to include cause details).
     3.  **Type Safety**: Ensure all parsing paths are type-safe and handle potential `null` or `undefined` child nodes gracefully before attempting to process them.
   - **Testing for 3.2 (Visitor Implementation)**:
     - The existing test suite (`range-expression-visitor.test.ts`) now includes robust checks for `ErrorNode` vs `RangeExpressionNode`.

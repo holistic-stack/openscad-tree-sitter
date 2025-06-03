@@ -1,5 +1,34 @@
 # OpenSCAD Parser - Progress Log
 
+## Implementation Progress (2025-06-05)
+
+### Priority 3.2: Refine `RangeExpressionVisitor` Implementation - Enhanced Error Messaging
+
+**Objective**: Improve the diagnostic quality of error messages produced by `RangeExpressionVisitor` when sub-expressions (start, step, end) cannot be parsed.
+
+**Task**: Modified `RangeExpressionVisitor.visitRangeExpression`.
+
+**Files Modified**:
+- `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.ts`
+
+**Changes Made**:
+- When parsing `start`, `step`, or `end` sub-expressions fails, and the underlying `ExpressionVisitor.dispatchSpecificExpression` returns an `ErrorNode` (the `cause`), the message from this `cause` is now appended to the primary error message of the `ErrorNode` returned by `RangeExpressionVisitor`.
+
+**Rationale & Outcome**:
+- Provides more detailed and context-rich error messages, aiding in debugging parsing issues related to range expressions.
+- For example, if `[ problematic_start_expr : 5 ]` fails because `problematic_start_expr` is unparsable, the error for the range will now include details about why `problematic_start_expr` itself failed.
+
+**Quality Gates Results (Post-Enhancement)**:
+- **Lint (`nx lint openscad-parser`)**: FAILING (1 error, 204 warnings). The error is the known ESLint configuration issue with Vitest globals. Warnings are pre-existing.
+- **Type Check (`nx typecheck openscad-parser`)**: FAILING. Numerous pre-existing TypeScript errors across the codebase, primarily related to `ErrorNode` handling and other type inconsistencies.
+- **Tests (`nx test openscad-parser`)**: FAILING (32 failed files, 118 failed tests). Failures are predominantly pre-existing and unrelated to the `RangeExpressionVisitor` error message enhancement. `RangeExpressionVisitor`'s own tests pass.
+
+**Impact**:
+- Error diagnostics for `RangeExpressionNode` parsing failures are now more informative.
+- This completes a specific refinement task for `RangeExpressionVisitor`'s error handling capabilities.
+
+---
+
 ## Implementation Progress (2025-06-04)
 
 ### Priority 3.2: Refine `RangeExpressionVisitor` Tests - Type Safety (COMPLETED)

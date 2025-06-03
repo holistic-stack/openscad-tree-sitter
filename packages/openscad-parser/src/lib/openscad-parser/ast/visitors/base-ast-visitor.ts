@@ -590,7 +590,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
    * @param node The let expression node to visit
    * @returns The let AST node or null if the node cannot be processed
    */
-  visitLetExpression(node: TSNode): ast.LetNode | ast.LetExpressionNode | null {
+  visitLetExpression(node: TSNode): ast.LetNode | ast.LetExpressionNode | ast.ErrorNode | null {
     console.log(
       `[BaseASTVisitor.visitLetExpression] Processing let expression: ${node.text.substring(
         0,
@@ -605,7 +605,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
    * @param node The conditional expression node to visit
    * @returns The expression AST node or null if the node cannot be processed
    */
-  visitConditionalExpression(node: TSNode): ast.ExpressionNode | null {
+  visitConditionalExpression(node: TSNode): ast.ExpressionNode | ast.ErrorNode | null {
     console.log(
       `[BaseASTVisitor.visitConditionalExpression] Processing conditional expression: ${node.text.substring(
         0,

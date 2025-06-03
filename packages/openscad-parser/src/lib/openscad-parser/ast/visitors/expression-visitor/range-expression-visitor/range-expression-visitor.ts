@@ -99,15 +99,15 @@ export class RangeExpressionVisitor extends BaseASTVisitor {
    * @param node - The Tree-sitter node to visit (must be a range_expression)
    * @returns The range expression AST node or an ErrorNode if parsing fails
    * 
-   * @example Input CST for `[0:2:10]`
+   * @example Input CST for `[var_start : func_step() : 10 + x]`
    * ```
    * (range_expression
    *   "["
-   *   start: (number_literal)
+   *   start: (identifier)       // Example: var_start can be any expression
    *   ":"
-   *   step: (number_literal)
+   *   step: (call_expression) // Example: func_step() can be any expression
    *   ":"
-   *   end: (number_literal)
+   *   end: (binary_expression)  // Example: 10 + x can be any expression
    *   "]"
    * )
    * ```
@@ -161,12 +161,16 @@ export class RangeExpressionVisitor extends BaseASTVisitor {
 
     const startExpressionResult = this.parentVisitor.dispatchSpecificExpression(startNode);
     if (!startExpressionResult || startExpressionResult.type === 'error') {
+      let message = `Failed to parse start expression '${startNode.text}' in range: ${node.text}`;
+      if (startExpressionResult && startExpressionResult.type === 'error') {
+        message += `. Cause: ${startExpressionResult.message}`;
+      }
       return {
         type: 'error',
         errorCode: 'UNPARSABLE_RANGE_START_EXPRESSION',
-        message: `Failed to parse start expression '${startNode.text}' in range: ${node.text}`,
+        message,
         originalNodeType: node.type,
-        cstNodeText: node.text, // Or startNode.text for more specific error source
+        cstNodeText: startNode.text,
         location: getLocation(startNode),
         ...(startExpressionResult && startExpressionResult.type === 'error' ? { cause: startExpressionResult } : {}),
       } as ast.ErrorNode;
@@ -175,12 +179,16 @@ export class RangeExpressionVisitor extends BaseASTVisitor {
 
     const endExpressionResult = this.parentVisitor.dispatchSpecificExpression(endNode);
     if (!endExpressionResult || endExpressionResult.type === 'error') {
+      let message = `Failed to parse end expression '${endNode.text}' in range: ${node.text}`;
+      if (endExpressionResult && endExpressionResult.type === 'error') {
+        message += `. Cause: ${endExpressionResult.message}`;
+      }
       return {
         type: 'error',
         errorCode: 'UNPARSABLE_RANGE_END_EXPRESSION',
-        message: `Failed to parse end expression '${endNode.text}' in range: ${node.text}`,
+        message,
         originalNodeType: node.type,
-        cstNodeText: node.text, // Or endNode.text
+        cstNodeText: endNode.text,
         location: getLocation(endNode),
         ...(endExpressionResult && endExpressionResult.type === 'error' ? { cause: endExpressionResult } : {}),
       } as ast.ErrorNode;
@@ -191,12 +199,16 @@ export class RangeExpressionVisitor extends BaseASTVisitor {
     if (stepNode) {
       const stepExpressionResult = this.parentVisitor.dispatchSpecificExpression(stepNode);
       if (!stepExpressionResult || stepExpressionResult.type === 'error') {
+        let message = `Failed to parse step expression '${stepNode.text}' in range: ${node.text}`;
+        if (stepExpressionResult && stepExpressionResult.type === 'error') {
+          message += `. Cause: ${stepExpressionResult.message}`;
+        }
         return {
           type: 'error',
           errorCode: 'UNPARSABLE_RANGE_STEP_EXPRESSION',
-          message: `Failed to parse step expression '${stepNode.text}' in range: ${node.text}`,
+          message,
           originalNodeType: node.type,
-          cstNodeText: node.text, // Or stepNode.text
+          cstNodeText: stepNode.text,
           location: getLocation(stepNode),
           ...(stepExpressionResult && stepExpressionResult.type === 'error' ? { cause: stepExpressionResult } : {}),
         } as ast.ErrorNode;
