@@ -60,30 +60,65 @@ export class FunctionCallVisitor extends BaseASTVisitor {
       functionNameNode = node.childForFieldName('name');
       argsNode = node.childForFieldName('arguments');
       if (!functionNameNode) {
-        this.errorHandler.logError(`[FunctionCallVisitor] Module name node not found for module_instantiation: ${node.text}`);
-        return null;
+        const message = `[FunctionCallVisitor] Module name node not found for module_instantiation: ${node.text}`;
+        this.errorHandler.logError(message);
+        return {
+          type: 'error',
+          errorCode: 'MISSING_FUNCTION_CALL_NAME',
+          message: `Module name not found for module_instantiation. CST node text: ${node.text}`,
+          originalNodeType: node.type,
+          cstNodeText: node.text,
+          location: getLocation(node),
+        } as ast.ErrorNode;
       }
 
     } else if (node.type === 'call_expression') {
       functionNameNode = node.childForFieldName('function');
       argsNode = node.childForFieldName('arguments');
       if (!functionNameNode) {
-        this.errorHandler.logError(`[FunctionCallVisitor] Function name node not found for call_expression: ${node.text}`);
-        return null;
+        const message = `[FunctionCallVisitor] Function name node not found for call_expression: ${node.text}`;
+        this.errorHandler.logError(message);
+        return {
+          type: 'error',
+          errorCode: 'MISSING_FUNCTION_CALL_NAME',
+          message: `Function name not found for call_expression. CST node text: ${node.text}`,
+          originalNodeType: node.type,
+          cstNodeText: node.text,
+          location: getLocation(node),
+        } as ast.ErrorNode;
       }
     } else {
+      const errorMsg = 'Unexpected node type for function call/module instantiation.';
       this.errorHandler.handleError(this.errorHandler.createSyntaxError(
-        'Function call name not found.',
-        { cstNode: node, code: ErrorCode.SYNTAX_ERROR }
+        `${errorMsg} Expected 'module_instantiation' or 'call_expression', got '${node.type}'.`,
+        { cstNode: node, code: ErrorCode.SYNTAX_ERROR, nodeType: node.type }
       ));
-      return null;
+      return {
+        type: 'error',
+        errorCode: 'UNEXPECTED_NODE_TYPE_FOR_FUNCTION_CALL',
+        message: `${errorMsg} Expected 'module_instantiation' or 'call_expression', got '${node.type}'. CST node text: ${node.text}`,
+        originalNodeType: node.type,
+        cstNodeText: node.text,
+        location: getLocation(node),
+      } as ast.ErrorNode;
     }
 
     this.errorHandler.logInfo(`[FunctionCallVisitor] Processing function call. Function name node: ${functionNameNode?.text}`);
 
+    // This check is somewhat redundant due to earlier checks but kept for safety.
+    // If functionNameNode is null here, it means an earlier check should have caught it and returned an ErrorNode.
+    // However, to be absolutely safe, if it somehow reaches here as null, we create an ErrorNode.
     if (!functionNameNode) {
-      this.errorHandler.handleError(this.errorHandler.createSyntaxError('Function call name not found.', { cstNode: node, code: ErrorCode.SYNTAX_ERROR }));
-      return null;
+      const message = `[FunctionCallVisitor] Critical error: Function name node is unexpectedly null after initial checks. Node: ${node.text}`;
+      this.errorHandler.logError(message, 'FunctionCallVisitor.visit', node);
+      return {
+        type: 'error',
+        errorCode: 'INTERNAL_PARSER_ERROR_UNEXPECTED_NULL_FUNCTION_NAME',
+        message: `Critical error: Function name node is unexpectedly null. CST node text: ${node.text}`,
+        originalNodeType: node.type,
+        cstNodeText: node.text,
+        location: getLocation(node),
+      } as ast.ErrorNode;
     }
 
     const functionName = functionNameNode.text;

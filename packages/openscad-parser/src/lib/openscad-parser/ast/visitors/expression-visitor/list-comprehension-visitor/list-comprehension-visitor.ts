@@ -128,13 +128,22 @@ export class ListComprehensionVisitor extends BaseASTVisitor {
    */
   private parseOpenScadStyle(node: TSNode): ast.ListComprehensionExpressionNode | null {
     try {
-      const forClause = node.descendantsOfType('for_clause')[0];
-      const expression = node.descendantsOfType('_value')[0];
-      const condition = node.descendantsOfType('condition')[0] || null;
+      const forClause = node.childForFieldName('list_comprehension_for');
+      const expression = node.childForFieldName('expr');
+      const condition = node.childForFieldName('condition');
 
-      if (!forClause || !expression) {
+      if (!forClause) {
         this.errorHandler.logDebug(
-          '[ListComprehensionVisitor.parseOpenScadStyle] Missing for_clause or expression in OpenSCAD-style list comprehension'
+          '[ListComprehensionVisitor.parseOpenScadStyle] Missing list_comprehension_for in OpenSCAD-style list comprehension'
+        );
+        return null;
+      }
+      // The 'expr' field is mandatory in the grammar for a valid list_comprehension node.
+      // If 'expression' (node.childByFieldName('expr')) is null here, it implies a malformed CST node
+      // not conforming to the expected list_comprehension structure, which should ideally be caught by tree-sitter's parsing.
+      if (!expression) {
+        this.errorHandler.logError(
+          `[ListComprehensionVisitor.parseOpenScadStyle] Critical: Missing 'expr' child in list_comprehension node: ${node.text}. This may indicate a grammar mismatch or malformed CST.`
         );
         return null;
       }
@@ -148,11 +157,35 @@ export class ListComprehensionVisitor extends BaseASTVisitor {
         return null;
       }
 
-      // Parse the expression
-      const expr = this.parentVisitor.dispatchSpecificExpression(expression);
+      // Parse the expression - handle nested list comprehensions
+      // Parse the expression - handle nested list comprehensions
+      let expr: ast.ExpressionNode | null = null;
+
+      // 'expression' (from line 131, const expression = node.descendantsOfType('_value')[0];) 
+      // is the TSNode representing the value part of the comprehension.
+      // e.g., in [for (i = x) i*2], 'expression' is the node for 'i*2'.
+      // e.g., in [for (i = x) [for (j = y) j*i]], 'expression' is the node for '[for (j = y) j*i]'.
+
+      // The earlier check `if (!forClause || !expression)` (line 134) ensures `expression` is not null here.
+      if (expression.type === 'list_comprehension') { // Check if the 'expression' TSNode is a list_comprehension
+        // The expression part is itself a list comprehension (nested)
+        this.errorHandler.logInfo(
+          `[ListComprehensionVisitor.parseOpenScadStyle] Found nested list comprehension: ${expression.text}`
+        );
+        // Recursively call visitListComprehension to parse the nested one.
+        // 'expression' here is the TSNode for the inner list comprehension.
+        expr = this.visitListComprehension(expression);
+      } else {
+        // The expression part is a regular expression, not a nested list comprehension.
+        this.errorHandler.logDebug(
+          `[ListComprehensionVisitor.parseOpenScadStyle] Parsing regular expression: ${expression.text}`
+        );
+        expr = this.parentVisitor.dispatchSpecificExpression(expression);
+      }
+
       if (!expr) {
         this.errorHandler.logWarning(
-          `[ListComprehensionVisitor.parseOpenScadStyle] Failed to parse expression: ${expression.text}`
+          `[ListComprehensionVisitor.parseOpenScadStyle] Failed to parse expression: ${expression?.text}`
         );
         return null;
       }

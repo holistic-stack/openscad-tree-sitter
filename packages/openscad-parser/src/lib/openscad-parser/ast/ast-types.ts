@@ -945,6 +945,25 @@ export interface ConditionalExpressionNode extends ExpressionNode {
 }
 
 /**
+ * Represents a parsing error encountered during AST construction.
+ * This node is used when a visitor cannot successfully convert a CST node
+ * into a valid AST node due to structural issues, missing parts, or
+ * unparsable sub-expressions.
+ *
+ * @since 0.2.0
+ * @category Core
+ */
+export interface ErrorNode extends BaseNode {
+  type: 'error';
+  errorCode: string; // e.g., 'MISSING_CHILD_NODE', 'UNPARSABLE_EXPRESSION'
+  message: string; // Human-readable error message
+  originalNodeType?: string; // The type of the CST node that failed to parse (e.g., 'range_expression')
+  cstNodeText?: string; // The text content of the problematic CST node
+  cause?: ErrorNode; // Optional underlying error that caused this error
+  // Location is inherited from BaseNode and should point to the problematic CST node
+}
+
+/**
  * Union type of all possible AST nodes
  */
 export type ASTNode =
@@ -996,4 +1015,7 @@ export type ASTNode =
   | ListComprehensionExpressionNode
   | BinaryExpressionNode
   | UnaryExpressionNode
-  | ConditionalExpressionNode;
+  | ConditionalExpressionNode
+  | ErrorNode; // Added ErrorNode here
+
+

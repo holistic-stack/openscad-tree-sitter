@@ -35,18 +35,34 @@
       }
     },
     "test": {
-      "executor": "@nx/vite:test",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "executor": "nx:run-commands",
       "options": {
-        "configFile": "packages/openscad-parser/vite.config.ts",
-        "reportsDirectory": "{workspaceRoot}/coverage/{projectRoot}"
+        "command": "vitest run --reporter=verbose --no-coverage",
+        "cwd": "packages/openscad-parser",
+        "env": {
+          "NX_TASKS_RUNNER_DYNAMIC_OUTPUT": "false",
+          "NX_SKIP_LOG_GROUPING": "true",
+          "FORCE_COLOR": "1"
+        }
       },
       "configurations": {
         "watch": {
-          "watch": true
+          "command": "vitest watch --reporter=verbose --no-coverage",
+          "cwd": "packages/openscad-parser",
+          "env": {
+            "NX_TASKS_RUNNER_DYNAMIC_OUTPUT": "false",
+            "NX_SKIP_LOG_GROUPING": "true",
+            "FORCE_COLOR": "1"
+          }
         },
         "coverage": {
-          "reportsDirectory": "{workspaceRoot}/coverage/{projectRoot}"
+          "command": "vitest run --reporter=verbose --coverage",
+          "cwd": "packages/openscad-parser",
+          "env": {
+            "NX_TASKS_RUNNER_DYNAMIC_OUTPUT": "false",
+            "NX_SKIP_LOG_GROUPING": "true",
+            "FORCE_COLOR": "1"
+          }
         }
       }
     },

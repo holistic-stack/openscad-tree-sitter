@@ -80,24 +80,47 @@ export class UnaryExpressionVisitor extends BaseASTVisitor {
 
     const operandAST = this.parentVisitor.dispatchSpecificExpression(operandNode);
 
+    // If operand parsing failed (returned null) or resulted in an error node, propagate it.
     if (!operandAST) {
       const error = this.errorHandler.createParserError(
-        `Failed to parse operand in unary expression.`,
+        `Failed to parse operand in unary expression: dispatchSpecificExpression returned null.`,
         {
           line: getLocation(operandNode).start.line,
           column: getLocation(operandNode).start.column,
-          nodeType: operandNode.type
+          nodeType: operandNode.type,
+          errorCode: 'UNPARSABLE_UNARY_OPERAND_NULL'
         }
       );
       this.errorHandler.report(error);
-      return null;
+      // Return a new ErrorNode if dispatchSpecificExpression returned null, to be consistent
+      return {
+        type: 'error',
+        errorCode: 'UNPARSABLE_UNARY_OPERAND_NULL',
+        message: `Failed to parse operand for unary expression. CST node text: ${operandNode.text}`,
+        originalNodeType: operandNode.type,
+        cstNodeText: operandNode.text,
+        location: getLocation(operandNode),
+      } as ast.ErrorNode;
     }
 
+    // Check if the dispatched expression itself is an ErrorNode
+    if (operandAST.type === 'error') {
+      // Propagate the ErrorNode directly
+      // Optionally, wrap it or add context if needed, but direct propagation is simplest for now
+      this.errorHandler.logWarning(
+        `[UnaryExpressionVisitor] Operand parsing resulted in an ErrorNode. Propagating error. Node: "${operandNode.text}"`,
+        'UnaryExpressionVisitor.visit',
+        operandAST
+      );
+      return operandAST; 
+    }
+
+    // At this point, operandAST should be a valid ExpressionNode (not null and not ErrorNode)
     return {
       type: 'expression',
       expressionType: 'unary_expression',
       operator: operator as ast.UnaryOperator, // Cast, assuming grammar aligns
-      operand: operandAST,
+      operand: operandAST, // operandAST is now guaranteed to be a valid ExpressionNode
       prefix: true, // OpenSCAD unary operators are always prefix
       location: getLocation(node),
     } as ast.UnaryExpressionNode;

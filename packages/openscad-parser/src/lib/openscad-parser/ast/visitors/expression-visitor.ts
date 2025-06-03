@@ -118,20 +118,17 @@ export class ExpressionVisitor extends BaseASTVisitor {
   /**
    * Create a binary expression node from a CST node
    * @param node The binary expression CST node
-   * @returns The binary expression AST node or null if the node cannot be processed
+   * @returns The binary expression AST node, an ErrorNode, or null if the node cannot be processed
    */
-  createBinaryExpressionNode(node: TSNode): ast.BinaryExpressionNode | null {
+  createBinaryExpressionNode(node: TSNode): ast.BinaryExpressionNode | ast.ErrorNode | null {
     this.safeLog(
       'info',
-      `[ExpressionVisitor.createBinaryExpressionNode] Creating binary expression node for: ${
-        node.type
-      } - "${node.text.substring(0, 30)}"`,
+      `[ExpressionVisitor.createBinaryExpressionNode] Creating binary expression node for: ${node.type} - "${node.text.substring(0, 30)}"`,
       'ExpressionVisitor.createBinaryExpressionNode',
       node
     );
 
     // Check if this is actually a single expression wrapped in a binary expression hierarchy node
-    // This happens when the grammar creates nested expression hierarchies for precedence
     if (node.namedChildCount === 1) {
       const child = node.namedChild(0);
       if (child) {
@@ -141,59 +138,56 @@ export class ExpressionVisitor extends BaseASTVisitor {
           'ExpressionVisitor.createBinaryExpressionNode',
           node
         );
-        // Delegate to the child node
-        return this.dispatchSpecificExpression(
-          child
-        ) as ast.BinaryExpressionNode;
+        const result = this.dispatchSpecificExpression(child);
+        // If the child is a binary expression or an error, return it directly.
+        // Otherwise, this isn't the binary expression we're trying to create here.
+        if (result && (result.type === 'error' || (result.type === 'expression' && (result as ast.BinaryExpressionNode).expressionType === 'binary'))) {
+           return result as ast.BinaryExpressionNode | ast.ErrorNode;
+        }
+        this.safeLog(
+          'warning',
+          `[ExpressionVisitor.createBinaryExpressionNode] Single child was not a binary expression or error. Node: "${node.text}", Child: "${child.type}". Returning null.`,
+          'ExpressionVisitor.createBinaryExpressionNode',
+          node
+        );
+        return null;
       }
     }
 
-    // Extract left operand, operator, and right operand
     let leftNode: TSNode | null = null;
     let operatorNode: TSNode | null = null;
     let rightNode: TSNode | null = null;
 
-    // Binary expressions should have at least 3 children (left, operator, right)
-    if (node.childCount >= 3) {
-      // Try to get named children first
+    // Prefer named children for clarity and grammar alignment
+    if (node.childForFieldName('left') && node.childForFieldName('operator') && node.childForFieldName('right')) {
       leftNode = node.childForFieldName('left');
       operatorNode = node.childForFieldName('operator');
       rightNode = node.childForFieldName('right');
-
-      // If that fails, try direct children approach
-      if (!leftNode || !operatorNode || !rightNode) {
-        leftNode = node.child(0);
-        rightNode = node.child(2);
-
-        // For operators, we need to find the first token that's an operator
-        for (let i = 0; i < node.childCount; i++) {
-          const child = node.child(i);
-          if (
-            child &&
-            [
-              '+',
-              '-',
-              '*',
-              '/',
-              '%',
-              '==',
-              '!=',
-              '<',
-              '<=',
-              '>',
-              '>=',
-              '&&',
-              '||',
-            ].includes(child.text)
-          ) {
-            operatorNode = child;
-            break;
-          }
+    } else if (node.childCount >= 3) { // Fallback for older grammar or non-standard binary structures
+      leftNode = node.child(0);
+      // Attempt to find the operator; this is less robust than named fields
+      // Iterate between the first and last child to find a potential operator
+      for (let i = 1; i < node.childCount - 1; i++) {
+        const child = node.child(i);
+        if (child && [
+            '+', '-', '*', '/', '%',
+            '==', '!=', '<', '<=', '>', '>=',
+            '&&', '||',
+          ].includes(child.text) && child.isNamed // isNamed check helps filter out anonymous punctuation
+        ) {
+          operatorNode = child;
+          // Assuming the child immediately after the operator is the right operand if not using named fields
+          // This part is tricky if there are multiple children between left and operator or operator and right.
+          // For a simple L-O-R structure, child(2) or child(node.childCount -1) might be right.
+          // If operator is child(i), then rightNode might be child(i+1) up to child(node.childCount-1)
+          // The original code used node.child(2) if named fields failed. This is ambiguous if op isn't child(1).
+          // For now, let's assume rightNode is the last child if we are in this fallback.
+          break; // Take the first valid operator found
         }
       }
+      rightNode = node.child(node.childCount - 1); // Fallback: assume last child is right operand
     }
 
-    // Log what we found
     this.safeLog(
       'info',
       `[ExpressionVisitor.createBinaryExpressionNode] Found nodes: left=${leftNode?.text}, op=${operatorNode?.text}, right=${rightNode?.text}`,
@@ -201,63 +195,66 @@ export class ExpressionVisitor extends BaseASTVisitor {
       node
     );
 
-    // Validate that we have all required parts
     if (!leftNode || !rightNode || !operatorNode) {
-      this.errorHandler.handleError(
-        new Error(
-          `Invalid binary expression structure: ${node.text.substring(0, 100)}`
-        ),
-        'ExpressionVisitor.createBinaryExpressionNode',
-        node
-      );
-      return null;
+      const message = `Invalid binary expression structure: Missing left, right, or operator. CST Node: ${node.text.substring(0, 100)}`;
+      this.errorHandler.handleError(new Error(message), 'ExpressionVisitor.createBinaryExpressionNode', node);
+      return {
+          type: 'error',
+          errorCode: 'INVALID_BINARY_EXPRESSION_STRUCTURE',
+          message: `Invalid binary expression structure. Left: ${leftNode?.text}, Op: ${operatorNode?.text}, Right: ${rightNode?.text}. CST: ${node.text.substring(0,50)}`,
+          originalNodeType: node.type,
+          cstNodeText: node.text,
+          location: getLocation(node),
+        } as ast.ErrorNode;
     }
 
-    // Process left and right operands recursively
     const leftExpr = this.dispatchSpecificExpression(leftNode);
-    const rightExpr = this.dispatchSpecificExpression(rightNode);
-
-    if (!leftExpr || !rightExpr) {
-      this.errorHandler.handleError(
-        new Error(
-          `Failed to process operands in binary expression: ${node.text.substring(
-            0,
-            100
-          )}`
-        ),
-        'ExpressionVisitor.createBinaryExpressionNode',
-        node
-      );
-      return null;
+    if (leftExpr && leftExpr.type === 'error') {
+      this.safeLog('warning', `[ExpressionVisitor.createBinaryExpressionNode] Left operand is an ErrorNode. Propagating. Node: ${leftNode.text}`, 'ExpressionVisitor.createBinaryExpressionNode', leftExpr);
+      return leftExpr;
+    }
+    if (!leftExpr) {
+      this.errorHandler.handleError(new Error(`Failed to process left operand (returned null): ${leftNode.text.substring(0,100)}`), 'ExpressionVisitor.createBinaryExpressionNode', leftNode);
+      return {
+          type: 'error',
+          errorCode: 'UNPARSABLE_BINARY_OPERAND_LEFT_NULL',
+          message: `Failed to parse left operand. CST: ${leftNode.text}`,
+          originalNodeType: leftNode.type, cstNodeText: leftNode.text, location: getLocation(leftNode),
+        } as ast.ErrorNode;
     }
 
-    // Create the binary expression node
+    const rightExpr = this.dispatchSpecificExpression(rightNode);
+    if (rightExpr && rightExpr.type === 'error') {
+      this.safeLog('warning', `[ExpressionVisitor.createBinaryExpressionNode] Right operand is an ErrorNode. Propagating. Node: ${rightNode.text}`, 'ExpressionVisitor.createBinaryExpressionNode', rightExpr);
+      return rightExpr;
+    }
+    if (!rightExpr) {
+      this.errorHandler.handleError(new Error(`Failed to process right operand (returned null): ${rightNode.text.substring(0,100)}`), 'ExpressionVisitor.createBinaryExpressionNode', rightNode);
+      return {
+          type: 'error',
+          errorCode: 'UNPARSABLE_BINARY_OPERAND_RIGHT_NULL',
+          message: `Failed to parse right operand. CST: ${rightNode.text}`,
+          originalNodeType: rightNode.type, cstNodeText: rightNode.text, location: getLocation(rightNode),
+        } as ast.ErrorNode;
+    }
+
     const binaryExprNode: ast.BinaryExpressionNode = {
       type: 'expression',
       expressionType: 'binary',
       operator: operatorNode.text as ast.BinaryOperator,
-      left: leftExpr,
-      right: rightExpr,
+      left: leftExpr as ast.ExpressionNode,
+      right: rightExpr as ast.ExpressionNode,
       location: getLocation(node),
     };
 
     this.safeLog(
       'info',
-      `[ExpressionVisitor.createBinaryExpressionNode] Created binary expression node: ${JSON.stringify(
-        binaryExprNode,
-        null,
-        2
-      )}`,
+      `[ExpressionVisitor.createBinaryExpressionNode] Created binary expression node: ${JSON.stringify(binaryExprNode, null, 2)}`,
       'ExpressionVisitor.createBinaryExpressionNode',
       node
     );
-
     return binaryExprNode;
   }
-  /**
-   * Function call visitor for handling function calls in expressions
-   */
-  private functionCallVisitor: FunctionCallVisitor;
 
   /**
    * List comprehension visitor for handling list comprehensions in expressions
@@ -322,7 +319,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @param node The expression node to dispatch
    * @returns The expression AST node or null if the node cannot be processed
    */
-  public dispatchSpecificExpression(node: TSNode): ast.ExpressionNode | null {
+  public dispatchSpecificExpression(node: TSNode): ast.ExpressionNode | ast.ErrorNode | null {
     this.errorHandler.logInfo(`[ExpressionVisitor.dispatchSpecificExpression] Dispatching node type: ${node.type}`);
 
 
