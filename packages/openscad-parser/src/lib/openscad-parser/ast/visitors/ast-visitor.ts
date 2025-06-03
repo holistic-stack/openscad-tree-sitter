@@ -255,5 +255,5 @@ export interface ASTVisitor {
    * @param node The expression node to visit
    * @returns The AST node or null if the node cannot be processed
    */
-  visitExpression(node: TSNode): ast.ASTNode | null;
+  visitExpression(node: TSNode): ast.ASTNode | ast.ErrorNode | null;
 }

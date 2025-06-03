@@ -113,17 +113,21 @@ describe('UnaryExpressionVisitor', () => {
       operator: '-',
       operand: {
         type: 'expression',
-        expressionType: 'module_instantiation',
-        moduleName: 'sin',
+        expressionType: 'function_call',
+        functionName: 'sin',
         args: [
           {
-            type: 'expression',
-            expressionType: 'number',
-            value: 90,
-            location: expect.anything(),
+            name: undefined, // Positional arguments have undefined name
+            value: {
+              type: 'expression',
+              expressionType: 'literal',
+              value: 90
+              // Location is optional on LiteralNode and seems to be missing here
+            }
+            // No location directly on the Parameter object itself
           },
         ],
-        location: expect.anything(),
+        location: expect.anything(), 
       },
       prefix: true,
       location: expect.anything(),

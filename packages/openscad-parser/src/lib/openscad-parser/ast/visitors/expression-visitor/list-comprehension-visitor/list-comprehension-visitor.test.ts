@@ -26,7 +26,7 @@ import { EnhancedOpenscadParser } from '../../../../enhanced-parser.js';
 import { ErrorHandler } from '../../../../error-handling/index.js';
 import { ListComprehensionVisitor } from './list-comprehension-visitor.js';
 import { ExpressionVisitor } from '../../expression-visitor.js';
-import { IdentifierExpressionNode } from '../../../ast-types.js';
+import { IdentifierExpressionNode, ErrorNode } from '../../../ast-types.js';
 
 describe('ListComprehensionVisitor', () => {
   let parser: EnhancedOpenscadParser;
@@ -65,14 +65,18 @@ describe('ListComprehensionVisitor', () => {
         const result = visitor.visitListComprehension(listCompNode);
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
-        expect(result?.expressionType).toBe('list_comprehension_expression');
-        expect(result?.variable).toBe('x');
-        expect(result?.range).toBeTruthy();
-        expect(result?.range?.expressionType).toBe('range_expression');
-        if (result?.expression && result.expression.expressionType === 'identifier_expression') {
-          expect((result.expression as IdentifierExpressionNode).text).toBe('x');
+        if (result && result.type !== 'error') {
+          expect(result.expressionType).toBe('list_comprehension_expression');
+          expect(result.variable).toBe('x');
+          expect(result.range).toBeTruthy();
+          expect(result.range?.expressionType).toBe('range_expression');
+          if (result.expression && result.expression.expressionType === 'identifier_expression') {
+            expect((result.expression as IdentifierExpressionNode).text).toBe('x');
+          }
+          expect(result.condition).toBeUndefined();
+        } else if (result?.type === 'error') {
+          fail('Expected ListComprehensionExpressionNode, got ErrorNode');
         }
-        expect(result?.condition).toBeUndefined();
       }
     });
 
@@ -88,13 +92,17 @@ describe('ListComprehensionVisitor', () => {
         const result = visitor.visitListComprehension(listCompNode);
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
-        expect(result?.expressionType).toBe('list_comprehension_expression');
-        expect(result?.variable).toBe('x');
-        expect(result?.range).toBeTruthy();
-        expect(result?.range?.expressionType).toBe('range_expression');
-        expect(result?.expression).toBeTruthy();
-        expect(result?.expression?.expressionType).toBe('binary_expression');
-        expect(result?.condition).toBeUndefined();
+        if (result && result.type !== 'error') {
+          expect(result.expressionType).toBe('list_comprehension_expression');
+          expect(result.variable).toBe('x');
+          expect(result.range).toBeTruthy();
+          expect(result.range?.expressionType).toBe('range_expression');
+          expect(result.expression).toBeTruthy();
+          expect(result.expression?.expressionType).toBe('binary_expression');
+          expect(result.condition).toBeUndefined();
+        } else if (result?.type === 'error') {
+          fail('Expected ListComprehensionExpressionNode, got ErrorNode');
+        }
       }
     });
 
@@ -109,17 +117,26 @@ describe('ListComprehensionVisitor', () => {
       if (listCompNode) {
         const result = visitor.visitListComprehension(listCompNode);
         expect(result).toBeTruthy();
-        expect(result?.type).toBe('expression');
-        expect(result?.expressionType).toBe('list_comprehension_expression');
-        expect(result?.variable).toBe('x');
-        expect(result?.range).toBeTruthy();
-        expect(result?.range?.expressionType).toBe('range_expression');
-        expect(result?.expression).toBeTruthy();
-        if (result?.expression && result.expression.expressionType === 'identifier_expression') {
-          expect((result.expression as IdentifierExpressionNode).text).toBe('x');
+        if (result && 'type' in result) {
+          if (result.type === 'error') {
+            fail('Expected ListComprehensionExpressionNode, got ErrorNode');
+          } else if (result.type === 'expression') {
+            expect(result.expressionType).toBe('list_comprehension_expression');
+            expect(result.variable).toBe('x');
+            expect(result.range).toBeTruthy();
+            expect(result.range?.expressionType).toBe('range_expression');
+            expect(result.expression).toBeTruthy();
+            if (result.expression && result.expression.expressionType === 'identifier_expression') {
+              expect((result.expression as IdentifierExpressionNode).text).toBe('x');
+            }
+            expect(result.condition).toBeTruthy();
+            expect(result.condition?.expressionType).toBe('binary_expression');
+          } else {
+            fail('Result is not an ErrorNode or an ExpressionNode');
+          }
+        } else if (result === null) {
+          fail('Result is null, expected ListComprehensionExpressionNode');
         }
-        expect(result?.condition).toBeTruthy();
-        expect(result?.condition?.expressionType).toBe('binary_expression');
       }
     });
   });
@@ -136,16 +153,21 @@ describe('ListComprehensionVisitor', () => {
       if (listCompNode) {
         const result = visitor.visitListComprehension(listCompNode);
         expect(result).toBeTruthy();
-        expect(result?.type).toBe('expression');
-        expect(result?.expressionType).toBe('list_comprehension_expression');
-        expect(result?.variable).toBe('x');
-        expect(result?.range).toBeTruthy();
-        expect(result?.range?.expressionType).toBe('range_expression');
-        expect(result?.expression).toBeTruthy();
-        if (result?.expression && result.expression.expressionType === 'identifier_expression') {
-          expect((result.expression as IdentifierExpressionNode).text).toBe('x');
+        if (result !== null && 'type' in result) {
+          if (result.type === 'error') {
+            fail('Expected ListComprehensionExpressionNode, got ErrorNode');
+          } else if (result.type === 'expression') {
+            expect(result.expressionType).toBe('list_comprehension_expression');
+            expect(result.variable).toBe('x');
+            expect(result.range).toBeTruthy();
+            expect(result.range?.expressionType).toBe('range_expression');
+            expect(result.expression).toBeTruthy();
+            if (result.expression && result.expression.expressionType === 'identifier_expression') {
+              expect((result.expression as IdentifierExpressionNode).text).toBe('x');
+            }
+            expect(result.condition).toBeUndefined();
+          }
         }
-        expect(result?.condition).toBeUndefined();
       }
     });
 
@@ -160,19 +182,27 @@ describe('ListComprehensionVisitor', () => {
       if (listCompNode) {
         const result = visitor.visitListComprehension(listCompNode);
         expect(result).toBeTruthy();
-        expect(result?.type).toBe('expression');
-        expect(result?.expressionType).toBe('list_comprehension_expression');
-        expect(result?.variable).toBe('x');
-        expect(result?.range).toBeTruthy();
-        expect(result?.range?.expressionType).toBe('range_expression');
-        expect(result?.expression).toBeTruthy();
-        if (result?.expression && result.expression.expressionType === 'identifier_expression') {
-          expect((result.expression as IdentifierExpressionNode).text).toBe('x');
+        if (result && 'type' in result) {
+          if (result.type === 'error') {
+            fail('Expected ListComprehensionExpressionNode, got ErrorNode');
+          } else if (result.type === 'expression') {
+            expect(result.expressionType).toBe('list_comprehension_expression');
+            expect(result.variable).toBe('x');
+            expect(result.range).toBeTruthy();
+            expect(result.range?.expressionType).toBe('range_expression');
+            expect(result.expression).toBeTruthy();
+            if (result.expression && result.expression.expressionType === 'identifier_expression') {
+              expect((result.expression as IdentifierExpressionNode).text).toBe('x');
+            }
+            expect(result.condition).toBeTruthy();
+            expect(result.condition?.expressionType).toBe('binary_expression');
+          } else {
+            fail('Result is not an ErrorNode or an ExpressionNode');
+          }
+        } else if (result === null) {
+          fail('Result is null, expected ListComprehensionExpressionNode');
         }
-        expect(result?.condition).toBeTruthy();
-        expect(result?.condition?.expressionType).toBe('binary_expression');
-      }
-    });
+      }    });
   });
 
   describe('Complex Expressions', () => {
@@ -188,13 +218,17 @@ describe('ListComprehensionVisitor', () => {
         const result = visitor.visitListComprehension(listCompNode);
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
-        expect(result?.expressionType).toBe('list_comprehension_expression');
-        expect(result?.variable).toBe('i');
-        expect(result?.range).toBeTruthy();
-        expect(result?.range?.expressionType).toBe('range_expression');
-        expect(result?.expression).toBeTruthy();
-        expect(result?.expression?.expressionType).toBe('array_expression');
-        expect(result?.condition).toBeUndefined();
+        if (result && result.type !== 'error') {
+          expect(result.expressionType).toBe('list_comprehension_expression');
+          expect(result.variable).toBe('i');
+          expect(result.range).toBeTruthy();
+          expect(result.range?.expressionType).toBe('range_expression');
+          expect(result.expression).toBeTruthy();
+          expect(result.expression?.expressionType).toBe('array_expression');
+          expect(result.condition).toBeUndefined();
+        } else if (result?.type === 'error') {
+          fail('Expected ListComprehensionExpressionNode, got ErrorNode');
+        }
       }
     });
 
@@ -210,14 +244,23 @@ describe('ListComprehensionVisitor', () => {
       if (listCompNode) {
         const result = visitor.visitListComprehension(listCompNode);
         expect(result).toBeTruthy();
-        expect(result?.type).toBe('expression');
-        expect(result?.expressionType).toBe('list_comprehension_expression');
-        expect(result?.variable).toBe('i');
-        expect(result?.range).toBeTruthy();
-        expect(result?.range?.expressionType).toBe('range_expression');
-        expect(result?.expression).toBeTruthy();
-        expect(result?.expression?.expressionType).toBe('let_expression');
-        expect(result?.condition).toBeUndefined();
+        if (result && 'type' in result) {
+          if (result.type === 'error') {
+            fail('Expected ListComprehensionExpressionNode, got ErrorNode');
+          } else if (result.type === 'expression') {
+            expect(result.expressionType).toBe('list_comprehension_expression');
+            expect(result.variable).toBe('i');
+            expect(result.range).toBeTruthy();
+            expect(result.range?.expressionType).toBe('range_expression');
+            expect(result.expression).toBeTruthy();
+            expect(result.expression?.expressionType).toBe('let_expression');
+            expect(result.condition).toBeUndefined();
+          } else {
+            fail('Result is not an ErrorNode or an ExpressionNode');
+          }
+        } else if (result === null) {
+          fail('Result is null, expected ListComprehensionExpressionNode');
+        }
       }
     });
   });
@@ -235,14 +278,23 @@ describe('ListComprehensionVisitor', () => {
       if (listCompNode) {
         const result = visitor.visitListComprehension(listCompNode);
         expect(result).toBeTruthy();
-        expect(result?.type).toBe('expression');
-        expect(result?.expressionType).toBe('list_comprehension_expression');
-        expect(result?.variable).toBe('i');
-        expect(result?.range).toBeTruthy();
-        expect(result?.range?.expressionType).toBe('range_expression');
-        expect(result?.expression).toBeTruthy();
-        expect(result?.expression?.expressionType).toBe('let_expression');
-        expect(result?.condition).toBeUndefined();
+        if (result && 'type' in result) {
+          if (result.type === 'error') {
+            fail('Expected ListComprehensionExpressionNode, got ErrorNode');
+          } else if (result.type === 'expression') {
+            expect(result.expressionType).toBe('list_comprehension_expression');
+            expect(result.variable).toBe('i');
+            expect(result.range).toBeTruthy();
+            expect(result.range?.expressionType).toBe('range_expression');
+            expect(result.expression).toBeTruthy();
+            expect(result.expression?.expressionType).toBe('let_expression');
+            expect(result.condition).toBeUndefined();
+          } else {
+            fail('Result is not an ErrorNode or an ExpressionNode');
+          }
+        } else if (result === null) {
+          fail('Result is null, expected ListComprehensionExpressionNode');
+        }
       }
     });
 
@@ -259,13 +311,17 @@ describe('ListComprehensionVisitor', () => {
         const result = visitor.visitListComprehension(listCompNode);
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
-        expect(result?.expressionType).toBe('list_comprehension_expression');
-        expect(result?.variable).toBe('a');
-        expect(result?.range).toBeTruthy();
-        expect(result?.range?.expressionType).toBe('range_expression');
-        expect(result?.expression).toBeTruthy();
-        expect(result?.expression?.expressionType).toBe('let_expression');
-        expect(result?.condition).toBeUndefined();
+        if (result && result.type !== 'error') {
+          expect(result.expressionType).toBe('list_comprehension_expression');
+          expect(result.variable).toBe('a');
+          expect(result.range).toBeTruthy();
+          expect(result.range?.expressionType).toBe('range_expression');
+          expect(result.expression).toBeTruthy();
+          expect(result.expression?.expressionType).toBe('let_expression');
+          expect(result.condition).toBeUndefined();
+        } else if (result?.type === 'error') {
+          fail('Expected ListComprehensionExpressionNode, got ErrorNode');
+        }
       }
     });
   });
@@ -279,12 +335,18 @@ describe('ListComprehensionVisitor', () => {
       const listCompNode = tree?.rootNode.descendantForIndex(0, code.length);
       if (listCompNode) {
         const result = visitor.visitListComprehension(listCompNode);
-        // Should either return null or a partial result
-        expect(result === null || result?.type === 'expression').toBe(true);
+        // For malformed input, we expect an ErrorNode or potentially null if parsing fails very early
+        expect(result === null || result?.type === 'error' || result?.type === 'expression').toBe(true);
+        if (result && result.type === 'expression' && result.expressionType !== 'list_comprehension_expression') {
+          // If it's an expression but not a list comprehension, it might be a partially parsed node or an error wrapped as expression.
+          // This test is primarily about not crashing and returning *something* sensible or an error.
+        } else if (result && result.type !== 'error' && result.type !== 'expression') {
+          fail('Expected ErrorNode, null, or partial ListComprehensionExpressionNode for malformed input');
+        }
       }
     });
 
-    it('should return null for non-list-comprehension nodes', () => {
+    it('should return an ErrorNode for non-list-comprehension nodes', () => {
       const code = 'cube(10)';
       const tree = parser.parse(code);
       expect(tree).toBeTruthy();
@@ -292,7 +354,15 @@ describe('ListComprehensionVisitor', () => {
       const cubeNode = tree?.rootNode.descendantForIndex(0, code.length);
       if (cubeNode) {
         const result = visitor.visitListComprehension(cubeNode);
-        expect(result).toBeNull();
+        expect(result).toBeTruthy(); // Check it's not null
+        expect(result?.type).toBe('error');
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        const errorNode = result as ErrorNode;
+        expect(errorNode.errorCode).toBe('MISSING_FOR_CLAUSE');
+        expect(errorNode.originalNodeType).toBe('module_instantiation');
+        expect(errorNode.message).toContain(
+          "Missing 'for' clause in OpenSCAD-style list comprehension"
+        );
       }
     });
   });

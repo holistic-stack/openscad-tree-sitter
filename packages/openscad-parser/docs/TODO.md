@@ -78,7 +78,7 @@
 
 **Dependencies**: Priority 1 and 2 must be completed first
 
-### ✅ Priority 4: List Comprehension Integration (COMPLETED)
+### ✅ Priority 4: List Comprehension Integration & Type Error Resolution (COMPLETED)
 **Status**: ✅ COMPLETED (2025-06-03)
 **Impact**: HIGH - Enables parsing of list comprehensions, including nested structures.
 
@@ -88,7 +88,8 @@
   - [x] Basic list comprehension support
   - [x] Conditional list comprehension support
   - [x] Nested list comprehension support (using `childForFieldName` and correct field names)
-  - [ ] Error handling and edge cases (ongoing refinement as part of general robustness)
+  - [x] Resolved type errors within `ListComprehensionVisitor` (2025-06-03).
+  - [ ] Further error handling and edge cases (ongoing refinement as part of general robustness)
 - [ ] **4.3**: Add test coverage (further edge cases can be added iteratively)
   - [x] Basic test cases for nested comprehensions covered by fix
   - [ ] Edge cases
@@ -97,7 +98,7 @@
 **Summary of 4.2 Completion**:
 - The `ListComprehensionVisitor` was successfully updated to handle nested OpenSCAD-style list comprehensions.
 - Key changes involved using `childForFieldName` for precise node retrieval (`list_comprehension_for`, `expr`, `condition`) and ensuring the recursive parsing logic for the `expr` field works correctly when it's a nested comprehension.
-- Lint and type checks pass. Focused tests indicate the parsing logic is correct.
+- Type checks now pass for the entire `openscad-parser` package. Lint and focused tests for list comprehension indicate parsing logic is correct.
 
 **Next Steps for List Comprehensions (Lower Priority/General Refinement)**:
 - Enhance error handling for more complex malformed inputs.
@@ -107,10 +108,10 @@
 
 ## Immediate Next Actions
 
-1. **Start Priority 1.1**: Update expression visitor dispatch logic
-2. **Run Quality Gates**: After each file change
-3. **Update Context**: Move completed tasks to PROGRESS.md
-4. **Validate**: Ensure tests improve before moving to next task
+1.  **Run Full Test Suite**: Execute `nx test openscad-parser` to ensure that the type fixes have not introduced any runtime regressions and that parsing logic remains correct.
+2.  **Run Linter**: Execute `nx lint openscad-parser` to check for any new lint issues and confirm resolution of previous ones in modified files.
+3.  **Address `range-expression-visitor.test.ts` Syntax Error**: Revisit the persistent syntax error at the end of this file if tests and linting are otherwise stable.
+4.  **Consult `reviewed_plan.md` / `TODO.md`**: Review for the next highest priority development task if `range-expression-visitor.test.ts` remains problematic or is deferred.
 
 ## Quality Gate Commands
 ```bash

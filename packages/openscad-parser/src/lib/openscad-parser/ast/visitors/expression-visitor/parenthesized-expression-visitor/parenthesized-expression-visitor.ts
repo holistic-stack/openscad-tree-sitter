@@ -23,7 +23,7 @@ export class ParenthesizedExpressionVisitor extends BaseASTVisitor {
     return null;
   }
 
-  visit(node: TSNode): ast.ExpressionNode | null { // Returns the inner expression's AST node
+  visit(node: TSNode): ast.ExpressionNode | ast.ErrorNode | null { // Returns the inner expression's AST node
     if (node.type !== 'parenthesized_expression') {
       const error = this.errorHandler.createParserError(
         `Expected 'parenthesized_expression' but got '${node.type}'`,

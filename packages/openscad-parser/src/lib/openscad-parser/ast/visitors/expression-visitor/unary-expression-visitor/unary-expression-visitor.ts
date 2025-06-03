@@ -23,7 +23,7 @@ export class UnaryExpressionVisitor extends BaseASTVisitor {
     return null;
   }
 
-  visit(node: TSNode): ast.UnaryExpressionNode | null {
+  visit(node: TSNode): ast.UnaryExpressionNode | ast.ErrorNode | null {
     if (node.type !== 'unary_expression') {
       const error = this.errorHandler.createParserError(
         `Expected 'unary_expression' but got '${node.type}'`,
@@ -87,8 +87,7 @@ export class UnaryExpressionVisitor extends BaseASTVisitor {
         {
           line: getLocation(operandNode).start.line,
           column: getLocation(operandNode).start.column,
-          nodeType: operandNode.type,
-          errorCode: 'UNPARSABLE_UNARY_OPERAND_NULL'
+          nodeType: operandNode.type
         }
       );
       this.errorHandler.report(error);

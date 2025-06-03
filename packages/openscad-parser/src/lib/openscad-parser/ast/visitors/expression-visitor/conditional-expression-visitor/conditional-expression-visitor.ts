@@ -23,7 +23,7 @@ export class ConditionalExpressionVisitor extends BaseASTVisitor {
     return null;
   }
 
-  visit(node: TSNode): ast.ConditionalExpressionNode | null {
+  visit(node: TSNode): ast.ConditionalExpressionNode | ast.ErrorNode | null {
     if (node.type !== 'conditional_expression') {
       const error = this.errorHandler.createParserError(
         `Expected 'conditional_expression' but got '${node.type}'`,
@@ -54,7 +54,7 @@ export class ConditionalExpressionVisitor extends BaseASTVisitor {
           // Delegate back to the parent visitor to handle this as a regular expression
           const result = this.parentVisitor.visitExpression(child);
           // If the result is a conditional expression, return it; otherwise return null
-          if (result && result.expressionType === 'conditional') {
+          if (result && result.type === 'expression' && result.expressionType === 'conditional') {
             return result as ast.ConditionalExpressionNode;
           }
           return null;
@@ -75,7 +75,10 @@ export class ConditionalExpressionVisitor extends BaseASTVisitor {
     }
 
     const conditionAST = this.parentVisitor.dispatchSpecificExpression(conditionNode);
-    if (!conditionAST) {
+    if (conditionAST && conditionAST.type === 'error') {
+    return conditionAST;
+  }
+  if (!conditionAST) {
       const error = this.errorHandler.createParserError(
         `Failed to parse condition in conditional expression.`,
         {
@@ -89,7 +92,10 @@ export class ConditionalExpressionVisitor extends BaseASTVisitor {
     }
 
     const consequenceAST = this.parentVisitor.dispatchSpecificExpression(consequenceNode);
-    if (!consequenceAST) {
+    if (consequenceAST && consequenceAST.type === 'error') {
+    return consequenceAST;
+  }
+  if (!consequenceAST) {
       const error = this.errorHandler.createParserError(
         `Failed to parse consequence in conditional expression.`,
         {
@@ -103,7 +109,10 @@ export class ConditionalExpressionVisitor extends BaseASTVisitor {
     }
 
     const alternativeAST = this.parentVisitor.dispatchSpecificExpression(alternativeNode);
-    if (!alternativeAST) {
+    if (alternativeAST && alternativeAST.type === 'error') {
+    return alternativeAST;
+  }
+  if (!alternativeAST) {
       const error = this.errorHandler.createParserError(
         `Failed to parse alternative in conditional expression.`,
         {
@@ -118,10 +127,10 @@ export class ConditionalExpressionVisitor extends BaseASTVisitor {
 
     return {
       type: 'expression',
-      expressionType: 'conditional_expression', // Changed from 'conditional' to 'conditional_expression' to match test expectations
-      condition: conditionAST,
-      thenBranch: consequenceAST,
-      elseBranch: alternativeAST,
+      expressionType: 'conditional_expression', 
+      condition: conditionAST as ast.ExpressionNode, 
+      thenBranch: consequenceAST as ast.ExpressionNode, 
+      elseBranch: alternativeAST as ast.ExpressionNode, 
       location: getLocation(node),
     };
   }

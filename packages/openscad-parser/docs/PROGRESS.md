@@ -1,5 +1,55 @@
 # OpenSCAD Parser - Progress Log
 
+## Implementation Progress (2025-06-03)
+
+### Priority: Fix Type Errors in `list-comprehension-visitor.ts`
+
+**Objective**: Resolve all TypeScript type errors in `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor/list-comprehension-visitor/list-comprehension-visitor.ts` to achieve a passing type check for the `openscad-parser` package.
+
+**Task**: Iteratively identified and fixed type errors in `list-comprehension-visitor.ts`.
+
+**Files Modified**:
+- `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor/list-comprehension-visitor/list-comprehension-visitor.ts`
+
+**Changes Made & Rationale**:
+- **Initial Syntactic Fixes**:
+  - Completed an unterminated `this.errorHandler.logError()` call in `parseOpenSCADStyle`'s `catch` block.
+  - Added the missing `return` statement in the same `catch` block to provide an `ast.ErrorNode`.
+  - Removed misplaced/duplicated code lines from `extractForClause`'s `catch` block.
+- **Type Compatibility and Property Access Fixes (Iterative)**:
+  - **`parsePythonStyle` Signature**: Changed return type from `ast.ListComprehensionExpressionNode | null` to `ast.ListComprehensionExpressionNode | ast.ErrorNode | null` to correctly reflect potential error returns (even if currently stubbed). This addressed `TS2367` (unintentional comparison) and `TS2339` (property 'message' does not exist on non-error type) in related dead code.
+  - **`ErrorNode.cause` Property (`TS2322`)**: Modified `ErrorNode` creation to conditionally add the `cause` property only if the causing node is indeed an `ErrorNode`. This respects `exactOptionalPropertyTypes: true` by not assigning `undefined` to a property expecting `ErrorNode`.
+    ```typescript
+    // Example for cause handling
+    const errorToReturn: ast.ErrorNode = { /* base error props */ };
+    if (causingAstNode && causingAstNode.type === 'error') {
+      errorToReturn.cause = causingAstNode;
+    }
+    return errorToReturn;
+    ```
+  - **`conditionAstNode` Assignment (`TS2375`)**: Added a type guard before assigning `conditionAstNode` (which can be `ExpressionNode | ErrorNode`) to `resultNode.condition` (which expects `ExpressionNode`). If `conditionAstNode` is an `ErrorNode`, it's now propagated upwards.
+    ```typescript
+    if (conditionAstNode && conditionAstNode.type === 'error') {
+      // ... create and return a new ErrorNode with conditionAstNode as cause
+    }
+    // Now conditionAstNode is confirmed ExpressionNode or null/undefined
+    if (conditionAstNode) resultNode.condition = conditionAstNode;
+    ```
+  - **`errorHandler.logError` Call**: Adjusted arguments passed to `errorHandler.logError` to match expected signature, resolving type errors during invocation. Specifically, ensured the second argument was an error code string rather than an `Error` object or `ast.ErrorNode` if the signature demanded it.
+  - **`ErrorNode.location` Assignment**: Ensured `location` property assigned to new `ErrorNode` instances is always `ast.SourceLocation` (not `ast.SourceLocation | undefined`) by using nullish coalescing (`?? getLocation(node)`) as a fallback if an originating `ErrorNode`'s location was undefined.
+
+**Quality Gates Results (Post-Fixes for this file)**:
+- **Lint (`nx lint openscad-parser`)**: To be run (expected to pass for this file, overall status pending).
+- **Type Check (`nx typecheck openscad-parser`)**: PASSING.
+- **Tests (`nx test openscad-parser`)**: To be run (tests for this visitor's functionality expected to pass, overall status pending).
+
+**Impact**:
+- All TypeScript type errors in `list-comprehension-visitor.ts` have been resolved.
+- The `openscad-parser` package now passes `nx typecheck openscad-parser`.
+- Improved type safety and robustness of error handling within the `ListComprehensionVisitor`.
+
+---
+
 ## Implementation Progress (2025-06-05)
 
 ### Priority 3.2: Refine `RangeExpressionVisitor` Implementation - Enhanced Error Messaging
@@ -26,6 +76,32 @@
 **Impact**:
 - Error diagnostics for `RangeExpressionNode` parsing failures are now more informative.
 - This completes a specific refinement task for `RangeExpressionVisitor`'s error handling capabilities.
+
+### Priority: Recover `function-call-visitor.ts` and Align with `FunctionCallNode` Interface
+
+**Objective**: Restore `function-call-visitor.ts` from a corrupted state and ensure its methods correctly implement `FunctionCallNode` creation and `ErrorNode` propagation, aligning with recent AST type changes.
+
+**Task**: Replaced the entire content of `function-call-visitor.ts` with a reconstructed and corrected version.
+
+**Files Modified**:
+- `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor/function-call-visitor.ts`
+
+**Changes Made in Reconstructed File**:
+- Restored the complete and correct class structure, including constructor, `visit`, `visitFunctionCall`, and `createASTNodeForFunction` methods.
+- Ensured `createASTNodeForFunction` correctly creates `FunctionCallNode` with `type: 'expression'` and `expressionType: 'function_call'`, consistent with the updated `ast.FunctionCallNode` interface.
+- Updated `visit` and `visitFunctionCall` methods to return `ast.FunctionCallNode | ast.ErrorNode` and improved `ErrorNode` creation and propagation logic.
+- Corrected the call to `extractArguments` to pass `this.parentVisitor` as required by its updated signature.
+- Removed unused helper methods like `createSimpleLiteralFromNode` and `createExpressionNode` that were part of the corrupted/intermediate state.
+
+**Rationale & Outcome**:
+- Successfully recovered `function-call-visitor.ts` from corruption, which was a major blocker.
+- The visitor now aligns with the intended design for `FunctionCallNode` and `ErrorNode` handling.
+- This unblocks further type checking, linting, and testing efforts.
+
+**Quality Gates Results (Post-Recovery)**:
+- **Lint (`nx lint openscad-parser`)**: To be run.
+- **Type Check (`nx typecheck openscad-parser`)**: To be run.
+- **Tests (`nx test openscad-parser`)**: To be run.
 
 ---
 

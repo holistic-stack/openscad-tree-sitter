@@ -23,7 +23,7 @@ export class BinaryExpressionVisitor extends BaseASTVisitor {
     return null;
   }
 
-  visit(node: TSNode): ast.BinaryExpressionNode | null {
+  visit(node: TSNode): ast.BinaryExpressionNode | ast.ErrorNode | null {
     // Accept all binary expression types from the grammar
     const validBinaryTypes = [
       'binary_expression',
@@ -121,7 +121,14 @@ export class BinaryExpressionVisitor extends BaseASTVisitor {
       node
     );
 
-    if (!leftAST || !rightAST) {
+    if (leftAST && leftAST.type === 'error') {
+    return leftAST;
+  }
+  if (rightAST && rightAST.type === 'error') {
+    return rightAST;
+  }
+
+  if (!leftAST || !rightAST) {
       // Errors in sub-expressions should have been handled by the parentVisitor
       // or its delegates. If they return null, it means a parsing error occurred.
       const error = this.errorHandler.createParserError(
@@ -142,8 +149,8 @@ export class BinaryExpressionVisitor extends BaseASTVisitor {
       type: 'expression',
       expressionType: 'binary', // Use 'binary' to match test expectations in expression-visitor.test.ts
       operator: operator as ast.BinaryOperator, // Cast, assuming grammar aligns with ast.BinaryOperator
-      left: leftAST,
-      right: rightAST,
+      left: leftAST as ast.ExpressionNode, // Cast is safe due to checks above
+      right: rightAST as ast.ExpressionNode, // Cast is safe due to checks above
       location: getLocation(node),
     };
   }

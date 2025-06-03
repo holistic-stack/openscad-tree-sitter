@@ -528,5 +528,5 @@ describe('RangeExpressionVisitor', () => {
         expect(errorNode.message).toContain("Expected 'range_expression', but received 'call_expression'");
       }
     });
-  });
-});
+    }
+  );

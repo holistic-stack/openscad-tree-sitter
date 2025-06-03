@@ -255,6 +255,7 @@ export type ParameterValue =
   | Vector2D
   | Vector3D
   | ExpressionNode
+  | ErrorNode
   | null
   | undefined;
 
@@ -330,9 +331,13 @@ export interface VariableNode extends ExpressionNode {
  * Represents a function call
  */
 export interface FunctionCallNode extends BaseNode {
-  type: 'function_call';
+  type: 'expression'; // Changed from 'function_call'
+  expressionType: 'function_call'; // Added
   functionName: string;
   args: Parameter[];
+  // Ensure it includes all necessary fields from ExpressionNode if they are relevant for function calls
+  // For now, assuming 'name' could be 'functionName' and 'args' is already present.
+  // Other ExpressionNode fields like 'value', 'operator', 'left', 'right', etc., are not typically part of a direct function call node.
 }
 
 /**
@@ -900,7 +905,7 @@ export interface RangeExpressionNode extends ExpressionNode {
 export interface LetExpressionNode extends ExpressionNode {
   expressionType: 'let_expression';
   assignments: AssignmentNode[];
-  expression: ExpressionNode;
+  expression: ExpressionNode | ErrorNode;
 }
 
 /**
