@@ -639,3 +639,63 @@ echo(func(5));
               (arguments
                 (argument
                   (number))))))))))
+
+==================
+List Comprehensions with Let Expressions
+==================
+
+areas = [let (num=len(vertices)) for (i=[0:num-1]) triarea(vertices[i])];
+complex = [let (a=5, b=10) for (x=[0:a]) x*b];
+
+---
+
+(source_file
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (list_comprehension
+        (let_assignment
+          name: (identifier)
+          value: (call_expression
+            function: (identifier)
+            arguments: (argument_list
+              (arguments
+                (argument
+                  (identifier))))))
+        (list_comprehension_for
+          iterator: (identifier)
+          range: (vector_expression
+            (binary_expression
+              left: (range_expression
+                start: (number)
+                end: (identifier))
+              operator: (subtraction_operator)
+              right: (number))))
+        expr: (call_expression
+          function: (identifier)
+          arguments: (argument_list
+            (arguments
+              (argument
+                (index_expression
+                  array: (identifier)
+                  index: (identifier)))))))))
+  (statement
+    (assignment_statement
+      name: (identifier)
+      value: (list_comprehension
+        (let_assignment
+          name: (identifier)
+          value: (number))
+        (let_assignment
+          name: (identifier)
+          value: (number))
+        (list_comprehension_for
+          iterator: (identifier)
+          range: (vector_expression
+            (range_expression
+              start: (number)
+              end: (identifier))))
+        expr: (binary_expression
+          left: (identifier)
+          operator: (multiplication_operator)
+          right: (identifier))))))

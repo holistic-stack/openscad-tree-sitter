@@ -814,12 +814,22 @@ module.exports = grammar({
 
     // List comprehension with correct syntax order
     // Syntax: [for (i = range) expr] or [for (i = range) if (condition) expr]
+    // Also supports: [let (assignments...) for (i = range) expr] - OpenSCAD 2021.01+
     // Allows nested list comprehensions with controlled recursion
     list_comprehension: ($) =>
       prec.dynamic(
         100,
         seq(
           '[',
+          // Optional let assignments before for loop (OpenSCAD 2021.01+ feature)
+          optional(
+            seq(
+              'let',
+              '(',
+              commaSep1($.let_assignment),
+              ')'
+            )
+          ),
           $.list_comprehension_for,
           optional(
             seq(
