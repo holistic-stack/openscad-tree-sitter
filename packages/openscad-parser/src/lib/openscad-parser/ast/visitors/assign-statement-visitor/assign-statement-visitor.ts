@@ -101,21 +101,153 @@ export class AssignStatementVisitor extends BaseASTVisitor {
 
   /**
    * Create an AST node for a specific function.
-   * This method is required by BaseASTVisitor but not used by AssignStatementVisitor
-   * since assign statements are handled directly.
+   * This method handles assign function calls by converting them to assign statements.
    *
    * @param node - The node to process
    * @param functionName - The name of the function
    * @param args - The arguments to the function
-   * @returns Always returns null since assign statements don't use this method
+   * @returns AssignStatementNode for assign functions, null for others
    */
   protected createASTNodeForFunction(
     node: TSNode,
     functionName: string,
     args: ast.Parameter[]
   ): ast.ASTNode | null {
-    // Assign statements are handled directly in visitAssignStatement
+    // Handle assign function calls
+    if (functionName === 'assign') {
+      return this.processAssignFunctionCall(node, args);
+    }
+
+    // Other functions are not handled by this visitor
     return null;
+  }
+
+  /**
+   * Process an assign function call and convert it to an assign statement.
+   * This method handles module_instantiation nodes with name 'assign'.
+   *
+   * @param node - The module_instantiation CST node
+   * @param args - The extracted arguments from the function call
+   * @returns The corresponding AssignStatementNode AST node, or null if processing fails
+   * @private
+   */
+  private processAssignFunctionCall(
+    node: TSNode,
+    args: ast.Parameter[]
+  ): ast.AssignStatementNode | null {
+    this.safeLog(
+      'info',
+      `[AssignStatementVisitor.processAssignFunctionCall] Processing assign function call: ${node.text.substring(0, 50)}`,
+      'AssignStatementVisitor.processAssignFunctionCall',
+      node
+    );
+
+    // Convert function call arguments to assignments
+    const assignments: ast.AssignmentNode[] = [];
+
+    for (const arg of args) {
+      if (arg.name && arg.value) {
+        // Convert parameter to assignment
+        const assignment: ast.AssignmentNode = {
+          type: 'assignment',
+          variable: arg.name,
+          value: arg.value,
+          location: getLocation(node), // Use the function call location
+        };
+        assignments.push(assignment);
+      }
+    }
+
+    // Find the body statement after the function call
+    // For assign function calls like "assign(x = 5) cube(x);", the body is in the statement field
+    let body: ast.ASTNode | null = null;
+
+    // According to the OpenSCAD grammar, module_instantiation can have a statement field:
+    // module_instantiation: seq(name, arguments, statement)
+    // So for "assign(x = 5) cube(x);", the structure is:
+    // - name: "assign"
+    // - arguments: "(x = 5)"
+    // - statement: "cube(x);"
+
+    const statementField = node.childForFieldName('statement');
+    if (statementField) {
+      this.safeLog(
+        'info',
+        `[AssignStatementVisitor.processAssignFunctionCall] Found statement field: ${statementField.text}`,
+        'AssignStatementVisitor.processAssignFunctionCall',
+        statementField
+      );
+      body = this.visitNode(statementField);
+    } else {
+      // Fallback: look for block field
+      const blockField = node.childForFieldName('block');
+      if (blockField) {
+        this.safeLog(
+          'info',
+          `[AssignStatementVisitor.processAssignFunctionCall] Found block field: ${blockField.text}`,
+          'AssignStatementVisitor.processAssignFunctionCall',
+          blockField
+        );
+        body = this.visitNode(blockField);
+      } else {
+        // Last resort: look for any statement or module_instantiation child that's not the arguments
+        for (let i = 0; i < node.childCount; i++) {
+          const child = node.child(i);
+          if (!child) continue;
+
+          // Skip argument_list and other non-body nodes
+          if (child.type === 'argument_list' || child.type === 'identifier' || child.type === '(' || child.type === ')' || child.type === ';') {
+            continue;
+          }
+
+          // Look for statement or module_instantiation nodes
+          if (child.type === 'statement' || child.type === 'module_instantiation' || child.type === 'block') {
+            this.safeLog(
+              'info',
+              `[AssignStatementVisitor.processAssignFunctionCall] Found child body: ${child.type} - ${child.text}`,
+              'AssignStatementVisitor.processAssignFunctionCall',
+              child
+            );
+            body = this.visitNode(child);
+            break;
+          }
+        }
+      }
+    }
+
+    if (!body) {
+      this.safeLog(
+        'warning',
+        `[AssignStatementVisitor.processAssignFunctionCall] No body found for assign function call`,
+        'AssignStatementVisitor.processAssignFunctionCall',
+        node
+      );
+      // For assign statements without a body, create an empty module instantiation
+      body = {
+        type: 'module_instantiation',
+        name: 'empty',
+        args: [],
+        children: [],
+        location: getLocation(node),
+      } as ast.ModuleInstantiationNode;
+    }
+
+    // Create the assign statement AST node
+    const assignNode: ast.AssignStatementNode = {
+      type: 'assign',
+      assignments,
+      body: body, // We ensure body is not null above
+      location: getLocation(node),
+    };
+
+    this.safeLog(
+      'info',
+      `[AssignStatementVisitor.processAssignFunctionCall] Successfully created assign statement with ${assignments.length} assignments`,
+      'AssignStatementVisitor.processAssignFunctionCall',
+      node
+    );
+
+    return assignNode;
   }
 
   /**

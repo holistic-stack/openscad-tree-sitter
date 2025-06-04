@@ -1,5 +1,40 @@
 # Lessons Learned - OpenSCAD Parser
 
+## 2025-06-03 (Local Time): Verifying Grammar for Unexpected Visitor Test Failures
+
+### Problem
+A specific test in `list-comprehension-visitor.test.ts` for OpenSCAD-style list comprehensions (e.g., `it('should parse OpenSCAD list comprehension [for (x = [1:5]) x]', ...)`) was consistently failing. The visitor was returning an `ast.ErrorNode` with a `CST_NODE_ERROR` (or similar, indicating a problem with the input CST node), while the test expected a valid `ast.ListComprehensionExpressionNode`.
+
+### Root Cause Analysis Process
+1.  **Initial Assumption**: The `ListComprehensionVisitor` logic for OpenSCAD-style comprehensions was flawed, or the `extractForClause` method had issues.
+2.  **Test Output Analysis**: Enhanced error logging in the test revealed that the CST node being passed to `visitListComprehension` was indeed problematic (e.g., `null`, `undefined`, or an `ERROR` node from Tree-sitter itself).
+3.  **Direct Grammar Test**: To isolate whether the issue was with the visitor or the underlying grammar, the problematic code snippet `[for (x = [1:5]) x]` was parsed directly using the `tree-sitter-openscad` grammar via `nx parse tree-sitter-openscad -- "<file_with_snippet>"`.
+4.  **Grammar Output**: The `tree-sitter parse` command output showed that the grammar itself produced a top-level `(ERROR ...)` node for the input string. This confirmed the CST node was malformed *before* it even reached the visitor.
+
+### Key Discovery
+The root cause was not in the `ListComprehensionVisitor` (which correctly identified and reported an error when given a malformed CST node) but in the `tree-sitter-openscad` grammar itself, which failed to parse the specific OpenSCAD-style list comprehension syntax.
+
+### Solution Approach (for the Visitor Test)
+- The visitor's behavior of returning an `ast.ErrorNode` was deemed correct given the invalid CST input.
+- The failing test needs to be skipped until the grammar is fixed.
+- A new task was created to address the grammar issue in the `tree-sitter-openscad` package.
+
+### Key Insights
+1.  **Isolate Failure Points**: When a visitor test fails due to unexpected `ErrorNode` returns (especially those indicating CST problems), directly test the input syntax against the raw Tree-sitter grammar. This helps determine if the issue is in the visitor logic or the grammar's parsing of that syntax.
+2.  **Visitor's Role**: A visitor's primary role is to translate a *valid* CST into an AST. While it should handle unexpected/error CST nodes gracefully (e.g., by returning an `ast.ErrorNode`), it cannot fix fundamental parsing errors from the grammar.
+3.  **Tooling for Grammar Verification**: Utilize commands like `tree-sitter parse` (or `nx parse <grammar_project>`) to quickly check how the grammar handles specific code snippets, independently of any visitors.
+
+### Impact
+- Prevented wasted effort trying to "fix" a visitor that was behaving correctly for its given input.
+- Correctly identified the true root cause in the upstream grammar.
+- Led to a more targeted plan: fix the grammar, then re-enable and verify the visitor test.
+
+### Prevention
+- When a test for a specific syntax construct fails with indications of a CST-level error, make it a standard step to verify that syntax directly against the grammar using `tree-sitter parse` or equivalent project-specific commands.
+- If the grammar produces an `ERROR` node, the visitor test for that exact input expecting a valid AST node is inherently flawed until the grammar is corrected.
+
+---
+
 ## 2025-06-03: TypeScript Type Refinement for `ErrorNode`, `exactOptionalPropertyTypes`, and Utility Signatures
 
 ### Problem

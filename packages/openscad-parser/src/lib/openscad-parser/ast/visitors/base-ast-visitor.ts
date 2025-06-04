@@ -21,6 +21,8 @@
 
 import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types.js';
+import { type ErrorHandlerOptions, ErrorHandler } from '../../error-handling/error-handler.js';
+import { Severity } from '../../error-handling/types/error-types.js';
 import type { ASTVisitor } from './ast-visitor.js';
 import { findDescendantOfType } from '../utils/node-utils.js';
 import {
@@ -190,7 +192,9 @@ function convertValueToParameterValue(value: ast.Value): ast.ParameterValue {
  *
  * @example Using with error handling
  * ```typescript
- * const errorHandler = new SimpleErrorHandler();
+ * const errorHandler = new ErrorHandler({
+ *   loggerOptions: { level: Severity.DEBUG },
+ * });
  * const visitor = new PrimitiveVisitor(sourceCode, errorHandler);
  *
  * const astNode = visitor.visitNode(cstNode);
@@ -204,6 +208,7 @@ function convertValueToParameterValue(value: ast.Value): ast.ParameterValue {
  * @category Visitors
  */
 export abstract class BaseASTVisitor implements ASTVisitor {
+  protected errorHandler: ErrorHandler;
   /**
    * Creates a new BaseASTVisitor instance.
    *
@@ -221,7 +226,15 @@ export abstract class BaseASTVisitor implements ASTVisitor {
    * const visitor = new MyCustomVisitor(sourceCode, errorHandler);
    * ```
    */
-  constructor(protected source: string, protected errorHandler?: { logInfo(message: string, context?: string, node?: unknown): void; logDebug(message: string, context?: string, node?: unknown): void; logWarning(message: string, context?: string, node?: unknown): void; logError(message: string, context?: string, node?: unknown): void; handleError(error: Error, context?: string, node?: unknown): void }) {}
+  constructor(protected source: string, providedErrorHandler?: ErrorHandler) {
+    if (providedErrorHandler) {
+      this.errorHandler = providedErrorHandler;
+    } else {
+      this.errorHandler = new ErrorHandler({
+        loggerOptions: { level: Severity.DEBUG },
+      } as ErrorHandlerOptions);
+    }
+  }
 
   /**
    * Visit a node and return the corresponding AST node

@@ -14,7 +14,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { EnhancedOpenscadParser } from './openscad-parser/enhanced-parser.js';
 import { SimpleErrorHandler } from './openscad-parser/error-handling/simple-error-handler.js';
-import type * as ast from './openscad-parser/ast/ast-types.js';
 
 describe('Documentation Examples - Range Expression Integration', () => {
   let parser: EnhancedOpenscadParser;
@@ -180,7 +179,7 @@ describe('Documentation Examples - Range Expression Integration', () => {
       // Should not have any "Unhandled expression type" errors
       const errors = errorHandler.getErrors();
       const unhandledErrors = errors.filter(error => 
-        error.message.includes('Unhandled expression type')
+        error.includes('Unhandled expression type')
       );
       expect(unhandledErrors).toHaveLength(0);
     });

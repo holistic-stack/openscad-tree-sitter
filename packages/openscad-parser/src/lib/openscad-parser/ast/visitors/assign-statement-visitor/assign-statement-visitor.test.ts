@@ -17,7 +17,7 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { EnhancedOpenscadParser, SimpleErrorHandler } from '../../../../index.js';
-import type { AssignStatementNode, AssignmentNode } from '../../ast-types.js';
+import type { AssignStatementNode } from '../../ast-types.js';
 
 describe('AssignStatementVisitor', () => {
   let parser: EnhancedOpenscadParser;

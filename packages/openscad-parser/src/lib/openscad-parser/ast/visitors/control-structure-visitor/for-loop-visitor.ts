@@ -231,7 +231,7 @@ export class ForLoopVisitor {
         const rangeWithStepMatch = rangeText.match(
           /\[\s*([^:]+)\s*:\s*([^:]+)\s*:\s*([^\]]+)\s*\]/
         );
-        if (rangeWithStepMatch && rangeWithStepMatch[1] && rangeWithStepMatch[2] && rangeWithStepMatch[3]) {
+        if (rangeWithStepMatch?.[1] && rangeWithStepMatch[2] && rangeWithStepMatch[3]) {
           const start = parseFloat(rangeWithStepMatch[1]);
           const step = parseFloat(rangeWithStepMatch[2]);
           const end = parseFloat(rangeWithStepMatch[3]);
@@ -246,7 +246,7 @@ export class ForLoopVisitor {
           const rangeMatch = rangeText.match(
             /\[\s*([^:]+)\s*:\s*([^\]]+)\s*\]/
           );
-          if (rangeMatch && rangeMatch[1] && rangeMatch[2]) {
+          if (rangeMatch?.[1] && rangeMatch[2]) {
             const start = parseFloat(rangeMatch[1]);
             const end = parseFloat(rangeMatch[2]);
 
@@ -431,7 +431,7 @@ export class ForLoopVisitor {
         const rangeWithStepMatch = rangeText.match(
           /\[\s*([^:]+)\s*:\s*([^:]+)\s*:\s*([^\]]+)\s*\]/
         );
-        if (rangeWithStepMatch && rangeWithStepMatch[1] && rangeWithStepMatch[2] && rangeWithStepMatch[3]) {
+        if (rangeWithStepMatch?.[1] && rangeWithStepMatch[2] && rangeWithStepMatch[3]) {
           const start = parseFloat(rangeWithStepMatch[1]);
           const step = parseFloat(rangeWithStepMatch[2]);
           const end = parseFloat(rangeWithStepMatch[3]);
@@ -444,7 +444,7 @@ export class ForLoopVisitor {
         } else {
           // Check if this is a simple range
           const rangeMatch = rangeText.match(/\[\s*([^:]+)\s*:\s*([^\]]+)\s*\]/);
-          if (rangeMatch && rangeMatch[1] && rangeMatch[2]) {
+          if (rangeMatch?.[1] && rangeMatch[2]) {
             const start = parseFloat(rangeMatch[1]);
             const end = parseFloat(rangeMatch[2]);
 

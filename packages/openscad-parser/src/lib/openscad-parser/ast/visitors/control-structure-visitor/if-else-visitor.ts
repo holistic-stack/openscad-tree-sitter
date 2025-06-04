@@ -224,7 +224,7 @@ export class IfElseVisitor {
     // Create condition expression
     let condition: ast.ExpressionNode;
 
-    if (args.length > 0 && args[0] && args[0].value) {
+    if (args.length > 0 && args[0]?.value) {
       const firstArg = args[0];
       const argValue = firstArg.value;
 
@@ -236,7 +236,7 @@ export class IfElseVisitor {
         argValue.type === 'expression'
       ) {
         // Use the expression directly if it's already an expression node
-        condition = argValue as ast.ExpressionNode;
+        condition = argValue;
       } else {
         // Create a literal expression for other value types
         condition = {

@@ -10,6 +10,7 @@
  * - Traditional with condition: [expr for (var = range) if (condition)]
  * - OpenSCAD: [for (var = range) expr]
  * - OpenSCAD with condition: [for (var = range) if (condition) expr]
+ * - OpenSCAD with let: [let (assignments) for (var = range) expr]
  * 
  * @example Traditional syntax
  * ```openscad
@@ -21,11 +22,7 @@
  * ```openscad
  * [for (x = [1:5]) x*x]
  * [for (x = [1:10]) if (x % 2 == 0) x]
- * ```
- * 
- * @example Complex expressions
- * ```openscad
- * [for (i = [0:5]) let(angle = i * 36) [cos(angle), sin(angle)]]
+ * [let (a=1) for (x = [1:5]) x+a]
  * ```
  */
 
@@ -38,23 +35,6 @@ import { getLocation } from '../../../utils/location-utils.js';
 
 /**
  * Visitor for handling list comprehension expressions in OpenSCAD.
- * 
- * This visitor processes Tree-sitter nodes representing list comprehensions
- * and converts them into structured AST nodes. It handles both traditional
- * Python-style syntax and OpenSCAD-specific syntax variants.
- * 
- * The visitor follows the Single Responsibility Principle by focusing
- * exclusively on list comprehension processing, delegating expression
- * evaluation to the parent ExpressionVisitor.
- * 
- * @example Basic usage
- * ```typescript
- * const errorHandler = new ErrorHandler();
- * const expressionVisitor = new ExpressionVisitor('', errorHandler);
- * const visitor = new ListComprehensionVisitor(expressionVisitor, errorHandler);
- * 
- * const result = visitor.visitListComprehension(listComprehensionNode);
- * ```
  */
 export class ListComprehensionVisitor extends BaseASTVisitor {
   constructor(
@@ -115,405 +95,501 @@ export class ListComprehensionVisitor extends BaseASTVisitor {
       if (openScadResult && openScadResult.type === 'error') {
         this.errorHandler.logWarning(
           `[ListComprehensionVisitor.visitListComprehension] Propagating error from OpenSCAD style parsing. CST: ${node.text.substring(0,50)} Error: ${openScadResult.message}`,
-          'visitListComprehension.openScadError'
+          'visitListComprehension.openScadErrorPropagation'
         );
         return openScadResult;
       }
 
-      // If openScadResult is null, it means it was not recognized as OpenSCAD style list comprehension.
-      // So, we can safely try Python style.
+      // If openScadResult is null, it means it was not recognized as OpenSCAD style. Try Python style.
       if (openScadResult === null) {
         this.errorHandler.logInfo(
-          `[ListComprehensionVisitor.visitListComprehension] Not an OpenSCAD style list comprehension, attempting Python style. CST: ${node.text.substring(0,50)}`
+          `[ListComprehensionVisitor.visitListComprehension] Not an OpenSCAD style list comprehension, attempting Python style. CST: ${node.text.substring(0,50)}`,
+          'visitListComprehension.tryPythonStyle'
         );
-        // This method should return ListComprehensionExpressionNode, ErrorNode, or null (if not Python style)
         const pythonResult = this.parsePythonStyle(node);
         if (pythonResult && pythonResult.type === 'expression' && pythonResult.expressionType === 'list_comprehension_expression') {
           this.errorHandler.logInfo(
-            `[ListComprehensionVisitor.visitListComprehension] Successfully parsed as Python style. CST: ${node.text.substring(0,50)}`
+            `[ListComprehensionVisitor.visitListComprehension] Successfully parsed as Python style. CST: ${node.text.substring(0,50)}`,
+            'visitListComprehension.pythonSuccess'
           );
           return pythonResult;
         }
-        // If pythonResult is an ErrorNode, propagate it.
         if (pythonResult && pythonResult.type === 'error') {
             this.errorHandler.logWarning(
             `[ListComprehensionVisitor.visitListComprehension] Propagating error from Python style parsing. CST: ${node.text.substring(0,50)} Error: ${pythonResult.message}`,
-            'visitListComprehension.pythonError'
+            'visitListComprehension.pythonErrorPropagation'
             );
             return pythonResult;
         }
-        // If pythonResult is null, it means it's not Python style either.
       }
 
-      // If neither style matches (openScadResult was null and pythonResult was null), 
-      // or if an error was propagated from one of the parsers and already returned,
-      // this point means the node is not a list comprehension this visitor can handle.
-      // Return null to align with the test expectation for non-list-comprehension nodes.
-      this.errorHandler.logInfo(
-        `[ListComprehensionVisitor.visitListComprehension] Node does not appear to be a list comprehension by OpenSCAD or Python style. Returning null. CST: ${node.text.substring(0,80)}`
+      this.errorHandler.logWarning(
+        `[ListComprehensionVisitor.visitListComprehension] Node (type: ${node.type}, text: "${node.text.substring(0, 80).replace(/\n/g, '\\n')}") is not a recognized list comprehension. Returning ErrorNode.`,
+        'visitListComprehension.notRecognizedAsLC'
       );
-      return null;
+      return {
+        type: 'error',
+        errorCode: 'NODE_NOT_LIST_COMPREHENSION',
+        message: `The provided CST node (type: ${node.type}) is not a recognized list comprehension.`,
+        location: getLocation(node),
+        originalNodeType: node.type,
+        cstNodeText: node.text.substring(0, 200), // Limit text length for error object
+      };
 
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.errorHandler.logError(
-        `[ListComprehensionVisitor.parseOpenScadStyle] Unexpected error: ${errorMessage}. ErrorCode: VISIT_LIST_COMPREHENSION_UNEXPECTED_ERROR. OriginalError: ${errorMessage}`
+        `[ListComprehensionVisitor.visitListComprehension] Unexpected error: ${errorMessage}. ErrorCode: VISIT_LIST_COMPREHENSION_UNEXPECTED_ERROR. OriginalError: ${errorMessage}`,
+        'VISIT_LIST_COMPREHENSION_UNEXPECTED_ERROR'
       );
       return {
         type: 'error',
         errorCode: 'VISIT_LIST_COMPREHENSION_UNEXPECTED_ERROR',
         message: `Unexpected error processing list comprehension: ${errorMessage}`,
-        location: getLocation(node), // Assuming getLocation is available in scope
+        location: getLocation(node),
         originalNodeType: node.type,
         cstNodeText: node.text,
       };
     }
   }
+  /**
+   * Parses OpenSCAD-style list comprehensions: [let (assignments)? for (var = range) if (condition)? expr]
+   * 
+   * This method attempts to identify and parse the components of an OpenSCAD-style
+   * list comprehension. It expects a specific order of child nodes:
+   * 1. Optional `let_clause`
+   * 2. Mandatory `list_comprehension_for`
+   * 3. Optional `if_clause`
+   * 4. Mandatory body expression (any valid expression node)
+   *
+   * If the structure deviates, or if essential components are missing, it returns
+   * an `ErrorNode` detailing the issue. If the node does not appear to be an
+   * OpenSCAD-style list comprehension at all (e.g., missing `for` clause early on),
+   * it returns `null` to allow `visitListComprehension` to try Python-style parsing.
+   * 
+   * @param node - The Tree-sitter node for the list comprehension.
+   * @returns An `ast.ListComprehensionExpressionNode` if successful, an `ast.ErrorNode`
+   *          if there's a structural issue, or `null` if it's not OpenSCAD style.
+   */
+  private parseOpenScadStyle(node: TSNode): ast.ListComprehensionExpressionNode | ast.ErrorNode | null {
+    this.errorHandler.logInfo(
+      `[ListComprehensionVisitor.parseOpenScadStyle] Attempting to parse as OpenSCAD style. CST: ${node.text.substring(0, 80)}`,
+      'parseOpenScadStyle.entry'
+    );
+
+    // Filter out non-significant children like '[', ']', 'comment', 'ERROR'
+    // We are interested in 'let_clause', 'list_comprehension_for', 'if_clause', and the body expression.
+    const significantChildren = node.children.filter(
+      c => c && c.type !== '[' && c.type !== ']' && c.type !== 'comment' && c.type !== 'ERROR' && c.type !== ','
+    );
+
+    if (significantChildren.length === 0) {
+      this.errorHandler.logWarning(
+        `[ListComprehensionVisitor.parseOpenScadStyle] No significant children found. Not an OpenSCAD style LC. CST: ${node.text.substring(0,80)}`,
+        'parseOpenScadStyle.noSignificantChildren'
+      );
+      return null; // Not an OpenSCAD style LC if no significant children
+    }
+
+    let childIndex = 0;
+    let letClauseCstNode: TSNode | null = null;
+    let forClauseCstNode: TSNode | null = null;
+    let bodyExpressionCstNode: TSNode | null = null;
+
+    // 1. Optional let_clause
+    if (significantChildren.length > childIndex) {
+      const currentChild = significantChildren[childIndex];
+      if (currentChild && currentChild.type === 'let_clause') {
+        letClauseCstNode = currentChild;
+        childIndex++;
+        this.errorHandler.logInfo(
+          `[ListComprehensionVisitor.parseOpenScadStyle] Found let_clause: ${letClauseCstNode.text.substring(0,50)}`,
+          'parseOpenScadStyle.letClauseFound'
+        );
+      }
+    }
+
+    // 2. Mandatory list_comprehension_for
+    if (significantChildren.length > childIndex) {
+      const currentChildNode = significantChildren[childIndex]; // Guarded access
+      if (currentChildNode && currentChildNode.type === 'list_comprehension_for') {
+        forClauseCstNode = currentChildNode;
+        childIndex++;
+        this.errorHandler.logInfo(
+          `[ListComprehensionVisitor.parseOpenScadStyle] Found list_comprehension_for: ${forClauseCstNode.text.substring(0,50)}`,
+          'parseOpenScadStyle.forClauseFound'
+        );
+      } else {
+        // Expected for_clause, but found something else or null (null unlikely due to filter)
+        if (letClauseCstNode) {
+          this.errorHandler.logError(
+            `[ListComprehensionVisitor.parseOpenScadStyle] 'list_comprehension_for' not found after 'let_clause', or wrong type. CST: ${node.text.substring(0,80)}. ErrorCode: LC_OPENSCAD_STYLE_MISSING_FOR_AFTER_LET`,
+            'LC_OPENSCAD_STYLE_MISSING_FOR_AFTER_LET'
+          );
+          return {
+            type: 'error' as const,
+            errorCode: 'LC_OPENSCAD_STYLE_MISSING_FOR_AFTER_LET',
+            message: `Required 'list_comprehension_for' child node not found or of wrong type after 'let_clause'.`,
+            location: getLocation(letClauseCstNode ?? node),
+            originalNodeType: node.type,
+            cstNodeText: node.text,
+          };
+        } else {
+           this.errorHandler.logInfo(
+            `[ListComprehensionVisitor.parseOpenScadStyle] First significant child is not 'list_comprehension_for'. Not OpenSCAD style. CST: ${currentChildNode?.text.substring(0,80)}`,
+            'parseOpenScadStyle.notOpenScadStyle'
+          );
+          return null; // Not OpenSCAD style
+        }
+      }
+    } else {
+      // No more children, but for_clause was mandatory.
+      if (letClauseCstNode) {
+        this.errorHandler.logError(
+          `[ListComprehensionVisitor.parseOpenScadStyle] 'list_comprehension_for' not found after 'let_clause' (no more children). CST: ${node.text.substring(0,80)}. ErrorCode: LC_OPENSCAD_STYLE_MISSING_FOR_AFTER_LET_EOF`,
+          'LC_OPENSCAD_STYLE_MISSING_FOR_AFTER_LET_EOF'
+        );
+        return {
+          type: 'error' as const,
+          errorCode: 'LC_OPENSCAD_STYLE_MISSING_FOR_AFTER_LET_EOF',
+          message: `Required 'list_comprehension_for' child node not found after 'let_clause' (end of significant children).`,
+          location: getLocation(letClauseCstNode ?? node),
+          originalNodeType: node.type,
+          cstNodeText: node.text,
+        };
+      } else {
+         this.errorHandler.logInfo(
+          `[ListComprehensionVisitor.parseOpenScadStyle] Not enough significant children for 'list_comprehension_for'. Not OpenSCAD style. CST: ${node.text.substring(0,80)}`,
+          'parseOpenScadStyle.notOpenScadStyle_EOF'
+        );
+        return null; // Not OpenSCAD style
+      }
+    }
+
+    // 3. Check for condition field (grammar uses direct field, not if_clause node)
+    const conditionFieldNode = node.childForFieldName('condition');
+    if (conditionFieldNode) {
+      this.errorHandler.logInfo(
+        `[ListComprehensionVisitor.parseOpenScadStyle] Found condition field: ${conditionFieldNode.text.substring(0,50)}`,
+        'parseOpenScadStyle.conditionFieldFound'
+      );
+    }
+
+    // 4. Mandatory body_expression (use expr field from grammar)
+    bodyExpressionCstNode = node.childForFieldName('expr');
+    if (bodyExpressionCstNode) {
+      this.errorHandler.logInfo(
+        `[ListComprehensionVisitor.parseOpenScadStyle] Found body_expression: ${bodyExpressionCstNode.text.substring(0,50)}`,
+        'parseOpenScadStyle.bodyFound'
+      );
+    } else {
+      this.errorHandler.logError(
+        `[ListComprehensionVisitor.parseOpenScadStyle] Missing body expression (expr field). CST: ${node.text.substring(0,80)}. ErrorCode: LC_OPENSCAD_STYLE_MISSING_BODY_EXPRESSION`,
+        'LC_OPENSCAD_STYLE_MISSING_BODY_EXPRESSION'
+      );
+      return {
+        type: 'error' as const,
+        errorCode: 'LC_OPENSCAD_STYLE_MISSING_BODY_EXPRESSION',
+        message: 'Missing body expression (expr field) in OpenSCAD-style list comprehension.',
+        location: getLocation(conditionFieldNode ?? forClauseCstNode ?? node), // Best guess for location
+        originalNodeType: node.type,
+        cstNodeText: node.text,
+      };
+    }
+    
+    // At this point, forClauseCstNode and bodyExpressionCstNode are guaranteed to be non-null.
+    // letClauseCstNode and conditionFieldNode are optional.
+
+    // Parse let_clause (placeholder for now - not yet supported)
+    if (letClauseCstNode) {
+      // TODO: Implement let clause parsing when the grammar and AST types support it
+      this.errorHandler.logWarning(
+        `[ListComprehensionVisitor.parseOpenScadStyle] Let clause found but not yet supported. CST: ${letClauseCstNode.text.substring(0, 50)}`,
+        'parseOpenScadStyle.letClauseNotSupported'
+      );
+    }
+
+    if (!forClauseCstNode) {
+      this.errorHandler.logError(
+        `[ListComprehensionVisitor.parseOpenScadStyle] Internal error: forClauseCstNode is unexpectedly null before calling extractForClause. This should have been caught earlier. CST: ${node.text.substring(0, 80)}`,
+        'LC_OPENSCAD_INTERNAL_NULL_FOR_CLAUSE_PRE_EXTRACT'
+      );
+      return {
+        type: 'error' as const,
+        errorCode: 'LC_OPENSCAD_INTERNAL_NULL_FOR_CLAUSE_PRE_EXTRACT',
+        message: 'Internal error: Mandatory for_clause CST node is null before extraction.',
+        location: getLocation(node),
+        originalNodeType: node.type,
+      };
+    }
+
+    // Extract for clause
+    const forClause = this.extractForClause(forClauseCstNode);
+
+    // Check if the range extraction failed (which indicates an error in extractForClause)
+    if (forClause.range.type === 'error') {
+      this.errorHandler.logWarning(
+        `[ListComprehensionVisitor.parseOpenScadStyle] Error extracting for_clause range. Propagating error. CST: ${forClauseCstNode.text.substring(0,50)}`,
+        'parseOpenScadStyle.extractForClauseErrorPropagation'
+      );
+      return forClause.range; // Propagate error from extractForClause
+    }
+
+    // After this point, forClause.range is guaranteed to be a valid ExpressionNode
+    if (!forClause.variable) {
+      this.errorHandler.logError(
+        `[ListComprehensionVisitor.parseOpenScadStyle] Failed to extract variable from for clause. CST: ${forClauseCstNode.text.substring(0,80)}. ErrorCode: LC_FOR_CLAUSE_NO_VARIABLE_PROP`,
+        'LC_FOR_CLAUSE_NO_VARIABLE_PROP'
+      );
+      return {
+        type: 'error' as const,
+        errorCode: 'LC_FOR_CLAUSE_NO_VARIABLE_PROP',
+        message: 'Failed to extract variable name from for clause.',
+        location: getLocation(forClauseCstNode),
+        originalNodeType: forClauseCstNode.type,
+        cstNodeText: forClauseCstNode.text,
+      };
+    }
+
+    if (!bodyExpressionCstNode) {
+      this.errorHandler.logError(
+        `[ListComprehensionVisitor.parseOpenScadStyle] Mandatory body expression CST node not found. CST: ${node.text.substring(0, 80)}`,
+        'LC_OPENSCAD_MISSING_BODY_EXPRESSION_NODE'
+      );
+      return {
+        type: 'error' as const,
+        errorCode: 'LC_OPENSCAD_MISSING_BODY_EXPRESSION_NODE',
+        message: 'Mandatory body expression CST node not found in OpenSCAD-style list comprehension.',
+        location: getLocation(conditionFieldNode ?? forClauseCstNode ?? node), // Best effort location
+        originalNodeType: node.type,
+        cstNodeText: node.text,
+      };
+    }
+    const bodyExpressionAstNode = this.parentVisitor.dispatchSpecificExpression(bodyExpressionCstNode) ?? null;
+    if (!bodyExpressionAstNode) {
+      this.errorHandler.logError(
+        `[ListComprehensionVisitor.parseOpenScadStyle] Failed to parse body expression (visitor returned null). CST: ${bodyExpressionCstNode.text.substring(0,80)}. ErrorCode: LC_BODY_EXPRESSION_UNPARSABLE_NULL`,
+        'LC_BODY_EXPRESSION_UNPARSABLE_NULL'
+      );
+      return {
+        type: 'error' as const,
+        errorCode: 'LC_BODY_EXPRESSION_UNPARSABLE_NULL',
+        message: 'Failed to parse body expression (visitor returned null).',
+        location: getLocation(bodyExpressionCstNode),
+        originalNodeType: bodyExpressionCstNode.type,
+        cstNodeText: bodyExpressionCstNode.text,
+      };
+    }
+    if (bodyExpressionAstNode.type === 'error') {
+      this.errorHandler.logError(
+        `[ListComprehensionVisitor.parseOpenScadStyle] Error in body expression. Propagating. CST: ${bodyExpressionCstNode.text.substring(0,80)}. ErrorCode: LC_BODY_EXPRESSION_ERROR_PROP`,
+        'LC_BODY_EXPRESSION_ERROR_PROP'
+      );
+      return {
+        type: 'error' as const,
+        errorCode: 'LC_BODY_EXPRESSION_ERROR_PROP',
+        message: 'Error parsing body expression.',
+        location: getLocation(bodyExpressionCstNode),
+        originalNodeType: bodyExpressionCstNode.type,
+        cstNodeText: bodyExpressionCstNode.text,
+        cause: bodyExpressionAstNode,
+      };
+    }
+
+    // Parse condition field (optional)
+    let conditionAstNode: ast.ExpressionNode | null = null;
+    if (conditionFieldNode) {
+      const parsedCondition = this.parentVisitor.dispatchSpecificExpression(conditionFieldNode);
+      if (!parsedCondition) {
+        this.errorHandler.logError(
+          `[ListComprehensionVisitor.parseOpenScadStyle] Failed to parse condition expression (visitor returned null). CST: ${conditionFieldNode.text.substring(0,80)}. ErrorCode: LC_CONDITION_UNPARSABLE_NULL`,
+          'LC_CONDITION_UNPARSABLE_NULL'
+        );
+        return {
+          type: 'error' as const,
+          errorCode: 'LC_CONDITION_UNPARSABLE_NULL',
+          message: 'Failed to parse condition expression (visitor returned null).',
+          location: getLocation(conditionFieldNode),
+          originalNodeType: conditionFieldNode.type,
+          cstNodeText: conditionFieldNode.text,
+        };
+      }
+      if (parsedCondition.type === 'error') {
+        this.errorHandler.logError(
+          `[ListComprehensionVisitor.parseOpenScadStyle] Error in condition expression. Propagating. CST: ${conditionFieldNode.text.substring(0,80)}. ErrorCode: LC_CONDITION_ERROR_PROP`,
+          'LC_CONDITION_ERROR_PROP'
+        );
+        return {
+          type: 'error' as const,
+          errorCode: 'LC_CONDITION_ERROR_PROP',
+          message: 'Error parsing condition expression.',
+          location: getLocation(conditionFieldNode),
+          originalNodeType: conditionFieldNode.type,
+          cstNodeText: conditionFieldNode.text,
+          cause: parsedCondition,
+        };
+      }
+      conditionAstNode = parsedCondition;
+    }
+
+    // Construct the AST node
+    const resultNode: ast.ListComprehensionExpressionNode = {
+      type: 'expression' as const,
+      expressionType: 'list_comprehension_expression' as const,
+      variable: forClause.variable, // Checked for null/empty and error propagation above
+      range: forClause.range,    // Error propagation handled above
+      expression: bodyExpressionAstNode, // Checked for null and error propagation above
+      location: getLocation(node),
+    };
+
+    // Add condition if present
+    if (conditionAstNode) {
+      resultNode.condition = conditionAstNode;
+    }
+
+    // TODO: Implement let assignments support when grammar and AST types are ready
+    // Currently letAssignments is always null, so no processing needed
+
+    this.errorHandler.logInfo(
+      `[ListComprehensionVisitor.parseOpenScadStyle] Successfully parsed OpenSCAD style list comprehension. Variable: ${resultNode.variable}, Body: ${resultNode.expression.expressionType}`,
+      'parseOpenScadStyle.success'
+    );
+    return resultNode;
+  }
 
   /**
-   * Parse OpenSCAD-style list comprehension: [for (i = range) expr] or [for (i = range) if (condition) expr]
+   * Extracts the loop variable and range expression from a 'list_comprehension_for' CST node. (OpenSCAD-style).
+   * 
+   * @param forClauseNode - The for_clause CST node to process.
+   * @returns Object containing the variable name and range expression AST node.
    */
-  private parseOpenScadStyle(node: TSNode): ast.ListComprehensionExpressionNode | ast.ErrorNode {
+  private extractForClause(forClauseNode: TSNode): { variable: string | null; range: ast.ExpressionNode | ast.ErrorNode } {
     try {
-      const forClauseNode = node.childForFieldName('list_comprehension_for');
-      const mainExpressionCstNode = node.childForFieldName('expr');
-      const conditionCstNode = node.childForFieldName('condition');
+      // Based on grammar.js, forClauseNode is a 'list_comprehension_for' CST node.
+      // It directly contains 'iterator' (variable) and 'range' (iterable expression) fields.
+      // list_comprehension_for: ($) =>
+      //   seq(
+      //     'for',
+      //     '(',
+      //     choice(
+      //       seq(field('iterator', $.identifier), '=', field('range', $._non_list_comprehension_value)), // Single assignment
+      //       seq($.list_comprehension_assignment, repeat1(seq(',', $.list_comprehension_assignment))) // Multiple assignments
+      //     ),
+      //     ')'
+      //   ),
 
-      if (!forClauseNode) {
+      // For simplicity, this implementation currently only supports the single assignment form.
+      // TODO: Extend to support multiple assignments (e.g., for (a=1, b=2) ...)
+
+      const variableIdentifierNode = forClauseNode.childForFieldName('iterator');
+      let variableName: string | null = null;
+
+      if (!variableIdentifierNode) {
         this.errorHandler.logError(
-          `[ListComprehensionVisitor.parseOpenScadStyle] Missing 'list_comprehension_for' child. CST: ${node.text}. ErrorCode: MISSING_FOR_CLAUSE`
+          `[ListComprehensionVisitor.extractForClause] Field 'iterator' (loop variable identifier) not found in list_comprehension_for node. CST: ${forClauseNode.text}. ErrorCode: LC_FOR_CLAUSE_MISSING_ITERATOR_FIELD`
         );
         return {
-          type: 'error',
-          errorCode: 'MISSING_FOR_CLAUSE',
-          message: "Missing 'for' clause in OpenSCAD-style list comprehension.",
-          location: getLocation(node),
-          originalNodeType: node.type,
-          cstNodeText: node.text,
+          variable: null,
+          range: { 
+            type: 'error' as const,
+            errorCode: 'LC_FOR_CLAUSE_MISSING_ITERATOR_FIELD',
+            message: "Field 'iterator' (loop variable identifier) not found in list_comprehension_for node.",
+            location: getLocation(forClauseNode),
+            originalNodeType: forClauseNode.type, // Added missing originalNodeType
+            cstNodeText: forClauseNode.text,
+          },
         };
       }
 
-      if (!mainExpressionCstNode) {
+      variableName = variableIdentifierNode.text;
+      if (variableName === null || variableName.trim() === '') {
         this.errorHandler.logError(
-          `[ListComprehensionVisitor.parseOpenScadStyle] Missing 'expr' child. CST: ${node.text}. ErrorCode: MISSING_MAIN_EXPRESSION_CHILD`
+          `[ListComprehensionVisitor.extractForClause] Loop variable identifier node ('iterator') has no text or is empty. CST: ${variableIdentifierNode.text}. ErrorCode: LC_FOR_CLAUSE_ITERATOR_NO_TEXT`
         );
         return {
-          type: 'error',
-          errorCode: 'MISSING_MAIN_EXPRESSION_CHILD',
-          message: "Missing main expression child 'expr' in OpenSCAD-style list comprehension.",
-          location: getLocation(node),
-          originalNodeType: node.type,
-          cstNodeText: node.text,
+          variable: null,
+          range: { 
+            type: 'error' as const,
+            errorCode: 'LC_FOR_CLAUSE_ITERATOR_NO_TEXT',
+            message: "Loop variable identifier node ('iterator') has no text or is empty.",
+            location: getLocation(variableIdentifierNode),
+            originalNodeType: variableIdentifierNode.type,
+            cstNodeText: variableIdentifierNode.text,
+          },
         };
       }
 
-      const { variable: variableName, range: rangeAstNode } = this.extractForClause(forClauseNode);
+      const rangeExprNode = forClauseNode.childForFieldName('range');
+      let rangeAstNode: ast.ExpressionNode | ast.ErrorNode;
 
-      if (!variableName) {
-        // Error already logged by extractForClause, rangeAstNode should be an ErrorNode in this case.
-        const message = 'Failed to extract variable name from for clause.';
-        this.errorHandler.logError(`[ListComprehensionVisitor.parseOpenScadStyle] ${message} CST: ${forClauseNode.text}. ErrorCode: NO_VARIABLE_IN_FOR_CLAUSE`);
-        const errorNode: ast.ErrorNode = {
-          type: 'error',
-          errorCode: 'NO_VARIABLE_IN_FOR_CLAUSE',
-          message,
+      if (rangeExprNode) {
+        const parsedRange = this.parentVisitor.dispatchSpecificExpression(rangeExprNode);
+        if (parsedRange) {
+          rangeAstNode = parsedRange; // Can be ExpressionNode or ErrorNode
+        } else {
+          this.errorHandler.logError(
+            `[ListComprehensionVisitor.extractForClause] parentVisitor.dispatchSpecificExpression returned null for range expression node ('range'). CST: ${rangeExprNode.text}. ErrorCode: LC_FOR_CLAUSE_UNPARSABLE_RANGE_NULL`
+          );
+          rangeAstNode = { 
+            type: 'error' as const,
+            errorCode: 'LC_FOR_CLAUSE_UNPARSABLE_RANGE_NULL',
+            message: `Failed to parse range expression ('range') (parent visitor returned null): ${rangeExprNode.text}`,
+            location: getLocation(rangeExprNode),
+            originalNodeType: rangeExprNode.type,
+            cstNodeText: rangeExprNode.text,
+          };
+        }
+      } else {
+        this.errorHandler.logError(
+          `[ListComprehensionVisitor.extractForClause] Field 'range' (for range expression) not found in list_comprehension_for node. CST: ${forClauseNode.text}. ErrorCode: LC_FOR_CLAUSE_MISSING_RANGE_FIELD`
+        );
+        rangeAstNode = { 
+          type: 'error' as const,
+          errorCode: 'LC_FOR_CLAUSE_MISSING_RANGE_FIELD',
+          message: "Field 'range' (for range expression) not found in list_comprehension_for node.",
           location: getLocation(forClauseNode),
           originalNodeType: forClauseNode.type,
           cstNodeText: forClauseNode.text,
         };
-        if (rangeAstNode.type === 'error') {
-          errorNode.cause = rangeAstNode;
-        }
-        return errorNode;
       }
-
-      if (rangeAstNode.type === 'error') {
-        this.errorHandler.logError(
-          `[ListComprehensionVisitor.parseOpenScadStyle] Error in range expression. CST: ${forClauseNode.text}. ErrorCode: RANGE_EXPRESSION_ERROR`
-        );
-        const errorToReturn_RangePropagated: ast.ErrorNode = {
-          type: 'error',
-          errorCode: 'RANGE_EXPRESSION_ERROR_PROPAGATED',
-          message: 'Error in list comprehension range expression.',
-          location: getLocation(node),
-          originalNodeType: node.type,
-          cstNodeText: node.text,
-        };
-        if (rangeAstNode && rangeAstNode.type === 'error') {
-          errorToReturn_RangePropagated.cause = rangeAstNode;
-        }
-        return errorToReturn_RangePropagated;
-      }
-
-      let mainExpressionAstNode: ast.ExpressionNode | ast.ErrorNode | null;
-      if (mainExpressionCstNode.type === 'list_comprehension') {
-        this.errorHandler.logInfo(
-          `[ListComprehensionVisitor.parseOpenScadStyle] Found nested list comprehension: ${mainExpressionCstNode.text}`
-        );
-        mainExpressionAstNode = this.visitListComprehension(mainExpressionCstNode);
-      } else {
-        this.errorHandler.logDebug(
-          `[ListComprehensionVisitor.parseOpenScadStyle] Parsing regular main expression: ${mainExpressionCstNode.text}`
-        );
-        const parsedExpr = this.parentVisitor.dispatchSpecificExpression(mainExpressionCstNode);
-        if (!parsedExpr) {
-          this.errorHandler.logError(
-            `[ListComprehensionVisitor.parseOpenScadStyle] Failed to parse main expression (null return). CST: ${mainExpressionCstNode.text}. ErrorCode: MAIN_EXPRESSION_PARSE_NULL`
-          );
-          mainExpressionAstNode = {
-            type: 'error',
-            errorCode: 'MAIN_EXPRESSION_PARSE_NULL',
-            message: 'Failed to parse main expression in list comprehension (null return).',
-            location: getLocation(mainExpressionCstNode),
-            originalNodeType: mainExpressionCstNode.type,
-            cstNodeText: mainExpressionCstNode.text,
-          };
-        } else {
-          mainExpressionAstNode = parsedExpr;
-        }
-      }
-
-      if (mainExpressionAstNode === null) {
-        this.errorHandler.logError(
-          `[ListComprehensionVisitor.parseOpenScadStyle] Failed to parse main expression for list comprehension: ${mainExpressionCstNode.text}. Visitor returned null.`,
-          'ListComprehensionVisitor.parseOpenScadStyle',
-          mainExpressionCstNode
-        );
-        return {
-          type: 'error',
-          errorCode: 'LIST_COMPREHENSION_MAIN_EXPRESSION_NULL',
-          message: `Failed to parse main expression for list comprehension: ${mainExpressionCstNode.text}. Visitor returned null.`,
-          location: getLocation(mainExpressionCstNode),
-          originalNodeType: mainExpressionCstNode.type,
-          cstNodeText: mainExpressionCstNode.text,
-        };
-      }
-      if (mainExpressionAstNode.type === 'error') {
-        this.errorHandler.logError(
-          `[ListComprehensionVisitor.parseOpenScadStyle] Error in main expression. CST: ${mainExpressionCstNode.text}. ErrorCode: MAIN_EXPRESSION_ERROR`
-        );
-        const errorToReturn_MainExprPropagated: ast.ErrorNode = {
-          type: 'error',
-          errorCode: 'MAIN_EXPRESSION_ERROR_PROPAGATED',
-          message: 'Error in list comprehension main expression.',
-          location: getLocation(node),
-          originalNodeType: node.type,
-          cstNodeText: node.text,
-        };
-        if (mainExpressionAstNode && mainExpressionAstNode.type === 'error') {
-          errorToReturn_MainExprPropagated.cause = mainExpressionAstNode;
-        }
-        return errorToReturn_MainExprPropagated;
-      }
-
-      let conditionAstNode: ast.ExpressionNode | ast.ErrorNode | null | undefined;
-      if (conditionCstNode) {
-        const parsedCondition = this.parentVisitor.dispatchSpecificExpression(conditionCstNode);
-        if (!parsedCondition) {
-          this.errorHandler.logError(
-            `[ListComprehensionVisitor.parseOpenScadStyle] Failed to parse condition (null return). CST: ${conditionCstNode.text}. ErrorCode: CONDITION_PARSE_NULL`
-          );
-          return {
-            type: 'error',
-            errorCode: 'CONDITION_PARSE_NULL',
-            message: 'Failed to parse condition in list comprehension (null return).',
-            location: getLocation(conditionCstNode),
-            originalNodeType: conditionCstNode.type,
-            cstNodeText: conditionCstNode.text,
-          };
-        }
-        if (parsedCondition.type === 'error') {
-          this.errorHandler.logError(
-            `[ListComprehensionVisitor.parseOpenScadStyle] Error in condition expression. CST: ${conditionCstNode.text}. ErrorCode: CONDITION_EXPRESSION_ERROR`
-          );
-          return {
-            type: 'error',
-            errorCode: 'CONDITION_EXPRESSION_ERROR_PROPAGATED',
-            message: 'Error in list comprehension condition expression.',
-            location: getLocation(node),
-            originalNodeType: node.type,
-            cstNodeText: node.text,
-            cause: parsedCondition,
-          };
-        }
-        conditionAstNode = parsedCondition;
-      }
-
-      const resultNode: ast.ListComprehensionExpressionNode = {
-        type: 'expression',
-        expressionType: 'list_comprehension_expression',
-        variable: variableName,
-        range: rangeAstNode, // Ensured to be ExpressionNode by checks above
-        expression: mainExpressionAstNode, // Ensured to be ExpressionNode by checks above
-        location: getLocation(node),
-      };
-      if (conditionAstNode) {
-        if (conditionAstNode.type === 'error') {
-          this.errorHandler.logError(
-            `[ListComprehensionVisitor.parseOpenScadStyle] Error in condition expression. CST: ${conditionCstNode?.text}. ErrorCode: ${conditionAstNode.errorCode}`,
-            conditionAstNode.errorCode // Pass errorCode as the second argument if that's what the signature expects
-          );
-          const errorToReturn_ConditionPropagated: ast.ErrorNode = {
-            type: 'error',
-            errorCode: 'CONDITION_EXPRESSION_ERROR_PROPAGATED',
-            message: 'Error in list comprehension condition expression.',
-            location: conditionAstNode.location ?? getLocation(node), // Fallback if ErrorNode's location is undefined
-            originalNodeType: node.type,
-            cstNodeText: node.text,
-            cause: conditionAstNode,
-          };
-          return errorToReturn_ConditionPropagated;
-        }
-        // Now, conditionAstNode is confirmed to be ExpressionNode
-        resultNode.condition = conditionAstNode;
-      }
-      return resultNode;
-    } catch (error: any) {
+      return { variable: variableName, range: rangeAstNode };
+    } catch (error: unknown) { 
+      const message = error instanceof Error ? error.message : String(error);
       this.errorHandler.logError(
-        `[ListComprehensionVisitor.parseOpenSCADStyle] Unexpected error: ${error.message}. ErrorCode: PARSE_OPENSCAD_STYLE_LIST_COMP_UNEXPECTED_ERROR`,
-        error
+        `[ListComprehensionVisitor.extractForClause] Unexpected error: ${message}. ErrorCode: LC_EXTRACT_FOR_CLAUSE_UNEXPECTED_ERROR`
       );
       return {
-        type: 'error',
-        errorCode: 'PARSE_OPENSCAD_STYLE_LIST_COMP_UNEXPECTED_ERROR',
-        message: `Unexpected error parsing OpenSCAD-style list comprehension: ${error.message}`,
-        location: getLocation(node),
-        cstNodeText: node.text,
+        variable: null,
+        range: { 
+          type: 'error' as const,
+          errorCode: 'LC_EXTRACT_FOR_CLAUSE_UNEXPECTED_ERROR',
+          message: `Unexpected error extracting for clause: ${message}`,
+          location: getLocation(forClauseNode),
+          originalNodeType: forClauseNode.type, // Added missing originalNodeType
+          cstNodeText: forClauseNode.text,
+        },
       };
     }
   }
 
   /**
-   * Parse traditional Python-style list comprehension: [expr for (i = range) if (condition)?]
-   * This is a fallback for when the OpenSCAD-style parsing fails.
-   * 
-   * Note: This implementation is currently limited because we don't have direct access to the parser.
-   * A more complete solution would require either:
-   * 1. Updating the grammar to support Python-style comprehensions natively
-   * 2. Exposing the parser instance from the parent visitor
+   * Parses Python-style list comprehensions: [expr for var in iterable if condition?]
+   * Placeholder implementation.
+   * @param node - The Tree-sitter node for the list comprehension.
+   * @returns An ast.ListComprehensionExpressionNode if successful, an ast.ErrorNode
+   *          if there's a structural issue, or null if it's not Python style.
    */
-  private parsePythonStyle(node: TSNode): ast.ListComprehensionExpressionNode | ast.ErrorNode | null {
-    this.errorHandler.logWarning(
-      `[ListComprehensionVisitor.parsePythonStyle] Python-style list comprehensions are not fully supported. ` +
-      `Consider using OpenSCAD-style: [for (i = range) expr]`
+  private parsePythonStyle(_node: TSNode): ast.ListComprehensionExpressionNode | ast.ErrorNode | null {
+    this.errorHandler.logInfo(
+      `[ListComprehensionVisitor.parsePythonStyle] Attempting to parse as Python style. CST: ${_node.text.substring(0, 80)}`,
+      'parsePythonStyle.entry'
     );
-    
-    // For now, we'll just return null to indicate we can't handle this format
-    // This will cause the parser to report a more appropriate error
+    // TODO: Implement Python-style list comprehension parsing logic.
+    // Expected structure: [body_expression, list_comprehension_for_python, optional list_comprehension_if_python]
+    this.errorHandler.logWarning(
+      `[ListComprehensionVisitor.parsePythonStyle] Python-style list comprehension parsing is not yet implemented. Returning null. CST: ${_node.text.substring(0,80)}`,
+      'parsePythonStyle.notImplemented'
+    );
     return null;
-  }
-
-  /**
-   * Extract variable and range from a for clause node.
-   * 
-   * @param forClause - The for clause node to process
-   * @returns Object containing the variable name and range expression
-   */
-  private extractForClause(forClause: TSNode): { variable: string | null; range: ast.ExpressionNode | ast.ErrorNode } {
-    try {
-      const varDecl = forClause.childForFieldName('variable_declaration');
-      if (!varDecl) {
-        this.errorHandler.logError(
-          `[ListComprehensionVisitor.extractForClause] No variable_declaration found in for clause. CST: ${forClause.text}. ErrorCode: MISSING_VARIABLE_DECLARATION_IN_FOR_CLAUSE`
-        );
-        return {
-          variable: null,
-          range: {
-            type: 'error',
-            errorCode: 'MISSING_VARIABLE_DECLARATION_IN_FOR_CLAUSE',
-            message: 'No variable_declaration found in for clause.',
-            location: getLocation(forClause),
-            originalNodeType: 'variable_declaration',
-            cstNodeText: forClause.text,
-          },
-        };
-      }
-
-      const variableNode = varDecl.namedChild(0); // Use namedChild for robustness
-      const variable = variableNode?.text || null;
-
-      if (!variable || !variableNode) {
-        this.errorHandler.logError(
-          `[ListComprehensionVisitor.extractForClause] Failed to extract variable name from for clause. CST: ${varDecl.text}. ErrorCode: MISSING_VARIABLE_NAME_IN_FOR_CLAUSE`
-        );
-        return {
-          variable: null,
-          range: {
-            type: 'error',
-            errorCode: 'MISSING_VARIABLE_NAME_IN_FOR_CLAUSE',
-            message: 'Failed to extract variable name from for clause.',
-            location: getLocation(varDecl),
-            originalNodeType: varDecl.type,
-            cstNodeText: varDecl.text,
-          },
-        };
-      }
-
-      const rangeNode = varDecl.namedChild(1); // Use namedChild for robustness
-      let rangeAstNode: ast.ExpressionNode | ast.ErrorNode;
-
-      if (rangeNode) {
-        const parsedRange = this.parentVisitor.dispatchSpecificExpression(rangeNode);
-        if (parsedRange) {
-          rangeAstNode = parsedRange; // Can be ExpressionNode or ErrorNode
-        } else {
-          // dispatchSpecificExpression returning null implies an issue handled by parentVisitor or unhandled node type
-          this.errorHandler.logError(
-            `[ListComprehensionVisitor.extractForClause] dispatchSpecificExpression returned null for range node. CST: ${rangeNode.text}. ErrorCode: UNHANDLED_RANGE_NODE_TYPE`
-          );
-          rangeAstNode = {
-            type: 'error',
-            errorCode: 'UNPARSABLE_RANGE_EXPRESSION_NULL_RETURN',
-            message: `Failed to parse range expression (null return): ${rangeNode.text}`,
-            location: getLocation(rangeNode),
-            originalNodeType: rangeNode.type,
-            cstNodeText: rangeNode.text,
-          };
-        }
-      } else {
-        this.errorHandler.logError(
-          `[ListComprehensionVisitor.extractForClause] No range expression node found in for clause. CST: ${varDecl.text}. ErrorCode: MISSING_RANGE_EXPRESSION_NODE`
-        );
-        rangeAstNode = {
-          type: 'error',
-          errorCode: 'MISSING_RANGE_EXPRESSION_NODE',
-          message: 'No range expression node found in for clause.',
-          location: getLocation(varDecl),
-          originalNodeType: varDecl.type, // Or more specific if known
-          cstNodeText: varDecl.text,
-        };
-      }
-      return { variable, range: rangeAstNode };
-    } catch (error: unknown) { // Catch any potential runtime errors during extraction
-      if (error instanceof Error) {
-        this.errorHandler.logError(
-          `[ListComprehensionVisitor.extractForClause] Unexpected error: ${error.message}. ErrorCode: EXTRACT_FOR_CLAUSE_UNEXPECTED_ERROR. OriginalError: ${error.message}`
-        );
-        return {
-          variable: null,
-          range: {
-            type: 'error',
-            errorCode: 'EXTRACT_FOR_CLAUSE_UNEXPECTED_ERROR',
-            message: `Unexpected error extracting for clause: ${error.message}`,
-            location: getLocation(forClause),
-            cstNodeText: forClause.text,
-          },
-        };
-      } else {
-        this.errorHandler.logError(
-          `[ListComprehensionVisitor.extractForClause] Unexpected unknown error: ${String(error)}. ErrorCode: EXTRACT_FOR_CLAUSE_UNEXPECTED_ERROR. OriginalError: ${String(error)}`
-        );
-        return {
-          variable: null,
-          range: {
-            type: 'error',
-            errorCode: 'EXTRACT_FOR_CLAUSE_UNEXPECTED_ERROR',
-            message: `Unexpected unknown error extracting for clause: ${String(error)}`,
-            location: getLocation(forClause),
-            cstNodeText: forClause.text,
-          },
-        };
-      }
-    }
   }
 }

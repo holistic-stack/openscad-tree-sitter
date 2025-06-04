@@ -13,7 +13,7 @@
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { EnhancedOpenscadParser, SimpleErrorHandler } from './index.js';
-import type { ASTNode, CubeNode, SphereNode, DifferenceNode } from './openscad-parser/ast/ast-types.js';
+import type { CubeNode, SphereNode, DifferenceNode } from './openscad-parser/ast/ast-types.js';
 
 describe('Documentation Examples Validation', () => {
   let parser: EnhancedOpenscadParser;
@@ -107,10 +107,10 @@ describe('Documentation Examples Validation', () => {
       ast.forEach(node => {
         switch (node.type) {
           case 'cube':
-            expect((node as CubeNode).size).toBeDefined();
+            expect((node).size).toBeDefined();
             break;
           case 'sphere':
-            expect((node as SphereNode).radius).toBeDefined();
+            expect((node).radius).toBeDefined();
             break;
           case 'module_definition':
             expect(node.type).toBe('module_definition');

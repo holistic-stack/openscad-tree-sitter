@@ -14,6 +14,8 @@ import { BaseASTVisitor } from '../base-ast-visitor';
 import type { EchoStatementNode, ExpressionNode } from '../../ast-types';
 import type { ErrorHandler } from '../../../error-handling/error-handler';
 import { findDescendantOfType } from '../../utils/node-utils';
+import { Logger } from '../../../error-handling/logger.js';
+import { Severity } from '../../../error-handling/types/error-types.js';
 
 /**
  * Visitor class for parsing OpenSCAD echo statements
@@ -37,6 +39,8 @@ import { findDescendantOfType } from '../../utils/node-utils';
  * @since 0.1.0
  */
 export class EchoStatementVisitor extends BaseASTVisitor {
+  private readonly logger: Logger;
+
   /**
    * Creates a new EchoStatementVisitor instance
    *
@@ -45,6 +49,7 @@ export class EchoStatementVisitor extends BaseASTVisitor {
    */
   constructor(sourceCode: string, errorHandler: ErrorHandler) {
     super(sourceCode, errorHandler);
+    this.logger = new Logger({ level: Severity.DEBUG });
   }
 
   /**
@@ -73,7 +78,7 @@ export class EchoStatementVisitor extends BaseASTVisitor {
    * @override
    */
   override visitEchoStatement(node: TSNode): EchoStatementNode | null {
-    console.log(
+    this.logger.debug(
       `[EchoStatementVisitor.visitEchoStatement] Processing echo statement: ${node.text.substring(
         0,
         50
@@ -83,7 +88,7 @@ export class EchoStatementVisitor extends BaseASTVisitor {
     try {
       // Validate that this is actually an echo_statement node
       if (node.type !== 'echo_statement') {
-        console.warn(
+        this.logger.warn(
           `[EchoStatementVisitor.visitEchoStatement] Expected echo_statement, got ${node.type}`
         );
         return null;
@@ -94,7 +99,7 @@ export class EchoStatementVisitor extends BaseASTVisitor {
       const echoArguments: ExpressionNode[] = [];
 
       if (argumentsNode) {
-        console.log(
+        this.logger.debug(
           `[EchoStatementVisitor.visitEchoStatement] Found arguments node with ${argumentsNode.childCount} children`
         );
 
@@ -124,13 +129,13 @@ export class EchoStatementVisitor extends BaseASTVisitor {
           if (expressionNode) {
             echoArguments.push(expressionNode);
           } else {
-            console.warn(
+            this.logger.warn(
               `[EchoStatementVisitor.visitEchoStatement] Failed to process argument: ${child.type} -> ${expressionToProcess.type}`
             );
           }
         }
       } else {
-        console.log(
+        this.logger.debug(
           `[EchoStatementVisitor.visitEchoStatement] No arguments node found - empty echo statement`
         );
       }
@@ -138,15 +143,15 @@ export class EchoStatementVisitor extends BaseASTVisitor {
       // Create the echo statement AST node
       const echoStatementNode: EchoStatementNode = {
         type: 'echo',
-        args: echoArguments,
+        arguments: echoArguments,
       };
 
-      console.log(
+      this.logger.debug(
         `[EchoStatementVisitor.visitEchoStatement] Successfully created echo statement AST node with ${echoArguments.length} arguments`
       );
       return echoStatementNode;
     } catch (error) {
-      console.error(
+      this.logger.error(
         `[EchoStatementVisitor.visitEchoStatement] Error processing echo statement: ${error}`
       );
       return null;
@@ -311,7 +316,7 @@ export class EchoStatementVisitor extends BaseASTVisitor {
 
       return null;
     } catch (error) {
-      console.warn(
+      this.logger.warn(
         `[EchoStatementVisitor.processExpression] Failed to process expression ${node.type}: ${error}`
       );
       return null;

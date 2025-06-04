@@ -435,6 +435,7 @@ describe('RangeExpressionVisitor', () => {
         );
       } // closes if (cubeCallNode)
     }); // closes it('visitRangeExpression should return ErrorNode for non-range_expression CST node', () => {
+  }); // closes describe('Error Handling and Invalid Inputs', () => {
 
   describe('Malformed Range Syntax Error Handling', () => {
     const testCases = [
@@ -528,5 +529,5 @@ describe('RangeExpressionVisitor', () => {
         expect(errorNode.message).toContain("Expected 'range_expression', but received 'call_expression'");
       }
     });
-    }
-  );
+  });
+});

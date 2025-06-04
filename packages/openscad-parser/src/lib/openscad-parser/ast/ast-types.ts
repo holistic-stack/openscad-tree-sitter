@@ -691,7 +691,7 @@ export interface AssertStatementNode extends BaseNode {
 export interface EchoStatementNode extends BaseNode {
   type: 'echo';
   /** The arguments/expressions to output */
-  args: ExpressionNode[];
+  arguments: ExpressionNode[];
 }
 
 /**

@@ -141,7 +141,7 @@ describe('EchoStatementVisitor', () => {
       const expectedNames = ['a', 'b', 'c', 'd', 'e'];
       echoNode.arguments.forEach((arg, index) => {
         expect(['variable', 'identifier']).toContain(arg.expressionType);
-        expect((arg as any).name).toBe(expectedNames[index]);
+        expect((arg).name).toBe(expectedNames[index]);
       });
     });
   });

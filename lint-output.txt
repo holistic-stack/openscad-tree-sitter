@@ -1,0 +1,312 @@
+
+> nx run openscad-parser:lint
+
+Linting "openscad-parser"...
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\documentation-examples.test.ts[24m[0m
+[0m  [2m110:21[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression  [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m  [2m113:21[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression  [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m  [2m194:7[22m   [33mwarning[39m  'testErrorHandler' is never reassigned. Use 'const' instead                        [2mprefer-const[22m[0m
+[0m  [2m195:7[22m   [33mwarning[39m  'testParser' is never reassigned. Use 'const' instead                              [2mprefer-const[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\errors\recovery-strategy.test.ts[24m[0m
+[0m  [2m45:33[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\evaluation\binary-expression-evaluator.ts[24m[0m
+[0m  [2m95:7[22m   [33mwarning[39m  Prefer using nullish coalescing operator (`??=`) instead of an assignment expression, as it is simpler to read  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m  [2m97:7[22m   [33mwarning[39m  Prefer using nullish coalescing operator (`??=`) instead of an assignment expression, as it is simpler to read  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m  [2m97:54[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator       [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\evaluation\binary-expression-evaluator\binary-expression-evaluator-cube.test.ts[24m[0m
+[0m  [2m117:65[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m  [2m118:73[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m  [2m119:67[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\evaluation\expression-evaluation-context.ts[24m[0m
+[0m  [2m103:26[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m112:21[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m212:19[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m213:19[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m225:19[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m226:19[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m238:19[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m251:19[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m263:19[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m275:19[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m287:19[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m299:19[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m311:19[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m323:19[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m324:19[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\evaluation\expression-evaluation.test.ts[24m[0m
+[0m  [2m56:65[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m  [2m57:73[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m  [2m58:67[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\extractors\color-extractor.ts[24m[0m
+[0m   [2m50:22[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m   [2m50:36[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m   [2m52:50[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m   [2m85:52[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m   [2m92:15[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m   [2m99:27[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m   [2m99:41[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m100:49[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m107:13[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\extractors\cube-extractor.test.ts[24m[0m
+[0m   [2m73:47[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m  [2m101:60[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m  [2m102:68[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m  [2m103:62[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\extractors\cube-extractor.ts[24m[0m
+[0m   [2m75:22[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m   [2m75:36[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m   [2m77:50[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m106:52[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m116:27[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m116:41[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m117:51[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m124:13[22m  [33mwarning[39m  Forbidden non-null assertion  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\extractors\direct-binary-expression-test.ts[24m[0m
+[0m  [2m29:33[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m  [2m33:33[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\extractors\parameter-extractor.ts[24m[0m
+[0m  [2m81:10[22m  [33mwarning[39m  'evaluateBinaryExpression' is defined but never used. Allowed unused vars must match /^_/u  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\extractors\value-extractor.ts[24m[0m
+[0m  [2m53:10[22m  [33mwarning[39m  'evaluateExpression' is defined but never used. Allowed unused vars must match /^_/u  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitor-ast-generator.test.ts[24m[0m
+[0m  [2m1:32[22m  [33mwarning[39m  'beforeAll' is defined but never used. Allowed unused vars must match /^_/u  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m1:43[22m  [33mwarning[39m  'afterAll' is defined but never used. Allowed unused vars must match /^_/u   [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\assert-statement-visitor\assert-statement-visitor.ts[24m[0m
+[0m  [2m105:5[22m  [33mwarning[39m  'node' is defined but never used. Allowed unused args must match /^_/u          [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m106:5[22m  [33mwarning[39m  'functionName' is defined but never used. Allowed unused args must match /^_/u  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m107:5[22m  [33mwarning[39m  'args' is defined but never used. Allowed unused args must match /^_/u          [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\assign-statement-visitor\assign-statement-visitor.test.ts[24m[0m
+[0m  [2m20:36[22m  [33mwarning[39m  'AssignmentNode' is defined but never used. Allowed unused vars must match /^_/u  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\assign-statement-visitor\assign-statement-visitor.ts[24m[0m
+[0m  [2m113:5[22m  [33mwarning[39m  'node' is defined but never used. Allowed unused args must match /^_/u          [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m114:5[22m  [33mwarning[39m  'functionName' is defined but never used. Allowed unused args must match /^_/u  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m115:5[22m  [33mwarning[39m  'args' is defined but never used. Allowed unused args must match /^_/u          [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\control-structure-visitor\for-loop-visitor.ts[24m[0m
+[0m  [2m234:13[22m  [33mwarning[39m  Prefer using an optional chain expression instead, as it's more concise and easier to read  [2m@typescript-eslint/prefer-optional-chain[22m[0m
+[0m  [2m249:15[22m  [33mwarning[39m  Prefer using an optional chain expression instead, as it's more concise and easier to read  [2m@typescript-eslint/prefer-optional-chain[22m[0m
+[0m  [2m434:13[22m  [33mwarning[39m  Prefer using an optional chain expression instead, as it's more concise and easier to read  [2m@typescript-eslint/prefer-optional-chain[22m[0m
+[0m  [2m447:15[22m  [33mwarning[39m  Prefer using an optional chain expression instead, as it's more concise and easier to read  [2m@typescript-eslint/prefer-optional-chain[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\control-structure-visitor\if-else-visitor.ts[24m[0m
+[0m  [2m227:28[22m  [33mwarning[39m  Prefer using an optional chain expression instead, as it's more concise and easier to read  [2m@typescript-eslint/prefer-optional-chain[22m[0m
+[0m  [2m239:21[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression           [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\echo-statement-visitor\echo-statement-visitor.test.ts[24m[0m
+[0m   [2m14:34[22m  [33mwarning[39m  'ExpressionNode' is defined but never used. Allowed unused vars must match /^_/u                           [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m144:17[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression                          [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m  [2m181:28[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m  [2m196:37[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\echo-statement-visitor\echo-statement-visitor.ts[24m[0m
+[0m  [2m176:11[22m  [33mwarning[39m  Unexpected lexical declaration in case block                                    [2mno-case-declarations[22m[0m
+[0m  [2m185:11[22m  [33mwarning[39m  Unexpected lexical declaration in case block                                    [2mno-case-declarations[22m[0m
+[0m  [2m194:11[22m  [33mwarning[39m  Unexpected lexical declaration in case block                                    [2mno-case-declarations[22m[0m
+[0m  [2m662:5[22m   [33mwarning[39m  'node' is defined but never used. Allowed unused args must match /^_/u          [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m663:5[22m   [33mwarning[39m  'functionName' is defined but never used. Allowed unused args must match /^_/u  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m664:5[22m   [33mwarning[39m  'args' is defined but never used. Allowed unused args must match /^_/u          [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m664:11[22m  [33mwarning[39m  Unexpected any. Specify a different type                                        [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m665:6[22m   [33mwarning[39m  Unexpected any. Specify a different type                                        [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m683:5[22m   [33mwarning[39m  'node' is defined but never used. Allowed unused args must match /^_/u          [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m684:5[22m   [33mwarning[39m  'functionName' is defined but never used. Allowed unused args must match /^_/u  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m685:5[22m   [33mwarning[39m  'args' is defined but never used. Allowed unused args must match /^_/u          [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m685:11[22m  [33mwarning[39m  Unexpected any. Specify a different type                                        [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m686:6[22m   [33mwarning[39m  Unexpected any. Specify a different type                                        [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m750:47[22m  [33mwarning[39m  Unexpected any. Specify a different type                                        [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m764:48[22m  [33mwarning[39m  Unexpected any. Specify a different type                                        [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\expression-visitor.ts[24m[0m
+[0m    [2m92:10[22m  [33mwarning[39m  'evaluateBinaryExpression' is defined but never used. Allowed unused vars must match /^_/u  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m   [2m250:13[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression           [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m   [2m251:14[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression           [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m   [2m471:17[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression           [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m   [2m472:18[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression           [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m   [2m626:22[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression           [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m   [2m627:23[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression           [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m   [2m628:23[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression           [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m  [2m1064:15[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression           [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m  [2m1242:18[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression           [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m  [2m1437:25[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression           [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m  [2m1495:25[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression           [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m  [2m1597:5[22m   [33mwarning[39m  'functionName' is defined but never used. Allowed unused args must match /^_/u              [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m1598:5[22m   [33mwarning[39m  'args' is defined but never used. Allowed unused args must match /^_/u                      [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\expression-visitor\binary-expression-visitor\binary-expression-visitor.ts[24m[0m
+[0m  [2m152:13[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression  [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m  [2m153:14[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression  [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\expression-visitor\conditional-expression-visitor\conditional-expression-visitor.ts[24m[0m
+[0m  [2m131:18[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression  [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m  [2m132:19[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression  [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m  [2m133:19[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression  [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\expression-visitor\function-call-visitor.ts[24m[0m
+[0m  [2m11:26[22m  [33mwarning[39m  'ErrorContext' is defined but never used. Allowed unused vars must match /^_/u  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\expression-visitor\list-comprehension-visitor\list-comprehension-visitor.test.ts[24m[0m
+[0m  [2m359:9[22m  [33mwarning[39m  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-unnecessary-type-assertion')[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\expression-visitor\list-comprehension-visitor\list-comprehension-visitor.ts[24m[0m
+[0m  [2m371:21[22m  [33mwarning[39m  Unexpected any. Specify a different type                                                                   [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m395:28[22m  [33mwarning[39m  'node' is defined but never used. Allowed unused args must match /^_/u                                     [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m433:43[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\expression-visitor\parenthesized-expression-visitor\parenthesized-expression-visitor.ts[24m[0m
+[0m  [2m42:70[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\expression-visitor\range-expression-visitor\range-expression-visitor.test.ts[24m[0m
+[0m  [2m531:2[22m  [31merror[39m  Parsing error: Declaration or statement expected[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\expression-visitor\range-expression-visitor\range-expression-visitor.ts[24m[0m
+[0m  [2m178:49[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression  [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m  [2m196:47[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression  [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m  [2m216:24[22m  [33mwarning[39m  This assertion is unnecessary since it does not change the type of the expression  [2m@typescript-eslint/no-unnecessary-type-assertion[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\module-visitor.ts[24m[0m
+[0m  [2m833:9[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a ternary expression, as it is simpler to read  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\primitive-visitor.ts[24m[0m
+[0m  [2m121:38[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\query-visitor.ts[24m[0m
+[0m  [2m142:15[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m227:32[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\transform-visitor.ts[24m[0m
+[0m  [2m353:25[22m  [33mwarning[39m  Unexpected any. Specify a different type      [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m381:9[22m   [33mwarning[39m  Unexpected lexical declaration in case block  [2mno-case-declarations[22m[0m
+[0m  [2m385:9[22m   [33mwarning[39m  Unexpected lexical declaration in case block  [2mno-case-declarations[22m[0m
+[0m  [2m389:9[22m   [33mwarning[39m  Unexpected lexical declaration in case block  [2mno-case-declarations[22m[0m
+[0m  [2m393:9[22m   [33mwarning[39m  Unexpected lexical declaration in case block  [2mno-case-declarations[22m[0m
+[0m  [2m398:9[22m   [33mwarning[39m  Unexpected lexical declaration in case block  [2mno-case-declarations[22m[0m
+[0m  [2m400:32[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m401:22[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m403:26[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m404:36[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m407:17[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m412:44[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m413:28[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m414:35[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m414:35[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m426:29[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m428:51[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m442:9[22m   [33mwarning[39m  Unexpected lexical declaration in case block  [2mno-case-declarations[22m[0m
+[0m  [2m450:9[22m   [33mwarning[39m  Unexpected lexical declaration in case block  [2mno-case-declarations[22m[0m
+[0m  [2m450:47[22m  [33mwarning[39m  Unexpected any. Specify a different type      [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m465:16[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m465:27[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m465:38[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m465:49[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m466:16[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m466:27[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m466:38[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m466:49[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m467:16[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m467:27[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m467:38[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m467:50[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m468:16[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m468:28[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m468:40[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m468:52[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m482:9[22m   [33mwarning[39m  Unexpected lexical declaration in case block  [2mno-case-declarations[22m[0m
+[0m  [2m482:69[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m492:9[22m   [33mwarning[39m  Unexpected lexical declaration in case block  [2mno-case-declarations[22m[0m
+[0m  [2m493:32[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m495:26[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m495:53[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m495:77[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m500:40[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m500:70[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m501:44[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m501:74[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m614:16[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m614:28[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m614:40[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m643:16[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m643:28[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m643:40[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m689:18[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m689:30[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m691:18[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m691:30[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m691:42[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m746:18[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m746:30[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m748:18[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m748:30[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m748:42[22m  [33mwarning[39m  Forbidden non-null assertion                  [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\ast\visitors\variable-visitor.ts[24m[0m
+[0m  [2m224:28[22m  [33mwarning[39m  'node' is defined but never used. Allowed unused args must match /^_/u  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\cst\cursor-utils\cstTreeCursorWalkLog.ts[24m[0m
+[0m  [2m53:54[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\cst\cursor-utils\cursor-utils.ts[24m[0m
+[0m   [2m94:41[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m  [2m137:44[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m  [2m142:26[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m  [2m146:41[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m  [2m222:50[22m  [33mwarning[39m  Unexpected any. Specify a different type                                                                   [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m223:19[22m  [33mwarning[39m  Unexpected any. Specify a different type                                                                   [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\cst\query-utils.ts[24m[0m
+[0m   [2m23:21[22m  [33mwarning[39m  Unexpected any. Specify a different type                                                                   [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m   [2m27:41[22m  [33mwarning[39m  Unexpected any. Specify a different type                                                                   [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m   [2m49:32[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m   [2m57:14[22m  [33mwarning[39m  Forbidden non-null assertion                                                                               [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m351:21[22m  [33mwarning[39m  Unexpected any. Specify a different type                                                                   [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\error-handling\error-handler.ts[24m[0m
+[0m  [2m287:55[22m  [33mwarning[39m  Unexpected any. Specify a different type                                [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m297:56[22m  [33mwarning[39m  Unexpected any. Specify a different type                                [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m330:58[22m  [33mwarning[39m  Unexpected any. Specify a different type                                [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m366:56[22m  [33mwarning[39m  Unexpected any. Specify a different type                                [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m408:47[22m  [33mwarning[39m  'node' is defined but never used. Allowed unused args must match /^_/u  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m408:54[22m  [33mwarning[39m  Unexpected any. Specify a different type                                [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\error-handling\recovery-strategy-registry.ts[24m[0m
+[0m  [2m305:72[22m  [33mwarning[39m  Prefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator  [2m@typescript-eslint/prefer-nullish-coalescing[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\error-handling\strategies\type-mismatch-strategy.ts[24m[0m
+[0m  [2m330:7[22m  [33mwarning[39m  'functionName' is assigned a value but never used. Allowed unused vars must match /^_/u  [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m  [2m331:7[22m  [33mwarning[39m  'paramIndex' is assigned a value but never used. Allowed unused vars must match /^_/u    [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4mC:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\src\lib\openscad-parser\error-handling\types\error-types.ts[24m[0m
+[0m  [2m193:11[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m203:15[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m205:16[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m[0m
+[0m[31m[1mÔ£û 209 problems (1 error, 208 warnings)[22m[39m[0m
+[0m[31m[1m[22m[39m[31m[1m  0 errors and 29 warnings potentially fixable with the `--fix` option.[22m[39m[0m
+[0m[31m[1m[22m[39m[0m
+Ô£û 209 problems (1 error, 208 warnings)
+  0 errors and 29 warnings are potentially fixable with the `--fix` option.
+
+
+
+ NX   Running target lint for project openscad-parser failed
+
+Failed tasks:
+
+- openscad-parser:lint
+
+Hint: run the command with --verbose for more details.
+

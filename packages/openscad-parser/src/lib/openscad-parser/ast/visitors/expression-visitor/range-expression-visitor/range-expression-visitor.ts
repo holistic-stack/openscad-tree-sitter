@@ -175,7 +175,7 @@ export class RangeExpressionVisitor extends BaseASTVisitor {
         ...(startExpressionResult && startExpressionResult.type === 'error' ? { cause: startExpressionResult } : {}),
       } as ast.ErrorNode;
     }
-    const startExpression: ast.ExpressionNode = startExpressionResult as ast.ExpressionNode;
+    const startExpression: ast.ExpressionNode = startExpressionResult;
 
     const endExpressionResult = this.parentVisitor.dispatchSpecificExpression(endNode);
     if (!endExpressionResult || endExpressionResult.type === 'error') {
@@ -193,7 +193,7 @@ export class RangeExpressionVisitor extends BaseASTVisitor {
         ...(endExpressionResult && endExpressionResult.type === 'error' ? { cause: endExpressionResult } : {}),
       } as ast.ErrorNode;
     }
-    const endExpression: ast.ExpressionNode = endExpressionResult as ast.ExpressionNode;
+    const endExpression: ast.ExpressionNode = endExpressionResult;
 
     let stepExpression: ast.ExpressionNode | undefined;
     if (stepNode) {
@@ -213,7 +213,7 @@ export class RangeExpressionVisitor extends BaseASTVisitor {
           ...(stepExpressionResult && stepExpressionResult.type === 'error' ? { cause: stepExpressionResult } : {}),
         } as ast.ErrorNode;
       }
-      stepExpression = stepExpressionResult as ast.ExpressionNode;
+      stepExpression = stepExpressionResult;
     }
 
     const rangeExpressionNode: ast.RangeExpressionNode = {

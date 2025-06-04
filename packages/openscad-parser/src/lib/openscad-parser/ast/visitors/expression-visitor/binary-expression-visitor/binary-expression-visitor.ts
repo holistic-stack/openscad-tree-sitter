@@ -149,8 +149,8 @@ export class BinaryExpressionVisitor extends BaseASTVisitor {
       type: 'expression',
       expressionType: 'binary', // Use 'binary' to match test expectations in expression-visitor.test.ts
       operator: operator as ast.BinaryOperator, // Cast, assuming grammar aligns with ast.BinaryOperator
-      left: leftAST as ast.ExpressionNode, // Cast is safe due to checks above
-      right: rightAST as ast.ExpressionNode, // Cast is safe due to checks above
+      left: leftAST, // Cast is safe due to checks above
+      right: rightAST, // Cast is safe due to checks above
       location: getLocation(node),
     };
   }
