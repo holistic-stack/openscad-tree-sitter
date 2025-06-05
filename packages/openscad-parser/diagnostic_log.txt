@@ -46,4 +46,11 @@ source_file (field: child) [0,0 → 2,6]: 'translate([10, 20, 30])\n          cu
 
 Cursor at: statement (expected statement)
 Cursor at: module_instantiation (expected module_instantiation)
-Cursor at: identifier (expected accessor_expression for translate)
+Cursor at: identifier (expected identifier for translate)
+Node text for translate: "translate"
+Cursor at: argument_list (expected argument_list)
+Node text for arguments: "([10, 20, 30])"
+Cursor at: vector_expression (expected vector_expression)
+Node text for vector_expression: "[10, 20, 30]"
+Cursor at: statement (expected statement for cube)
+Node text for cube statement: "cube(10);"
