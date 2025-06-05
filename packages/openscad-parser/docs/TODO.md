@@ -86,6 +86,71 @@
 
 **Note**: All these are optimization opportunities, not critical issues. The parser is fully functional and production-ready for all standard OpenSCAD use cases.
 
+## Editor Integration Requirements (HIGH PRIORITY)
+
+### IDE Support Features (PRIORITY: HIGH)
+**Status**: REQUIRED for openscad-editor Phase 4 implementation
+**Impact**: Essential for advanced IDE features (code completion, navigation, formatting)
+**Estimated Effort**: 6-8 hours
+
+**Required Parser Enhancements for Editor Integration**:
+
+#### **Symbol Information API** (PRIORITY: HIGH - 3-4 hours)
+- **Symbol Extraction**: API to extract all symbols (modules, functions, variables) from AST
+- **Scope Analysis**: Determine symbol visibility and scope boundaries
+- **Symbol Metadata**: Provide symbol types, parameters, return types, documentation
+- **Position Mapping**: Map symbols to source code positions for navigation
+
+**Implementation Requirements**:
+```typescript
+interface SymbolInfo {
+  name: string;
+  type: 'module' | 'function' | 'variable' | 'parameter';
+  position: SourceLocation;
+  scope: SourceLocation;
+  parameters?: ParameterInfo[];
+  documentation?: string;
+}
+
+interface SymbolProvider {
+  extractSymbols(ast: ASTNode[]): SymbolInfo[];
+  findSymbolAt(position: Position): SymbolInfo | null;
+  findReferences(symbol: SymbolInfo): SourceLocation[];
+}
+```
+
+#### **AST Position Utilities** (PRIORITY: HIGH - 2-3 hours)
+- **Position-to-Node Mapping**: Find AST node at specific source position
+- **Node-to-Position Mapping**: Get source position from AST node
+- **Range Utilities**: Calculate symbol ranges for highlighting and navigation
+- **Hover Information**: Extract contextual information for hover providers
+
+**Implementation Requirements**:
+```typescript
+interface PositionUtilities {
+  findNodeAt(ast: ASTNode[], position: Position): ASTNode | null;
+  getNodeRange(node: ASTNode): SourceRange;
+  getHoverInfo(node: ASTNode): HoverInfo | null;
+  getCompletionContext(ast: ASTNode[], position: Position): CompletionContext;
+}
+```
+
+#### **Completion Context Analysis** (PRIORITY: HIGH - 1-2 hours)
+- **Context Detection**: Determine completion context (module call, parameter, expression)
+- **Scope-aware Suggestions**: Provide relevant completions based on current scope
+- **Parameter Hints**: Extract parameter information for function/module calls
+- **Type Information**: Provide type hints for expressions and variables
+
+**Implementation Requirements**:
+```typescript
+interface CompletionContext {
+  type: 'module_call' | 'function_call' | 'parameter' | 'expression' | 'statement';
+  availableSymbols: SymbolInfo[];
+  expectedType?: string;
+  parameterIndex?: number;
+}
+```
+
 ## Development History Summary
 
 ### Major Milestones Achieved (2024-2025)
