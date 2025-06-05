@@ -111,7 +111,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
     const args: ast.Parameter[] = [];
 
     if (argsNode) {
-      const extractedParams = extractArguments(argsNode, this.errorHandler);
+      const extractedParams = extractArguments(argsNode, this.errorHandler, this.source);
       // extractArguments returns Parameter[], errors are handled by errorHandler.
       args.push(...extractedParams);
     }
@@ -164,7 +164,7 @@ export class FunctionCallVisitor extends BaseASTVisitor {
     const args: ast.Parameter[] = [];
 
     if (argumentsNode) {
-      const extractedParams = extractArguments(argumentsNode, this.errorHandler);
+      const extractedParams = extractArguments(argumentsNode, this.errorHandler, this.source);
       // extractArguments returns Parameter[], errors are handled by errorHandler.
       args.push(...extractedParams);
     }

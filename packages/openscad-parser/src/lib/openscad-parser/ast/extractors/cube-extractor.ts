@@ -16,7 +16,7 @@ import { ErrorHandler } from '../../error-handling/index.js';
  * @param errorHandler Optional error handler for enhanced expression evaluation
  * @returns A cube AST node or null if the node cannot be processed
  */
-export function extractCubeNode(node: TSNode, errorHandler?: ErrorHandler): ast.CubeNode | null {
+export function extractCubeNode(node: TSNode, errorHandler?: ErrorHandler, sourceCode?: string): ast.CubeNode | null {
   console.log(
     `[extractCubeNode] Processing cube node: ${node.text.substring(0, 50)}`
   );
@@ -60,7 +60,7 @@ export function extractCubeNode(node: TSNode, errorHandler?: ErrorHandler): ast.
     `[extractCubeNode] Found arguments node: type=${argsNode.type}, text='${argsNode.text}'`
   );
 
-  const args = extractArguments(argsNode, errorHandler);
+  const args = extractArguments(argsNode, errorHandler, sourceCode);
   console.log(
     `[extractCubeNode] Extracted ${args.length} arguments: ${JSON.stringify(
       args

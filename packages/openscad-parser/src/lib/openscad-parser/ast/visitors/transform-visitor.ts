@@ -356,7 +356,7 @@ export class TransformVisitor extends BaseASTVisitor {
 
     // Extract arguments
     const argsNode = node.childForFieldName('arguments');
-    const args = argsNode ? extractArguments(argsNode) : [];
+    const args = argsNode ? extractArguments(argsNode, undefined, this.source) : [];
     console.log(
       `[TransformVisitor.visitModuleInstantiation] Extracted ${args.length} arguments for ${functionName}`
     );

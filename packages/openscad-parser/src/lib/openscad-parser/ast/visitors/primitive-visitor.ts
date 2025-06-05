@@ -198,10 +198,10 @@ export class PrimitiveVisitor extends BaseASTVisitor {
     switch (functionName) {
       case 'cube':
         // Use the specialized cube extractor first, fall back to the old method if it fails
-        return extractCubeNode(node) || this.createCubeNode(node, args);
+        return extractCubeNode(node, this.errorHandler, this.source) || this.createCubeNode(node, args);
       case 'sphere': {
         // Use the specialized sphere extractor first, fall back to the old method if it fails
-        const sphereNode = extractSphereNode(node);
+        const sphereNode = extractSphereNode(node, this.errorHandler, this.source);
         if (sphereNode) {
           return sphereNode;
         }
@@ -267,7 +267,7 @@ export class PrimitiveVisitor extends BaseASTVisitor {
 
     // Extract arguments
     const argsNode = node.childForFieldName('arguments');
-    const extractedArgs = argsNode ? extractArguments(argsNode) : [];
+    const extractedArgs = argsNode ? extractArguments(argsNode, undefined, this.source) : [];
 
     // Convert ExtractedParameter[] to Parameter[]
     const args: ast.Parameter[] = extractedArgs.map(arg => {
@@ -438,7 +438,7 @@ export class PrimitiveVisitor extends BaseASTVisitor {
         console.log(
           `[PrimitiveVisitor.visitAccessorExpression] Found arguments node: ${argumentsNode.text}`
         );
-        args = extractArguments(argumentsNode);
+        args = extractArguments(argumentsNode, undefined, this.source);
         console.log(
           `[PrimitiveVisitor.visitAccessorExpression] Extracted ${args.length} arguments`
         );
@@ -447,7 +447,7 @@ export class PrimitiveVisitor extends BaseASTVisitor {
           `[PrimitiveVisitor.visitAccessorExpression] No arguments node found in argument_list`
         );
         // Try to extract arguments directly from the argument_list
-        args = extractArguments(argsNode);
+        args = extractArguments(argsNode, undefined, this.source);
         console.log(
           `[PrimitiveVisitor.visitAccessorExpression] Extracted ${args.length} arguments directly from argument_list`
         );

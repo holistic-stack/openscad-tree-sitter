@@ -3,13 +3,14 @@ import * as ast from '../ast-types.js';
 import { extractArguments } from './argument-extractor.js';
 import { getLocation } from '../utils/location-utils.js';
 import { extractNumberParameter } from '../extractors/parameter-extractor.js';
+import { ErrorHandler } from '../../error-handling/index.js';
 
 /**
  * Extract a sphere node from an accessor expression node
  * @param node The accessor expression node
  * @returns A sphere AST node or null if the node cannot be processed
  */
-export function extractSphereNode(node: TSNode): ast.SphereNode | null {
+export function extractSphereNode(node: TSNode, errorHandler?: ErrorHandler, sourceCode?: string): ast.SphereNode | null {
   console.log(
     `[extractSphereNode] Processing sphere node: ${node.text.substring(0, 50)}`
   );
@@ -32,7 +33,7 @@ export function extractSphereNode(node: TSNode): ast.SphereNode | null {
     };
   }
 
-  const args = extractArguments(argsNode);
+  const args = extractArguments(argsNode, errorHandler, sourceCode);
   console.log(
     `[extractSphereNode] Extracted ${args.length} arguments: ${JSON.stringify(
       args

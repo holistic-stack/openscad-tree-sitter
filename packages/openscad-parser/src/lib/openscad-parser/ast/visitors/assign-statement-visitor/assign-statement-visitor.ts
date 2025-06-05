@@ -429,7 +429,7 @@ export class AssignStatementVisitor extends BaseASTVisitor {
 
     // Extract arguments using the same approach as BaseASTVisitor
     const argsNode = node.childForFieldName('arguments');
-    let extractedArgs = argsNode ? extractArguments(argsNode) : [];
+    let extractedArgs = argsNode ? extractArguments(argsNode, undefined, this.source) : [];
 
     // If the argument extractor failed to extract arguments (e.g., due to complex expressions),
     // fall back to manual extraction

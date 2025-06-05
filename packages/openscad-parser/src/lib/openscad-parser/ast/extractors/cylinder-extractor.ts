@@ -6,6 +6,7 @@ import {
   extractBooleanParameter,
 } from './parameter-extractor.js';
 import { getLocation } from '../utils/location-utils.js';
+import { ErrorHandler } from '../../error-handling/index.js';
 
 /**
  * Extracts parameters for a cylinder node from a CST node.
@@ -20,7 +21,7 @@ import { getLocation } from '../utils/location-utils.js';
  * @param node The CST node representing the cylinder call.
  * @returns An AST CylinderNode or null if extraction fails.
  */
-export function extractCylinderNode(node: SyntaxNode): ast.CylinderNode | null {
+export function extractCylinderNode(node: SyntaxNode, errorHandler?: ErrorHandler, sourceCode?: string): ast.CylinderNode | null {
   if (node.type !== 'call_expression' && node.type !== 'module_call') {
     return null;
   }
@@ -32,7 +33,7 @@ export function extractCylinderNode(node: SyntaxNode): ast.CylinderNode | null {
     return null;
   }
 
-  const params = extractArguments(argsNode);
+  const params = extractArguments(argsNode, errorHandler, sourceCode);
 
   let h: number | undefined;
   let r: number | undefined;

@@ -7,6 +7,7 @@ import {
   extractStringParameter,
   extractVectorParameter,
 } from '../extractors/parameter-extractor.js';
+import { ErrorHandler } from '../../error-handling/index.js';
 // findDescendantOfType is not used in this file
 
 /**
@@ -14,7 +15,7 @@ import {
  * @param node The accessor expression node
  * @returns A color AST node or null if the node cannot be processed
  */
-export function extractColorNode(node: TSNode): ast.ColorNode | null {
+export function extractColorNode(node: TSNode, errorHandler?: ErrorHandler, sourceCode?: string): ast.ColorNode | null {
   console.log(
     `[extractColorNode] Processing color node: ${node.text.substring(0, 50)}`
   );
@@ -35,7 +36,7 @@ export function extractColorNode(node: TSNode): ast.ColorNode | null {
     };
   }
 
-  const args = extractArguments(argsNode);
+  const args = extractArguments(argsNode, errorHandler, sourceCode);
   console.log(
     `[extractColorNode] Extracted ${args.length} arguments: ${JSON.stringify(
       args

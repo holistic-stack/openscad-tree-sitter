@@ -343,7 +343,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
 
     // Extract arguments
     const argsNode = node.childForFieldName('arguments');
-    const extractedArgs = argsNode ? extractArguments(argsNode) : [];
+    const extractedArgs = argsNode ? extractArguments(argsNode, undefined, this.source) : [];
 
     // Convert ExtractedParameter[] to Parameter[]
     const args: ast.Parameter[] = extractedArgs.map(arg => {

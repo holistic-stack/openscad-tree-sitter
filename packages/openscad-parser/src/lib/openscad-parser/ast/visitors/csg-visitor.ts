@@ -336,7 +336,7 @@ export class CSGVisitor extends BaseASTVisitor {
     const argsNode = node.childForFieldName('arguments');
     let args: ast.Parameter[] = [];
     if (argsNode) {
-      args = extractArguments(argsNode);
+      args = extractArguments(argsNode, undefined, this.source);
     }
 
     // Process based on function name

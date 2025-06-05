@@ -6,6 +6,7 @@ import {
   extractNumberParameter,
   extractBooleanParameter,
 } from '../extractors/parameter-extractor.js';
+import { ErrorHandler } from '../../error-handling/index.js';
 // findDescendantOfType is not used in this file
 
 /**
@@ -13,7 +14,7 @@ import {
  * @param node The accessor expression node
  * @returns An offset AST node or null if the node cannot be processed
  */
-export function extractOffsetNode(node: TSNode): ast.OffsetNode | null {
+export function extractOffsetNode(node: TSNode, errorHandler?: ErrorHandler, sourceCode?: string): ast.OffsetNode | null {
   console.log(
     `[extractOffsetNode] Processing offset node: ${node.text.substring(0, 50)}`
   );
@@ -37,7 +38,7 @@ export function extractOffsetNode(node: TSNode): ast.OffsetNode | null {
     };
   }
 
-  const args = extractArguments(argsNode);
+  const args = extractArguments(argsNode, errorHandler, sourceCode);
   console.log(
     `[extractOffsetNode] Extracted ${args.length} arguments: ${JSON.stringify(
       args
