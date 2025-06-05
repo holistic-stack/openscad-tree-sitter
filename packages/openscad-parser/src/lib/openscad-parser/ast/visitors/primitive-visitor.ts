@@ -168,6 +168,65 @@ export class PrimitiveVisitor extends BaseASTVisitor {
   }
 
   /**
+   * Visit a module instantiation node
+   * @param node The module instantiation node to visit
+   * @returns The AST node or null if the node cannot be processed by this visitor
+   */
+  override visitModuleInstantiation(node: TSNode): ast.ASTNode | null {
+    // Extract function name
+    const nameFieldNode = node.childForFieldName('name');
+    if (!nameFieldNode) {
+      return null;
+    }
+
+    const functionName = nameFieldNode.text;
+    if (!functionName) {
+      return null;
+    }
+
+    // Check if this is a primitive shape function
+    if (
+      ![
+        'cube',
+        'sphere',
+        'cylinder',
+        'polyhedron',
+        'square',
+        'circle',
+        'polygon',
+        'text',
+      ].includes(functionName)
+    ) {
+      // Not a primitive function, return null to let other visitors handle it
+      return null;
+    }
+
+    // Extract arguments
+    const argsNode = node.childForFieldName('arguments');
+    const extractedArgs = argsNode ? extractArguments(argsNode) : [];
+
+    // Convert ExtractedParameter[] to Parameter[]
+    const args: ast.Parameter[] = extractedArgs.map(arg => {
+      if ('name' in arg && arg.name) {
+        // Named argument
+        return {
+          name: arg.name,
+          value: arg.value as any, // Type conversion handled by createASTNodeForFunction
+        };
+      } else {
+        // Positional argument
+        return {
+          name: '', // Positional arguments have an empty name
+          value: (arg as any).value as any, // Type conversion handled by createASTNodeForFunction
+        };
+      }
+    });
+
+    // Process based on function name
+    return this.createASTNodeForFunction(node, functionName, args);
+  }
+
+  /**
    * Visit an accessor expression node (function calls like cube(10))
    * @param node The accessor expression node to visit
    * @returns The AST node or null if the node cannot be processed

@@ -102,9 +102,9 @@ export class AssertStatementVisitor extends BaseASTVisitor {
    * @returns Always returns null since assert statements don't use this method
    */
   protected createASTNodeForFunction(
-    node: TSNode,
-    functionName: string,
-    args: ast.Parameter[]
+    _node: TSNode,
+    _functionName: string,
+    _args: ast.Parameter[]
   ): ast.ASTNode | null {
     // Assert statements are handled directly in visitAssertStatement
     return null;
@@ -137,6 +137,56 @@ export class AssertStatementVisitor extends BaseASTVisitor {
           break;
       }
     }
+  }
+
+  /**
+   * Override visitStatement to handle generic statement nodes that contain assert statements.
+   *
+   * This method is called when the tree-sitter grammar produces a generic 'statement' node
+   * that wraps an 'assert_statement'. It finds the assert_statement within the wrapper
+   * and delegates to visitAssertStatement.
+   *
+   * @param node - The Tree-sitter CST node representing a generic statement
+   * @returns The corresponding AssertStatementNode AST node, or null if no assert statement found
+   *
+   * @example Statement wrapper handling
+   * ```typescript
+   * // For OpenSCAD code: assert(true);
+   * // Tree-sitter produces: statement -> assert_statement
+   * const result = visitor.visitStatement(statementNode);
+   * // Returns: { type: 'assert', condition: { expressionType: 'literal', value: true } }
+   * ```
+   *
+   * @since 0.1.0
+   */
+  override visitStatement(node: TSNode): ast.ASTNode | null {
+    this.safeLog(
+      'info',
+      `[AssertStatementVisitor.visitStatement] Processing statement node: ${node.text.substring(0, 50)}`,
+      'AssertStatementVisitor.visitStatement',
+      node
+    );
+
+    // Look for assert_statement within the statement node
+    const assertStatement = findDescendantOfType(node, 'assert_statement');
+    if (assertStatement) {
+      this.safeLog(
+        'info',
+        `[AssertStatementVisitor.visitStatement] Found assert_statement in statement, delegating to visitAssertStatement`,
+        'AssertStatementVisitor.visitStatement',
+        assertStatement
+      );
+      return this.visitAssertStatement(assertStatement);
+    }
+
+    // If no assert statement found, return null (let other visitors handle it)
+    this.safeLog(
+      'info',
+      `[AssertStatementVisitor.visitStatement] No assert_statement found in statement node`,
+      'AssertStatementVisitor.visitStatement',
+      node
+    );
+    return null;
   }
 
   /**
@@ -277,36 +327,95 @@ export class AssertStatementVisitor extends BaseASTVisitor {
   /**
    * Finds the condition expression within an assert statement node.
    *
-   * This helper method locates the first expression node within the assert
-   * statement, which represents the condition to be evaluated.
+   * The tree-sitter grammar produces assert_statement nodes with a named 'condition' field
+   * that contains the expression to be evaluated (e.g., boolean, binary_expression, etc.).
    *
    * @param node - The assert statement CST node
    * @returns The condition expression node, or null if not found
    *
+   * @example CST structure
+   * ```
+   * (assert_statement [0, 0] - [0, 13]
+   *   condition: (boolean [0, 7] - [0, 11]))
+   * ```
+   *
    * @private
    */
   private findConditionExpression(node: TSNode): TSNode | null {
-    // Look for the first expression node
-    return findDescendantOfType(node, 'expression');
+    // The condition is stored as a named field in the assert_statement node
+    const conditionNode = node.childForFieldName('condition');
+    if (conditionNode) {
+      this.safeLog(
+        'info',
+        `[AssertStatementVisitor.findConditionExpression] Found condition field: ${conditionNode.type}`,
+        'AssertStatementVisitor.findConditionExpression',
+        conditionNode
+      );
+      return conditionNode;
+    }
+
+    // Fallback: look for common expression types as direct children
+    const expressionTypes = [
+      'boolean', 'number', 'string', 'identifier',
+      'binary_expression', 'unary_expression', 'function_call',
+      'parenthesized_expression', 'expression'
+    ];
+
+    for (const expressionType of expressionTypes) {
+      const expressionNode = findDescendantOfType(node, expressionType);
+      if (expressionNode) {
+        this.safeLog(
+          'info',
+          `[AssertStatementVisitor.findConditionExpression] Found condition via fallback: ${expressionType}`,
+          'AssertStatementVisitor.findConditionExpression',
+          expressionNode
+        );
+        return expressionNode;
+      }
+    }
+
+    this.safeLog(
+      'warning',
+      `[AssertStatementVisitor.findConditionExpression] No condition found in assert statement`,
+      'AssertStatementVisitor.findConditionExpression',
+      node
+    );
+    return null;
   }
 
   /**
    * Finds the optional message expression within an assert statement node.
    *
-   * This helper method locates the second expression node within the assert
-   * statement (after a comma), which represents the optional error message.
-   * It looks for direct child expressions separated by commas, not nested expressions.
+   * The tree-sitter grammar produces assert_statement nodes with an optional named 'message' field
+   * that contains the error message expression (e.g., string, identifier, etc.).
    *
    * @param node - The assert statement CST node
    * @returns The message expression node, or null if not found
    *
+   * @example CST structure with message
+   * ```
+   * (assert_statement [0, 0] - [0, 25]
+   *   condition: (boolean [0, 7] - [0, 11])
+   *   message: (string [0, 13] - [0, 23]))
+   * ```
+   *
    * @private
    */
   private findMessageExpression(node: TSNode): TSNode | null {
-    // Look for direct child expressions separated by commas
-    // The structure should be: assert ( expression , expression )
-    let foundComma = false;
+    // The message is stored as a named field in the assert_statement node
+    const messageNode = node.childForFieldName('message');
+    if (messageNode) {
+      this.safeLog(
+        'info',
+        `[AssertStatementVisitor.findMessageExpression] Found message field: ${messageNode.type}`,
+        'AssertStatementVisitor.findMessageExpression',
+        messageNode
+      );
+      return messageNode;
+    }
 
+    // Fallback: look for expressions after a comma (legacy parsing)
+    let foundComma = false;
     for (let i = 0; i < node.childCount; i++) {
       const child = node.child(i);
       if (!child) continue;
@@ -318,11 +427,23 @@ export class AssertStatementVisitor extends BaseASTVisitor {
       }
 
       // If we found a comma and this is an expression, it's the message
-      if (foundComma && child.type === 'expression') {
+      if (foundComma && (child.type === 'string' || child.type === 'identifier' || child.type === 'expression')) {
+        this.safeLog(
+          'info',
+          `[AssertStatementVisitor.findMessageExpression] Found message via fallback: ${child.type}`,
+          'AssertStatementVisitor.findMessageExpression',
+          child
+        );
         return child;
       }
     }
 
+    this.safeLog(
+      'debug',
+      `[AssertStatementVisitor.findMessageExpression] No message found in assert statement`,
+      'AssertStatementVisitor.findMessageExpression',
+      node
+    );
     return null;
   }
 

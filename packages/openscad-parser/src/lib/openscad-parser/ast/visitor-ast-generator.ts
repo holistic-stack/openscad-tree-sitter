@@ -174,14 +174,17 @@ export class VisitorASTGenerator {
     const expressionVisitor = new ExpressionVisitor(this.source, this.errorHandler);
 
     // Add all visitors to the composite visitor
+    // Order matters: specialized visitors should come before general ones
     compositeVisitor['visitors'] = [
+      new AssignStatementVisitor(this.source, this.errorHandler), // Handle assign statements first
+      new AssertStatementVisitor(this.source, this.errorHandler),
+      // Specialized visitors for module instantiations must come before general EchoStatementVisitor
       new PrimitiveVisitor(this.source, this.errorHandler),
       transformVisitor, // transformVisitor instance already has errorHandler
       new CSGVisitor(this.source, this.errorHandler),
       new ControlStructureVisitor(this.source, this.errorHandler),
-      new AssertStatementVisitor(this.source, this.errorHandler),
+      // General statement visitor comes after specialized visitors
       new EchoStatementVisitor(this.source, this.errorHandler),
-      new AssignStatementVisitor(this.source, this.errorHandler),
       expressionVisitor,
       new VariableVisitor(this.source, this.errorHandler),
       new ModuleVisitor(this.source, this.errorHandler),

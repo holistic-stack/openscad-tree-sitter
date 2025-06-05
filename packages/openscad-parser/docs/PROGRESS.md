@@ -1,5 +1,74 @@
 # OpenSCAD Parser - Progress Log
 
+## ✅ ExpressionVisitor Missing `visitUnaryExpression` Method Fixed (2025-06-05)
+
+**Status**: COMPLETED - Missing `visitUnaryExpression` method fixed and tests passing (100% success rate)
+**Priority**: High (Critical for unary expression support like `-5` and `!flag`)
+**Effort**: 30 minutes
+**Impact**: Fixed critical missing method causing unary expression test failures
+
+**Achievement**: Successfully added missing `visitUnaryExpression` method to ExpressionVisitor with proper error handling and dispatch integration.
+
+**Root Cause Identified**: Missing method implementation:
+- ExpressionVisitor was missing `visitUnaryExpression` method
+- No dispatch case for `unary_expression` in `dispatchSpecificExpression`
+- Inconsistent `expressionType` naming ('unary_expression' vs 'unary')
+
+**Key Technical Changes**:
+- Added dedicated `visitUnaryExpression` method with comprehensive error handling
+- Added `unary_expression` case to `dispatchSpecificExpression` method
+- Fixed `expressionType` to be 'unary' for consistency with test expectations
+- Both negation (`-5`) and logical not (`!flag`) expressions now working
+
+**Test Results**: All 2 unary expression tests passing (100% success rate)
+**Files Modified**: `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/expression-visitor.ts`
+
+**Quality Gates**: ✅ TypeScript compilation passing, ✅ Lint passing, ✅ Tests passing
+
+## ✅ MAJOR SUCCESS: AssertStatementVisitor Completely Fixed (2025-06-05)
+
+**Status**: COMPLETED - All AssertStatementVisitor tests now passing (100% success rate)
+**Priority**: High (Critical for OpenSCAD `assert` statement support)
+**Effort**: 2 hours
+**Impact**: Major breakthrough - All AssertStatementVisitor issues resolved, test success rate improved significantly
+
+**Achievement**: Successfully fixed all AssertStatementVisitor issues including statement routing, condition/message parsing, and tree-sitter grammar integration.
+
+**Root Cause Identified**: Multiple critical issues:
+- Missing `visitStatement` method for proper statement routing
+- Incorrect condition/message extraction (not using tree-sitter named fields)
+- Tree-sitter grammar integration issues
+
+**Key Technical Changes**:
+- Added `visitStatement` method to properly handle statement wrapper nodes
+- Fixed `findConditionExpression` to use named field 'condition' from tree-sitter grammar
+- Fixed `findMessageExpression` to use named field 'message' from tree-sitter grammar
+- Implemented comprehensive error handling and logging for debugging
+- Fixed lint warnings by prefixing unused parameters with underscores
+
+**Test Results - Complete Success (15/15 tests passing)**:
+- ✅ **Basic Assert Statements**: `assert(true);`, `assert(false);`, `assert(x);` - ALL PASSING
+- ✅ **Assert Statements with Conditions**: `assert(x > 0);`, `assert(x > 0 && y < 100);`, `assert(len(points) == 3);` - ALL PASSING
+- ✅ **Assert Statements with Messages**: `assert(x > 0, "x must be positive");`, `assert(len(points) == 3, "Invalid triangle");` - ALL PASSING
+- ✅ **Assert Statements without Semicolons**: `assert(true)`, `assert(x > 0, "error")` - ALL PASSING
+- ✅ **Error Handling**: Missing conditions, malformed syntax, extra commas - ALL PASSING
+- ✅ **Multiple Assert Statements**: Multiple assertions in sequence - PASSING
+
+**Quality Gates Status**:
+- ✅ TypeScript compilation: PASSING (all type errors resolved)
+- ✅ Lint: PASSING (only pre-existing warnings, no errors)
+- ✅ Tests: ALL AssertStatementVisitor tests PASSING (100% success rate)
+- ✅ Overall Impact: AssertStatementVisitor improved from 0% to 100% success rate
+
+**Key Technical Insights**:
+- Tree-sitter named fields provide the most reliable way to extract specific node components
+- Statement routing through `visitStatement` is essential for handling grammar wrapper nodes
+- `childForFieldName()` is more precise than generic traversal methods when fields are defined
+- Comprehensive logging aids in debugging complex tree-sitter grammar integration issues
+
+**Files Modified**:
+- `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/assert-statement-visitor/assert-statement-visitor.ts`
+
 ## ✅ MAJOR SUCCESS: ForLoopVisitor Completely Fixed (2025-06-05)
 
 **Status**: COMPLETED - All ForLoopVisitor tests now passing (100% success rate)

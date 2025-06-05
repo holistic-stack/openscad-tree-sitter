@@ -336,6 +336,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
       case 'undef_literal':
       case 'undef': // Handle both undef_literal and undef node types
         return this.visitLiteral(node);
+      case 'unary_expression':
+        return this.visitUnaryExpression(node);
       case 'vector_expression':
         return this.visitVectorExpression(node);
       case 'array_expression':
@@ -511,7 +513,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
         // Create unary expression node
         return {
           type: 'expression',
-          expressionType: 'unary_expression',
+          expressionType: 'unary',
           operator: operatorNode.text as ast.UnaryOperator,
           operand: operandExpr,
           prefix: true, // All unary operators in OpenSCAD are prefix operators
@@ -694,6 +696,96 @@ export class ExpressionVisitor extends BaseASTVisitor {
    */
   visitBinaryExpression(node: TSNode): ast.BinaryExpressionNode | ast.ErrorNode | null {
     return this.createBinaryExpressionNode(node);
+  }
+
+  /**
+   * Visit a unary expression node (e.g., -x, !flag)
+   * @param node The unary expression CST node
+   * @returns The unary expression AST node or null if the node cannot be processed
+   */
+  visitUnaryExpression(node: TSNode): ast.UnaryExpressionNode | ast.ErrorNode | null {
+    this.errorHandler.logInfo(
+      `[ExpressionVisitor.visitUnaryExpression] Processing unary expression: ${node.text.substring(0, 50)}`,
+      'ExpressionVisitor.visitUnaryExpression',
+      node
+    );
+
+    // Check if this is actually a single expression wrapped in a unary expression hierarchy node
+    if (node.namedChildCount === 1) {
+      const child = node.namedChild(0);
+      if (child) {
+        this.errorHandler.logInfo(
+          `[ExpressionVisitor.visitUnaryExpression] Detected single expression wrapped as unary expression. Delegating to child. Node: "${node.text}", Child: "${child.type}"`,
+          'ExpressionVisitor.visitUnaryExpression',
+          node
+        );
+        // Delegate to the child node
+        const result = this.dispatchSpecificExpression(child);
+        // If the child is a unary expression or an error, return it directly.
+        // Otherwise, this isn't the unary expression we're trying to create here.
+        if (result && (result.type === 'error' || (result.type === 'expression' && (result as ast.UnaryExpressionNode).expressionType === 'unary'))) {
+           return result as ast.UnaryExpressionNode | ast.ErrorNode;
+        }
+        this.errorHandler.logInfo(
+          `[ExpressionVisitor.visitUnaryExpression] Single child was not a unary expression or error. Node: "${node.text}", Child: "${child.type}". Returning null.`,
+          'ExpressionVisitor.visitUnaryExpression',
+          node
+        );
+        return null;
+      }
+    }
+
+    // Process unary expression directly
+    const operatorNode = node.child(0);
+    const operandNode = node.child(1);
+
+    if (!operatorNode || !operandNode) {
+      const message = `Invalid unary expression structure: Missing operator or operand. CST Node: ${node.text.substring(0, 100)}`;
+      this.errorHandler.handleError(new Error(message), 'ExpressionVisitor.visitUnaryExpression', node);
+      return {
+        type: 'error',
+        errorCode: 'INVALID_UNARY_EXPRESSION_STRUCTURE',
+        message: `Invalid unary expression structure. Operator: ${operatorNode?.text}, Operand: ${operandNode?.text}. CST: ${node.text.substring(0,50)}`,
+        originalNodeType: node.type,
+        cstNodeText: node.text,
+        location: getLocation(node),
+      } as ast.ErrorNode;
+    }
+
+    // Process operand
+    const operandExpr = this.dispatchSpecificExpression(operandNode);
+    if (operandExpr && operandExpr.type === 'error') {
+      this.errorHandler.logWarning(`[ExpressionVisitor.visitUnaryExpression] Operand is an ErrorNode. Propagating. Node: ${operandNode.text}`, 'ExpressionVisitor.visitUnaryExpression', operandExpr);
+      return operandExpr;
+    }
+    if (!operandExpr) {
+      this.errorHandler.logError(`[ExpressionVisitor.visitUnaryExpression] Failed to process operand (returned null): ${operandNode.text.substring(0,100)}. ErrorCode: UNPARSABLE_UNARY_OPERAND_NULL`, 'ExpressionVisitor.visitUnaryExpression', operandNode);
+      return {
+        type: 'error',
+        errorCode: 'UNPARSABLE_UNARY_OPERAND_NULL',
+        message: `Failed to parse unary operand. CST: ${operandNode.text}`,
+        originalNodeType: operandNode.type,
+        cstNodeText: operandNode.text,
+        location: getLocation(operandNode),
+      } as ast.ErrorNode;
+    }
+
+    // Create unary expression node
+    const unaryExprNode: ast.UnaryExpressionNode = {
+      type: 'expression',
+      expressionType: 'unary',
+      operator: operatorNode.text as ast.UnaryOperator,
+      operand: operandExpr,
+      prefix: true, // All unary operators in OpenSCAD are prefix operators
+      location: getLocation(node),
+    };
+
+    this.errorHandler.logInfo(
+      `[ExpressionVisitor.visitUnaryExpression] Created unary expression node: ${JSON.stringify(unaryExprNode, null, 2)}`,
+      'ExpressionVisitor.visitUnaryExpression',
+      node
+    );
+    return unaryExprNode;
   }
 
   /**

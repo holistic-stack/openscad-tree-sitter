@@ -275,9 +275,9 @@ export class TransformVisitor extends BaseASTVisitor {
       ].includes(functionName)
     ) {
       console.log(
-        `[TransformVisitor.visitModuleInstantiation] Not a transform function: ${functionName}, delegating to parent`
+        `[TransformVisitor.visitModuleInstantiation] Not a transform function: ${functionName}, returning null to let other visitors handle it`
       );
-      return super.visitModuleInstantiation(node);
+      return null;
     }
 
     // Extract arguments

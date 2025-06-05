@@ -1,48 +1,43 @@
 # OpenSCAD Parser - Current Context
 
-## Current Status (2025-06-04)
+## Current Status (2025-06-05)
 
-### Current Task: ForLoopVisitor FULLY FIXED - Major Success! 🎉
+### Current Task: Fix Visitor Ordering - CSG/Transform Operations Issue
 
-**Status**: ✅ COMPLETED - All ForLoopVisitor tests passing (100% success rate)
-**Focus**: Successfully fixed all ForLoopVisitor issues including type errors, variable/range parsing, body processing, and step handling.
+**Status**: IN PROGRESS - Fixing visitor order to resolve CSG/Transform operations returning 'module_instantiation'
+**Focus**: Reorder visitors in VisitorASTGenerator so specialized visitors (CSG, Transform, Primitive) process before general EchoStatementVisitor
 
-**Major Achievement (2025-06-05 - Current Session)**:
-- ✅ **ForLoopVisitor COMPLETELY FIXED**: All 4 tests passing (100% success rate)
-- ✅ **Type Errors Resolved**: Fixed all TypeScript compilation errors related to identifier vs variable node types
-- ✅ **Variable/Range Parsing**: Successfully parsing identifiers and range expressions in for loops
-- ✅ **Body Processing**: Fixed body statement processing using custom statement handlers
-- ✅ **Step Handling**: Fixed step extraction from range expressions with steps like [0:0.5:5]
-- ✅ **Expression Visitor Integration**: Fixed method calls to use `dispatchSpecificExpression` instead of `visitNode`
-- ✅ **Type Safety**: Updated all type guards to use `isAstVariableNode` instead of `isAstIdentifierNode`
-- ✅ **Quality Gates**: TypeScript compilation passing, lint passing, all ForLoop tests passing
-- ✅ **Overall Impact**: Test success rate improved to ~72% (409/567 tests passing)
+**Root Cause Identified**:
+- EchoStatementVisitor processes module instantiations before specialized visitors
+- Falls back to generic ModuleInstantiationNode when function not recognized
+- Prevents CSGVisitor/TransformVisitor from handling union/difference/translate/etc.
+
+**Expected Impact**: Fix ~100+ failing tests for CSG operations, transforms, and primitives
+
+**Recent Completions**:
+- ✅ **visitUnaryExpression Method**: Added to ExpressionVisitor, tests passing
+- ✅ **AssertStatementVisitor**: All 15 tests passing (100% success rate)
 
 ## Next Priority Tasks
 
-Based on the current test results (~72% success rate - 409/567 tests passing), the next high-priority tasks are:
+Based on the current test results (AssertStatementVisitor now 100% success), the next high-priority tasks are:
 
 1. **AssignStatementVisitor** (Priority: HIGH)
    - **Issue**: Tests expecting 'assign' but getting 'module_instantiation'
    - **Impact**: 15 failing tests
-   - **Status**: Core functionality working, edge cases need refinement
+   - **Status**: Core functionality working, needs statement routing like AssertStatementVisitor
 
-2. **AssertStatementVisitor** (Priority: HIGH)
-   - **Issue**: Tests expecting statements but getting empty arrays
-   - **Impact**: 10 failing tests
-   - **Status**: Visitor needs implementation review
-
-3. **EchoStatementVisitor** (Priority: MEDIUM)
+2. **EchoStatementVisitor** (Priority: MEDIUM)
    - **Issue**: One remaining test failure for error recovery
    - **Impact**: 1 failing test (93% success rate)
    - **Status**: Nearly complete, minor error handling refinement needed
 
-4. **RangeExpressionVisitor** (Priority: LOW)
+3. **RangeExpressionVisitor** (Priority: LOW)
    - **Issue**: Minor issues with step handling and error codes
    - **Impact**: 3 failing tests
    - **Status**: Core functionality working, edge cases need refinement
 
-The ForLoopVisitor success demonstrates that systematic type fixing and proper visitor integration can achieve 100% test success rates.
+The AssertStatementVisitor success demonstrates that systematic tree-sitter grammar integration and proper statement routing can achieve 100% test success rates.
 
 **ForLoopVisitor Test Results - Complete Success (4/4 tests passing)**:
 - ✅ **Basic for loop**: `for (i = [0:5]) { cube(10); }` - PASSING

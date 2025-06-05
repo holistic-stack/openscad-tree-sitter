@@ -2,6 +2,15 @@
 
 ## Active Tasks
 
+### ❗ Priority H: Fix Visitor Ordering - CSG/Transform Operations (URGENT)
+**Status**: 🔴 IN PROGRESS
+**Tests**: ~100+ failing tests for CSG operations, transforms, primitives
+**Issue**: EchoStatementVisitor processes module instantiations before specialized visitors
+**Root Cause**: Visitor order in VisitorASTGenerator has EchoStatementVisitor before CSGVisitor/TransformVisitor
+**Impact**: union/difference/intersection/translate/rotate/scale return 'module_instantiation' instead of specific types
+**Expected Fix**: Reorder visitors so specialized visitors process before general statement visitors
+**Files to Modify**: `packages/openscad-parser/src/lib/openscad-parser/ast/visitor-ast-generator.ts`
+
 ### ❗ Priority G: Fix Grammar for All List Comprehension Styles (CRITICAL BLOCKER)
 **Status**: PENDING
 **Impact**: CRITICAL - Blocks `list-comprehension-visitor.test.ts` in `openscad-parser`.
@@ -123,38 +132,61 @@
 
 ### Current Priorities
 
-1. **✅ List Comprehension Success** (Priority: COMPLETED)
+1. **✅ ExpressionVisitor Missing `visitUnaryExpression` Method** (Priority: COMPLETED)
+   - **Status**: ✅ COMPLETED - Missing `visitUnaryExpression` method fixed and tests passing
+   - **Issue**: ExpressionVisitor was missing `visitUnaryExpression` method causing `TypeError: visitor.visitUnaryExpression is not a function`
+   - **Solution**: Added dedicated `visitUnaryExpression` method with proper error handling and dispatch integration
+   - **Achievements**:
+     - ✅ **1.1**: Added `visitUnaryExpression` method to ExpressionVisitor with comprehensive error handling
+     - ✅ **1.2**: Added `unary_expression` case to `dispatchSpecificExpression` method for proper routing
+     - ✅ **1.3**: Fixed `expressionType` to be 'unary' instead of 'unary_expression' for consistency
+     - ✅ **1.4**: Both negation (`-5`) and logical not (`!flag`) expressions now working
+     - ✅ **1.5**: All unary expression tests passing (2/2 tests)
+
+2. **✅ Assert Statement Visitor** (Priority: COMPLETED)
+   - **Status**: ✅ COMPLETED - All AssertStatementVisitor tests passing (100% success rate)
+   - **Issue**: Tests expecting statements but getting empty arrays due to missing statement routing and incorrect tree-sitter field access
+   - **Solution**: Added `visitStatement` method and fixed condition/message extraction using tree-sitter named fields
+   - **Achievements**:
+     - ✅ **2.1**: Added `visitStatement` method for proper statement wrapper handling
+     - ✅ **2.2**: Fixed `findConditionExpression` to use named field 'condition' from tree-sitter grammar
+     - ✅ **2.3**: Fixed `findMessageExpression` to use named field 'message' from tree-sitter grammar
+     - ✅ **2.4**: Comprehensive error handling and logging for debugging
+     - ✅ **2.5**: All test scenarios working: basic assertions, conditions, messages, error handling
+
+2. **✅ List Comprehension Success** (Priority: COMPLETED)
    - **Status**: COMPLETED - 7/13 tests now passing
    - **Achievements**:
-     - ✅ **1.1**: Function call test enabled: `[for (i = [0:2]) a_function(i)]` - PASSING
-     - ✅ **1.2**: Complex conditional expressions working
-     - ✅ **1.3**: Nested arrays and vectors working
-     - ⏸️ **1.4**: Let expression tests (deferred - requires grammar analysis)
-     - ⏸️ **1.5**: Python-style tests (deferred - future feature)
+     - ✅ **2.1**: Function call test enabled: `[for (i = [0:2]) a_function(i)]` - PASSING
+     - ✅ **2.2**: Complex conditional expressions working
+     - ✅ **2.3**: Nested arrays and vectors working
+     - ⏸️ **2.4**: Let expression tests (deferred - requires grammar analysis)
+     - ⏸️ **2.5**: Python-style tests (deferred - future feature)
 
-2. **✅ Fix Function Call Visitor Issues** (Priority: COMPLETED)
+3. **✅ Fix Function Call Visitor Issues** (Priority: COMPLETED)
    - **Status**: COMPLETED - Function call visitor issues resolved with 4/4 tests passing
    - **Issue**: Tests expecting `type: 'function_call'` but getting `type: 'expression'`
    - **Solution**: Updated test expectations to use unified expression node structure
    - **Achievements**:
-     - ✅ **2.1**: Investigated function call visitor return type structure
-     - ✅ **2.2**: Fixed test expectations to match correct `type: 'expression'` structure
-     - ✅ **2.3**: Verified `expressionType: 'function_call'` is set correctly
-     - ✅ **2.4**: Validated function call visitor integration with expression visitor
-     - ⏸️ **2.5**: Skipped complex nested function call test (mocking complexity)
+     - ✅ **3.1**: Investigated function call visitor return type structure
+     - ✅ **3.2**: Fixed test expectations to match correct `type: 'expression'` structure
+     - ✅ **3.3**: Verified `expressionType: 'function_call'` is set correctly
+     - ✅ **3.4**: Validated function call visitor integration with expression visitor
+     - ⏸️ **3.5**: Skipped complex nested function call test (mocking complexity)
 
-3. **Fix Assignment Statement Visitor** (Priority: HIGH)
+4. **Fix Assignment Statement Visitor** (Priority: HIGH)
    - **Status**: MOSTLY COMPLETED - 11/17 tests passing (65% success rate)
-   - **Issue**: Some edge cases with string values and complex expressions
-   - **Impact**: 6 remaining test failures for edge cases
+   - **Issue**: Tests expecting 'assign' but getting 'module_instantiation' - likely needs statement routing like AssertStatementVisitor
+   - **Impact**: 15 remaining test failures for statement routing and edge cases
    - **Achievements**:
-     - ✅ **3.1**: Fixed core assignment extraction logic using `childForFieldName('statement')`
-     - ✅ **3.2**: Implemented proper assignment parsing from named arguments
-     - ✅ **3.3**: Basic assign statements, boolean values, multiple assignments working
+     - ✅ **4.1**: Fixed core assignment extraction logic using `childForFieldName('statement')`
+     - ✅ **4.2**: Implemented proper assignment parsing from named arguments
+     - ✅ **4.3**: Basic assign statements, boolean values, multiple assignments working
    - **Remaining Actions**:
-     - [ ] **3.4**: Fix string value parsing edge cases
-     - [ ] **3.5**: Improve complex expression handling (arithmetic, range expressions)
-     - [ ] **3.6**: Address test expectation mismatches for body types
+     - [ ] **4.4**: Add `visitStatement` method for proper statement routing (like AssertStatementVisitor)
+     - [ ] **4.5**: Fix string value parsing edge cases
+     - [ ] **4.6**: Improve complex expression handling (arithmetic, range expressions)
+     - [ ] **4.7**: Address test expectation mismatches for body types
 
 4. **✅ Fix Echo Statement Visitor** (Priority: COMPLETED)
    - **Status**: COMPLETED - Echo statement visitor issues resolved with 14/15 tests passing (93% success rate)

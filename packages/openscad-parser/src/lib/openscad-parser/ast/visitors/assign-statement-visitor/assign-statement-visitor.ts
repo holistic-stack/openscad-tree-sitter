@@ -52,6 +52,7 @@ import { BaseASTVisitor } from '../base-ast-visitor.js';
 import { ErrorHandler } from '../../../error-handling/index.js';
 import * as ast from '../../ast-types.js';
 import { getLocation } from '../../utils/location-utils.js';
+import { extractArguments, type ExtractedParameter } from '../../extractors/argument-extractor.js';
 
 /**
  * Visitor class for processing OpenSCAD assign statements.
@@ -280,6 +281,273 @@ export class AssignStatementVisitor extends BaseASTVisitor {
   }
 
   /**
+   * Override visitStatement to handle assign statements specifically.
+   *
+   * This method checks if the statement contains an assign module instantiation
+   * and processes it accordingly. For non-assign statements, it returns null
+   * to allow other visitors to handle them.
+   *
+   * @param node - The Tree-sitter node representing the statement
+   * @returns An AssignStatementNode if the statement contains 'assign', null otherwise
+   *
+   * @since 1.0.0
+   */
+  override visitStatement(node: TSNode): ast.AssignStatementNode | null {
+    this.safeLog(
+      'info',
+      `[AssignStatementVisitor.visitStatement] Processing statement: ${node.text.substring(0, 50)}`,
+      'AssignStatementVisitor.visitStatement',
+      node
+    );
+
+    // Look for module_instantiation in the statement
+    const moduleInstantiation = this.findDescendantOfType(node, 'module_instantiation');
+    if (moduleInstantiation) {
+      // Check if it's an assign module instantiation
+      const nameFieldNode = moduleInstantiation.childForFieldName('name');
+      if (nameFieldNode && nameFieldNode.text === 'assign') {
+        this.safeLog(
+          'info',
+          `[AssignStatementVisitor.visitStatement] Found assign module instantiation in statement`,
+          'AssignStatementVisitor.visitStatement',
+          moduleInstantiation
+        );
+        return this.visitModuleInstantiation(moduleInstantiation);
+      }
+    }
+
+    // Look for assign_statement in the statement (if the grammar supports it)
+    const assignStatement = this.findDescendantOfType(node, 'assign_statement');
+    if (assignStatement) {
+      this.safeLog(
+        'info',
+        `[AssignStatementVisitor.visitStatement] Found assign_statement in statement`,
+        'AssignStatementVisitor.visitStatement',
+        assignStatement
+      );
+      return this.visitAssignStatement(assignStatement);
+    }
+
+    // Not an assign statement, let other visitors handle it
+    this.safeLog(
+      'debug',
+      `[AssignStatementVisitor.visitStatement] No assign statement found, skipping`,
+      'AssignStatementVisitor.visitStatement',
+      node
+    );
+    return null;
+  }
+
+  /**
+   * Helper method to find descendant nodes of a specific type.
+   *
+   * @param node - The parent node to search in
+   * @param nodeType - The type of node to find
+   * @returns The first descendant node of the specified type, or null if not found
+   *
+   * @private
+   */
+  private findDescendantOfType(node: TSNode, nodeType: string): TSNode | null {
+    // Check direct children first
+    for (let i = 0; i < node.childCount; i++) {
+      const child = node.child(i);
+      if (child && child.type === nodeType) {
+        return child;
+      }
+    }
+
+    // Recursively check descendants
+    for (let i = 0; i < node.childCount; i++) {
+      const child = node.child(i);
+      if (child) {
+        const descendant = this.findDescendantOfType(child, nodeType);
+        if (descendant) {
+          return descendant;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Visit a module instantiation node and check if it's an assign statement.
+   *
+   * This method handles the deprecated assign() function syntax by detecting
+   * module instantiations with the name 'assign' and converting them to
+   * proper AssignStatementNode structures.
+   *
+   * @param node - The Tree-sitter node representing the module instantiation
+   * @returns An AssignStatementNode if the module is 'assign', null otherwise
+   *
+   * @example Processing assign module instantiation
+   * ```typescript
+   * // For OpenSCAD code: assign(x = 5) cube(x);
+   * const assignNode = visitor.visitModuleInstantiation(node);
+   * // Returns: { type: 'assign', assignments: [...], body: {...} }
+   * ```
+   *
+   * @since 1.0.0
+   */
+  override visitModuleInstantiation(node: TSNode): ast.AssignStatementNode | null {
+    this.safeLog(
+      'info',
+      `[AssignStatementVisitor.visitModuleInstantiation] Processing module instantiation: ${node.text.substring(0, 50)}`,
+      'AssignStatementVisitor.visitModuleInstantiation',
+      node
+    );
+
+    // Extract module name using the same approach as BaseASTVisitor
+    const nameFieldNode = node.childForFieldName('name');
+    if (!nameFieldNode) {
+      this.safeLog(
+        'debug',
+        `[AssignStatementVisitor.visitModuleInstantiation] No name field found for module instantiation`,
+        'AssignStatementVisitor.visitModuleInstantiation',
+        node
+      );
+      return null;
+    }
+
+    const functionName = nameFieldNode.text;
+    if (functionName !== 'assign') {
+      this.safeLog(
+        'debug',
+        `[AssignStatementVisitor.visitModuleInstantiation] Module name '${functionName}' is not 'assign', skipping`,
+        'AssignStatementVisitor.visitModuleInstantiation',
+        node
+      );
+      return null;
+    }
+
+    this.safeLog(
+      'info',
+      `[AssignStatementVisitor.visitModuleInstantiation] Processing assign module instantiation`,
+      'AssignStatementVisitor.visitModuleInstantiation',
+      node
+    );
+
+    // Extract arguments using the same approach as BaseASTVisitor
+    const argsNode = node.childForFieldName('arguments');
+    let extractedArgs = argsNode ? extractArguments(argsNode) : [];
+
+    // If the argument extractor failed to extract arguments (e.g., due to complex expressions),
+    // fall back to manual extraction
+    if (extractedArgs.length === 0 && argsNode) {
+      extractedArgs = this.manuallyExtractArguments(argsNode);
+    }
+
+    // Convert function arguments to assignments
+    const assignments: ast.AssignmentNode[] = [];
+
+    for (const arg of extractedArgs) {
+      if ('name' in arg && arg.name) {
+        // Convert the extracted value to an expression node
+        let value = this.convertExtractedValueToExpression(arg.value);
+
+        // If conversion failed, create a generic expression node
+        if (!value) {
+          // Try to extract the raw expression text from the original argument
+          const rawValue = this.extractRawExpressionFromArgument(argsNode, arg.name);
+          value = {
+            type: 'expression',
+            expressionType: 'literal',
+            value: rawValue || 'unknown',
+            location: getLocation(node)
+          };
+        }
+
+        assignments.push({
+          type: 'assignment',
+          variable: arg.name,
+          value,
+          location: getLocation(node)
+        });
+      }
+    }
+
+    // Extract the body (the statement or block that follows the assign call)
+    // Based on CST analysis, the body is the third child (index 2) of the module_instantiation node
+    let body: ast.ASTNode | null = null;
+
+    // The CST structure for assign(x = 5) cube(x); is:
+    // module_instantiation
+    //   ├── identifier: "assign"
+    //   ├── argument_list: "(x = 5)"
+    //   └── statement: "cube(x);"
+
+    if (node.childCount >= 3) {
+      const bodyNode = node.child(2);
+      if (bodyNode) {
+        this.safeLog(
+          'info',
+          `[AssignStatementVisitor.visitModuleInstantiation] Found body node: type=${bodyNode.type}, text="${bodyNode.text}"`,
+          'AssignStatementVisitor.visitModuleInstantiation',
+          bodyNode
+        );
+
+
+
+        // Handle different types of body nodes
+        if (bodyNode.type === 'block') {
+          // For block bodies, create a simple block node without processing individual statements
+          // This avoids the issue where the AssignStatementVisitor interferes with statement processing
+          this.safeLog(
+            'info',
+            `[AssignStatementVisitor.visitModuleInstantiation] Processing block body: type=${bodyNode.type}, text="${bodyNode.text}"`,
+            'AssignStatementVisitor.visitModuleInstantiation',
+            bodyNode
+          );
+          body = {
+            type: 'block',
+            statements: [], // Empty for now - could be enhanced later
+            location: getLocation(bodyNode)
+          };
+        } else if (bodyNode.type === 'statement') {
+          // For statement bodies, look for module_instantiation within the statement
+          const moduleInstantiation = this.findDescendantOfType(bodyNode, 'module_instantiation');
+          if (moduleInstantiation) {
+            this.safeLog(
+              'info',
+              `[AssignStatementVisitor.visitModuleInstantiation] Found module_instantiation in statement body: type=${moduleInstantiation.type}, text="${moduleInstantiation.text}"`,
+              'AssignStatementVisitor.visitModuleInstantiation',
+              moduleInstantiation
+            );
+            // Process the module instantiation using the parent class's method
+            body = super.visitModuleInstantiation(moduleInstantiation);
+          } else {
+            // Use the parent class's visitNode method to process the statement
+            body = super.visitNode(bodyNode);
+          }
+        } else {
+          // For other types of bodies, use the parent class's visitNode method
+          this.safeLog(
+            'info',
+            `[AssignStatementVisitor.visitModuleInstantiation] Processing other body type: type=${bodyNode.type}, text="${bodyNode.text}"`,
+            'AssignStatementVisitor.visitModuleInstantiation',
+            bodyNode
+          );
+          body = super.visitNode(bodyNode);
+        }
+      }
+    } else {
+      this.safeLog(
+        'info',
+        `[AssignStatementVisitor.visitModuleInstantiation] No body found - node has only ${node.childCount} children`,
+        'AssignStatementVisitor.visitModuleInstantiation',
+        node
+      );
+    }
+
+    return {
+      type: 'assign',
+      assignments,
+      body,
+      location: getLocation(node)
+    };
+  }
+
+  /**
    * Visits an assign statement node and converts it to an AST node.
    *
    * This method processes Tree-sitter CST nodes representing assign statements
@@ -444,6 +712,149 @@ export class AssignStatementVisitor extends BaseASTVisitor {
       value,
       location: getLocation(node),
     };
+  }
+
+  /**
+   * Manually extract arguments from an argument_list node when the standard extractor fails.
+   *
+   * This method handles cases where the argument extractor fails due to complex expressions
+   * that it doesn't understand (like binary_expression, function_call, etc.).
+   *
+   * @param argsNode - The argument_list node to extract arguments from
+   * @returns Array of extracted parameters with name and raw expression text
+   *
+   * @private
+   */
+  private manuallyExtractArguments(argsNode: TSNode): ExtractedParameter[] {
+    const results: ExtractedParameter[] = [];
+
+    // Look for the arguments node within the argument_list
+    for (let i = 0; i < argsNode.childCount; i++) {
+      const child = argsNode.child(i);
+      if (child && child.type === 'arguments') {
+        // Process each argument within the arguments node
+        for (let j = 0; j < child.childCount; j++) {
+          const argChild = child.child(j);
+          if (argChild && argChild.type === 'argument') {
+            // Extract name and value from the argument
+            const nameNode = argChild.child(0);
+            const equalsNode = argChild.child(1);
+
+            if (nameNode && nameNode.type === 'identifier' &&
+                equalsNode && equalsNode.type === '=') {
+
+              // Find the expression node (everything after the '=')
+              for (let k = 2; k < argChild.childCount; k++) {
+                const exprNode = argChild.child(k);
+                if (exprNode && exprNode.text.trim() !== '') {
+                  results.push({
+                    name: nameNode.text,
+                    value: {
+                      type: 'expression',
+                      expressionType: 'literal',
+                      value: exprNode.text
+                    }
+                  });
+                  break; // Only take the first expression node
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * Extract the raw expression text for a named argument from the arguments node.
+   *
+   * @param argsNode - The argument_list node containing the arguments
+   * @param variableName - The name of the variable to find
+   * @returns The raw text of the expression, or null if not found
+   *
+   * @private
+   */
+  private extractRawExpressionFromArgument(argsNode: TSNode, variableName: string): string | null {
+    // Find the argument with the matching variable name
+    for (let i = 0; i < argsNode.childCount; i++) {
+      const child = argsNode.child(i);
+      if (child && child.type === 'arguments') {
+        // Look for argument nodes within the arguments node
+        for (let j = 0; j < child.childCount; j++) {
+          const argChild = child.child(j);
+          if (argChild && argChild.type === 'argument') {
+            // Check if this argument has the matching variable name
+            const nameNode = argChild.child(0);
+            if (nameNode && nameNode.type === 'identifier' && nameNode.text === variableName) {
+              // Find the expression after the '=' sign
+              for (let k = 2; k < argChild.childCount; k++) {
+                const exprNode = argChild.child(k);
+                if (exprNode && exprNode.type !== '=' && exprNode.text.trim() !== '') {
+                  return exprNode.text;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Convert an extracted value from the argument extractor to an expression node.
+   *
+   * @param extractedValue - The extracted value from the argument extractor
+   * @returns The corresponding expression AST node, or null if conversion fails
+   *
+   * @private
+   */
+  private convertExtractedValueToExpression(extractedValue: any): ast.ExpressionNode | null {
+    if (!extractedValue || typeof extractedValue !== 'object') {
+      return null;
+    }
+
+    // Handle different types of extracted values
+    switch (extractedValue.type) {
+      case 'number':
+        return {
+          type: 'expression',
+          expressionType: 'literal',
+          value: extractedValue.value,
+          location: { line: 0, column: 0 }, // Default location
+        };
+      case 'string':
+        return {
+          type: 'expression',
+          expressionType: 'literal',
+          value: extractedValue.value,
+          location: { line: 0, column: 0 }, // Default location
+        };
+      case 'boolean':
+        return {
+          type: 'expression',
+          expressionType: 'literal',
+          value: extractedValue.value,
+          location: { line: 0, column: 0 }, // Default location
+        };
+      case 'identifier':
+        return {
+          type: 'expression',
+          expressionType: 'identifier',
+          name: extractedValue.value,
+          location: { line: 0, column: 0 }, // Default location
+        };
+      default:
+        // For unknown types, create a generic literal expression
+        return {
+          type: 'expression',
+          expressionType: 'literal',
+          value: extractedValue.value || extractedValue,
+          location: { line: 0, column: 0 }, // Default location
+        };
+    }
   }
 
   /**
