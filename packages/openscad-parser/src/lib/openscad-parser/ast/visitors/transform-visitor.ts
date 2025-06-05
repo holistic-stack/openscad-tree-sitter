@@ -361,8 +361,10 @@ export class TransformVisitor extends BaseASTVisitor {
       `[TransformVisitor.visitModuleInstantiation] Extracted ${args.length} arguments for ${functionName}`
     );
 
-    // Process children
+    // Process children - handle both body field and direct child statements
     const children: ast.ASTNode[] = [];
+
+    // First, try to find a body field (for block syntax)
     const bodyNode = node.childForFieldName('body');
     if (bodyNode) {
       console.log(
@@ -416,15 +418,58 @@ export class TransformVisitor extends BaseASTVisitor {
         );
       }
     } else {
+      // No body field found - look for direct child statements or blocks
+      // This handles the grammar pattern: name arguments statement
       console.log(
-        `[TransformVisitor.visitModuleInstantiation] No body node found`
+        `[TransformVisitor.visitModuleInstantiation] No body field found, looking for direct children`
       );
+
+      for (let i = 0; i < node.namedChildCount; i++) {
+        const child = node.namedChild(i);
+        if (child && (child.type === 'statement' || child.type === 'block')) {
+          console.log(
+            `[TransformVisitor.visitModuleInstantiation] Found direct child: type=${child.type}, text=${child.text.substring(0, 50)}`
+          );
+
+          if (child.type === 'block') {
+            // Handle block with multiple statements
+            for (let j = 0; j < child.namedChildCount; j++) {
+              const blockChild = child.namedChild(j);
+              if (blockChild) {
+                const visitedChild = this.compositeVisitor
+                  ? this.compositeVisitor.visitNode(blockChild)
+                  : this.visitNode(blockChild);
+                if (visitedChild) {
+                  children.push(visitedChild);
+                  console.log(
+                    `[TransformVisitor.visitModuleInstantiation] Added block child: type=${visitedChild.type}`
+                  );
+                }
+              }
+            }
+          } else {
+            // Handle single statement
+            const visitedChild = this.compositeVisitor
+              ? this.compositeVisitor.visitNode(child)
+              : this.visitNode(child);
+            if (visitedChild) {
+              children.push(visitedChild);
+              console.log(
+                `[TransformVisitor.visitModuleInstantiation] Added direct child: type=${visitedChild.type}`
+              );
+            }
+          }
+        }
+      }
     }
 
     // Create the transform node with children
     const transformNode = this.createTransformNode(node, functionName, args);
     if (transformNode && 'children' in transformNode) {
       (transformNode as any).children = children;
+      console.log(
+        `[TransformVisitor.visitModuleInstantiation] Set ${children.length} children on ${functionName} node`
+      );
     }
 
     return transformNode;
@@ -471,21 +516,34 @@ export class TransformVisitor extends BaseASTVisitor {
         // Handle color transform
         let colorValue: string | ast.Vector4D = 'black'; // Default color
 
+
+
         if (args.length > 0 && args[0]!.value !== null) {
-          if (typeof args[0]!.value === 'string') {
+          const argValue = args[0]!.value;
+
+          // Handle expression objects that wrap the actual value
+          let actualValue = argValue;
+          if (typeof argValue === 'object' && argValue !== null && 'value' in argValue) {
+            actualValue = (argValue as any).value;
+          }
+
+          if (typeof actualValue === 'string') {
             // If it's a string, use it directly
-            colorValue = args[0]!.value;
-          } else if (Array.isArray(args[0]!.value)) {
+            colorValue = actualValue;
+          } else if (typeof argValue === 'string') {
+            // Direct string value
+            colorValue = argValue;
+          } else if (Array.isArray(argValue)) {
             // If it's an array, try to convert it to a Vector4D
             // First, ensure we're working with a safe array that has at least one element
-            if (args[0]!.value.length > 0) {
+            if (argValue.length > 0) {
               // Create a safe color array with default values
               const colorArray: [number, number, number, number] = [0, 0, 0, 1];
 
               // Fill in values from the input array, if they exist and are numbers
-              for (let i = 0; i < Math.min(args[0]!.value.length, 4); i++) {
-                if (typeof args[0]!.value[i] === 'number') {
-                  colorArray[i] = args[0]!.value[i]!;
+              for (let i = 0; i < Math.min(argValue.length, 4); i++) {
+                if (typeof argValue[i] === 'number') {
+                  colorArray[i] = argValue[i] as number;
                 }
               }
 
@@ -497,9 +555,9 @@ export class TransformVisitor extends BaseASTVisitor {
                 node
               );
             }
-          } else if (typeof args[0]!.value === 'number') {
+          } else if (typeof argValue === 'number') {
             // If it's a number, convert it to a grayscale color
-            const value = Math.min(1, Math.max(0, args[0]!.value));
+            const value = Math.min(1, Math.max(0, argValue));
             colorValue = [value, value, value, 1];
           }
         }

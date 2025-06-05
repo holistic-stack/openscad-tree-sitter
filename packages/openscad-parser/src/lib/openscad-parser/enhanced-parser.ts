@@ -222,7 +222,7 @@ export class EnhancedOpenscadParser {
       this.previousTree = tree;
 
       // Check for syntax errors
-      if (tree && this.hasErrorNodes(tree.rootNode)) {
+      if (tree && (this.hasErrorNodes(tree.rootNode) || this.hasMissingTokens(tree.rootNode))) {
         const errorDetails = this.formatSyntaxError(code, tree.rootNode);
         this.errorHandler.handleError(errorDetails);
       }
@@ -534,7 +534,7 @@ export class EnhancedOpenscadParser {
    * @since 0.1.0
    */
   private hasErrorNodes(node: TreeSitter.Node): boolean {
-    if (node.type === 'ERROR') {
+    if (node.type === 'ERROR' || node.isMissing) {
       return true;
     }
 
@@ -546,6 +546,22 @@ export class EnhancedOpenscadParser {
     }
 
     return false;
+  }
+
+  /**
+   * Checks if the parse tree contains MISSING tokens by examining the string representation.
+   *
+   * Tree-sitter uses MISSING tokens for error recovery when expected tokens are absent.
+   * These tokens may not be detectable through the isMissing property in all cases.
+   *
+   * @param node - The Tree-sitter node to check for MISSING tokens
+   * @returns true if the tree contains MISSING tokens, false otherwise
+   * @private
+   * @since 0.1.0
+   */
+  private hasMissingTokens(node: TreeSitter.Node): boolean {
+    const treeString = node.toString();
+    return treeString.includes('MISSING');
   }
 
   /**
@@ -562,7 +578,7 @@ export class EnhancedOpenscadParser {
    * @since 0.1.0
    */
   private formatSyntaxError(code: string, rootNode: TreeSitter.Node): string {
-    const errorNode = this.findFirstErrorNode(rootNode);
+    const errorNode = this.findFirstErrorNode(rootNode) || this.findFirstMissingToken(rootNode);
     if (!errorNode) {
       return `Syntax error found in parsed code:\n${code}`;
     }
@@ -596,7 +612,7 @@ export class EnhancedOpenscadParser {
    * @since 0.1.0
    */
   private findFirstErrorNode(node: TreeSitter.Node): TreeSitter.Node | null {
-    if (node.type === 'ERROR') {
+    if (node.type === 'ERROR' || node.isMissing) {
       return node;
     }
 
@@ -608,6 +624,37 @@ export class EnhancedOpenscadParser {
           return errorNode;
         }
       }
+    }
+
+    return null;
+  }
+
+  /**
+   * Recursively searches for the first node that represents a MISSING token.
+   *
+   * This method traverses the Tree-sitter CST to find nodes that contain MISSING tokens
+   * in their string representation, which indicates error recovery by the parser.
+   *
+   * @param node - The Tree-sitter node to begin the search from
+   * @returns The first node containing a MISSING token, or null if none found
+   * @private
+   * @since 0.1.0
+   */
+  private findFirstMissingToken(node: TreeSitter.Node): TreeSitter.Node | null {
+    // Check if this node's string representation contains MISSING
+    if (node.toString().includes('MISSING')) {
+      // If this node has children, try to find a more specific child with MISSING
+      for (let i = 0; i < node.childCount; i++) {
+        const child = node.child(i);
+        if (child) {
+          const missingChild = this.findFirstMissingToken(child);
+          if (missingChild) {
+            return missingChild;
+          }
+        }
+      }
+      // If no child contains MISSING, this node is the one
+      return node;
     }
 
     return null;

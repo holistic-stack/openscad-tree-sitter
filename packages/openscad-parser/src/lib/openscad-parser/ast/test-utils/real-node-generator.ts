@@ -98,16 +98,9 @@ export class RealNodeGenerator {
       return null;
     }
 
-    // Look for any binary expression type
+    // Look for binary expression type (unified in current grammar)
     const binaryTypes = [
-      'binary_expression',
-      'additive_expression',
-      'multiplicative_expression',
-      'relational_expression',
-      'equality_expression',
-      'logical_and_expression',
-      'logical_or_expression',
-      'exponentiation_expression'
+      'binary_expression'
     ];
 
     for (const type of binaryTypes) {
@@ -138,7 +131,7 @@ export class RealNodeGenerator {
   }
 
   /**
-   * Get an expression node of any type
+   * Get an expression node of any type (looks for the value in assignment)
    */
   async getExpressionNode(expressionCode: string): Promise<TSNode | null> {
     if (!this.parser) {
@@ -151,7 +144,19 @@ export class RealNodeGenerator {
       return null;
     }
 
-    return this.findNodeByType(tree.rootNode, 'expression');
+    // Look for the value node in the assignment statement
+    const assignmentNode = this.findNodeByType(tree.rootNode, 'assignment_statement');
+    if (assignmentNode) {
+      // Find the value field in the assignment
+      for (let i = 0; i < assignmentNode.childCount; i++) {
+        const child = assignmentNode.child(i);
+        if (child && child.type !== 'identifier' && child.type !== '=') {
+          return child; // This should be the expression/value node
+        }
+      }
+    }
+
+    return null;
   }
 
   /**

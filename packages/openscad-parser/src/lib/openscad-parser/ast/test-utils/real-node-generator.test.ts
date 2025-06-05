@@ -83,8 +83,8 @@ describe('RealNodeGenerator', () => {
       const node = await generator.getBinaryExpressionNode('a * b');
 
       expect(node).not.toBeNull();
-      // The grammar creates a hierarchy, so we get the first matching type
-      expect(['additive_expression', 'multiplicative_expression']).toContain(node?.type);
+      // The grammar now uses unified binary_expression type
+      expect(node?.type).toBe('binary_expression');
       expect(node?.text).toContain('a * b');
     });
 
@@ -92,8 +92,8 @@ describe('RealNodeGenerator', () => {
       const node = await generator.getBinaryExpressionNode('x > 5');
 
       expect(node).not.toBeNull();
-      // The grammar creates a hierarchy, so we get the first matching type
-      expect(['additive_expression', 'relational_expression']).toContain(node?.type);
+      // The grammar now uses unified binary_expression type
+      expect(node?.type).toBe('binary_expression');
       // The node text might be just part of the expression due to grammar hierarchy
       expect(node?.text).toBeDefined();
     });
@@ -143,7 +143,7 @@ describe('RealNodeGenerator', () => {
       const node = await generator.getExpressionNode('42');
 
       expect(node).not.toBeNull();
-      expect(node?.type).toBe('expression');
+      expect(node?.type).toBe('number'); // The actual node type for literal 42
 
       // Verify it's a real Tree-sitter node
       expect(typeof node?.namedChild).toBe('function');

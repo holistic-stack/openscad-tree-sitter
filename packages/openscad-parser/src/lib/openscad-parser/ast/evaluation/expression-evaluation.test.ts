@@ -19,7 +19,7 @@ describe('Enhanced Expression Evaluation', () => {
   
   // Add a simple test to verify binary expression node creation
   it('should create a binary expression node', () => {
-    const code = '1 + 2;';
+    const code = 'x = 1 + 2;';
     console.log('Testing simple binary expression:', code);
     
     const tree = parser.parse(code);

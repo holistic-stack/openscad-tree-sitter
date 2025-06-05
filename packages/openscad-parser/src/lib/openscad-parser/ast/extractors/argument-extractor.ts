@@ -873,7 +873,8 @@ export function extractValue(valueNode: TSNode): ast.Value | null {
             // Handle structured value objects
             const actualValue = operandValue.value;
             // Convert string numbers to actual numbers
-            const numericValue = typeof actualValue === 'string' ? parseFloat(actualValue) : actualValue;
+            const numericValue = typeof actualValue === 'string' ? parseFloat(actualValue) :
+                                typeof actualValue === 'number' ? actualValue : NaN;
 
             if (operator === '-' && typeof numericValue === 'number' && !isNaN(numericValue)) {
               console.log(`[extractValue] Applied unary minus to structured value: -${numericValue}`);
@@ -980,8 +981,10 @@ export function extractValue(valueNode: TSNode): ast.Value | null {
 
           // Only handle numeric operations for now
           if (leftValue?.type === 'number' && rightValue?.type === 'number') {
-            const leftNum = typeof leftValue.value === 'string' ? parseFloat(leftValue.value) : leftValue.value;
-            const rightNum = typeof rightValue.value === 'string' ? parseFloat(rightValue.value) : rightValue.value;
+            const leftNum = typeof leftValue.value === 'string' ? parseFloat(leftValue.value) :
+                           typeof leftValue.value === 'number' ? leftValue.value : NaN;
+            const rightNum = typeof rightValue.value === 'string' ? parseFloat(rightValue.value) :
+                            typeof rightValue.value === 'number' ? rightValue.value : NaN;
 
             if (!isNaN(leftNum) && !isNaN(rightNum)) {
               let result: number;

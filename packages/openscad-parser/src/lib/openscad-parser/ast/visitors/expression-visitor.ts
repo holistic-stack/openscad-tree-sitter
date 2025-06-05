@@ -392,6 +392,8 @@ export class ExpressionVisitor extends BaseASTVisitor {
         }
       case 'let_expression':
         return this.visitLetExpression(node);
+      case 'conditional_expression':
+        return this.visitConditionalExpression(node);
       default:
         return this.createExpressionNode(node);
     }
@@ -728,6 +730,59 @@ export class ExpressionVisitor extends BaseASTVisitor {
    */
   visitBinaryExpression(node: TSNode): ast.BinaryExpressionNode | ast.ErrorNode | null {
     return this.createBinaryExpressionNode(node);
+  }
+
+  /**
+   * Visit a conditional expression node (ternary operator: condition ? consequence : alternative)
+   * @param node The conditional expression CST node
+   * @returns The conditional expression AST node or null if the node cannot be processed
+   */
+  override visitConditionalExpression(node: TSNode): ast.ConditionalExpressionNode | ast.ErrorNode | null {
+    if (node.type !== 'conditional_expression') {
+      this.errorHandler.logError(
+        `Expected conditional_expression node, got ${node.type}`,
+        'ExpressionVisitor.visitConditionalExpression',
+        node
+      );
+      return null;
+    }
+
+    // Extract the three parts of the conditional expression
+    const conditionNode = node.childForFieldName('condition');
+    const consequenceNode = node.childForFieldName('consequence');
+    const alternativeNode = node.childForFieldName('alternative');
+
+    if (!conditionNode || !consequenceNode || !alternativeNode) {
+      this.errorHandler.logError(
+        'Conditional expression missing required fields (condition, consequence, alternative)',
+        'ExpressionVisitor.visitConditionalExpression',
+        node
+      );
+      return null;
+    }
+
+    // Process each part
+    const condition = this.dispatchSpecificExpression(conditionNode);
+    const consequence = this.dispatchSpecificExpression(consequenceNode);
+    const alternative = this.dispatchSpecificExpression(alternativeNode);
+
+    if (!condition || !consequence || !alternative) {
+      this.errorHandler.logError(
+        'Failed to process conditional expression components',
+        'ExpressionVisitor.visitConditionalExpression',
+        node
+      );
+      return null;
+    }
+
+    return {
+      type: 'expression',
+      expressionType: 'conditional',
+      condition,
+      thenBranch: consequence,
+      elseBranch: alternative,
+      location: getLocation(node),
+    } as ast.ConditionalExpressionNode;
   }
 
   /**

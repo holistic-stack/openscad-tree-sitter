@@ -202,9 +202,10 @@ describe('FunctionVisitor', () => {
       ]);
 
       expect(result).not.toBeNull();
-      expect(result.type).toBe('function_call');
-      expect(result.name).toBe('add');
-      expect(result.arguments).toHaveLength(2);
+      expect(result.type).toBe('expression');
+      expect(result.expressionType).toBe('function_call');
+      expect(result.functionName).toBe('add');
+      expect(result.args).toHaveLength(2);
     });
   });
 });

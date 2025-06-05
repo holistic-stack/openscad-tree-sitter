@@ -136,8 +136,8 @@ describe('OpenSCADParser', () => {
     const hasErrors = result?.rootNode.hasError;
     expect(hasErrors).toBe(true);
 
-    // The tree should contain ERROR nodes
+    // The tree should contain MISSING tokens (tree-sitter error recovery)
     const rootNodeString = result?.rootNode.toString();
-    expect(rootNodeString).toContain('ERROR');
+    expect(rootNodeString).toContain('MISSING');
   });
 });

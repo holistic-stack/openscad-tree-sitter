@@ -74,7 +74,7 @@ describe('cstTreeCursorWalkLog', () => {
     expect(output).toContain('cube(10)');
 
     // Verify hierarchical structure with these node types in sequence
-    verifyNodeSequence(output, ['source_file', 'statement', 'expression']);
+    verifyNodeSequence(output, ['source_file', 'statement', 'module_instantiation']);
   });
 
   it('should handle multi-line nodes correctly', () => {

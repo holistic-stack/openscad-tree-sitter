@@ -316,7 +316,19 @@ export class AssignStatementVisitor extends BaseASTVisitor {
       }
     }
 
-    // Look for assign_statement in the statement (if the grammar supports it)
+    // Look for assignment_statement in the statement (modern OpenSCAD syntax)
+    const assignmentStatement = this.findDescendantOfType(node, 'assignment_statement');
+    if (assignmentStatement) {
+      this.safeLog(
+        'info',
+        `[AssignStatementVisitor.visitStatement] Found assignment_statement in statement`,
+        'AssignStatementVisitor.visitStatement',
+        assignmentStatement
+      );
+      return this.visitAssignStatement(assignmentStatement);
+    }
+
+    // Look for assign_statement in the statement (deprecated syntax, if the grammar supports it)
     const assignStatement = this.findDescendantOfType(node, 'assign_statement');
     if (assignStatement) {
       this.safeLog(
@@ -607,11 +619,33 @@ export class AssignStatementVisitor extends BaseASTVisitor {
   override visitAssignStatement(node: TSNode): ast.AssignStatementNode | null {
     this.safeLog(
       'info',
-      `[AssignStatementVisitor.visitAssignStatement] Processing assign statement: ${node.text.substring(0, 50)}`,
+      `[AssignStatementVisitor.visitAssignStatement] Processing assignment statement: ${node.text.substring(0, 50)}`,
       'AssignStatementVisitor.visitAssignStatement',
       node
     );
 
+    // Handle modern assignment_statement nodes (e.g., "range = [0:2:10];")
+    if (node.type === 'assignment_statement') {
+      const assignment = this.processModernAssignmentStatement(node);
+      if (!assignment) {
+        return null;
+      }
+
+      // Wrap the assignment in an AssignStatementNode for consistency
+      return {
+        type: 'assign',
+        assignments: [assignment],
+        body: {
+          type: 'expression',
+          expressionType: 'literal',
+          value: '',
+          location: getLocation(node),
+        },
+        location: getLocation(node),
+      } as ast.AssignStatementNode;
+    }
+
+    // Handle deprecated assign() function syntax
     // Extract assignments from assign_assignment nodes
     const assignments: ast.AssignmentNode[] = [];
 
@@ -664,6 +698,82 @@ export class AssignStatementVisitor extends BaseASTVisitor {
     );
 
     return assignNode;
+  }
+
+  /**
+   * Process a modern assignment_statement node (e.g., "range = [0:2:10];").
+   *
+   * This method handles the modern OpenSCAD variable assignment syntax where
+   * assignment_statement nodes have name and value fields directly.
+   *
+   * @param node - The assignment_statement CST node
+   * @returns A simple variable assignment AST node, or null if processing fails
+   *
+   * @private
+   */
+  private processModernAssignmentStatement(node: TSNode): ast.AssignmentNode | null {
+    this.safeLog(
+      'info',
+      `[AssignStatementVisitor.processModernAssignmentStatement] Processing modern assignment: ${node.text.substring(0, 50)}`,
+      'AssignStatementVisitor.processModernAssignmentStatement',
+      node
+    );
+
+    // Extract variable name from the name field
+    const nameNode = node.childForFieldName('name');
+    if (!nameNode) {
+      this.safeLog(
+        'warning',
+        `[AssignStatementVisitor.processModernAssignmentStatement] No name field found in assignment statement`,
+        'AssignStatementVisitor.processModernAssignmentStatement',
+        node
+      );
+      return null;
+    }
+
+    const variableName = nameNode.text;
+
+    // Extract value from the value field
+    const valueNode = node.childForFieldName('value');
+    if (!valueNode) {
+      this.safeLog(
+        'warning',
+        `[AssignStatementVisitor.processModernAssignmentStatement] No value field found in assignment statement`,
+        'AssignStatementVisitor.processModernAssignmentStatement',
+        node
+      );
+      return null;
+    }
+
+    // Process the value expression using the expression visitor system
+    const value = this.processExpression(valueNode);
+    if (!value) {
+      this.safeLog(
+        'warning',
+        `[AssignStatementVisitor.processModernAssignmentStatement] Failed to process value expression`,
+        'AssignStatementVisitor.processModernAssignmentStatement',
+        valueNode
+      );
+      return null;
+    }
+
+    // Create a simple variable assignment AST node
+    // For modern assignments like "range = [0:2:10];", we create an assignment node
+    const assignmentNode: ast.AssignmentNode = {
+      type: 'assignment',
+      variable: variableName,
+      value: value,
+      location: getLocation(node),
+    };
+
+    this.safeLog(
+      'info',
+      `[AssignStatementVisitor.processModernAssignmentStatement] Successfully created variable assignment: ${variableName} = ${valueNode.text}`,
+      'AssignStatementVisitor.processModernAssignmentStatement',
+      node
+    );
+
+    return assignmentNode;
   }
 
   /**
@@ -922,13 +1032,113 @@ export class AssignStatementVisitor extends BaseASTVisitor {
    * @private
    */
   private processExpression(node: TSNode): ast.ExpressionNode | null {
-    // For now, create a basic expression node
-    // This will be enhanced when integrated with the expression visitor system
+    this.safeLog(
+      'info',
+      `[AssignStatementVisitor.processExpression] Processing expression: type=${node.type}, text=${node.text}`,
+      'AssignStatementVisitor.processExpression',
+      node
+    );
+
+    // Handle different expression types
+    switch (node.type) {
+      case 'range_expression':
+        return this.processRangeExpression(node);
+      case 'number':
+        return {
+          type: 'expression',
+          expressionType: 'literal',
+          value: parseFloat(node.text),
+          location: getLocation(node),
+        } as ast.LiteralNode;
+      case 'string':
+        return {
+          type: 'expression',
+          expressionType: 'literal',
+          value: node.text.slice(1, -1), // Remove quotes
+          location: getLocation(node),
+        } as ast.LiteralNode;
+      case 'identifier':
+        return {
+          type: 'expression',
+          expressionType: 'variable',
+          name: node.text,
+          location: getLocation(node),
+        };
+      default:
+        // For other expression types, use the base visitor's expression handling
+        const result = this.visitExpression(node);
+        if (result && result.type === 'expression') {
+          return result as ast.ExpressionNode;
+        }
+
+        // Fallback: create a literal expression with the raw text
+        this.safeLog(
+          'warning',
+          `[AssignStatementVisitor.processExpression] Unhandled expression type: ${node.type}, falling back to literal`,
+          'AssignStatementVisitor.processExpression',
+          node
+        );
+        return {
+          type: 'expression',
+          expressionType: 'literal',
+          value: node.text,
+          location: getLocation(node),
+        };
+    }
+  }
+
+  /**
+   * Process a range_expression node to create a RangeExpressionNode.
+   *
+   * @param node - The range_expression CST node
+   * @returns The corresponding RangeExpressionNode, or null if processing fails
+   *
+   * @private
+   */
+  private processRangeExpression(node: TSNode): ast.RangeExpressionNode | null {
+    this.safeLog(
+      'info',
+      `[AssignStatementVisitor.processRangeExpression] Processing range expression: ${node.text}`,
+      'AssignStatementVisitor.processRangeExpression',
+      node
+    );
+
+    // Extract start, step, and end from the range expression
+    const startNode = node.childForFieldName('start');
+    const stepNode = node.childForFieldName('step');
+    const endNode = node.childForFieldName('end');
+
+    if (!startNode || !endNode) {
+      this.safeLog(
+        'warning',
+        `[AssignStatementVisitor.processRangeExpression] Missing start or end in range expression`,
+        'AssignStatementVisitor.processRangeExpression',
+        node
+      );
+      return null;
+    }
+
+    const start = this.processExpression(startNode);
+    const end = this.processExpression(endNode);
+    const step = stepNode ? this.processExpression(stepNode) : undefined;
+
+    if (!start || !end) {
+      this.safeLog(
+        'warning',
+        `[AssignStatementVisitor.processRangeExpression] Failed to process start or end expressions`,
+        'AssignStatementVisitor.processRangeExpression',
+        node
+      );
+      return null;
+    }
+
     return {
       type: 'expression',
-      expressionType: 'literal',
-      value: node.text,
+      expressionType: 'range_expression',
+      start,
+      end,
+      step: step || undefined,
       location: getLocation(node),
-    };
+    } as ast.RangeExpressionNode;
   }
 }

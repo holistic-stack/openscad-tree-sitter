@@ -174,7 +174,8 @@ describe('AssignStatementVisitor', () => {
       expect(assignNode.assignments).toHaveLength(1);
       expect(assignNode.assignments[0].variable).toBe('r');
       expect(assignNode.body).toBeDefined();
-      expect(assignNode.body.type).toBe('block');
+      expect(assignNode.body.type).toBe('expression');
+      expect((assignNode.body as any).expressionType).toBe('block');
     });
 
     it('should parse assign statement with complex block', () => {
@@ -189,7 +190,8 @@ describe('AssignStatementVisitor', () => {
       expect(assignNode.assignments).toHaveLength(2);
       expect(assignNode.assignments[0].variable).toBe('size');
       expect(assignNode.assignments[1].variable).toBe('height');
-      expect(assignNode.body.type).toBe('block');
+      expect(assignNode.body.type).toBe('expression');
+      expect((assignNode.body as any).expressionType).toBe('block');
     });
   });
 

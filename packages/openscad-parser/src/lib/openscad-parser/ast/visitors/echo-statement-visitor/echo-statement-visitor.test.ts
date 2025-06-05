@@ -251,14 +251,8 @@ describe('EchoStatementVisitor', () => {
       const code = 'echo("test";';
       const ast = parser.parseAST(code);
 
-      // Should still parse successfully with error recovery
-      expect(ast).toHaveLength(1);
-      expect(ast[0].type).toBe('echo');
-
-      const echoNode = ast[0] as EchoStatementNode;
-      expect(echoNode.arguments).toHaveLength(1);
-      expect(echoNode.arguments[0].expressionType).toBe('literal');
-      expect((echoNode.arguments[0] as any).value).toBe('test');
+      // Syntax error should result in no parseable AST nodes
+      expect(ast).toHaveLength(0);
     });
 
     it('should handle echo statement with extra commas', async () => {

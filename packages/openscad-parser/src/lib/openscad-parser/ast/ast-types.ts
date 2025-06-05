@@ -221,7 +221,7 @@ export type Vector4D = [number, number, number, number];
  */
 export interface Value {
   type: 'number' | 'boolean' | 'string' | 'identifier' | 'vector' | 'range';
-  value: string | Value[];
+  value: string | number | boolean | Value[];
   start?: string;
   end?: string;
   step?: string;

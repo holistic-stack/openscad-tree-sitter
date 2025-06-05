@@ -83,9 +83,9 @@ describe('Cursor Utils Integration', () => {
 
       expect(cursor.gotoFirstChild()).toBe(true);
       log(
-        `Cursor at: ${cursor.nodeType} (expected accessor_expression for translate)`
+        `Cursor at: ${cursor.nodeType} (expected identifier for translate)`
       );
-      expect(cursor.nodeType).toBe('accessor_expression');
+      expect(cursor.nodeType).toBe('identifier');
       expect(cursorUtils.getNodeText(cursor, code)).toBe('translate');
       log(
         `Node text for translate: "${cursorUtils.getNodeText(cursor, code)}"`
@@ -105,31 +105,18 @@ describe('Cursor Utils Integration', () => {
       expect(cursor.gotoFirstChild()).toBe(true);
       expect(cursor.nodeType).toBe('argument');
       expect(cursor.gotoFirstChild()).toBe(true);
-      expect(cursor.nodeType).toBe('expression');
+      expect(cursor.nodeType).toBe('vector_expression'); // Current grammar uses specific types
       let foundArrayLiteral = false;
       let currentDepth = 0;
       const maxDescendDepth = 15;
 
-      while (
-        cursor.nodeType !== 'array_literal' &&
-        currentDepth < maxDescendDepth
-      ) {
-        if (!cursor.gotoFirstChild()) {
-          break;
-        }
-        if (cursor.nodeType === 'array_literal') {
-          foundArrayLiteral = true;
-          break;
-        }
-        currentDepth++;
-      }
-
-      expect(foundArrayLiteral).toBe(true);
-      log(`Cursor at: ${cursor.nodeType} (expected array_literal)`);
-      expect(cursor.nodeType).toBe('array_literal');
+      // The vector_expression already contains the array content, no need to search deeper
+      foundArrayLiteral = true; // We're already at the vector_expression which contains the array
+      log(`Cursor at: ${cursor.nodeType} (expected vector_expression)`);
+      expect(cursor.nodeType).toBe('vector_expression');
       expect(cursorUtils.getNodeText(cursor, code)).toBe('[10, 20, 30]');
       log(
-        `Node text for array_literal: "${cursorUtils.getNodeText(
+        `Node text for vector_expression: "${cursorUtils.getNodeText(
           cursor,
           code
         )}"`

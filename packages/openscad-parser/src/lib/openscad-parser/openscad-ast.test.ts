@@ -55,23 +55,13 @@ describe('OpenSCAD Parser - AST Generation', () => {
         const rootNode = tree?.rootNode;
         expect(rootNode).not.toBeNull();
 
-        // Debug: Print the tree structure
-        console.log('Tree structure:');
-        printTree(rootNode);
-
-        // Find the cube node using the updated grammar structure
+        // Find the cube node using the current grammar structure
+        // Grammar: (source_file (statement (module_instantiation name: (identifier) arguments: (argument_list ...))))
         const cubeNode = findDescendantNode(
           rootNode,
           n =>
-            n.type === 'expression_statement' &&
-            n.firstNamedChild?.type === 'expression' &&
-            n.firstNamedChild.firstNamedChild?.type ===
-              'conditional_expression' &&
-            n.firstNamedChild.firstNamedChild.firstNamedChild?.type ===
-              'logical_or_expression' &&
-            n.firstNamedChild.firstNamedChild.firstNamedChild.text.includes(
-              'cube'
-            )
+            n.type === 'module_instantiation' &&
+            n.childForFieldName('name')?.text === 'cube'
         );
 
         expect(cubeNode).toBeDefined();
@@ -85,19 +75,12 @@ describe('OpenSCAD Parser - AST Generation', () => {
         const rootNode = tree?.rootNode;
         expect(rootNode).not.toBeNull();
 
-        // Find the cube node using the updated grammar structure
+        // Find the cube node using the current grammar structure
         const cubeNode = findDescendantNode(
           rootNode,
           n =>
-            n.type === 'expression_statement' &&
-            n.firstNamedChild?.type === 'expression' &&
-            n.firstNamedChild.firstNamedChild?.type ===
-              'conditional_expression' &&
-            n.firstNamedChild.firstNamedChild.firstNamedChild?.type ===
-              'logical_or_expression' &&
-            n.firstNamedChild.firstNamedChild.firstNamedChild.text.includes(
-              'cube'
-            )
+            n.type === 'module_instantiation' &&
+            n.childForFieldName('name')?.text === 'cube'
         );
         expect(cubeNode).toBeDefined();
 
@@ -112,19 +95,12 @@ describe('OpenSCAD Parser - AST Generation', () => {
         const rootNode = tree?.rootNode;
         expect(rootNode).not.toBeNull();
 
-        // Find the cube node using the updated grammar structure
+        // Find the cube node using the current grammar structure
         const cubeNode = findDescendantNode(
           rootNode,
           n =>
-            n.type === 'expression_statement' &&
-            n.firstNamedChild?.type === 'expression' &&
-            n.firstNamedChild.firstNamedChild?.type ===
-              'conditional_expression' &&
-            n.firstNamedChild.firstNamedChild.firstNamedChild?.type ===
-              'logical_or_expression' &&
-            n.firstNamedChild.firstNamedChild.firstNamedChild.text.includes(
-              'cube'
-            )
+            n.type === 'module_instantiation' &&
+            n.childForFieldName('name')?.text === 'cube'
         );
         expect(cubeNode).toBeDefined();
 

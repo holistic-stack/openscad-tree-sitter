@@ -44,9 +44,11 @@ describe('OpenscadParser Error Handling', () => {
       expect(result).toBeDefined();
       expect(result?.rootNode).toBeDefined();
 
-      // The tree should contain ERROR nodes
+      // The tree should contain MISSING tokens (tree-sitter error recovery)
       const rootNodeString = result?.rootNode.toString();
-      expect(rootNodeString).toContain('ERROR');
+      expect(rootNodeString).toContain('MISSING');
+
+
 
       // Should have called console.error with a formatted error message
       expect(mockConsoleError).toHaveBeenCalled();

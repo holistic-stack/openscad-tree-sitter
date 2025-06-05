@@ -165,8 +165,8 @@ export class RangeExpressionVisitor extends BaseASTVisitor {
     const endNode = node.childForFieldName('end');
     const stepNode = node.childForFieldName('step'); // Might be null
 
-    // Validate startNode
-    if (!startNode || startNode.isMissing || startNode.type === 'ERROR' || startNode.hasError) {
+    // Validate startNode - only check for truly missing nodes, not nodes with errors
+    if (!startNode || startNode.isMissing || startNode.type === 'ERROR') {
       this.errorHandler?.logError(
         `[RangeExpressionVisitor.visitRangeExpression] Invalid or missing 'start' node. CST: ${node.text}`,
         'RangeExpressionVisitor.visitRangeExpression: invalid_start_node'
@@ -181,8 +181,8 @@ export class RangeExpressionVisitor extends BaseASTVisitor {
       };
     }
 
-    // Validate endNode
-    if (!endNode || endNode.isMissing || endNode.type === 'ERROR' || endNode.hasError) {
+    // Validate endNode - only check for truly missing nodes, not nodes with errors
+    if (!endNode || endNode.isMissing || endNode.type === 'ERROR') {
       this.errorHandler?.logError(
         `[RangeExpressionVisitor.visitRangeExpression] Invalid or missing 'end' node. CST: ${node.text}`,
         'RangeExpressionVisitor.visitRangeExpression: invalid_end_node'
@@ -191,6 +191,9 @@ export class RangeExpressionVisitor extends BaseASTVisitor {
         type: 'error',
         errorCode: 'MISSING_RANGE_END',
         message: `Missing end expression in range: ${node.text}.`,
+        originalNodeType: node.type,
+        cstNodeText: node.text,
+        location: getLocation(node),
       };
     }
 
@@ -242,22 +245,6 @@ export class RangeExpressionVisitor extends BaseASTVisitor {
       };
     }
     const startExpression = startExpressionResult as ast.ExpressionNode;
-
-    // Validate endNode
-    if (!endNode || endNode.isMissing || endNode.type === 'ERROR' || endNode.hasError) {
-      this.errorHandler?.logError(
-        `[RangeExpressionVisitor.visitRangeExpression] Invalid or missing 'end' node. CST: ${node.text}`,
-        'RangeExpressionVisitor.visitRangeExpression: invalid_end_node'
-      );
-      return {
-        type: 'error',
-        errorCode: 'MISSING_RANGE_END',
-        message: `Missing end expression in range: ${node.text}.`,
-        originalNodeType: node.type,
-        cstNodeText: node.text,
-        location: getLocation(node),
-      };
-    }
 
     // Check for forbidden CST node types in end expression
     const forbiddenEndNodeTypes = ['if_statement', 'for_statement', 'while_statement', 'do_statement', 'module_declaration', 'function_declaration', 'include_statement', 'import_statement', 'use_statement']; // Add other reserved/invalid types as needed
@@ -328,7 +315,7 @@ export class RangeExpressionVisitor extends BaseASTVisitor {
     // Parse step expression (if present and valid)
     let stepExpression: ast.ExpressionNode | undefined = undefined;
     if (stepNode) {
-      if (stepNode.isMissing || stepNode.type === 'ERROR' || stepNode.hasError) {
+      if (stepNode.isMissing || stepNode.type === 'ERROR') {
         this.errorHandler?.logError(
           `[RangeExpressionVisitor.visitRangeExpression] Invalid or missing 'step' node. CST: ${stepNode.text}`,
           'RangeExpressionVisitor.visitRangeExpression: invalid_step_node'
