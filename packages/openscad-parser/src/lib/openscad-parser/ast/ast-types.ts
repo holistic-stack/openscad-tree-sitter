@@ -596,8 +596,8 @@ export interface IfNode extends BaseNode {
  */
 export interface ForLoopVariable {
   variable: string;
-  range: ExpressionNode | Vector2D | Vector3D;
-  step?: number;
+  range: ExpressionNode | ErrorNode;
+  step?: ExpressionNode | ErrorNode | undefined;
 }
 
 /**
@@ -971,6 +971,48 @@ export interface ErrorNode extends BaseNode {
 /**
  * Union type of all possible AST nodes
  */
+/**
+ * Union type of all possible AST nodes that can function as a statement in a block.
+ * This includes control flow statements, assignments, module instantiations,
+ * definitions, and geometry-producing operations.
+ */
+export type StatementNode =
+  | IfNode
+  | ForLoopNode
+  | LetNode
+  | EachNode
+  | AssertStatementNode
+  | EchoStatementNode
+  | AssignStatementNode
+  | ModuleInstantiationNode
+  | ModuleDefinitionNode
+  | FunctionDefinitionNode
+  | TranslateNode
+  | RotateNode
+  | ScaleNode
+  | MirrorNode
+  | MultmatrixNode
+  | ColorNode
+  | UnionNode
+  | DifferenceNode
+  | IntersectionNode
+  | HullNode
+  | MinkowskiNode
+  | CubeNode
+  | SphereNode
+  | CylinderNode
+  | PolyhedronNode
+  | PolygonNode
+  | CircleNode
+  | SquareNode
+  | TextNode
+  | LinearExtrudeNode
+  | RotateExtrudeNode
+  | OffsetNode
+  | ResizeNode
+  | ChildrenNode
+  | ErrorNode; // ErrorNode can also be a result of a statement
+
 export type ASTNode =
   | ExpressionNode
   | LiteralNode

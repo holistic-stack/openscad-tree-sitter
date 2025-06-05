@@ -214,6 +214,10 @@ export class EchoStatementVisitor extends BaseASTVisitor {
         case 'binary_expression':
           // Handle binary expressions (arithmetic, logical, etc.)
           return this.processBinaryExpression(actualNode);
+
+        case 'call_expression':
+          // Handle function call expressions using grammar field names
+          return this.processCallExpressionWithFields(actualNode);
       }
 
       // Handle different expression types directly
@@ -389,7 +393,69 @@ export class EchoStatementVisitor extends BaseASTVisitor {
   }
 
   /**
-   * Processes function call expressions
+   * Processes function call expressions using grammar field names
+   *
+   * This method uses the proper field names from the tree-sitter grammar:
+   * - field('function', $.identifier) for the function name
+   * - field('arguments', $.argument_list) for the arguments
+   *
+   * @param node The call expression CST node
+   * @returns The ExpressionNode AST node or null if processing fails
+   *
+   * @private
+   */
+  private processCallExpressionWithFields(node: TSNode): ExpressionNode | null {
+    // Extract function name using the 'function' field from grammar
+    const functionNode = node.childForFieldName('function');
+    const functionName = functionNode ? functionNode.text : 'unknown';
+
+    // Extract arguments using the 'arguments' field from grammar
+    const argumentsNode = node.childForFieldName('arguments');
+    const args: ExpressionNode[] = [];
+
+    if (argumentsNode) {
+      // Process arguments within the argument_list
+      for (let i = 0; i < argumentsNode.childCount; i++) {
+        const child = argumentsNode.child(i);
+        if (!child) continue;
+
+        // Skip punctuation (parentheses, commas)
+        if (child.type === '(' || child.type === ')' || child.type === ',') {
+          continue;
+        }
+
+        // Handle arguments node containing multiple argument children
+        if (child.type === 'arguments') {
+          for (let j = 0; j < child.childCount; j++) {
+            const argChild = child.child(j);
+            if (argChild && argChild.type === 'argument') {
+              const processedArg = this.processExpression(argChild);
+              if (processedArg) {
+                args.push(processedArg);
+              }
+            }
+          }
+        } else if (child.type === 'argument') {
+          // Handle individual argument nodes
+          const processedArg = this.processExpression(child);
+          if (processedArg) {
+            args.push(processedArg);
+          }
+        }
+      }
+    }
+
+    return {
+      type: 'expression',
+      expressionType: 'function_call',
+      name: functionName,
+      arguments: args,
+      text: node.text,
+    } as ExpressionNode;
+  }
+
+  /**
+   * Processes function call expressions (legacy method)
    *
    * @param node The call expression CST node
    * @returns The ExpressionNode AST node or null if processing fails
@@ -397,14 +463,8 @@ export class EchoStatementVisitor extends BaseASTVisitor {
    * @private
    */
   private processCallExpression(node: TSNode): ExpressionNode | null {
-    // Basic function call representation
-    return {
-      type: 'expression',
-      expressionType: 'function_call',
-      functionName: this.extractFunctionName(node),
-      arguments: this.extractCallArguments(node),
-      text: node.text,
-    } as ExpressionNode;
+    // Use the new field-based method
+    return this.processCallExpressionWithFields(node);
   }
 
   /**
@@ -766,9 +826,25 @@ export class EchoStatementVisitor extends BaseASTVisitor {
    *
    * @private
    */
-  private extractVectorElements(node: TSNode): any[] {
-    // For now, return a simple representation
-    // In a full implementation, this would parse the elements properly
-    return [node.text];
+  private extractVectorElements(node: TSNode): ExpressionNode[] {
+    const elements: ExpressionNode[] = [];
+
+    // Process all children, skipping brackets and commas
+    for (let i = 0; i < node.childCount; i++) {
+      const child = node.child(i);
+      if (
+        child &&
+        child.type !== '[' &&
+        child.type !== ']' &&
+        child.type !== ','
+      ) {
+        const processedElement = this.processExpression(child);
+        if (processedElement) {
+          elements.push(processedElement);
+        }
+      }
+    }
+
+    return elements;
   }
 }

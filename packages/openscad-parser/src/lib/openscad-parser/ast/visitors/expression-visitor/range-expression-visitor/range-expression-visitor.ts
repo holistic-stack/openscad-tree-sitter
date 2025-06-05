@@ -53,6 +53,34 @@ import { ExpressionVisitor } from '../../expression-visitor.js'; // Added import
  * ```
  */
 export class RangeExpressionVisitor extends BaseASTVisitor {
+
+  /**
+   * Main entry point for visiting a node with this visitor.
+   * It specifically handles 'range_expression' CST nodes by dispatching
+   * to `visitRangeExpression`. Other node types will result in an error.
+   * @param node The Tree-sitter CST node to visit.
+   * @returns An ASTNode (RangeExpressionNode or ErrorNode).
+   */
+  override visitNode(node: TSNode): ast.ASTNode | null {
+    if (node.type === 'range_expression') {
+      return this.visitRangeExpression(node);
+    }
+    this.errorHandler?.logError(
+      `[RangeExpressionVisitor.visitNode] Unexpected node type: ${node.type}. Expected 'range_expression'.`,
+      'RangeExpressionVisitor.visitNode: unexpected_node_type',
+      node
+    );
+    // Return an ErrorNode, which is a subtype of ASTNode. Null could also be valid if the node is simply ignored.
+    return {
+      type: 'error',
+      errorCode: 'UNEXPECTED_NODE_TYPE_FOR_RANGE_VISITOR',
+      message: `RangeExpressionVisitor: Expected 'range_expression', but received '${node.type}'.`,
+      originalNodeType: node.type,
+      cstNodeText: node.text,
+      location: getLocation(node),
+    } as ast.ErrorNode;
+  }
+
   /**
    * Parent expression visitor for processing nested expressions
    */
@@ -118,10 +146,11 @@ export class RangeExpressionVisitor extends BaseASTVisitor {
       'RangeExpressionVisitor.visitRangeExpression'
     );
 
-    // Validate node type
     if (node.type !== 'range_expression') {
-      // This case should ideally be handled by the main visit method or the caller.
-      // If called directly with a wrong node type, it's an internal error.
+      this.errorHandler?.logError(
+        `[RangeExpressionVisitor.visitRangeExpression] Expected 'range_expression', got '${node.type}'. CST: ${node.text}`,
+        'RangeExpressionVisitor.visitRangeExpression: invalid_node_type'
+      );
       return {
         type: 'error',
         errorCode: 'INVALID_NODE_TYPE_FOR_RANGE_VISIT',
@@ -129,138 +158,269 @@ export class RangeExpressionVisitor extends BaseASTVisitor {
         originalNodeType: node.type,
         cstNodeText: node.text,
         location: getLocation(node),
-      } as ast.ErrorNode;
+      };
     }
 
-    // No try-catch here; errors are returned as ErrorNode
     const startNode = node.childForFieldName('start');
-    if (!startNode) {
-      return {
-        type: 'error',
-        errorCode: 'RANGE_EXPRESSION_MISSING_START',
-        message: `Range expression is missing the start component: ${node.text}`,
-        originalNodeType: node.type,
-        cstNodeText: node.text,
-        location: getLocation(node),
-      } as ast.ErrorNode;
-    }
-
     const endNode = node.childForFieldName('end');
-    if (!endNode) {
+    const stepNode = node.childForFieldName('step'); // Might be null
+
+    // Validate startNode
+    if (!startNode || startNode.isMissing || startNode.type === 'ERROR' || startNode.hasError) {
+      this.errorHandler?.logError(
+        `[RangeExpressionVisitor.visitRangeExpression] Invalid or missing 'start' node. CST: ${node.text}`,
+        'RangeExpressionVisitor.visitRangeExpression: invalid_start_node'
+      );
       return {
         type: 'error',
-        errorCode: 'RANGE_EXPRESSION_MISSING_END',
-        message: `Range expression is missing the end component: ${node.text}`,
+        errorCode: 'MISSING_RANGE_START',
+        message: `Missing start expression in range: ${node.text}.`,
         originalNodeType: node.type,
         cstNodeText: node.text,
         location: getLocation(node),
-      } as ast.ErrorNode;
+      };
     }
 
-    const stepNode = node.childForFieldName('step');
+    // Validate endNode
+    if (!endNode || endNode.isMissing || endNode.type === 'ERROR' || endNode.hasError) {
+      this.errorHandler?.logError(
+        `[RangeExpressionVisitor.visitRangeExpression] Invalid or missing 'end' node. CST: ${node.text}`,
+        'RangeExpressionVisitor.visitRangeExpression: invalid_end_node'
+      );
+      return {
+        type: 'error',
+        errorCode: 'MISSING_RANGE_END',
+        message: `Missing end expression in range: ${node.text}.`,
+      };
+    }
 
+    // Parse start expression
     const startExpressionResult = this.parentVisitor.dispatchSpecificExpression(startNode);
-    if (!startExpressionResult || startExpressionResult.type === 'error') {
-      let message = `Failed to parse start expression '${startNode.text}' in range: ${node.text}`;
-      if (startExpressionResult && startExpressionResult.type === 'error') {
-        message += `. Cause: ${startExpressionResult.message}`;
+    if (!startExpressionResult) {
+      this.errorHandler?.logError(
+        `[RangeExpressionVisitor.visitRangeExpression] Failed to parse 'start' expression (null result). CST: ${startNode.text}`,
+        'RangeExpressionVisitor.visitRangeExpression: start_expr_null_result'
+      );
+      return {
+        type: 'error',
+        errorCode: 'RANGE_START_PARSE_FAILURE',
+        message: `Failed to parse start expression in range: ${startNode.text}. Visitor returned null.`,
+        originalNodeType: node.type,
+        cstNodeText: node.text,
+        location: getLocation(node),
+      };
+    }
+    if (startExpressionResult.type === 'error') {
+      // Check if the error was due to 'if' keyword (parsed as identifier)
+      if (startNode.text === 'if' && startNode.type === 'identifier') {
+        this.errorHandler?.logError(
+          `[RangeExpressionVisitor.visitRangeExpression] Keyword 'if' used as start expression. CST: ${startNode.text}`,
+          'RangeExpressionVisitor.visitRangeExpression: keyword_as_start_expression'
+        );
+        return {
+          type: 'error',
+          errorCode: 'E209_INVALID_SYNTAX_IN_RANGE_START',
+          message: `Invalid syntax: Reserved keyword '${startNode.text}' cannot be used as a standalone expression. Context: in start of range '${node.text}'.`,
+          originalNodeType: node.type, // The overall node being parsed is a range_expression
+          cstNodeText: startNode.text,
+          location: getLocation(startNode),
+        };
       }
+      // Original error handling for unparsable start expression
+      this.errorHandler?.logError(
+        `[RangeExpressionVisitor.visitRangeExpression] 'start' expression parsing returned an error. CST: ${startNode.text}, Error: ${startExpressionResult.message}`,
+        'RangeExpressionVisitor.visitRangeExpression: start_expr_is_error'
+      );
       return {
         type: 'error',
         errorCode: 'UNPARSABLE_RANGE_START_EXPRESSION',
-        message,
+        message: `Failed to parse start expression '${startNode.text}' in range ${node.text}. Error: ${startExpressionResult.message}`,
+        cause: startExpressionResult,
         originalNodeType: node.type,
-        cstNodeText: startNode.text,
-        location: getLocation(startNode),
-        ...(startExpressionResult && startExpressionResult.type === 'error' ? { cause: startExpressionResult } : {}),
-      } as ast.ErrorNode;
+        cstNodeText: node.text,
+        location: getLocation(node),
+      };
     }
-    const startExpression: ast.ExpressionNode = startExpressionResult;
+    const startExpression = startExpressionResult as ast.ExpressionNode;
 
+    // Validate endNode
+    if (!endNode || endNode.isMissing || endNode.type === 'ERROR' || endNode.hasError) {
+      this.errorHandler?.logError(
+        `[RangeExpressionVisitor.visitRangeExpression] Invalid or missing 'end' node. CST: ${node.text}`,
+        'RangeExpressionVisitor.visitRangeExpression: invalid_end_node'
+      );
+      return {
+        type: 'error',
+        errorCode: 'MISSING_RANGE_END',
+        message: `Missing end expression in range: ${node.text}.`,
+        originalNodeType: node.type,
+        cstNodeText: node.text,
+        location: getLocation(node),
+      };
+    }
+
+    // Check for forbidden CST node types in end expression
+    const forbiddenEndNodeTypes = ['if_statement', 'for_statement', 'while_statement', 'do_statement', 'module_declaration', 'function_declaration', 'include_statement', 'import_statement', 'use_statement']; // Add other reserved/invalid types as needed
+    if (forbiddenEndNodeTypes.includes(endNode.type)) {
+      this.errorHandler?.logError(
+        `[RangeExpressionVisitor.visitRangeExpression] Forbidden CST node type '${endNode.type}' used as end expression. CST: ${endNode.text}`,
+        'RangeExpressionVisitor.visitRangeExpression: forbidden_end_node_type'
+      );
+      return {
+        type: 'error',
+        errorCode: 'E210_INVALID_SYNTAX_IN_RANGE_END',
+        message: `Invalid syntax: Forbidden node type '${endNode.type}' used as end expression in range: ${node.text}.`,
+        originalNodeType: endNode.type,
+        cstNodeText: endNode.text,
+        location: getLocation(endNode),
+      };
+    }
+
+    // Parse end expression
     const endExpressionResult = this.parentVisitor.dispatchSpecificExpression(endNode);
-    if (!endExpressionResult || endExpressionResult.type === 'error') {
-      let message = `Failed to parse end expression '${endNode.text}' in range: ${node.text}`;
-      if (endExpressionResult && endExpressionResult.type === 'error') {
-        message += `. Cause: ${endExpressionResult.message}`;
+    if (!endExpressionResult) {
+      this.errorHandler?.logError(
+        `[RangeExpressionVisitor.visitRangeExpression] Failed to parse 'end' expression (null result). CST: ${endNode.text}`,
+        'RangeExpressionVisitor.visitRangeExpression: end_expr_null_result'
+      );
+      return {
+        type: 'error',
+        errorCode: 'RANGE_END_PARSE_FAILURE',
+        message: `Failed to parse end expression in range: ${endNode.text}. Visitor returned null.`,
+        originalNodeType: node.type,
+        cstNodeText: node.text,
+        location: getLocation(node),
+      };
+    }
+    if (endExpressionResult.type === 'error') {
+      // Check if the error was due to 'if' keyword (parsed as identifier)
+      if (endNode.text === 'if' && endNode.type === 'identifier') {
+        this.errorHandler?.logError(
+          `[RangeExpressionVisitor.visitRangeExpression] Keyword 'if' used as end expression. CST: ${endNode.text}`,
+          'RangeExpressionVisitor.visitRangeExpression: keyword_as_end_expression'
+        );
+        return {
+          type: 'error',
+          errorCode: 'E211_INVALID_SYNTAX_IN_RANGE_END',
+          message: `Invalid syntax: Reserved keyword '${endNode.text}' cannot be used as a standalone expression. Context: in end of range '${node.text}'.`,
+          originalNodeType: node.type, // The overall node being parsed is a range_expression
+          cstNodeText: endNode.text,
+          location: getLocation(endNode),
+        };
       }
+      // Original error handling for unparsable end expression
+      this.errorHandler?.logError(
+        `[RangeExpressionVisitor.visitRangeExpression] 'end' expression parsing returned an error. CST: ${endNode.text}, Error: ${endExpressionResult.message}`,
+        'RangeExpressionVisitor.visitRangeExpression: end_expr_is_error'
+      );
       return {
         type: 'error',
         errorCode: 'UNPARSABLE_RANGE_END_EXPRESSION',
-        message,
+        message: `Failed to parse end expression '${endNode.text}' in range ${node.text}. Error: ${endExpressionResult.message}`,
+        cause: endExpressionResult,
         originalNodeType: node.type,
-        cstNodeText: endNode.text,
-        location: getLocation(endNode),
-        ...(endExpressionResult && endExpressionResult.type === 'error' ? { cause: endExpressionResult } : {}),
-      } as ast.ErrorNode;
+        cstNodeText: node.text,
+        location: getLocation(node),
+      };
     }
-    const endExpression: ast.ExpressionNode = endExpressionResult;
+    const endExpression = endExpressionResult as ast.ExpressionNode;
 
-    let stepExpression: ast.ExpressionNode | undefined;
+    // Parse step expression (if present and valid)
+    let stepExpression: ast.ExpressionNode | undefined = undefined;
     if (stepNode) {
+      if (stepNode.isMissing || stepNode.type === 'ERROR' || stepNode.hasError) {
+        this.errorHandler?.logError(
+          `[RangeExpressionVisitor.visitRangeExpression] Invalid or missing 'step' node. CST: ${stepNode.text}`,
+          'RangeExpressionVisitor.visitRangeExpression: invalid_step_node'
+        );
+        return {
+          type: 'error',
+          errorCode: 'INVALID_RANGE_STEP',
+          message: `Invalid step expression in range: ${stepNode.text}.`,
+          originalNodeType: node.type,
+          cstNodeText: node.text,
+          location: getLocation(node),
+        };
+      }
+
+      // Check for forbidden CST node types in step expression
+      const forbiddenStepNodeTypes = ['if_statement', 'for_statement', 'while_statement', 'do_statement', 'module_declaration', 'function_declaration', 'include_statement', 'import_statement', 'use_statement']; // Add other reserved/invalid types as needed
+      if (forbiddenStepNodeTypes.includes(stepNode.type)) {
+        this.errorHandler?.logError(
+          `[RangeExpressionVisitor.visitRangeExpression] Forbidden CST node type '${stepNode.type}' used as step expression. CST: ${stepNode.text}`,
+          'RangeExpressionVisitor.visitRangeExpression: forbidden_step_node_type'
+        );
+        return {
+          type: 'error',
+          errorCode: 'E211_INVALID_SYNTAX_IN_RANGE_STEP',
+          message: `Invalid syntax: Forbidden node type '${stepNode.type}' used as step expression in range: ${node.text}.`,
+          originalNodeType: stepNode.type,
+          cstNodeText: stepNode.text,
+          location: getLocation(stepNode),
+        };
+      }
+
       const stepExpressionResult = this.parentVisitor.dispatchSpecificExpression(stepNode);
-      if (!stepExpressionResult || stepExpressionResult.type === 'error') {
-        let message = `Failed to parse step expression '${stepNode.text}' in range: ${node.text}`;
-        if (stepExpressionResult && stepExpressionResult.type === 'error') {
-          message += `. Cause: ${stepExpressionResult.message}`;
+      if (!stepExpressionResult) {
+        this.errorHandler?.logError(
+          `[RangeExpressionVisitor.visitRangeExpression] Failed to parse 'step' expression (null result). CST: ${stepNode.text}`,
+          'RangeExpressionVisitor.visitRangeExpression: step_expr_null_result'
+        );
+        return {
+          type: 'error',
+          errorCode: 'RANGE_STEP_PARSE_FAILURE',
+          message: `Failed to parse step expression in range: ${stepNode.text}. Visitor returned null.`,
+          originalNodeType: node.type,
+          cstNodeText: node.text,
+          location: getLocation(node),
+        };
+      }
+      if (stepExpressionResult.type === 'error') {
+        // Check if the error was due to 'if' keyword (parsed as identifier)
+        if (stepNode.text === 'if' && stepNode.type === 'identifier') {
+          this.errorHandler?.logError(
+            `[RangeExpressionVisitor.visitRangeExpression] Keyword 'if' used as step expression. CST: ${stepNode.text}`,
+            'RangeExpressionVisitor.visitRangeExpression: keyword_as_step_expression'
+          );
+          return {
+            type: 'error',
+            errorCode: 'E210_INVALID_SYNTAX_IN_RANGE_STEP',
+            message: `Invalid syntax: Reserved keyword '${stepNode.text}' cannot be used as a standalone expression. Context: in step of range '${node.text}'.`,
+            originalNodeType: node.type, // The overall node being parsed is a range_expression
+            cstNodeText: stepNode.text,
+            location: getLocation(stepNode),
+          };
         }
+        // Original error handling for unparsable step expression
+        this.errorHandler?.logError(
+          `[RangeExpressionVisitor.visitRangeExpression] 'step' expression parsing returned an error. CST: ${stepNode.text}, Error: ${stepExpressionResult.message}`,
+          'RangeExpressionVisitor.visitRangeExpression: step_expr_is_error'
+        );
         return {
           type: 'error',
           errorCode: 'UNPARSABLE_RANGE_STEP_EXPRESSION',
-          message,
-          originalNodeType: node.type,
+          message: `Unable to parse step expression in range: ${stepNode.text}. Error: ${stepExpressionResult.message}`,
+          originalNodeType: stepNode.type,
           cstNodeText: stepNode.text,
-          location: getLocation(stepNode),
-          ...(stepExpressionResult && stepExpressionResult.type === 'error' ? { cause: stepExpressionResult } : {}),
-        } as ast.ErrorNode;
+          location: getLocation(node),
+        };
       }
-      stepExpression = stepExpressionResult;
+      stepExpression = stepExpressionResult as ast.ExpressionNode;
     }
 
+    // All parts are valid, create the RangeExpressionNode
     const rangeExpressionNode: ast.RangeExpressionNode = {
       type: 'expression',
       expressionType: 'range_expression',
       start: startExpression,
       end: endExpression,
-      location: getLocation(node),
+      location: getLocation(node)
     };
 
-    if (stepExpression) {
+    if (stepExpression !== undefined) {
       rangeExpressionNode.step = stepExpression;
     }
 
-    // Optional: Log success if needed, but not strictly necessary for visitor logic
-    // this.errorHandler?.logInfo(
-    //   `[RangeExpressionVisitor.visitRangeExpression] Successfully created range expression AST node`,
-    //   'RangeExpressionVisitor.visitRangeExpression'
-    // );
-
     return rangeExpressionNode;
   }
-
-
-  /**
-   * Visit method for compatibility with base visitor interface.
-   * Delegates to visitRangeExpression for range_expression nodes and
-   * checks array_literal nodes for range patterns.
-   *
-   * @param node - The Tree-sitter node to visit
-   * @returns The AST node or null if the node cannot be processed
-   */
-  visit(node: TSNode): ast.ASTNode | ast.ErrorNode {
-    if (node.type === 'range_expression') {
-      return this.visitRangeExpression(node);
-    }
-
-    // If not a range_expression, it's an error for this specific visitor.
-    // The generic ExpressionVisitor should handle dispatching to the correct visitor.
-    return {
-        type: 'error',
-        errorCode: 'UNEXPECTED_NODE_TYPE_FOR_RANGE_VISITOR',
-        message: `RangeExpressionVisitor: Expected 'range_expression', but received '${node.type}'.`,
-        originalNodeType: node.type,
-        cstNodeText: node.text,
-        location: getLocation(node),
-      } as ast.ErrorNode;
-  }
 }
-

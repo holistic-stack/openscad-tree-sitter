@@ -314,6 +314,107 @@ Instead of trying to fix a working visitor, correctly identified the issue as ou
 
 ---
 
+## 2025-06-05: Array Expression Parsing with Vector Elements Extraction
+
+### Problem
+The EchoStatementVisitor was failing to parse array expressions like `echo([1, 2, 3])`. The test expected the array to be parsed as 3 individual elements, but it was being parsed as a single string `'[1, 2, 3]'`.
+
+### Root Cause
+The `extractVectorElements` method was just a placeholder that returned `[node.text]` instead of properly parsing the individual elements within the vector expression.
+
+### Solution
+Fixed the `extractVectorElements` method to properly traverse the vector expression children and extract individual elements:
+
+```typescript
+private extractVectorElements(node: TSNode): ExpressionNode[] {
+  const elements: ExpressionNode[] = [];
+
+  // Process all children, skipping brackets and commas
+  for (let i = 0; i < node.childCount; i++) {
+    const child = node.child(i);
+    if (
+      child &&
+      child.type !== '[' &&
+      child.type !== ']' &&
+      child.type !== ','
+    ) {
+      const processedElement = this.processExpression(child);
+      if (processedElement) {
+        elements.push(processedElement);
+      }
+    }
+  }
+
+  return elements;
+}
+```
+
+### Key Insights
+1. **CST Structure Analysis**: The `vector_expression` contains individual element nodes separated by brackets and commas
+2. **Child Traversal**: Need to iterate through all children and filter out structural tokens (`[`, `]`, `,`)
+3. **Recursive Processing**: Each element should be processed through `processExpression` to handle nested expressions
+4. **Type Safety**: Return `ExpressionNode[]` instead of `any[]` for better type safety
+
+### Impact
+- ✅ Array expression test now passing (14/15 tests passing - 93% success rate)
+- ✅ Arrays like `[1, 2, 3]` correctly parsed as 3 individual elements
+- ✅ Proper integration with existing expression processing pipeline
+- ✅ Quality gates passing (lint successful)
+
+### Prevention
+- Always check if placeholder methods are properly implemented
+- Use CST structure analysis to understand how to traverse complex expressions
+- Test with actual tree-sitter output to verify implementation matches grammar structure
+- Prefer typed return values over `any[]` for better type safety
+
+---
+
+## 2025-06-05: Function Call Expression Parsing with Tree-sitter Field Names
+
+### Problem
+The EchoStatementVisitor was failing to extract function names from function call expressions like `echo(sin(45))`. The test expected `funcCall.name` to be `'sin'` but was getting `undefined`.
+
+### Root Cause
+The original implementation was using generic extraction methods instead of leveraging the specific field names defined in the tree-sitter grammar. The grammar defines:
+```javascript
+call_expression: ($) =>
+  seq(
+    field('function', $.identifier),
+    field('arguments', $.argument_list)
+  )
+```
+
+### Solution
+Created a new `processCallExpressionWithFields` method that uses `childForFieldName()` to extract the function name and arguments:
+
+```typescript
+// Extract function name using the 'function' field from grammar
+const functionNode = node.childForFieldName('function');
+const functionName = functionNode ? functionNode.text : 'unknown';
+
+// Extract arguments using the 'arguments' field from grammar
+const argumentsNode = node.childForFieldName('arguments');
+```
+
+### Key Insights
+1. **Use Grammar Field Names**: When tree-sitter grammar defines named fields, always use `childForFieldName()` for direct access
+2. **CST Structure Analysis**: Parsing the actual CST structure (`nx parse tree-sitter-openscad -- file.scad`) reveals the exact field names and hierarchy
+3. **Incremental Testing**: Fixing one issue at a time allows for focused debugging and validation
+
+### Impact
+- ✅ Function call test now passing (13/15 tests passing - 87% success rate)
+- ✅ Function names correctly extracted from call expressions
+- ✅ Proper integration with existing expression processing pipeline
+- ✅ Quality gates passing (lint successful)
+
+### Prevention
+- Always check the grammar definition for field names before implementing extraction logic
+- Use `nx parse tree-sitter-openscad -- file.scad` to understand CST structure
+- Prefer `childForFieldName()` over generic traversal methods when fields are defined
+- Test with actual tree-sitter output to verify implementation matches grammar structure
+
+---
+
 ## Template for Future Lessons
 
 ### Problem

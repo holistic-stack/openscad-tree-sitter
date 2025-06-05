@@ -1,5 +1,172 @@
 # OpenSCAD Parser - Progress Log
 
+## ✅ MAJOR SUCCESS: ForLoopVisitor Completely Fixed (2025-06-05)
+
+**Status**: COMPLETED - All ForLoopVisitor tests now passing (100% success rate)
+**Priority**: High (Critical for OpenSCAD `for` loop support)
+**Effort**: 4 hours
+**Impact**: Major breakthrough - All ForLoopVisitor issues resolved, overall test success rate improved to ~72%
+
+**Achievement**: Successfully fixed all ForLoopVisitor issues including type errors, variable/range parsing, body processing, and step handling.
+
+**Root Cause Identified**: Multiple critical issues:
+- TypeScript compilation errors (identifier vs variable node types)
+- Body processing failures (0 body statements instead of 1)
+- Step handling missing for range expressions with steps
+- Expression visitor integration issues
+
+**Key Technical Changes**:
+- Fixed all type errors by updating type guards to use `isAstVariableNode` instead of `isAstIdentifierNode`
+- Fixed expression visitor integration by using `dispatchSpecificExpression` instead of `visitNode`
+- Implemented custom body processing with `processBlockStatements` and `processStatement` methods
+- Added step extraction from range expressions for ForLoopVariable objects
+- Updated all variable type declarations and comments throughout the visitor
+
+**Test Results - Complete Success (4/4 tests passing)**:
+- ✅ **Basic for loop**: `for (i = [0:5]) { cube(10); }` - PASSING
+- ✅ **For loop with step**: `for (i = [0:0.5:5]) { cube(10); }` - PASSING (step handling working)
+- ✅ **Multiple variables**: `for (i = [0:5], j = [0:5]) { cube(10); }` - PASSING (2 assignments)
+- ✅ **Complex expressions**: `for (i = [0:len(v)-1]) { cube(10); }` - PASSING (binary expressions and function calls)
+
+**Quality Gates Status**:
+- ✅ TypeScript compilation: PASSING (all type errors resolved)
+- ✅ Lint: PASSING (only warnings, no errors)
+- ✅ Tests: ALL ForLoopVisitor tests PASSING (100% success rate)
+- ✅ Overall Impact: Test success rate improved to ~72% (409/567 tests passing)
+
+**Key Technical Insights**:
+- Variable vs identifier node type consistency is critical for type safety
+- Custom body processing avoids circular dependencies with composite visitors
+- Step extraction from range expressions requires proper type checking
+- Expression visitor method naming is crucial for proper delegation
+
+**Files Modified**:
+- `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/control-structure-visitor/for-loop-visitor.ts`
+
+## Expression System Refinements (2025-06-05)
+
+**Status**: ONGOING
+**Priority**: High (Part of Critical Expression System Fixes)
+**Effort**: Minimal
+**Impact**: Aligns tests with current grammar, reduces false negatives.
+
+**Key Achievements & Changes**:
+- **`simple-binary.test.ts` Fix**:
+  - Updated test expectations in `simple-binary.test.ts` to use `binary_expression` instead of older, specific types like `additive_expression` or `multiplicative_expression`. This aligns the test with the refactored grammar where various binary operations are now represented by a single `binary_expression` CST node type.
+  - Verified that `ExpressionVisitor.dispatchSpecificExpression` correctly routes `binary_expression` nodes to `createBinaryExpressionNode`, requiring no changes to the visitor itself for this specific fix.
+
+
+## ForLoopVisitor Refinement (2025-06-04)
+
+**Status**: IN PROGRESS - Major cleanup and type error resolution completed.
+**Priority**: High (Critical for OpenSCAD `for` loop support)
+**Effort**: Ongoing
+**Impact**: Aims to fix failing `for` loop tests and enable robust parsing of for-loop constructs.
+
+**Key Achievements & Changes in `for-loop-visitor.ts`**:
+- **Structural Cleanup**: Removed several obsolete and duplicated methods that were causing lint errors and confusion:
+  - `extractVariablesFromText` (legacy regex-based parsing)
+  - An older, incomplete `visitBlock` implementation
+  - `processForHeader` (legacy header processing)
+  - `extractVariableFromIterator` (legacy iterator processing)
+- **`ErrorHandler` Call Correction**: Ensured all `ErrorHandler.logError`, `logWarning`, and `logInfo` calls use a string literal for the second `context` argument, resolving lint errors.
+- **Type Error Resolution in `createForNode`**:
+  - Fixed issues where `arg.value.type` could be `never` by safely accessing `(arg.value as any).type` in error messages.
+  - Corrected `createNumericLiteralNode` calls where `arg.value` (a `number[]`) was accessed for its `length` in error messages by casting to `number[]`.
+- **`createNumericLiteralNode` Enhancement**: Updated the `createNumericLiteralNode` utility function to accept `boolean` values, aligning with its usage in `createForNode`.
+- **Console Log Removal**: Replaced `console.log` statements in `createForNode` with `this.errorHandler.logInfo` for consistent logging.
+- **`visitBlock` Refinements**: Attempted to resolve persistent TypeScript lint errors (`'child' is possibly 'null'`) by adding explicit null checks for `child` nodes within the loop. The latest approach uses an `if (currentChild)` block to ensure TypeScript's control flow analysis recognizes `currentChild` as non-null.
+
+**Next Steps**:
+- Run the test suite for `openscad-parser`, focusing on `for-loop-visitor.test.ts`, to assess the impact of these changes.
+- Address any remaining test failures or new lint/type errors that arise.
+- Update `current-context.md` with these details.
+
+---
+
+## ✅ MAJOR SUCCESS: Array Expression Parsing Fixed (2025-06-05)
+
+**Status**: COMPLETED - Array expression issue resolved with 14/15 tests passing (93% success rate)
+**Priority**: High (Critical for OpenSCAD array/vector support in echo statements)
+**Effort**: 1 hour
+**Impact**: Major breakthrough - Successfully implemented array expression parsing by fixing vector elements extraction
+
+**Achievement**: Successfully fixed array expression parsing in EchoStatementVisitor by implementing proper vector elements extraction.
+
+**Root Cause Identified**: The `extractVectorElements` method was just a placeholder that returned `[node.text]` instead of properly parsing the individual elements within the vector expression.
+
+**Key Technical Changes**:
+- Fixed `extractVectorElements` method to properly traverse vector expression children
+- Implemented child iteration that skips structural tokens (`[`, `]`, `,`) and processes individual elements
+- Used `this.processExpression(child)` to recursively process each element
+- Changed return type from `any[]` to `ExpressionNode[]` for better type safety
+- Proper filtering of non-expression children (brackets and commas)
+
+**Test Results - Excellent Progress (14/15 tests now passing)**:
+- ✅ **Array expressions**: `echo([1, 2, 3])` - Array elements correctly parsed as 3 individual elements
+- ✅ **Function call expressions**: `echo(sin(45))` - Function name correctly extracted as `'sin'`
+- ✅ **All basic echo functionality**: String, number, boolean, variable arguments - ALL PASSING
+- ✅ **Multiple arguments**: Mixed types and many arguments - ALL PASSING
+- ✅ **Arithmetic expressions**: `echo(x + y)` - PASSING
+- ✅ **Edge cases**: Empty echo, no semicolon, multiple statements - ALL PASSING
+- ❌ **Error recovery**: Missing parenthesis test expects recovery that isn't working (1 failure)
+
+**Quality Gates Status**:
+- ✅ Lint: PASSING (only warnings, no errors)
+- ⚠️ TypeScript: Some errors in other files (not related to changes)
+- ✅ Core functionality: Array expressions working correctly
+
+**Key Technical Insights**:
+- CST structure analysis reveals that `vector_expression` contains individual element nodes separated by structural tokens
+- Child traversal with filtering is essential for extracting meaningful content from complex expressions
+- Recursive processing through `processExpression` ensures nested expressions are handled correctly
+- Type safety improvements prevent runtime errors and improve maintainability
+
+**Files Modified**:
+- `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/echo-statement-visitor/echo-statement-visitor.ts` (fixed extractVectorElements method)
+
+## ✅ MAJOR SUCCESS: Function Call Expression Parsing Fixed (2025-06-05)
+
+**Status**: COMPLETED - Function call expression issue resolved with 13/15 tests passing (87% success rate)
+**Priority**: High (Critical for OpenSCAD function call support in echo statements)
+**Effort**: 2 hours
+**Impact**: Major breakthrough - Successfully implemented function call expression parsing using tree-sitter grammar field names
+
+**Achievement**: Successfully fixed function call expression parsing in EchoStatementVisitor using proper tree-sitter grammar field names.
+
+**Root Cause Identified**: The issue was using generic extraction methods instead of leveraging the specific field names defined in the tree-sitter grammar. The grammar defines `call_expression` with `field('function', $.identifier)` and `field('arguments', $.argument_list)`.
+
+**Key Technical Changes**:
+- Added `case 'call_expression'` to the `processExpression` method switch statement
+- Implemented `processCallExpressionWithFields` method using `childForFieldName()` for direct field access
+- Used `node.childForFieldName('function')` to extract function name from the grammar's function field
+- Used `node.childForFieldName('arguments')` to extract arguments from the grammar's arguments field
+- Proper processing of nested `arguments` and `argument` nodes within the argument list
+- Maintained backward compatibility by updating existing `processCallExpression` to use the new method
+
+**Test Results - Excellent Progress (13/15 tests now passing)**:
+- ✅ **Function call expressions**: `echo(sin(45))` - Function name correctly extracted as `'sin'`
+- ✅ **All basic echo functionality**: String, number, boolean, variable arguments - ALL PASSING
+- ✅ **Multiple arguments**: Mixed types and many arguments - ALL PASSING
+- ✅ **Arithmetic expressions**: `echo(x + y)` - PASSING
+- ✅ **Edge cases**: Empty echo, no semicolon, multiple statements - ALL PASSING
+- ❌ **Array expressions**: Array elements not parsed correctly (1 failure)
+- ❌ **Error recovery**: Missing parenthesis test expects recovery that isn't working (1 failure)
+
+**Quality Gates Status**:
+- ✅ Lint: PASSING (only warnings, no errors)
+- ⚠️ TypeScript: Some errors in other files (not related to changes)
+- ✅ Core functionality: Function call expressions working correctly
+
+**Key Technical Insights**:
+- Tree-sitter grammar field names provide the most reliable way to extract specific node components
+- `childForFieldName()` is more precise than generic traversal methods when fields are defined
+- CST structure analysis using `nx parse tree-sitter-openscad -- file.scad` is crucial for understanding grammar
+- Field-based access eliminates ambiguity and improves code maintainability
+
+**Files Modified**:
+- `packages/openscad-parser/src/lib/openscad-parser/ast/visitors/echo-statement-visitor/echo-statement-visitor.ts` (added function call processing)
+
 ## ✅ MAJOR SUCCESS: EchoStatementVisitor Implementation (2025-06-04)
 
 **Status**: CORE IMPLEMENTATION COMPLETE - 12/15 tests passing (80% success rate)

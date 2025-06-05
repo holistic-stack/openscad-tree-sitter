@@ -146,7 +146,8 @@ export enum ErrorCode {
   VALIDATION_ERROR = 'E400',
   INVALID_ARGUMENTS = 'E401',
   INVALID_MODIFIER = 'E402',
-  INVALID_ARGUMENT_VALUE = 'E403',
+  INVALID_FUNCTION_CALL_ARGUMENT_TYPE = 'E209',
+  RESERVED_KEYWORD_AS_EXPRESSION = 'E210', // Added: For keywords used incorrectly as expressions
 
   // AST Construction / Semantic Errors (500-599)
   LET_NO_ASSIGNMENTS_FOUND = 'E500',

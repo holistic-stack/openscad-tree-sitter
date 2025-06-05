@@ -157,33 +157,38 @@
      - [ ] **3.6**: Address test expectation mismatches for body types
 
 4. **✅ Fix Echo Statement Visitor** (Priority: COMPLETED)
-   - **Status**: COMPLETED - Echo statement visitor issues resolved with 12/15 tests passing (80% success rate)
-   - **Issue**: `arguments` property was null/undefined due to property name mismatch
-   - **Solution**: Fixed property naming and logger integration
+   - **Status**: COMPLETED - Echo statement visitor issues resolved with 14/15 tests passing (93% success rate)
+   - **Issue**: `arguments` property was null/undefined due to property name mismatch, function call expressions not working, array expressions not parsing individual elements
+   - **Solution**: Fixed property naming, logger integration, function call expression parsing using tree-sitter grammar field names, and array expression parsing by implementing proper vector elements extraction
    - **Achievements**:
      - ✅ **4.1**: Fixed `EchoStatementNode` interface property name from `args` to `arguments`
      - ✅ **4.2**: Updated visitor to create nodes with correct property name
      - ✅ **4.3**: Replaced console.log with project logger and fixed imports
      - ✅ **4.4**: Comprehensive expression processing for echo arguments working
-     - ⏸️ **4.5**: Function call and array expression refinement (3 remaining failures)
+     - ✅ **4.5**: Function call expression parsing fixed using `childForFieldName()` for grammar fields
+     - ✅ **4.6**: Array expression parsing fixed by implementing proper `extractVectorElements` method
+     - ⏸️ **4.7**: Error recovery refinement (1 remaining failure)
 
-5. **Fix For Loop Visitor** (Priority: HIGH)
-   - **Status**: CRITICAL - All for loop tests failing with null return values
-   - **Issue**: For loop visitor returning null instead of ForLoopNode
-   - **Impact**: All for loop statement tests failing
-   - **Next Actions**:
-     - [ ] **5.1**: Investigate for loop CST structure and visitor implementation
-     - [ ] **5.2**: Fix null return values and implement proper for loop parsing
-     - [ ] **5.3**: Ensure proper for loop AST construction and integration
+5. **✅ Fix For Loop Visitor** (Priority: COMPLETED)
+   - **Status**: ✅ COMPLETED - All ForLoopVisitor tests passing (100% success rate)
+   - **Issue**: Previously, for loop visitor had type errors, body processing failures, step handling missing, and expression visitor integration issues.
+   - **Impact**: Major breakthrough - All 4 ForLoopVisitor tests now passing, overall test success rate improved to ~72%
+   - **Achievements**:
+     - ✅ **5.1**: Fixed all TypeScript compilation errors (identifier vs variable node types)
+     - ✅ **5.2**: Fixed expression visitor integration using `dispatchSpecificExpression` instead of `visitNode`
+     - ✅ **5.3**: Implemented custom body processing with `processBlockStatements` and `processStatement` methods
+     - ✅ **5.4**: Added step extraction from range expressions for ForLoopVariable objects
+     - ✅ **5.5**: Updated all variable type declarations and comments throughout the visitor
+     - ✅ **5.6**: All test scenarios working: basic for loops, stepped ranges, multiple variables, complex expressions
 
 6. **Address Binary Expression Node Types** (Priority: MEDIUM)
-   - **Status**: Tests expecting old node types but getting unified types
-   - **Issue**: Tests expect `'additive_expression'` but get `'binary_expression'`
-   - **Impact**: Some binary expression tests failing
+   - **Status**: Partially Addressed. `simple-binary.test.ts` updated.
+   - **Issue**: Some tests may still expect old node types (e.g., `'additive_expression'`) but the grammar now produces a unified `'binary_expression'`.
+   - **Impact**: Potential for some binary expression tests to fail due to outdated expectations.
    - **Next Actions**:
-     - [ ] **5.1**: Update test expectations to use unified `'binary_expression'` type
-     - [ ] **5.2**: Ensure consistency across all binary expression tests
-     - [ ] **5.3**: Validate binary expression visitor functionality
+     - [x] **6.1**: Update test expectations in `simple-binary.test.ts` to use unified `'binary_expression'` type. (DONE for `1+2` and `3*4` cases)
+     - [ ] **6.2**: Review and update other binary expression tests for consistency with the unified `'binary_expression'` type.
+     - [ ] **6.3**: Validate binary expression visitor functionality with a broader range of binary operations after test updates.
 
 6. **Address Remaining ESLint Warnings** (Priority: LOW)
    - **Status**: Minor warnings in other files, not blocking

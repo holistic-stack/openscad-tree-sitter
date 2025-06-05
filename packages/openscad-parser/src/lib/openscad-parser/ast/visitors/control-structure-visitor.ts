@@ -145,9 +145,9 @@ export class ControlStructureVisitor extends BaseASTVisitor {
   /**
    * Visit a for statement node
    * @param node The for statement node to visit
-   * @returns The for loop AST node or null if the node cannot be processed
+   * @returns The for loop AST node, error node, or null if the node cannot be processed
    */
-  override visitForStatement(node: TSNode): ast.ForLoopNode | null {
+  override visitForStatement(node: TSNode): ast.ForLoopNode | ast.ErrorNode | null {
     console.log(
       `[ControlStructureVisitor.visitForStatement] Processing for statement: ${node.text.substring(
         0,

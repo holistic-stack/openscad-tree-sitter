@@ -29,6 +29,8 @@ import {
   extractArguments,
   type ExtractedParameter,
 } from '../extractors/argument-extractor.js';
+import { defaultLocation, createErrorNodeInternal } from '../utils/ast-error-utils.js';
+import { getLocation } from '../utils/location-utils.js';
 
 /**
  * Converts an ExtractedParameter to a ParameterValue for AST node creation.
@@ -369,15 +371,64 @@ export abstract class BaseASTVisitor implements ASTVisitor {
     );
 
     // Process based on function name
-    return this.createASTNodeForFunction(node, functionName, args);
+    let astNode = this.createASTNodeForFunction(node, functionName, args);
+
+    if (!astNode) {
+      // If no specialized visitor handled this, create a generic ModuleInstantiationNode.
+      // This allows parsing of user-defined modules or modules not yet specifically implemented in other visitors.
+      this.errorHandler.logInfo(
+        `[BaseASTVisitor.visitModuleInstantiation] No specific visitor for '${functionName}'. Creating generic ModuleInstantiationNode.`,
+        'BaseASTVisitor.visitModuleInstantiation: generic_fallback',
+        node
+      );
+
+      let childrenNodes: ast.ASTNode[] = [];
+      // The body of a module instantiation (a block or a single statement) is the last child of the CST node,
+      // if it's not one of the already processed named fields (name, arguments) or a modifier or a semicolon.
+      const lastCstChild = node.lastChild;
+      const modifierNode = node.childForFieldName('modifier'); // May be null
+
+      if (lastCstChild) {
+        const isNameField = lastCstChild === nameFieldNode;
+        const isArgumentsField = lastCstChild === argsNode;
+        const isModifierField = lastCstChild === modifierNode;
+        const isSemicolon = lastCstChild.type === ';';
+
+        if (!isNameField && !isArgumentsField && !isModifierField && !isSemicolon) {
+          // This lastCstChild is potentially the body
+          if (lastCstChild.type === 'block') {
+            childrenNodes = this.visitBlock(lastCstChild);
+          } else {
+            // Attempt to visit as a single statement
+            const singleChildAst = this.visitNode(lastCstChild);
+            if (singleChildAst) {
+              childrenNodes = [singleChildAst];
+            }
+          }
+        }
+      }
+
+      astNode = {
+        type: 'module_instantiation',
+        name: functionName,
+        args: args, // These are the ast.Parameter[] converted earlier
+        children: childrenNodes,
+        location: getLocation(node),
+      };
+    }
+    return astNode;
   }
 
   /**
-   * Create an AST node for a specific function
-   * @param node The node to process
-   * @param functionName The name of the function
-   * @param args The arguments to the function
-   * @returns The AST node or null if the function is not supported
+   * Create an AST node for a specific function (e.g., cube, sphere, translate).
+   * This method is intended to be overridden by specialized visitors that handle
+   * known OpenSCAD functions/modules. If a function is not handled by a specialized
+   * visitor, `visitModuleInstantiation` will create a generic `ModuleInstantiationNode`.
+   *
+   * @param node The CST node for the module instantiation.
+   * @param functionName The name of the function/module called.
+   * @param args The processed arguments passed to the function/module.
+   * @returns An ASTNode if the function is handled, otherwise null.
    */
   protected abstract createASTNodeForFunction(
     node: TSNode,
@@ -588,7 +639,7 @@ export abstract class BaseASTVisitor implements ASTVisitor {
    * @param node The for statement node to visit
    * @returns The for loop AST node or null if the node cannot be processed
    */
-  visitForStatement(node: TSNode): ast.ForLoopNode | null {
+  visitForStatement(node: TSNode): ast.ForLoopNode | ast.ErrorNode | null {
     console.log(
       `[BaseASTVisitor.visitForStatement] Processing for statement: ${node.text.substring(
         0,

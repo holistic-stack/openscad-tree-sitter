@@ -103,7 +103,7 @@ import { evaluateExpression } from '../evaluation/expression-evaluator-registry.
  * }
  * ```
  */
-function isExpressionNode(
+export function isExpressionNode(
   value: ast.ParameterValue
 ): value is ast.ExpressionNode {
   return (

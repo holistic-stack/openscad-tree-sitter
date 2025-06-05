@@ -417,7 +417,7 @@ describe('RangeExpressionVisitor', () => {
       const code = 'a = cube(5);'; // cube(5) is not a range_expression
       const tree = parser.parse(code);
       expect(tree).toBeTruthy(); // Ensure tree is not null for the test
-      if (!tree) return; // Add explicit null check for TypeScript
+      if (!tree) throw new Error('Parser returned null tree'); // Type guard for subsequent lines
       const assignmentExpr = tree.rootNode.child(0)?.child(0);
       const cubeCallNode = assignmentExpr?.childForFieldName('value'); // This will be a call_expression
       
@@ -429,9 +429,9 @@ describe('RangeExpressionVisitor', () => {
         expect(result).toBeTruthy();
         expect(result?.type).toBe('error');
         const errorNode = result as ast.ErrorNode;
-        expect(errorNode.errorCode).toBe('INVALID_NODE_TYPE_FOR_RANGE_EXPRESSION_VISIT');
+        expect(errorNode.errorCode).toBe('INVALID_NODE_TYPE_FOR_RANGE_VISIT');
         expect(errorNode.message).toContain(
-          `RangeExpressionVisitor.visitRangeExpression: Expected 'range_expression', but received '${cubeCallNode.type}'`
+          `RangeExpressionVisitor.visitRangeExpression: Expected 'range_expression', got '${cubeCallNode.type}'.`
         );
       } // closes if (cubeCallNode)
     }); // closes it('visitRangeExpression should return ErrorNode for non-range_expression CST node', () => {
@@ -439,51 +439,65 @@ describe('RangeExpressionVisitor', () => {
 
   describe('Malformed Range Syntax Error Handling', () => {
     const testCases = [
-      { code: 'x = [:5];', errorCode: 'MISSING_RANGE_START', messagePart: 'Missing start expression' },
-      { code: 'x = [0:];', errorCode: 'MISSING_RANGE_END', messagePart: 'Missing end expression' },
-      { code: 'x = [:];', errorCode: 'MISSING_RANGE_START', messagePart: 'Missing start expression' }, // start is checked first
-      // The grammar might not produce a range_expression for [if:5] if 'if' is a keyword and not an expr here
-      // Assuming for now it does, or that the 'start' child is an ERROR node that dispatchSpecificExpression handles
-      { code: 'x = [if:5];', errorCode: 'UNPARSABLE_RANGE_START_EXPRESSION', messagePart: 'Failed to parse start expression' },
-      { code: 'x = [0:if];', errorCode: 'UNPARSABLE_RANGE_END_EXPRESSION', messagePart: 'Failed to parse end expression' }, 
-      { code: 'x = [0:if:5];', errorCode: 'UNPARSABLE_RANGE_STEP_EXPRESSION', messagePart: 'Failed to parse step expression' },
+      {
+        code: 'x = [:5];', // Parsed as vector_expression by grammar
+        errorCode: 'UNEXPECTED_NODE_TYPE_FOR_RANGE_VISITOR',
+        messagePart: "Expected 'range_expression', but received 'vector_expression'",
+        expectedValueNodeType: 'vector_expression',
+      },
+      {
+        code: 'x = [0:];', // Parsed as range_expression, missing end
+        errorCode: 'MISSING_RANGE_END',
+        messagePart: 'Missing end expression in range',
+        expectedValueNodeType: 'range_expression',
+      },
+      {
+        code: 'x = [:];', // Parsed as vector_expression by grammar
+        errorCode: 'UNEXPECTED_NODE_TYPE_FOR_RANGE_VISITOR',
+        messagePart: "Expected 'range_expression', but received 'vector_expression'",
+        expectedValueNodeType: 'vector_expression',
+      },
+      {
+        code: 'x = [if:5];', // Parsed as range_expression, but 'if' in start is invalid
+        errorCode: 'E209_INVALID_SYNTAX_IN_RANGE_START',
+        messagePart: "Reserved keyword 'if' cannot be used as a standalone expression",
+        expectedValueNodeType: 'range_expression',
+      },
+      {
+        code: 'x = [0:if];', // Parsed as range_expression, but 'if' in end is invalid
+        errorCode: 'E211_INVALID_SYNTAX_IN_RANGE_END',
+        messagePart: "Reserved keyword 'if' cannot be used as a standalone expression",
+        expectedValueNodeType: 'range_expression',
+      },
+      {
+        code: 'x = [0:if:5];', // Parsed as range_expression, but 'if' in step is invalid
+        errorCode: 'E210_INVALID_SYNTAX_IN_RANGE_STEP',
+        messagePart: "Reserved keyword 'if' cannot be used as a standalone expression",
+        expectedValueNodeType: 'range_expression',
+      },
     ];
 
     testCases.forEach(tc => {
-      it(`should return ErrorNode for ${tc.code} with errorCode ${tc.errorCode}`, () => {
+      it(`should return ErrorNode for ${tc.code} with errorCode ${tc.errorCode} when valueNode is ${tc.expectedValueNodeType}`, () => {
         const tree = parser.parse(tc.code);
         expect(tree).toBeTruthy();
+        if (!tree) throw new Error('Parser returned null tree'); // Type guard
         const assignmentNode = tree.rootNode.child(0);
-        const assignmentExpr = assignmentNode?.child(0);
-        const valueNode = assignmentExpr?.childForFieldName('value');
-        
-        // For malformed cases like [:5], tree-sitter might create an ERROR node directly
-        // or a range_expression with missing children. We need to handle both.
-        if (valueNode && valueNode.type === 'range_expression') {
-          const result = visitor.visit(valueNode);
-          expect(result).toBeTruthy();
-          expect(result?.type).toBe('error');
-          const errorNode = result as ast.ErrorNode;
-          expect(errorNode.errorCode).toBe(tc.errorCode);
-          expect(errorNode.message).toContain(tc.messagePart);
-          expect(errorNode.originalNodeType).toBe('range_expression');
-        } else if (valueNode && valueNode.type === 'ERROR') {
-          // If the grammar itself flags a top-level error for the range part
-          // This test might need adjustment if ExpressionVisitor is expected to return an ErrorNode for ERROR CSTs
-          // For now, this assumes RangeExpressionVisitor might not even be reached or valueNode is not 'range_expression'
-          // This specific path might indicate a grammar issue or a need for error recovery before the visitor.
-          console.warn(`CST node for ${tc.code} is an ERROR node. Visitor might not be directly testable for this specific error code.`);
-          // Potentially, ExpressionVisitor should return an ErrorNode here, which then propagates.
-          // For this suite, we focus on RangeExpressionVisitor's direct handling of 'range_expression' nodes.
-        } else {
-          // If valueNode is null or not a range_expression/ERROR, the test setup might be wrong for the grammar's output
-          console.warn(`Could not find a 'range_expression' or 'ERROR' CST node for ${tc.code}. Found: ${valueNode?.type}`);
-          // This case might require a different way to test, e.g., by directly creating a mock CST node
-          // or accepting that some syntax errors are caught before RangeExpressionVisitor.
-          // For now, we'll assume valid test cases will yield a range_expression for the visitor.
-          // If a test fails here, it means the grammar handles the error differently than assumed.
-          expect(valueNode?.type).toBe('range_expression'); // Force failure if not range_expression to highlight issue
-        }
+        const assignmentExpr = assignmentNode?.child(0); // assignment_expression
+        const valueNode = assignmentExpr?.childForFieldName('value'); // This is the actual expression node
+
+        expect(valueNode).toBeTruthy(); // Ensure valueNode is found
+        expect(valueNode!.type).toBe(tc.expectedValueNodeType);
+
+        const result = visitor.visitNode(valueNode!);
+        expect(result?.type).toBe('error');
+        const errorNode = result as ast.ErrorNode;
+        expect(errorNode.errorCode).toBe(tc.errorCode);
+        expect(errorNode.message).toContain(tc.messagePart);
+
+        // If the valueNode itself was not a range_expression, its type is the originalNodeType.
+        // If valueNode was a range_expression but had internal errors, originalNodeType is 'range_expression'.
+        expect(errorNode.originalNodeType).toBe(tc.expectedValueNodeType);
       });
     });
   });
@@ -494,6 +508,7 @@ describe('RangeExpressionVisitor', () => {
       const code = 'f = [1:5];';
       const tree = parser.parse(code);
       expect(tree).toBeTruthy();
+      if (!tree) throw new Error('Parser returned null tree'); // Type guard
       const assignmentNode = tree.rootNode.child(0);
       const valueNode = assignmentNode?.child(0)?.childForFieldName('value');
       
@@ -501,7 +516,7 @@ describe('RangeExpressionVisitor', () => {
       expect(valueNode?.type).toBe('range_expression');
 
       if (valueNode) {
-        const result = visitor.visit(valueNode);
+        const result = visitor.visitNode(valueNode);
         expect(result).toBeTruthy();
         expect(result?.type).toBe('expression');
         if (result?.type === 'expression') {
@@ -514,6 +529,8 @@ describe('RangeExpressionVisitor', () => {
     it('should return ErrorNode for unsupported node types via visit method', () => {
       const code = 'a = cube(5);'; // cube(5) is not a range_expression
       const tree = parser.parse(code);
+      expect(tree).toBeTruthy(); // Added expect for consistency and to ensure tree is checked
+      if (!tree) throw new Error('Parser returned null tree'); // Type guard
       const assignmentExpr = tree.rootNode.child(0)?.child(0);
       const cubeCallNode = assignmentExpr?.childForFieldName('value');
 
@@ -521,7 +538,7 @@ describe('RangeExpressionVisitor', () => {
       expect(cubeCallNode?.type).not.toBe('range_expression');
 
       if (cubeCallNode) {
-        const result = visitor.visit(cubeCallNode);
+        const result = visitor.visitNode(cubeCallNode);
         expect(result).toBeTruthy();
         expect(result?.type).toBe('error');
         const errorNode = result as ast.ErrorNode;

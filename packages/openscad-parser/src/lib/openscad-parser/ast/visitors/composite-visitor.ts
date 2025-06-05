@@ -445,9 +445,9 @@ visitModuleDefinition(node: TSNode): ast.ModuleDefinitionNode | null {
   /**
    * Visit a for statement node
    * @param node The for statement node to visit
-   * @returns The for loop AST node or null if the node cannot be processed
+   * @returns The for loop AST node, error node, or null if the node cannot be processed
    */
-  visitForStatement(node: TSNode): ast.ForLoopNode | null {
+  visitForStatement(node: TSNode): ast.ForLoopNode | ast.ErrorNode | null {
     console.log(
       `[CompositeVisitor.visitForStatement] Processing for statement: ${node.text.substring(
         0,

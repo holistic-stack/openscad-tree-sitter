@@ -92,6 +92,26 @@ import { findDescendantOfType } from '../utils/node-utils.js';
 import { evaluateBinaryExpression } from '../evaluation/binary-expression-evaluator/binary-expression-evaluator.js';
 import { ErrorCode } from '../../error-handling/types/error-types.js';
 
+// List of reserved keywords that cannot be used as standalone expressions.
+// Note: 'true', 'false', 'undef' are handled by visitLiteral.
+// Keywords like 'let' are part of specific expression structures (e.g., LetExpressionNode)
+// and are handled by their respective visitors if they appear in valid constructs.
+// This list targets keywords that, if parsed as a simple identifier in an expression context, are invalid.
+const RESERVED_KEYWORDS_AS_EXPRESSION_BLOCKLIST = new Set([
+  'if',
+  'else',
+  'for',
+  'module',
+  'function',
+  'include',
+  'use',
+  'echo', // echo() is a call, echo; is not a valid expression value
+  'assert', // assert() is a call, assert; is not a valid expression value
+  // 'let', // let(...) is an expression, but 'let' alone is not.
+  // 'assign', // assign(...) is an expression, but 'assign' alone is not.
+  // Consider adding other statement-starting keywords if they can be mistakenly parsed as identifiers in expressions.
+]);
+
 /**
  * Visitor for processing OpenSCAD expressions with comprehensive type support.
  *
@@ -431,7 +451,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
         // At this point, leftExpr and rightExpr are valid ExpressionNodes
         return {
           type: 'expression',
-          expressionType: 'binary',
+          expressionType: 'binary_expression',
           operator: operatorNode.text as ast.BinaryOperator,
           left: leftExpr, // Cast is safe due to checks above
           right: rightExpr, // Cast is safe due to checks above
@@ -491,7 +511,7 @@ export class ExpressionVisitor extends BaseASTVisitor {
         // Create unary expression node
         return {
           type: 'expression',
-          expressionType: 'unary',
+          expressionType: 'unary_expression',
           operator: operatorNode.text as ast.UnaryOperator,
           operand: operandExpr,
           prefix: true, // All unary operators in OpenSCAD are prefix operators
@@ -1060,24 +1080,47 @@ export class ExpressionVisitor extends BaseASTVisitor {
       node
     );
 
-    // Create a variable node for the identifier
+    const identifierName = node.text;
+
+    // Check if the identifier is a reserved keyword that cannot be an expression
+    if (RESERVED_KEYWORDS_AS_EXPRESSION_BLOCKLIST.has(identifierName)) {
+      const message = `Reserved keyword '${identifierName}' cannot be used as a standalone expression.`;
+      this.errorHandler.logError(
+        message,
+        'ExpressionVisitor.visitIdentifier',
+        node
+      );
+      return {
+        type: 'error',
+        errorCode: ErrorCode.RESERVED_KEYWORD_AS_EXPRESSION,
+        message,
+        originalNodeType: node.type,
+        cstNodeText: node.text,
+        location: getLocation(node),
+      } as ast.ErrorNode;
+    }
+
+    // Check if the identifier is a special variable (e.g., $fn, $fa, $fs)
+    if (identifierName.startsWith('$')) {
+      return {
+        type: 'expression',
+        expressionType: 'variable',
+        name: identifierName,
+        isSpecialVariable: true, // Mark as special variable
+        location: getLocation(node),
+      } as ast.VariableNode;
+    }
+
     return {
       type: 'expression',
       expressionType: 'variable',
-      name: node.text,
+      name: identifierName,
+      // isSpecialVariable will be implicitly undefined for non-special variables
       location: getLocation(node),
-    };
+    } as ast.VariableNode;
   }
 
   /**
-   * Visit a let expression node.
-   * This method constructs an AST node for a 'let' expression, which allows
-   * defining local variables (assignments) scoped to a body expression.
-   *
-   * It processes each assignment within the 'let' block. If any assignment
-   * fails to parse, or if its value expression results in an error, this
-   * method will return an ErrorNode, propagating the issue. Similarly, if the
-   * main body expression of the 'let' block fails to parse or results in an
    * error, an ErrorNode is returned.
    *
    * Only if all assignments and the body expression are processed successfully
@@ -1543,11 +1586,14 @@ export class ExpressionVisitor extends BaseASTVisitor {
     functionName: string,
     args: ast.Parameter[]
   ): ast.ASTNode | null {
-    // Expression visitor doesn't handle function definitions, only function calls
-    // Function calls are handled by the FunctionCallVisitor
-    if (node.type === 'module_instantiation') {
-      return this.functionCallVisitor.visit(node);
-    }
+    this.errorHandler.logWarning(
+      `[ExpressionVisitor.createASTNodeForFunction] This method should not be directly called on ExpressionVisitor. Function definitions are not expressions. Offending node: ${node.type} '${node.text.substring(0, 30)}...'`,
+      'ExpressionVisitor.createASTNodeForFunction',
+      node
+    );
+    // ExpressionVisitor does not directly create AST nodes for function definitions.
+    // Function calls are handled by FunctionCallVisitor.
+    // If this method is called, it's likely a misrouted call or a misunderstanding of visitor responsibilities.
     return null;
   }
 }

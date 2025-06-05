@@ -314,7 +314,7 @@ export class ListComprehensionVisitor extends BaseASTVisitor {
         `[ListComprehensionVisitor.parseOpenScadStyle] Internal error: forClauseCstNode is unexpectedly null before calling extractForClause. This should have been caught earlier. CST: ${node.text.substring(0, 80)}`,
         'LC_OPENSCAD_INTERNAL_NULL_FOR_CLAUSE_PRE_EXTRACT'
       );
-      return {
+      return { 
         type: 'error' as const,
         errorCode: 'LC_OPENSCAD_INTERNAL_NULL_FOR_CLAUSE_PRE_EXTRACT',
         message: 'Internal error: Mandatory for_clause CST node is null before extraction.',
@@ -324,12 +324,18 @@ export class ListComprehensionVisitor extends BaseASTVisitor {
     }
 
     // Extract for clause
-    const forClause = this.extractForClause(forClauseCstNode);
+    // forClauseCstNode is guaranteed non-null here due to the check above.
+    const forClause = this.extractForClause(forClauseCstNode!); 
+    this.errorHandler.logInfo(
+      `[ListComprehensionVisitor.parseOpenScadStyle] Extracted forClause. Variable: ${forClause.variable}, Range CST: ${forClauseCstNode!.childForFieldName('range')?.text?.substring(0,50)}, Range AST type: ${forClause.range.type}, Range AST expressionType: ${('expressionType' in forClause.range ? (forClause.range as any).expressionType : 'N/A')}, Range AST errorCode: ${('errorCode' in forClause.range ? (forClause.range as any).errorCode : 'N/A')}`,
+      'parseOpenScadStyle.forClauseResult',
+      forClause.range
+    );
 
-    // Check if the range extraction failed (which indicates an error in extractForClause)
+    // Validate forClause.range (Error propagation)
     if (forClause.range.type === 'error') {
       this.errorHandler.logWarning(
-        `[ListComprehensionVisitor.parseOpenScadStyle] Error extracting for_clause range. Propagating error. CST: ${forClauseCstNode.text.substring(0,50)}`,
+        `[ListComprehensionVisitor.parseOpenScadStyle] Error extracting for_clause range. Propagating error. CST: ${forClauseCstNode!.text.substring(0,50)}`,
         'parseOpenScadStyle.extractForClauseErrorPropagation'
       );
       return forClause.range; // Propagate error from extractForClause
@@ -338,48 +344,62 @@ export class ListComprehensionVisitor extends BaseASTVisitor {
     // After this point, forClause.range is guaranteed to be a valid ExpressionNode
     if (!forClause.variable) {
       this.errorHandler.logError(
-        `[ListComprehensionVisitor.parseOpenScadStyle] Failed to extract variable from for clause. CST: ${forClauseCstNode.text.substring(0,80)}. ErrorCode: LC_FOR_CLAUSE_NO_VARIABLE_PROP`,
+        `[ListComprehensionVisitor.parseOpenScadStyle] Failed to extract variable from for clause. CST: ${forClauseCstNode!.text.substring(0,80)}. ErrorCode: LC_FOR_CLAUSE_NO_VARIABLE_PROP`,
         'LC_FOR_CLAUSE_NO_VARIABLE_PROP'
       );
       return {
         type: 'error' as const,
         errorCode: 'LC_FOR_CLAUSE_NO_VARIABLE_PROP',
         message: 'Failed to extract variable name from for clause.',
-        location: getLocation(forClauseCstNode),
-        originalNodeType: forClauseCstNode.type,
-        cstNodeText: forClauseCstNode.text,
+        location: getLocation(forClauseCstNode!),
+        originalNodeType: forClauseCstNode!.type,
+        cstNodeText: forClauseCstNode!.text,
       };
     }
 
-    if (!bodyExpressionCstNode) {
+    // Ensure bodyExpressionCstNode is valid before dispatching
+    // bodyExpressionCstNode is guaranteed non-null if we reach here due to earlier checks.
+    if (!bodyExpressionCstNode) { 
       this.errorHandler.logError(
-        `[ListComprehensionVisitor.parseOpenScadStyle] Mandatory body expression CST node not found. CST: ${node.text.substring(0, 80)}`,
-        'LC_OPENSCAD_MISSING_BODY_EXPRESSION_NODE'
+        `[ListComprehensionVisitor.parseOpenScadStyle] Mandatory body expression CST node is null before dispatch. This indicates an earlier logic error. CST: ${node.text.substring(0, 80)}`,
+        'LC_OPENSCAD_NULL_BODY_EXPRESSION_NODE_PRE_DISPATCH'
       );
       return {
         type: 'error' as const,
-        errorCode: 'LC_OPENSCAD_MISSING_BODY_EXPRESSION_NODE',
-        message: 'Mandatory body expression CST node not found in OpenSCAD-style list comprehension.',
-        location: getLocation(conditionFieldNode ?? forClauseCstNode ?? node), // Best effort location
+        errorCode: 'LC_OPENSCAD_NULL_BODY_EXPRESSION_NODE_PRE_DISPATCH',
+        message: 'Internal error: Mandatory body expression CST node was null before dispatching.',
+        location: getLocation(node), 
         originalNodeType: node.type,
         cstNodeText: node.text,
       };
     }
-    const bodyExpressionAstNode = this.parentVisitor.dispatchSpecificExpression(bodyExpressionCstNode) ?? null;
+
+    const bodyExpressionAstNode = this.parentVisitor.dispatchSpecificExpression(
+      bodyExpressionCstNode 
+    );
+    this.errorHandler.logInfo(
+      `[ListComprehensionVisitor.parseOpenScadStyle] Parsed bodyExpression. Body CST: ${bodyExpressionCstNode?.text?.substring(0,50)}, Body AST type: ${bodyExpressionAstNode?.type}, Body AST expressionType: ${bodyExpressionAstNode && 'expressionType' in bodyExpressionAstNode ? (bodyExpressionAstNode as any).expressionType : 'N/A'}, Body AST errorCode: ${bodyExpressionAstNode && 'errorCode' in bodyExpressionAstNode ? (bodyExpressionAstNode as any).errorCode : 'N/A'}`,
+      'parseOpenScadStyle.bodyExpressionResult',
+      bodyExpressionAstNode
+    );
+
+    // Validate body expression result (Error propagation)
     if (!bodyExpressionAstNode) {
       this.errorHandler.logError(
-        `[ListComprehensionVisitor.parseOpenScadStyle] Failed to parse body expression (visitor returned null). CST: ${bodyExpressionCstNode.text.substring(0,80)}. ErrorCode: LC_BODY_EXPRESSION_UNPARSABLE_NULL`,
+        `[ListComprehensionVisitor.parseOpenScadStyle] Failed to parse body expression (visitor returned null). CST: ${bodyExpressionCstNode!.text.substring(0,80)}. ErrorCode: LC_BODY_EXPRESSION_UNPARSABLE_NULL`,
         'LC_BODY_EXPRESSION_UNPARSABLE_NULL'
       );
       return {
         type: 'error' as const,
         errorCode: 'LC_BODY_EXPRESSION_UNPARSABLE_NULL',
         message: 'Failed to parse body expression (visitor returned null).',
-        location: getLocation(bodyExpressionCstNode),
-        originalNodeType: bodyExpressionCstNode.type,
-        cstNodeText: bodyExpressionCstNode.text,
+        location: getLocation(bodyExpressionCstNode!),
+        originalNodeType: bodyExpressionCstNode!.type,
+        cstNodeText: bodyExpressionCstNode!.text,
       };
     }
+    // The `if (bodyExpressionAstNode.type === 'error')` check that follows this block
+    // will now correctly reference bodyExpressionAstNode in the proper scope.
     if (bodyExpressionAstNode.type === 'error') {
       this.errorHandler.logError(
         `[ListComprehensionVisitor.parseOpenScadStyle] Error in body expression. Propagating. CST: ${bodyExpressionCstNode.text.substring(0,80)}. ErrorCode: LC_BODY_EXPRESSION_ERROR_PROP`,

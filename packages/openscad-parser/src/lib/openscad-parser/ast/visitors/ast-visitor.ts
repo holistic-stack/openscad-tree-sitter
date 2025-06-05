@@ -192,7 +192,7 @@ export interface ASTVisitor {
    * @param node The for statement node to visit
    * @returns The for loop AST node or null if the node cannot be processed
    */
-  visitForStatement(node: TSNode): ast.ForLoopNode | null;
+  visitForStatement(node: TSNode): ast.ForLoopNode | ast.ErrorNode | null;
 
   /**
    * Visit a let expression node

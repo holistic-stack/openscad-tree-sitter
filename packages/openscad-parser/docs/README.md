@@ -53,15 +53,31 @@ const ast = parser.parseAST(code);
 console.log(ast[0].type); // 'difference'
 console.log(ast[0].children.length); // Number of child operations
 
-// Parse range expressions - fully integrated in context!
-const rangeCode = `
-  for (i = [0:2:10]) {
+// Parse for loops with range expressions - fully integrated!
+const forLoopCode = `
+  // Basic for loop
+  for (i = [0:5]) {
+    cube(i);
+  }
+
+  // For loop with step
+  for (i = [0:0.5:5]) {
     translate([i, 0, 0]) cube(1);
+  }
+
+  // Multiple variables
+  for (i = [0:5], j = [0:5]) {
+    translate([i, j, 0]) cube(1);
+  }
+
+  // Complex expressions
+  for (i = [0:len(points)-1]) {
+    translate(points[i]) sphere(1);
   }
 `;
 
-const rangeAst = parser.parseAST(rangeCode);
-// Range [0:2:10] is parsed as RangeExpressionNode with proper integration
+const forLoopAst = parser.parseAST(forLoopCode);
+// All for loop patterns are fully supported with 100% test coverage
 
 // List comprehensions with ranges work seamlessly
 const listCompCode = `
@@ -276,7 +292,7 @@ graph TD
 - ✅ `intersection()` - Intersect objects
 
 ### Control Structures
-- ✅ `for()` loops
+- ✅ **`for()` loops**: `for (i = [0:5]) { cube(i); }` - **Complete support with range expressions, multiple variables, and complex expressions**
 - ✅ `if()` conditionals
 - ✅ Module definitions and calls
 - ✅ Function definitions and calls

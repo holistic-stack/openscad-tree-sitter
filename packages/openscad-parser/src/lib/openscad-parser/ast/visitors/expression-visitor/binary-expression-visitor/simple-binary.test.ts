@@ -35,7 +35,7 @@ describe('SimpleBinaryExpressionTest', () => {
     const binaryNode = await nodeGenerator.getBinaryExpressionNode('1 + 2');
 
     expect(binaryNode).not.toBeNull();
-    expect(binaryNode?.type).toBe('additive_expression');
+    expect(binaryNode?.type).toBe('binary_expression'); // Updated to reflect unified grammar
 
     // Debug: Print the tree structure to understand the issue
     console.log('\n=== Testing binary expression visitor with real nodes ===');
@@ -53,7 +53,7 @@ describe('SimpleBinaryExpressionTest', () => {
     const binaryNode = await nodeGenerator.getBinaryExpressionNode('3 * 4');
 
     expect(binaryNode).not.toBeNull();
-    expect(['additive_expression', 'multiplicative_expression']).toContain(binaryNode?.type);
+    expect(binaryNode?.type).toBe('binary_expression'); // Updated to reflect unified grammar
 
     // Test that the visitor can handle the real node
     const result = visitor.visit(binaryNode!);
