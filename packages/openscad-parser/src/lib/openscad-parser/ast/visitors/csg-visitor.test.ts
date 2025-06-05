@@ -190,40 +190,21 @@ describe('CSGVisitor', () => {
       expect((result as any).children.length).toBeGreaterThanOrEqual(0);
     });
 
-    it('should handle call_expression nodes for union operations', () => {
+    it('should handle module_instantiation nodes for union operations', () => {
       const code = 'union() { cube(10); sphere(5); }';
       const tree = parser.parseCST(code);
       if (!tree) throw new Error('Failed to parse CST');
 
-      // Find the call_expression node
-      const callExpression = findDescendantOfType(
+      // Find the module_instantiation node (this is what the grammar actually produces)
+      const moduleInstantiation = findDescendantOfType(
         tree.rootNode,
-        'call_expression'
+        'module_instantiation'
       );
-      if (!callExpression) {
-        // If call_expression is not found, try to find accessor_expression as a fallback
-        const accessorExpression = findDescendantOfType(
-          tree.rootNode,
-          'accessor_expression'
-        );
-        if (!accessorExpression)
-          throw new Error(
-            'Failed to find call_expression or accessor_expression node'
-          );
-
-        // Visit the node
-        const result = visitor.visitAccessorExpression(accessorExpression);
-
-        // Verify the result
-        expect(result).not.toBeNull();
-        expect(result?.type).toBe('union');
-        // We expect children to be populated, but the exact count might vary based on implementation
-        expect((result as any).children.length).toBeGreaterThanOrEqual(0);
-        return;
-      }
+      if (!moduleInstantiation)
+        throw new Error('Failed to find module_instantiation node');
 
       // Visit the node
-      const result = visitor.visitCallExpression(callExpression);
+      const result = visitor.visitModuleInstantiation(moduleInstantiation);
 
       // Verify the result
       expect(result).not.toBeNull();

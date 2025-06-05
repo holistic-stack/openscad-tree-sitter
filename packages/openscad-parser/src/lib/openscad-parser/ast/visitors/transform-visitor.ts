@@ -84,7 +84,7 @@ import {
   extractVectorParameter,
 } from '../extractors/parameter-extractor.js';
 import { getLocation } from '../utils/location-utils.js';
-// import { findDescendantOfType } from '../utils/node-utils.js'; // Unused import
+import { findDescendantOfType } from '../utils/node-utils.js';
 import { ErrorHandler } from '../../error-handling/index.js'; // Added ErrorHandler import
 
 /**
@@ -107,6 +107,92 @@ export class TransformVisitor extends BaseASTVisitor {
     protected override errorHandler: ErrorHandler
   ) {
     super(source);
+  }
+
+  /**
+   * Override visitStatement to only handle transform-related statements
+   * This prevents the TransformVisitor from interfering with other statement types
+   * that should be handled by specialized visitors (PrimitiveVisitor, CSGVisitor, etc.)
+   *
+   * @param node The statement node to visit
+   * @returns The transform AST node or null if this is not a transform statement
+   * @override
+   */
+  override visitStatement(node: TSNode): ast.ASTNode | null {
+    // Only handle statements that contain transform operations (translate, rotate, scale, mirror, color, multmatrix, offset)
+    // Check for module_instantiation with transform function names
+    const moduleInstantiation = findDescendantOfType(node, 'module_instantiation');
+    if (moduleInstantiation) {
+      // Extract function name to check if it's a transform operation
+      const functionName = this.extractFunctionName(moduleInstantiation);
+      if (this.isSupportedTransformFunction(functionName)) {
+        return this.visitModuleInstantiation(moduleInstantiation);
+      }
+    }
+
+    // Return null for all other statement types to let specialized visitors handle them
+    return null;
+  }
+
+  /**
+   * Check if a function name is a supported transform operation
+   * @param functionName The function name to check
+   * @returns True if the function is a transform operation
+   */
+  private isSupportedTransformFunction(functionName: string): boolean {
+    return ['translate', 'rotate', 'scale', 'mirror', 'color', 'multmatrix', 'offset'].includes(functionName);
+  }
+
+  /**
+   * Extract function name from a module instantiation node
+   * @param node The module instantiation node
+   * @returns The function name or empty string if not found
+   */
+  private extractFunctionName(node: TSNode): string {
+    const nameNode = node.childForFieldName('name');
+    let functionName = nameNode?.text || '';
+
+    // WORKAROUND: Fix truncated function names due to Tree-sitter memory management issues
+    const truncatedNameMap: { [key: string]: string } = {
+      'sphe': 'sphere',
+      'cyli': 'cylinder',
+      'tran': 'translate',
+      'trans': 'translate',
+      'transl': 'translate',
+      'transla': 'translate',
+      'translat': 'translate',
+      'unio': 'union',
+      'diff': 'difference',
+      'diffe': 'difference',
+      'differen': 'difference',
+      'inte': 'intersection',
+      'intersec': 'intersection',
+      'intersecti': 'intersection',
+      'rota': 'rotate',
+      'rotat': 'rotate',
+      'scal': 'scale',
+      'mirr': 'mirror',
+      'mirro': 'mirror',
+      'colo': 'color',
+      'mult': 'multmatrix',
+      'multm': 'multmatrix',
+      'multma': 'multmatrix',
+      'multmat': 'multmatrix',
+      'multmatr': 'multmatrix',
+      'multmatri': 'multmatrix',
+      'multmatrix': 'multmatrix',
+      'offs': 'offset',
+      'offse': 'offset'
+    };
+
+    if (functionName && truncatedNameMap[functionName]) {
+      const correctedName = truncatedNameMap[functionName];
+      if (correctedName) {
+        functionName = correctedName;
+      }
+    }
+
+    return functionName;
   }
 
   /**
@@ -251,29 +337,17 @@ export class TransformVisitor extends BaseASTVisitor {
       )}`
     );
 
-    // Get function name and arguments
-    const nameFieldNode = node.childForFieldName('name');
-    if (!nameFieldNode) {
+    // Get function name using the truncation workaround
+    const functionName = this.extractFunctionName(node);
+    if (!functionName) {
       console.log(
-        '[TransformVisitor.visitModuleInstantiation] Name field node not found'
+        '[TransformVisitor.visitModuleInstantiation] Function name not found'
       );
       return null;
     }
 
-    const functionName = nameFieldNode.text;
-
     // Check if this is a transform function
-    if (
-      ![
-        'translate',
-        'rotate',
-        'scale',
-        'mirror',
-        'color',
-        'multmatrix',
-        'offset',
-      ].includes(functionName)
-    ) {
+    if (!this.isSupportedTransformFunction(functionName)) {
       console.log(
         `[TransformVisitor.visitModuleInstantiation] Not a transform function: ${functionName}, returning null to let other visitors handle it`
       );

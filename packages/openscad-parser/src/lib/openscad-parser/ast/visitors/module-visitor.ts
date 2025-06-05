@@ -73,6 +73,7 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types.js';
 import { BaseASTVisitor } from './base-ast-visitor.js';
 import { getLocation } from '../utils/location-utils.js';
+import { findDescendantOfType } from '../utils/node-utils.js';
 import {
   extractModuleParameters,
   extractModuleParametersFromText,
@@ -94,6 +95,34 @@ import { ErrorHandler } from '../../error-handling/index.js'; // Added ErrorHand
 export class ModuleVisitor extends BaseASTVisitor {
   constructor(source: string, protected override errorHandler: ErrorHandler) {
     super(source, errorHandler);
+  }
+
+  /**
+   * Override visitStatement to only handle module-related statements
+   * This prevents the ModuleVisitor from interfering with other statement types
+   * that should be handled by specialized visitors (PrimitiveVisitor, TransformVisitor, etc.)
+   *
+   * @param node The statement node to visit
+   * @returns The module AST node or null if this is not a module statement
+   * @override
+   */
+  override visitStatement(node: TSNode): ast.ASTNode | null {
+    // Only handle statements that contain module definitions
+    // Check for module_definition
+    const moduleDefinition = findDescendantOfType(node, 'module_definition');
+    if (moduleDefinition) {
+      return this.visitModuleDefinition(moduleDefinition);
+    }
+
+    // Check for function_definition (functions are also handled by ModuleVisitor)
+    const functionDefinition = findDescendantOfType(node, 'function_definition');
+    if (functionDefinition) {
+      return this.visitFunctionDefinition(functionDefinition);
+    }
+
+    // Return null for all other statement types to let specialized visitors handle them
+    // This includes module_instantiation which should be handled by specialized visitors
+    return null;
   }
 
   /**

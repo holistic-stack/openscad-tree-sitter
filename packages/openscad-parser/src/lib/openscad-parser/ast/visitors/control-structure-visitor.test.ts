@@ -213,16 +213,16 @@ describe('ControlStructureVisitor', () => {
     });
 
     it('should create a for loop node with variables', () => {
-      // Create a mock for loop node
+      // Create a mock for_statement node that matches the actual tree-sitter grammar
       const mockForNode = {
-        type: 'module_instantiation',
+        type: 'for_statement',
         text: 'for (i = [0:10]) { cube(i); }',
         childCount: 3,
         child: (index: number) => {
           if (index === 0) {
             return {
               type: 'identifier',
-              text: 'for',
+              text: 'i',
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
@@ -230,104 +230,21 @@ describe('ControlStructureVisitor', () => {
             };
           } else if (index === 1) {
             return {
-              type: 'argument_list',
-              text: '(i = [0:10])',
-              childCount: 1,
-              child: () => ({
-                type: 'named_argument',
-                text: 'i = [0:10]',
-                childCount: 3,
-                child: (j: number) => {
-                  if (j === 0) {
-                    return {
-                      type: 'identifier',
-                      text: 'i',
-                      childCount: 0,
-                      child: () => null,
-                      childForFieldName: () => null,
-                      namedChildren: [],
-                    };
-                  } else if (j === 1) {
-                    return {
-                      type: 'equals',
-                      text: '=',
-                      childCount: 0,
-                      child: () => null,
-                      childForFieldName: () => null,
-                      namedChildren: [],
-                    };
-                  } else if (j === 2) {
-                    return {
-                      type: 'range_expression',
-                      text: '[0:10]',
-                      childCount: 0,
-                      child: () => null,
-                      childForFieldName: () => null,
-                      namedChildren: [],
-                    };
-                  }
-                  return null;
-                },
-                childForFieldName: (name: string) => {
-                  if (name === 'name') {
-                    return {
-                      type: 'identifier',
-                      text: 'i',
-                      childCount: 0,
-                      child: () => null,
-                      childForFieldName: () => null,
-                      namedChildren: [],
-                    };
-                  } else if (name === 'value') {
-                    return {
-                      type: 'range_expression',
-                      text: '[0:10]',
-                      childCount: 0,
-                      child: () => null,
-                      childForFieldName: () => null,
-                      namedChildren: [],
-                    };
-                  }
-                  return null;
-                },
-                namedChildren: [
-                  {
-                    type: 'identifier',
-                    text: 'i',
-                    childCount: 0,
-                    child: () => null,
-                    childForFieldName: () => null,
-                    namedChildren: [],
-                  },
-                  {
-                    type: 'equals',
-                    text: '=',
-                    childCount: 0,
-                    child: () => null,
-                    childForFieldName: () => null,
-                    namedChildren: [],
-                  },
-                  {
-                    type: 'range_expression',
-                    text: '[0:10]',
-                    childCount: 0,
-                    child: () => null,
-                    childForFieldName: () => null,
-                    namedChildren: [],
-                  },
-                ],
-              }),
-              childForFieldName: () => null,
-              namedChildren: [
-                {
-                  type: 'named_argument',
-                  text: 'i = [0:10]',
-                  childCount: 3,
-                  child: () => null,
-                  childForFieldName: () => null,
-                  namedChildren: [],
-                },
-              ],
+              type: 'range_expression',
+              text: '[0:10]',
+              childCount: 3,
+              child: (childIndex: number) => {
+                if (childIndex === 0) return { type: 'number', text: '0' };
+                if (childIndex === 1) return { type: ':', text: ':' };
+                if (childIndex === 2) return { type: 'number', text: '10' };
+                return null;
+              },
+              childForFieldName: (fieldName: string) => {
+                if (fieldName === 'start') return { type: 'number', text: '0' };
+                if (fieldName === 'end') return { type: 'number', text: '10' };
+                return null;
+              },
+              namedChildren: [],
             };
           } else if (index === 2) {
             return {
@@ -342,31 +259,31 @@ describe('ControlStructureVisitor', () => {
           return null;
         },
         childForFieldName: (name: string) => {
-          if (name === 'name') {
+          if (name === 'iterator') {
             return {
               type: 'identifier',
-              text: 'for',
+              text: 'i',
               childCount: 0,
               child: () => null,
               childForFieldName: () => null,
               namedChildren: [],
             };
-          } else if (name === 'arguments') {
+          } else if (name === 'range') {
             return {
-              type: 'argument_list',
-              text: '(i = [0:10])',
-              childCount: 1,
-              child: () => null,
-              childForFieldName: () => null,
-              namedChildren: [],
-            };
-          } else if (name === 'block') {
-            return {
-              type: 'block',
-              text: '{ cube(i); }',
+              type: 'range_expression',
+              text: '[0:10]',
               childCount: 3,
-              child: () => null,
-              childForFieldName: () => null,
+              child: (childIndex: number) => {
+                if (childIndex === 0) return { type: 'number', text: '0' };
+                if (childIndex === 1) return { type: ':', text: ':' };
+                if (childIndex === 2) return { type: 'number', text: '10' };
+                return null;
+              },
+              childForFieldName: (fieldName: string) => {
+                if (fieldName === 'start') return { type: 'number', text: '0' };
+                if (fieldName === 'end') return { type: 'number', text: '10' };
+                return null;
+              },
               namedChildren: [],
             };
           }
@@ -375,16 +292,16 @@ describe('ControlStructureVisitor', () => {
         namedChildren: [
           {
             type: 'identifier',
-            text: 'for',
+            text: 'i',
             childCount: 0,
             child: () => null,
             childForFieldName: () => null,
             namedChildren: [],
           },
           {
-            type: 'argument_list',
-            text: '(i = [0:10])',
-            childCount: 1,
+            type: 'range_expression',
+            text: '[0:10]',
+            childCount: 3,
             child: () => null,
             childForFieldName: () => null,
             namedChildren: [],
@@ -400,8 +317,8 @@ describe('ControlStructureVisitor', () => {
         ],
       } as unknown as TSNode;
 
-      // Visit the node
-      const result = visitor.visitModuleInstantiation(mockForNode);
+      // Visit the node using the correct method for for_statement
+      const result = visitor.visitForStatement(mockForNode);
 
       // Verify the result
       expect(result).not.toBeNull();

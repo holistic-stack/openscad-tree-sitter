@@ -12,6 +12,7 @@
 import { Node as TSNode } from 'web-tree-sitter';
 import { BaseASTVisitor } from '../base-ast-visitor';
 import type { EchoStatementNode, ExpressionNode } from '../../ast-types';
+import type * as ast from '../../ast-types';
 import type { ErrorHandler } from '../../../error-handling/error-handler';
 import { findDescendantOfType } from '../../utils/node-utils';
 import { Logger } from '../../../error-handling/logger.js';
@@ -50,6 +51,45 @@ export class EchoStatementVisitor extends BaseASTVisitor {
   constructor(sourceCode: string, errorHandler: ErrorHandler) {
     super(sourceCode, errorHandler);
     this.logger = new Logger({ level: Severity.DEBUG });
+  }
+
+  /**
+   * Override visitStatement to only handle echo statements
+   * This prevents the EchoStatementVisitor from interfering with other statement types
+   * that should be handled by specialized visitors (PrimitiveVisitor, TransformVisitor, etc.)
+   *
+   * @param node The statement node to visit
+   * @returns The echo statement AST node or null if this is not an echo statement
+   * @override
+   */
+  override visitStatement(node: TSNode): ast.ASTNode | null {
+    // Only handle statements that contain echo_statement nodes
+    const echoStatement = findDescendantOfType(node, 'echo_statement');
+    if (echoStatement) {
+      return this.visitEchoStatement(echoStatement);
+    }
+
+    // Return null for all other statement types to let specialized visitors handle them
+    return null;
+  }
+
+  /**
+   * Implementation of the abstract createASTNodeForFunction method
+   * EchoStatementVisitor doesn't handle function calls, so this always returns null
+   *
+   * @param node The CST node for the module instantiation
+   * @param functionName The name of the function/module called
+   * @param args The processed arguments passed to the function/module
+   * @returns Always null since EchoStatementVisitor doesn't handle function calls
+   * @protected
+   */
+  protected createASTNodeForFunction(
+    node: TSNode,
+    functionName: string,
+    args: ast.Parameter[]
+  ): ast.ASTNode | null {
+    // EchoStatementVisitor doesn't handle function calls
+    return null;
   }
 
   /**
@@ -712,26 +752,7 @@ export class EchoStatementVisitor extends BaseASTVisitor {
     return null;
   }
 
-  /**
-   * Creates an AST node for a function call
-   * This method is required by the base class but not used in echo statement processing
-   *
-   * @param node The function call node
-   * @param functionName The name of the function
-   * @param args The function arguments
-   * @returns Always returns null as echo statements don't process function calls directly
-   *
-   * @protected
-   */
-  protected createASTNodeForFunction(
-    node: TSNode,
-    functionName: string,
-    args: any[]
-  ): any {
-    // Echo statements don't need special function call processing
-    // This is handled by the expression visitor system
-    return null;
-  }
+
 
   /**
    * Placeholder method for function call processing

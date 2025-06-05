@@ -1,1 +1,1 @@
-echo(sin(45));
+union() { cube(10); sphere(5); }

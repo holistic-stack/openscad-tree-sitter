@@ -298,6 +298,38 @@ export class ExpressionVisitor extends BaseASTVisitor {
   }
 
   /**
+   * Override visitStatement to only handle expression statements
+   * This prevents the ExpressionVisitor from interfering with other statement types
+   * that should be handled by specialized visitors (PrimitiveVisitor, TransformVisitor, etc.)
+   *
+   * @param node The statement node to visit
+   * @returns The expression AST node or null if this is not an expression statement
+   * @override
+   */
+  override visitStatement(node: TSNode): ast.ASTNode | null {
+    // Only handle statements that contain expression nodes
+    // Check for expression_statement, assignment_statement with expressions
+    const expressionStatement = node.descendantsOfType('expression_statement')[0];
+    if (expressionStatement) {
+      // Find the expression within the expression statement
+      const expression = expressionStatement.namedChild(0);
+      if (expression) {
+        return this.dispatchSpecificExpression(expression);
+      }
+    }
+
+    // Check for assignment statements that contain expressions
+    const assignmentStatement = node.descendantsOfType('assignment_statement')[0];
+    if (assignmentStatement) {
+      // Assignment statements are handled by AssignStatementVisitor, not ExpressionVisitor
+      return null;
+    }
+
+    // Return null for all other statement types to let specialized visitors handle them
+    return null;
+  }
+
+  /**
    * Dispatch an expression node to the appropriate handler method
    * @param node The expression node to dispatch
    * @returns The expression AST node or null if the node cannot be processed

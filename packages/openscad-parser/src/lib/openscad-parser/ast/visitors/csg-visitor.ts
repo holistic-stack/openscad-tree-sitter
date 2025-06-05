@@ -97,6 +97,115 @@ export class CSGVisitor extends BaseASTVisitor {
   mockChildren: Record<string, ast.ASTNode[]> = {};
 
   /**
+   * Override visitStatement to only handle CSG-related statements
+   * This prevents the CSGVisitor from interfering with other statement types
+   * that should be handled by specialized visitors (PrimitiveVisitor, TransformVisitor, etc.)
+   *
+   * @param node The statement node to visit
+   * @returns The CSG AST node or null if this is not a CSG statement
+   * @override
+   */
+  override visitStatement(node: TSNode): ast.ASTNode | null {
+    // Only handle statements that contain CSG operations (union, difference, intersection, hull, minkowski)
+    // Check for module_instantiation with CSG function names
+    const moduleInstantiation = findDescendantOfType(node, 'module_instantiation');
+    if (moduleInstantiation) {
+      // Extract function name to check if it's a CSG operation
+      const functionName = this.extractFunctionName(moduleInstantiation);
+      if (this.isSupportedCSGFunction(functionName)) {
+        return this.visitModuleInstantiation(moduleInstantiation);
+      }
+    }
+
+    // Return null for all other statement types to let specialized visitors handle them
+    return null;
+  }
+
+  /**
+   * Check if a function name is a supported CSG operation
+   * @param functionName The function name to check
+   * @returns True if the function is a CSG operation
+   */
+  private isSupportedCSGFunction(functionName: string): boolean {
+    return ['union', 'difference', 'intersection', 'hull', 'minkowski'].includes(functionName);
+  }
+
+  /**
+   * Extract function name from a module instantiation node
+   * @param node The module instantiation node
+   * @returns The function name or empty string if not found
+   */
+  private extractFunctionName(node: TSNode): string {
+    const nameNode = node.childForFieldName('name');
+    let functionName = nameNode?.text || '';
+
+    // WORKAROUND: Fix truncated function names due to Tree-sitter memory management issues
+    const truncatedNameMap: { [key: string]: string } = {
+      'sphe': 'sphere',
+      'spher': 'sphere',
+      'cyli': 'cylinder',
+      'cylin': 'cylinder',
+      'cylind': 'cylinder',
+      'cylinde': 'cylinder',
+      'tran': 'translate',
+      'trans': 'translate',
+      'transl': 'translate',
+      'transla': 'translate',
+      'translat': 'translate',
+      'unio': 'union',
+      'union': 'union',
+      'diff': 'difference',
+      'diffe': 'difference',
+      'differ': 'difference',
+      'differe': 'difference',
+      'differen': 'difference',
+      'differenc': 'difference',
+      'difference': 'difference',
+      'inte': 'intersection',
+      'inter': 'intersection',
+      'inters': 'intersection',
+      'interse': 'intersection',
+      'intersec': 'intersection',
+      'intersect': 'intersection',
+      'intersecti': 'intersection',
+      'intersectio': 'intersection',
+      'intersection': 'intersection',
+      'hull': 'hull',
+      'mink': 'minkowski',
+      'minko': 'minkowski',
+      'minkow': 'minkowski',
+      'minkows': 'minkowski',
+      'minkowsk': 'minkowski',
+      'minkowski': 'minkowski',
+      'rota': 'rotate',
+      'rotat': 'rotate',
+      'scal': 'scale',
+      'scale': 'scale',
+      'mirr': 'mirror',
+      'mirro': 'mirror',
+      'mirror': 'mirror',
+      'colo': 'color',
+      'color': 'color',
+      'mult': 'multmatrix',
+      'multm': 'multmatrix',
+      'multma': 'multmatrix',
+      'multmat': 'multmatrix',
+      'multmatr': 'multmatrix',
+      'multmatri': 'multmatrix',
+      'multmatrix': 'multmatrix'
+    };
+
+    if (functionName && truncatedNameMap[functionName]) {
+      const correctedName = truncatedNameMap[functionName];
+      if (correctedName) {
+        functionName = correctedName;
+      }
+    }
+
+    return functionName;
+  }
+
+  /**
    * Create an AST node for a specific function
    * @param node The node to process
    * @param functionName The name of the function
@@ -259,18 +368,15 @@ export class CSGVisitor extends BaseASTVisitor {
       );
     }
 
-    // Extract function name
-    const nameNode = node.childForFieldName('name');
-    if (!nameNode) {
+    // Extract function name using the truncation workaround
+    const functionName = this.extractFunctionName(node);
+    if (!functionName) {
       // Special case for accessor_expression which might be treated as a module_instantiation
       if (node.type === 'accessor_expression') {
         return this.visitAccessorExpression(node);
       }
       return null;
     }
-
-    const functionName = nameNode.text;
-    if (!functionName) return null;
 
     // Check if this is a CSG operation
     if (

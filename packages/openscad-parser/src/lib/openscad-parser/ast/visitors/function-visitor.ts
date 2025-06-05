@@ -74,6 +74,7 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types.js';
 import { BaseASTVisitor } from './base-ast-visitor.js';
 import { getLocation } from '../utils/location-utils.js';
+import { findDescendantOfType } from '../utils/node-utils.js';
 import {
   extractModuleParameters,
   extractModuleParametersFromText,
@@ -102,6 +103,28 @@ import { ErrorHandler } from '../../error-handling/index.js'; // Added ErrorHand
 export class FunctionVisitor extends BaseASTVisitor {
   constructor(source: string, protected override errorHandler: ErrorHandler) {
     super(source, errorHandler);
+  }
+
+  /**
+   * Override visitStatement to only handle function-related statements
+   * This prevents the FunctionVisitor from interfering with other statement types
+   * that should be handled by specialized visitors (PrimitiveVisitor, TransformVisitor, etc.)
+   *
+   * @param node The statement node to visit
+   * @returns The function AST node or null if this is not a function statement
+   * @override
+   */
+  override visitStatement(node: TSNode): ast.ASTNode | null {
+    // Only handle statements that contain function definitions
+    // Check for function_definition
+    const functionDefinition = findDescendantOfType(node, 'function_definition');
+    if (functionDefinition) {
+      return this.visitFunctionDefinition(functionDefinition);
+    }
+
+    // Return null for all other statement types to let specialized visitors handle them
+    // This includes function calls which should be handled by ExpressionVisitor
+    return null;
   }
 
   /**

@@ -52,7 +52,7 @@ import { BaseASTVisitor } from '../base-ast-visitor.js';
 import { ErrorHandler } from '../../../error-handling/index.js';
 import * as ast from '../../ast-types.js';
 import { getLocation } from '../../utils/location-utils.js';
-import { extractArguments, type ExtractedParameter } from '../../extractors/argument-extractor.js';
+import { extractArguments, type ExtractedParameter, type ExtractedNamedArgument } from '../../extractors/argument-extractor.js';
 
 /**
  * Visitor class for processing OpenSCAD assign statements.
@@ -434,7 +434,14 @@ export class AssignStatementVisitor extends BaseASTVisitor {
     // If the argument extractor failed to extract arguments (e.g., due to complex expressions),
     // fall back to manual extraction
     if (extractedArgs.length === 0 && argsNode) {
-      extractedArgs = this.manuallyExtractArguments(argsNode);
+      const manualArgs = this.manuallyExtractArguments(argsNode);
+      // Convert ExtractedParameter[] to Parameter[] by converting the values
+      extractedArgs = manualArgs
+        .filter((arg): arg is ExtractedNamedArgument => 'name' in arg && arg.name !== undefined)
+        .map((arg): ast.Parameter => ({
+          name: arg.name,
+          value: this.convertValueToParameterValue(arg.value)
+        }));
     }
 
     // Convert function arguments to assignments
@@ -448,7 +455,7 @@ export class AssignStatementVisitor extends BaseASTVisitor {
         // If conversion failed, create a generic expression node
         if (!value) {
           // Try to extract the raw expression text from the original argument
-          const rawValue = this.extractRawExpressionFromArgument(argsNode, arg.name);
+          const rawValue = argsNode ? this.extractRawExpressionFromArgument(argsNode, arg.name) : null;
           value = {
             type: 'expression',
             expressionType: 'literal',
@@ -499,10 +506,11 @@ export class AssignStatementVisitor extends BaseASTVisitor {
             bodyNode
           );
           body = {
-            type: 'block',
+            type: 'expression',
+            expressionType: 'block',
             statements: [], // Empty for now - could be enhanced later
             location: getLocation(bodyNode)
-          };
+          } as ast.ExpressionNode;
         } else if (bodyNode.type === 'statement') {
           // For statement bodies, look for module_instantiation within the statement
           const moduleInstantiation = this.findDescendantOfType(bodyNode, 'module_instantiation');
@@ -542,7 +550,12 @@ export class AssignStatementVisitor extends BaseASTVisitor {
     return {
       type: 'assign',
       assignments,
-      body,
+      body: body || {
+        type: 'expression',
+        expressionType: 'literal',
+        value: 'empty',
+        location: getLocation(node)
+      },
       location: getLocation(node)
     };
   }
@@ -750,8 +763,7 @@ export class AssignStatementVisitor extends BaseASTVisitor {
                   results.push({
                     name: nameNode.text,
                     value: {
-                      type: 'expression',
-                      expressionType: 'literal',
+                      type: 'string',
                       value: exprNode.text
                     }
                   });
@@ -823,28 +835,28 @@ export class AssignStatementVisitor extends BaseASTVisitor {
           type: 'expression',
           expressionType: 'literal',
           value: extractedValue.value,
-          location: { line: 0, column: 0 }, // Default location
+          location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }, // Default location
         };
       case 'string':
         return {
           type: 'expression',
           expressionType: 'literal',
           value: extractedValue.value,
-          location: { line: 0, column: 0 }, // Default location
+          location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }, // Default location
         };
       case 'boolean':
         return {
           type: 'expression',
           expressionType: 'literal',
           value: extractedValue.value,
-          location: { line: 0, column: 0 }, // Default location
+          location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }, // Default location
         };
       case 'identifier':
         return {
           type: 'expression',
-          expressionType: 'identifier',
+          expressionType: 'variable',
           name: extractedValue.value,
-          location: { line: 0, column: 0 }, // Default location
+          location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }, // Default location
         };
       default:
         // For unknown types, create a generic literal expression
@@ -852,9 +864,50 @@ export class AssignStatementVisitor extends BaseASTVisitor {
           type: 'expression',
           expressionType: 'literal',
           value: extractedValue.value || extractedValue,
-          location: { line: 0, column: 0 }, // Default location
+          location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }, // Default location
         };
     }
+  }
+
+  /**
+   * Convert a Value to a ParameterValue.
+   *
+   * @param value - The Value object to convert
+   * @returns A ParameterValue object
+   * @private
+   */
+  private convertValueToParameterValue(value: ast.Value): ast.ParameterValue {
+    if (value.type === 'number') {
+      return parseFloat(value.value as string);
+    } else if (value.type === 'boolean') {
+      return value.value === 'true';
+    } else if (value.type === 'string') {
+      return value.value as string;
+    } else if (value.type === 'identifier') {
+      return {
+        type: 'expression',
+        expressionType: 'variable',
+        name: value.value as string,
+        location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
+      } as ast.VariableNode;
+    } else if (value.type === 'vector') {
+      const vectorValues = (value.value as ast.Value[]).map(v => {
+        if (v.type === 'number') {
+          return parseFloat(v.value as string);
+        }
+        return 0; // Default for non-numeric elements
+      });
+
+      if (vectorValues.length === 2) {
+        return vectorValues as ast.Vector2D;
+      } else if (vectorValues.length >= 3) {
+        return [vectorValues[0], vectorValues[1], vectorValues[2]] as ast.Vector3D;
+      }
+      return [0, 0, 0] as ast.Vector3D; // Default fallback
+    }
+
+    // Default fallback - return as string
+    return value.value as string || '';
   }
 
   /**

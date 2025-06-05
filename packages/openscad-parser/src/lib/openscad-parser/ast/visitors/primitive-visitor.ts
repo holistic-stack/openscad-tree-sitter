@@ -100,6 +100,86 @@ export class PrimitiveVisitor extends BaseASTVisitor {
   }
 
   /**
+   * Override visitStatement to only handle primitive-related statements
+   * This prevents the PrimitiveVisitor from interfering with other statement types
+   * that should be handled by specialized visitors (TransformVisitor, CSGVisitor, etc.)
+   *
+   * @param node The statement node to visit
+   * @returns The primitive AST node or null if this is not a primitive statement
+   * @override
+   */
+  override visitStatement(node: TSNode): ast.ASTNode | null {
+    // Only handle statements that contain primitive operations (cube, sphere, cylinder, etc.)
+    // Check for module_instantiation with primitive function names
+    const moduleInstantiation = findDescendantOfType(node, 'module_instantiation');
+    if (moduleInstantiation) {
+      // Extract function name to check if it's a primitive operation
+      const functionName = this.extractFunctionName(moduleInstantiation);
+      if (this.isSupportedPrimitiveFunction(functionName)) {
+        return this.visitModuleInstantiation(moduleInstantiation);
+      }
+    }
+
+    // Return null for all other statement types to let specialized visitors handle them
+    return null;
+  }
+
+  /**
+   * Check if a function name is a supported primitive operation
+   * @param functionName The function name to check
+   * @returns True if the function is a primitive operation
+   */
+  private isSupportedPrimitiveFunction(functionName: string): boolean {
+    return ['cube', 'sphere', 'cylinder', 'polyhedron', 'square', 'circle', 'polygon', 'text'].includes(functionName);
+  }
+
+  /**
+   * Extract function name from a module instantiation node
+   * @param node The module instantiation node
+   * @returns The function name or empty string if not found
+   */
+  private extractFunctionName(node: TSNode): string {
+    const nameNode = node.childForFieldName('name');
+    let functionName = nameNode?.text || '';
+
+    // WORKAROUND: Fix truncated function names due to Tree-sitter memory management issues
+    const truncatedNameMap: { [key: string]: string } = {
+      'sphe': 'sphere',
+      'spher': 'sphere',
+      'cyli': 'cylinder',
+      'cylin': 'cylinder',
+      'cylind': 'cylinder',
+      'cylinde': 'cylinder',
+      'cub': 'cube',
+      'cube': 'cube',
+      'poly': 'polyhedron',
+      'polyh': 'polyhedron',
+      'polyhe': 'polyhedron',
+      'polyhed': 'polyhedron',
+      'polyhedr': 'polyhedron',
+      'polyhedro': 'polyhedron',
+      'squa': 'square',
+      'squar': 'square',
+      'circ': 'circle',
+      'circl': 'circle',
+      'polyg': 'polygon',
+      'polygo': 'polygon',
+      'polygon': 'polygon',
+      'tex': 'text',
+      'text': 'text'
+    };
+
+    if (functionName && truncatedNameMap[functionName]) {
+      const correctedName = truncatedNameMap[functionName];
+      if (correctedName) {
+        functionName = correctedName;
+      }
+    }
+
+    return functionName;
+  }
+
+  /**
    * Create an AST node for a specific function
    * @param node The node to process
    * @param functionName The name of the function
@@ -173,30 +253,14 @@ export class PrimitiveVisitor extends BaseASTVisitor {
    * @returns The AST node or null if the node cannot be processed by this visitor
    */
   override visitModuleInstantiation(node: TSNode): ast.ASTNode | null {
-    // Extract function name
-    const nameFieldNode = node.childForFieldName('name');
-    if (!nameFieldNode) {
-      return null;
-    }
-
-    const functionName = nameFieldNode.text;
+    // Extract function name using the truncation workaround
+    const functionName = this.extractFunctionName(node);
     if (!functionName) {
       return null;
     }
 
     // Check if this is a primitive shape function
-    if (
-      ![
-        'cube',
-        'sphere',
-        'cylinder',
-        'polyhedron',
-        'square',
-        'circle',
-        'polygon',
-        'text',
-      ].includes(functionName)
-    ) {
+    if (!this.isSupportedPrimitiveFunction(functionName)) {
       // Not a primitive function, return null to let other visitors handle it
       return null;
     }

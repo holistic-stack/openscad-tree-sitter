@@ -126,6 +126,42 @@ export class ControlStructureVisitor extends BaseASTVisitor {
   }
 
   /**
+   * Override visitStatement to only handle control structure statements
+   * This prevents the ControlStructureVisitor from interfering with other statement types
+   * that should be handled by specialized visitors (PrimitiveVisitor, TransformVisitor, etc.)
+   *
+   * @param node The statement node to visit
+   * @returns The control structure AST node or null if this is not a control structure statement
+   * @override
+   */
+  override visitStatement(node: TSNode): ast.ASTNode | null {
+    // Only handle statements that contain control structure nodes
+    // Check for if_statement, for_statement, let_expression, each_statement
+    const ifStatement = node.descendantsOfType('if_statement')[0];
+    if (ifStatement) {
+      return this.visitIfStatement(ifStatement);
+    }
+
+    const forStatement = node.descendantsOfType('for_statement')[0];
+    if (forStatement) {
+      return this.visitForStatement(forStatement);
+    }
+
+    const letExpression = node.descendantsOfType('let_expression')[0];
+    if (letExpression) {
+      return this.visitLetExpression(letExpression);
+    }
+
+    const eachStatement = node.descendantsOfType('each_statement')[0];
+    if (eachStatement) {
+      return this.visitEachStatement(eachStatement);
+    }
+
+    // Return null for all other statement types to let specialized visitors handle them
+    return null;
+  }
+
+  /**
    * Visit an if statement node
    * @param node The if statement node to visit
    * @returns The if AST node or null if the node cannot be processed

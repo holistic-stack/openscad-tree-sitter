@@ -112,6 +112,39 @@ export class VariableVisitor extends BaseASTVisitor {
   constructor(source: string, protected override errorHandler: ErrorHandler) {
     super(source, errorHandler);
   }
+
+  /**
+   * Override visitStatement to only handle variable-related statements
+   * This prevents the VariableVisitor from interfering with other statement types
+   * that should be handled by specialized visitors (PrimitiveVisitor, TransformVisitor, etc.)
+   *
+   * @param node The statement node to visit
+   * @returns The variable AST node or null if this is not a variable statement
+   * @override
+   */
+  override visitStatement(node: TSNode): ast.ASTNode | null {
+    // Only handle statements that contain variable assignments or references
+    // Check for assignment_statement with variable assignments
+    const assignmentStatement = findDescendantOfType(node, 'assignment_statement');
+    if (assignmentStatement) {
+      // Assignment statements are handled by AssignStatementVisitor, not VariableVisitor
+      return null;
+    }
+
+    // Check for variable_statement (if such a node type exists in the grammar)
+    const variableStatement = findDescendantOfType(node, 'variable_statement');
+    if (variableStatement) {
+      // Process variable statement
+      const identifier = findDescendantOfType(variableStatement, 'identifier');
+      if (identifier) {
+        return this.visitIdentifier(identifier);
+      }
+    }
+
+    // Return null for all other statement types to let specialized visitors handle them
+    return null;
+  }
+
   /**
    * Create a variable node from a variable node in the CST
    * @param node The variable node from the CST
