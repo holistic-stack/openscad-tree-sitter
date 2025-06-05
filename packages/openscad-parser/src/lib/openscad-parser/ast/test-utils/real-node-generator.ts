@@ -74,6 +74,12 @@ export class RealNodeGenerator {
       }
     }
 
+    // Also try looking for module_instantiation (which is how OpenSCAD parses primitives like cube, sphere)
+    const moduleInstNode = this.findNodeByType(tree.rootNode, 'module_instantiation');
+    if (moduleInstNode) {
+      return moduleInstNode;
+    }
+
     return null;
   }
 

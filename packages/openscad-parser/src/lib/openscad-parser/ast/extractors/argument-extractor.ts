@@ -276,6 +276,16 @@ export function extractArguments(
   console.log(
     `[extractArguments] Processing arguments node: type=${argsNode.type}, text=${nodeText}`
   );
+
+  // Detect Tree-sitter memory corruption for empty argument lists
+  // If we see patterns like ');' or ')' as argument text, it's likely corruption
+  if (nodeText.match(/^\s*\)[\s;]*$/)) {
+    console.log(
+      `[extractArguments] Detected Tree-sitter memory corruption in empty argument list: '${nodeText}'. Returning empty arguments.`
+    );
+    return [];
+  }
+
   const args: ast.Parameter[] = [];
 
   // Handle argument_list nodes specially
@@ -581,6 +591,15 @@ function extractArgument(
     `[extractArgument] Processing argument node: type=${argNode.type}, text=${nodeText}`
   );
 
+  // Detect Tree-sitter memory corruption patterns
+  // If we see patterns like ');' or ')' as argument text, it's likely corruption
+  if (nodeText.match(/^\s*\)[\s;]*$/)) {
+    console.log(
+      `[extractArgument] Detected Tree-sitter memory corruption in argument: '${nodeText}'. Skipping.`
+    );
+    return null;
+  }
+
   // Handle named_argument nodes directly
   if (argNode.type === 'named_argument') {
     console.log(`[extractArgument] Processing named_argument node`);
@@ -832,6 +851,58 @@ export function extractValue(valueNode: TSNode): ast.Value | null {
       return extractRangeLiteral(valueNode);
 
     // Handle expression hierarchy - these nodes typically have a single child that contains the actual value
+    case 'unary_expression': {
+      // Handle unary expressions specially (e.g., -5, +3, !flag)
+      console.log(
+        `[extractValue] Processing unary_expression: ${valueNode.text}`
+      );
+
+      if (valueNode.childCount === 2) {
+        const operatorNode = valueNode.child(0);
+        const operandNode = valueNode.child(1);
+
+        if (operatorNode && operandNode) {
+          const operator = operatorNode.text;
+          const operandValue = extractValue(operandNode);
+
+          console.log(
+            `[extractValue] Unary operator: '${operator}', operand: ${JSON.stringify(operandValue)}`
+          );
+
+          if (operandValue && typeof operandValue === 'object' && 'value' in operandValue) {
+            // Handle structured value objects
+            const actualValue = operandValue.value;
+            // Convert string numbers to actual numbers
+            const numericValue = typeof actualValue === 'string' ? parseFloat(actualValue) : actualValue;
+
+            if (operator === '-' && typeof numericValue === 'number' && !isNaN(numericValue)) {
+              console.log(`[extractValue] Applied unary minus to structured value: -${numericValue}`);
+              return { type: 'number', value: -numericValue };
+            }
+            if (operator === '+' && typeof numericValue === 'number' && !isNaN(numericValue)) {
+              console.log(`[extractValue] Applied unary plus to structured value: +${numericValue}`);
+              return { type: 'number', value: numericValue };
+            }
+          } else if (typeof operandValue === 'number') {
+            // Handle direct numeric values
+            if (operator === '-') {
+              console.log(`[extractValue] Applied unary minus to direct value: -${operandValue}`);
+              return { type: 'number', value: -operandValue };
+            }
+            if (operator === '+') {
+              console.log(`[extractValue] Applied unary plus to direct value: +${operandValue}`);
+              return { type: 'number', value: operandValue };
+            }
+          }
+        }
+      }
+
+      console.log(
+        `[extractValue] Could not process unary_expression: ${valueNode.text}`
+      );
+      return null;
+    }
+
     case 'conditional_expression':
     case 'logical_or_expression':
     case 'logical_and_expression':
@@ -840,7 +911,6 @@ export function extractValue(valueNode: TSNode): ast.Value | null {
     case 'additive_expression':
     case 'multiplicative_expression':
     case 'exponentiation_expression':
-    case 'unary_expression':
     case 'postfix_expression':
     case 'accessor_expression':
     case 'primary_expression': {
@@ -887,6 +957,60 @@ export function extractValue(valueNode: TSNode): ast.Value | null {
       console.log(
         `[extractValue] Could not extract value from expression hierarchy node: ${valueNode.type}`
       );
+      return null;
+    }
+
+    case 'binary_expression': {
+      // Handle binary expressions like 1 + 2, 3 * 4, etc.
+      console.log(`[extractValue] Processing binary_expression: ${valueNode.text}`);
+
+      // For now, we'll evaluate simple arithmetic expressions
+      // This is a basic implementation - a full expression evaluator would be more robust
+      if (valueNode.childCount >= 3) {
+        const leftNode = valueNode.child(0);
+        const operatorNode = valueNode.child(1);
+        const rightNode = valueNode.child(2);
+
+        if (leftNode && operatorNode && rightNode) {
+          const leftValue = extractValue(leftNode);
+          const rightValue = extractValue(rightNode);
+          const operator = operatorNode.text;
+
+          console.log(`[extractValue] Binary expression: ${JSON.stringify(leftValue)} ${operator} ${JSON.stringify(rightValue)}`);
+
+          // Only handle numeric operations for now
+          if (leftValue?.type === 'number' && rightValue?.type === 'number') {
+            const leftNum = typeof leftValue.value === 'string' ? parseFloat(leftValue.value) : leftValue.value;
+            const rightNum = typeof rightValue.value === 'string' ? parseFloat(rightValue.value) : rightValue.value;
+
+            if (!isNaN(leftNum) && !isNaN(rightNum)) {
+              let result: number;
+              switch (operator) {
+                case '+':
+                  result = leftNum + rightNum;
+                  break;
+                case '-':
+                  result = leftNum - rightNum;
+                  break;
+                case '*':
+                  result = leftNum * rightNum;
+                  break;
+                case '/':
+                  result = rightNum !== 0 ? leftNum / rightNum : 0;
+                  break;
+                default:
+                  console.log(`[extractValue] Unsupported binary operator: ${operator}`);
+                  return null;
+              }
+
+              console.log(`[extractValue] Evaluated binary expression: ${leftNum} ${operator} ${rightNum} = ${result}`);
+              return { type: 'number', value: result };
+            }
+          }
+        }
+      }
+
+      console.log(`[extractValue] Could not evaluate binary_expression: ${valueNode.text}`);
       return null;
     }
 

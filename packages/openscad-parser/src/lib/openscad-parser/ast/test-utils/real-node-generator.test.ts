@@ -40,7 +40,7 @@ describe('RealNodeGenerator', () => {
       const node = await generator.getCallExpressionNode('cube(10);');
 
       expect(node).not.toBeNull();
-      expect(node?.type).toBe('accessor_expression'); // OpenSCAD grammar uses accessor_expression for function calls
+      expect(node?.type).toBe('module_instantiation'); // OpenSCAD grammar uses module_instantiation for primitives
       expect(node?.text).toContain('cube(10)');
 
       // Verify it's a real Tree-sitter node
@@ -53,7 +53,7 @@ describe('RealNodeGenerator', () => {
       const node = await generator.getCallExpressionNode('sphere(r=5);');
 
       expect(node).not.toBeNull();
-      expect(node?.type).toBe('accessor_expression'); // OpenSCAD grammar uses accessor_expression for function calls
+      expect(node?.type).toBe('module_instantiation'); // OpenSCAD grammar uses module_instantiation for primitives
       expect(node?.text).toContain('sphere(r=5)');
     });
 
@@ -156,7 +156,7 @@ describe('RealNodeGenerator', () => {
 
       const node = await testGenerator.getCallExpressionNode('cube(5);');
       expect(node).not.toBeNull();
-      expect(node?.type).toBe('accessor_expression'); // OpenSCAD grammar uses accessor_expression for function calls
+      expect(node?.type).toBe('module_instantiation'); // OpenSCAD grammar uses module_instantiation for primitives
 
       testGenerator.dispose();
     });
