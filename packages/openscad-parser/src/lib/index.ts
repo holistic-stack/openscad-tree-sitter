@@ -246,3 +246,6 @@ export { SimpleErrorHandler, type IErrorHandler } from './openscad-parser/error-
 
 // Re-export AST types for consumers
 export * from './openscad-parser/ast/ast-types.js';
+
+// Re-export IDE support features
+export * from './ide-support/index.js';
