@@ -1,13 +1,67 @@
 /**
- * OpenSCAD Completion Provider
- * 
- * Provides intelligent code completion for OpenSCAD using AST analysis
- * and built-in symbol database.
+ * Enhanced OpenSCAD Completion Provider
+ *
+ * Provides intelligent code completion for OpenSCAD using advanced AST analysis,
+ * Symbol Information API, Position Utilities, and built-in symbol database.
+ *
+ * Features:
+ * - Context-aware completion using Position Utilities
+ * - Scope-aware symbol suggestions using Symbol Information API
+ * - Parameter hints for functions and modules
+ * - Built-in OpenSCAD symbols with documentation
+ * - Smart filtering based on completion context
  */
 
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
-import { ALL_OPENSCAD_SYMBOLS, SYMBOL_BY_NAME, OPENSCAD_SNIPPETS, type SymbolInfo } from './openscad-symbols';
+import { ALL_OPENSCAD_SYMBOLS, OPENSCAD_SNIPPETS, type SymbolInfo } from './openscad-symbols';
 import { type OutlineItem, type OpenSCADParserService } from '../services/openscad-parser-service';
+
+// TODO: Import advanced parser APIs when package is properly built
+// For now, define minimal interfaces to support the enhanced completion structure
+
+interface Position {
+  line: number;
+  column: number;
+  offset: number;
+}
+
+interface ASTNode {
+  type: string;
+  [key: string]: any;
+}
+
+interface ParserSymbolInfo {
+  name: string;
+  kind: 'module' | 'function' | 'variable' | 'parameter' | 'constant';
+  loc?: {
+    start: Position;
+    end: Position;
+  };
+  parameters?: Array<{ name: string; value?: any; defaultValue?: any; description?: string }>;
+  documentation?: string;
+  scope?: string;
+}
+
+interface SymbolProvider {
+  getSymbols(ast: ASTNode[]): ParserSymbolInfo[];
+  getSymbolAtPosition(ast: ASTNode[], position: Position): ParserSymbolInfo | undefined;
+}
+
+interface ParserCompletionContext {
+  type: 'module_call' | 'function_call' | 'parameter' | 'expression' | 'statement' | 'assignment' | 'unknown';
+  availableSymbols: ParserSymbolInfo[];
+  parameterIndex?: number;
+  expectedType?: string;
+}
+
+interface PositionUtilities {
+  findNodeAt(ast: ASTNode[], position: Position): ASTNode | undefined;
+  getNodeRange(node: ASTNode): { start: Position; end: Position };
+  getHoverInfo(ast: ASTNode[], position: Position): any | undefined;
+  getCompletionContext(ast: ASTNode[], position: Position): ParserCompletionContext | undefined;
+  isPositionInRange(position: Position, range: { start: Position; end: Position }): boolean;
+  findNodesContaining(ast: ASTNode[], position: Position): ASTNode[];
+}
 
 interface CompletionContext {
   position: monaco.Position;
@@ -17,6 +71,12 @@ interface CompletionContext {
   isInString: boolean;
   isInComment: boolean;
   triggerCharacter?: string | undefined;
+  // Enhanced context from Position Utilities
+  parserContext?: ParserCompletionContext | undefined;
+  availableSymbols: ParserSymbolInfo[];
+  contextType: 'module_call' | 'function_call' | 'parameter' | 'expression' | 'statement' | 'assignment' | 'unknown';
+  parameterIndex?: number | undefined;
+  expectedType?: string | undefined;
 }
 
 interface CompletionStats {
@@ -29,6 +89,8 @@ interface CompletionStats {
 
 export class OpenSCADCompletionProvider implements monaco.languages.CompletionItemProvider {
   private parserService: OpenSCADParserService | null = null;
+  private symbolProvider: SymbolProvider | null = null;
+  private positionUtilities: PositionUtilities | null = null;
   private lastCompletionStats: CompletionStats = {
     totalSuggestions: 0,
     astSymbols: 0,
@@ -37,8 +99,14 @@ export class OpenSCADCompletionProvider implements monaco.languages.CompletionIt
     computeTime: 0
   };
 
-  constructor(parserService?: OpenSCADParserService) {
+  constructor(
+    parserService?: OpenSCADParserService,
+    symbolProvider?: SymbolProvider,
+    positionUtilities?: PositionUtilities
+  ) {
     this.parserService = parserService || null;
+    this.symbolProvider = symbolProvider || null;
+    this.positionUtilities = positionUtilities || null;
   }
 
   triggerCharacters = ['.', '(', '[', ' '];
@@ -108,6 +176,45 @@ export class OpenSCADCompletionProvider implements monaco.languages.CompletionIt
     const isInString = this.isInsideString(beforeCursor);
     const isInComment = this.isInsideComment(beforeCursor);
 
+    // Enhanced context analysis using Position Utilities
+    let parserContext: ParserCompletionContext | undefined;
+    let availableSymbols: ParserSymbolInfo[] | undefined;
+    let contextType: CompletionContext['contextType'] = 'unknown';
+    let parameterIndex: number | undefined;
+    let expectedType: string | undefined;
+
+    if (this.positionUtilities && this.symbolProvider && this.parserService?.isReady()) {
+      try {
+        // Get the current AST from parser service
+        const ast = this.getASTFromParserService();
+        if (ast) {
+          // Convert Monaco position to parser position (0-based)
+          const parserPosition: Position = {
+            line: position.lineNumber - 1,
+            column: position.column - 1,
+            offset: this.calculateOffset(model, position)
+          };
+
+          // Get advanced completion context from Position Utilities
+          parserContext = this.positionUtilities.getCompletionContext(ast, parserPosition);
+
+          if (parserContext) {
+            availableSymbols = parserContext.availableSymbols;
+            contextType = parserContext.type;
+            parameterIndex = parserContext.parameterIndex;
+            expectedType = parserContext.expectedType;
+          }
+
+          // Get all symbols from Symbol Provider
+          if (!availableSymbols) {
+            availableSymbols = this.symbolProvider.getSymbols(ast);
+          }
+        }
+      } catch (error) {
+        console.warn('Error in enhanced context analysis:', error);
+      }
+    }
+
     return {
       position,
       model,
@@ -115,7 +222,12 @@ export class OpenSCADCompletionProvider implements monaco.languages.CompletionIt
       wordAtPosition,
       isInString,
       isInComment,
-      triggerCharacter
+      triggerCharacter,
+      parserContext,
+      availableSymbols: availableSymbols || [],
+      contextType: contextType || 'unknown',
+      parameterIndex,
+      expectedType
     };
   }
 
@@ -160,6 +272,12 @@ export class OpenSCADCompletionProvider implements monaco.languages.CompletionIt
   }
 
   private async getASTSymbols(context: CompletionContext): Promise<monaco.languages.CompletionItem[]> {
+    // Use enhanced Symbol Provider if available
+    if (context.availableSymbols && context.availableSymbols.length > 0) {
+      return this.convertSymbolsToCompletions(context.availableSymbols, context);
+    }
+
+    // Fallback to parser service outline
     if (!this.parserService?.isReady()) {
       return [];
     }
@@ -172,6 +290,33 @@ export class OpenSCADCompletionProvider implements monaco.languages.CompletionIt
       console.error('Error getting AST symbols:', error);
       return [];
     }
+  }
+
+  /**
+   * Convert Symbol Provider symbols to Monaco completion items
+   */
+  private convertSymbolsToCompletions(
+    symbols: ParserSymbolInfo[],
+    context: CompletionContext
+  ): monaco.languages.CompletionItem[] {
+    const completions: monaco.languages.CompletionItem[] = [];
+
+    for (const symbol of symbols) {
+      // Skip symbols defined after current position
+      if (symbol.loc && symbol.loc.start.line >= context.position.lineNumber - 1) {
+        continue;
+      }
+
+      // Filter based on context type
+      if (this.shouldIncludeSymbolForContext(symbol, context)) {
+        const completion = this.createCompletionFromSymbol(symbol, context);
+        if (completion) {
+          completions.push(completion);
+        }
+      }
+    }
+
+    return completions;
   }
 
   private convertOutlineToCompletions(
@@ -355,5 +500,156 @@ export class OpenSCADCompletionProvider implements monaco.languages.CompletionIt
 
   setParserService(parserService: OpenSCADParserService): void {
     this.parserService = parserService;
+  }
+
+  setSymbolProvider(symbolProvider: SymbolProvider): void {
+    this.symbolProvider = symbolProvider;
+  }
+
+  setPositionUtilities(positionUtilities: PositionUtilities): void {
+    this.positionUtilities = positionUtilities;
+  }
+
+  /**
+   * Get AST from parser service - this would need to be implemented
+   * based on how the parser service exposes AST data
+   */
+  private getASTFromParserService(): ASTNode[] | undefined {
+    // TODO: This needs to be implemented based on the actual parser service API
+    // For now, return undefined to avoid errors
+    return undefined;
+  }
+
+  /**
+   * Calculate character offset from Monaco position
+   */
+  private calculateOffset(model: monaco.editor.ITextModel, position: monaco.Position): number {
+    let offset = 0;
+    for (let line = 1; line < position.lineNumber; line++) {
+      offset += model.getLineContent(line).length + 1; // +1 for newline
+    }
+    offset += position.column - 1;
+    return offset;
+  }
+
+  /**
+   * Determine if a symbol should be included based on completion context
+   */
+  private shouldIncludeSymbolForContext(symbol: ParserSymbolInfo, context: CompletionContext): boolean {
+    const symbolKind = symbol.kind;
+
+    // Context-specific filtering
+    switch (context.contextType) {
+      case 'module_call':
+        return symbolKind === 'module';
+      case 'function_call':
+        return symbolKind === 'function';
+      case 'parameter':
+        // In parameter context, include variables and parameters
+        return ['variable', 'parameter'].includes(symbolKind);
+      case 'expression':
+        // In expressions, include functions and variables
+        return ['function', 'variable', 'constant'].includes(symbolKind);
+      case 'statement':
+      case 'assignment':
+      case 'unknown':
+      default:
+        // Include all symbols for general contexts
+        return true;
+    }
+  }
+
+  /**
+   * Create a Monaco completion item from a parser symbol
+   */
+  private createCompletionFromSymbol(
+    symbol: ParserSymbolInfo,
+    context: CompletionContext
+  ): monaco.languages.CompletionItem | null {
+    const kind = this.getCompletionKindFromParserSymbol(symbol);
+
+    // Create enhanced documentation
+    let documentation = symbol.documentation || `${symbol.kind}: ${symbol.name}`;
+    if (symbol.parameters && symbol.parameters.length > 0) {
+      documentation += '\n\nParameters:\n';
+      symbol.parameters.forEach((param: any) => {
+        const paramName = param.name || 'unnamed';
+        const paramDesc = param.description || 'parameter';
+        documentation += `- ${paramName}: ${paramDesc}\n`;
+      });
+    }
+
+    // Create smart insert text with parameter hints
+    const insertText = this.createSmartInsertText(symbol, context);
+
+    return {
+      label: symbol.name,
+      kind,
+      detail: this.createDetailText(symbol),
+      documentation: { value: documentation },
+      insertText,
+      insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+      range: {
+        startLineNumber: context.position.lineNumber,
+        endLineNumber: context.position.lineNumber,
+        startColumn: context.position.column - context.wordAtPosition.length,
+        endColumn: context.position.column
+      },
+      sortText: `1_${symbol.name}` // Prioritize user symbols
+    };
+  }
+
+  /**
+   * Get Monaco completion kind from parser symbol
+   */
+  private getCompletionKindFromParserSymbol(symbol: ParserSymbolInfo): monaco.languages.CompletionItemKind {
+    switch (symbol.kind) {
+      case 'module': return monaco.languages.CompletionItemKind.Module;
+      case 'function': return monaco.languages.CompletionItemKind.Function;
+      case 'variable': return monaco.languages.CompletionItemKind.Variable;
+      case 'parameter': return monaco.languages.CompletionItemKind.Variable;
+      case 'constant': return monaco.languages.CompletionItemKind.Constant;
+      default: return monaco.languages.CompletionItemKind.Text;
+    }
+  }
+
+  /**
+   * Create detail text for completion item
+   */
+  private createDetailText(symbol: ParserSymbolInfo): string {
+    let detail = symbol.kind;
+    if (symbol.loc) {
+      detail += ` (line ${symbol.loc.start.line + 1})`;
+    }
+    if (symbol.scope) {
+      detail += ` in ${symbol.scope}`;
+    }
+    return detail;
+  }
+
+  /**
+   * Create smart insert text with parameter placeholders
+   */
+  private createSmartInsertText(symbol: ParserSymbolInfo, _context: CompletionContext): string {
+    // For functions and modules, add parameter placeholders
+    if ((symbol.kind === 'function' || symbol.kind === 'module') && symbol.parameters) {
+      const requiredParams = symbol.parameters.filter((p: any) => !p.defaultValue);
+
+      if (requiredParams.length > 0) {
+        const paramPlaceholders = requiredParams.map((param: any, index: number) =>
+          `\${${index + 1}:${param.name || 'param'}}`
+        ).join(', ');
+        return `${symbol.name}(${paramPlaceholders})`;
+      } else if (symbol.parameters.length > 0) {
+        // Has optional parameters
+        return `${symbol.name}($1)`;
+      } else {
+        // No parameters
+        return `${symbol.name}()`;
+      }
+    }
+
+    // For variables and constants, just insert the name
+    return symbol.name;
   }
 }

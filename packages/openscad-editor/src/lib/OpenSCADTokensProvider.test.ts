@@ -332,3 +332,17 @@ describe('OpenSCADTokensProvider (Integration)', () => {
     });
   });
 });
+
+// Helper function to create a mock Monaco text model
+function createMockTextModel(lines: string[]): monaco.editor.ITextModel {
+  return {
+    getLineContent: (lineNumber: number) => {
+      // Monaco uses 1-based line numbers
+      return lines[lineNumber - 1] || '';
+    },
+    getLineCount: () => lines.length,
+    getValue: () => lines.join('\n'),
+    getVersionId: () => 1,
+    // Add other required properties as needed
+  } as monaco.editor.ITextModel;
+}

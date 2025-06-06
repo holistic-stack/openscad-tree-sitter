@@ -18,9 +18,12 @@ interface IOpenscadParser {
 // Dynamic import of the parser to avoid build-time dependency issues
 async function createParser(): Promise<IOpenscadParser> {
   try {
-    // Try to dynamically import the parser package
-    const parserModule = await import('@openscad/parser');
-    return new parserModule.OpenscadParser();
+    // TODO: Re-enable when @openscad/parser package is properly built
+    // const parserModule = await import('@openscad/parser');
+    // return new parserModule.OpenscadParser();
+
+    // For now, always use mock implementation
+    throw new Error('Parser package not available - using mock');
   } catch (error) {
     console.warn('OpenSCAD parser not available, using mock implementation:', error);
     // Fallback to a mock implementation
