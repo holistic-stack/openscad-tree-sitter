@@ -46,15 +46,5 @@
     "src/**/*.test.jsx",
     "src/**/*.spec.jsx"
   ],
-  "references": [
-    {
-      "path": "../tree-sitter-openscad"
-    },
-    {
-      "path": "../openscad-parser"
-    },
-    {
-      "path": "../openscad-editor/tsconfig.lib.json"
-    }
-  ]
+  "references": []
 }
