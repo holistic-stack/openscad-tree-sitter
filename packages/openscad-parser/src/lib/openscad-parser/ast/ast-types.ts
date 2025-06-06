@@ -804,7 +804,7 @@ export type UnaryOperator = '-' | '!';
  */
 export interface ModuleDefinitionNode extends BaseNode {
   type: 'module_definition';
-  name: string;
+  name: IdentifierNode; // Changed from string to IdentifierNode
   parameters: ModuleParameter[];
   body: ASTNode[];
 }
@@ -832,7 +832,7 @@ export interface ModuleInstantiationNode extends BaseNode {
  */
 export interface FunctionDefinitionNode extends BaseNode {
   type: 'function_definition';
-  name: string;
+  name: IdentifierNode; // Changed from string to IdentifierNode
   parameters: ModuleParameter[];
   expression: ExpressionNode;
 }
@@ -842,7 +842,7 @@ export interface FunctionDefinitionNode extends BaseNode {
  */
 export interface AssignmentNode extends BaseNode {
   type: 'assignment';
-  variable: string;
+  variable: IdentifierNode; // Changed from string to IdentifierNode
   value: ExpressionNode | ParameterValue;
 }
 

@@ -72,7 +72,10 @@ describe('ModuleVisitor', () => {
 
         expect(result).not.toBeNull();
         expect(result?.type).toBe('module_definition');
-        expect(result?.name).toBe('mycube');
+        expect(result?.name?.name).toBe('mycube');
+        expect(result?.name?.type).toBe('expression');
+        expect(result?.name?.expressionType).toBe('identifier');
+        expect(result?.name?.location).toBeDefined();
         expect(result?.parameters).toHaveLength(0);
         expect(result?.body).toHaveLength(1);
         expect(result?.body[0].type).toBe('cube');
@@ -113,7 +116,10 @@ describe('ModuleVisitor', () => {
 
         expect(result).not.toBeNull();
         expect(result?.type).toBe('module_definition');
-        expect(result?.name).toBe('mycube');
+        expect(result?.name?.name).toBe('mycube');
+        expect(result?.name?.type).toBe('expression');
+        expect(result?.name?.expressionType).toBe('identifier');
+        expect(result?.name?.location).toBeDefined();
         expect(result?.parameters).toHaveLength(1);
         expect(result?.parameters[0].name).toBe('size');
         expect(result?.body).toHaveLength(1);
@@ -154,7 +160,10 @@ describe('ModuleVisitor', () => {
 
         expect(result).not.toBeNull();
         expect(result?.type).toBe('module_definition');
-        expect(result?.name).toBe('mycube');
+        expect(result?.name?.name).toBe('mycube');
+        expect(result?.name?.type).toBe('expression');
+        expect(result?.name?.expressionType).toBe('identifier');
+        expect(result?.name?.location).toBeDefined();
         expect(result?.parameters).toHaveLength(2);
         expect(result?.parameters[0].name).toBe('size');
         expect(result?.parameters[0].defaultValue).toBe(10);
@@ -198,7 +207,10 @@ describe('ModuleVisitor', () => {
 
         expect(result).not.toBeNull();
         expect(result?.type).toBe('module_definition');
-        expect(result?.name).toBe('translate_cube');
+        expect(result?.name?.name).toBe('translate_cube');
+        expect(result?.name?.type).toBe('expression');
+        expect(result?.name?.expressionType).toBe('identifier');
+        expect(result?.name?.location).toBeDefined();
         expect(result?.parameters).toHaveLength(1);
         expect(result?.parameters[0].name).toBe('v');
         expect(result?.parameters[0].defaultValue).toEqual([0, 0, 0]);

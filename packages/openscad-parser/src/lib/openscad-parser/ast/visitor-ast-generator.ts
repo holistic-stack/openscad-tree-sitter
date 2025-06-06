@@ -174,11 +174,14 @@ export class VisitorASTGenerator {
     const expressionVisitor = new ExpressionVisitor(this.source, this.errorHandler);
 
     // Add all visitors to the composite visitor
-    // Order matters: specialized visitors should come before general ones
+    // Order matters: definition visitors must come before instantiation visitors
     compositeVisitor['visitors'] = [
       new AssignStatementVisitor(this.source, this.errorHandler), // Handle assign statements first
       new AssertStatementVisitor(this.source, this.errorHandler),
-      // Specialized visitors for module instantiations must come before general EchoStatementVisitor
+      // Module and function definitions must be processed before instantiations
+      new ModuleVisitor(this.source, this.errorHandler), // Process module definitions first
+      new FunctionVisitor(this.source, this.errorHandler), // Process function definitions first
+      // Specialized visitors for module instantiations come after definition visitors
       new PrimitiveVisitor(this.source, this.errorHandler),
       transformVisitor, // transformVisitor instance already has errorHandler
       new CSGVisitor(this.source, this.errorHandler),
@@ -187,8 +190,6 @@ export class VisitorASTGenerator {
       new EchoStatementVisitor(this.source, this.errorHandler),
       expressionVisitor,
       new VariableVisitor(this.source, this.errorHandler),
-      new ModuleVisitor(this.source, this.errorHandler),
-      new FunctionVisitor(this.source, this.errorHandler),
     ];
 
     // Create a query visitor that uses the composite visitor

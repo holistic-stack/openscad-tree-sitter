@@ -74,6 +74,7 @@ import { Node as TSNode } from 'web-tree-sitter';
 import * as ast from '../ast-types.js';
 import { BaseASTVisitor } from './base-ast-visitor.js';
 import { getLocation } from '../utils/location-utils.js';
+import { defaultLocation } from '../utils/ast-error-utils.js';
 import { findDescendantOfType } from '../utils/node-utils.js';
 import {
   extractModuleParameters,
@@ -117,7 +118,10 @@ export class FunctionVisitor extends BaseASTVisitor {
   override visitStatement(node: TSNode): ast.ASTNode | null {
     // Only handle statements that contain function definitions
     // Check for function_definition
-    const functionDefinition = findDescendantOfType(node, 'function_definition');
+    const functionDefinition = findDescendantOfType(
+      node,
+      'function_definition'
+    );
     if (functionDefinition) {
       return this.visitFunctionDefinition(functionDefinition);
     }
@@ -157,35 +161,67 @@ export class FunctionVisitor extends BaseASTVisitor {
    * @param node The function definition node to visit
    * @returns The AST node or null if the node cannot be processed
    */
-  override visitFunctionDefinition(node: TSNode): ast.FunctionDefinitionNode | null {
-    console.log(
+  override visitFunctionDefinition(
+    node: TSNode
+  ): ast.FunctionDefinitionNode | null {
+    this.errorHandler.logDebug(
       `[FunctionVisitor.visitFunctionDefinition] Processing function definition: ${node.text.substring(
         0,
         50
-      )}`
+      )}`,
+      'FunctionVisitor.visitFunctionDefinition',
+      node
     );
 
-    // Extract function name
-    let name = '';
+    // Extract function name identifier
+    const nameCSTNode = node.childForFieldName('name');
+    let nameAstIdentifierNode: ast.IdentifierNode;
 
-    // Extract function name from the node
-    const nameNode = node.childForFieldName('name');
-    if (nameNode) {
-      name = nameNode.text;
-    }
-
-    // For the test cases, extract the name from the text if not found in the node
-    if (!name && node.text.startsWith('function ')) {
-      const functionText = node.text.substring(9); // Skip 'function '
-      const nameEndIndex = functionText.indexOf('(');
-      if (nameEndIndex > 0) {
-        name = functionText.substring(0, nameEndIndex);
+    if (nameCSTNode) {
+      nameAstIdentifierNode = {
+        type: 'expression',
+        expressionType: 'identifier',
+        name: nameCSTNode.text,
+        location: getLocation(nameCSTNode),
+      };
+    } else {
+      // Fallback for test cases or malformed CST: try to parse name from text
+      let parsedName = '';
+      const nodeText = node.text;
+      if (nodeText.startsWith('function ')) {
+        const functionTextContent = nodeText.substring('function '.length);
+        const nameEndIndex = functionTextContent.indexOf('(');
+        if (nameEndIndex > 0) {
+          parsedName = functionTextContent.substring(0, nameEndIndex).trim();
+        }
       }
-    }
 
-    if (!name) {
-      console.log(`[FunctionVisitor.visitFunctionDefinition] No name found`);
-      return null;
+      if (parsedName) {
+        nameAstIdentifierNode = {
+          type: 'expression',
+          expressionType: 'identifier',
+          name: parsedName,
+          // location is intentionally omitted as it's undefined in this fallback
+        };
+        this.errorHandler.logWarning(
+          `[FunctionVisitor.visitFunctionDefinition] Function name '${parsedName}' was parsed from text due to missing name CST node. Precise location data for the name identifier will be missing. Node text: ${node.text.substring(
+            0,
+            50
+          )}`,
+          'FunctionVisitor.visitFunctionDefinition',
+          node
+        );
+      } else {
+        this.errorHandler.logError(
+          `[FunctionVisitor.visitFunctionDefinition] Could not find or parse function name. Name CST node missing and text parsing failed for node: ${node.text.substring(
+            0,
+            50
+          )}`,
+          'FunctionVisitor.visitFunctionDefinition',
+          node
+        );
+        return null;
+      }
     }
 
     // Extract parameters
@@ -284,16 +320,17 @@ export class FunctionVisitor extends BaseASTVisitor {
       };
     }
 
-    console.log(
-      `[FunctionVisitor.visitFunctionDefinition] Created function definition node with name=${name}, parameters=${moduleParameters.length}`
+    this.errorHandler.logDebug(
+      `[FunctionVisitor.visitFunctionDefinition] Created function definition node with name=${nameAstIdentifierNode.name}, parameters=${moduleParameters.length}`,
+      'FunctionVisitor.visitFunctionDefinition'
     );
 
     return {
       type: 'function_definition',
-      name,
+      name: nameAstIdentifierNode, // Use the created IdentifierNode
       parameters: moduleParameters,
       expression,
-      location: getLocation(node),
+      location: nameCSTNode ? getLocation(nameCSTNode) : defaultLocation, // Location of the entire function definition
     };
   }
 

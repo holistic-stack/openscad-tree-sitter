@@ -1,5 +1,38 @@
 # Lessons Learned - OpenSCAD Parser
 
+## 2025-06-05: Investigating Test Failures with `SymbolInfo` Location Properties
+
+### Problem
+Vitest tests for `OpenSCADSymbolProvider` were failing to correctly receive `SymbolInfo` objects when these objects included `location` or `nameLocation` properties (of type `SourceLocation`). The test scope would often see an empty array of symbols or encounter issues when these properties were present, despite various cloning attempts (`JSON.parse(JSON.stringify(...))`, manual cloning).
+
+### Hypothesis & Attempted Solution
+It was hypothesized that the property names `location` and `nameLocation` themselves might be causing conflicts or being handled specially by the test environment (Vitest) when their values were complex objects, leading to issues with serialization, deep comparison, or proxying.
+
+To test this, the following changes were made:
+- In `symbol-types.ts`, `SymbolInfo.location` was renamed to `loc` and `SymbolInfo.nameLocation` to `nameLoc`.
+- In `symbol-provider.ts`, the `getSymbols` and `getSymbolAtPosition` methods were updated to use these new property names.
+- In `symbol-provider.test.ts`, all assertions were updated to expect `loc` and `nameLoc`.
+
+### Outcome & New Problem
+The tests in `symbol-provider.test.ts` still fail (5 out of 10), but the failure points have changed:
+- Tests for `getSymbols` now fail when asserting `symbol.loc` (e.g., `AssertionError: expected undefined not to be null`). This indicates that the `loc` property, despite being set in the provider, is arriving as `undefined` in the test context.
+- Tests for `getSymbolAtPosition` now fail because the method returns `null` unexpectedly.
+
+This outcome suggests that simply renaming the properties did not address the root cause of the issue with how these complex location objects are handled or transmitted within the test environment.
+
+### Key Insights
+1.  **Surface-Level Changes May Not Suffice**: When debugging issues related to test environment behavior with complex objects, renaming properties might be a valid diagnostic step, but it may not address deeper issues related to object serialization, cloning, proxying, or comparison mechanisms used by the test runner.
+2.  **Failure Point Shifts Can Be Informative**: Even if a change doesn't fix the problem, if it shifts the point of failure, it provides new clues. The `loc` property now being `undefined` (instead of the whole symbol array being empty) points towards a problem specifically with the `loc` property's value or its transmission, rather than the symbol object as a whole.
+3.  **Consider Test Runner Internals**: Deep-seated issues like this might require a better understanding of how the specific test runner (Vitest, in this case) handles, clones, or proxies objects passed between the test execution context and the assertion/matcher context.
+
+### Prevention & Next Steps for Investigation
+- **Verify Object Integrity**: Log the symbol objects immediately before they are returned from the provider and immediately upon reception in the test to see exactly what changes, if anything.
+- **Simplify Test Case**: Create a minimal test case with a very simple object structure containing a `loc`-like property to see if the issue is reproducible outside the full `SymbolInfo` complexity.
+- **Explore Vitest Documentation/Issues**: Look for known issues or specific guidance in Vitest documentation regarding the handling of complex nested objects or objects with specific property names that might have special meaning (though `loc` is less likely to be special than `location`).
+- **Alternative Data Structures**: If the `SourceLocation` object structure itself is problematic for the test environment, consider if a simplified or flattened version could be used for testing purposes, or if custom serializers/deserializers are needed.
+
+---
+
 ## 2025-06-03 (Local Time): Verifying Grammar for Unexpected Visitor Test Failures
 
 ### Problem

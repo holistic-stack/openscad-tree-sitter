@@ -145,9 +145,13 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @param node The binary expression CST node
    * @returns The binary expression AST node, an ErrorNode, or null if the node cannot be processed
    */
-  createBinaryExpressionNode(node: TSNode): ast.BinaryExpressionNode | ast.ErrorNode | null {
+  createBinaryExpressionNode(
+    node: TSNode
+  ): ast.BinaryExpressionNode | ast.ErrorNode | null {
     this.errorHandler.logInfo(
-      `[ExpressionVisitor.createBinaryExpressionNode] Creating binary expression node for: ${node.type} - "${node.text.substring(0, 30)}"`,
+      `[ExpressionVisitor.createBinaryExpressionNode] Creating binary expression node for: ${
+        node.type
+      } - "${node.text.substring(0, 30)}"`,
       'ExpressionVisitor.createBinaryExpressionNode',
       node
     );
@@ -164,8 +168,13 @@ export class ExpressionVisitor extends BaseASTVisitor {
         const result = this.dispatchSpecificExpression(child);
         // If the child is a binary expression or an error, return it directly.
         // Otherwise, this isn't the binary expression we're trying to create here.
-        if (result && (result.type === 'error' || (result.type === 'expression' && (result as ast.BinaryExpressionNode).expressionType === 'binary'))) {
-           return result as ast.BinaryExpressionNode | ast.ErrorNode;
+        if (
+          result &&
+          (result.type === 'error' ||
+            (result.type === 'expression' &&
+              (result as ast.BinaryExpressionNode).expressionType === 'binary'))
+        ) {
+          return result as ast.BinaryExpressionNode | ast.ErrorNode;
         }
         this.errorHandler.logInfo(
           `[ExpressionVisitor.createBinaryExpressionNode] Single child was not a binary expression or error. Node: "${node.text}", Child: "${child.type}". Returning null.`,
@@ -181,21 +190,39 @@ export class ExpressionVisitor extends BaseASTVisitor {
     let rightNode: TSNode | null = null;
 
     // Prefer named children for clarity and grammar alignment
-    if (node.childForFieldName('left') && node.childForFieldName('operator') && node.childForFieldName('right')) {
+    if (
+      node.childForFieldName('left') &&
+      node.childForFieldName('operator') &&
+      node.childForFieldName('right')
+    ) {
       leftNode = node.childForFieldName('left');
       operatorNode = node.childForFieldName('operator');
       rightNode = node.childForFieldName('right');
-    } else if (node.childCount >= 3) { // Fallback for older grammar or non-standard binary structures
+    } else if (node.childCount >= 3) {
+      // Fallback for older grammar or non-standard binary structures
       leftNode = node.child(0);
       // Attempt to find the operator; this is less robust than named fields
       // Iterate between the first and last child to find a potential operator
       for (let i = 1; i < node.childCount - 1; i++) {
         const child = node.child(i);
-        if (child && [
-            '+', '-', '*', '/', '%',
-            '==', '!=', '<', '<=', '>', '>=',
-            '&&', '||',
-          ].includes(child.text) && child.isNamed // isNamed check helps filter out anonymous punctuation
+        if (
+          child &&
+          [
+            '+',
+            '-',
+            '*',
+            '/',
+            '%',
+            '==',
+            '!=',
+            '<',
+            '<=',
+            '>',
+            '>=',
+            '&&',
+            '||',
+          ].includes(child.text) &&
+          child.isNamed // isNamed check helps filter out anonymous punctuation
         ) {
           operatorNode = child;
           // Assuming the child immediately after the operator is the right operand if not using named fields
@@ -217,46 +244,85 @@ export class ExpressionVisitor extends BaseASTVisitor {
     );
 
     if (!leftNode || !rightNode || !operatorNode) {
-      const message = `Invalid binary expression structure: Missing left, right, or operator. CST Node: ${node.text.substring(0, 100)}`;
-      this.errorHandler.handleError(new Error(message), 'ExpressionVisitor.createBinaryExpressionNode', node);
+      const message = `Invalid binary expression structure: Missing left, right, or operator. CST Node: ${node.text.substring(
+        0,
+        100
+      )}`;
+      this.errorHandler.handleError(
+        new Error(message),
+        'ExpressionVisitor.createBinaryExpressionNode',
+        node
+      );
       return {
-          type: 'error',
-          errorCode: 'INVALID_BINARY_EXPRESSION_STRUCTURE',
-          message: `Invalid binary expression structure. Left: ${leftNode?.text}, Op: ${operatorNode?.text}, Right: ${rightNode?.text}. CST: ${node.text.substring(0,50)}`,
-          originalNodeType: node.type,
-          cstNodeText: node.text,
-          location: getLocation(node),
-        } as ast.ErrorNode;
+        type: 'error',
+        errorCode: 'INVALID_BINARY_EXPRESSION_STRUCTURE',
+        message: `Invalid binary expression structure. Left: ${
+          leftNode?.text
+        }, Op: ${operatorNode?.text}, Right: ${
+          rightNode?.text
+        }. CST: ${node.text.substring(0, 50)}`,
+        originalNodeType: node.type,
+        cstNodeText: node.text,
+        location: getLocation(node),
+      } as ast.ErrorNode;
     }
 
     const leftExpr = this.dispatchSpecificExpression(leftNode);
     if (leftExpr && leftExpr.type === 'error') {
-      this.errorHandler.logWarning(`[ExpressionVisitor.createBinaryExpressionNode] Left operand is an ErrorNode. Propagating. Node: ${leftNode.text}`, 'ExpressionVisitor.createBinaryExpressionNode', leftExpr);
+      this.errorHandler.logWarning(
+        `[ExpressionVisitor.createBinaryExpressionNode] Left operand is an ErrorNode. Propagating. Node: ${leftNode.text}`,
+        'ExpressionVisitor.createBinaryExpressionNode',
+        leftExpr
+      );
       return leftExpr;
     }
     if (!leftExpr) {
-      this.errorHandler.logError(`[ExpressionVisitor.createBinaryExpressionNode] Failed to process left operand (returned null): ${leftNode.text.substring(0,100)}. ErrorCode: UNPARSABLE_BINARY_OPERAND_LEFT_NULL`, 'ExpressionVisitor.createBinaryExpressionNode', leftNode);
+      this.errorHandler.logError(
+        `[ExpressionVisitor.createBinaryExpressionNode] Failed to process left operand (returned null): ${leftNode.text.substring(
+          0,
+          100
+        )}. ErrorCode: UNPARSABLE_BINARY_OPERAND_LEFT_NULL`,
+        'ExpressionVisitor.createBinaryExpressionNode',
+        leftNode
+      );
       return {
-          type: 'error',
-          errorCode: 'UNPARSABLE_BINARY_OPERAND_LEFT_NULL',
-          message: `Failed to parse left operand. CST: ${leftNode.text}`,
-          originalNodeType: leftNode.type, cstNodeText: leftNode.text, location: getLocation(leftNode),
-        } as ast.ErrorNode;
+        type: 'error',
+        errorCode: 'UNPARSABLE_BINARY_OPERAND_LEFT_NULL',
+        message: `Failed to parse left operand. CST: ${leftNode.text}`,
+        originalNodeType: leftNode.type,
+        cstNodeText: leftNode.text,
+        location: getLocation(leftNode),
+      } as ast.ErrorNode;
     }
 
     const rightExpr = this.dispatchSpecificExpression(rightNode);
     if (rightExpr && rightExpr.type === 'error') {
-      this.errorHandler.logWarning(`[ExpressionVisitor.createBinaryExpressionNode] Right operand is an ErrorNode. Propagating. Node: ${rightNode.text}`, 'ExpressionVisitor.createBinaryExpressionNode', rightExpr);
+      this.errorHandler.logWarning(
+        `[ExpressionVisitor.createBinaryExpressionNode] Right operand is an ErrorNode. Propagating. Node: ${rightNode.text}`,
+        'ExpressionVisitor.createBinaryExpressionNode',
+        rightExpr
+      );
       return rightExpr;
     }
     if (!rightExpr) {
-      this.errorHandler.handleError(new Error(`Failed to process right operand (returned null): ${rightNode.text.substring(0,100)}`), 'ExpressionVisitor.createBinaryExpressionNode', rightNode);
+      this.errorHandler.handleError(
+        new Error(
+          `Failed to process right operand (returned null): ${rightNode.text.substring(
+            0,
+            100
+          )}`
+        ),
+        'ExpressionVisitor.createBinaryExpressionNode',
+        rightNode
+      );
       return {
-          type: 'error',
-          errorCode: 'UNPARSABLE_BINARY_OPERAND_RIGHT_NULL',
-          message: `Failed to parse right operand. CST: ${rightNode.text}`,
-          originalNodeType: rightNode.type, cstNodeText: rightNode.text, location: getLocation(rightNode),
-        } as ast.ErrorNode;
+        type: 'error',
+        errorCode: 'UNPARSABLE_BINARY_OPERAND_RIGHT_NULL',
+        message: `Failed to parse right operand. CST: ${rightNode.text}`,
+        originalNodeType: rightNode.type,
+        cstNodeText: rightNode.text,
+        location: getLocation(rightNode),
+      } as ast.ErrorNode;
     }
 
     const binaryExprNode: ast.BinaryExpressionNode = {
@@ -269,7 +335,11 @@ export class ExpressionVisitor extends BaseASTVisitor {
     };
 
     this.errorHandler.logInfo(
-      `[ExpressionVisitor.createBinaryExpressionNode] Created binary expression node: ${JSON.stringify(binaryExprNode, null, 2)}`,
+      `[ExpressionVisitor.createBinaryExpressionNode] Created binary expression node: ${JSON.stringify(
+        binaryExprNode,
+        null,
+        2
+      )}`,
       'ExpressionVisitor.createBinaryExpressionNode',
       node
     );
@@ -309,7 +379,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
   override visitStatement(node: TSNode): ast.ASTNode | null {
     // Only handle statements that contain expression nodes
     // Check for expression_statement, assignment_statement with expressions
-    const expressionStatement = node.descendantsOfType('expression_statement')[0];
+    const expressionStatement = node.descendantsOfType(
+      'expression_statement'
+    )[0];
     if (expressionStatement) {
       // Find the expression within the expression statement
       const expression = expressionStatement.namedChild(0);
@@ -319,7 +391,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
     }
 
     // Check for assignment statements that contain expressions
-    const assignmentStatement = node.descendantsOfType('assignment_statement')[0];
+    const assignmentStatement = node.descendantsOfType(
+      'assignment_statement'
+    )[0];
     if (assignmentStatement) {
       // Assignment statements are handled by AssignStatementVisitor, not ExpressionVisitor
       return null;
@@ -334,14 +408,16 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @param node The expression node to dispatch
    * @returns The expression AST node or null if the node cannot be processed
    */
-  public dispatchSpecificExpression(node: TSNode): ast.ExpressionNode | ast.ErrorNode | null {
-    this.errorHandler.logInfo(`[ExpressionVisitor.dispatchSpecificExpression] Dispatching node type: ${node.type}`);
+  public dispatchSpecificExpression(
+    node: TSNode
+  ): ast.ExpressionNode | ast.ErrorNode | null {
+    this.errorHandler.logInfo(
+      `[ExpressionVisitor.dispatchSpecificExpression] Dispatching node type: ${node.type}`
+    );
 
     // Check for binary expression types first
     // Note: Grammar refactoring unified all binary expressions under 'binary_expression'
-    const binaryExpressionTypes = [
-      'binary_expression',
-    ];
+    const binaryExpressionTypes = ['binary_expression'];
 
     if (binaryExpressionTypes.includes(node.type)) {
       this.errorHandler.logInfo(
@@ -384,12 +460,21 @@ export class ExpressionVisitor extends BaseASTVisitor {
       case 'range_expression':
         return this.rangeExpressionVisitor.visitRangeExpression(node);
       case 'module_instantiation':
-      case 'call_expression': // Handle call_expression similar to module_instantiation
-        {
-          const result = this.functionCallVisitor.visit(node); // visit should return ExpressionNode | ErrorNode | null
-          this.errorHandler.logInfo(`[ExpressionVisitor.dispatchSpecificExpression] ${node.type} result: ${result ? (result.type === 'error' ? 'ErrorNode' : 'ExpressionNode') : 'null'}`);
-          return result;
-        }
+      case 'call_expression': { // Handle call_expression similar to module_instantiation
+        const result = this.functionCallVisitor.visit(node); // visit should return ExpressionNode | ErrorNode | null
+        this.errorHandler.logInfo(
+          `[ExpressionVisitor.dispatchSpecificExpression] ${
+            node.type
+          } result: ${
+            result
+              ? result.type === 'error'
+                ? 'ErrorNode'
+                : 'ExpressionNode'
+              : 'null'
+          }`
+        );
+        return result;
+      }
       case 'let_expression':
         return this.visitLetExpression(node);
       case 'conditional_expression':
@@ -404,7 +489,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @param node The CST node
    * @returns The expression AST node or null if the node cannot be processed
    */
-  createExpressionNode(node: TSNode): ast.ExpressionNode | ast.ErrorNode | null {
+  createExpressionNode(
+    node: TSNode
+  ): ast.ExpressionNode | ast.ErrorNode | null {
     this.errorHandler.logInfo(
       `[ExpressionVisitor.createExpressionNode] Creating expression node for type: ${node.type}`,
       'ExpressionVisitor.createExpressionNode',
@@ -461,7 +548,11 @@ export class ExpressionVisitor extends BaseASTVisitor {
         }
 
         if (!leftExpr) {
-          this.errorHandler.logError( `[ExpressionVisitor.createExpressionNode] Missing left operand for binary expression. Node: "${node.text}"`, 'ExpressionVisitor.createExpressionNode', node);
+          this.errorHandler.logError(
+            `[ExpressionVisitor.createExpressionNode] Missing left operand for binary expression. Node: "${node.text}"`,
+            'ExpressionVisitor.createExpressionNode',
+            node
+          );
           return {
             type: 'error',
             errorCode: 'MISSING_LEFT_OPERAND',
@@ -473,7 +564,11 @@ export class ExpressionVisitor extends BaseASTVisitor {
         }
 
         if (!rightExpr) {
-          this.errorHandler.logError( `[ExpressionVisitor.createExpressionNode] Missing right operand for binary expression. Node: "${node.text}"`, 'ExpressionVisitor.createExpressionNode', node);
+          this.errorHandler.logError(
+            `[ExpressionVisitor.createExpressionNode] Missing right operand for binary expression. Node: "${node.text}"`,
+            'ExpressionVisitor.createExpressionNode',
+            node
+          );
           return {
             type: 'error',
             errorCode: 'MISSING_RIGHT_OPERAND',
@@ -604,7 +699,11 @@ export class ExpressionVisitor extends BaseASTVisitor {
         }
 
         if (!conditionExpr) {
-          this.errorHandler.logError( `[ExpressionVisitor.createExpressionNode] Missing condition in conditional expression. Node: "${node.text}"`, 'ExpressionVisitor.createExpressionNode', node);
+          this.errorHandler.logError(
+            `[ExpressionVisitor.createExpressionNode] Missing condition in conditional expression. Node: "${node.text}"`,
+            'ExpressionVisitor.createExpressionNode',
+            node
+          );
           return {
             type: 'error',
             errorCode: 'MISSING_CONDITION_EXPRESSION',
@@ -615,7 +714,11 @@ export class ExpressionVisitor extends BaseASTVisitor {
           } as ast.ErrorNode;
         }
         if (!thenExpr) {
-          this.errorHandler.logError( `[ExpressionVisitor.createExpressionNode] Missing 'then' branch in conditional expression. Node: "${node.text}"`, 'ExpressionVisitor.createExpressionNode', node);
+          this.errorHandler.logError(
+            `[ExpressionVisitor.createExpressionNode] Missing 'then' branch in conditional expression. Node: "${node.text}"`,
+            'ExpressionVisitor.createExpressionNode',
+            node
+          );
           return {
             type: 'error',
             errorCode: 'MISSING_THEN_BRANCH_EXPRESSION',
@@ -626,7 +729,11 @@ export class ExpressionVisitor extends BaseASTVisitor {
           } as ast.ErrorNode;
         }
         if (!elseExpr) {
-          this.errorHandler.logError( `[ExpressionVisitor.createExpressionNode] Missing 'else' branch in conditional expression. Node: "${node.text}"`, 'ExpressionVisitor.createExpressionNode', node);
+          this.errorHandler.logError(
+            `[ExpressionVisitor.createExpressionNode] Missing 'else' branch in conditional expression. Node: "${node.text}"`,
+            'ExpressionVisitor.createExpressionNode',
+            node
+          );
           return {
             type: 'error',
             errorCode: 'MISSING_ELSE_BRANCH_EXPRESSION',
@@ -691,7 +798,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
       }
       case 'function_call': {
         // Convert function call to expression node for expression contexts
-        const functionCall = this.functionCallVisitor.visitFunctionCall(node) as ast.FunctionCallNode;
+        const functionCall = this.functionCallVisitor.visitFunctionCall(
+          node
+        ) as ast.FunctionCallNode;
         if (functionCall) {
           // Create an expression wrapper for the function call
           return {
@@ -728,7 +837,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @param node The binary expression CST node
    * @returns The binary expression AST node or null if the node cannot be processed
    */
-  visitBinaryExpression(node: TSNode): ast.BinaryExpressionNode | ast.ErrorNode | null {
+  visitBinaryExpression(
+    node: TSNode
+  ): ast.BinaryExpressionNode | ast.ErrorNode | null {
     return this.createBinaryExpressionNode(node);
   }
 
@@ -737,7 +848,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @param node The conditional expression CST node
    * @returns The conditional expression AST node or null if the node cannot be processed
    */
-  override visitConditionalExpression(node: TSNode): ast.ConditionalExpressionNode | ast.ErrorNode | null {
+  override visitConditionalExpression(
+    node: TSNode
+  ): ast.ConditionalExpressionNode | ast.ErrorNode | null {
     if (node.type !== 'conditional_expression') {
       this.errorHandler.logError(
         `Expected conditional_expression node, got ${node.type}`,
@@ -790,9 +903,14 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @param node The unary expression CST node
    * @returns The unary expression AST node or null if the node cannot be processed
    */
-  visitUnaryExpression(node: TSNode): ast.UnaryExpressionNode | ast.ErrorNode | null {
+  visitUnaryExpression(
+    node: TSNode
+  ): ast.UnaryExpressionNode | ast.ErrorNode | null {
     this.errorHandler.logInfo(
-      `[ExpressionVisitor.visitUnaryExpression] Processing unary expression: ${node.text.substring(0, 50)}`,
+      `[ExpressionVisitor.visitUnaryExpression] Processing unary expression: ${node.text.substring(
+        0,
+        50
+      )}`,
       'ExpressionVisitor.visitUnaryExpression',
       node
     );
@@ -810,8 +928,13 @@ export class ExpressionVisitor extends BaseASTVisitor {
         const result = this.dispatchSpecificExpression(child);
         // If the child is a unary expression or an error, return it directly.
         // Otherwise, this isn't the unary expression we're trying to create here.
-        if (result && (result.type === 'error' || (result.type === 'expression' && (result as ast.UnaryExpressionNode).expressionType === 'unary'))) {
-           return result as ast.UnaryExpressionNode | ast.ErrorNode;
+        if (
+          result &&
+          (result.type === 'error' ||
+            (result.type === 'expression' &&
+              (result as ast.UnaryExpressionNode).expressionType === 'unary'))
+        ) {
+          return result as ast.UnaryExpressionNode | ast.ErrorNode;
         }
         this.errorHandler.logInfo(
           `[ExpressionVisitor.visitUnaryExpression] Single child was not a unary expression or error. Node: "${node.text}", Child: "${child.type}". Returning null.`,
@@ -827,12 +950,21 @@ export class ExpressionVisitor extends BaseASTVisitor {
     const operandNode = node.child(1);
 
     if (!operatorNode || !operandNode) {
-      const message = `Invalid unary expression structure: Missing operator or operand. CST Node: ${node.text.substring(0, 100)}`;
-      this.errorHandler.handleError(new Error(message), 'ExpressionVisitor.visitUnaryExpression', node);
+      const message = `Invalid unary expression structure: Missing operator or operand. CST Node: ${node.text.substring(
+        0,
+        100
+      )}`;
+      this.errorHandler.handleError(
+        new Error(message),
+        'ExpressionVisitor.visitUnaryExpression',
+        node
+      );
       return {
         type: 'error',
         errorCode: 'INVALID_UNARY_EXPRESSION_STRUCTURE',
-        message: `Invalid unary expression structure. Operator: ${operatorNode?.text}, Operand: ${operandNode?.text}. CST: ${node.text.substring(0,50)}`,
+        message: `Invalid unary expression structure. Operator: ${
+          operatorNode?.text
+        }, Operand: ${operandNode?.text}. CST: ${node.text.substring(0, 50)}`,
         originalNodeType: node.type,
         cstNodeText: node.text,
         location: getLocation(node),
@@ -842,11 +974,22 @@ export class ExpressionVisitor extends BaseASTVisitor {
     // Process operand
     const operandExpr = this.dispatchSpecificExpression(operandNode);
     if (operandExpr && operandExpr.type === 'error') {
-      this.errorHandler.logWarning(`[ExpressionVisitor.visitUnaryExpression] Operand is an ErrorNode. Propagating. Node: ${operandNode.text}`, 'ExpressionVisitor.visitUnaryExpression', operandExpr);
+      this.errorHandler.logWarning(
+        `[ExpressionVisitor.visitUnaryExpression] Operand is an ErrorNode. Propagating. Node: ${operandNode.text}`,
+        'ExpressionVisitor.visitUnaryExpression',
+        operandExpr
+      );
       return operandExpr;
     }
     if (!operandExpr) {
-      this.errorHandler.logError(`[ExpressionVisitor.visitUnaryExpression] Failed to process operand (returned null): ${operandNode.text.substring(0,100)}. ErrorCode: UNPARSABLE_UNARY_OPERAND_NULL`, 'ExpressionVisitor.visitUnaryExpression', operandNode);
+      this.errorHandler.logError(
+        `[ExpressionVisitor.visitUnaryExpression] Failed to process operand (returned null): ${operandNode.text.substring(
+          0,
+          100
+        )}. ErrorCode: UNPARSABLE_UNARY_OPERAND_NULL`,
+        'ExpressionVisitor.visitUnaryExpression',
+        operandNode
+      );
       return {
         type: 'error',
         errorCode: 'UNPARSABLE_UNARY_OPERAND_NULL',
@@ -868,7 +1011,11 @@ export class ExpressionVisitor extends BaseASTVisitor {
     };
 
     this.errorHandler.logInfo(
-      `[ExpressionVisitor.visitUnaryExpression] Created unary expression node: ${JSON.stringify(unaryExprNode, null, 2)}`,
+      `[ExpressionVisitor.visitUnaryExpression] Created unary expression node: ${JSON.stringify(
+        unaryExprNode,
+        null,
+        2
+      )}`,
       'ExpressionVisitor.visitUnaryExpression',
       node
     );
@@ -881,7 +1028,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @param node The expression node to visit (CST node)
    * @returns The expression AST node or null if the node cannot be processed
    */
-  override visitExpression(node: TSNode): ast.ExpressionNode | ast.ErrorNode | null {
+  override visitExpression(
+    node: TSNode
+  ): ast.ExpressionNode | ast.ErrorNode | null {
     // Debug: Log the node structure
     this.errorHandler.logInfo(
       `[ExpressionVisitor.visitExpression] Processing expression: ${node.text.substring(
@@ -1061,7 +1210,10 @@ export class ExpressionVisitor extends BaseASTVisitor {
     }
 
     // Check for module instantiation (function call)
-    const moduleInstantiationNode = findDescendantOfType(node, 'module_instantiation');
+    const moduleInstantiationNode = findDescendantOfType(
+      node,
+      'module_instantiation'
+    );
     if (moduleInstantiationNode) {
       this.errorHandler.logInfo(
         `[ExpressionVisitor.visitExpression] Found module instantiation (function call): ${moduleInstantiationNode.text.substring(
@@ -1189,7 +1341,11 @@ export class ExpressionVisitor extends BaseASTVisitor {
     }
 
     if (!objectAST) {
-      this.errorHandler.logError( `[ExpressionVisitor.visitAccessorExpression] Missing object for accessor expression. Node: "${node.text}"`, 'ExpressionVisitor.visitAccessorExpression', node);
+      this.errorHandler.logError(
+        `[ExpressionVisitor.visitAccessorExpression] Missing object for accessor expression. Node: "${node.text}"`,
+        'ExpressionVisitor.visitAccessorExpression',
+        node
+      );
       return {
         type: 'error',
         errorCode: 'MISSING_OBJECT_FOR_ACCESSOR',
@@ -1215,7 +1371,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @param node The primary expression node to visit
    * @returns The expression AST node or null if the node cannot be processed
    */
-  visitPrimaryExpression(node: TSNode): ast.ExpressionNode | ast.ErrorNode | null {
+  visitPrimaryExpression(
+    node: TSNode
+  ): ast.ExpressionNode | ast.ErrorNode | null {
     this.errorHandler.logInfo(
       `[ExpressionVisitor.visitPrimaryExpression] Processing primary expression: ${node.text.substring(
         0,
@@ -1309,38 +1467,48 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @returns An `ast.LetExpressionNode` if parsing is successful,
    *          or an `ast.ErrorNode` if any part of the let expression is invalid.
    */
-  override visitLetExpression(node: TSNode): ast.LetExpressionNode | ast.ErrorNode {
+  override visitLetExpression(
+    node: TSNode
+  ): ast.LetExpressionNode | ast.ErrorNode {
     this.errorHandler.logInfo(
-      `[ExpressionVisitor.visitLetExpression] Processing let expression: ${node.text.substring(0, 80)}`,
+      `[ExpressionVisitor.visitLetExpression] Processing let expression: ${node.text.substring(
+        0,
+        80
+      )}`,
       'ExpressionVisitor.visitLetExpression',
       node
     );
 
     const processedAssignments: ast.AssignmentNode[] = [];
     // In OpenSCAD grammar, let_assignment nodes are direct children of let_expression
-    const letAssignmentCstNodes: TSNode[] = node.children.filter((c): c is TSNode => c !== null && c.type === 'let_assignment');
+    const letAssignmentCstNodes: TSNode[] = node.children.filter(
+      (c): c is TSNode => c !== null && c.type === 'let_assignment'
+    );
 
     if (letAssignmentCstNodes.length === 0) {
-        this.errorHandler.logInfo(
-            `[ExpressionVisitor.visitLetExpression] No assignments found in let expression. CST: ${node.text}. ErrorCode: NO_ASSIGNMENTS_IN_LET_EXPRESSION`,
-            'ExpressionVisitor.visitLetExpression',
-            node
-        );
-        const parserError = this.errorHandler.createParserError('No assignments found in let expression', {
+      this.errorHandler.logInfo(
+        `[ExpressionVisitor.visitLetExpression] No assignments found in let expression. CST: ${node.text}. ErrorCode: NO_ASSIGNMENTS_IN_LET_EXPRESSION`,
+        'ExpressionVisitor.visitLetExpression',
+        node
+      );
+      const parserError = this.errorHandler.createParserError(
+        'No assignments found in let expression',
+        {
           code: ErrorCode.LET_NO_ASSIGNMENTS_FOUND,
           line: getLocation(node).start.line,
           column: getLocation(node).start.column,
           nodeType: node.type,
           source: node.text,
-        });
-        return {
-          type: 'error',
-          errorCode: parserError.code,
-          message: parserError.message,
-          location: getLocation(node),
-          originalNodeType: parserError.context.nodeType ?? '',
-          cstNodeText: parserError.context.source ?? '',
-        };
+        }
+      );
+      return {
+        type: 'error',
+        errorCode: parserError.code,
+        message: parserError.message,
+        location: getLocation(node),
+        originalNodeType: parserError.context.nodeType ?? '',
+        cstNodeText: parserError.context.source ?? '',
+      };
     }
 
     for (const assignCstNode of letAssignmentCstNodes) {
@@ -1354,13 +1522,16 @@ export class ExpressionVisitor extends BaseASTVisitor {
           'ExpressionVisitor.visitLetExpression',
           assignCstNode
         );
-        const parserError = this.errorHandler.createParserError(`Failed to process an assignment structure within let expression: ${assignCstNode.text}`, {
-          code: ErrorCode.LET_ASSIGNMENT_PROCESSING_FAILED,
-          line: getLocation(assignCstNode).start.line,
-          column: getLocation(assignCstNode).start.column,
-          nodeType: assignCstNode.type,
-          source: assignCstNode.text,
-        });
+        const parserError = this.errorHandler.createParserError(
+          `Failed to process an assignment structure within let expression: ${assignCstNode.text}`,
+          {
+            code: ErrorCode.LET_ASSIGNMENT_PROCESSING_FAILED,
+            line: getLocation(assignCstNode).start.line,
+            column: getLocation(assignCstNode).start.column,
+            nodeType: assignCstNode.type,
+            source: assignCstNode.text,
+          }
+        );
         return {
           type: 'error',
           errorCode: parserError.code,
@@ -1373,7 +1544,12 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
       // Check if the value of the assignment is an ErrorNode
       // Ensure value exists and is an object before checking 'type' property
-      if (assignmentAst.value && typeof assignmentAst.value === 'object' && 'type' in assignmentAst.value && assignmentAst.value.type === 'error') {
+      if (
+        assignmentAst.value &&
+        typeof assignmentAst.value === 'object' &&
+        'type' in assignmentAst.value &&
+        assignmentAst.value.type === 'error'
+      ) {
         this.errorHandler.logInfo(
           `[ExpressionVisitor.visitLetExpression] Error in let assignment value for '${assignmentAst.variable}'. Propagating. ErrorCode: LET_ASSIGNMENT_VALUE_ERROR`,
           'ExpressionVisitor.visitLetExpression',
@@ -1399,7 +1575,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
     if (bodyCstNode) {
       this.errorHandler.logInfo(
-        `[ExpressionVisitor.visitLetExpression] bodyCstNode - Type: ${bodyCstNode.type}, Text: ${bodyCstNode.text.substring(0, 100)}`,
+        `[ExpressionVisitor.visitLetExpression] bodyCstNode - Type: ${
+          bodyCstNode.type
+        }, Text: ${bodyCstNode.text.substring(0, 100)}`,
         'visitLetExpression.bodyCstNode'
       );
     } else {
@@ -1415,13 +1593,16 @@ export class ExpressionVisitor extends BaseASTVisitor {
         'ExpressionVisitor.visitLetExpression',
         node
       );
-      const parserError = this.errorHandler.createParserError('No body found in let expression', {
-        code: ErrorCode.MISSING_LET_BODY,
-        line: getLocation(node).start.line,
-        column: getLocation(node).start.column,
-        nodeType: node.type,
-        source: node.text,
-      });
+      const parserError = this.errorHandler.createParserError(
+        'No body found in let expression',
+        {
+          code: ErrorCode.MISSING_LET_BODY,
+          line: getLocation(node).start.line,
+          column: getLocation(node).start.column,
+          nodeType: node.type,
+          source: node.text,
+        }
+      );
       return {
         type: 'error',
         errorCode: parserError.code,
@@ -1433,31 +1614,43 @@ export class ExpressionVisitor extends BaseASTVisitor {
     }
 
     this.errorHandler.logInfo(
-        `[ExpressionVisitor.visitLetExpression] Calling dispatchSpecificExpression for bodyCstNode (Type: ${bodyCstNode.type}, Text: ${bodyCstNode.text.substring(0,50)})`,
-        'visitLetExpression.bodyDispatchCall'
-      );
-      const bodyExpressionAst = this.dispatchSpecificExpression(bodyCstNode);
+      `[ExpressionVisitor.visitLetExpression] Calling dispatchSpecificExpression for bodyCstNode (Type: ${
+        bodyCstNode.type
+      }, Text: ${bodyCstNode.text.substring(0, 50)})`,
+      'visitLetExpression.bodyDispatchCall'
+    );
+    const bodyExpressionAst = this.dispatchSpecificExpression(bodyCstNode);
 
-      if (bodyExpressionAst) {
-        if (bodyExpressionAst.type === 'error') {
-          this.errorHandler.logInfo(
-            `[ExpressionVisitor.visitLetExpression] dispatchSpecificExpression for body returned ErrorNode - Code: ${bodyExpressionAst.errorCode}, Message: ${bodyExpressionAst.message.substring(0,100)}, CST: ${bodyCstNode.text.substring(0,100)}`,
-            'visitLetExpression.bodyDispatchResult',
-            bodyExpressionAst // Log the full error node
-          );
-        } else {
-          this.errorHandler.logInfo(
-            `[ExpressionVisitor.visitLetExpression] dispatchSpecificExpression for body returned ExpressionNode - Type: ${bodyExpressionAst.expressionType}, CST: ${bodyCstNode.text.substring(0,100)}`,
-            'visitLetExpression.bodyDispatchResult',
-            bodyExpressionAst // Log the full expression node
-          );
-        }
+    if (bodyExpressionAst) {
+      if (bodyExpressionAst.type === 'error') {
+        this.errorHandler.logInfo(
+          `[ExpressionVisitor.visitLetExpression] dispatchSpecificExpression for body returned ErrorNode - Code: ${
+            bodyExpressionAst.errorCode
+          }, Message: ${bodyExpressionAst.message.substring(
+            0,
+            100
+          )}, CST: ${bodyCstNode.text.substring(0, 100)}`,
+          'visitLetExpression.bodyDispatchResult',
+          bodyExpressionAst // Log the full error node
+        );
       } else {
         this.errorHandler.logInfo(
-          `[ExpressionVisitor.visitLetExpression] dispatchSpecificExpression for body returned null for CST: ${bodyCstNode.text.substring(0,100)}.`,
-          'visitLetExpression.bodyDispatchResult'
+          `[ExpressionVisitor.visitLetExpression] dispatchSpecificExpression for body returned ExpressionNode - Type: ${
+            bodyExpressionAst.expressionType
+          }, CST: ${bodyCstNode.text.substring(0, 100)}`,
+          'visitLetExpression.bodyDispatchResult',
+          bodyExpressionAst // Log the full expression node
         );
       }
+    } else {
+      this.errorHandler.logInfo(
+        `[ExpressionVisitor.visitLetExpression] dispatchSpecificExpression for body returned null for CST: ${bodyCstNode.text.substring(
+          0,
+          100
+        )}.`,
+        'visitLetExpression.bodyDispatchResult'
+      );
+    }
 
     if (!bodyExpressionAst) {
       this.errorHandler.logInfo(
@@ -1465,13 +1658,16 @@ export class ExpressionVisitor extends BaseASTVisitor {
         'ExpressionVisitor.visitLetExpression',
         bodyCstNode
       );
-      const parserError = this.errorHandler.createParserError('Failed to process body expression in let expression (returned null)', {
-        code: ErrorCode.LET_BODY_EXPRESSION_PARSE_FAILED, 
-        line: getLocation(bodyCstNode).start.line,
-        column: getLocation(bodyCstNode).start.column,
-        nodeType: bodyCstNode.type,
-        source: bodyCstNode.text,
-      });
+      const parserError = this.errorHandler.createParserError(
+        'Failed to process body expression in let expression (returned null)',
+        {
+          code: ErrorCode.LET_BODY_EXPRESSION_PARSE_FAILED,
+          line: getLocation(bodyCstNode).start.line,
+          column: getLocation(bodyCstNode).start.column,
+          nodeType: bodyCstNode.type,
+          source: bodyCstNode.text,
+        }
+      );
       return {
         type: 'error',
         errorCode: parserError.code,
@@ -1502,7 +1698,11 @@ export class ExpressionVisitor extends BaseASTVisitor {
 
     // If we reach here, all assignments are valid, and bodyExpressionAst is a valid ExpressionNode.
     this.errorHandler.logInfo(
-      `[ExpressionVisitor.visitLetExpression] Successfully processed let expression. Assignments: ${processedAssignments.length}, Body Type: ${bodyExpressionAst.expressionType ?? bodyExpressionAst.type}`,
+      `[ExpressionVisitor.visitLetExpression] Successfully processed let expression. Assignments: ${
+        processedAssignments.length
+      }, Body Type: ${
+        bodyExpressionAst.expressionType ?? bodyExpressionAst.type
+      }`,
       'ExpressionVisitor.visitLetExpression'
     );
 
@@ -1548,7 +1748,12 @@ export class ExpressionVisitor extends BaseASTVisitor {
       return null;
     }
 
-    const variable = nameNode.text;
+    const variable: ast.IdentifierNode = {
+      type: 'expression',
+      expressionType: 'identifier',
+      name: nameNode.text,
+      location: getLocation(nameNode),
+    };
 
     // Extract value expression
     const valueNode = node.childForFieldName('value');
@@ -1584,7 +1789,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @param node The vector expression node to visit
    * @returns The vector expression AST node or null if the node cannot be processed
    */
-  visitVectorExpression(node: TSNode): ast.VectorExpressionNode | ast.ErrorNode | null {
+  visitVectorExpression(
+    node: TSNode
+  ): ast.VectorExpressionNode | ast.ErrorNode | null {
     this.errorHandler.logInfo(
       `[ExpressionVisitor.visitVectorExpression] Processing vector expression: ${node.text.substring(
         0,
@@ -1640,7 +1847,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
    * @param node The array expression node to visit
    * @returns The array expression AST node or null if the node cannot be processed
    */
-  visitArrayExpression(node: TSNode): ast.ArrayExpressionNode | ast.ErrorNode | null {
+  visitArrayExpression(
+    node: TSNode
+  ): ast.ArrayExpressionNode | ast.ErrorNode | null {
     this.errorHandler.logInfo(
       `[ExpressionVisitor.visitArrayExpression] Processing array expression: ${node.text.substring(
         0,
@@ -1766,7 +1975,9 @@ export class ExpressionVisitor extends BaseASTVisitor {
     args: ast.Parameter[]
   ): ast.ASTNode | null {
     this.errorHandler.logWarning(
-      `[ExpressionVisitor.createASTNodeForFunction] This method should not be directly called on ExpressionVisitor. Function definitions are not expressions. Offending node: ${node.type} '${node.text.substring(0, 30)}...'`,
+      `[ExpressionVisitor.createASTNodeForFunction] This method should not be directly called on ExpressionVisitor. Function definitions are not expressions. Offending node: ${
+        node.type
+      } '${node.text.substring(0, 30)}...'`,
       'ExpressionVisitor.createASTNodeForFunction',
       node
     );

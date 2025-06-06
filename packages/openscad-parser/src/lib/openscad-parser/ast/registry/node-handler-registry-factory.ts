@@ -2,7 +2,7 @@ import { DefaultNodeHandlerRegistry } from './default-node-handler-registry.js';
 // NodeHandler is not used directly in this file
 import type { NodeHandlerRegistry } from './node-handler-registry.js';
 import { Node as TSNode } from 'web-tree-sitter';
-import type { ExpressionNode } from '../ast-types.js';
+import type { ExpressionNode, IdentifierNode } from '../ast-types.js';
 
 /**
  * Factory for creating and configuring NodeHandlerRegistry instances.
@@ -162,7 +162,21 @@ export class NodeHandlerRegistryFactory {
     registry: NodeHandlerRegistry
   ): void {
     registry.register('module', (_node: TSNode) => {
-      return { type: 'module_definition', name: '', parameters: [], body: [] };
+      const dummyName: IdentifierNode = {
+        type: 'expression',
+        expressionType: 'identifier',
+        name: '',
+        location: {
+          start: { line: 0, column: 0, offset: 0 },
+          end: { line: 0, column: 0, offset: 0 },
+        },
+      };
+      return {
+        type: 'module_definition',
+        name: dummyName,
+        parameters: [],
+        body: [],
+      };
     });
 
     registry.register('function', (_node: TSNode) => {
@@ -171,9 +185,18 @@ export class NodeHandlerRegistryFactory {
         type: 'expression',
         expressionType: 'literal',
       };
+      const dummyName: IdentifierNode = {
+        type: 'expression',
+        expressionType: 'identifier',
+        name: '',
+        location: {
+          start: { line: 0, column: 0, offset: 0 },
+          end: { line: 0, column: 0, offset: 0 },
+        },
+      };
       return {
         type: 'function_definition',
-        name: '',
+        name: dummyName,
         parameters: [],
         expression: dummyExpression,
       };

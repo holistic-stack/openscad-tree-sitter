@@ -31,7 +31,14 @@ describe('FunctionVisitor', () => {
         text: 'function getValue() = 42;',
         childForFieldName: (name: string) => {
           if (name === 'name') {
-            return { text: 'getValue' } as TSNode;
+            const functionName = 'getValue';
+            return {
+              text: functionName,
+              startIndex: 0,
+              endIndex: functionName.length,
+              startPosition: { row: 0, column: 0 },
+              endPosition: { row: 0, column: functionName.length },
+            } as TSNode;
           } else if (name === 'parameters') {
             return null;
           } else if (name === 'expression') {
@@ -46,7 +53,10 @@ describe('FunctionVisitor', () => {
 
       expect(result).not.toBeNull();
       expect(result?.type).toBe('function_definition');
-      expect(result?.name).toBe('getValue');
+      expect(result?.name?.name).toBe('getValue');
+      expect(result?.name?.type).toBe('expression');
+      expect(result?.name?.expressionType).toBe('identifier');
+      expect(result?.name?.location).toBeDefined(); // May require mock update
       expect(result?.parameters).toHaveLength(0);
       expect(result?.expression).toBeDefined();
       expect(result?.expression.value).toBe('42');
@@ -63,7 +73,14 @@ describe('FunctionVisitor', () => {
         text: 'function add(a, b) = a + b;',
         childForFieldName: (name: string) => {
           if (name === 'name') {
-            return { text: 'add' } as TSNode;
+            const functionName = 'add';
+            return {
+              text: functionName,
+              startIndex: 0,
+              endIndex: functionName.length,
+              startPosition: { row: 0, column: 0 },
+              endPosition: { row: 0, column: functionName.length },
+            } as TSNode;
           } else if (name === 'parameters') {
             return { text: 'a, b' } as TSNode;
           } else if (name === 'expression') {
@@ -78,7 +95,10 @@ describe('FunctionVisitor', () => {
 
       expect(result).not.toBeNull();
       expect(result?.type).toBe('function_definition');
-      expect(result?.name).toBe('add');
+      expect(result?.name?.name).toBe('add');
+      expect(result?.name?.type).toBe('expression');
+      expect(result?.name?.expressionType).toBe('identifier');
+      expect(result?.name?.location).toBeDefined(); // May require mock update
       expect(result?.parameters).toHaveLength(2);
       expect(result?.parameters[0].name).toBe('a');
       expect(result?.parameters[1].name).toBe('b');
@@ -97,7 +117,14 @@ describe('FunctionVisitor', () => {
         text: 'function add(a=0, b=0) = a + b;',
         childForFieldName: (name: string) => {
           if (name === 'name') {
-            return { text: 'add' } as TSNode;
+            const functionName = 'add';
+            return {
+              text: functionName,
+              startIndex: 0,
+              endIndex: functionName.length,
+              startPosition: { row: 0, column: 0 },
+              endPosition: { row: 0, column: functionName.length },
+            } as TSNode;
           } else if (name === 'parameters') {
             return { text: 'a=0, b=0' } as TSNode;
           } else if (name === 'expression') {
@@ -112,7 +139,10 @@ describe('FunctionVisitor', () => {
 
       expect(result).not.toBeNull();
       expect(result?.type).toBe('function_definition');
-      expect(result?.name).toBe('add');
+      expect(result?.name?.name).toBe('add');
+      expect(result?.name?.type).toBe('expression');
+      expect(result?.name?.expressionType).toBe('identifier');
+      expect(result?.name?.location).toBeDefined(); // May require mock update
       expect(result?.parameters).toHaveLength(2);
       expect(result?.parameters[0].name).toBe('a');
       expect(result?.parameters[0].defaultValue).toBe(0);
@@ -133,7 +163,14 @@ describe('FunctionVisitor', () => {
         text: 'function createVector(x=0, y=0, z=0) = [x, y, z];',
         childForFieldName: (name: string) => {
           if (name === 'name') {
-            return { text: 'createVector' } as TSNode;
+            const functionName = 'createVector';
+            return {
+              text: functionName,
+              startIndex: 0,
+              endIndex: functionName.length,
+              startPosition: { row: 0, column: 0 },
+              endPosition: { row: 0, column: functionName.length },
+            } as TSNode;
           } else if (name === 'parameters') {
             return { text: 'x=0, y=0, z=0' } as TSNode;
           } else if (name === 'expression') {
@@ -148,7 +185,10 @@ describe('FunctionVisitor', () => {
 
       expect(result).not.toBeNull();
       expect(result?.type).toBe('function_definition');
-      expect(result?.name).toBe('createVector');
+      expect(result?.name?.name).toBe('createVector');
+      expect(result?.name?.type).toBe('expression');
+      expect(result?.name?.expressionType).toBe('identifier');
+      expect(result?.name?.location).toBeDefined(); // May require mock update
       expect(result?.parameters).toHaveLength(3);
       expect(result?.parameters[0].name).toBe('x');
       expect(result?.parameters[0].defaultValue).toBe(0);

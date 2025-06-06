@@ -1,0 +1,723 @@
+
+> nx run openscad-parser:test --testNamePattern=should identify a simple module definition --run
+
+> vitest run --reporter=verbose --no-coverage --testNamePattern="should identify a simple module definition" --run
+
+
+[1m[46m RUN [49m[22m [36mv3.1.4 [39m[90mC:/Users/luciano/git/openscad-tree-sitter/packages/openscad-parser[39m
+
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/base-ast-visitor.test.ts[2m > [22mBaseASTVisitor[2m > [22mshould debug the CST structure
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/base-ast-visitor.test.ts[2m > [22mBaseASTVisitor[2m > [22mvisitNode[2m > [22mshould handle expression nodes
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/base-ast-visitor.test.ts[2m > [22mBaseASTVisitor[2m > [22mvisitNode[2m > [22mshould handle statement nodes
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/base-ast-visitor.test.ts[2m > [22mBaseASTVisitor[2m > [22mvisitNode[2m > [22mshould return null for unknown node types
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/base-ast-visitor.test.ts[2m > [22mBaseASTVisitor[2m > [22mvisitChildren[2m > [22mshould visit all children of a node
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/base-ast-visitor.test.ts[2m > [22mBaseASTVisitor[2m > [22mvisitModuleInstantiation[2m > [22mshould process expression nodes as module instantiations
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/csg-visitor.test.ts[2m > [22mCSGVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould create a union node
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/csg-visitor.test.ts[2m > [22mCSGVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould handle module_instantiation nodes for union operations
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/csg-visitor.test.ts[2m > [22mCSGVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould handle call_expression nodes for difference operations
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/csg-visitor.test.ts[2m > [22mCSGVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould handle call_expression nodes for intersection operations
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/csg-visitor.test.ts[2m > [22mCSGVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould handle call_expression nodes for hull operations
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/csg-visitor.test.ts[2m > [22mCSGVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould handle call_expression nodes for minkowski operations
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/csg-visitor.test.ts[2m > [22mCSGVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould create a union node with children
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/csg-visitor.test.ts[2m > [22mCSGVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould create a difference node
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/csg-visitor.test.ts[2m > [22mCSGVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould create an intersection node
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/csg-visitor.test.ts[2m > [22mCSGVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould create a hull node
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/csg-visitor.test.ts[2m > [22mCSGVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould create a minkowski node
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/csg-visitor.test.ts[2m > [22mCSGVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould return null for unsupported functions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assign-statement-visitor/assign-statement-visitor.test.ts[2m > [22mAssignStatementVisitor[2m > [22mBasic Assign Statements[2m > [22mshould parse basic assign statement with single assignment
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assign-statement-visitor/assign-statement-visitor.test.ts[2m > [22mAssignStatementVisitor[2m > [22mBasic Assign Statements[2m > [22mshould parse assign statement with boolean value
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assign-statement-visitor/assign-statement-visitor.test.ts[2m > [22mAssignStatementVisitor[2m > [22mBasic Assign Statements[2m > [22mshould parse assign statement with string value
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assign-statement-visitor/assign-statement-visitor.test.ts[2m > [22mAssignStatementVisitor[2m > [22mMultiple Assignments[2m > [22mshould parse assign statement with multiple assignments
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assign-statement-visitor/assign-statement-visitor.test.ts[2m > [22mAssignStatementVisitor[2m > [22mMultiple Assignments[2m > [22mshould parse assign statement with three assignments
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assign-statement-visitor/assign-statement-visitor.test.ts[2m > [22mAssignStatementVisitor[2m > [22mMultiple Assignments[2m > [22mshould parse assign statement with mixed value types
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assign-statement-visitor/assign-statement-visitor.test.ts[2m > [22mAssignStatementVisitor[2m > [22mComplex Expressions[2m > [22mshould parse assign statement with arithmetic expressions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assign-statement-visitor/assign-statement-visitor.test.ts[2m > [22mAssignStatementVisitor[2m > [22mComplex Expressions[2m > [22mshould parse assign statement with function calls
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assign-statement-visitor/assign-statement-visitor.test.ts[2m > [22mAssignStatementVisitor[2m > [22mComplex Expressions[2m > [22mshould parse assign statement with array expressions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assign-statement-visitor/assign-statement-visitor.test.ts[2m > [22mAssignStatementVisitor[2m > [22mComplex Expressions[2m > [22mshould parse assign statement with range expressions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assign-statement-visitor/assign-statement-visitor.test.ts[2m > [22mAssignStatementVisitor[2m > [22mBlock Bodies[2m > [22mshould parse assign statement with block body
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assign-statement-visitor/assign-statement-visitor.test.ts[2m > [22mAssignStatementVisitor[2m > [22mBlock Bodies[2m > [22mshould parse assign statement with complex block
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assign-statement-visitor/assign-statement-visitor.test.ts[2m > [22mAssignStatementVisitor[2m > [22mEdge Cases[2m > [22mshould handle assign statement with no assignments
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assign-statement-visitor/assign-statement-visitor.test.ts[2m > [22mAssignStatementVisitor[2m > [22mEdge Cases[2m > [22mshould handle assign statement without semicolon
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assign-statement-visitor/assign-statement-visitor.test.ts[2m > [22mAssignStatementVisitor[2m > [22mEdge Cases[2m > [22mshould handle multiple assign statements
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assign-statement-visitor/assign-statement-visitor.test.ts[2m > [22mAssignStatementVisitor[2m > [22mError Handling[2m > [22mshould handle malformed assign statement gracefully
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assign-statement-visitor/assign-statement-visitor.test.ts[2m > [22mAssignStatementVisitor[2m > [22mError Handling[2m > [22mshould handle assign statement with missing body
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/list-comprehension-visitor/list-comprehension-visitor.test.ts[2m > [22mListComprehensionVisitor[2m > [22mTraditional Syntax[2m > [22mshould parse simple list comprehension [x for (x = [1:5])]
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/list-comprehension-visitor/list-comprehension-visitor.test.ts[2m > [22mListComprehensionVisitor[2m > [22mTraditional Syntax[2m > [22mshould parse expression list comprehension [x*x for (x = [1:5])]
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/list-comprehension-visitor/list-comprehension-visitor.test.ts[2m > [22mListComprehensionVisitor[2m > [22mTraditional Syntax[2m > [22mshould parse conditional list comprehension [x for (x = [1:10]) if (x % 2 == 0)]
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/list-comprehension-visitor/list-comprehension-visitor.test.ts[2m > [22mListComprehensionVisitor[2m > [22mOpenSCAD Syntax[2m > [22mshould parse OpenSCAD list comprehension [for (x = [1:5]) x]
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/list-comprehension-visitor/list-comprehension-visitor.test.ts[2m > [22mListComprehensionVisitor[2m > [22mOpenSCAD Syntax[2m > [22mshould parse OpenSCAD list comprehension with condition [for (x = [1:10]) if (x % 2 == 0) x]
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/list-comprehension-visitor/list-comprehension-visitor.test.ts[2m > [22mListComprehensionVisitor[2m > [22mComplex Expressions[2m > [22mshould parse list comprehension with complex conditional [for (i = [0:10]) if (i > 2 && i < 8 && i % 2 == 0) i*i]
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/list-comprehension-visitor/list-comprehension-visitor.test.ts[2m > [22mListComprehensionVisitor[2m > [22mComplex Expressions[2m > [22mshould parse list comprehension with function calls [for (i = [0:2]) a_function(i)]
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/list-comprehension-visitor/list-comprehension-visitor.test.ts[2m > [22mListComprehensionVisitor[2m > [22mComplex Expressions[2m > [22mshould parse list comprehension with nested arrays [for (i = [0:2]) [i, i*2]]
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/list-comprehension-visitor/list-comprehension-visitor.test.ts[2m > [22mListComprehensionVisitor[2m > [22mComplex Expressions[2m > [22mshould return an ErrorNode for invalid "for...let" order in [for (i = [0:2]) let(x = i*2) x]
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/list-comprehension-visitor/list-comprehension-visitor.test.ts[2m > [22mListComprehensionVisitor[2m > [22mLet Expressions[2m > [22mshould return an ErrorNode for invalid "for...let" order in [for (i = [0:3]) let(angle = i * 36) [cos(angle), sin(angle)]]
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/list-comprehension-visitor/list-comprehension-visitor.test.ts[2m > [22mListComprehensionVisitor[2m > [22mLet Expressions[2m > [22mshould return an ErrorNode for invalid "for...let" order in [for (a = [1:4]) let(b = a*a, c = 2*b) [a, b, c]]
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/list-comprehension-visitor/list-comprehension-visitor.test.ts[2m > [22mListComprehensionVisitor[2m > [22mError Handling[2m > [22mshould handle malformed list comprehension gracefully
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/list-comprehension-visitor/list-comprehension-visitor.test.ts[2m > [22mListComprehensionVisitor[2m > [22mError Handling[2m > [22mshould return an ErrorNode for non-list-comprehension nodes
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.integration.test.ts[2m > [22mExpressionVisitor Integration[2m > [22mBinary Expressions[2m > [22mshould handle arithmetic binary expressions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.integration.test.ts[2m > [22mExpressionVisitor Integration[2m > [22mBinary Expressions[2m > [22mshould handle comparison binary expressions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.integration.test.ts[2m > [22mExpressionVisitor Integration[2m > [22mBinary Expressions[2m > [22mshould handle logical binary expressions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.integration.test.ts[2m > [22mExpressionVisitor Integration[2m > [22mUnary Expressions[2m > [22mshould handle negation unary expressions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.integration.test.ts[2m > [22mExpressionVisitor Integration[2m > [22mUnary Expressions[2m > [22mshould handle logical not unary expressions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.integration.test.ts[2m > [22mExpressionVisitor Integration[2m > [22mConditional Expressions[2m > [22mshould handle ternary conditional expressions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.integration.test.ts[2m > [22mExpressionVisitor Integration[2m > [22mArray Expressions[2m > [22mshould handle array expressions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.integration.test.ts[2m > [22mExpressionVisitor Integration[2m > [22mComplex Expressions[2m > [22mshould handle complex nested expressions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.integration.test.ts[2m > [22mExpressionVisitor Integration[2m > [22mComplex Expressions[2m > [22mshould handle expressions with multiple operators
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.test.ts[2m > [22mExpressionVisitor[2m > [22mvisitBinaryExpression[2m > [22mshould handle arithmetic binary expressions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.test.ts[2m > [22mExpressionVisitor[2m > [22mvisitBinaryExpression[2m > [22mshould handle comparison binary expressions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.test.ts[2m > [22mExpressionVisitor[2m > [22mvisitBinaryExpression[2m > [22mshould handle logical binary expressions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.test.ts[2m > [22mExpressionVisitor[2m > [22mvisitUnaryExpression[2m > [22mshould handle negation unary expressions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.test.ts[2m > [22mExpressionVisitor[2m > [22mvisitUnaryExpression[2m > [22mshould handle logical not unary expressions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.test.ts[2m > [22mExpressionVisitor[2m > [22mvisitConditionalExpression[2m > [22mshould handle ternary conditional expressions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.test.ts[2m > [22mExpressionVisitor[2m > [22mvisitVariableReference[2m > [22mshould handle variable references
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.test.ts[2m > [22mExpressionVisitor[2m > [22mvisitLiteral[2m > [22mshould handle number literals
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.test.ts[2m > [22mExpressionVisitor[2m > [22mvisitLiteral[2m > [22mshould handle string literals
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.test.ts[2m > [22mExpressionVisitor[2m > [22mvisitLiteral[2m > [22mshould handle boolean literals
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.test.ts[2m > [22mExpressionVisitor[2m > [22mvisitArrayExpression[2m > [22mshould handle array expressions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/control-structures.test.ts[2m > [22mControl Structures AST Generation[2m > [22mif statements[2m > [22mshould parse a basic if statement
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/control-structures.test.ts[2m > [22mControl Structures AST Generation[2m > [22mif statements[2m > [22mshould parse an if-else statement
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/control-structures.test.ts[2m > [22mControl Structures AST Generation[2m > [22mif statements[2m > [22mshould parse an if-else-if-else statement
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/control-structures.test.ts[2m > [22mControl Structures AST Generation[2m > [22mfor loops[2m > [22mshould parse a basic for loop
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/control-structures.test.ts[2m > [22mControl Structures AST Generation[2m > [22mfor loops[2m > [22mshould parse a for loop with step
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/control-structures.test.ts[2m > [22mControl Structures AST Generation[2m > [22mfor loops[2m > [22mshould parse a for loop with multiple variables
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/control-structures.test.ts[2m > [22mControl Structures AST Generation[2m > [22mlet expressions[2m > [22mshould parse a basic let expression
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/control-structures.test.ts[2m > [22mControl Structures AST Generation[2m > [22mlet expressions[2m > [22mshould parse a let expression with multiple assignments
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/control-structures.test.ts[2m > [22mControl Structures AST Generation[2m > [22meach statements[2m > [22mshould parse a basic each statement
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/module-function.test.ts[2m > [22mModule and Function AST Generation[2m > [22mModule Definition[2m > [22mshould parse a basic module without parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/module-function.test.ts[2m > [22mModule and Function AST Generation[2m > [22mModule Definition[2m > [22mshould parse a module with positional parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/module-function.test.ts[2m > [22mModule and Function AST Generation[2m > [22mModule Definition[2m > [22mshould parse a module with named parameters and default values
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/module-function.test.ts[2m > [22mModule and Function AST Generation[2m > [22mModule Definition[2m > [22mshould parse a module with special variables
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/module-function.test.ts[2m > [22mModule and Function AST Generation[2m > [22mModule Definition[2m > [22mshould parse a module with children
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/module-function.test.ts[2m > [22mModule and Function AST Generation[2m > [22mModule Definition[2m > [22mshould parse a module with child indexing
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/module-function.test.ts[2m > [22mModule and Function AST Generation[2m > [22mFunction Definition[2m > [22mshould parse a basic function with parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/module-function.test.ts[2m > [22mModule and Function AST Generation[2m > [22mFunction Definition[2m > [22mshould parse a function with default parameter values
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/module-function.test.ts[2m > [22mModule and Function AST Generation[2m > [22mModule Instantiation[2m > [22mshould parse a basic module instantiation
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/module-function.test.ts[2m > [22mModule and Function AST Generation[2m > [22mModule Instantiation[2m > [22mshould parse a module instantiation with positional parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/module-function.test.ts[2m > [22mModule and Function AST Generation[2m > [22mModule Instantiation[2m > [22mshould parse a module instantiation with named parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/module-function.test.ts[2m > [22mModule and Function AST Generation[2m > [22mModule Instantiation[2m > [22mshould parse a module instantiation with children
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.test.ts[2m > [22mRangeExpressionVisitor[2m > [22mSimple Range Expressions[2m > [22mshould parse simple range [0:5]
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.test.ts[2m > [22mRangeExpressionVisitor[2m > [22mSimple Range Expressions[2m > [22mshould parse range with negative numbers [-5:5]
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.test.ts[2m > [22mRangeExpressionVisitor[2m > [22mSimple Range Expressions[2m > [22mshould parse range with decimal numbers [1.5:10.5]
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.test.ts[2m > [22mRangeExpressionVisitor[2m > [22mStepped Range Expressions[2m > [22mshould parse stepped range [0:2:10]
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.test.ts[2m > [22mRangeExpressionVisitor[2m > [22mStepped Range Expressions[2m > [22mshould parse stepped range with decimal step [1:0.5:5]
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.test.ts[2m > [22mRangeExpressionVisitor[2m > [22mStepped Range Expressions[2m > [22mshould parse stepped range with variables [a:b:c]
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.test.ts[2m > [22mRangeExpressionVisitor[2m > [22mStepped Range Expressions[2m > [22mshould parse stepped range with function calls [funcA():1:funcB()]
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.test.ts[2m > [22mRangeExpressionVisitor[2m > [22mStepped Range Expressions[2m > [22mshould parse reverse range [10:-1:0]
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.test.ts[2m > [22mRangeExpressionVisitor[2m > [22mExpression Range Expressions[2m > [22mshould parse range with variables [x:y]
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.test.ts[2m > [22mRangeExpressionVisitor[2m > [22mExpression Range Expressions[2m > [22mshould parse range with arithmetic expressions [a+1:b*2]
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.test.ts[2m > [22mRangeExpressionVisitor[2m > [22mExpression Range Expressions[2m > [22mshould return ErrorNode with cause if start expression is an ErrorNode
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.test.ts[2m > [22mRangeExpressionVisitor[2m > [22mError Handling and Invalid Inputs[2m > [22mvisitRangeExpression should return ErrorNode for non-range_expression CST node
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.test.ts[2m > [22mRangeExpressionVisitor[2m > [22mMalformed Range Syntax Error Handling[2m > [22mshould return ErrorNode for x = [:5]; with errorCode UNEXPECTED_NODE_TYPE_FOR_RANGE_VISITOR when valueNode is vector_expression
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.test.ts[2m > [22mRangeExpressionVisitor[2m > [22mMalformed Range Syntax Error Handling[2m > [22mshould return ErrorNode for x = [0:]; with errorCode MISSING_RANGE_END when valueNode is range_expression
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.test.ts[2m > [22mRangeExpressionVisitor[2m > [22mMalformed Range Syntax Error Handling[2m > [22mshould return ErrorNode for x = [:]; with errorCode UNEXPECTED_NODE_TYPE_FOR_RANGE_VISITOR when valueNode is vector_expression
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.test.ts[2m > [22mRangeExpressionVisitor[2m > [22mMalformed Range Syntax Error Handling[2m > [22mshould return ErrorNode for x = [if:5]; with errorCode E209_INVALID_SYNTAX_IN_RANGE_START when valueNode is range_expression
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.test.ts[2m > [22mRangeExpressionVisitor[2m > [22mMalformed Range Syntax Error Handling[2m > [22mshould return ErrorNode for x = [0:if]; with errorCode E211_INVALID_SYNTAX_IN_RANGE_END when valueNode is range_expression
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.test.ts[2m > [22mRangeExpressionVisitor[2m > [22mMalformed Range Syntax Error Handling[2m > [22mshould return ErrorNode for x = [0:if:5]; with errorCode E210_INVALID_SYNTAX_IN_RANGE_STEP when valueNode is range_expression
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.test.ts[2m > [22mRangeExpressionVisitor[2m > [22mVisit Method Dispatch[2m > [22mshould correctly parse valid range_expression nodes
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/range-expression-visitor/range-expression-visitor.test.ts[2m > [22mRangeExpressionVisitor[2m > [22mVisit Method Dispatch[2m > [22mshould return ErrorNode for unsupported node types via visit method
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/primitive-visitor.test.ts[2m > [22mPrimitiveVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould create a cube node with default parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/primitive-visitor.test.ts[2m > [22mPrimitiveVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould create a cube node with size parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/primitive-visitor.test.ts[2m > [22mPrimitiveVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould create a cube node with size and center parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/primitive-visitor.test.ts[2m > [22mPrimitiveVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould create a cube node with vector size
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/primitive-visitor.test.ts[2m > [22mPrimitiveVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould create a sphere node with default parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/primitive-visitor.test.ts[2m > [22mPrimitiveVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould create a sphere node with radius parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/primitive-visitor.test.ts[2m > [22mPrimitiveVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould create a sphere node with diameter parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/primitive-visitor.test.ts[2m > [22mPrimitiveVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould create a cylinder node with default parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/primitive-visitor.test.ts[2m > [22mPrimitiveVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould create a cylinder node with height and radius parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/primitive-visitor.test.ts[2m > [22mPrimitiveVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould create a cylinder node with different top and bottom radii
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/primitive-visitor.test.ts[2m > [22mPrimitiveVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould create a cylinder node with diameter parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/primitive-visitor.test.ts[2m > [22mPrimitiveVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould create a cylinder node with different top and bottom diameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/primitive-visitor.test.ts[2m > [22mPrimitiveVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould return null for unsupported functions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cylinder-extractor.test.ts[2m > [22mCylinder Extractor[2m > [22mextractCylinderNode[2m > [22mshould extract cylinder with h and r parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cylinder-extractor.test.ts[2m > [22mCylinder Extractor[2m > [22mextractCylinderNode[2m > [22mshould extract cylinder with h and d parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cylinder-extractor.test.ts[2m > [22mCylinder Extractor[2m > [22mextractCylinderNode[2m > [22mshould extract cylinder with h, r1, and r2 parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cylinder-extractor.test.ts[2m > [22mCylinder Extractor[2m > [22mextractCylinderNode[2m > [22mshould extract cylinder with h, d1, and d2 parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cylinder-extractor.test.ts[2m > [22mCylinder Extractor[2m > [22mextractCylinderNode[2m > [22mshould extract cylinder with center=true parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cylinder-extractor.test.ts[2m > [22mCylinder Extractor[2m > [22mextractCylinderNode[2m > [22mshould extract cylinder with center=false parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cylinder-extractor.test.ts[2m > [22mCylinder Extractor[2m > [22mextractCylinderNode[2m > [22mshould extract cylinder with $fn parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cylinder-extractor.test.ts[2m > [22mCylinder Extractor[2m > [22mextractCylinderNode[2m > [22mshould extract cylinder with $fa parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cylinder-extractor.test.ts[2m > [22mCylinder Extractor[2m > [22mextractCylinderNode[2m > [22mshould extract cylinder with $fs parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cylinder-extractor.test.ts[2m > [22mCylinder Extractor[2m > [22mextractCylinderNode[2m > [22mshould handle positional arguments (h, r1, r2, center)
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cylinder-extractor.test.ts[2m > [22mCylinder Extractor[2m > [22mextractCylinderNode[2m > [22mshould handle positional arguments (h, r, center)
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cylinder-extractor.test.ts[2m > [22mCylinder Extractor[2m > [22mextractCylinderNode[2m > [22mshould prioritize named parameters over positional ones (mixed)
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cylinder-extractor.test.ts[2m > [22mCylinder Extractor[2m > [22mextractCylinderNode[2m > [22mshould default r1 and r2 to r if r is provided and r1/r2 are not
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cylinder-extractor.test.ts[2m > [22mCylinder Extractor[2m > [22mextractCylinderNode[2m > [22mshould default r to r1 if r1 is provided and r is not (and r2 is different or undefined)
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cylinder-extractor.test.ts[2m > [22mCylinder Extractor[2m > [22mextractCylinderNode[2m > [22mshould default r to d/2 if d is provided
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cylinder-extractor.test.ts[2m > [22mCylinder Extractor[2m > [22mextractCylinderNode[2m > [22mshould default r1 to d1/2 and r2 to d2/2 if d1 and d2 are provided
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cylinder-extractor.test.ts[2m > [22mCylinder Extractor[2m > [22mextractCylinderNode[2m > [22mshould return undefined or minimal node if h is missing
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cylinder-extractor.test.ts[2m > [22mCylinder Extractor[2m > [22mextractCylinderNode[2m > [22mshould handle no parameters by using defaults (if any are defined by OpenSCAD)
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/transform-visitor.test.ts[2m > [22mTransformVisitor[2m > [22mTranslate Transformation[2m > [22mshould parse translate([10, 20, 30]) sphere(5);
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/transform-visitor.test.ts[2m > [22mTransformVisitor[2m > [22mTranslate Transformation[2m > [22mshould parse translate(v = [1, 2, 3]) cube(1);
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/transform-visitor.test.ts[2m > [22mTransformVisitor[2m > [22mTranslate Transformation[2m > [22mshould parse translate([10, 20]) /* 2D vector */ circle(5);
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/transform-visitor.test.ts[2m > [22mTransformVisitor[2m > [22mTranslate Transformation[2m > [22mshould parse translate(5) /* single number */ cylinder(h=10, r=1);
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/transform-visitor.test.ts[2m > [22mTransformVisitor[2m > [22mTranslate Transformation[2m > [22mshould parse translate([-5, 10.5, 0]) text("hello");
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/transform-visitor.test.ts[2m > [22mTransformVisitor[2m > [22mTranslate Transformation[2m > [22mshould parse translate([-5, 10.5]) polygon();
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/transform-visitor.test.ts[2m > [22mTransformVisitor[2m > [22mTranslate Transformation[2m > [22mshould parse translate() polygon(); (no arguments)
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/transform-visitor.test.ts[2m > [22mTransformVisitor[2m > [22mOLD createASTNodeForFunction tests - to be refactored/removed[2m > [22mOLD: should create a translate node with vector parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/transform-visitor.test.ts[2m > [22mTransformVisitor[2m > [22mOLD createASTNodeForFunction tests - to be refactored/removed[2m > [22mshould create a rotate node with angle parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/transform-visitor.test.ts[2m > [22mTransformVisitor[2m > [22mOLD createASTNodeForFunction tests - to be refactored/removed[2m > [22mOLD: should create a sphere node
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assert-statement-visitor/assert-statement-visitor.test.ts[2m > [22mAssertStatementVisitor[2m > [22mBasic Assert Statements[2m > [22mshould parse basic assert statement with literal true
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assert-statement-visitor/assert-statement-visitor.test.ts[2m > [22mAssertStatementVisitor[2m > [22mBasic Assert Statements[2m > [22mshould parse basic assert statement with literal false
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assert-statement-visitor/assert-statement-visitor.test.ts[2m > [22mAssertStatementVisitor[2m > [22mBasic Assert Statements[2m > [22mshould parse assert statement with variable condition
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assert-statement-visitor/assert-statement-visitor.test.ts[2m > [22mAssertStatementVisitor[2m > [22mAssert Statements with Conditions[2m > [22mshould parse assert statement with comparison condition
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assert-statement-visitor/assert-statement-visitor.test.ts[2m > [22mAssertStatementVisitor[2m > [22mAssert Statements with Conditions[2m > [22mshould parse assert statement with logical condition
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assert-statement-visitor/assert-statement-visitor.test.ts[2m > [22mAssertStatementVisitor[2m > [22mAssert Statements with Conditions[2m > [22mshould parse assert statement with equality condition
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assert-statement-visitor/assert-statement-visitor.test.ts[2m > [22mAssertStatementVisitor[2m > [22mAssert Statements with Messages[2m > [22mshould parse assert statement with string message
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assert-statement-visitor/assert-statement-visitor.test.ts[2m > [22mAssertStatementVisitor[2m > [22mAssert Statements with Messages[2m > [22mshould parse assert statement with complex condition and message
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assert-statement-visitor/assert-statement-visitor.test.ts[2m > [22mAssertStatementVisitor[2m > [22mAssert Statements with Messages[2m > [22mshould parse assert statement with variable message
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assert-statement-visitor/assert-statement-visitor.test.ts[2m > [22mAssertStatementVisitor[2m > [22mAssert Statements without Semicolons[2m > [22mshould parse assert statement without semicolon
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assert-statement-visitor/assert-statement-visitor.test.ts[2m > [22mAssertStatementVisitor[2m > [22mAssert Statements without Semicolons[2m > [22mshould parse assert statement with message but without semicolon
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assert-statement-visitor/assert-statement-visitor.test.ts[2m > [22mAssertStatementVisitor[2m > [22mError Handling[2m > [22mshould handle assert statement with missing condition
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assert-statement-visitor/assert-statement-visitor.test.ts[2m > [22mAssertStatementVisitor[2m > [22mError Handling[2m > [22mshould handle assert statement with missing closing parenthesis
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assert-statement-visitor/assert-statement-visitor.test.ts[2m > [22mAssertStatementVisitor[2m > [22mError Handling[2m > [22mshould handle assert statement with extra commas
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/assert-statement-visitor/assert-statement-visitor.test.ts[2m > [22mAssertStatementVisitor[2m > [22mMultiple Assert Statements[2m > [22mshould parse multiple assert statements
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples-range-integration.test.ts[2m > [22mDocumentation Examples - Range Expression Integration[2m > [22mRange Expression Integration Examples[2m > [22mshould parse range expressions in for loops as documented
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples-range-integration.test.ts[2m > [22mDocumentation Examples - Range Expression Integration[2m > [22mRange Expression Integration Examples[2m > [22mshould parse range expressions in variable assignments as documented
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples-range-integration.test.ts[2m > [22mDocumentation Examples - Range Expression Integration[2m > [22mRange Expression Integration Examples[2m > [22mshould parse range expressions in list comprehensions as documented
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples-range-integration.test.ts[2m > [22mDocumentation Examples - Range Expression Integration[2m > [22mRange Expressions in For Loops[2m > [22mshould parse for loops with range expressions as documented
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples-range-integration.test.ts[2m > [22mDocumentation Examples - Range Expression Integration[2m > [22mRange Expressions in List Comprehensions[2m > [22mshould parse list comprehensions with range expressions as documented
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples-range-integration.test.ts[2m > [22mDocumentation Examples - Range Expression Integration[2m > [22mComplex Range Expressions in Context[2m > [22mshould parse negative step ranges in for loops
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples-range-integration.test.ts[2m > [22mDocumentation Examples - Range Expression Integration[2m > [22mComplex Range Expressions in Context[2m > [22mshould parse decimal step ranges in variable assignments
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples-range-integration.test.ts[2m > [22mDocumentation Examples - Range Expression Integration[2m > [22mComplex Range Expressions in Context[2m > [22mshould parse expression ranges in list comprehensions
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples-range-integration.test.ts[2m > [22mDocumentation Examples - Range Expression Integration[2m > [22mIntegration Evidence Examples[2m > [22mshould demonstrate no "Unhandled expression type" warnings
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples-range-integration.test.ts[2m > [22mDocumentation Examples - Range Expression Integration[2m > [22mIntegration Evidence Examples[2m > [22mshould demonstrate seamless list comprehension support
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples-range-integration.test.ts[2m > [22mDocumentation Examples - Range Expression Integration[2m > [22mREADME.md Examples[2m > [22mshould validate the main README range expression example
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples-range-integration.test.ts[2m > [22mDocumentation Examples - Range Expression Integration[2m > [22mREADME.md Examples[2m > [22mshould validate the list comprehension example from README
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples-range-integration.test.ts[2m > [22mDocumentation Examples - Range Expression Integration[2m > [22mREADME.md Examples[2m > [22mshould validate the variable assignment example from README
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples-range-integration.test.ts[2m > [22mDocumentation Examples - Range Expression Integration[2m > [22mAST Types Documentation Examples[2m > [22mshould validate range expressions work in documented contexts
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples-range-integration.test.ts[2m > [22mDocumentation Examples - Range Expression Integration[2m > [22mAST Types Documentation Examples[2m > [22mshould validate stepped range expressions in context
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples-range-integration.test.ts[2m > [22mDocumentation Examples - Range Expression Integration[2m > [22mAST Types Documentation Examples[2m > [22mshould validate variable range expressions in context
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples-range-integration.test.ts[2m > [22mDocumentation Examples - Range Expression Integration[2m > [22mPerformance and Quality Validation[2m > [22mshould demonstrate efficient parsing of multiple range expressions
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples-range-integration.test.ts[2m > [22mDocumentation Examples - Range Expression Integration[2m > [22mPerformance and Quality Validation[2m > [22mshould maintain type safety with range expressions in context
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/module-visitor.test.ts[2m > [22mModuleVisitor[2m > [22mvisitModuleDefinition[2m > [22mshould parse a basic module without parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/module-visitor.test.ts[2m > [22mModuleVisitor[2m > [22mvisitModuleDefinition[2m > [22mshould parse a module with parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/module-visitor.test.ts[2m > [22mModuleVisitor[2m > [22mvisitModuleDefinition[2m > [22mshould parse a module with default parameter values
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/module-visitor.test.ts[2m > [22mModuleVisitor[2m > [22mvisitModuleDefinition[2m > [22mshould parse a module with vector parameter values
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/module-visitor.test.ts[2m > [22mModuleVisitor[2m > [22mcreateModuleInstantiationNode[2m > [22mshould create a module instantiation node
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/module-visitor.test.ts[2m > [22mModuleVisitor[2m > [22mcreateModuleInstantiationNode[2m > [22mshould create a module instantiation node with children
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/function-call-visitor.test.ts[2m > [22mFunctionCallVisitor[2m > [22mvisitFunctionCall[2m > [22mshould handle simple function calls with no arguments
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/function-call-visitor.test.ts[2m > [22mFunctionCallVisitor[2m > [22mvisitFunctionCall[2m > [22mshould handle function calls with positional arguments
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/function-call-visitor.test.ts[2m > [22mFunctionCallVisitor[2m > [22mvisitFunctionCall[2m > [22mshould handle function calls with named arguments
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/function-call-visitor.test.ts[2m > [22mFunctionCallVisitor[2m > [22mvisitFunctionCall[2m > [22mshould handle function calls with mixed arguments
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/function-call-visitor.test.ts[2m > [22mFunctionCallVisitor[2m > [22mvisitFunctionCall[2m > [22mshould handle nested function calls
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/cst/cursor-utils/cursor-utils.test.ts[2m > [22mcursor-utils[2m > [22misNodeType[2m > [22mshould return true for matching node type
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/cst/cursor-utils/cursor-utils.test.ts[2m > [22mcursor-utils[2m > [22mgetNodeRange[2m > [22mshould return correct source range for nodes
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/cst/cursor-utils/cursor-utils.test.ts[2m > [22mcursor-utils[2m > [22mgetNodeText[2m > [22mshould return correct text for single-line node
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/cst/cursor-utils/cursor-utils.test.ts[2m > [22mcursor-utils[2m > [22mgetNodeText[2m > [22mshould handle multi-line nodes
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/cst/cursor-utils/cursor-utils.test.ts[2m > [22mcursor-utils[2m > [22mgetNodeText[2m > [22mshould handle different node types correctly
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/cst/cursor-utils/cursor-utils.test.ts[2m > [22mcursor-utils[2m > [22mgetNodeText[2m > [22mshould handle translate transform
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/echo-statement-visitor/echo-statement-visitor.test.ts[2m > [22mEchoStatementVisitor[2m > [22mBasic Echo Statements[2m > [22mshould parse basic echo statement with string literal
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/echo-statement-visitor/echo-statement-visitor.test.ts[2m > [22mEchoStatementVisitor[2m > [22mBasic Echo Statements[2m > [22mshould parse echo statement with number literal
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/echo-statement-visitor/echo-statement-visitor.test.ts[2m > [22mEchoStatementVisitor[2m > [22mBasic Echo Statements[2m > [22mshould parse echo statement with boolean literal
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/echo-statement-visitor/echo-statement-visitor.test.ts[2m > [22mEchoStatementVisitor[2m > [22mBasic Echo Statements[2m > [22mshould parse echo statement with variable
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/echo-statement-visitor/echo-statement-visitor.test.ts[2m > [22mEchoStatementVisitor[2m > [22mMultiple Arguments[2m > [22mshould parse echo statement with multiple string arguments
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/echo-statement-visitor/echo-statement-visitor.test.ts[2m > [22mEchoStatementVisitor[2m > [22mMultiple Arguments[2m > [22mshould parse echo statement with mixed argument types
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/echo-statement-visitor/echo-statement-visitor.test.ts[2m > [22mEchoStatementVisitor[2m > [22mMultiple Arguments[2m > [22mshould parse echo statement with many arguments
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/echo-statement-visitor/echo-statement-visitor.test.ts[2m > [22mEchoStatementVisitor[2m > [22mComplex Expressions[2m > [22mshould parse echo statement with arithmetic expression
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/echo-statement-visitor/echo-statement-visitor.test.ts[2m > [22mEchoStatementVisitor[2m > [22mComplex Expressions[2m > [22mshould parse echo statement with function call
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/echo-statement-visitor/echo-statement-visitor.test.ts[2m > [22mEchoStatementVisitor[2m > [22mComplex Expressions[2m > [22mshould parse echo statement with array expression
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/echo-statement-visitor/echo-statement-visitor.test.ts[2m > [22mEchoStatementVisitor[2m > [22mEdge Cases[2m > [22mshould parse empty echo statement
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/echo-statement-visitor/echo-statement-visitor.test.ts[2m > [22mEchoStatementVisitor[2m > [22mEdge Cases[2m > [22mshould parse echo statement without semicolon
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/echo-statement-visitor/echo-statement-visitor.test.ts[2m > [22mEchoStatementVisitor[2m > [22mEdge Cases[2m > [22mshould parse multiple echo statements
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/echo-statement-visitor/echo-statement-visitor.test.ts[2m > [22mEchoStatementVisitor[2m > [22mError Handling[2m > [22mshould handle echo statement with missing closing parenthesis
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/echo-statement-visitor/echo-statement-visitor.test.ts[2m > [22mEchoStatementVisitor[2m > [22mError Handling[2m > [22mshould handle echo statement with extra commas
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/cst/cursor-utils/cursor-utils.integration.test.ts[2m > [22mCursor Utils Integration[2m > [22mTransformations[2m > [22mshould handle translate transform
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/cst/cursor-utils/cursor-utils.integration.test.ts[2m > [22mCursor Utils Integration[2m > [22mTransformations[2m > [22mshould extract correct text from nodes
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/transformations.test.ts[2m > [22mTransformation AST Generation[2m > [22mMirror Transformation[2m > [22mshould parse a mirror with vector parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/transformations.test.ts[2m > [22mTransformation AST Generation[2m > [22mMirror Transformation[2m > [22mshould parse a mirror with named v parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/transformations.test.ts[2m > [22mTransformation AST Generation[2m > [22mMirror Transformation[2m > [22mshould parse a mirror with 2D vector parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/transformations.test.ts[2m > [22mTransformation AST Generation[2m > [22mMultmatrix Transformation[2m > [22mshould parse a multmatrix with matrix parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/transformations.test.ts[2m > [22mTransformation AST Generation[2m > [22mMultmatrix Transformation[2m > [22mshould parse a multmatrix with named m parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/transformations.test.ts[2m > [22mTransformation AST Generation[2m > [22mColor Transformation[2m > [22mshould parse a color with name parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/transformations.test.ts[2m > [22mTransformation AST Generation[2m > [22mColor Transformation[2m > [22mshould parse a color with hex value
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/transformations.test.ts[2m > [22mTransformation AST Generation[2m > [22mColor Transformation[2m > [22mshould parse a color with rgb vector
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/transformations.test.ts[2m > [22mTransformation AST Generation[2m > [22mColor Transformation[2m > [22mshould parse a color with rgba vector
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/transformations.test.ts[2m > [22mTransformation AST Generation[2m > [22mColor Transformation[2m > [22mshould parse a color with alpha parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/transformations.test.ts[2m > [22mTransformation AST Generation[2m > [22mColor Transformation[2m > [22mshould parse a color with named c and alpha parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/transformations.test.ts[2m > [22mTransformation AST Generation[2m > [22mOffset Transformation[2m > [22mshould parse an offset with r parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/transformations.test.ts[2m > [22mTransformation AST Generation[2m > [22mOffset Transformation[2m > [22mshould parse an offset with delta parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/transformations.test.ts[2m > [22mTransformation AST Generation[2m > [22mOffset Transformation[2m > [22mshould parse an offset with chamfer parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/function-visitor.test.ts[2m > [22mFunctionVisitor[2m > [22mvisitFunctionDefinition[2m > [22mshould parse a basic function definition without parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/function-visitor.test.ts[2m > [22mFunctionVisitor[2m > [22mvisitFunctionDefinition[2m > [22mshould parse a function definition with parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/function-visitor.test.ts[2m > [22mFunctionVisitor[2m > [22mvisitFunctionDefinition[2m > [22mshould parse a function definition with default parameter values
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/function-visitor.test.ts[2m > [22mFunctionVisitor[2m > [22mvisitFunctionDefinition[2m > [22mshould parse a function definition with mixed parameter types
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/function-visitor.test.ts[2m > [22mFunctionVisitor[2m > [22mcreateFunctionCallNode[2m > [22mshould create a function call node with arguments
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/control-structure-visitor.test.ts[2m > [22mControlStructureVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould create an if node with condition
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/control-structure-visitor.test.ts[2m > [22mControlStructureVisitor[2m > [22mcreateASTNodeForFunction[2m > [22mshould create a for loop node with variables
+[90mstdout[2m | src/lib/ide-support/symbol-provider/symbol-provider.test.ts[2m > [22m[2mOpenSCADSymbolProvider[2m > [22m[2mgetSymbols[2m > [22m[2mshould identify a simple module definition
+[22m[39m[INFO] Initializing enhanced OpenSCAD parser...
+using local fetch mock ./tree-sitter-openscad.wasm
+__dirname C:\Users\luciano\git\openscad-tree-sitter\packages\openscad-parser\node_modules\@openscad\tree-sitter-openscad\tree-sitter-openscad.wasm
+
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/scale.test.ts[2m > [22mScale AST Generation[2m > [22mscale transformation[2m > [22mshould parse scale with vector parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/scale.test.ts[2m > [22mScale AST Generation[2m > [22mscale transformation[2m > [22mshould parse scale with scalar parameter (uniform)
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/scale.test.ts[2m > [22mScale AST Generation[2m > [22mscale transformation[2m > [22mshould parse scale with named v parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/scale.test.ts[2m > [22mScale AST Generation[2m > [22mscale transformation[2m > [22mshould parse scale with 2D vector parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/scale.test.ts[2m > [22mScale AST Generation[2m > [22mscale transformation[2m > [22mshould parse scale with child block
+[90mstdout[2m | src/lib/ide-support/symbol-provider/symbol-provider.test.ts[2m > [22m[2mOpenSCADSymbolProvider[2m > [22m[2mgetSymbols[2m > [22m[2mshould identify a simple module definition
+[22m[39m[INFO] Enhanced OpenSCAD parser initialized successfully
+
+[90mstdout[2m | src/lib/ide-support/symbol-provider/symbol-provider.test.ts[2m > [22m[2mOpenSCADSymbolProvider[2m > [22m[2mgetSymbols[2m > [22m[2mshould identify a simple module definition
+[22m[39m[2025-06-06T03:00:29.299Z] [DEBUG] [SymbolProvider] Initialized
+
+[90mstdout[2m | src/lib/ide-support/symbol-provider/symbol-provider.test.ts[2m > [22m[2mOpenSCADSymbolProvider[2m > [22m[2mgetSymbols[2m > [22m[2mshould identify a simple module definition
+[22m[39m[Test:simple_module_definition] Code: module my_module() { cube(10); }
+[INFO] Generating AST from OpenSCAD code...
+[INFO] Processing root node of type: source_file with 1 children
+[2025-06-06T03:00:29.306Z] [INFO] Processing root node of type: source_file with 1 children
+[INFO] Processing node of type: statement
+[2025-06-06T03:00:29.306Z] [INFO] Processing node of type: statement
+[INFO] Processing statement node of type: statement
+[2025-06-06T03:00:29.306Z] [INFO] Processing statement node of type: statement
+[INFO] [AssignStatementVisitor.visitStatement] Processing statement: module my_module() { cube(10); }
+[2025-06-06T03:00:29.307Z] [INFO] [AssignStatementVisitor.visitStatement] Processing statement: module my_module() { cube(10); }
+[INFO] [AssertStatementVisitor.visitStatement] Processing statement node: module my_module() { cube(10); }
+[2025-06-06T03:00:29.307Z] [INFO] [AssertStatementVisitor.visitStatement] Processing statement node: module my_module() { cube(10); }
+[INFO] [AssertStatementVisitor.visitStatement] No assert_statement found in statement node
+[2025-06-06T03:00:29.308Z] [INFO] [AssertStatementVisitor.visitStatement] No assert_statement found in statement node
+[extractArguments] Processing arguments node: type=argument_list, text=(10)
+[extractArguments] Processing argument_list node
+[extractArguments] Processing argument_list child 0: type=(, text=(
+[extractArguments] Processing argument_list child 1: type=arguments, text=10
+[extractArguments] Processing arguments node: type=arguments, text=10
+[extractArguments] Processing positional arguments in arguments node
+[extractArgument] Processing argument node: type=argument, text=10
+[extractArgument] Examining child 0: type=number, text='10'
+[extractArgument] Found expression: type=number, text='10'
+[extractArgument] Found positional argument: 10
+[extractValue] Processing value node: type=number, text='10'
+[extractValue] Matched number. Value: 10
+[extractArgument] Extracted value: {"type":"number","value":"10"}
+[extractArguments] Extracted positional parameter: {"value":{"type":"expression","expressionType":"literal","value":10}}
+[extractArguments] Processing argument_list child 2: type=), text=)
+[extractArguments] Extracted 1 arguments from argument_list: [{"value":{"type":"expression","expressionType":"literal","value":10}}]
+[PrimitiveVisitor.createASTNodeForFunction] Processing function: cube
+[extractCubeNode] Processing cube node: cube(10);
+[extractCubeNode] Node type: module_instantiation, childCount: 3
+[extractCubeNode] Found arguments node: type=argument_list, text='(10)'
+[extractArguments] Processing arguments node: type=argument_list, text=(10)
+[extractArguments] Processing argument_list node
+[extractArguments] Processing argument_list child 0: type=(, text=(
+[extractArguments] Processing argument_list child 1: type=arguments, text=10
+[extractArguments] Processing arguments node: type=arguments, text=10
+[extractArguments] Processing positional arguments in arguments node
+[extractArgument] Processing argument node: type=argument, text=10
+[extractArgument] Examining child 0: type=number, text='10'
+[extractArgument] Found expression: type=number, text='10'
+[extractArgument] Found positional argument: 10
+[extractValue] Processing value node: type=number, text='10'
+[extractValue] Matched number. Value: 10
+[extractArgument] Extracted value: {"type":"number","value":"10"}
+[extractArguments] Extracted positional parameter: {"value":{"type":"expression","expressionType":"literal","value":10}}
+[extractArguments] Processing argument_list child 2: type=), text=)
+[extractArguments] Extracted 1 arguments from argument_list: [{"value":{"type":"expression","expressionType":"literal","value":10}}]
+[extractCubeNode] Extracted 1 arguments: [{"value":{"type":"expression","expressionType":"literal","value":10}}]
+[extractCubeNode] Final parameters: size=10, center=false
+[INFO] Visitor PrimitiveVisitor processed statement into AST node of type: cube
+[2025-06-06T03:00:29.311Z] [INFO] Visitor PrimitiveVisitor processed statement into AST node of type: cube
+[INFO] AST generation complete. Created 1 top-level nodes.
+[2025-06-06T03:00:29.311Z] [INFO] AST generation complete. Created 1 top-level nodes.
+[INFO] AST generation completed. Generated 1 top-level nodes.
+[Test:simple_module_definition] AST input: [
+  {
+    "type": "cube",
+    "size": 10,
+    "center": false,
+    "location": {
+      "start": {
+        "line": 0,
+        "column": 21,
+        "offset": 21
+      },
+      "end": {
+        "line": 0,
+        "column": 30,
+        "offset": 30
+      }
+    }
+  }
+]
+[2025-06-06T03:00:29.311Z] [DEBUG] [SymbolProvider.getSymbols] called. AST length: 1
+[2025-06-06T03:00:29.311Z] [DEBUG] [SymbolProvider.getSymbols] Unhandled node type: cube
+[2025-06-06T03:00:29.311Z] [DEBUG] [SymbolProvider.getSymbols] Returning 0 symbols. Details:
+[2025-06-06T03:00:29.311Z] [DEBUG] [SymbolProvider.getSymbols] Final symbols before return: []
+[Test:simple_module_definition] Symbols returned: []
+
+[90mstdout[2m | src/lib/ide-support/symbol-provider/symbol-provider.test.ts[2m > [22m[2mOpenSCADSymbolProvider[2m > [22m[2mgetSymbols[2m > [22m[2mshould identify a simple module definition
+[22m[39m[INFO] Enhanced parser disposed successfully
+
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples.test.ts[2m > [22mDocumentation Examples Validation[2m > [22mBasic Usage Examples[2m > [22mshould demonstrate basic parser initialization and usage
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples.test.ts[2m > [22mDocumentation Examples Validation[2m > [22mBasic Usage Examples[2m > [22mshould demonstrate parser with custom error handler
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples.test.ts[2m > [22mDocumentation Examples Validation[2m > [22mBasic Usage Examples[2m > [22mshould demonstrate CST parsing
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples.test.ts[2m > [22mDocumentation Examples Validation[2m > [22mAdvanced Usage Examples[2m > [22mshould demonstrate complex AST processing
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples.test.ts[2m > [22mDocumentation Examples Validation[2m > [22mAdvanced Usage Examples[2m > [22mshould demonstrate incremental parsing
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples.test.ts[2m > [22mDocumentation Examples Validation[2m > [22mAdvanced Usage Examples[2m > [22mshould demonstrate incremental AST updates
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples.test.ts[2m > [22mDocumentation Examples Validation[2m > [22mError Handling Examples[2m > [22mshould demonstrate error handling with invalid code
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples.test.ts[2m > [22mDocumentation Examples Validation[2m > [22mReal Parser Pattern Examples[2m > [22mshould demonstrate standard test setup pattern
+ [2m[90mÔåô[39m[22m src/lib/documentation-examples.test.ts[2m > [22mDocumentation Examples Validation[2m > [22mPerformance Examples[2m > [22mshould demonstrate parser reuse for performance
+ [2m[90mÔåô[39m[22m src/lib/ide-support/symbol-provider/symbol-provider.test.ts[2m > [22mOpenSCADSymbolProvider[2m > [22mgetSymbols[2m > [22mshould return an empty array for empty input
+ [31m├ù[39m src/lib/ide-support/symbol-provider/symbol-provider.test.ts[2m > [22mOpenSCADSymbolProvider[2m > [22mgetSymbols[2m > [22mshould identify a simple module definition[32m 45[2mms[22m[39m
+[31m   ÔåÆ expected +0 to be 1 // Object.is equality[39m
+ [2m[90mÔåô[39m[22m src/lib/ide-support/symbol-provider/symbol-provider.test.ts[2m > [22mOpenSCADSymbolProvider[2m > [22mgetSymbols[2m > [22mshould identify a simple function definition
+ [2m[90mÔåô[39m[22m src/lib/ide-support/symbol-provider/symbol-provider.test.ts[2m > [22mOpenSCADSymbolProvider[2m > [22mgetSymbols[2m > [22mshould identify a simple variable assignment
+ [2m[90mÔåô[39m[22m src/lib/ide-support/symbol-provider/symbol-provider.test.ts[2m > [22mOpenSCADSymbolProvider[2m > [22mgetSymbols[2m > [22mshould identify multiple symbols
+ [2m[90mÔåô[39m[22m src/lib/ide-support/symbol-provider/symbol-provider.test.ts[2m > [22mOpenSCADSymbolProvider[2m > [22mgetSymbolAtPosition[2m > [22mshould return null if no symbol is at the position (empty space)
+ [2m[90mÔåô[39m[22m src/lib/ide-support/symbol-provider/symbol-provider.test.ts[2m > [22mOpenSCADSymbolProvider[2m > [22mgetSymbolAtPosition[2m > [22mshould return null if position is on a keyword not part of a symbol name
+ [2m[90mÔåô[39m[22m src/lib/ide-support/symbol-provider/symbol-provider.test.ts[2m > [22mOpenSCADSymbolProvider[2m > [22mgetSymbolAtPosition[2m > [22mshould identify a module symbol at its definition name position
+ [2m[90mÔåô[39m[22m src/lib/ide-support/symbol-provider/symbol-provider.test.ts[2m > [22mOpenSCADSymbolProvider[2m > [22mgetSymbolAtPosition[2m > [22mshould identify a function symbol at its definition name position
+ [2m[90mÔåô[39m[22m src/lib/ide-support/symbol-provider/symbol-provider.test.ts[2m > [22mOpenSCADSymbolProvider[2m > [22mgetSymbolAtPosition[2m > [22mshould identify a variable symbol at its definition name position
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/error-handling-integration.test.ts[2m > [22mError Handling Integration[2m > [22mErrorHandler[2m > [22mshould create and report syntax errors
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/error-handling-integration.test.ts[2m > [22mError Handling Integration[2m > [22mErrorHandler[2m > [22mshould create and report type errors
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/error-handling-integration.test.ts[2m > [22mError Handling Integration[2m > [22mErrorHandler[2m > [22mshould filter errors by severity
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/error-handling-integration.test.ts[2m > [22mError Handling Integration[2m > [22mErrorHandler[2m > [22mshould clear errors
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/error-handling-integration.test.ts[2m > [22mError Handling Integration[2m > [22mLogger[2m > [22mshould log messages at appropriate levels
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/error-handling-integration.test.ts[2m > [22mError Handling Integration[2m > [22mLogger[2m > [22mshould format messages with timestamp and severity
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/error-handling-integration.test.ts[2m > [22mError Handling Integration[2m > [22mLogger[2m > [22mshould respect enabled/disabled state
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/error-handling-integration.test.ts[2m > [22mError Handling Integration[2m > [22mRecoveryStrategyRegistry[2m > [22mshould register default strategies
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/error-handling-integration.test.ts[2m > [22mError Handling Integration[2m > [22mRecoveryStrategyRegistry[2m > [22mshould attempt recovery for supported errors
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/error-handling-integration.test.ts[2m > [22mError Handling Integration[2m > [22mRecoveryStrategyRegistry[2m > [22mshould provide recovery suggestions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/error-handling-integration.test.ts[2m > [22mError Handling Integration[2m > [22mRecoveryStrategyRegistry[2m > [22mshould check if recovery is possible
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/error-handling-integration.test.ts[2m > [22mError Handling Integration[2m > [22mIntegration[2m > [22mshould integrate error error-handling with recovery registry
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/error-handling-integration.test.ts[2m > [22mError Handling Integration[2m > [22mIntegration[2m > [22mshould integrate error error-handling with logger
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitor-ast-generator.test.ts[2m > [22mVisitorASTGenerator[2m > [22mgenerate[2m > [22mshould generate an AST for a simple cube
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitor-ast-generator.test.ts[2m > [22mVisitorASTGenerator[2m > [22mgenerate[2m > [22mshould generate an AST for a simple sphere
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitor-ast-generator.test.ts[2m > [22mVisitorASTGenerator[2m > [22mgenerate[2m > [22mshould generate an AST for a simple cylinder
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitor-ast-generator.test.ts[2m > [22mVisitorASTGenerator[2m > [22mgenerate[2m > [22mshould generate an AST for a simple translate
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitor-ast-generator.test.ts[2m > [22mVisitorASTGenerator[2m > [22mgenerate[2m > [22mshould generate an AST for a simple rotate
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitor-ast-generator.test.ts[2m > [22mVisitorASTGenerator[2m > [22mgenerate[2m > [22mshould generate an AST for a simple scale
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitor-ast-generator.test.ts[2m > [22mVisitorASTGenerator[2m > [22mgenerate[2m > [22mshould generate an AST for a simple union
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitor-ast-generator.test.ts[2m > [22mVisitorASTGenerator[2m > [22mgenerate[2m > [22mshould generate an AST for a simple difference
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitor-ast-generator.test.ts[2m > [22mVisitorASTGenerator[2m > [22mgenerate[2m > [22mshould generate an AST for a simple intersection
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitor-ast-generator.test.ts[2m > [22mVisitorASTGenerator[2m > [22mgenerate[2m > [22mshould generate an AST for multiple statements
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitor-ast-generator.test.ts[2m > [22mVisitorASTGenerator[2m > [22mgenerate[2m > [22mshould generate an AST for complex nested operations
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/evaluation/expression-evaluation.test.ts[2m > [22mEnhanced Expression Evaluation[2m > [22mshould create a binary expression node
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/evaluation/expression-evaluation.test.ts[2m > [22mEnhanced Expression Evaluation[2m > [22mshould evaluate binary expressions in cube arguments
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/evaluation/expression-evaluation.test.ts[2m > [22mEnhanced Expression Evaluation[2m > [22mshould evaluate complex binary expressions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/evaluation/expression-evaluation.test.ts[2m > [22mEnhanced Expression Evaluation[2m > [22mshould handle simple numbers without expression evaluation
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/cst/cursor-utils/cstTreeCursorWalkLog.test.ts[2m > [22mcstTreeCursorWalkLog[2m > [22mshould log basic node information
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/cst/cursor-utils/cstTreeCursorWalkLog.test.ts[2m > [22mcstTreeCursorWalkLog[2m > [22mshould handle multi-line nodes correctly
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/cst/cursor-utils/cstTreeCursorWalkLog.test.ts[2m > [22mcstTreeCursorWalkLog[2m > [22mshould preserve cursor state after traversal
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/cst/cursor-utils/cstTreeCursorWalkLog.test.ts[2m > [22mcstTreeCursorWalkLog[2m > [22mshould respect maxDepth parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/cst/cursor-utils/cstTreeCursorWalkLog.test.ts[2m > [22mcstTreeCursorWalkLog[2m > [22mshould handle null or undefined cursor gracefully
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/cst/cursor-utils/cstTreeCursorWalkLog.test.ts[2m > [22mcstTreeCursorWalkLog[2m > [22mshould truncate long text nodes appropriately
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/cst/cursor-utils/cstTreeCursorWalkLog.test.ts[2m > [22mcstTreeCursorWalkLog[2m > [22mshould traverse complex nested structures
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/cst/cursor-utils/cstTreeCursorWalkLog.test.ts[2m > [22mcstTreeCursorWalkLog[2m > [22mshould correctly log transform statements
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/primitive-visitor.test.ts[2m > [22mPrimitiveVisitor[2m > [22mcreateCubeNode[2m > [22mshould create a cube node with size parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/primitive-visitor.test.ts[2m > [22mPrimitiveVisitor[2m > [22mcreateCubeNode[2m > [22mshould create a cube node with center parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/primitive-visitor.test.ts[2m > [22mPrimitiveVisitor[2m > [22mcreateCubeNode[2m > [22mshould create a cube node with named size parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/primitive-visitor.test.ts[2m > [22mPrimitiveVisitor[2m > [22mcreateCubeNode[2m > [22mshould create a cube node with vector size parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/primitive-visitor.test.ts[2m > [22mPrimitiveVisitor[2m > [22mcreateCubeNode[2m > [22mshould create a cube node with default parameters when no arguments are provided
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/control-structure-visitor/for-loop-visitor.test.ts[2m > [22mForLoopVisitor[2m > [22mvisitForStatement[2m > [22mshould parse a basic for loop
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/control-structure-visitor/for-loop-visitor.test.ts[2m > [22mForLoopVisitor[2m > [22mvisitForStatement[2m > [22mshould parse a for loop with step
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/control-structure-visitor/for-loop-visitor.test.ts[2m > [22mForLoopVisitor[2m > [22mvisitForStatement[2m > [22mshould parse a for loop with multiple variables
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/control-structure-visitor/for-loop-visitor.test.ts[2m > [22mForLoopVisitor[2m > [22mvisitForStatement[2m > [22mshould handle complex expressions in for loops
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/difference.test.ts[2m > [22mDifference AST Generation[2m > [22mdifference operation[2m > [22mshould parse basic difference of cube and sphere
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/difference.test.ts[2m > [22mDifference AST Generation[2m > [22mdifference operation[2m > [22mshould parse difference with nested transformations
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/difference.test.ts[2m > [22mDifference AST Generation[2m > [22mdifference operation[2m > [22mshould parse empty difference
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/composite-visitor.test.ts[2m > [22mCompositeVisitor[2m > [22mvisitNode[2m > [22mshould delegate to the appropriate visitor for primitive shapes
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/composite-visitor.test.ts[2m > [22mCompositeVisitor[2m > [22mvisitNode[2m > [22mshould delegate to the appropriate visitor for transformations
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/composite-visitor.test.ts[2m > [22mCompositeVisitor[2m > [22mvisitNode[2m > [22mshould delegate to the appropriate visitor for CSG operations
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/composite-visitor.test.ts[2m > [22mCompositeVisitor[2m > [22mvisitNode[2m > [22mshould return null if no visitor can process the node
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/composite-visitor.test.ts[2m > [22mCompositeVisitor[2m > [22mvisitChildren[2m > [22mshould visit all children of a node
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/composite-visitor.test.ts[2m > [22mCompositeVisitor[2m > [22mcomplex scenarios[2m > [22mshould handle nested transformations
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/composite-visitor.test.ts[2m > [22mCompositeVisitor[2m > [22mcomplex scenarios[2m > [22mshould handle CSG operations with multiple children
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/composite-visitor.test.ts[2m > [22mCompositeVisitor[2m > [22mcomplex scenarios[2m > [22mshould handle complex combinations of operations
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/type-mismatch-strategy.test.ts[2m > [22mTypeMismatchStrategy[2m > [22mcanHandle[2m > [22mshould handle TYPE_MISMATCH error code
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/type-mismatch-strategy.test.ts[2m > [22mTypeMismatchStrategy[2m > [22mcanHandle[2m > [22mshould handle INVALID_OPERATION error code
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/type-mismatch-strategy.test.ts[2m > [22mTypeMismatchStrategy[2m > [22mcanHandle[2m > [22mshould not handle other error codes
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/type-mismatch-strategy.test.ts[2m > [22mTypeMismatchStrategy[2m > [22mrecover - Simple type conversion[2m > [22mshould convert string to number when expected
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/type-mismatch-strategy.test.ts[2m > [22mTypeMismatchStrategy[2m > [22mrecover - Simple type conversion[2m > [22mshould convert number to string when expected
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/type-mismatch-strategy.test.ts[2m > [22mTypeMismatchStrategy[2m > [22mrecover - Binary operation type promotion[2m > [22mshould add type conversion for number + string
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/type-mismatch-strategy.test.ts[2m > [22mTypeMismatchStrategy[2m > [22mrecover - Binary operation type promotion[2m > [22mshould handle comparison operations with type conversion
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/type-mismatch-strategy.test.ts[2m > [22mTypeMismatchStrategy[2m > [22mrecover - Function argument type mismatch[2m > [22mshould add type conversion for function arguments
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/type-mismatch-strategy.test.ts[2m > [22mTypeMismatchStrategy[2m > [22mgetRecoverySuggestion[2m > [22mshould provide a suggestion for type conversion
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/type-mismatch-strategy.test.ts[2m > [22mTypeMismatchStrategy[2m > [22mgetRecoverySuggestion[2m > [22mshould provide a suggestion for operation type promotion
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unknown-identifier-strategy.test.ts[2m > [22mUnknownIdentifierStrategy[2m > [22mcanHandle[2m > [22mshould handle UNDEFINED_VARIABLE error code
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unknown-identifier-strategy.test.ts[2m > [22mUnknownIdentifierStrategy[2m > [22mcanHandle[2m > [22mshould handle UNDEFINED_FUNCTION error code
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unknown-identifier-strategy.test.ts[2m > [22mUnknownIdentifierStrategy[2m > [22mcanHandle[2m > [22mshould handle error messages about undefined variables
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unknown-identifier-strategy.test.ts[2m > [22mUnknownIdentifierStrategy[2m > [22mcanHandle[2m > [22mshould not handle other error codes
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unknown-identifier-strategy.test.ts[2m > [22mUnknownIdentifierStrategy[2m > [22mextractIdentifier[2m > [22mshould extract identifier from context
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unknown-identifier-strategy.test.ts[2m > [22mUnknownIdentifierStrategy[2m > [22mextractIdentifier[2m > [22mshould extract identifier from error message
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unknown-identifier-strategy.test.ts[2m > [22mUnknownIdentifierStrategy[2m > [22mfindSimilarIdentifiers[2m > [22mshould find similar variable names
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unknown-identifier-strategy.test.ts[2m > [22mUnknownIdentifierStrategy[2m > [22mfindSimilarIdentifiers[2m > [22mshould find similar function names
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unknown-identifier-strategy.test.ts[2m > [22mUnknownIdentifierStrategy[2m > [22mfindSimilarIdentifiers[2m > [22mshould respect max suggestions limit
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unknown-identifier-strategy.test.ts[2m > [22mUnknownIdentifierStrategy[2m > [22mrecover[2m > [22mshould correct simple typos in variable names
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unknown-identifier-strategy.test.ts[2m > [22mUnknownIdentifierStrategy[2m > [22mrecover[2m > [22mshould handle function name typos
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unknown-identifier-strategy.test.ts[2m > [22mUnknownIdentifierStrategy[2m > [22mrecover[2m > [22mshould return null for unknown identifiers with no close matches
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unknown-identifier-strategy.test.ts[2m > [22mUnknownIdentifierStrategy[2m > [22mgetRecoverySuggestion[2m > [22mshould return a helpful suggestion with alternatives
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unknown-identifier-strategy.test.ts[2m > [22mUnknownIdentifierStrategy[2m > [22mgetRecoverySuggestion[2m > [22mshould handle cases with no suggestions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/query-visitor.test.ts[2m > [22mQueryVisitor[2m > [22mshould find nodes by type
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/query-visitor.test.ts[2m > [22mQueryVisitor[2m > [22mshould find nodes by multiple types
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/query-visitor.test.ts[2m > [22mQueryVisitor[2m > [22mshould execute a query and cache the results
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/query-visitor.test.ts[2m > [22mQueryVisitor[2m > [22mshould clear the query cache
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cube.test.ts[2m > [22mCube Primitive[2m > [22mcube primitive[2m > [22mshould parse basic cube with size parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cube.test.ts[2m > [22mCube Primitive[2m > [22mcube primitive[2m > [22mshould parse cube with center parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cube.test.ts[2m > [22mCube Primitive[2m > [22mcube primitive[2m > [22mshould parse cube with named size parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cube.test.ts[2m > [22mCube Primitive[2m > [22mcube primitive[2m > [22mshould parse cube with named parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cube.test.ts[2m > [22mCube Primitive[2m > [22mcube primitive[2m > [22mshould parse cube with vector size parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cube.test.ts[2m > [22mCube Primitive[2m > [22mcube primitive[2m > [22mshould parse cube with named vector size parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cube.test.ts[2m > [22mCube Primitive[2m > [22mcube primitive[2m > [22mshould parse cube with vector size and center parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cube.test.ts[2m > [22mCube Primitive[2m > [22mcube primitive[2m > [22mshould parse cube with named vector size and center parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cube.test.ts[2m > [22mCube Primitive[2m > [22mcube primitive[2m > [22mshould parse cube with default size when no parameters are provided
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/evaluation/binary-expression-evaluator/binary-expression-evaluator.test.ts[2m > [22mBinaryExpressionEvaluator[2m > [22mshould evaluate addition correctly
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/evaluation/binary-expression-evaluator/binary-expression-evaluator.test.ts[2m > [22mBinaryExpressionEvaluator[2m > [22mshould evaluate subtraction correctly
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/evaluation/binary-expression-evaluator/binary-expression-evaluator.test.ts[2m > [22mBinaryExpressionEvaluator[2m > [22mshould evaluate multiplication correctly
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/evaluation/binary-expression-evaluator/binary-expression-evaluator.test.ts[2m > [22mBinaryExpressionEvaluator[2m > [22mshould evaluate division correctly
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/evaluation/binary-expression-evaluator/binary-expression-evaluator.test.ts[2m > [22mBinaryExpressionEvaluator[2m > [22mshould evaluate modulo correctly
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/evaluation/binary-expression-evaluator/binary-expression-evaluator.test.ts[2m > [22mBinaryExpressionEvaluator[2m > [22mshould evaluate nested binary expressions correctly
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/evaluation/binary-expression-evaluator/binary-expression-evaluator.test.ts[2m > [22mBinaryExpressionEvaluator[2m > [22mshould handle comparison operators correctly
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/evaluation/binary-expression-evaluator/binary-expression-evaluator.test.ts[2m > [22mBinaryExpressionEvaluator[2m > [22mshould handle logical operators correctly
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/evaluation/binary-expression-evaluator/binary-expression-evaluator.test.ts[2m > [22mBinaryExpressionEvaluator[2m > [22mshould return null for invalid operand types
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/rotate.test.ts[2m > [22mRotate AST Generation[2m > [22mrotate transformation[2m > [22mshould parse rotate with scalar angle (z-axis)
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/rotate.test.ts[2m > [22mRotate AST Generation[2m > [22mrotate transformation[2m > [22mshould parse rotate with vector angles [x,y,z]
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/rotate.test.ts[2m > [22mRotate AST Generation[2m > [22mrotate transformation[2m > [22mshould parse rotate with a and v parameters (axis-angle)
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/rotate.test.ts[2m > [22mRotate AST Generation[2m > [22mrotate transformation[2m > [22mshould parse rotate with child block
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/incremental-parsing.test.ts[2m > [22mIncremental Parsing[2m > [22mshould parse code incrementally
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/incremental-parsing.test.ts[2m > [22mIncremental Parsing[2m > [22mshould generate AST incrementally
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/incremental-parsing.test.ts[2m > [22mIncremental Parsing[2m > [22mshould handle multiple incremental updates
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/incremental-parsing.test.ts[2m > [22mIncremental Parsing[2m > [22mshould handle complex code changes
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/evaluation/binary-expression-evaluator/binary-expression-evaluator-cube.test.ts[2m > [22mBinary Expression Evaluation in Cube Arguments[2m > [22mshould evaluate simple addition in cube arguments
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/evaluation/binary-expression-evaluator/binary-expression-evaluator-cube.test.ts[2m > [22mBinary Expression Evaluation in Cube Arguments[2m > [22mshould evaluate multiplication in cube arguments
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/evaluation/binary-expression-evaluator/binary-expression-evaluator-cube.test.ts[2m > [22mBinary Expression Evaluation in Cube Arguments[2m > [22mshould evaluate complex expressions in cube arguments
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/test-utils/real-node-generator.test.ts[2m > [22mRealNodeGenerator[2m > [22minitialization[2m > [22mshould initialize and dispose correctly
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/test-utils/real-node-generator.test.ts[2m > [22mRealNodeGenerator[2m > [22minitialization[2m > [22mshould handle multiple init calls gracefully
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/test-utils/real-node-generator.test.ts[2m > [22mRealNodeGenerator[2m > [22mgetCallExpressionNode[2m > [22mshould generate real call expression node for cube
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/test-utils/real-node-generator.test.ts[2m > [22mRealNodeGenerator[2m > [22mgetCallExpressionNode[2m > [22mshould generate real call expression node for sphere
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/test-utils/real-node-generator.test.ts[2m > [22mRealNodeGenerator[2m > [22mgetCallExpressionNode[2m > [22mshould return null for invalid code
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/test-utils/real-node-generator.test.ts[2m > [22mRealNodeGenerator[2m > [22mgetBinaryExpressionNode[2m > [22mshould generate real binary expression node for addition
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/test-utils/real-node-generator.test.ts[2m > [22mRealNodeGenerator[2m > [22mgetBinaryExpressionNode[2m > [22mshould generate real binary expression node for multiplication
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/test-utils/real-node-generator.test.ts[2m > [22mRealNodeGenerator[2m > [22mgetBinaryExpressionNode[2m > [22mshould generate real binary expression node for comparison
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/test-utils/real-node-generator.test.ts[2m > [22mRealNodeGenerator[2m > [22mgetUnaryExpressionNode[2m > [22mshould generate real unary expression node for negation
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/test-utils/real-node-generator.test.ts[2m > [22mRealNodeGenerator[2m > [22mgetUnaryExpressionNode[2m > [22mshould generate real unary expression node for logical not
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/test-utils/real-node-generator.test.ts[2m > [22mRealNodeGenerator[2m > [22mgetModuleInstantiationNode[2m > [22mshould generate real module instantiation node for translate
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/test-utils/real-node-generator.test.ts[2m > [22mRealNodeGenerator[2m > [22mgetModuleInstantiationNode[2m > [22mshould generate real module instantiation node for rotate
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/test-utils/real-node-generator.test.ts[2m > [22mRealNodeGenerator[2m > [22mgetExpressionNode[2m > [22mshould generate real expression node
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/test-utils/real-node-generator.test.ts[2m > [22mRealNodeGenerator[2m > [22mconvenience function[2m > [22mshould create and initialize generator with convenience function
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/test-utils/real-node-generator.test.ts[2m > [22mRealNodeGenerator[2m > [22merror handling[2m > [22mshould throw error when not initialized
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/test-utils/real-node-generator.test.ts[2m > [22mRealNodeGenerator[2m > [22mdebug functionality[2m > [22mshould print tree structure without throwing
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/extractors/cube-extractor.test.ts[2m > [22mCube Extractor[2m > [22mshould extract a cube with a numeric size
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/extractors/cube-extractor.test.ts[2m > [22mCube Extractor[2m > [22mshould extract a cube with a simple binary expression size
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/extractors/cube-extractor.test.ts[2m > [22mCube Extractor[2m > [22mshould extract a cube with a multiplication expression size
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/extractors/cube-extractor.test.ts[2m > [22mCube Extractor[2m > [22mshould extract a cube with a complex expression size
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/extractors/cube-extractor.test.ts[2m > [22mCube Extractor[2m > [22mshould extract a cube with a vector size
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/extractors/cube-extractor.test.ts[2m > [22mCube Extractor[2m > [22mshould extract a cube with a vector containing expressions
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/sphere.test.ts[2m > [22mSphere AST Generation[2m > [22msphere primitive[2m > [22mshould parse basic sphere with r parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/sphere.test.ts[2m > [22mSphere AST Generation[2m > [22msphere primitive[2m > [22mshould parse sphere with d parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/sphere.test.ts[2m > [22mSphere AST Generation[2m > [22msphere primitive[2m > [22mshould parse sphere with $fn parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/sphere.test.ts[2m > [22mSphere AST Generation[2m > [22msphere primitive[2m > [22mshould parse sphere with $fa and $fs parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/sphere.test.ts[2m > [22mSphere AST Generation[2m > [22msphere primitive[2m > [22mshould handle sphere with named r parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/sphere.test.ts[2m > [22mSphere AST Generation[2m > [22msphere primitive[2m > [22mshould prioritize diameter over radius when both are provided
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/sphere.test.ts[2m > [22mSphere AST Generation[2m > [22msphere primitive[2m > [22mshould handle sphere with all resolution parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/sphere.test.ts[2m > [22mSphere AST Generation[2m > [22msphere primitive[2m > [22mshould handle sphere with default radius when no parameters are provided
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/query/query-manager.test.ts[2m > [22mQueryManager[2m > [22mshould execute a query and cache the results
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/query/query-manager.test.ts[2m > [22mQueryManager[2m > [22mshould find nodes by type
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/query/query-manager.test.ts[2m > [22mQueryManager[2m > [22mshould clear the cache
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/query/query-manager.test.ts[2m > [22mQueryManager[2m > [22mshould get cache statistics
+ [2m[90mÔåô[39m[22m src/lib/enhanced-parser.test.ts[2m > [22mEnhancedOpenscadParser[2m > [22mBasic functionality[2m > [22mshould initialize successfully
+ [2m[90mÔåô[39m[22m src/lib/enhanced-parser.test.ts[2m > [22mEnhancedOpenscadParser[2m > [22mBasic functionality[2m > [22mshould parse simple OpenSCAD code and return CST
+ [2m[90mÔåô[39m[22m src/lib/enhanced-parser.test.ts[2m > [22mEnhancedOpenscadParser[2m > [22mBasic functionality[2m > [22mshould parse OpenSCAD code and return AST
+ [2m[90mÔåô[39m[22m src/lib/enhanced-parser.test.ts[2m > [22mEnhancedOpenscadParser[2m > [22mBasic functionality[2m > [22mshould handle parse method (alias for parseCST)
+ [2m[90mÔåô[39m[22m src/lib/enhanced-parser.test.ts[2m > [22mEnhancedOpenscadParser[2m > [22mError handling[2m > [22mshould collect error messages through error handler
+ [2m[90mÔåô[39m[22m src/lib/enhanced-parser.test.ts[2m > [22mEnhancedOpenscadParser[2m > [22mError handling[2m > [22mshould handle syntax errors in code
+ [2m[90mÔåô[39m[22m src/lib/enhanced-parser.test.ts[2m > [22mEnhancedOpenscadParser[2m > [22mIncremental parsing[2m > [22mshould support incremental updates
+ [2m[90mÔåô[39m[22m src/lib/enhanced-parser.test.ts[2m > [22mEnhancedOpenscadParser[2m > [22mComplex OpenSCAD code[2m > [22mshould parse complex nested structures
+ [2m[90mÔåô[39m[22m src/lib/enhanced-parser.test.ts[2m > [22mEnhancedOpenscadParser[2m > [22mComplex OpenSCAD code[2m > [22mshould parse transformations
+ [2m[90mÔåô[39m[22m src/lib/enhanced-parser.test.ts[2m > [22mEnhancedOpenscadParser[2m > [22mComplex OpenSCAD code[2m > [22mshould generate AST for complex nested structures
+ [2m[90mÔåô[39m[22m src/lib/enhanced-parser.test.ts[2m > [22mEnhancedOpenscadParser[2m > [22mComplex OpenSCAD code[2m > [22mshould generate AST for transformations
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/registry/node-handler-registry.test.ts[2m > [22mNodeHandlerRegistry[2m > [22mDefaultNodeHandlerRegistry[2m > [22mshould register and retrieve a error-handling
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/registry/node-handler-registry.test.ts[2m > [22mNodeHandlerRegistry[2m > [22mDefaultNodeHandlerRegistry[2m > [22mshould check if a error-handling exists
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/registry/node-handler-registry.test.ts[2m > [22mNodeHandlerRegistry[2m > [22mDefaultNodeHandlerRegistry[2m > [22mshould get all registered node types
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/registry/node-handler-registry.test.ts[2m > [22mNodeHandlerRegistry[2m > [22mDefaultNodeHandlerRegistry[2m > [22mshould throw an error when registering with an empty node type
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/registry/node-handler-registry.test.ts[2m > [22mNodeHandlerRegistry[2m > [22mDefaultNodeHandlerRegistry[2m > [22mshould throw an error when registering with a null error-handling
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/registry/node-handler-registry.test.ts[2m > [22mNodeHandlerRegistry[2m > [22mNodeHandlerRegistryFactory[2m > [22mshould create a registry with all handlers registered
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/registry/node-handler-registry.test.ts[2m > [22mNodeHandlerRegistry[2m > [22mNodeHandlerRegistryFactory[2m > [22mshould register all primitive handlers
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/registry/node-handler-registry.test.ts[2m > [22mNodeHandlerRegistry[2m > [22mNodeHandlerRegistryFactory[2m > [22mshould register all transformation handlers
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/registry/node-handler-registry.test.ts[2m > [22mNodeHandlerRegistry[2m > [22mNodeHandlerRegistryFactory[2m > [22mshould register all CSG operation handlers
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/registry/node-handler-registry.test.ts[2m > [22mNodeHandlerRegistry[2m > [22mNodeHandlerRegistryFactory[2m > [22mshould register all module and function handlers
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unclosed-bracket-strategy.test.ts[2m > [22mUnclosedBracketStrategy[2m > [22mcanHandle[2m > [22mshould handle UNCLOSED_PAREN error code
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unclosed-bracket-strategy.test.ts[2m > [22mUnclosedBracketStrategy[2m > [22mcanHandle[2m > [22mshould handle UNCLOSED_BRACKET error code
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unclosed-bracket-strategy.test.ts[2m > [22mUnclosedBracketStrategy[2m > [22mcanHandle[2m > [22mshould handle UNCLOSED_BRACE error code
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unclosed-bracket-strategy.test.ts[2m > [22mUnclosedBracketStrategy[2m > [22mcanHandle[2m > [22mshould handle syntax error about missing parenthesis
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unclosed-bracket-strategy.test.ts[2m > [22mUnclosedBracketStrategy[2m > [22mcanHandle[2m > [22mshould not handle other error codes
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unclosed-bracket-strategy.test.ts[2m > [22mUnclosedBracketStrategy[2m > [22mrecover - Parentheses[2m > [22mshould add missing closing parenthesis
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unclosed-bracket-strategy.test.ts[2m > [22mUnclosedBracketStrategy[2m > [22mrecover - Parentheses[2m > [22mshould handle nested parentheses
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unclosed-bracket-strategy.test.ts[2m > [22mUnclosedBracketStrategy[2m > [22mrecover - Brackets[2m > [22mshould add missing closing bracket
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unclosed-bracket-strategy.test.ts[2m > [22mUnclosedBracketStrategy[2m > [22mrecover - Brackets[2m > [22mshould handle nested brackets
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unclosed-bracket-strategy.test.ts[2m > [22mUnclosedBracketStrategy[2m > [22mrecover - Braces[2m > [22mshould add missing closing brace for module
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unclosed-bracket-strategy.test.ts[2m > [22mUnclosedBracketStrategy[2m > [22mgetRecoverySuggestion[2m > [22mshould return correct suggestion for unclosed parenthesis
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unclosed-bracket-strategy.test.ts[2m > [22mUnclosedBracketStrategy[2m > [22mgetRecoverySuggestion[2m > [22mshould return correct suggestion for unclosed bracket
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/unclosed-bracket-strategy.test.ts[2m > [22mUnclosedBracketStrategy[2m > [22mgetRecoverySuggestion[2m > [22mshould return correct suggestion for unclosed brace
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/changes/change-tracker.test.ts[2m > [22mChangeTracker[2m > [22mshould track changes
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/changes/change-tracker.test.ts[2m > [22mChangeTracker[2m > [22mshould get all changes
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/changes/change-tracker.test.ts[2m > [22mChangeTracker[2m > [22mshould get changes since a specific time
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/changes/change-tracker.test.ts[2m > [22mChangeTracker[2m > [22mshould check if a node is affected by changes
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/changes/change-tracker.test.ts[2m > [22mChangeTracker[2m > [22mshould check if a node is affected by changes since a specific time
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/changes/change-tracker.test.ts[2m > [22mChangeTracker[2m > [22mshould clear all changes
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/changes/change-tracker.test.ts[2m > [22mChangeTracker[2m > [22mshould convert index to position correctly
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/changes/change-tracker.test.ts[2m > [22mChangeTracker[2m > [22mshould throw an error for out of bounds index
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/cst/query-utils.test.ts[2m > [22mQueryManager[2m > [22mqueryTree[2m > [22mshould find function calls in the source code
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/cst/query-utils.test.ts[2m > [22mQueryManager[2m > [22mfindAllNodesOfType[2m > [22mshould find all nodes of a specific type
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/cst/query-utils.test.ts[2m > [22mQueryManager[2m > [22mhasAncestorOfType[2m > [22mshould check if a node has an ancestor of a specific type
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/cst/query-utils.test.ts[2m > [22mQueryManager[2m > [22mgetNodeTextWithSemicolon[2m > [22mshould get node text including trailing semicolon if present
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/cst/query-utils.test.ts[2m > [22mQueryManager[2m > [22mgetNodeTextWithSemicolon[2m > [22mshould not add semicolon if not present in source
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/errors/recovery-strategy.test.ts[2m > [22mRecoveryStrategies[2m > [22mSkipToNextStatementStrategy[2m > [22mshould skip to the next statement
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/errors/recovery-strategy.test.ts[2m > [22mRecoveryStrategies[2m > [22mSkipToNextStatementStrategy[2m > [22mshould return null if no next statement is found
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/errors/recovery-strategy.test.ts[2m > [22mRecoveryStrategies[2m > [22mInsertMissingTokenStrategy[2m > [22mshould handle missing token errors
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/errors/recovery-strategy.test.ts[2m > [22mRecoveryStrategies[2m > [22mInsertMissingTokenStrategy[2m > [22mshould return null for non-syntax errors
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/errors/recovery-strategy.test.ts[2m > [22mRecoveryStrategies[2m > [22mDeleteExtraTokenStrategy[2m > [22mshould handle unexpected token errors
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/errors/recovery-strategy.test.ts[2m > [22mRecoveryStrategies[2m > [22mDeleteExtraTokenStrategy[2m > [22mshould return null for non-syntax errors
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/errors/recovery-strategy.test.ts[2m > [22mRecoveryStrategies[2m > [22mRecoveryStrategyFactory[2m > [22mshould create InsertMissingTokenStrategy for missing token errors
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/errors/recovery-strategy.test.ts[2m > [22mRecoveryStrategies[2m > [22mRecoveryStrategyFactory[2m > [22mshould create DeleteExtraTokenStrategy for unexpected token errors
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/errors/recovery-strategy.test.ts[2m > [22mRecoveryStrategies[2m > [22mRecoveryStrategyFactory[2m > [22mshould create SkipToNextStatementStrategy for other syntax errors
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/errors/recovery-strategy.test.ts[2m > [22mRecoveryStrategies[2m > [22mRecoveryStrategyFactory[2m > [22mshould return null for non-syntax errors
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/sphere-extractor.test.ts[2m > [22mSphere Extractor[2m > [22mextractSphereNode[2m > [22mshould extract sphere with radius parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/sphere-extractor.test.ts[2m > [22mSphere Extractor[2m > [22mextractSphereNode[2m > [22mshould extract sphere with named radius parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/sphere-extractor.test.ts[2m > [22mSphere Extractor[2m > [22mextractSphereNode[2m > [22mshould extract sphere with diameter parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/sphere-extractor.test.ts[2m > [22mSphere Extractor[2m > [22mextractSphereNode[2m > [22mshould extract sphere with $fn parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/sphere-extractor.test.ts[2m > [22mSphere Extractor[2m > [22mextractSphereNode[2m > [22mshould extract sphere with $fa parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/sphere-extractor.test.ts[2m > [22mSphere Extractor[2m > [22mextractSphereNode[2m > [22mshould extract sphere with $fs parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/sphere-extractor.test.ts[2m > [22mSphere Extractor[2m > [22mextractSphereNode[2m > [22mshould extract sphere with multiple resolution parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/sphere-extractor.test.ts[2m > [22mSphere Extractor[2m > [22mextractSphereNode[2m > [22mshould extract sphere with default radius when no parameters are provided
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/sphere-extractor.test.ts[2m > [22mSphere Extractor[2m > [22mextractSphereNode[2m > [22mshould prioritize diameter over radius when both are provided
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/control-structure-visitor/if-else-visitor.test.ts[2m > [22mIfElseVisitor[2m > [22mvisitIfStatement[2m > [22mshould parse a basic if statement
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/control-structure-visitor/if-else-visitor.test.ts[2m > [22mIfElseVisitor[2m > [22mvisitIfStatement[2m > [22mshould parse an if-else statement
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/control-structure-visitor/if-else-visitor.test.ts[2m > [22mIfElseVisitor[2m > [22mvisitIfStatement[2m > [22mshould parse an if-else-if-else statement
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/control-structure-visitor/if-else-visitor.test.ts[2m > [22mIfElseVisitor[2m > [22mvisitIfStatement[2m > [22mshould handle complex conditions in if statements
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/minkowski.test.ts[2m > [22mMinkowski Operation AST Generation[2m > [22mshould parse a basic minkowski sum of multiple children
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/minkowski.test.ts[2m > [22mMinkowski Operation AST Generation[2m > [22mshould parse a minkowski with sphere for rounded corners
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/minkowski.test.ts[2m > [22mMinkowski Operation AST Generation[2m > [22mshould parse a minkowski with a single child
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/minkowski.test.ts[2m > [22mMinkowski Operation AST Generation[2m > [22mshould parse a minkowski with nested operations
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/minkowski.test.ts[2m > [22mMinkowski Operation AST Generation[2m > [22mshould parse a minkowski with 2D objects
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/extractors/module-parameter-extractor.test.ts[2m > [22mModule Parameter Extractor[2m > [22mextractModuleParametersFromText[2m > [22mshould extract parameters without default values
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/extractors/module-parameter-extractor.test.ts[2m > [22mModule Parameter Extractor[2m > [22mextractModuleParametersFromText[2m > [22mshould extract parameters with default values
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/extractors/module-parameter-extractor.test.ts[2m > [22mModule Parameter Extractor[2m > [22mextractModuleParametersFromText[2m > [22mshould extract parameters with mixed default values
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/extractors/module-parameter-extractor.test.ts[2m > [22mModule Parameter Extractor[2m > [22mextractModuleParametersFromText[2m > [22mshould extract parameters with vector default values
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/extractors/module-parameter-extractor.test.ts[2m > [22mModule Parameter Extractor[2m > [22mextractModuleParametersFromText[2m > [22mshould extract parameters with 2D vector default values
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/extractors/module-parameter-extractor.test.ts[2m > [22mModule Parameter Extractor[2m > [22mextractModuleParametersFromText[2m > [22mshould handle empty parameter list
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/extractors/module-parameter-extractor.test.ts[2m > [22mModule Parameter Extractor[2m > [22mextractModuleParametersFromText[2m > [22mshould handle whitespace in parameter list
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/extractors/module-parameter-extractor.test.ts[2m > [22mModule Parameter Extractor[2m > [22mextractModuleParametersFromText[2m > [22mshould handle negative numbers as default values
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/extractors/module-parameter-extractor.test.ts[2m > [22mModule Parameter Extractor[2m > [22mextractModuleParametersFromText[2m > [22mshould handle vectors with negative numbers
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/unary-expression-visitor/unary-expression-visitor.test.ts[2m > [22mUnaryExpressionVisitor[2m > [22mshould parse a simple negation expression
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/unary-expression-visitor/unary-expression-visitor.test.ts[2m > [22mUnaryExpressionVisitor[2m > [22mshould parse a simple logical not expression
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/unary-expression-visitor/unary-expression-visitor.test.ts[2m > [22mUnaryExpressionVisitor[2m > [22mshould parse a negation of a function call
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/openscad-parser.test.ts[2m > [22mOpenSCADParser[2m > [22mshould initialize automatically in the constructor
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/openscad-parser.test.ts[2m > [22mOpenSCADParser[2m > [22mshould parse simple OpenSCAD code correctly
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/openscad-parser.test.ts[2m > [22mOpenSCADParser[2m > [22mshould parse complex OpenSCAD code correctly
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/openscad-parser.test.ts[2m > [22mOpenSCADParser[2m > [22mshould handle invalid OpenSCAD code gracefully
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cube-extractor.test.ts[2m > [22mCube Extractor[2m > [22mextractCubeNode[2m > [22mshould extract cube with size parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cube-extractor.test.ts[2m > [22mCube Extractor[2m > [22mextractCubeNode[2m > [22mshould extract cube with center parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cube-extractor.test.ts[2m > [22mCube Extractor[2m > [22mextractCubeNode[2m > [22mshould extract cube with named size parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cube-extractor.test.ts[2m > [22mCube Extractor[2m > [22mextractCubeNode[2m > [22mshould extract cube with named parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cube-extractor.test.ts[2m > [22mCube Extractor[2m > [22mextractCubeNode[2m > [22mshould extract cube with vector size parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cube-extractor.test.ts[2m > [22mCube Extractor[2m > [22mextractCubeNode[2m > [22mshould extract cube with named vector size parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cube-extractor.test.ts[2m > [22mCube Extractor[2m > [22mextractCubeNode[2m > [22mshould extract cube with vector size and center parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cube-extractor.test.ts[2m > [22mCube Extractor[2m > [22mextractCubeNode[2m > [22mshould extract cube with named vector size and center parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/cube-extractor.test.ts[2m > [22mCube Extractor[2m > [22mextractCubeNode[2m > [22mshould extract cube with default size when no parameters are provided
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/argument-debug.test.ts[2m > [22mOpenSCAD Argument Debug[2m > [22mshould print the structure of the argument node
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/query/lru-query-cache.test.ts[2m > [22mLRUQueryCache[2m > [22mshould evict the least recently used entry when the cache is full
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/query/lru-query-cache.test.ts[2m > [22mLRUQueryCache[2m > [22mshould update the LRU order when an entry is accessed
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/query/lru-query-cache.test.ts[2m > [22mLRUQueryCache[2m > [22mshould handle hash collisions correctly
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/query/lru-query-cache.test.ts[2m > [22mLRUQueryCache[2m > [22mshould return correct cache statistics
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.debug.test.ts[2m > [22mExpressionVisitor Debug[2m > [22mshould debug the CST structure of a binary expression
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.debug.test.ts[2m > [22mExpressionVisitor Debug[2m > [22mshould debug the CST structure of an assignment statement
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/missing-semicolon-strategy.test.ts[2m > [22mMissingSemicolonStrategy[2m > [22mcanHandle[2m > [22mshould handle MISSING_SEMICOLON error code
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/missing-semicolon-strategy.test.ts[2m > [22mMissingSemicolonStrategy[2m > [22mcanHandle[2m > [22mshould handle syntax error about missing semicolon
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/missing-semicolon-strategy.test.ts[2m > [22mMissingSemicolonStrategy[2m > [22mcanHandle[2m > [22mshould not handle other error codes
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/missing-semicolon-strategy.test.ts[2m > [22mMissingSemicolonStrategy[2m > [22mrecover[2m > [22mshould add semicolon to end of line
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/missing-semicolon-strategy.test.ts[2m > [22mMissingSemicolonStrategy[2m > [22mrecover[2m > [22mshould not add semicolon if line already ends with one
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/missing-semicolon-strategy.test.ts[2m > [22mMissingSemicolonStrategy[2m > [22mrecover[2m > [22mshould handle empty lines
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/error-handling/strategies/missing-semicolon-strategy.test.ts[2m > [22mMissingSemicolonStrategy[2m > [22mgetRecoverySuggestion[2m > [22mshould return a helpful message
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/openscad-ast.test.ts[2m > [22mOpenSCAD Parser - AST Generation[2m > [22mPrimitive Shapes[2m > [22mCube[2m > [22mshould parse a simple cube with size parameter
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/openscad-ast.test.ts[2m > [22mOpenSCAD Parser - AST Generation[2m > [22mPrimitive Shapes[2m > [22mCube[2m > [22mshould parse a cube with vector size
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/openscad-ast.test.ts[2m > [22mOpenSCAD Parser - AST Generation[2m > [22mPrimitive Shapes[2m > [22mCube[2m > [22mshould parse a cube with named parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor.simple.test.ts[2m > [22mExpressionVisitor Simple Tests[2m > [22mshould handle a simple binary expression
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/ast-generator.integration.test.ts[2m > [22mAST Generator Integration Tests[2m > [22mtranslate and cube operations[2m > [22mshould parse translate with cube without curly braces
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/ast-generator.integration.test.ts[2m > [22mAST Generator Integration Tests[2m > [22mtranslate and cube operations[2m > [22mshould parse translate with cube using curly braces and named parameters
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/conditional-expression-visitor/conditional-expression-visitor.test.ts[2m > [22mConditionalExpressionVisitor[2m > [22mshould parse a simple conditional expression
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/errors/syntax-error.test.ts[2m > [22mSyntaxError[2m > [22mshould create a SyntaxError with the correct properties
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/errors/syntax-error.test.ts[2m > [22mSyntaxError[2m > [22mshould create a missing token error
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/errors/syntax-error.test.ts[2m > [22mSyntaxError[2m > [22mshould create an unexpected token error
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/errors/syntax-error.test.ts[2m > [22mSyntaxError[2m > [22mshould create an unmatched token error
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/errors/syntax-error.test.ts[2m > [22mSyntaxError[2m > [22mshould create a missing semicolon error
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/parenthesized-expression-visitor/parenthesized-expression-visitor.test.ts[2m > [22mParenthesizedExpressionVisitor[2m > [22mshould parse a simple parenthesized expression (number literal)
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/parenthesized-expression-visitor/parenthesized-expression-visitor.test.ts[2m > [22mParenthesizedExpressionVisitor[2m > [22mshould parse a parenthesized binary expression
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/binary-expression-visitor/simple-binary.test.ts[2m > [22mSimpleBinaryExpressionTest[2m > [22mshould handle simple addition with real binary expression node
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/binary-expression-visitor/simple-binary.test.ts[2m > [22mSimpleBinaryExpressionTest[2m > [22mshould handle simple multiplication with real binary expression node
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/binary-expression-visitor/simple-binary.test.ts[2m > [22mSimpleBinaryExpressionTest[2m > [22mshould handle comparison expressions with real nodes
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/debug-cst.test.ts[2m > [22mDebug CST Structure[2m > [22mshould debug the CST structure for cube
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/debug-cst.test.ts[2m > [22mDebug CST Structure[2m > [22mshould debug the CST structure for sphere
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/debug-accessor.test.ts[2m > [22mDebug Accessor Expression Structure[2m > [22mshould debug the accessor expression structure for translate
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/errors/parser-error.test.ts[2m > [22mParserError[2m > [22mshould create a ParserError with the correct properties
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/errors/parser-error.test.ts[2m > [22mParserError[2m > [22mshould get the source line where the error occurred
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/errors/parser-error.test.ts[2m > [22mParserError[2m > [22mshould get a formatted error message with context
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/errors/parser-error.test.ts[2m > [22mParserError[2m > [22mshould create a ParserError from a tree-sitter position
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/errors/parser-error.test.ts[2m > [22mParserError[2m > [22mshould create a ParserError from a tree-sitter node
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/node-types-debug.test.ts[2m > [22mOpenSCAD Node Types Debug[2m > [22mshould print the structure of the module_instantiation node
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/expression-visitor/binary-expression-visitor/binary-expression-visitor.test.ts[2m > [22mBinaryExpressionVisitor[2m > [22mshould parse a simple addition expression
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/openscad-parser-visitor.test.ts[2m > [22mOpenscadParser with Visitor AST Generator[2m > [22mparseAST with visitor generator[2m > [22mshould parse a simple cube
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/openscad-parser-visitor.test.ts[2m > [22mOpenscadParser with Visitor AST Generator[2m > [22mparseAST with visitor generator[2m > [22mshould parse a simple sphere
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/openscad-parser-visitor.test.ts[2m > [22mOpenscadParser with Visitor AST Generator[2m > [22mparseAST with visitor generator[2m > [22mshould parse a simple cylinder
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/openscad-parser-visitor.test.ts[2m > [22mOpenscadParser with Visitor AST Generator[2m > [22mparseAST with visitor generator[2m > [22mshould parse a simple translate
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/openscad-parser-visitor.test.ts[2m > [22mOpenscadParser with Visitor AST Generator[2m > [22mparseAST with visitor generator[2m > [22mshould parse a simple union
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/openscad-parser-visitor.test.ts[2m > [22mOpenscadParser with Visitor AST Generator[2m > [22mparseAST with visitor generator[2m > [22mshould parse a simple difference
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/openscad-parser-visitor.test.ts[2m > [22mOpenscadParser with Visitor AST Generator[2m > [22mparseAST with visitor generator[2m > [22mshould parse a simple intersection
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/openscad-parser-visitor.test.ts[2m > [22mOpenscadParser with Visitor AST Generator[2m > [22mparseAST with visitor generator[2m > [22mshould parse complex nested operations
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/composite-visitor-real.test.ts[2m > [22mReal Parser Integration Tests[2m > [22mCore parsing functionality[2m > [22mshould parse a simple cube and return CST
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/composite-visitor-real.test.ts[2m > [22mReal Parser Integration Tests[2m > [22mCore parsing functionality[2m > [22mshould parse OpenSCAD code and return valid tree structure
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/visitors/composite-visitor-real.test.ts[2m > [22mReal Parser Integration Tests[2m > [22mCore parsing functionality[2m > [22mshould parse code with multiple statements
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/openscad-parser-error-handling.test.ts[2m > [22mOpenscadParser Error Handling[2m > [22mshould parse valid OpenSCAD code without errors
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/openscad-parser-error-handling.test.ts[2m > [22mOpenscadParser Error Handling[2m > [22mshould handle invalid OpenSCAD code gracefully
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/openscad-parser-error-handling.test.ts[2m > [22mOpenscadParser Error Handling[2m > [22mshould throw a ParserError for initialization errors
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/query/query-cache.test.ts[2m > [22mQueryCache[2m > [22mshould store and retrieve query results
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/query/query-cache.test.ts[2m > [22mQueryCache[2m > [22mshould return null for non-existent queries
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/query/query-cache.test.ts[2m > [22mQueryCache[2m > [22mshould clear the cache
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/query/query-cache.test.ts[2m > [22mQueryCache[2m > [22mshould track cache statistics
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/intersection.test.ts[2m > [22mIntersection AST Generation[2m > [22mintersection operation[2m > [22mshould parse basic intersection of cube and sphere
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/intersection.test.ts[2m > [22mIntersection AST Generation[2m > [22mintersection operation[2m > [22mshould parse intersection of cylinder and cube
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/intersection.test.ts[2m > [22mIntersection AST Generation[2m > [22mintersection operation[2m > [22mshould parse empty intersection
+ [2m[90mÔåô[39m[22m src/lib/simple.test.ts[2m > [22mSimple Test[2m > [22mshould pass a basic test
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/union.test.ts[2m > [22mUnion AST Generation[2m > [22munion operation[2m > [22mshould parse basic union of multiple children
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/union.test.ts[2m > [22mUnion AST Generation[2m > [22munion operation[2m > [22mshould parse implicit union (no union keyword)
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/union.test.ts[2m > [22mUnion AST Generation[2m > [22munion operation[2m > [22mshould parse union with a single child
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/ast/tests/union.test.ts[2m > [22mUnion AST Generation[2m > [22munion operation[2m > [22mshould parse empty union
+ [2m[90mÔåô[39m[22m src/lib/openscad-parser/node-types.test.ts[2m > [22mOpenSCAD Node Types[2m > [22mshould print the node types in a simple OpenSCAD program
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ» Failed Tests 1 ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+
+ FAIL  src/lib/ide-support/symbol-provider/symbol-provider.test.ts > OpenSCADSymbolProvider > getSymbols > should identify a simple module definition
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ÔØ» src/lib/ide-support/symbol-provider/symbol-provider.test.ts:60:30
+     58|         JSON.stringify(symbols, null, 2)
+     59|       );
+     60|       expect(symbols.length).toBe(1);
+       |                              ^
+     61|       expect(symbols[0].name).toBe('my_module');
+     62|       expect(symbols[0].kind).toBe('module');
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[1/1]ÔÄ»
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[33m82 skipped[39m[90m (83)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[33m576 skipped[39m[90m (577)[39m
+[2m   Start at [22m 00:00:23
+[2m   Duration [22m 15.38s[2m (transform 2.45s, setup 2.31s, collect 18.61s, tests 46ms, environment 98.93s, prepare 20.55s)[22m
+
+
+
+
+ NX   Running target test for project openscad-parser failed
+
+Failed tasks:
+
+- openscad-parser:test
+
+Hint: run the command with --verbose for more details.
+
+Warning: command "vitest run --reporter=verbose --no-coverage --testNamePattern="should identify a simple module definition" --run" exited with non-zero status code

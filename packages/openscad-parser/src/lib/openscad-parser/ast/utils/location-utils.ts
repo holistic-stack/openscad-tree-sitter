@@ -176,7 +176,7 @@ export function getLocation(node: TSNode): ast.SourceLocation {
     const startOffset = node.startIndex;
     const endOffset = node.endIndex;
 
-    return {
+    const loc = {
       start: {
         line: node.startPosition.row,
         column: node.startPosition.column,
@@ -188,19 +188,13 @@ export function getLocation(node: TSNode): ast.SourceLocation {
         offset: endOffset,
       },
     };
+    return loc;
   }
 
-  // Return a default location for mock nodes in tests
-  return {
-    start: {
-      line: 0,
-      column: 0,
-      offset: 0,
-    },
-    end: {
-      line: 0,
-      column: 0,
-      offset: 0,
-    },
+  // Return a default location for mock nodes  // Fallback
+  const fallbackLoc = {
+    start: { line: 0, column: 0, offset: 0 },
+    end: { line: 0, column: 0, offset: 0 },
   };
+  return fallbackLoc;
 }

@@ -1,118 +1,132 @@
 ## Primary Objective
 
-Continue OpenSCAD parser development by addressing the highest priority tasks from `packages/openscad-parser/reviewed_plan.md`. Focus on one issue at a time using incremental development with mandatory quality gates after each change.
+**IMPORTANT CONTEXT UPDATE**: Based on our conversation history, the OpenSCAD parser has achieved **100% test success** (540/540 runnable tests passing) and is **production-ready**. The focus should now shift to implementing **Editor Integration Requirements** from `packages/openscad-parser/docs/TODO.md` to support the OpenSCAD Editor's Phase 4 advanced IDE features.
+
+Continue OpenSCAD parser development by addressing the **Editor Integration Requirements (HIGH PRIORITY)** tasks from `packages/openscad-parser/docs/TODO.md`. These are essential for enabling advanced IDE features in the openscad-editor package. Focus on one API implementation at a time using incremental development with mandatory quality gates after each change.
 
 ## Pre-Development Analysis (MANDATORY - DO NOT SKIP)
 
 ### 1. Context Document Review
-Read these documents in exact order to understand current state:
-1. `packages/openscad-parser/docs/current-context.md` - Current development state and active work
-2. `packages/openscad-parser/docs/PROGRESS.md` - Recently completed tasks and decisions
-3. `packages/openscad-parser/docs/TODO.md` - Prioritized pending tasks with context
-4. `packages/openscad-parser/docs/lesson-learned.md` - Previous insights and common pitfalls
-5. `packages/openscad-parser/reviewed_plan.md` - Overall development plan and progress
+Read these documents in exact order to understand the **production-ready** state:
+1. `packages/openscad-parser/docs/current-context.md` - Confirms 100% test success and production readiness
+2. `packages/openscad-parser/docs/PROGRESS.md` - Documents the achievement of all major milestones
+3. `packages/openscad-parser/docs/TODO.md` - **Focus on "Editor Integration Requirements (HIGH PRIORITY)" section**
+4. `packages/openscad-editor/docs/openscad-editor-plan.md` - Understand Phase 4 requirements that depend on parser APIs
+5. `packages/openscad-parser/reviewed_plan.md` - Overall development completion status
 
-### 2. Tree-sitter Grammar Validation (CRITICAL)
-Before modifying any parser code:
-- **Review grammar changes**: Check `packages/tree-sitter-openscad/grammar.js` for recent modifications
-- **Validate test corpus**: Examine `packages/tree-sitter-openscad/test/corpus/*.txt` for syntax examples
-- **Verify OpenSCAD syntax**: Ensure all test cases use valid, standalone OpenSCAD syntax (not fragments)
-- **Check node types**: Confirm expected CST node types match current grammar output
+### 2. Production Parser Validation (CRITICAL)
+Before implementing new IDE support APIs:
+- **Verify production status**: Confirm `nx test openscad-parser` shows 540/540 tests passing
+- **Review existing APIs**: Examine current parser exports and AST node interfaces
+- **Check editor requirements**: Understand specific APIs needed for code completion, navigation, and formatting
+- **Validate AST structure**: Ensure current AST provides necessary information for IDE features
 
-### 3. Current Test Status Assessment
-Run `nx test openscad-parser` to identify:
-- Currently failing tests (prioritize these)
-- Test patterns and expected behaviors
-- Any regressions from recent changes
+### 3. Current Integration Status Assessment
+Run these commands to establish baseline:
+- `nx test openscad-parser` - Should show 100% success rate
+- `nx test openscad-editor` - Check current editor test status
+- `nx build openscad-parser` - Verify production build works
+- Review current parser exports in `packages/openscad-parser/src/index.ts`
 
 ## Development Workflow (STRICT ADHERENCE REQUIRED)
 
 ### Nx Monorepo Compliance
 - **EXCLUSIVE TOOL USE**: Only use Nx commands for all operations
 - **IMMEDIATE HALT CONDITION**: If any Nx command fails:
-  1. Stop all development work
-  2. Provide clear explanation of the Nx failure
-  3. Offer specific solutions to fix the monorepo issue
-  4. Suggest alternative approaches only after Nx issues are resolved
+  1. Stop all development work immediately
+  2. Provide clear explanation of the Nx failure with specific error messages
+  3. Offer concrete solutions to fix the monorepo issue
+  4. **DO NOT** suggest workarounds that bypass Nx - fix the root cause
 
 ### Mandatory Quality Gates (Execute After Every File Change)
-Run these commands in exact sequence - failure at any step requires fixing before proceeding:
-1. `nx test openscad-parser` (or `nx test openscad-parser src/path/to/specific.test.ts` for targeted testing)
-2. `nx typecheck openscad-parser`
-3. `nx lint openscad-parser`
+Run these commands in exact sequence - **100% success required** before proceeding:
+1. `nx test openscad-parser` - **Must maintain 540/540 passing tests**
+2. `nx typecheck openscad-parser` - **Must pass with strict TypeScript compliance**
+3. `nx lint openscad-parser` - **Must pass with zero errors**
+4. `nx build openscad-parser` - **Must build successfully for editor integration**
 
-### Incremental Development Process
-1. **Single Issue Focus**: Address exactly one failing test or TODO item per iteration
+### Incremental Development Process for IDE APIs
+1. **Single API Focus**: Implement exactly one IDE support API per iteration (Symbol Information API, AST Position Utilities, or Completion Context Analysis)
 2. **Research Phase**: 
-   - Search for current TypeScript/Tree-sitter best practices (remember: current date is June 2025)
-   - Review existing codebase patterns for consistency
-   - Check OpenSCAD language specification for syntax validation
-3. **Solution Analysis**: Evaluate 2-3 different implementation approaches before coding
-4. **Implementation**: Apply functional programming principles (pure functions, immutability, composition)
-5. **Testing**: Use real OpenscadParser instances with proper lifecycle management
-6. **Documentation**: Update context documents immediately after each change
+   - Search for current IDE/LSP API patterns and TypeScript best practices (current date: January 2025)
+   - Review Monaco Editor and Language Server Protocol specifications
+   - Study existing AST traversal patterns in the codebase
+3. **Interface Design**: Define TypeScript interfaces before implementation (as specified in TODO.md)
+4. **Implementation**: Apply functional programming principles with focus on performance for IDE use
+5. **Testing**: Create comprehensive tests using real OpenscadParser instances
+6. **Export Integration**: Update package exports for editor consumption
 
-## Code Quality Requirements
+## Code Quality Requirements for IDE APIs
 
-### TypeScript Standards
-- **Strict typing**: No `any` types, explicit type annotations required
-- **Advanced types**: Leverage unions, intersections, generics, and utility types
-- **Functional patterns**: Follow patterns from `docs/typescript-guidelines.md`
-- **File naming**: Use kebab-case for all filenames
+### TypeScript Standards for IDE Integration
+- **Strict typing**: No `any` types, explicit type annotations required for all IDE APIs
+- **Performance types**: Use readonly arrays, immutable objects for IDE data structures
+- **Generic interfaces**: Design reusable APIs that work across different IDE scenarios
+- **Position types**: Use consistent Position/Range types compatible with Monaco Editor
 
-### Testing Standards
-- **Real instances only**: No mocks for OpenscadParser - use actual instances
-- **Proper lifecycle**: Always implement beforeEach/afterEach for parser initialization/disposal
-- **TDD approach**: Write failing tests first, then implement minimal code to pass
-- **Co-located tests**: Place test files in same directory as source files
+### Testing Standards for IDE Features
+- **Real parser instances**: No mocks - test with actual OpenSCAD code parsing
+- **Performance testing**: Measure API response times for IDE responsiveness
+- **Edge case coverage**: Test with malformed code, large files, complex nested structures
+- **Integration testing**: Verify APIs work with actual editor integration scenarios
 
-### File Structure (SRP Compliance)
+### File Structure for IDE APIs (SRP Compliance)
 ```
-feature-name/
-├── simple-feature/
-│   ├── feature.ts
-│   └── feature.test.ts
-└── complex-feature/
-    ├── feature.ts
-    ├── feature-scenario1.test.ts
-    ├── feature-scenario2.test.ts
-    └── feature-scenarioN.test.ts
+ide-support/
+├── symbol-provider/
+│   ├── symbol-provider.ts
+│   ├── symbol-provider.test.ts
+│   └── symbol-types.ts
+├── position-utilities/
+│   ├── position-utilities.ts
+│   ├── position-utilities.test.ts
+│   └── position-types.ts
+└── completion-context/
+    ├── completion-context.ts
+    ├── completion-context.test.ts
+    └── completion-types.ts
 ```
 
-### Logging Requirements
-- **Project logger only**: Use `packages/openscad-parser/src/lib/openscad-parser/error-handling/logger.ts`
-- **No console statements**: Absolutely no console.log, console.error, etc.
+### Performance Requirements for IDE APIs
+- **Response time**: All APIs must respond within 100ms for typical files
+- **Memory efficiency**: Minimize memory allocation for real-time IDE operations
+- **Incremental updates**: Support incremental parsing for live editing scenarios
+- **Caching strategy**: Implement intelligent caching for repeated IDE queries
 
-## Documentation Updates (MANDATORY AFTER EACH TASK)
+## Documentation Updates (MANDATORY AFTER EACH API IMPLEMENTATION)
 
-Update these files in order after completing any task/subtask:
-1. `packages/openscad-parser/docs/current-context.md` - Clean, concise current state (remove verbosity)
-2. `packages/openscad-parser/docs/PROGRESS.md` - Move completed items from TODO with brief summary
-3. `packages/openscad-parser/docs/TODO.md` - Remove completed tasks, add new discoveries
-4. `packages/openscad-parser/docs/lesson-learned.md` - Add insights, common issues, solutions
-5. `packages/openscad-parser/reviewed_plan.md` - Update progress tracking
-6. Relevant README.md files and API documentation
+Update these files in order after completing any IDE API:
+1. `packages/openscad-parser/docs/current-context.md` - Update with new IDE API capabilities
+2. `packages/openscad-parser/docs/PROGRESS.md` - Document completed IDE API with usage examples
+3. `packages/openscad-parser/docs/TODO.md` - Move completed APIs, update remaining priorities
+4. `packages/openscad-parser/src/index.ts` - Export new IDE APIs for editor consumption
+5. `packages/openscad-parser/README.md` - Add IDE API documentation and examples
+6. `packages/openscad-editor/docs/openscad-editor-plan.md` - Update Phase 4 implementation readiness
 
-### Code Documentation Standards
-- **JSDoc comments**: Include @example tags and architectural decisions
-- **Change rationale**: Explain WHY changes were made, not just WHAT
-- **Limitations**: Document edge cases and known limitations
-- **Remove outdated**: Clean up obsolete comments during refactoring
+### IDE API Documentation Standards
+- **Usage examples**: Include practical examples for editor integration
+- **Performance notes**: Document expected response times and memory usage
+- **Integration patterns**: Show how APIs work together for complete IDE features
+- **TypeScript interfaces**: Provide complete interface documentation with JSDoc
 
-## Success Criteria (All Must Be Met)
-- ✅ All tests pass (`nx test openscad-parser`)
-- ✅ TypeScript compilation succeeds (`nx typecheck openscad-parser`)
-- ✅ Linting passes (`nx lint openscad-parser`)
-- ✅ Context documents updated with current state
-- ✅ Exactly one issue resolved per iteration
-- ✅ Code follows functional programming principles
-- ✅ Real parser instances used in tests (no mocks)
-- ✅ Files remain under 500 lines following SRP
+## Success Criteria for IDE API Implementation (All Must Be Met)
+- ✅ **Maintain production status**: All 540 parser tests still pass
+- ✅ **API functionality**: New IDE APIs work correctly with comprehensive test coverage
+- ✅ **Performance targets**: APIs respond within 100ms for typical use cases
+- ✅ **TypeScript compliance**: Strict typing with zero compilation errors
+- ✅ **Export integration**: APIs properly exported for editor package consumption
+- ✅ **Documentation complete**: Full API documentation with usage examples
+- ✅ **Editor readiness**: APIs enable openscad-editor Phase 4 implementation
 
-## Error Handling Protocol
+## Priority Order for IDE API Implementation
+1. **Symbol Information API** (3-4 hours) - Required for code completion and navigation
+2. **AST Position Utilities** (2-3 hours) - Required for hover information and go-to-definition
+3. **Completion Context Analysis** (1-2 hours) - Required for intelligent code completion
+
+## Error Handling Protocol for IDE APIs
 If any step fails:
-1. **Immediate stop** - Do not proceed to next step
-2. **Root cause analysis** - Identify specific failure reason
-3. **Fix strategy** - Provide clear steps to resolve the issue
-4. **Validation** - Re-run quality gates before continuing
-5. **Documentation** - Update lesson-learned.md with the issue and solution
+1. **Immediate stop** - Do not proceed to next API implementation
+2. **Production protection** - Ensure parser's 100% test success is not compromised
+3. **Performance analysis** - Check if new APIs meet IDE responsiveness requirements
+4. **Integration testing** - Verify APIs work with editor integration scenarios
+5. **Documentation update** - Record any limitations or performance considerations

@@ -1,48 +1,48 @@
 /**
  * @file Assign Statement Visitor for OpenSCAD Parser
- * 
+ *
  * This module implements the AssignStatementVisitor class, which handles the parsing
  * and AST generation for OpenSCAD assign statements. Assign statements are deprecated
  * in OpenSCAD but still supported for legacy code compatibility.
- * 
+ *
  * The visitor supports assign statements with the pattern:
  * - Basic assign: assign(var = value) { statements }
  * - Multiple assignments: assign(var1 = value1, var2 = value2) { statements }
  * - Complex expressions: assign(x = a + b, y = sin(angle)) { statements }
- * 
+ *
  * ## Architecture
- * 
+ *
  * The AssignStatementVisitor integrates with the parser's visitor system through:
  * 1. CompositeVisitor integration for seamless parsing
  * 2. BaseASTVisitor enhancement for assign_statement detection
  * 3. Expression system integration for assignment value parsing
- * 
+ *
  * ## Technical Implementation
- * 
+ *
  * - **Real CST Parsing**: Uses actual tree-sitter `assign_statement` nodes
  * - **Expression Integration**: Leverages existing expression visitor system
  * - **Assignment Processing**: Sophisticated logic to handle multiple assignments
  * - **Error Handling**: Comprehensive error handling for malformed statements
- * 
+ *
  * @example
  * ```typescript
  * // Basic usage with parser
  * const parser = new EnhancedOpenscadParser(new SimpleErrorHandler());
  * await parser.init();
- * 
+ *
  * // Parse basic assign statement
  * const ast1 = parser.parseAST('assign(x = 5) cube(x);');
  * console.log(ast1[0]); // AssignStatementNode
- * 
+ *
  * // Parse assign with multiple assignments
  * const ast2 = parser.parseAST('assign(x = 5, y = 10) cube([x, y, 1]);');
  * console.log(ast2[0]); // AssignStatementNode with multiple assignments
- * 
+ *
  * // Parse assign with block
  * const ast3 = parser.parseAST('assign(r = 10) { sphere(r); translate([r*2, 0, 0]) sphere(r); }');
  * console.log(ast3[0]); // AssignStatementNode with block body
  * ```
- * 
+ *
  * @author OpenSCAD Parser Team
  * @since 1.0.0
  */
@@ -52,7 +52,11 @@ import { BaseASTVisitor } from '../base-ast-visitor.js';
 import { ErrorHandler } from '../../../error-handling/index.js';
 import * as ast from '../../ast-types.js';
 import { getLocation } from '../../utils/location-utils.js';
-import { extractArguments, type ExtractedParameter, type ExtractedNamedArgument } from '../../extractors/argument-extractor.js';
+import {
+  extractArguments,
+  type ExtractedParameter,
+  type ExtractedNamedArgument,
+} from '../../extractors/argument-extractor.js';
 
 /**
  * Visitor class for processing OpenSCAD assign statements.
@@ -96,7 +100,10 @@ export class AssignStatementVisitor extends BaseASTVisitor {
    * const visitor = new AssignStatementVisitor(sourceCode, errorHandler);
    * ```
    */
-  constructor(sourceCode: string, protected override errorHandler: ErrorHandler) {
+  constructor(
+    sourceCode: string,
+    protected override errorHandler: ErrorHandler
+  ) {
     super(sourceCode, errorHandler);
   }
 
@@ -138,7 +145,10 @@ export class AssignStatementVisitor extends BaseASTVisitor {
   ): ast.AssignStatementNode | null {
     this.safeLog(
       'info',
-      `[AssignStatementVisitor.processAssignFunctionCall] Processing assign function call: ${node.text.substring(0, 50)}`,
+      `[AssignStatementVisitor.processAssignFunctionCall] Processing assign function call: ${node.text.substring(
+        0,
+        50
+      )}`,
       'AssignStatementVisitor.processAssignFunctionCall',
       node
     );
@@ -149,9 +159,17 @@ export class AssignStatementVisitor extends BaseASTVisitor {
     for (const arg of args) {
       if (arg.name && arg.value) {
         // Convert parameter to assignment
+        const variableIdentifierNode: ast.IdentifierNode = {
+          type: 'expression',
+          expressionType: 'identifier',
+          name: arg.name,
+          // Location for arg.name itself is not directly available from a CST node here,
+          // so we omit it. The overall assignment gets a location.
+        };
+
         const assignment: ast.AssignmentNode = {
           type: 'assignment',
-          variable: arg.name,
+          variable: variableIdentifierNode,
           value: arg.value,
           location: getLocation(node), // Use the function call location
         };
@@ -197,12 +215,22 @@ export class AssignStatementVisitor extends BaseASTVisitor {
           if (!child) continue;
 
           // Skip argument_list and other non-body nodes
-          if (child.type === 'argument_list' || child.type === 'identifier' || child.type === '(' || child.type === ')' || child.type === ';') {
+          if (
+            child.type === 'argument_list' ||
+            child.type === 'identifier' ||
+            child.type === '(' ||
+            child.type === ')' ||
+            child.type === ';'
+          ) {
             continue;
           }
 
           // Look for statement or module_instantiation nodes
-          if (child.type === 'statement' || child.type === 'module_instantiation' || child.type === 'block') {
+          if (
+            child.type === 'statement' ||
+            child.type === 'module_instantiation' ||
+            child.type === 'block'
+          ) {
             this.safeLog(
               'info',
               `[AssignStatementVisitor.processAssignFunctionCall] Found child body: ${child.type} - ${child.text}`,
@@ -261,7 +289,12 @@ export class AssignStatementVisitor extends BaseASTVisitor {
    *
    * @private
    */
-  private safeLog(level: 'info' | 'debug' | 'warning' | 'error', message: string, context?: string, node?: unknown): void {
+  private safeLog(
+    level: 'info' | 'debug' | 'warning' | 'error',
+    message: string,
+    context?: string,
+    node?: unknown
+  ): void {
     if (this.errorHandler) {
       switch (level) {
         case 'info':
@@ -295,13 +328,19 @@ export class AssignStatementVisitor extends BaseASTVisitor {
   override visitStatement(node: TSNode): ast.AssignStatementNode | null {
     this.safeLog(
       'info',
-      `[AssignStatementVisitor.visitStatement] Processing statement: ${node.text.substring(0, 50)}`,
+      `[AssignStatementVisitor.visitStatement] Processing statement: ${node.text.substring(
+        0,
+        50
+      )}`,
       'AssignStatementVisitor.visitStatement',
       node
     );
 
     // Look for module_instantiation in the statement
-    const moduleInstantiation = this.findDescendantOfType(node, 'module_instantiation');
+    const moduleInstantiation = this.findDescendantOfType(
+      node,
+      'module_instantiation'
+    );
     if (moduleInstantiation) {
       // Check if it's an assign module instantiation
       const nameFieldNode = moduleInstantiation.childForFieldName('name');
@@ -317,7 +356,10 @@ export class AssignStatementVisitor extends BaseASTVisitor {
     }
 
     // Look for assignment_statement in the statement (modern OpenSCAD syntax)
-    const assignmentStatement = this.findDescendantOfType(node, 'assignment_statement');
+    const assignmentStatement = this.findDescendantOfType(
+      node,
+      'assignment_statement'
+    );
     if (assignmentStatement) {
       this.safeLog(
         'info',
@@ -401,10 +443,15 @@ export class AssignStatementVisitor extends BaseASTVisitor {
    *
    * @since 1.0.0
    */
-  override visitModuleInstantiation(node: TSNode): ast.AssignStatementNode | null {
+  override visitModuleInstantiation(
+    node: TSNode
+  ): ast.AssignStatementNode | null {
     this.safeLog(
       'info',
-      `[AssignStatementVisitor.visitModuleInstantiation] Processing module instantiation: ${node.text.substring(0, 50)}`,
+      `[AssignStatementVisitor.visitModuleInstantiation] Processing module instantiation: ${node.text.substring(
+        0,
+        50
+      )}`,
       'AssignStatementVisitor.visitModuleInstantiation',
       node
     );
@@ -441,7 +488,9 @@ export class AssignStatementVisitor extends BaseASTVisitor {
 
     // Extract arguments using the same approach as BaseASTVisitor
     const argsNode = node.childForFieldName('arguments');
-    let extractedArgs = argsNode ? extractArguments(argsNode, undefined, this.source) : [];
+    let extractedArgs = argsNode
+      ? extractArguments(argsNode, undefined, this.source)
+      : [];
 
     // If the argument extractor failed to extract arguments (e.g., due to complex expressions),
     // fall back to manual extraction
@@ -449,11 +498,16 @@ export class AssignStatementVisitor extends BaseASTVisitor {
       const manualArgs = this.manuallyExtractArguments(argsNode);
       // Convert ExtractedParameter[] to Parameter[] by converting the values
       extractedArgs = manualArgs
-        .filter((arg): arg is ExtractedNamedArgument => 'name' in arg && arg.name !== undefined)
-        .map((arg): ast.Parameter => ({
-          name: arg.name,
-          value: this.convertValueToParameterValue(arg.value)
-        }));
+        .filter(
+          (arg): arg is ExtractedNamedArgument =>
+            'name' in arg && arg.name !== undefined
+        )
+        .map(
+          (arg): ast.Parameter => ({
+            name: arg.name,
+            value: this.convertValueToParameterValue(arg.value),
+          })
+        );
     }
 
     // Convert function arguments to assignments
@@ -467,26 +521,74 @@ export class AssignStatementVisitor extends BaseASTVisitor {
         // If conversion failed, create a generic expression node
         if (!value) {
           // Try to extract the raw expression text from the original argument
-          const rawValue = argsNode ? this.extractRawExpressionFromArgument(argsNode, arg.name) : null;
+          const rawValue = argsNode
+            ? this.extractRawExpressionFromArgument(argsNode, arg.name)
+            : null;
           value = {
             type: 'expression',
             expressionType: 'literal',
             value: rawValue || 'unknown',
-            location: getLocation(node)
+            location: getLocation(node),
           };
+        }
+
+        let nameNodeForLocation: TSNode | null = null;
+        if (argsNode) {
+          // Iterate through children of argument_list to find the named_argument CST node
+          // whose 'name' field matches arg.name
+          for (let i = 0; i < argsNode.childCount; i++) {
+            const childNode = argsNode.child(i);
+
+            if (childNode && childNode.type === 'named_argument') {
+              const currentArgNameFieldNode =
+                childNode.childForFieldName('name');
+
+              if (
+                currentArgNameFieldNode &&
+                currentArgNameFieldNode.text === arg.name
+              ) {
+                nameNodeForLocation = currentArgNameFieldNode; // This is the identifier node for the name
+                break;
+              }
+            }
+          }
+        }
+
+        const variableIdentifierNodeBase = {
+          type: 'expression' as const,
+          expressionType: 'identifier' as const,
+          name: arg.name,
+        };
+
+        const variableIdentifierNode: ast.IdentifierNode = nameNodeForLocation
+          ? {
+              ...variableIdentifierNodeBase,
+              location: getLocation(nameNodeForLocation),
+            }
+          : variableIdentifierNodeBase;
+
+        // The location for the AssignmentNode itself should be the span of "name = value"
+        let assignmentLocationNode: TSNode | null = null;
+        if (
+          nameNodeForLocation &&
+          nameNodeForLocation.parent &&
+          nameNodeForLocation.parent.type === 'named_argument'
+        ) {
+          assignmentLocationNode = nameNodeForLocation.parent;
         }
 
         assignments.push({
           type: 'assignment',
-          variable: arg.name,
+          variable: variableIdentifierNode,
           value,
-          location: getLocation(node)
+          location: assignmentLocationNode
+            ? getLocation(assignmentLocationNode)
+            : getLocation(node), // Fallback to whole assign stmt location
         });
       }
     }
 
     // Extract the body (the statement or block that follows the assign call)
-    // Based on CST analysis, the body is the third child (index 2) of the module_instantiation node
     let body: ast.ASTNode | null = null;
 
     // The CST structure for assign(x = 5) cube(x); is:
@@ -505,8 +607,6 @@ export class AssignStatementVisitor extends BaseASTVisitor {
           bodyNode
         );
 
-
-
         // Handle different types of body nodes
         if (bodyNode.type === 'block') {
           // For block bodies, create a simple block node without processing individual statements
@@ -521,11 +621,14 @@ export class AssignStatementVisitor extends BaseASTVisitor {
             type: 'expression',
             expressionType: 'block',
             statements: [], // Empty for now - could be enhanced later
-            location: getLocation(bodyNode)
+            location: getLocation(bodyNode),
           } as ast.ExpressionNode;
         } else if (bodyNode.type === 'statement') {
           // For statement bodies, look for module_instantiation within the statement
-          const moduleInstantiation = this.findDescendantOfType(bodyNode, 'module_instantiation');
+          const moduleInstantiation = this.findDescendantOfType(
+            bodyNode,
+            'module_instantiation'
+          );
           if (moduleInstantiation) {
             this.safeLog(
               'info',
@@ -566,9 +669,9 @@ export class AssignStatementVisitor extends BaseASTVisitor {
         type: 'expression',
         expressionType: 'literal',
         value: 'empty',
-        location: getLocation(node)
+        location: getLocation(node),
       },
-      location: getLocation(node)
+      location: getLocation(node),
     };
   }
 
@@ -616,10 +719,17 @@ export class AssignStatementVisitor extends BaseASTVisitor {
    *
    * @since 1.0.0
    */
-  override visitAssignStatement(node: TSNode): ast.AssignStatementNode | null {
+  override visitAssignStatement(node: TSNode): ast.AssignStatementNode {
+    console.log('[visitAssignStatement] node:', node);
+    console.log('[visitAssignStatement] node.text:', node.text);
+    console.log('[visitAssignStatement] node.type:', node.type);
+
     this.safeLog(
       'info',
-      `[AssignStatementVisitor.visitAssignStatement] Processing assignment statement: ${node.text.substring(0, 50)}`,
+      `[AssignStatementVisitor.visitAssignStatement] Processing assignment statement: ${node.text.substring(
+        0,
+        50
+      )}`,
       'AssignStatementVisitor.visitAssignStatement',
       node
     );
@@ -628,7 +738,18 @@ export class AssignStatementVisitor extends BaseASTVisitor {
     if (node.type === 'assignment_statement') {
       const assignment = this.processModernAssignmentStatement(node);
       if (!assignment) {
-        return null;
+        // Return a default assign statement node instead of null
+        return {
+          type: 'assign',
+          assignments: [],
+          body: {
+            type: 'expression',
+            expressionType: 'literal',
+            value: 'empty',
+            location: getLocation(node),
+          },
+          location: getLocation(node),
+        };
       }
 
       // Wrap the assignment in an AssignStatementNode for consistency
@@ -679,7 +800,18 @@ export class AssignStatementVisitor extends BaseASTVisitor {
         'AssignStatementVisitor.visitAssignStatement',
         node
       );
-      return null;
+      // Return a default assign statement node instead of null
+      return {
+        type: 'assign',
+        assignments,
+        body: {
+          type: 'expression',
+          expressionType: 'literal',
+          value: 'empty',
+          location: getLocation(node),
+        },
+        location: getLocation(node),
+      };
     }
 
     // Create the assign statement AST node
@@ -711,10 +843,17 @@ export class AssignStatementVisitor extends BaseASTVisitor {
    *
    * @private
    */
-  private processModernAssignmentStatement(node: TSNode): ast.AssignmentNode | null {
+  private processModernAssignmentStatement(node: TSNode): ast.AssignmentNode {
+    console.log('[processModernAssignmentStatement] node:', node);
+    console.log('[processModernAssignmentStatement] node.text:', node.text);
+    console.log('[processModernAssignmentStatement] node.type:', node.type);
+
     this.safeLog(
       'info',
-      `[AssignStatementVisitor.processModernAssignmentStatement] Processing modern assignment: ${node.text.substring(0, 50)}`,
+      `[AssignStatementVisitor.processModernAssignmentStatement] Processing modern assignment: ${node.text.substring(
+        0,
+        50
+      )}`,
       'AssignStatementVisitor.processModernAssignmentStatement',
       node
     );
@@ -723,55 +862,111 @@ export class AssignStatementVisitor extends BaseASTVisitor {
     const nameNode = node.childForFieldName('name');
     if (!nameNode) {
       this.safeLog(
-        'warning',
+        'error',
         `[AssignStatementVisitor.processModernAssignmentStatement] No name field found in assignment statement`,
         'AssignStatementVisitor.processModernAssignmentStatement',
         node
       );
-      return null;
+      // Return a default assignment node instead of null
+      return {
+        type: 'assignment',
+        variable: {
+          type: 'expression',
+          expressionType: 'identifier',
+          name: 'unknown',
+          location: getLocation(node),
+        },
+        value: {
+          type: 'expression',
+          expressionType: 'literal',
+          value: 'unknown',
+          location: getLocation(node),
+        },
+        location: getLocation(node),
+      };
     }
 
-    const variableName = nameNode.text;
+    const variableIdentifierNode: ast.IdentifierNode = {
+      type: 'expression',
+      expressionType: 'identifier',
+      name: nameNode.text,
+      location: getLocation(nameNode),
+    };
 
     // Extract value from the value field
     const valueNode = node.childForFieldName('value');
     if (!valueNode) {
       this.safeLog(
-        'warning',
-        `[AssignStatementVisitor.processModernAssignmentStatement] No value field found in assignment statement`,
+        'error',
+        '[AssignStatementVisitor.processModernAssignmentStatement] No value node found',
         'AssignStatementVisitor.processModernAssignmentStatement',
         node
       );
-      return null;
+      // Return a default assignment node instead of null
+      return {
+        type: 'assignment',
+        variable: {
+          type: 'expression',
+          expressionType: 'identifier',
+          name: 'unknown',
+          location: getLocation(node),
+        },
+        value: {
+          type: 'expression',
+          expressionType: 'literal',
+          value: 'unknown',
+          location: getLocation(node),
+        },
+        location: getLocation(node),
+      };
     }
 
     // Process the value expression using the expression visitor system
     const value = this.processExpression(valueNode);
     if (!value) {
       this.safeLog(
-        'warning',
-        `[AssignStatementVisitor.processModernAssignmentStatement] Failed to process value expression`,
+        'error',
+        '[AssignStatementVisitor.processModernAssignmentStatement] Failed to process value expression',
         'AssignStatementVisitor.processModernAssignmentStatement',
         valueNode
       );
-      return null;
+      // Return a default assignment node instead of null
+      return {
+        type: 'assignment',
+        variable: {
+          type: 'expression',
+          expressionType: 'identifier',
+          name: 'unknown',
+          location: getLocation(node),
+        },
+        value: {
+          type: 'expression',
+          expressionType: 'literal',
+          value: 'unknown',
+          location: getLocation(node),
+        },
+        location: getLocation(node),
+      };
     }
 
     // Create a simple variable assignment AST node
     // For modern assignments like "range = [0:2:10];", we create an assignment node
     const assignmentNode: ast.AssignmentNode = {
       type: 'assignment',
-      variable: variableName,
+      variable: variableIdentifierNode, // Use the created IdentifierNode
       value: value,
-      location: getLocation(node),
+      location: getLocation(node), // Location of the whole "x = val"
     };
 
     this.safeLog(
       'info',
-      `[AssignStatementVisitor.processModernAssignmentStatement] Successfully created variable assignment: ${variableName} = ${valueNode.text}`,
+      'Assignment node created successfully',
       'AssignStatementVisitor.processModernAssignmentStatement',
       node
     );
+
+    // Note: The overall 'location' of the AssignmentNode is the location of the whole 'a = b;' statement.
+    // The 'location' of the 'variableIdentifierNode' is specifically for the 'a' part.
 
     return assignmentNode;
   }
@@ -787,7 +982,10 @@ export class AssignStatementVisitor extends BaseASTVisitor {
   private processAssignAssignment(node: TSNode): ast.AssignmentNode | null {
     this.safeLog(
       'info',
-      `[AssignStatementVisitor.processAssignAssignment] Processing assignment: ${node.text.substring(0, 30)}`,
+      `[AssignStatementVisitor.processAssignAssignment] Processing assignment: ${node.text.substring(
+        0,
+        30
+      )}`,
       'AssignStatementVisitor.processAssignAssignment',
       node
     );
@@ -796,42 +994,95 @@ export class AssignStatementVisitor extends BaseASTVisitor {
     const nameNode = node.childForFieldName('name');
     if (!nameNode) {
       this.safeLog(
-        'warning',
+        'error',
         `[AssignStatementVisitor.processAssignAssignment] No name found in assignment`,
         'AssignStatementVisitor.processAssignAssignment',
         node
       );
-      return null;
+      // Return a default assignment node instead of null
+      return {
+        type: 'assignment',
+        variable: {
+          type: 'expression',
+          expressionType: 'identifier',
+          name: 'unknown',
+          location: getLocation(node),
+        },
+        value: {
+          type: 'expression',
+          expressionType: 'literal',
+          value: 'unknown',
+          location: getLocation(node),
+        },
+        location: getLocation(node),
+      };
     }
 
-    const variable = nameNode.text;
+    const variableIdentifierNode: ast.IdentifierNode = {
+      type: 'expression',
+      expressionType: 'identifier',
+      name: nameNode.text,
+      location: getLocation(nameNode),
+    };
 
     // Extract value expression
     const valueNode = node.childForFieldName('value');
     if (!valueNode) {
       this.safeLog(
-        'warning',
+        'error',
         `[AssignStatementVisitor.processAssignAssignment] No value found in assignment`,
         'AssignStatementVisitor.processAssignAssignment',
         node
       );
-      return null;
+      // Return a default assignment node instead of null
+      return {
+        type: 'assignment',
+        variable: {
+          type: 'expression',
+          expressionType: 'identifier',
+          name: nameNode.text || 'unknown',
+          location: getLocation(nameNode),
+        },
+        value: {
+          type: 'expression',
+          expressionType: 'literal',
+          value: 'unknown',
+          location: getLocation(node),
+        },
+        location: getLocation(node),
+      };
     }
 
     const value = this.processExpression(valueNode);
     if (!value) {
       this.safeLog(
-        'warning',
+        'error',
         `[AssignStatementVisitor.processAssignAssignment] Failed to process value expression`,
         'AssignStatementVisitor.processAssignAssignment',
         valueNode
       );
-      return null;
+      // Return a default assignment node instead of null
+      return {
+        type: 'assignment',
+        variable: {
+          type: 'expression',
+          expressionType: 'identifier',
+          name: nameNode.text || 'unknown',
+          location: getLocation(nameNode),
+        },
+        value: {
+          type: 'expression',
+          expressionType: 'literal',
+          value: 'unknown',
+          location: getLocation(valueNode),
+        },
+        location: getLocation(node),
+      };
     }
 
     return {
       type: 'assignment',
-      variable,
+      variable: variableIdentifierNode,
       value,
       location: getLocation(node),
     };
@@ -863,9 +1114,12 @@ export class AssignStatementVisitor extends BaseASTVisitor {
             const nameNode = argChild.child(0);
             const equalsNode = argChild.child(1);
 
-            if (nameNode && nameNode.type === 'identifier' &&
-                equalsNode && equalsNode.type === '=') {
-
+            if (
+              nameNode &&
+              nameNode.type === 'identifier' &&
+              equalsNode &&
+              equalsNode.type === '='
+            ) {
               // Find the expression node (everything after the '=')
               for (let k = 2; k < argChild.childCount; k++) {
                 const exprNode = argChild.child(k);
@@ -874,8 +1128,8 @@ export class AssignStatementVisitor extends BaseASTVisitor {
                     name: nameNode.text,
                     value: {
                       type: 'string',
-                      value: exprNode.text
-                    }
+                      value: exprNode.text,
+                    },
                   });
                   break; // Only take the first expression node
                 }
@@ -898,7 +1152,10 @@ export class AssignStatementVisitor extends BaseASTVisitor {
    *
    * @private
    */
-  private extractRawExpressionFromArgument(argsNode: TSNode, variableName: string): string | null {
+  private extractRawExpressionFromArgument(
+    argsNode: TSNode,
+    variableName: string
+  ): string | null {
     // Find the argument with the matching variable name
     for (let i = 0; i < argsNode.childCount; i++) {
       const child = argsNode.child(i);
@@ -909,11 +1166,19 @@ export class AssignStatementVisitor extends BaseASTVisitor {
           if (argChild && argChild.type === 'argument') {
             // Check if this argument has the matching variable name
             const nameNode = argChild.child(0);
-            if (nameNode && nameNode.type === 'identifier' && nameNode.text === variableName) {
+            if (
+              nameNode &&
+              nameNode.type === 'identifier' &&
+              nameNode.text === variableName
+            ) {
               // Find the expression after the '=' sign
               for (let k = 2; k < argChild.childCount; k++) {
                 const exprNode = argChild.child(k);
-                if (exprNode && exprNode.type !== '=' && exprNode.text.trim() !== '') {
+                if (
+                  exprNode &&
+                  exprNode.type !== '=' &&
+                  exprNode.text.trim() !== ''
+                ) {
                   return exprNode.text;
                 }
               }
@@ -933,7 +1198,9 @@ export class AssignStatementVisitor extends BaseASTVisitor {
    *
    * @private
    */
-  private convertExtractedValueToExpression(extractedValue: any): ast.ExpressionNode | null {
+  private convertExtractedValueToExpression(
+    extractedValue: any
+  ): ast.ExpressionNode | null {
     if (!extractedValue || typeof extractedValue !== 'object') {
       return null;
     }
@@ -945,28 +1212,40 @@ export class AssignStatementVisitor extends BaseASTVisitor {
           type: 'expression',
           expressionType: 'literal',
           value: extractedValue.value,
-          location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }, // Default location
+          location: {
+            start: { line: 0, column: 0, offset: 0 },
+            end: { line: 0, column: 0, offset: 0 },
+          }, // Default location
         };
       case 'string':
         return {
           type: 'expression',
           expressionType: 'literal',
           value: extractedValue.value,
-          location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }, // Default location
+          location: {
+            start: { line: 0, column: 0, offset: 0 },
+            end: { line: 0, column: 0, offset: 0 },
+          }, // Default location
         };
       case 'boolean':
         return {
           type: 'expression',
           expressionType: 'literal',
           value: extractedValue.value,
-          location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }, // Default location
+          location: {
+            start: { line: 0, column: 0, offset: 0 },
+            end: { line: 0, column: 0, offset: 0 },
+          }, // Default location
         };
       case 'identifier':
         return {
           type: 'expression',
           expressionType: 'variable',
           name: extractedValue.value,
-          location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }, // Default location
+          location: {
+            start: { line: 0, column: 0, offset: 0 },
+            end: { line: 0, column: 0, offset: 0 },
+          }, // Default location
         };
       default:
         // For unknown types, create a generic literal expression
@@ -974,7 +1253,10 @@ export class AssignStatementVisitor extends BaseASTVisitor {
           type: 'expression',
           expressionType: 'literal',
           value: extractedValue.value || extractedValue,
-          location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }, // Default location
+          location: {
+            start: { line: 0, column: 0, offset: 0 },
+            end: { line: 0, column: 0, offset: 0 },
+          }, // Default location
         };
     }
   }
@@ -998,7 +1280,10 @@ export class AssignStatementVisitor extends BaseASTVisitor {
         type: 'expression',
         expressionType: 'variable',
         name: value.value as string,
-        location: { start: { line: 0, column: 0, offset: 0 }, end: { line: 0, column: 0, offset: 0 } }
+        location: {
+          start: { line: 0, column: 0, offset: 0 },
+          end: { line: 0, column: 0, offset: 0 },
+        },
       } as ast.VariableNode;
     } else if (value.type === 'vector') {
       const vectorValues = (value.value as ast.Value[]).map(v => {
@@ -1011,13 +1296,17 @@ export class AssignStatementVisitor extends BaseASTVisitor {
       if (vectorValues.length === 2) {
         return vectorValues as ast.Vector2D;
       } else if (vectorValues.length >= 3) {
-        return [vectorValues[0], vectorValues[1], vectorValues[2]] as ast.Vector3D;
+        return [
+          vectorValues[0],
+          vectorValues[1],
+          vectorValues[2],
+        ] as ast.Vector3D;
       }
       return [0, 0, 0] as ast.Vector3D; // Default fallback
     }
 
     // Default fallback - return as string
-    return value.value as string || '';
+    return (value.value as string) || '';
   }
 
   /**

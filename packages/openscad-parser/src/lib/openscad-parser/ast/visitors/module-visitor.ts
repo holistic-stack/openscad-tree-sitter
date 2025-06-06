@@ -151,34 +151,60 @@ export class ModuleVisitor extends BaseASTVisitor {
    * @returns The AST node or null if the node cannot be processed
    */
   override visitModuleDefinition(node: TSNode): ast.ModuleDefinitionNode | null {
-    console.log(
+    this.errorHandler.logDebug(
       `[ModuleVisitor.visitModuleDefinition] Processing module definition: ${node.text.substring(
         0,
         50
-      )}`
+      )}`,
+      'ModuleVisitor.visitModuleDefinition',
+      node
     );
 
-    // Extract module name
-    let name = '';
+    // Extract module name identifier
+    const nameCSTNode = node.childForFieldName('name');
+    let nameAstIdentifierNode: ast.IdentifierNode;
 
-    // Extract module name from the node
-    const nameNode = node.childForFieldName('name');
-    if (nameNode) {
-      name = nameNode.text;
-    }
-
-    // For the test cases, extract the name from the text if not found in the node
-    if (!name && node.text.startsWith('module ')) {
-      const moduleText = node.text.substring(7); // Skip 'module '
-      const nameEndIndex = moduleText.indexOf('(');
-      if (nameEndIndex > 0) {
-        name = moduleText.substring(0, nameEndIndex);
+    if (nameCSTNode) {
+      nameAstIdentifierNode = {
+        type: 'expression', // Corrected: IdentifierNode is a type of ExpressionNode
+        expressionType: 'identifier',
+        name: nameCSTNode.text,
+        location: getLocation(nameCSTNode),
+      };
+    } else {
+      // Fallback for test cases or malformed CST: try to parse name from text
+      let parsedName = '';
+      const nodeText = node.text;
+      if (nodeText.startsWith('module ')) {
+        const moduleTextContent = nodeText.substring('module '.length);
+        const nameEndIndex = moduleTextContent.indexOf('(');
+        if (nameEndIndex > 0) {
+          parsedName = moduleTextContent.substring(0, nameEndIndex).trim();
+        }
       }
-    }
 
-    if (!name) {
-      console.log(`[ModuleVisitor.visitModuleDefinition] No name found`);
-      return null;
+      if (parsedName) {
+        // If nameCSTNode is missing, we create an IdentifierNode without a precise location.
+        // The 'location' property is optional in BaseNode, so we omit it here.
+        nameAstIdentifierNode = {
+          type: 'expression',
+          expressionType: 'identifier',
+          name: parsedName,
+          // location is intentionally omitted as it's undefined in this fallback
+        };
+        this.errorHandler.logWarning(
+          `[ModuleVisitor.visitModuleDefinition] Module name '${parsedName}' was parsed from text due to missing name CST node. Precise location data for the name identifier will be missing. Node text: ${node.text.substring(0,50)}`,
+          'ModuleVisitor.visitModuleDefinition',
+          node
+        );
+      } else {
+        this.errorHandler.logError(
+          `[ModuleVisitor.visitModuleDefinition] Could not find or parse module name. Name CST node missing and text parsing failed for node: ${node.text.substring(0,50)}`,
+          'ModuleVisitor.visitModuleDefinition',
+          node
+        );
+        return null;
+      }
     }
 
     // Extract parameters
@@ -259,16 +285,17 @@ export class ModuleVisitor extends BaseASTVisitor {
       });
     }
 
-    console.log(
-      `[ModuleVisitor.visitModuleDefinition] Created module definition node with name=${name}, parameters=${moduleParameters.length}, body=${body.length}`
+    this.errorHandler.logDebug(
+      `[ModuleVisitor.visitModuleDefinition] Created module definition node with name=${nameAstIdentifierNode.name}, parameters=${moduleParameters.length}, body=${body.length}`,
+      'ModuleVisitor.visitModuleDefinition'
     );
 
     return {
       type: 'module_definition',
-      name,
+      name: nameAstIdentifierNode, // Use the created IdentifierNode
       parameters: moduleParameters,
       body,
-      location: getLocation(node),
+      location: getLocation(node), // Location of the entire module definition
     };
   }
 

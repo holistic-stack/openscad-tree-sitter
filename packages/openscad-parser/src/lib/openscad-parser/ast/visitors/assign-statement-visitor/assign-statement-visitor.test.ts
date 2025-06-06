@@ -43,7 +43,10 @@ describe('AssignStatementVisitor', () => {
 
       const assignNode = ast[0] as AssignStatementNode;
       expect(assignNode.assignments).toHaveLength(1);
-      expect(assignNode.assignments[0].variable).toBe('x');
+      expect(assignNode.assignments[0].variable.name).toBe('x');
+      expect(assignNode.assignments[0].variable.type).toBe('expression');
+      expect(assignNode.assignments[0].variable.expressionType).toBe('identifier');
+      expect(assignNode.assignments[0].variable.location).toBeDefined();
       expect(assignNode.assignments[0].value).toBeDefined();
       expect(assignNode.body).toBeDefined();
       expect(assignNode.body.type).toBe('module_instantiation');
@@ -56,7 +59,10 @@ describe('AssignStatementVisitor', () => {
       expect(ast).toHaveLength(1);
       const assignNode = ast[0] as AssignStatementNode;
       expect(assignNode.assignments).toHaveLength(1);
-      expect(assignNode.assignments[0].variable).toBe('flag');
+      expect(assignNode.assignments[0].variable.name).toBe('flag');
+      expect(assignNode.assignments[0].variable.type).toBe('expression');
+      expect(assignNode.assignments[0].variable.expressionType).toBe('identifier');
+      expect(assignNode.assignments[0].variable.location).toBeDefined();
       expect(assignNode.assignments[0].value).toBeDefined();
     });
 
@@ -67,7 +73,10 @@ describe('AssignStatementVisitor', () => {
       expect(ast).toHaveLength(1);
       const assignNode = ast[0] as AssignStatementNode;
       expect(assignNode.assignments).toHaveLength(1);
-      expect(assignNode.assignments[0].variable).toBe('name');
+      expect(assignNode.assignments[0].variable.name).toBe('name');
+      expect(assignNode.assignments[0].variable.type).toBe('expression');
+      expect(assignNode.assignments[0].variable.expressionType).toBe('identifier');
+      expect(assignNode.assignments[0].variable.location).toBeDefined();
       expect(assignNode.assignments[0].value).toBeDefined();
     });
   });
@@ -81,10 +90,16 @@ describe('AssignStatementVisitor', () => {
       const assignNode = ast[0] as AssignStatementNode;
       expect(assignNode.assignments).toHaveLength(2);
       
-      expect(assignNode.assignments[0].variable).toBe('x');
+      expect(assignNode.assignments[0].variable.name).toBe('x');
+      expect(assignNode.assignments[0].variable.type).toBe('expression');
+      expect(assignNode.assignments[0].variable.expressionType).toBe('identifier');
+      expect(assignNode.assignments[0].variable.location).toBeDefined();
       expect(assignNode.assignments[0].value).toBeDefined();
       
-      expect(assignNode.assignments[1].variable).toBe('y');
+      expect(assignNode.assignments[1].variable.name).toBe('y');
+      expect(assignNode.assignments[1].variable.type).toBe('expression');
+      expect(assignNode.assignments[1].variable.expressionType).toBe('identifier');
+      expect(assignNode.assignments[1].variable.location).toBeDefined();
       expect(assignNode.assignments[1].value).toBeDefined();
       
       expect(assignNode.body).toBeDefined();
@@ -101,7 +116,10 @@ describe('AssignStatementVisitor', () => {
       
       expect(assignNode.assignments[0].variable).toBe('x');
       expect(assignNode.assignments[1].variable).toBe('y');
-      expect(assignNode.assignments[2].variable).toBe('z');
+      expect(assignNode.assignments[2].variable.name).toBe('z');
+      expect(assignNode.assignments[2].variable.type).toBe('expression');
+      expect(assignNode.assignments[2].variable.expressionType).toBe('identifier');
+      expect(assignNode.assignments[2].variable.location).toBeDefined();
     });
 
     it('should parse assign statement with mixed value types', () => {
@@ -112,9 +130,18 @@ describe('AssignStatementVisitor', () => {
       const assignNode = ast[0] as AssignStatementNode;
       expect(assignNode.assignments).toHaveLength(3);
       
-      expect(assignNode.assignments[0].variable).toBe('num');
-      expect(assignNode.assignments[1].variable).toBe('str');
-      expect(assignNode.assignments[2].variable).toBe('flag');
+      expect(assignNode.assignments[0].variable.name).toBe('num');
+      expect(assignNode.assignments[0].variable.type).toBe('expression');
+      expect(assignNode.assignments[0].variable.expressionType).toBe('identifier');
+      expect(assignNode.assignments[0].variable.location).toBeDefined();
+      expect(assignNode.assignments[1].variable.name).toBe('str');
+      expect(assignNode.assignments[1].variable.type).toBe('expression');
+      expect(assignNode.assignments[1].variable.expressionType).toBe('identifier');
+      expect(assignNode.assignments[1].variable.location).toBeDefined();
+      expect(assignNode.assignments[2].variable.name).toBe('flag');
+      expect(assignNode.assignments[2].variable.type).toBe('expression');
+      expect(assignNode.assignments[2].variable.expressionType).toBe('identifier');
+      expect(assignNode.assignments[2].variable.location).toBeDefined();
     });
   });
 
@@ -126,7 +153,10 @@ describe('AssignStatementVisitor', () => {
       expect(ast).toHaveLength(1);
       const assignNode = ast[0] as AssignStatementNode;
       expect(assignNode.assignments).toHaveLength(1);
-      expect(assignNode.assignments[0].variable).toBe('result');
+      expect(assignNode.assignments[0].variable.name).toBe('result');
+      expect(assignNode.assignments[0].variable.type).toBe('expression');
+      expect(assignNode.assignments[0].variable.expressionType).toBe('identifier');
+      expect(assignNode.assignments[0].variable.location).toBeDefined();
       expect(assignNode.assignments[0].value).toBeDefined();
     });
 
@@ -137,8 +167,14 @@ describe('AssignStatementVisitor', () => {
       expect(ast).toHaveLength(1);
       const assignNode = ast[0] as AssignStatementNode;
       expect(assignNode.assignments).toHaveLength(2);
-      expect(assignNode.assignments[0].variable).toBe('angle');
-      expect(assignNode.assignments[1].variable).toBe('radius');
+      expect(assignNode.assignments[0].variable.name).toBe('angle');
+      expect(assignNode.assignments[0].variable.type).toBe('expression');
+      expect(assignNode.assignments[0].variable.expressionType).toBe('identifier');
+      expect(assignNode.assignments[0].variable.location).toBeDefined();
+      expect(assignNode.assignments[1].variable.name).toBe('radius');
+      expect(assignNode.assignments[1].variable.type).toBe('expression');
+      expect(assignNode.assignments[1].variable.expressionType).toBe('identifier');
+      expect(assignNode.assignments[1].variable.location).toBeDefined();
     });
 
     it('should parse assign statement with array expressions', () => {
@@ -148,7 +184,10 @@ describe('AssignStatementVisitor', () => {
       expect(ast).toHaveLength(1);
       const assignNode = ast[0] as AssignStatementNode;
       expect(assignNode.assignments).toHaveLength(1);
-      expect(assignNode.assignments[0].variable).toBe('points');
+      expect(assignNode.assignments[0].variable.name).toBe('points');
+      expect(assignNode.assignments[0].variable.type).toBe('expression');
+      expect(assignNode.assignments[0].variable.expressionType).toBe('identifier');
+      expect(assignNode.assignments[0].variable.location).toBeDefined();
       expect(assignNode.assignments[0].value).toBeDefined();
     });
 
@@ -159,7 +198,10 @@ describe('AssignStatementVisitor', () => {
       expect(ast).toHaveLength(1);
       const assignNode = ast[0] as AssignStatementNode;
       expect(assignNode.assignments).toHaveLength(1);
-      expect(assignNode.assignments[0].variable).toBe('range');
+      expect(assignNode.assignments[0].variable.name).toBe('range');
+      expect(assignNode.assignments[0].variable.type).toBe('expression');
+      expect(assignNode.assignments[0].variable.expressionType).toBe('identifier');
+      expect(assignNode.assignments[0].variable.location).toBeDefined();
       expect(assignNode.assignments[0].value).toBeDefined();
     });
   });
@@ -172,7 +214,10 @@ describe('AssignStatementVisitor', () => {
       expect(ast).toHaveLength(1);
       const assignNode = ast[0] as AssignStatementNode;
       expect(assignNode.assignments).toHaveLength(1);
-      expect(assignNode.assignments[0].variable).toBe('r');
+      expect(assignNode.assignments[0].variable.name).toBe('r');
+      expect(assignNode.assignments[0].variable.type).toBe('expression');
+      expect(assignNode.assignments[0].variable.expressionType).toBe('identifier');
+      expect(assignNode.assignments[0].variable.location).toBeDefined();
       expect(assignNode.body).toBeDefined();
       expect(assignNode.body.type).toBe('expression');
       expect((assignNode.body as any).expressionType).toBe('block');
@@ -188,8 +233,14 @@ describe('AssignStatementVisitor', () => {
       expect(ast).toHaveLength(1);
       const assignNode = ast[0] as AssignStatementNode;
       expect(assignNode.assignments).toHaveLength(2);
-      expect(assignNode.assignments[0].variable).toBe('size');
-      expect(assignNode.assignments[1].variable).toBe('height');
+      expect(assignNode.assignments[0].variable.name).toBe('size');
+      expect(assignNode.assignments[0].variable.type).toBe('expression');
+      expect(assignNode.assignments[0].variable.expressionType).toBe('identifier');
+      expect(assignNode.assignments[0].variable.location).toBeDefined();
+      expect(assignNode.assignments[1].variable.name).toBe('height');
+      expect(assignNode.assignments[1].variable.type).toBe('expression');
+      expect(assignNode.assignments[1].variable.expressionType).toBe('identifier');
+      expect(assignNode.assignments[1].variable.location).toBeDefined();
       expect(assignNode.body.type).toBe('expression');
       expect((assignNode.body as any).expressionType).toBe('block');
     });
@@ -213,7 +264,10 @@ describe('AssignStatementVisitor', () => {
       expect(ast).toHaveLength(1);
       const assignNode = ast[0] as AssignStatementNode;
       expect(assignNode.assignments).toHaveLength(1);
-      expect(assignNode.assignments[0].variable).toBe('x');
+      expect(assignNode.assignments[0].variable.name).toBe('x');
+      expect(assignNode.assignments[0].variable.type).toBe('expression');
+      expect(assignNode.assignments[0].variable.expressionType).toBe('identifier');
+      expect(assignNode.assignments[0].variable.location).toBeDefined();
     });
 
     it('should handle multiple assign statements', () => {
@@ -230,8 +284,14 @@ describe('AssignStatementVisitor', () => {
       const firstAssign = ast[0] as AssignStatementNode;
       const secondAssign = ast[1] as AssignStatementNode;
       
-      expect(firstAssign.assignments[0].variable).toBe('x');
-      expect(secondAssign.assignments[0].variable).toBe('y');
+      expect(firstAssign.assignments[0].variable.name).toBe('x');
+      expect(firstAssign.assignments[0].variable.type).toBe('expression');
+      expect(firstAssign.assignments[0].variable.expressionType).toBe('identifier');
+      expect(firstAssign.assignments[0].variable.location).toBeDefined();
+      expect(secondAssign.assignments[0].variable.name).toBe('y');
+      expect(secondAssign.assignments[0].variable.type).toBe('expression');
+      expect(secondAssign.assignments[0].variable.expressionType).toBe('identifier');
+      expect(secondAssign.assignments[0].variable.location).toBeDefined();
     });
   });
 
