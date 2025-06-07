@@ -36,8 +36,8 @@ export enum QuickFixKind {
 export interface QuickFixAction {
   readonly title: string;
   readonly kind: QuickFixKind;
-  readonly edit?: monaco.editor.IWorkspaceEdit;
-  readonly command?: monaco.editor.Command;
+  readonly edit?: monaco.languages.WorkspaceEdit;
+  readonly command?: monaco.languages.Command;
   readonly diagnostics?: readonly OpenSCADDiagnostic[];
   readonly isPreferred?: boolean;
   readonly disabled?: {
@@ -203,6 +203,7 @@ export class OpenSCADQuickFixProvider implements monaco.languages.CodeActionProv
         edit: {
           edits: [{
             resource: model.uri,
+            versionId: model.getVersionId(),
             textEdit: {
               range: {
                 startLineNumber: range.endLineNumber,
@@ -227,6 +228,7 @@ export class OpenSCADQuickFixProvider implements monaco.languages.CodeActionProv
         edit: {
           edits: [{
             resource: model.uri,
+            versionId: model.getVersionId(),
             textEdit: {
               range: {
                 startLineNumber: range.endLineNumber,
@@ -252,6 +254,7 @@ export class OpenSCADQuickFixProvider implements monaco.languages.CodeActionProv
         edit: {
           edits: [{
             resource: model.uri,
+            versionId: model.getVersionId(),
             textEdit: {
               range,
               text: fix
@@ -284,6 +287,7 @@ export class OpenSCADQuickFixProvider implements monaco.languages.CodeActionProv
         edit: {
           edits: [{
             resource: model.uri,
+            versionId: model.getVersionId(),
             textEdit: {
               range: {
                 startLineNumber: 1,
@@ -320,6 +324,7 @@ export class OpenSCADQuickFixProvider implements monaco.languages.CodeActionProv
           edit: {
             edits: [{
               resource: model.uri,
+              versionId: model.getVersionId(),
               textEdit: {
                 range: {
                   startLineNumber: range.startLineNumber,
@@ -331,6 +336,7 @@ export class OpenSCADQuickFixProvider implements monaco.languages.CodeActionProv
               }
             }, {
               resource: model.uri,
+              versionId: model.getVersionId(),
               textEdit: {
                 range,
                 text: 'extracted_value'
@@ -407,30 +413,30 @@ export class OpenSCADQuickFixProvider implements monaco.languages.CodeActionProv
    * Calculate Levenshtein distance between two strings
    */
   private levenshteinDistance(str1: string, str2: string): number {
-    const matrix: number[][] = [];
+    const matrix: number[][] = Array(str2.length + 1).fill(null).map(() => Array(str1.length + 1).fill(0));
 
     for (let i = 0; i <= str2.length; i++) {
-      matrix[i] = [i];
+      matrix[i]![0] = i;
     }
 
     for (let j = 0; j <= str1.length; j++) {
-      matrix[0][j] = j;
+      matrix[0]![j] = j;
     }
 
     for (let i = 1; i <= str2.length; i++) {
       for (let j = 1; j <= str1.length; j++) {
         if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
-          matrix[i][j] = matrix[i - 1][j - 1];
+          matrix[i]![j] = matrix[i - 1]![j - 1]!;
         } else {
-          matrix[i][j] = Math.min(
-            matrix[i - 1][j - 1] + 1, // substitution
-            matrix[i][j - 1] + 1,     // insertion
-            matrix[i - 1][j] + 1      // deletion
+          matrix[i]![j] = Math.min(
+            matrix[i - 1]![j - 1]! + 1, // substitution
+            matrix[i]![j - 1]! + 1,     // insertion
+            matrix[i - 1]![j]! + 1      // deletion
           );
         }
       }
     }
 
-    return matrix[str2.length][str1.length];
+    return matrix[str2.length]![str1.length]!;
   }
 }

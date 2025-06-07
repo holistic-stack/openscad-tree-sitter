@@ -203,18 +203,30 @@ export class OpenSCADErrorDetectionProvider {
     model: monaco.editor.ITextModel,
     diagnostics: OpenSCADDiagnostic[]
   ): void {
-    const markers: monaco.editor.IMarkerData[] = diagnostics.map(diagnostic => ({
-      severity: diagnostic.severity,
-      message: diagnostic.message,
-      startLineNumber: diagnostic.range.startLineNumber,
-      startColumn: diagnostic.range.startColumn,
-      endLineNumber: diagnostic.range.endLineNumber,
-      endColumn: diagnostic.range.endColumn,
-      source: diagnostic.source,
-      code: diagnostic.code,
-      relatedInformation: diagnostic.relatedInformation,
-      tags: diagnostic.tags
-    }));
+    const markers: monaco.editor.IMarkerData[] = diagnostics.map(diagnostic => {
+      const marker: monaco.editor.IMarkerData = {
+        severity: diagnostic.severity as unknown as monaco.MarkerSeverity,
+        message: diagnostic.message,
+        startLineNumber: diagnostic.range.startLineNumber,
+        startColumn: diagnostic.range.startColumn,
+        endLineNumber: diagnostic.range.endLineNumber,
+        endColumn: diagnostic.range.endColumn,
+        source: diagnostic.source
+      };
+
+      // Only add optional properties if they have valid values
+      if (typeof diagnostic.code === 'string') {
+        marker.code = diagnostic.code;
+      }
+      if (diagnostic.relatedInformation) {
+        marker.relatedInformation = [...diagnostic.relatedInformation];
+      }
+      if (diagnostic.tags) {
+        marker.tags = [...diagnostic.tags];
+      }
+
+      return marker;
+    });
 
     monaco.editor.setModelMarkers(model, 'openscad-diagnostics', markers);
   }
