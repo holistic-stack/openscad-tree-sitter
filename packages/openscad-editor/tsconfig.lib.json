@@ -10,7 +10,8 @@
     "module": "preserve",
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "noEmit": true,
+    "noEmit": false,
+    "emitDeclarationOnly": true,
 
     // Output configuration
     "outDir": "../../dist/out-tsc",

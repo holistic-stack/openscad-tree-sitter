@@ -25,8 +25,8 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@openscad/editor": ["packages/openscad-editor/src/index.ts"],
-      "@openscad/parser": ["packages/openscad-parser/dist/lib/index.d.ts"],
+      "@openscad/editor": ["packages/openscad-editor/dist/index.ts"],
+      "@openscad/parser": ["packages/openscad-parser/dist/src/lib/index.ts"],
       "@openscad/tree-sitter-openscad": [
         "packages/tree-sitter-openscad/src/index.ts"
       ],

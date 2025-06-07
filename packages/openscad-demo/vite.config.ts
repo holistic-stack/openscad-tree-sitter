@@ -1,51 +1,92 @@
 /// <reference types='vitest' />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-// import dts from 'vite-plugin-dts'; // Removed for app build
-import * as path from 'path';
-// import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin'; // Removed for app build
 import monacoEditorPlugin from 'vite-plugin-monaco-editor';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
-import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
-import { dirname, resolve } from 'node:path';
+import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig(() => ({
-  root: __dirname, // Keep root for resolving paths correctly
+  root: __dirname,
+  cacheDir: '../../node_modules/.vite/packages/openscad-demo',
+
   plugins: [
     react(),
     nxViteTsPaths(),
-    // nxCopyAssetsPlugin(['*.md']), // Removed
-    // dts({
-    //   entryRoot: 'src',
-    //   tsconfigPath: path.join(__dirname, 'tsconfig.lib.json'),
-    // }), // Removed for app build
     (monacoEditorPlugin as any).default({
       languageWorkers: ['editorWorkerService', 'css', 'html', 'json', 'typescript'],
-      // publicPath: 'monaco-assets' // Optional: if you want to serve monaco assets from a subfolder
     }),
   ],
-  // To ensure static assets from @openscad/editor (e.g., .wasm, .scm files in its public dir)
-  // are available, you might need to:
-  // 1. Configure `assetsInclude` in Vite if they are not picked up automatically.
-  // 2. Or, add a build step to copy them from `packages/openscad-editor/public`
-  //    to `packages/openscad-demo/public` or the build output directory.
-  // `vite-plugin-monaco-editor` handles Monaco's own assets.
-  // `web-tree-sitter` might also need its wasm file to be accessible.
-  // Adding '../../node_modules/web-tree-sitter' to fs.allow for dev.
-  // For prod, ensure `parser.wasm` from web-tree-sitter is in your public/assets dir.
 
+  // Build configuration for React web application
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+    sourcemap: true,
+    reportCompressedSize: true,
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
+  },
+
+  // Configure WASM file serving for Vite 6.x
+  assetsInclude: ['**/*.wasm'],
+  publicDir: 'public',
+
+  // Development server configuration
+  server: {
+    port: 4200,
+    host: 'localhost',
+    fs: {
+      allow: ['..', '../..'], // Allow access to parent directories for monorepo
+    },
+    headers: {
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+      'Cross-Origin-Opener-Policy': 'same-origin',
+    },
+  },
+
+  // Preview server configuration
+  preview: {
+    port: 4300,
+    host: 'localhost',
+  },
+
+  // Global definitions for Vite 6.x
+  define: {
+    global: 'globalThis',
+  },
+
+  // Dependency optimization
+  optimizeDeps: {
+    exclude: [
+      '@openscad/parser',
+      '@openscad/editor',
+      '@openscad/tree-sitter-openscad',
+    ],
+    include: [
+      'react',
+      'react-dom',
+      'monaco-editor',
+      '@monaco-editor/react',
+    ],
+  },
+
+  // Vitest configuration
   test: {
-    watch: false,
     globals: true,
+    cache: {
+      dir: '../../node_modules/.vitest/packages/openscad-demo',
+    },
     environment: 'jsdom',
-    include: ['{src,tests}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     reporters: ['default'],
     coverage: {
       reportsDirectory: '../../coverage/packages/openscad-demo',
       provider: 'v8' as const,
     },
+    watch: false,
   },
 }));

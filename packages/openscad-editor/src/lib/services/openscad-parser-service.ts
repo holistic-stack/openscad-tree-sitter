@@ -6,44 +6,7 @@
  */
 
 import type * as TreeSitter from 'web-tree-sitter';
-
-// Parser interface that matches the OpenscadParser class
-interface IOpenscadParser {
-  isInitialized: boolean;
-  init(wasmPath?: string): Promise<void>;
-  parse(code: string): TreeSitter.Tree | null;
-  dispose(): void;
-}
-
-// Dynamic import of the parser to avoid build-time dependency issues
-async function createParser(): Promise<IOpenscadParser> {
-  try {
-    // TODO: Re-enable when @openscad/parser package is properly built
-    // const parserModule = await import('@openscad/parser');
-    // return new parserModule.OpenscadParser();
-
-    // For now, always use mock implementation
-    throw new Error('Parser package not available - using mock');
-  } catch (error) {
-    console.warn('OpenSCAD parser not available, using mock implementation:', error);
-    // Fallback to a mock implementation
-    const mockParser: IOpenscadParser = {
-      isInitialized: false,
-      async init(_wasmPath?: string): Promise<void> {
-        mockParser.isInitialized = true;
-        console.warn('Using mock parser implementation - WASM file not available');
-      },
-      parse(_code: string): TreeSitter.Tree | null {
-        console.warn('Mock parser returning null - no actual parsing performed');
-        return null;
-      },
-      dispose(): void {
-        mockParser.isInitialized = false;
-      }
-    };
-    return mockParser;
-  }
-}
+import { EnhancedOpenscadParser, SimpleErrorHandler } from '@openscad/parser';
 
 // Simple error interface for our service
 export interface ParseError {
@@ -102,24 +65,33 @@ export interface DocumentSymbol {
  * Service class for parsing OpenSCAD code and providing AST-based features
  */
 export class OpenSCADParserService {
-  private parser: IOpenscadParser | null = null;
+  private parser: EnhancedOpenscadParser | null = null;
+  private errorHandler: SimpleErrorHandler;
   private documentTree: TreeSitter.Tree | null = null;
   private lastParseErrors: ParseError[] = [];
   private isInitialized = false;
 
+  constructor() {
+    this.errorHandler = new SimpleErrorHandler();
+  }
+
   /**
    * Initialize the parser service
    */
-  async init(wasmPath = '/public/tree-sitter-openscad.wasm'): Promise<void> {
+  async init(): Promise<void> {
     if (this.isInitialized) {
       return;
     }
 
     try {
-      this.parser = await createParser();
-      await this.parser.init(wasmPath);
+      console.log('🔄 Initializing OpenSCAD parser service...');
+
+      // Create and initialize the enhanced parser
+      this.parser = new EnhancedOpenscadParser(this.errorHandler);
+      await this.parser.init();
+
       this.isInitialized = true;
-      console.log('✅ OpenSCAD parser initialized successfully with WASM path:', wasmPath);
+      console.log('✅ OpenSCAD parser service initialized successfully');
     } catch (error) {
       console.error('❌ Failed to initialize OpenSCAD parser:', error);
       throw new Error(`Parser initialization failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -139,12 +111,25 @@ export class OpenSCADParserService {
     try {
       console.log('🔄 Parsing OpenSCAD document...');
 
-      // Parse the content
-      const tree = this.parser.parse(content);
+      // Clear previous errors
+      this.errorHandler.clear();
+
+      // Parse the content using enhanced parser
+      const tree = this.parser.parseCST(content);
 
       if (tree) {
         this.documentTree = tree;
-        this.lastParseErrors = this.extractErrorsFromTree(tree, content);
+
+        // Get errors from error handler
+        const parserErrors = this.errorHandler.getErrors();
+        this.lastParseErrors = parserErrors.map((error: any) => ({
+          message: error.message,
+          location: {
+            line: error.line || 0,
+            column: error.column || 0,
+          },
+          severity: 'error' as const,
+        }));
 
         console.log(`✅ Document parsed successfully: ${this.lastParseErrors.length} errors found`);
 
@@ -158,7 +143,7 @@ export class OpenSCADParserService {
         this.documentTree = null;
         this.lastParseErrors = [
           {
-            message: 'Failed to parse document - parser returned null tree. This may indicate WASM initialization issues.',
+            message: 'Failed to parse document - parser returned null tree.',
             location: { line: 1, column: 1 },
             severity: 'error',
           },
@@ -281,36 +266,6 @@ export class OpenSCADParserService {
   }
 
   // Private helper methods
-
-  private extractErrorsFromTree(
-    tree: TreeSitter.Tree,
-    source: string
-  ): ParseError[] {
-    const errors: ParseError[] = [];
-
-    const walkNode = (node: TreeSitter.Node) => {
-      if (node.type === 'ERROR' || node.hasError) {
-        errors.push({
-          message: `Syntax error: unexpected ${node.type}`,
-          location: {
-            line: node.startPosition.row,
-            column: node.startPosition.column,
-          },
-          severity: 'error',
-        });
-      }
-
-      for (let i = 0; i < node.childCount; i++) {
-        const child = node.child(i);
-        if (child) {
-          walkNode(child);
-        }
-      }
-    };
-
-    walkNode(tree.rootNode);
-    return errors;
-  }
 
   private hasErrors(node: TreeSitter.Node): boolean {
     if (node.type === 'ERROR' || node.hasError) {

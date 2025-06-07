@@ -168,7 +168,7 @@ export class EnhancedOpenscadParser {
    * ```
    * @since 0.1.0
    */
-  async init(wasmPath = './tree-sitter-openscad.wasm'): Promise<void> {
+  async init(wasmPath = './tree-sitter-openscad.wasm', treeSitterWasmPath = './tree-sitter.wasm'): Promise<void> {
     try {
       this.errorHandler.logInfo('Initializing enhanced OpenSCAD parser...');
 
@@ -181,7 +181,11 @@ export class EnhancedOpenscadParser {
 
       const bytes = new Uint8Array(arrayBuffer);
 
-      await TreeSitter.Parser.init();
+      await TreeSitter.Parser.init({
+        locateFile(scriptName: string) {
+          return scriptName === 'tree-sitter.wasm' ? treeSitterWasmPath : scriptName;
+        },
+      });
       this.parser = new TreeSitter.Parser();
       this.language = await TreeSitter.Language.load(bytes);
       this.parser.setLanguage(this.language);

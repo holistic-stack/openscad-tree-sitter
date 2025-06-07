@@ -1,25 +1,61 @@
 import { vi } from 'vitest';
 import createFetchMock from 'vitest-fetch-mock';
 import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+const __dirname = import.meta.dirname;
 
 const fetchMocker = createFetchMock(vi);
 fetchMocker.enableMocks();
 
 vi.mocked(fetch).mockImplementation(url => {
   console.log('using local fetch mock', url);
+  // Handle both string and URL objects
+  let urlPath: string;
   if (typeof url === 'string') {
-    const urlPath = url.startsWith('/') ? url.slice(1) : url;
+    urlPath = url;
+  } else if (url instanceof URL) {
+    urlPath = url.pathname;
+  } else {
+    // Handle other URL-like objects
+    urlPath = String(url);
+  }
+
+  // Point to the tree-sitter-openscad package for WASM files
+  const treeSitterPath = join(__dirname, '../../node_modules/@openscad/tree-sitter-openscad');
+  console.log('__dirname', join(treeSitterPath, urlPath));
+
+  // Normalize the path
+  urlPath = urlPath.startsWith('/') ? urlPath.slice(1) : urlPath;
+
+  try {
+    let filePath: string;
+
+    // Handle different WASM files
+    if (urlPath === 'tree-sitter.wasm') {
+      // Core web-tree-sitter WASM file
+      filePath = join(__dirname, '../../node_modules/web-tree-sitter/tree-sitter.wasm');
+    } else {
+      // OpenSCAD-specific WASM file
+      filePath = join(treeSitterPath, urlPath);
+    }
+
+    console.log('Attempting to read WASM file from:', filePath);
+
     // read file in urlPath as Uint8Array
-    const localFile = readFileSync(urlPath);
+    const localFile = readFileSync(filePath);
     const uint8Array = new Uint8Array(localFile);
     return Promise.resolve({
       ok: true,
+      arrayBuffer: () => Promise.resolve(uint8Array.buffer),
       bytes: () => Promise.resolve(uint8Array),
-    } as any);
+    } as unknown as Response);
+  } catch (error) {
+    console.error('Failed to read WASM file:', urlPath, error);
+    return Promise.resolve({
+      ok: false,
+      status: 404,
+      statusText: 'Not Found',
+    } as unknown as Response);
   }
-
-  return Promise.resolve({
-    json: vi.fn().mockResolvedValue({}),
-    arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(0)),
-  } as any);
 });

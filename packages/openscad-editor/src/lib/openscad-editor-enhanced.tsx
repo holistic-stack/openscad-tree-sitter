@@ -126,7 +126,7 @@ export const OpenscadEditorEnhanced: React.FC<OpenscadEditorEnhancedProps> = ({
 
       // Initialize parser service
       const parserService = new OpenSCADParserService();
-      await parserService.init(wasmPath);
+      await parserService.init();
       parserServiceRef.current = parserService;
 
       // Initialize diagnostics service

@@ -1,52 +1,89 @@
+/// <reference types='vitest' />
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
-import tsconfigPaths from 'vite-tsconfig-paths';
-import { join, resolve } from 'path';
+import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  root: __dirname,
+  cacheDir: '../../node_modules/.vite/packages/openscad-parser',
+
   plugins: [
+    nxViteTsPaths(),
     dts({
       entryRoot: 'src',
-      tsconfigPath: join(__dirname, 'tsconfig.json'),
+      tsconfigPath: resolve(__dirname, 'tsconfig.json'),
+      outDir: resolve(__dirname, 'dist'),
+      copyDtsFiles: true,
     }),
-    tsconfigPaths(),
   ],
+
+  // Library mode configuration for Vite 6.x
   build: {
-    lib: {
-      entry: resolve(__dirname, 'src/lib/index.ts'),
-      name: 'openscadParser',
-      fileName: 'index',
-      formats: ['es', 'cjs'],
-    },
+    outDir: resolve(__dirname, 'dist'),
+    emptyOutDir: true,
     sourcemap: true,
     minify: false,
-    outDir: 'dist',
-    emptyOutDir: true,
+    reportCompressedSize: true,
+
+    lib: {
+      entry: resolve(__dirname, 'src/lib/index.ts'),
+      name: 'OpenSCADParser',
+      fileName: (format) => `index.${format === 'es' ? 'js' : 'cjs'}`,
+      formats: ['es', 'cjs'],
+    },
+
     rollupOptions: {
+      // External packages that should not be bundled into the library
+      external: [
+        '@openscad/tree-sitter-openscad',
+        'web-tree-sitter',
+        // Node.js built-ins
+        'path',
+        'fs',
+        'url',
+        'util',
+      ],
+
       output: {
-        preserveModules: true,
-        preserveModulesRoot: 'src',
-        entryFileNames: '[name].js',
-        chunkFileNames: '[name].js',
-        assetFileNames: '[name][extname]',
-        hoistTransitiveImports: false,
-        interop: 'auto',
+        // Provide global variables to use in the UMD build for externalized deps
+        globals: {
+          '@openscad/tree-sitter-openscad': 'TreeSitterOpenSCAD',
+          'web-tree-sitter': 'TreeSitter',
+        },
+
+        // Vite 6.x best practices for library output
         exports: 'named',
+        interop: 'auto',
+        hoistTransitiveImports: false,
         generatedCode: {
           constBindings: true,
           objectShorthand: true,
         },
       },
-      external: ['@openscad/tree-sitter-openscad', 'web-tree-sitter'],
-    }
+    },
   },
+
+  // Vitest configuration
   test: {
     globals: true,
+    cache: {
+      dir: '../../node_modules/.vitest/packages/openscad-parser',
+    },
     environment: 'jsdom',
     environmentOptions: {
       jsdom: {
         resources: 'usable',
       },
+    },
+    include: ['src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    reporters: ['default'],
+    coverage: {
+      reportsDirectory: '../../coverage/packages/openscad-parser',
+      provider: 'v8',
     },
     isolate: true,
     setupFiles: './src/test-utils/setupTest.ts',

@@ -6,24 +6,23 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "./index.js",
-  "types": "./index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "README.md",
+    "dist",
     "./public/tree-sitter-openscad.wasm",
-    "./public/highlights.scm",
-    "index.js",
-    "index.d.ts",
-    "index.mjs",
-    "lib/**/*.js",
-    "lib/**/*.d.ts",
-    "lib/**/*.mjs"
+    "./public/highlights.scm"
   ],
   "exports": {
     ".": {
-      "import": "./index.mjs",
-      "require": "./index.js"
-    }
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
   },
   "repository": {
     "type": "git",
@@ -60,10 +59,15 @@
   },
   "devDependencies": {
     "@monaco-editor/react": "^4.7.0",
+    "@nx/vite": "^21.1.1",
+    "@vitejs/plugin-react": "^4.3.1",
     "monaco-editor": "^0.52.2",
-    "vite": "^6.0.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
     "shx": "^0.3.4",
-    "vite-plugin-dts": "^3.9.1",
+    "typescript": "^5.8.3",
+    "vite": "^6.0.0",
+    "vite-plugin-dts": "^4.5.0",
     "vitest": "^3.1.4",
     "vitest-fetch-mock": "^0.4.5"
   }
