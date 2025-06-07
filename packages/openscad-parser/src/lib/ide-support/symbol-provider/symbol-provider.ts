@@ -69,17 +69,56 @@ export class OpenSCADSymbolProvider implements SymbolProvider {
       return [];
     }
 
-    for (const node of ast) {
+    // Recursively extract symbols from the AST
+    this.extractSymbolsRecursively(ast, symbols);
+
+    this.logger.debug(
+      `[SymbolProvider.getSymbols] Returning ${symbols.length} symbols. Details:`
+    );
+    symbols.forEach((s, index) => {
+      this.logger.debug(`  Symbol[${index}]: ${s.name}, kind: ${s.kind}`);
+      this.logger.debug(`    loc: ${JSON.stringify(s.loc)}`);
+      this.logger.debug(
+        `    nameLoc: ${s.nameLoc ? JSON.stringify(s.nameLoc) : 'undefined'}`
+      );
+    });
+    this.logger.debug(
+      `[SymbolProvider.getSymbols] Final symbols before return: ${JSON.stringify(
+        symbols,
+        null,
+        2
+      )}`
+    );
+    return symbols;
+  }
+
+  /**
+   * Recursively extracts symbols from AST nodes and their children.
+   */
+  private extractSymbolsRecursively(nodes: ASTNode[], symbols: SymbolInfo[]): void {
+    for (const node of nodes) {
       if (!node || !node.location) {
         this.logger.debug(
-          `[SymbolProvider.getSymbols] Skipping node due to missing node or node.location: ${JSON.stringify(
+          `[SymbolProvider.extractSymbolsRecursively] Skipping node due to missing node or node.location: ${JSON.stringify(
             node
           )}`
         );
         continue;
       }
 
-      switch (node.type) {
+      // Extract symbol from current node
+      this.extractSymbolFromNode(node, symbols);
+
+      // Recursively process children
+      this.processNodeChildren(node, symbols);
+    }
+  }
+
+  /**
+   * Extracts symbol information from a single AST node.
+   */
+  private extractSymbolFromNode(node: ASTNode, symbols: SymbolInfo[]): void {
+    switch (node.type) {
         case 'module_definition': {
           const moduleNode = node as ModuleDefinitionNode;
           if (
@@ -95,7 +134,7 @@ export class OpenSCADSymbolProvider implements SymbolProvider {
               this.logger.warn(
                 `[SymbolProvider.getSymbols] Missing locObj or nameLocObj for module: ${moduleNode.name.name}`
               );
-              continue;
+              return;
             }
 
             const symbolInfo: SymbolInfo = {
@@ -126,9 +165,9 @@ export class OpenSCADSymbolProvider implements SymbolProvider {
 
             if (!locObj || !nameLocObj) {
               this.logger.warn(
-                `[SymbolProvider.getSymbols] Missing locObj or nameLocObj for function: ${functionNode.name.name}`
+                `[SymbolProvider.extractSymbolFromNode] Missing locObj or nameLocObj for function: ${functionNode.name.name}`
               );
-              continue;
+              return;
             }
 
             const symbolInfo: SymbolInfo = {
@@ -189,31 +228,47 @@ export class OpenSCADSymbolProvider implements SymbolProvider {
           }
           break;
         }
+        case 'assignment': {
+          const assignmentNode = node as AssignmentNode;
+          if (
+            assignmentNode.location &&
+            assignmentNode.variable &&
+            typeof assignmentNode.variable.name === 'string' &&
+            assignmentNode.variable.location
+          ) {
+            const locObj = cloneSourceLocation(assignmentNode.location); // Location of the whole assignment expression
+            const nameLocObj = cloneSourceLocation(
+              assignmentNode.variable.location
+            ); // Location of the variable identifier itself
+
+            if (!locObj || !nameLocObj) {
+              this.logger.warn(
+                `[SymbolProvider.getSymbols] Missing locObj or nameLocObj for assignment: ${assignmentNode.variable.name}`
+              );
+              break;
+            }
+
+            const symbolInfo: SymbolInfo = {
+              name: assignmentNode.variable.name,
+              kind: 'variable',
+              loc: locObj,
+              nameLoc: nameLocObj,
+            };
+            symbols.push(symbolInfo);
+            this.logger.debug(
+              `[SymbolProvider.getSymbols] Added variable: ${JSON.stringify(
+                symbolInfo
+              )}`
+            );
+          }
+          break;
+        }
         default:
           this.logger.debug(
-            `[SymbolProvider.getSymbols] Unhandled node type: ${node.type}`
+            `[SymbolProvider.extractSymbolFromNode] Unhandled node type: ${node.type}`
           );
           break;
       }
-    }
-    this.logger.debug(
-      `[SymbolProvider.getSymbols] Returning ${symbols.length} symbols. Details:`
-    );
-    symbols.forEach((s, index) => {
-      this.logger.debug(`  Symbol[${index}]: ${s.name}, kind: ${s.kind}`);
-      this.logger.debug(`    loc: ${JSON.stringify(s.loc)}`);
-      this.logger.debug(
-        `    nameLoc: ${s.nameLoc ? JSON.stringify(s.nameLoc) : 'undefined'}`
-      );
-    });
-    this.logger.debug(
-      `[SymbolProvider.getSymbols] Final symbols before return: ${JSON.stringify(
-        symbols,
-        null,
-        2
-      )}`
-    );
-    return symbols;
   }
 
   /**
@@ -277,5 +332,27 @@ export class OpenSCADSymbolProvider implements SymbolProvider {
       )}.`
     );
     return null;
+  }
+
+  /**
+   * Processes children of an AST node to extract nested symbols.
+   */
+  private processNodeChildren(node: ASTNode, symbols: SymbolInfo[]): void {
+    // Handle module definitions with body
+    if (node.type === 'module_definition') {
+      const moduleNode = node as ModuleDefinitionNode;
+      if (moduleNode.body && Array.isArray(moduleNode.body)) {
+        this.extractSymbolsRecursively(moduleNode.body, symbols);
+      }
+    }
+
+    // Handle function definitions (they might have nested symbols in the future)
+    if (node.type === 'function_definition') {
+      const functionNode = node as FunctionDefinitionNode;
+      // Functions don't typically have nested symbols, but we could add parameter extraction here
+    }
+
+    // Handle other node types that might have children
+    // Add more cases as needed for other node types with children
   }
 }

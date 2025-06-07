@@ -184,16 +184,16 @@ export class ModuleVisitor extends BaseASTVisitor {
       }
 
       if (parsedName) {
-        // If nameCSTNode is missing, we create an IdentifierNode without a precise location.
-        // The 'location' property is optional in BaseNode, so we omit it here.
+        // If nameCSTNode is missing, we create an IdentifierNode with location based on the parent node.
+        // This ensures location information is always available for IDE features.
         nameAstIdentifierNode = {
           type: 'expression',
           expressionType: 'identifier',
           name: parsedName,
-          // location is intentionally omitted as it's undefined in this fallback
+          location: getLocation(node), // Use parent node location as fallback
         };
         this.errorHandler.logWarning(
-          `[ModuleVisitor.visitModuleDefinition] Module name '${parsedName}' was parsed from text due to missing name CST node. Precise location data for the name identifier will be missing. Node text: ${node.text.substring(0,50)}`,
+          `[ModuleVisitor.visitModuleDefinition] Module name '${parsedName}' was parsed from text due to missing name CST node. Using parent node location as fallback. Node text: ${node.text.substring(0,50)}`,
           'ModuleVisitor.visitModuleDefinition',
           node
         );

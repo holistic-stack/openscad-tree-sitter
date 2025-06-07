@@ -163,8 +163,7 @@ export class AssignStatementVisitor extends BaseASTVisitor {
           type: 'expression',
           expressionType: 'identifier',
           name: arg.name,
-          // Location for arg.name itself is not directly available from a CST node here,
-          // so we omit it. The overall assignment gets a location.
+          location: getLocation(node), // Use parent node location as fallback
         };
 
         const assignment: ast.AssignmentNode = {
@@ -565,7 +564,10 @@ export class AssignStatementVisitor extends BaseASTVisitor {
               ...variableIdentifierNodeBase,
               location: getLocation(nameNodeForLocation),
             }
-          : variableIdentifierNodeBase;
+          : {
+              ...variableIdentifierNodeBase,
+              location: getLocation(node), // Use parent node location as fallback
+            };
 
         // The location for the AssignmentNode itself should be the span of "name = value"
         let assignmentLocationNode: TSNode | null = null;

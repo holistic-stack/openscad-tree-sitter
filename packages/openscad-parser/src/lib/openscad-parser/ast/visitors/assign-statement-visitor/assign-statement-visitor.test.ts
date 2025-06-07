@@ -114,8 +114,14 @@ describe('AssignStatementVisitor', () => {
       const assignNode = ast[0] as AssignStatementNode;
       expect(assignNode.assignments).toHaveLength(3);
       
-      expect(assignNode.assignments[0].variable).toBe('x');
-      expect(assignNode.assignments[1].variable).toBe('y');
+      expect(assignNode.assignments[0].variable.name).toBe('x');
+      expect(assignNode.assignments[0].variable.type).toBe('expression');
+      expect(assignNode.assignments[0].variable.expressionType).toBe('identifier');
+      expect(assignNode.assignments[0].variable.location).toBeDefined();
+      expect(assignNode.assignments[1].variable.name).toBe('y');
+      expect(assignNode.assignments[1].variable.type).toBe('expression');
+      expect(assignNode.assignments[1].variable.expressionType).toBe('identifier');
+      expect(assignNode.assignments[1].variable.location).toBeDefined();
       expect(assignNode.assignments[2].variable.name).toBe('z');
       expect(assignNode.assignments[2].variable.type).toBe('expression');
       expect(assignNode.assignments[2].variable.expressionType).toBe('identifier');

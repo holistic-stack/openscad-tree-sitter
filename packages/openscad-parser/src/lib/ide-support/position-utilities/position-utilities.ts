@@ -9,6 +9,7 @@ import type {
   ModuleDefinitionNode,
   FunctionDefinitionNode,
   AssignStatementNode,
+  AssignmentNode,
   ExpressionNode,
 } from '../../openscad-parser/ast/ast-types.js';
 import type {
@@ -167,6 +168,15 @@ export class OpenSCADPositionUtilities implements PositionUtilities {
           }
         } else {
           description = 'Variable assignment';
+        }
+        break;
+      }
+      case 'assignment': {
+        const assignmentNode = node as AssignmentNode;
+        kind = 'variable';
+        description = `Variable: ${assignmentNode.variable?.name || 'unnamed'}`;
+        if (assignmentNode.value) {
+          description += ` = ${this.formatParameterValue(assignmentNode.value)}`;
         }
         break;
       }
