@@ -1,0 +1,98 @@
+{
+  "name": "@holistic-stack/tree-sitter-openscad",
+  "version": "0.1.0",
+  "description": "Tree-sitter grammar for OpenSCAD",
+  "exports": {
+    ".": {
+      "import": "./bindings/web/index.js",
+      "require": "./bindings/web/index.cjs",
+      "types": "./bindings/web/index.d.ts"
+    },
+    "./node": {
+      "import": "./bindings/node/index.js",
+      "require": "./bindings/node/index.cjs",
+      "types": "./bindings/node/index.d.ts"
+    },
+    "./web": {
+      "import": "./bindings/web/index.js",
+      "require": "./bindings/web/index.cjs",
+      "types": "./bindings/web/index.d.ts"
+    },
+    "./wasm": "./tree-sitter-openscad.wasm"
+  },
+  "main": "bindings/node/index.cjs",
+  "module": "bindings/node/index.js",
+  "types": "bindings/node/index.d.ts",
+  "browser": "bindings/web/index.js",
+  "scripts": {
+    "install": "node scripts/echo-install-message.js",
+    "parse": "tree-sitter parse",
+    "parse:all": "node scripts/test-real-world-cli.js",
+    "playground": "tree-sitter playground"
+  },
+  "keywords": [
+    "parser",
+    "tree-sitter",
+    "openscad",
+    "grammar",
+    "syntax",
+    "highlighting",
+    "incremental",
+    "parsing",
+    "3d",
+    "cad"
+  ],
+  "files": [
+    "grammar.js",
+    "queries/*",
+    "src/**",
+    "bindings/node/**",
+    "bindings/web/**",
+    "binding.gyp",
+    "prebuilds/**",
+    "scripts/**",
+    "tree-sitter-openscad.wasm"
+  ],
+  "author": "OpenSCAD Community",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "optionalDependencies": {
+    "node-gyp-build": "^4.8.0"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "0.25.3",
+    "node-addon-api": "^8.3.1",
+    "node-gyp": "^11.2.0",
+    "prebuildify": "^6.0.0",
+    "web-tree-sitter": "0.25.3"
+  },
+  "peerDependencies": {
+    "tree-sitter": "^0.22.4",
+    "web-tree-sitter": "0.25.3"
+  },
+  "peerDependenciesMeta": {
+    "tree-sitter": {
+      "optional": true
+    },
+    "web-tree-sitter": {
+      "optional": true
+    }
+  },
+  "tree-sitter": [
+    {
+      "scope": "source.openscad",
+      "file-types": [
+        "scad"
+      ],
+      "highlights": [
+        "queries/highlights.scm"
+      ],
+      "tags": [
+        "queries/tags.scm"
+      ]
+    }
+  ]
+}

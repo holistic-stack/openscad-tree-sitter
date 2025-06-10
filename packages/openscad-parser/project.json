@@ -1,0 +1,99 @@
+{
+  "name": "openscad-parser",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/openscad-parser/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/vite:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "{projectRoot}/dist",
+        "configFile": "packages/openscad-parser/vite.config.ts"
+      },
+      "configurations": {
+        "development": {
+          "mode": "development"
+        },
+        "production": {
+          "mode": "production"
+        }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "dependencies"
+        }
+      ]
+    },
+    "dev": {
+      "executor": "@nx/vite:dev-server",
+      "options": {
+        "buildTarget": "openscad-parser:build:development",
+        "configFile": "packages/openscad-parser/vite.config.ts"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --reporter=verbose --no-coverage",
+        "cwd": "packages/openscad-parser",
+        "env": {
+          "NX_TASKS_RUNNER_DYNAMIC_OUTPUT": "false",
+          "NX_SKIP_LOG_GROUPING": "true",
+          "FORCE_COLOR": "1"
+        }
+      },
+      "configurations": {
+        "watch": {
+          "command": "vitest watch --reporter=verbose --no-coverage",
+          "cwd": "packages/openscad-parser",
+          "env": {
+            "NX_TASKS_RUNNER_DYNAMIC_OUTPUT": "false",
+            "NX_SKIP_LOG_GROUPING": "true",
+            "FORCE_COLOR": "1"
+          }
+        },
+        "coverage": {
+          "command": "vitest run --reporter=verbose --coverage",
+          "cwd": "packages/openscad-parser",
+          "env": {
+            "NX_TASKS_RUNNER_DYNAMIC_OUTPUT": "false",
+            "NX_SKIP_LOG_GROUPING": "true",
+            "FORCE_COLOR": "1"
+          }
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["packages/openscad-parser/src/**/*.ts", "packages/openscad-parser/vite.config.ts"]
+      }
+    },
+    "lint:fix": {
+      "executor": "@nx/eslint:lint",
+      "options": {
+        "lintFilePatterns": ["packages/openscad-parser/src/**/*.ts", "packages/openscad-parser/vite.config.ts"],
+        "fix": true
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit --project packages/openscad-parser/tsconfig.json",
+        "cwd": "."
+      }
+    },
+    "docs:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "typedoc --options typedoc.json",
+        "cwd": "packages/openscad-parser"
+      },
+      "outputs": ["{projectRoot}/docs/typedocs"]
+    }
+  },
+  "tags": ["type:library", "scope:parser", "platform:node"]
+}

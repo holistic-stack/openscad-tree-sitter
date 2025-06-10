@@ -1,0 +1,6 @@
+packages:
+  # All packages in the packages directory
+  - 'packages/*'
+
+onlyBuiltDependencies:
+  - tree-sitter-cli

@@ -1,0 +1,50 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // Library-specific configuration
+    "composite": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./.tsbuildinfo",
+
+    // Bundler configuration for Vite
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+
+    // Output configuration
+    "outDir": "./dist",
+    "declarationMap": true,
+
+    // Library-specific settings
+    "lib": ["es2022"],
+    "types": [
+      "node",
+      "vite/client",
+      "vitest/globals",
+      "vitest"
+    ],
+
+    // Path mapping
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "*": ["node_modules/*"]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "vite.config.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ],
+  "references": [
+    {
+      "path": "../tree-sitter-openscad"
+    }
+  ]
+}

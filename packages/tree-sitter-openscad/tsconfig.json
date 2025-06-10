@@ -1,0 +1,27 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // Library-specific configuration
+    "composite": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./.tsbuildinfo",
+
+    // Output configuration
+    "outDir": "./dist",
+    "declarationMap": true,
+
+    // Library-specific settings
+    "lib": ["es2022"],
+    "types": ["node"]
+  },
+  "include": [
+    "src/**/*",
+    "bindings/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
+}

@@ -6,21 +6,55 @@ yarn-error.log
 pnpm-debug.log
 package-lock.json
 yarn.lock
+.pnpm-store/
 
 # Build outputs
 build/
 dist/
-*.wasm
+out/
 *.o
-
-*.a
-.DS_Store
+*.obj
+*.lib
+*.exp
+*.node
 
 # Generated parser files
-src/
-bindings/
-*.cc
-*.c
+packages/tree-sitter-openscad/src/parser.c
+packages/tree-sitter-openscad/src/grammar.json
+packages/tree-sitter-openscad/src/node-types.json
+packages/tree-sitter-openscad/src/tree_sitter/
+packages/tree-sitter-openscad/bindings/node/binding.cc
+packages/tree-sitter-openscad/bindings/node/index.js
+packages/tree-sitter-openscad/bindings/node/index.d.ts
+packages/tree-sitter-openscad/bindings/wasm/*.wasm
+packages/tree-sitter-openscad/bindings/wasm/*.js
+packages/tree-sitter-openscad/bindings/wasm/*.d.ts
+
+# Nx cache and generated files
+.nx/
+.nx/cache
+.nx/workspace-data
+tmp/
+.tmp/
+.cache/
+
+# Unused bindings (disabled in tree-sitter.json)
+public/*.wasm
+public/*.scm
+packages/tree-sitter-openscad/bindings/rust/
+packages/tree-sitter-openscad/bindings/c/
+packages/tree-sitter-openscad/bindings/go/
+packages/tree-sitter-openscad/bindings/python/
+packages/tree-sitter-openscad/bindings/swift/
+packages/tree-sitter-openscad/bindings/zig/
+
+# Compiled binaries
+*.a
+*.exe
+*.dll
+*.so
+*.dylib
+.DS_Store
 
 # IDE and editor files
 .idea/
@@ -29,15 +63,65 @@ bindings/
 *.sublime-*
 *.swp
 *~
+.tasks/
+.history/
+.project
+.classpath
+.settings/
+*.code-workspace
 
 # Test output
 .nyc_output/
 coverage/
+test-results/
+parse-debug.log
+junit.xml
+*.lcov
 
 # Logs
 logs/
 *.log
 
 # Environment variables
-.env
-.env.local 
+.env.local
+.env.development
+.env.test
+.env.production
+.env.*.local
+
+# Test and coverage results
+/coverage
+/.vitest
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
+# Node.js specific
+.npm
+.node_repl_history
+.lock-wscript
+.yarn-integrity
+.npm-debug.log*
+.yarn-debug.log*
+.yarn-error.log*
+.pnpm-debug.log*
+
+# TypeScript specific
+*.tsbuildinfo
+*.tsbuildinfo-*
+.tscache/
+tsconfig.tsbuildinfo
+
+# Temporary files
+playwright-report/
+test-results.json
+*.tmp
+*.temp
+*_temp.js
+*_temp.scad
+.temp/
+.tmp/
+.github/instructions/nx.instructions.md
+
+vite.config.*.timestamp*
+vitest.config.*.timestamp*
