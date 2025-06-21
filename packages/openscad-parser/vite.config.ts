@@ -38,7 +38,7 @@ export default defineConfig({
     rollupOptions: {
       // External packages that should not be bundled into the library
       external: [
-        '@openscad/tree-sitter-openscad',
+        '@holistic-stack/tree-sitter-openscad',
         'web-tree-sitter',
         // Node.js built-ins
         /^node:.*/, // Externalize all Node.js built-ins
@@ -48,7 +48,7 @@ export default defineConfig({
       output: {
         // Provide global variables to use in the UMD build for externalized deps
         globals: {
-          '@openscad/tree-sitter-openscad': 'TreeSitterOpenSCAD',
+          '@holistic-stack/tree-sitter-openscad': 'TreeSitterOpenSCAD',
           'web-tree-sitter': 'TreeSitter',
         },
 
