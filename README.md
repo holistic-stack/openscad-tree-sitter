@@ -32,10 +32,10 @@ The OpenSCAD Tree-sitter Parser is a production-ready parsing solution that comb
 
 ```bash
 # Install the parser package
-npm install @openscad/parser
+npm install@holistic-stack/openscad-parser
 
 # Or with pnpm
-pnpm add @openscad/parser
+pnpm add@holistic-stack/openscad-parser
 ```
 
 ```typescript

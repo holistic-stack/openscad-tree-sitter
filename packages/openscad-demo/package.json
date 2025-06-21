@@ -11,7 +11,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "postinstall": "shx mkdir -p ./public && shx cp ./node_modules/@openscad/tree-sitter-openscad/tree-sitter-openscad.wasm ./public/tree-sitter-openscad.wasm && shx cp ./node_modules/web-tree-sitter/tree-sitter.wasm ./public/tree-sitter.wasm && shx cp ./node_modules/@openscad/tree-sitter-openscad/queries/highlights.scm ./public/highlights.scm"
+    "postinstall": "shx mkdir -p ./public && shx cp ./node_modules/@holistic-stack/tree-sitter-openscad/tree-sitter-openscad.wasm ./public/tree-sitter-openscad.wasm && shx cp ./node_modules/web-tree-sitter/tree-sitter.wasm ./public/tree-sitter.wasm && shx cp ./node_modules/@holistic-stack/tree-sitter-openscad/queries/highlights.scm ./public/highlights.scm"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",

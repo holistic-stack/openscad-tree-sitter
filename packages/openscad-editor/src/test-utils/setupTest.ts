@@ -40,7 +40,7 @@ function resolveWasmPath(urlPath: string): string {
 
   // Strategy 1: Use Node.js module resolution algorithm (most reliable)
   const moduleResolutionStrategies = [
-    // Try @openscad/tree-sitter-openscad package
+    // Try@holistic-stack/tree-sitter-openscad package
     () => {
       try {
         const packagePath = resolve.sync('@openscad/tree-sitter-openscad/package.json', {
@@ -91,7 +91,7 @@ function resolveWasmPath(urlPath: string): string {
 
   // Strategy 2: Use find-up to locate package.json files and resolve from there
   const findUpStrategies = [
-    // Find @openscad/tree-sitter-openscad package.json using matcher function
+    // Find@holistic-stack/tree-sitter-openscad package.json using matcher function
     () => {
       try {
         const packageJson = findUpSync((directory: string) => {

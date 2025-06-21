@@ -62,13 +62,13 @@ Tree-sitter OpenSCAD is a **PERFECT production-ready grammar** achieving unprece
 
 ```bash
 # Using npm
-npm install @openscad/tree-sitter-openscad
+npm install@holistic-stack/tree-sitter-openscad
 
 # Using pnpm
-pnpm add @openscad/tree-sitter-openscad
+pnpm add@holistic-stack/tree-sitter-openscad
 
 # Using yarn
-yarn add @openscad/tree-sitter-openscad
+yarn add@holistic-stack/tree-sitter-openscad
 ```
 
 ### Pre-built Binaries
@@ -83,7 +83,7 @@ Pre-built binaries are available for common platforms:
 For web environments, use the WASM build:
 
 ```bash
-npm install @openscad/tree-sitter-openscad/wasm
+npm install@holistic-stack/tree-sitter-openscad/wasm
 ```
 
 ## 🚀 Usage

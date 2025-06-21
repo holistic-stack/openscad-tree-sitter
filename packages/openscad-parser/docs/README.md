@@ -48,7 +48,7 @@ When looking for specific API details:
 ### Installation
 
 ```bash
-npm install @openscad/parser
+npm install@holistic-stack/openscad-parser
 ```
 
 ### Basic Usage

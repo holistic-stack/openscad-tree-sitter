@@ -7,7 +7,7 @@
  * - AST node types and utilities
  * - IDE support features
  *
- * @module @openscad/parser
+ * @module@holistic-stack/openscad-parser
  * @since 0.1.0
  */
 

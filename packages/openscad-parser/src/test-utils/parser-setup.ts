@@ -27,7 +27,7 @@ export async function setupParser(): Promise<Parser> {
       } catch (e) {
         console.error('Failed to load tree-sitter-openscad.wasm:', e);
         throw new Error(
-          'Could not find tree-sitter-openscad.wasm. Please make sure @openscad/tree-sitter-openscad is installed.'
+          'Could not find tree-sitter-openscad.wasm. Please make sure@holistic-stack/tree-sitter-openscad is installed.'
         );
       }
     },
@@ -43,9 +43,9 @@ export async function setupParser(): Promise<Parser> {
     // @ts-expect-error - web-tree-sitter types are incorrect for dynamic language loading
     parser.setLanguage(language);
   } catch (e) {
-    console.error('Failed to load @openscad/tree-sitter-openscad:', e);
+    console.error('Failed to load@holistic-stack/tree-sitter-openscad:', e);
     throw new Error(
-      'Could not load @openscad/tree-sitter-openscad. Please make sure it is installed and built.'
+      'Could not load@holistic-stack/tree-sitter-openscad. Please make sure it is installed and built.'
     );
   }
 

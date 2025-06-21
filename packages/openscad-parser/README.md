@@ -66,13 +66,13 @@ The OpenSCAD Parser is built on solid functional programming principles:
 
 ```bash
 # Using npm
-npm install @openscad/parser
+npm install@holistic-stack/openscad-parser
 
 # Using pnpm
-pnpm add @openscad/parser
+pnpm add@holistic-stack/openscad-parser
 
 # Using yarn
-yarn add @openscad/parser
+yarn add@holistic-stack/openscad-parser
 ```
 
 ## 🚀 Quick Start
