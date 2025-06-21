@@ -46,8 +46,8 @@
     "postinstall": "shx mkdir -p ./public && shx cp ./node_modules/@openscad/tree-sitter-openscad/tree-sitter-openscad.wasm ./public/tree-sitter-openscad.wasm && shx cp ./node_modules/web-tree-sitter/tree-sitter.wasm ./public/tree-sitter.wasm"
   },
   "dependencies": {
-    "@openscad/parser": "workspace:*",
-    "@openscad/tree-sitter-openscad": "workspace:*",
+    "@holistic-stack/openscad-parser": "0.1.1",
+    "@holistic-stack/tree-sitter-openscad": "0.1.0",
     "vite-plugin-monaco-editor": "^1.1.0",
     "web-tree-sitter": "0.25.3"
   },
