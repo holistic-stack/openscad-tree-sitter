@@ -19,21 +19,19 @@
       }
     },
     "build": {
-      "executor": "nx:run-commands",
-      "outputs": ["{projectRoot}/dist"],
+      "executor": "@nx/vite:build",
+      "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
-        "command": "npx vite build",
-        "cwd": "{projectRoot}"
+        "outputPath": "packages/openscad-demo/dist",
+        "configFile": "packages/openscad-demo/vite.config.ts"
       },
       "configurations": {
         "development": {
-          "command": "npx vite build --mode development",
-          "cwd": "{projectRoot}"
+          "mode": "development"
         },
         "production": {
-          "command": "npx vite build --mode production",
-          "cwd": "{projectRoot}"
+          "mode": "production"
         }
       }
     },
