@@ -9,7 +9,7 @@ import {
   type FeaturePreset,
   type OpenscadEditorFeatures,
   createFeatureConfig
-} from '@openscad/editor';
+} from '@holistic-stack/openscad-editor';
 import { EnhancedFeatureConfigPanel } from './components/enhanced-feature-config-panel';
 import { FeatureComparisonPanel } from './components/feature-comparison-panel';
 // Simple demo logger to avoid console.log linting issues

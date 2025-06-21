@@ -16,7 +16,7 @@
  *   OpenSCADHoverProvider, 
  *   DocumentationParser,
  *   formatDocumentationAsMarkdown 
- * } from '@openscad/editor/hover';
+ * } from '@holistic-stack/openscad-editor/hover';
  * 
  * // Create hover provider
  * const hoverProvider = new OpenSCADHoverProvider(

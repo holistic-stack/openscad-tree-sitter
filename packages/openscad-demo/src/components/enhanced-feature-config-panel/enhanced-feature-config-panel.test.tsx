@@ -15,7 +15,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { EnhancedFeatureConfigPanel } from './enhanced-feature-config-panel';
-import type { OpenscadEditorFeatures, FeaturePreset } from '@openscad/editor';
+import type { OpenscadEditorFeatures, FeaturePreset } from '@holistic-stack/openscad-editor';
 
 /**
  * Mock performance metrics for testing

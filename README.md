@@ -101,7 +101,7 @@ TypeScript parser with AST generation and error handling.
 - **Features**: Expression evaluation, visitor pattern, incremental parsing
 - **Usage**: Primary package for applications requiring OpenSCAD code analysis
 
-### [`@openscad/editor`](./packages/openscad-editor)
+### [`@holistic-stack/openscad-editor`](./packages/openscad-editor)
 Monaco editor integration with OpenSCAD language support.
 - **Purpose**: Provides rich editing experience with syntax highlighting
 - **Features**: IntelliSense, error highlighting, code completion

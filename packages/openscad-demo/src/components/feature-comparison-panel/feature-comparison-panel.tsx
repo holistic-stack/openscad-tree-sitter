@@ -22,7 +22,7 @@ import {
   requiresParser,
   hasIDEFeatures,
   hasAdvancedFeatures
-} from '@openscad/editor';
+} from '@holistic-stack/openscad-editor';
 
 /**
  * Performance metrics for feature configuration comparison

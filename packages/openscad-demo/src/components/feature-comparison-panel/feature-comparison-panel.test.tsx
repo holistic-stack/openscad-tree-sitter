@@ -11,7 +11,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { FeatureComparisonPanel } from './feature-comparison-panel';
 
 // Mock the OpenSCAD Editor component to avoid Monaco Editor initialization in tests
-vi.mock('@openscad/editor', () => ({
+vi.mock('@holistic-stack/openscad-editor', () => ({
   OpenscadEditor: ({ value, features, onChange, onParseResult }: any) => (
     <div data-testid="mock-openscad-editor">
       <div data-testid="editor-value">{value}</div>

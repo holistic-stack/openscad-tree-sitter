@@ -1098,7 +1098,7 @@ This project is licensed under the MIT License - see the [LICENSE](../../LICENSE
 ## 🔗 Related Projects
 
 - **[@openscad/tree-sitter-openscad](../tree-sitter-openscad)**: Tree-sitter grammar for OpenSCAD
-- **[@openscad/editor](../openscad-editor)**: Monaco editor integration
+- **[@holistic-stack/openscad-editor](../openscad-editor)**: Monaco editor integration
 - **[@openscad/demo](../openscad-demo)**: Interactive demo application
 
 ---

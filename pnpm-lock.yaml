@@ -183,7 +183,7 @@ importers:
       '@monaco-editor/react':
         specifier: ^4.7.0
         version: 4.7.0(monaco-editor@0.52.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      '@openscad/editor':
+      '@holistic-stack/openscad-editor':
         specifier: workspace:*
         version: link:../openscad-editor
       '@openscad/parser':

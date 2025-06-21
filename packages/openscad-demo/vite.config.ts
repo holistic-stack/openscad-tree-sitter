@@ -71,7 +71,7 @@ export default defineConfig(() => ({
   optimizeDeps: {
     exclude: [
       '@openscad/parser',
-      '@openscad/editor',
+      '@holistic-stack/openscad-editor',
       '@openscad/tree-sitter-openscad',
     ],
     include: [
@@ -100,7 +100,7 @@ export default defineConfig(() => ({
     // Handle Monaco Editor and WASM files in test environment
     server: {
       deps: {
-        inline: ['monaco-editor', '@monaco-editor/react', '@openscad/editor'],
+        inline: ['monaco-editor', '@monaco-editor/react', '@holistic-stack/openscad-editor'],
       },
     },
     // Mock problematic modules in test environment

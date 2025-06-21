@@ -16,7 +16,7 @@
  *   OpenSCADNavigationProvider, 
  *   SymbolSearcher,
  *   registerNavigationCommands 
- * } from '@openscad/editor/navigation';
+ * } from '@holistic-stack/openscad-editor/navigation';
  * 
  * // Create navigation provider
  * const navigationProvider = new OpenSCADNavigationProvider(

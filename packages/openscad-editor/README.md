@@ -1,6 +1,6 @@
 # OpenSCAD Monaco Editor Integration
 
-[![npm](https://img.shields.io/npm/v/@openscad/editor.svg)](https://www.npmjs.com/package/@openscad/editor)
+[![npm](https://img.shields.io/npm/v/@holistic-stack/openscad-editor.svg)](https://www.npmjs.com/package/@holistic-stack/openscad-editor)
 [![Build Status](https://github.com/user/openscad-tree-sitter/workflows/CI/badge.svg)](https://github.com/user/openscad-tree-sitter/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -86,13 +86,13 @@ The OpenSCAD Editor package transforms Monaco Editor into a powerful OpenSCAD de
 
 ```bash
 # Using npm
-npm install @openscad/editor monaco-editor
+npm install @holistic-stack/openscad-editor monaco-editor
 
 # Using pnpm
-pnpm add @openscad/editor monaco-editor
+pnpm add @holistic-stack/openscad-editor monaco-editor
 
 # Using yarn
-yarn add @openscad/editor monaco-editor
+yarn add @holistic-stack/openscad-editor monaco-editor
 ```
 
 ## 📦 Available Components
@@ -110,7 +110,7 @@ The package exports several editor components for different use cases:
 The package defaults to the `OpenscadEditor`:
 
 ```typescript
-import OpenscadEditor from '@openscad/editor'; // OpenSCAD editor component
+import OpenscadEditor from '@holistic-stack/openscad-editor'; // OpenSCAD editor component
 ```
 
 ## 🚀 Quick Start
@@ -118,7 +118,7 @@ import OpenscadEditor from '@openscad/editor'; // OpenSCAD editor component
 ### Basic Setup
 
 ```typescript
-import { OpenscadEditor } from '@openscad/editor';
+import { OpenscadEditor } from '@holistic-stack/openscad-editor';
 
 // Basic editor with syntax highlighting only
 <OpenscadEditor
@@ -146,7 +146,7 @@ import { OpenscadEditor } from '@openscad/editor';
 
 ```tsx
 import React, { useState } from 'react';
-import { OpenscadEditor, OpenscadOutline, type ParseResult, type OutlineItem } from '@openscad/editor';
+import { OpenscadEditor, OpenscadOutline, type ParseResult, type OutlineItem } from '@holistic-stack/openscad-editor';
 
 interface OpenSCADEditorProps {
   initialValue?: string;
@@ -213,7 +213,7 @@ export default OpenSCADEditorComponent;
 The editor supports four feature presets for different use cases:
 
 ```typescript
-import { OpenscadEditor } from '@openscad/editor';
+import { OpenscadEditor } from '@holistic-stack/openscad-editor';
 
 // BASIC: Syntax highlighting and basic editing only
 <OpenscadEditor value={code} onChange={setCode} features="BASIC" />
@@ -233,7 +233,7 @@ import { OpenscadEditor } from '@openscad/editor';
 For fine-grained control, you can provide a custom feature configuration:
 
 ```typescript
-import { OpenscadEditor, type OpenscadEditorFeatures } from '@openscad/editor';
+import { OpenscadEditor, type OpenscadEditorFeatures } from '@holistic-stack/openscad-editor';
 
 const customFeatures: OpenscadEditorFeatures = {
   core: {
@@ -274,7 +274,7 @@ const customFeatures: OpenscadEditorFeatures = {
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue';
-import { OpenSCADEditor } from '@openscad/editor';
+import { OpenSCADEditor } from '@holistic-stack/openscad-editor';
 
 interface Props {
   modelValue: string;
@@ -365,7 +365,7 @@ editor.setTheme('openscad-dark');
 ### Custom Theme Creation
 
 ```typescript
-import { defineTheme } from '@openscad/editor';
+import { defineTheme } from '@holistic-stack/openscad-editor';
 
 // Define custom theme
 defineTheme('my-openscad-theme', {
@@ -432,7 +432,7 @@ const builtinFunctions = [
 ### Custom Completions
 
 ```typescript
-import { CompletionProvider } from '@openscad/editor';
+import { CompletionProvider } from '@holistic-stack/openscad-editor';
 
 // Create custom completion provider
 const customCompletions = new CompletionProvider();
@@ -467,7 +467,7 @@ editor.setCompletionProvider(customCompletions);
 ### Snippet Support
 
 ```typescript
-import { SnippetProvider } from '@openscad/editor';
+import { SnippetProvider } from '@holistic-stack/openscad-editor';
 
 const snippets = new SnippetProvider();
 
@@ -504,7 +504,7 @@ editor.setSnippetProvider(snippets);
 ### Real-time Error Detection
 
 ```typescript
-import { DiagnosticsProvider } from '@openscad/editor';
+import { DiagnosticsProvider } from '@holistic-stack/openscad-editor';
 
 // Configure diagnostics
 const diagnostics = new DiagnosticsProvider({
@@ -557,7 +557,7 @@ editor.configure({
 ### Automatic Formatting
 
 ```typescript
-import { FormattingProvider } from '@openscad/editor';
+import { FormattingProvider } from '@holistic-stack/openscad-editor';
 
 // Configure formatting
 const formatter = new FormattingProvider({
@@ -683,7 +683,7 @@ window.addEventListener('beforeunload', () => {
 ### Unit Testing
 
 ```typescript
-import { OpenSCADEditor } from '@openscad/editor';
+import { OpenSCADEditor } from '@holistic-stack/openscad-editor';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 describe('OpenSCAD Editor', () => {
@@ -738,7 +738,7 @@ describe('OpenSCAD Editor', () => {
 ### Integration Testing
 
 ```typescript
-import { OpenSCADEditor } from '@openscad/editor';
+import { OpenSCADEditor } from '@holistic-stack/openscad-editor';
 import { EnhancedOpenscadParser } from '@openscad/parser';
 
 describe('Editor Integration', () => {

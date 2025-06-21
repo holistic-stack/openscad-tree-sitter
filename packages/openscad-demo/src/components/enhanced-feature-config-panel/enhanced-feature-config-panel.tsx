@@ -23,7 +23,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import type { OpenscadEditorFeatures, FeaturePreset, CoreFeatures, ParserFeatures, IDEFeatures, AdvancedFeatures } from '@openscad/editor';
+import type { OpenscadEditorFeatures, FeaturePreset, CoreFeatures, ParserFeatures, IDEFeatures, AdvancedFeatures } from '@holistic-stack/openscad-editor';
 
 /**
  * Performance metrics for feature configuration
