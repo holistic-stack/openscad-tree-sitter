@@ -31,7 +31,7 @@ import {
   type SymbolInfo as ParserSymbolInfo,
   type SymbolProvider as ParserSymbolProvider,
   type PositionUtilities as ParserPositionUtilities
-} from '@openscad/parser';
+} from '@holistic-stack/openscad-parser';
 import { 
   OpenSCADRenameProvider, 
   type RenameConfig 

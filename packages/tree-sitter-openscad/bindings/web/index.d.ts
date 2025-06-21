@@ -1,7 +1,7 @@
 /**
  * Web bindings for the tree-sitter-openscad grammar
  */
-declare module '@openscad/tree-sitter-openscad/bindings/web' {
+declare module '@holistic-stack/tree-sitter-openscad/bindings/web' {
   /**
    * Path to the WebAssembly file containing the compiled tree-sitter grammar
    */

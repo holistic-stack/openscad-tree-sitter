@@ -26,7 +26,7 @@ import {
   type CompletionContext as ParserCompletionContext,
   type Position,
   type ASTNode
-} from '@openscad/parser';
+} from '@holistic-stack/openscad-parser';
 
 interface CompletionContext {
   position: monaco.Position;

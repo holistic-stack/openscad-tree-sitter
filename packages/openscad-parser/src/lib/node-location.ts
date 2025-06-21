@@ -39,7 +39,7 @@
  *
  * @example Using with Tree-sitter nodes
  * ```typescript
- * import { NodeLocation } from '@openscad/parser';
+ * import { NodeLocation } from '@holistic-stack/openscad-parser';
  *
  * function createLocationFromNode(node: TreeSitter.SyntaxNode): NodeLocation {
  *   return new NodeLocation(

@@ -28,7 +28,7 @@ import {
   type PositionUtilities,
   OpenSCADSymbolProvider,
   OpenSCADPositionUtilities
-} from '@openscad/parser';
+} from '@holistic-stack/openscad-parser';
 
 // Type alias for compatibility with existing code
 type ParserSymbolInfo = SymbolInfo;

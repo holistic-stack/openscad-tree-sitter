@@ -105,7 +105,7 @@ function resolveWasmPath(urlPath: string): string {
           const packagePath = join(directory, 'package.json');
           try {
             const pkg = JSON.parse(readFileSync(packagePath, 'utf8'));
-            return pkg.name === '@openscad/tree-sitter-openscad' ? packagePath : undefined;
+            return pkg.name === '@holistic-stack/tree-sitter-openscad' ? packagePath : undefined;
           } catch {
             return undefined;
           }

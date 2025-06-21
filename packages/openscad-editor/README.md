@@ -739,7 +739,7 @@ describe('OpenSCAD Editor', () => {
 
 ```typescript
 import { OpenSCADEditor } from '@holistic-stack/openscad-editor';
-import { EnhancedOpenscadParser } from '@openscad/parser';
+import { EnhancedOpenscadParser } from '@holistic-stack/openscad-parser';
 
 describe('Editor Integration', () => {
   it('should integrate with parser for real-time validation', async () => {
@@ -825,9 +825,9 @@ This project is licensed under the MIT License - see the [LICENSE](../../LICENSE
 
 ## 🔗 Related Projects
 
-- **[@openscad/parser](../openscad-parser)**: TypeScript parser with AST generation
-- **[@openscad/tree-sitter-openscad](../tree-sitter-openscad)**: Tree-sitter grammar
-- **[@openscad/demo](../openscad-demo)**: Interactive demo application
+- **[@holistic-stack/openscad-parser](../openscad-parser)**: TypeScript parser with AST generation
+- **[@holistic-stack/tree-sitter-openscad](../tree-sitter-openscad)**: Tree-sitter grammar
+- **[@holistic-stack/openscad-demo](../openscad-demo)**: Interactive demo application
 
 ---
 

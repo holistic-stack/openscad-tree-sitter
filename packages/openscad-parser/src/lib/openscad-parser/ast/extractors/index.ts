@@ -21,7 +21,7 @@
  *
  * @example Basic argument extraction
  * ```typescript
- * import { extractArguments } from '@openscad/parser/extractors';
+ * import { extractArguments } from '@holistic-stack/openscad-parser/extractors';
  *
  * // Extract arguments from a function call CST node
  * const args = extractArguments(argumentsNode);
@@ -30,7 +30,7 @@
  *
  * @example Value extraction
  * ```typescript
- * import { extractParameterValue } from '@openscad/parser/extractors';
+ * import { extractParameterValue } from '@holistic-stack/openscad-parser/extractors';
  *
  * // Extract a specific value from a CST node
  * const value = extractParameterValue(valueNode);
@@ -39,7 +39,7 @@
  *
  * @example Type-safe parameter processing
  * ```typescript
- * import { extractArguments, type ExtractedParameter } from '@openscad/parser/extractors';
+ * import { extractArguments, type ExtractedParameter } from '@holistic-stack/openscad-parser/extractors';
  *
  * function processCubeParameters(args: ExtractedParameter[]) {
  *   const sizeParam = args.find(arg => arg.name === 'size' || !arg.name);

@@ -14,8 +14,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@openscad/tree-sitter-openscad': path.resolve(__dirname, './packages/tree-sitter-openscad'),
-      '@openscad/parser': path.resolve(__dirname, './packages/openscad-parser/src')
+      '@holistic-stack/tree-sitter-openscad': path.resolve(__dirname, './packages/tree-sitter-openscad'),
+      '@holistic-stack/openscad-parser': path.resolve(__dirname, './packages/openscad-parser/src')
     }
   }
 });

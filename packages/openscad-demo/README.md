@@ -610,8 +610,8 @@ This project is licensed under the MIT License - see the [LICENSE](../../LICENSE
 
 ## 🔗 Related Projects
 
-- **[@openscad/parser](../openscad-parser)**: TypeScript parser with AST generation
-- **[@openscad/tree-sitter-openscad](../tree-sitter-openscad)**: Tree-sitter grammar
+- **[@holistic-stack/openscad-parser](../openscad-parser)**: TypeScript parser with AST generation
+- **[@holistic-stack/tree-sitter-openscad](../tree-sitter-openscad)**: Tree-sitter grammar
 - **[@holistic-stack/openscad-editor](../openscad-editor)**: Monaco editor integration
 
 ---

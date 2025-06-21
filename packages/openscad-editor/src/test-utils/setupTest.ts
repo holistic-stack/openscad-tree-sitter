@@ -43,7 +43,7 @@ function resolveWasmPath(urlPath: string): string {
     // Try@holistic-stack/tree-sitter-openscad package
     () => {
       try {
-        const packagePath = resolve.sync('@openscad/tree-sitter-openscad/package.json', {
+        const packagePath = resolve.sync('@holistic-stack/tree-sitter-openscad/package.json', {
           basedir: __dirname
         });
         return join(dirname(packagePath), normalizedPath);
@@ -98,7 +98,7 @@ function resolveWasmPath(urlPath: string): string {
           const packagePath = join(directory, 'package.json');
           try {
             const pkg = JSON.parse(readFileSync(packagePath, 'utf8'));
-            return pkg.name === '@openscad/tree-sitter-openscad' ? packagePath : undefined;
+            return pkg.name === '@holistic-stack/tree-sitter-openscad' ? packagePath : undefined;
           } catch {
             return undefined;
           }

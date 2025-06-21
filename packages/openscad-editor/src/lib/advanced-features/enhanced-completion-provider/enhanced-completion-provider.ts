@@ -18,7 +18,7 @@ import type {
   SymbolInfo,
   ASTNode,
   Position
-} from '@openscad/parser';
+} from '@holistic-stack/openscad-parser';
 
 /**
  * Enhanced completion item with additional metadata

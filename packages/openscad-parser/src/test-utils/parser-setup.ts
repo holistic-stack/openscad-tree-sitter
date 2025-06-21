@@ -17,7 +17,7 @@ export async function setupParser(): Promise<Parser> {
       // Try to find the wasm file in the expected location
       const wasmPath = join(
         __dirname,
-        '../../../node_modules/@openscad/tree-sitter-openscad/tree-sitter-openscad.wasm'
+        '../../../node_modules/@holistic-stack/tree-sitter-openscad/tree-sitter-openscad.wasm'
       );
 
       try {
@@ -37,7 +37,7 @@ export async function setupParser(): Promise<Parser> {
 
   try {
     // Try to load the OpenSCAD language
-    const languageModule = await import('@openscad/tree-sitter-openscad');
+    const languageModule = await import('@holistic-stack/tree-sitter-openscad');
     // Access the default export which should be the Language object
     const language = languageModule.default || languageModule;
     // @ts-expect-error - web-tree-sitter types are incorrect for dynamic language loading

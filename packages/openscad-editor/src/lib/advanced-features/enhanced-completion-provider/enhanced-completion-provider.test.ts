@@ -11,7 +11,7 @@ import {
   DEFAULT_ENHANCED_COMPLETION_CONFIG,
   type EnhancedCompletionConfig
 } from './enhanced-completion-provider';
-import type { OpenscadParser, SymbolInfo, ASTNode } from '@openscad/parser';
+import type { OpenscadParser, SymbolInfo, ASTNode } from '@holistic-stack/openscad-parser';
 
 // Mock Monaco types for testing
 const createMockModel = (content: string[]): monaco.editor.ITextModel => ({

@@ -22,7 +22,7 @@
  *
  * @example Node utilities usage
  * ```typescript
- * import { findDescendantOfType, getChildrenOfType } from '@openscad/parser/utils';
+ * import { findDescendantOfType, getChildrenOfType } from '@holistic-stack/openscad-parser/utils';
  *
  * // Find a specific node type in the tree
  * const identifierNode = findDescendantOfType(rootNode, 'identifier');
@@ -33,7 +33,7 @@
  *
  * @example Location utilities usage
  * ```typescript
- * import { getLocation, createLocationFromNode } from '@openscad/parser/utils';
+ * import { getLocation, createLocationFromNode } from '@holistic-stack/openscad-parser/utils';
  *
  * // Get source location for error reporting
  * const location = getLocation(node);
@@ -42,7 +42,7 @@
  *
  * @example Vector utilities usage
  * ```typescript
- * import { normalizeVector, isValidVector, createVector3D } from '@openscad/parser/utils';
+ * import { normalizeVector, isValidVector, createVector3D } from '@holistic-stack/openscad-parser/utils';
  *
  * // Validate and normalize vectors
  * const vector = [10, 20, 30];
@@ -54,7 +54,7 @@
  *
  * @example Variable utilities usage
  * ```typescript
- * import { isValidVariableName, normalizeVariableName } from '@openscad/parser/utils';
+ * import { isValidVariableName, normalizeVariableName } from '@holistic-stack/openscad-parser/utils';
  *
  * // Validate variable names
  * if (isValidVariableName('myVariable')) {

@@ -50,7 +50,7 @@ import { ErrorHandler } from './error-handling/index.js';
  *
  * @example Complete Parser Workflow
  * ```typescript
- * import { OpenscadParser, ConsoleErrorHandler } from '@openscad/parser';
+ * import { OpenscadParser, ConsoleErrorHandler } from '@holistic-stack/openscad-parser';
  *
  * // Setup with custom error handling
  * const errorHandler = new ConsoleErrorHandler();

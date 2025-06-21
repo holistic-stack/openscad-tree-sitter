@@ -70,9 +70,9 @@ export default defineConfig(() => ({
   // Dependency optimization
   optimizeDeps: {
     exclude: [
-      '@openscad/parser',
+      '@holistic-stack/openscad-parser',
       '@holistic-stack/openscad-editor',
-      '@openscad/tree-sitter-openscad',
+      '@holistic-stack/tree-sitter-openscad',
     ],
     include: [
       'react',

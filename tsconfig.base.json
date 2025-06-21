@@ -26,8 +26,8 @@
     "baseUrl": ".",
     "paths": {
       "@holistic-stack/openscad-editor": ["packages/openscad-editor/dist/index.ts"],
-      "@openscad/parser": ["packages/openscad-parser/dist/src/lib/index.ts"],
-      "@openscad/tree-sitter-openscad": [
+      "@holistic-stack/openscad-parser": ["packages/openscad-parser/dist/src/lib/index.ts"],
+      "@holistic-stack/tree-sitter-openscad": [
         "packages/tree-sitter-openscad/src/index.ts"
       ],
       "openscad-demo": ["packages/openscad-demo/src/index.ts"]

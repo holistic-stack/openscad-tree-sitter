@@ -6,7 +6,7 @@
  */
 
 import type * as TreeSitter from 'web-tree-sitter';
-import { EnhancedOpenscadParser, SimpleErrorHandler, type ASTNode } from '@openscad/parser';
+import { EnhancedOpenscadParser, SimpleErrorHandler, type ASTNode } from '@holistic-stack/openscad-parser';
 
 // Simple error interface for our service
 export interface ParseError {

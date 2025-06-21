@@ -1,6 +1,6 @@
 # Tree-sitter OpenSCAD Grammar
 
-[![npm](https://img.shields.io/npm/v/@openscad/tree-sitter-openscad.svg)](https://www.npmjs.com/package/@openscad/tree-sitter-openscad)
+[![npm](https://img.shields.io/npm/v/@holistic-stack/tree-sitter-openscad.svg)](https://www.npmjs.com/package/@holistic-stack/tree-sitter-openscad)
 [![Test Coverage](https://img.shields.io/badge/Test%20Coverage-100%25%20(114%2F114)-brightgreen.svg)](https://github.com/openscad/tree-sitter-openscad)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -92,7 +92,7 @@ npm install@holistic-stack/tree-sitter-openscad/wasm
 
 ```javascript
 const Parser = require('tree-sitter');
-const OpenSCAD = require('@openscad/tree-sitter-openscad');
+const OpenSCAD = require('@holistic-stack/tree-sitter-openscad');
 
 const parser = new Parser();
 parser.setLanguage(OpenSCAD);
@@ -123,7 +123,7 @@ console.log('Module name:', moduleNode.childForFieldName('name').text);
 
 ```typescript
 import Parser from 'tree-sitter';
-import OpenSCAD from '@openscad/tree-sitter-openscad';
+import OpenSCAD from '@holistic-stack/tree-sitter-openscad';
 
 /**
  * Initialize the OpenSCAD parser with proper error handling

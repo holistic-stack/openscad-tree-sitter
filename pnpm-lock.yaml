@@ -186,10 +186,10 @@ importers:
       '@holistic-stack/openscad-editor':
         specifier: workspace:*
         version: link:../openscad-editor
-      '@openscad/parser':
+      '@holistic-stack/openscad-parser':
         specifier: workspace:*
         version: link:../openscad-parser
-      '@openscad/tree-sitter-openscad':
+      '@holistic-stack/tree-sitter-openscad':
         specifier: workspace:*
         version: link:../tree-sitter-openscad
       monaco-editor:
@@ -283,10 +283,10 @@ importers:
 
   packages/openscad-editor:
     dependencies:
-      '@openscad/parser':
+      '@holistic-stack/openscad-parser':
         specifier: workspace:*
         version: link:../openscad-parser
-      '@openscad/tree-sitter-openscad':
+      '@holistic-stack/tree-sitter-openscad':
         specifier: workspace:*
         version: link:../tree-sitter-openscad
       vite-plugin-monaco-editor:
@@ -347,7 +347,7 @@ importers:
 
   packages/openscad-parser:
     dependencies:
-      '@openscad/tree-sitter-openscad':
+      '@holistic-stack/tree-sitter-openscad':
         specifier: workspace:*
         version: link:../tree-sitter-openscad
       find-up:
